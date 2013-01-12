@@ -1,8 +1,13 @@
 use strict;
 use warnings;
-use Test::More tests => 34;
+use Test::More tests => 37;
 
 BEGIN {
+    plan skip_all => 'local test only'   if defined $ENV{'CATALYST_SERVER'};
+
+    # enable plugin
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/wml .`;
+
     use lib('t');
     require TestUtils;
     import TestUtils;
@@ -26,4 +31,7 @@ for my $url (@{$pages}) {
         'like'           => [ 'WML Thruk' ],
     );
 }
+
+# restore default
+`cd plugins/plugins-enabled && rm -f wml`;
 

@@ -136,18 +136,18 @@ eval {
 # check plugin test symlinks
 my $testlinks = {};
 mkdir("t/xt") unless -d "t/xt";
-for my $testdir (glob('plugins/plugins-enabled/*/t')) {
-    $testdir =~ m|/plugins-enabled/(.*)/t|gmx or die("test directory $testdir does not have valid format!");
+for my $testdir (glob('plugins/plugins-available/*/t')) {
+    $testdir =~ m|/plugins-available/(.*)/t|gmx or die("test directory $testdir does not have valid format!");
     my $plugin = $1;
 
     if(!-e 't/xt/'.$plugin and !-l 't/xt/'.$plugin) {
-        symlink('../../plugins/plugins-enabled/'.$plugin.'/t', 't/xt/'.$plugin) or die("cannot create symlink ('../../plugins/plugins-enabled/$plugin/t', 't/xt/$plugin'): $!");
-        $testlinks->{$plugin} = '../../plugins/plugins-enabled/'.$plugin.'/t';
+        symlink('../../plugins/plugins-available/'.$plugin.'/t', 't/xt/'.$plugin) or die("cannot create symlink ('../../plugins/plugins-available/$plugin/t', 't/xt/$plugin'): $!");
+        $testlinks->{$plugin} = '../../plugins/plugins-available/'.$plugin.'/t';
         next;
     }
     my $target = readlink('t/xt/'.$plugin);
-    if($target ne '../../plugins/plugins-enabled/'.$plugin.'/t') {
-        die('t/xt/'.$plugin.' has wrong target: '.$target.' vs. ../../plugins/plugins-enabled/'.$plugin.'/t');
+    if($target ne '../../plugins/plugins-available/'.$plugin.'/t') {
+        die('t/xt/'.$plugin.' has wrong target: '.$target.' vs. ../../plugins/plugins-available/'.$plugin.'/t');
     }
     $testlinks->{$plugin} = $target;
 }

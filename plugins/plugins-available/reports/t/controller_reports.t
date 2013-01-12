@@ -4,15 +4,17 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'local test only'   if defined $ENV{'CATALYST_SERVER'};
     plan tests => 81;
-}
 
-BEGIN {
+    # enable plugin
+    `cd plugins/plugins-enabled && rm -f reports2`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports .`;
+
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-
 
 ###########################################################
 # test modules
@@ -43,3 +45,8 @@ for my $test (@{$pages}) {
     $test->{'like'}   = [ 'Reports' ]                                unless defined $test->{'like'};
     TestUtils::test_page(%{$test});
 }
+
+# restore default
+`cd plugins/plugins-enabled && rm -f reports`;
+`cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
+unlink('root/thruk/plugins/reports');
