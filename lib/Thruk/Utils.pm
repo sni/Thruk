@@ -1634,6 +1634,43 @@ sub reduce_number {
 }
 
 ########################################
+
+=head2 get_template_variable
+
+  get_template_variable($c, $template, $variable)
+
+return variable defined from template
+
+=cut
+
+sub get_template_variable {
+    my($c, $template, $var, $stash) = @_;
+
+    # more stash variables to set?
+    $stash = {} unless defined $stash;
+    for my $key (keys %{$stash}) {
+        $c->stash->{$key} = $stash->{$key};
+    }
+
+    $c->stash->{'temp'}  = $template;
+    $c->stash->{'var'}   = $var;
+    my $data;
+    eval {
+        $data = $c->view('TT')->render($c, 'get_variable.tt');
+    };
+    if($@) {
+        Thruk::Utils::CLI::_error($@);
+        return $c->detach('/error/index/13');
+    }
+
+    my $VAR1;
+    ## no critic
+    eval($data);
+    ## use critic
+    return $VAR1;
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

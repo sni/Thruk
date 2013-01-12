@@ -2,7 +2,7 @@
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
 <script type="text/javascript">
   var d1 = {
-      label: "Availability",
+      label: "[% loc("Availability") %]",
       color: "rgb(82, 167, 82)",
       bars: { show: true },
       data: [% encode_json_obj(data.values) %]

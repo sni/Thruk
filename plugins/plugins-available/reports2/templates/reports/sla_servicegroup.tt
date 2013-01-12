@@ -2,13 +2,14 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'servicegroup'            => [ 'Servicegroup',               'servicegroups',   ''                      , '', 1 ] },
+        { 'language'                => [ 'Language',                   'language',        'en'                    ,'' , 1 ] },
+        { 'servicegroup'            => [ 'Servicegroup',               'servicegroups',   ''                      ,'' , 1 ] },
         { 'timeperiod'              => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                  ] },
         { 'breakdown'               => [ 'Breakdown by',               'breakdowns',      'months'                        ] },
         { 'rpttimeperiod'           => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
-        { 'sla'                     => [ 'SLA %',                      'int',             '98'                    , '', 1 ] },
-        { 'graph_min_sla'           => [ 'Graph SLA %',                'int',             '90'                    , '', 1 ] },
-        { 'decimals'                => [ 'Decimal Points',             'int',             '2'                     , '', 1 ] },
+        { 'sla'                     => [ 'SLA %',                      'int',             '98'                    ,'' , 1 ] },
+        { 'graph_min_sla'           => [ 'Graph SLA %',                'int',             '90'                    ,'' , 1 ] },
+        { 'decimals'                => [ 'Decimal Points',             'int',             '2'                     ,'' , 1 ] },
         { 'assumeinitialstates'     => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
         { 'initialassumedhoststate' => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
         { 'initialassumedservicestate'  => [ 'Initial Assumed State',  'svc_initialassumedstate',          '0'            ] },
@@ -30,10 +31,10 @@
   [%# report settings #%]
   [% PROCESS 'reports/locale/en.tt' %]
   [%
-    title        = 'SLA Report'
+    title        = loc('SLA Report')
     subtitle     = r.name
-    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
-                     'Servicegroup:', param.servicegroup,
+    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat),
+                     loc('Servicegroup:'),      param.servicegroup,
                    ]
   %]
 
@@ -41,7 +42,7 @@
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
 
     [% IF avail_data.services.size > 1 %]
-      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="SLA Graph Overview" %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
         [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
       [% END %]
     [% END %]
@@ -50,7 +51,7 @@
       [% FOREACH svc = avail_data.services.$hst.keys.sort %]
         [% c.request.parameters.host    = hst %]
         [% c.request.parameters.service = svc %]
-        [% pagetitle                    = "Service: " _ svc _ ' on ' _ hst %]
+        [% pagetitle                    = loc("Service: %s on %s", svc, hst) %]
 
         [% WRAPPER 'reports/comp/page_standard.tt' %]
           [% PROCESS 'reports/comp/sla_graph_page.tt' %]

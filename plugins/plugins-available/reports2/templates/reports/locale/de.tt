@@ -1,0 +1,43 @@
+[%
+  locale_name          = 'german';
+  reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
+  reportDateFormat     = '%d %b %Y';
+  weekAbbr             = 'KW';
+  monthNames           = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  dayNames             = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  translations         = {
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Event Report'                          => 'Ereigniss Bericht',
+    'SLA Report'                            => 'SLA Bericht',
+    'Report Timeperiod:'                    => 'Zeitraum:',
+    'Legend'                                => 'Legende',
+    'Host Alert'                            => 'Host Störung',
+    'Service Alert'                         => 'Service Störung',
+    'Totals'                                => 'Anzahl',
+    'Events'                                => 'Ereignisse',
+    'no events during this timeperiod.'     => 'keine Ereignisse in diesem Zeitraum.',
+    'Servicegroup:'                         => 'Servicegruppe:',
+    'SLA Overview Graph'                    => 'SLA Übersicht',
+    'Availability'                          => 'Verfügbarkeit',
+    'Service: %s on %s'                     => 'Service: %s auf %s',
+    'Average Availability'                  => 'Durchschnittsverfügbarkeit',
+    'Total Uptime'                          => 'Verfügbarkeitsdauer',
+    'Total Downtime'                        => 'Ausfalldauer',
+    'no outages during this timeperiod'     => 'Keine Ausfälle in diesem Zeitraum',
+    'Worst Outages'                         => 'Die längsten Ausfälle',
+    'Latest Outages'                        => 'Die neuesten Ausfälle',
+    'Outages'                               => 'Ausfälle',
+    'Report:'                               => 'Bericht:',
+    'Service:'                              => 'Service:',
+    'Description:'                          => 'Beschreibung:',
+    'Host:'                                 => 'Host:',
+    'Hostgroup:'                            => 'Hostgruppe:',
+    'Your report is attached.'              => 'Der Bericht befindet sich im Anhang.',
+  }
+%]

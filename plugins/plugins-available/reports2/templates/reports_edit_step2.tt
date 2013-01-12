@@ -193,6 +193,12 @@
           <option value="[% t %]"[% IF t == value %] selected[% END %]>[% t %]</option>
           [% END %]
         </select>
+      [% ELSIF type == 'language' %]
+        <select name='params.[% key %]'>
+          [% FOR l = languages.keys.sort %]
+          <option value="[% languages.$l.abrv %]"[% IF languages.$l.abrv == value %] selected[% END %]>[% l %]</option>
+          [% END %]
+        </select>
       [% ELSE %]
         <input type="text" name="params.[% key %]" value="[% escape_html(value) %]">
       [% END %]

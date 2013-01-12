@@ -5,7 +5,7 @@ use warnings;
 use Thruk 1.60;
 use Carp;
 use parent 'Catalyst::Controller';
-use Data::Dumper;
+use File::Slurp;
 use Thruk::Utils::Reports;
 
 =head1 NAME
@@ -148,25 +148,9 @@ sub report_edit {
         }
     }
 
-    $c->stash->{r} = $r;
-
-    # get templates
-    my $templates = {};
-    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
-        for my $file (glob($path.'/reports/*.tt')) {
-            $file =~ s/^.*\/(.*)$/$1/mx;
-            my $name = $file;
-            $name    =~ s/\.tt$//gmx;
-            $name    = join(' ', map(ucfirst, split(/_/mx, $name)));
-            $name    =~ s/Sla/SLA/gmx;
-            $templates->{$file} = {
-                file => $file,
-                name => $name,
-            };
-        }
-    }
-    $c->stash->{templates} = $templates;
-
+    $c->stash->{r}           = $r;
+    $c->stash->{templates}   = Thruk::Utils::Reports::get_report_templates($c);
+    $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
     $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
 
     Thruk::Utils::ssi_include($c);
@@ -193,12 +177,13 @@ sub report_edit_step2 {
         }
     }
 
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    my $template     = $c->{'request'}->{'parameters'}->{'template'};
+    $r->{'template'} = $template if defined $template;
 
-    my $template = $c->{'request'}->{'parameters'}->{'template'};
-    $r->{'template'}      = $template if defined $template;
-    $c->stash->{r}        = $r;
-    $c->stash->{template} = 'reports_edit_step2.tt';
+    $c->stash->{r}           = $r;
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
+    $c->stash->{template}    = 'reports_edit_step2.tt';
     return;
 }
 
@@ -266,6 +251,7 @@ sub report_remove {
     }
     return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
 }
+
 
 ##########################################################
 

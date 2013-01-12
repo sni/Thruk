@@ -20,7 +20,8 @@ use File::Temp qw/tempfile/;
 use File::Slurp;
 use MIME::Base64;
 
-$Thruk::Utils::Reports::Render::c   = undef;
+$Thruk::Utils::Reports::Render::c      = undef;
+$Thruk::Utils::Reports::Render::locale = {};
 
 ##########################################################
 
@@ -761,6 +762,14 @@ sub _sum_availability {
         $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
     }
     return($percent, $time);
+}
+
+##############################################
+sub _locale {
+    my($fmt) = shift;
+    my $tr  = $Thruk::Utils::Reports::Render::locale;
+    $fmt = $tr->{$fmt} || $fmt;
+    return sprintf($fmt, @_);
 }
 
 ##############################################

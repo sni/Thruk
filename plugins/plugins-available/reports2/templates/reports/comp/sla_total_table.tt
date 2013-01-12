@@ -1,16 +1,16 @@
 <table class="availability_details totals">
   <tr>
-    <th>Average Availability</th>
+    <th>[% loc("Average Availability") %]</th>
     [% format = '%0.' _ param.decimals _ 'f' %]
     [% value  = sprintf(format, data.percent) %]
     <td class="[% IF value < param.sla %]sla_nok[% END %]">[% IF data.percent == -1 %]&nbsp;[% ELSE %][% value %]%[% END %]</td>
   </tr>
   <tr>
-    <th>Total Uptime</th>
+    <th>[% loc("Total Uptime") %]</th>
     <td>[% duration(data.time.available) %]</td>
   </tr>
   <tr>
-    <th>Total Downtime</th>
+    <th>[% loc("Total Downtime") %]</th>
     <td>[% duration(data.time.unavailable) %]</td>
   </tr>
 </table>

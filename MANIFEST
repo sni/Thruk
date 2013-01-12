@@ -830,6 +830,7 @@ plugins/plugins-available/reports2/root/strftime-min.js
 plugins/plugins-available/reports2/script/html2pdf.sh
 plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
+plugins/plugins-available/reports2/t/report_locales.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
 plugins/plugins-available/reports2/templates/reports.tt
@@ -848,6 +849,7 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
+plugins/plugins-available/reports2/templates/reports/locale/de.tt
 plugins/plugins-available/reports2/templates/reports/locale/en.tt
 plugins/plugins-available/reports2/templates/reports/report_from_url.tt
 plugins/plugins-available/reports2/templates/reports/sla_host.tt

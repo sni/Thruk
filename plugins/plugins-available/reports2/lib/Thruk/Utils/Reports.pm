@@ -84,7 +84,7 @@ sub report_show {
         }
         elsif($report->{'var'}->{'attachment'}) {
             $c->stash->{'text'} = read_file($report_file);
-            $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $report->{'var'}->{'attachment'} . q["] );
+            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$report->{'var'}->{'attachment'}.'"' );
             $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
         } else {
             my $name = $report->{'name'};
@@ -345,6 +345,11 @@ sub generate_report {
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
         $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
     }
+    # initialize localization
+    if($options->{'params'}->{'language'}) {
+        $c->stash->{'loc'} = \&{'Thruk::Utils::Reports::Render::_locale'};
+        $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
+    }
 
     # prepage stage, functions here could still change stash
     eval {
@@ -489,6 +494,68 @@ sub clean_report_tmp_files {
     unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
     return;
+}
+
+##########################################################
+
+=head2 get_report_templates
+
+  get_report_templates($c)
+
+return available report templates
+
+=cut
+sub get_report_templates {
+    my($c) = @_;
+    my $templates = {};
+    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+        for my $file (glob($path.'/reports/*.tt')) {
+            $file =~ s/^.*\/(.*)$/$1/mx;
+            my $name = $file;
+            $name    =~ s/\.tt$//gmx;
+            $name    = join(' ', map(ucfirst, split(/_/mx, $name)));
+            $name    =~ s/Sla/SLA/gmx;
+            $templates->{$file} = {
+                file => $file,
+                name => $name,
+            };
+        }
+    }
+    return($templates);
+}
+
+##########################################################
+
+=head2 get_report_languages
+
+  get_report_languages($c)
+
+return available report languages
+
+=cut
+sub get_report_languages {
+    my($c) = @_;
+    my $languages = {};
+    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+        for my $file (glob($path.'/reports/locale/*.tt')) {
+            $file    =~ s/^.*\/(.*)$/$1/mx;
+            my $name = _get_locale_name($c, $file) || 'unknown';
+            my $abrv = $file;
+            $abrv    =~ s/\.tt$//gmx;
+            $languages->{$name} = {
+                file => $file,
+                name => $name,
+                abrv => $abrv,
+            };
+        }
+    }
+    return($languages);
+}
+
+##########################################################
+sub _get_locale_name {
+    my($c, $template) = @_;
+    return Thruk::Utils::get_template_variable($c, 'reports/locale/'.$template, 'locale_name');
 }
 
 ##########################################################
@@ -696,23 +763,7 @@ sub _get_report_cmd {
 sub _get_required_fields {
     my($c, $report) = @_;
 
-    $c->stash->{'block'} = 'edit';
-    $c->stash->{'temp'}  = 'reports/'.$report->{'template'};
-    $c->stash->{'var'}   = 'required_fields';
-    my $data;
-    eval {
-        $data = $c->view('TT')->render($c, 'get_variable.tt');
-    };
-    if($@) {
-        Thruk::Utils::CLI::_error($@);
-        return $c->detach('/error/index/13');
-    }
-
-    my $VAR1;
-    ## no critic
-    eval($data);
-    ## use critic
-    return $VAR1;
+    return Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' });
 }
 
 ##########################################################

@@ -2,17 +2,18 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'host'                    => [ 'Host',                  'hosts',           ''                    , '', 1 ] },
-        { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'                ] },
-        { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                      ] },
-        { 'rpttimeperiod'           => [ 'Report Timeperiod',     'rpttimeperiod',   ''                            ] },
-        { 'sla'                     => [ 'SLA %',                 'int',             '98'                  , '', 1 ] },
-        { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  , '', 1 ] },
-        { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   , '', 1 ] },
-        { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                         ] },
-        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'          ] },
-        { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                          ] },
-        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']       ] },
+        { 'language'                => [ 'Language',              'language',        'en'                  ,'', 1 ] },
+        { 'host'                    => [ 'Host',                  'hosts',           ''                    ,'', 1 ] },
+        { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'               ] },
+        { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                     ] },
+        { 'rpttimeperiod'           => [ 'Report Timeperiod',     'rpttimeperiod',   ''                           ] },
+        { 'sla'                     => [ 'SLA %',                 'int',             '98'                  ,'', 1 ] },
+        { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  ,'', 1 ] },
+        { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   ,'', 1 ] },
+        { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
+        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'         ] },
+        { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                         ] },
+        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']      ] },
     ];
   %]
 [% END %]
@@ -28,10 +29,10 @@
   [%# report settings #%]
   [% PROCESS 'reports/locale/en.tt' %]
   [%
-    title        = 'SLA Report'
+    title        = loc('SLA Report')
     subtitle     = r.name
-    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
-                     'Host:', param.host,
+    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat),
+                     loc('Host:'), param.host,
                    ]
   %]
 
@@ -39,7 +40,7 @@
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
 
     [% IF avail_data.hosts.size > 1 %]
-      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="SLA Graph Overview" %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
         [% PROCESS 'reports/comp/sla_total_graph.tt' type='host' %]
       [% END %]
     [% END %]
@@ -47,7 +48,7 @@
     [% FOREACH hst = avail_data.hosts.keys.sort %]
     [% c.request.parameters.host    = hst %]
     [% c.request.parameters.service = "" %]
-    [% pagetitle = "Host: " _ hst %]
+    [% pagetitle = loc("Host: %s", hst) %]
     [% WRAPPER 'reports/comp/page_standard.tt' %]
       [% PROCESS 'reports/comp/sla_graph_page.tt' %]
     [% END %]
