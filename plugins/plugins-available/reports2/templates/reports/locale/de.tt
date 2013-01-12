@@ -1,11 +1,12 @@
 [%
-  locale_name          = 'german';
+  locale_name          = 'german';      # language name should be in english
   reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
   reportDateFormat     = '%d %b %Y';
   weekAbbr             = 'KW';
   monthNames           = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   dayNames             = ['Mo','Di','Mi','Do','Fr','Sa','So'];
   translations         = {
+# keep those personal names
     'Up'                                    => 'Up',
     'Down'                                  => 'Down',
     'Unreachable'                           => 'Unreachable',
@@ -13,6 +14,12 @@
     'Warning'                               => 'Warning',
     'Unknown'                               => 'Unknown',
     'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Hostgruppe:',
+    'Servicegroup:'                         => 'Servicegruppe:',
     'Event Report'                          => 'Ereigniss Bericht',
     'SLA Report'                            => 'SLA Bericht',
     'Report Timeperiod:'                    => 'Zeitraum:',
@@ -22,7 +29,6 @@
     'Totals'                                => 'Anzahl',
     'Events'                                => 'Ereignisse',
     'no events during this timeperiod.'     => 'keine Ereignisse in diesem Zeitraum.',
-    'Servicegroup:'                         => 'Servicegruppe:',
     'SLA Overview Graph'                    => 'SLA Übersicht',
     'Availability'                          => 'Verfügbarkeit',
     'Service: %s on %s'                     => 'Service: %s auf %s',
@@ -34,10 +40,7 @@
     'Latest Outages'                        => 'Die neuesten Ausfälle',
     'Outages'                               => 'Ausfälle',
     'Report:'                               => 'Bericht:',
-    'Service:'                              => 'Service:',
     'Description:'                          => 'Beschreibung:',
-    'Host:'                                 => 'Host:',
-    'Hostgroup:'                            => 'Hostgruppe:',
     'Your report is attached.'              => 'Der Bericht befindet sich im Anhang.',
   }
 %]
