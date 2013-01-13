@@ -82,27 +82,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
   -b, --backend=<backend>       Comma seperated list of backends/sites
                                 which should be used for querys.
   -l, --list-backends           List available backends/sites.
-  -a, --action=<action>         Perform this action:
-                                  - url=<url>           output url result
-                                  - report=<nr>         generate report
-                                  - reportmail=<nr>     send report by mail
-
-                               Mongodb Logcache:
-                                  - logcacheimport      initial logcache import
-                                  - logcacheupdate      update logcache
-                                  - logcacheauthupdate  update logcache authorization information
-                                  - logcachestats       print logcache statistics
-
-                               Internal Commands
-                                  - installcron         update cronjobs for downtimes and reports
-                                                        (only needed during package installation)
-                                  - uninstallcron       remove all thruk cronjobs
-                                                        (only needed during package deinstallation)
-                               Testing Commands
-                                  - listbackends        list all backends
-                                  - listhosts           list hostnames
-                                  - listhostgroups      list hostgroupnames
-
+  -a, --action=<action>         Perform given action
 
   -A, --auth=<auth>             Set username for querys
 
@@ -149,11 +129,26 @@ script has the following arguments
 =item B<-a> I<action>, B<--action>=I<action>
 
     perform selected action:
+      - url=<url>           output url result
+      - report=<nr>         generate report
+      - reportmail=<nr>     send report by mail
 
-    - url=<url>     request this url. Url can be shortened and the
-                    leading /thruk/cgi-bin/ can be stripped.
+    Mongodb Logcache:
+      - logcacheimport      initial logcache import
+      - logcacheupdate      update logcache
+      - logcacheauthupdate  update logcache authorization information
+      - logcachestats       print logcache statistics
 
-    - report=<nr>   generate report by specifying its id.
+    Internal Commands
+      - installcron         update cronjobs for downtimes and reports
+                            (only needed during package installation)
+      - uninstallcron       remove all thruk cronjobs
+                            (only needed during package deinstallation)
+    Testing Commands
+      - listbackends        list all backends
+      - listhosts           list hostnames
+      - listhostgroups      list hostgroupnames
+
 
 =item B<-A> I<authname>, B<--auth>=I<authname>
 
