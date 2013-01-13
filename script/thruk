@@ -33,14 +33,15 @@ my $branch   = '';
 $branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 
 my $options = {
-    'verbose'  => 0,
+    'verbose'  => 1,
     'backends' => [],
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
 GetOptions (
    "h|help"             => \$options->{'help'},
-   "v|verbose"          => \$options->{'verbose'},
+   "v|verbose"          => sub { $options->{'verbose'}++ },
+   "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
      "local"            => \$options->{'local'},
@@ -55,6 +56,7 @@ GetOptions (
 if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
 pod2usage( { -verbose => 2, -exit => 3 } ) if $options->{'help'};
 pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
+$options->{'verbose'} = 0 if $options->{'quiet'};
 
 use Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);

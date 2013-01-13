@@ -1671,6 +1671,12 @@ sub get_template_variable {
 }
 
 ########################################
+sub format_response_error {
+    my($response) = @_;
+    return $response->{_rc}.': '.$response->{'_content'};
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

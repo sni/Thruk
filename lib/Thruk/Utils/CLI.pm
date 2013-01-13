@@ -34,7 +34,7 @@ $Thruk::Utils::CLI::c       = undef;
     new([ $options ])
 
  $options = {
-    verbose         => 0|1,         # be more verbose
+    verbose         => 0-2,         # be more verbose
     credential      => 'secret',    # secret key when accessing remote instances
     remoteurl       => 'url',       # url where to access remote instances
     local           => 0|1,         # local requests only
@@ -55,8 +55,7 @@ sub new {
     $ENV{'THRUK_SRC'}       = 'CLI';
     $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
-    $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
-    $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
+    $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
         $options->{'remoteurl_specified'} = 0;
@@ -182,10 +181,9 @@ sub _run {
     _debug("_run(): ".Dumper($self->{'opt'}));
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
-
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
-            _error("remote command failed:");
-            _error($response);
+            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
+            _debug(" -> ".Dumper($response));
             return 1;
         }
     }
@@ -212,7 +210,7 @@ sub _run {
         binmode STDERR;
         print STDERR $result->{'output'};
     }
-    _debug("".$c->stats->report) if defined $c;
+    _trace("".$c->stats->report) if defined $c;
     return $result->{'rc'};
 }
 
@@ -243,7 +241,7 @@ sub _request {
         return($data, $response);
     }
 
-    _error(" -> failed: ".Dumper($response));
+    _debug(" -> failed: ".Dumper($response));
     return(undef, $response);
 }
 
@@ -428,25 +426,30 @@ sub _cmd_listhostgroups {
 sub _cmd_listbackends {
     my($c) = @_;
     $c->{'db'}->enable_backends();
-    $c->{'db'}->get_processinfo();
+    eval {
+        $c->{'db'}->get_processinfo();
+    };
+    _debug($@) if $@;
     Thruk::Action::AddDefaults::_set_possible_backends($c, {});
     my $output = '';
     $output .= sprintf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
-    $output .= sprintf("---------------------------------------\n");
+    $output .= sprintf("-------------------------------------------------\n");
     for my $key (@{$c->stash->{'backends'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
+        my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
+        $addr    =~ s|/cgi-bin/remote.cgi$||mx;
         $output .= sprintf("%-4s %-8s %-10s %s",
                 (!defined $peer->{'hidden'} or $peer->{'hidden'} == 0) ? ' * ' : '',
                 $key,
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
-                $c->stash->{'backend_detail'}->{$key}->{'addr'},
+                $addr,
         );
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
         chomp($error);
         $output .= " (".$error.")" if $error;
         $output .= "\n";
     }
-    $output .= sprintf("---------------------------------------\n");
+    $output .= sprintf("-------------------------------------------------\n");
     return $output;
 }
 
@@ -511,12 +514,14 @@ sub _request_url {
         return $txt;
     }
     elsif($result->{'code'} == 500) {
-        my $txt = 'request failed: '.$result->{'code'}."\ninternal error, please consult your logfiles\n";
+        my $txt = 'request failed: '.$result->{'code'}." - internal error, please consult your logfiles\n";
+        _debug(Dumper($result));
         return($result->{'code'}, $result, $txt) if wantarray;
         return $txt;
     }
     elsif($result->{'code'} != 200) {
-        my $txt = 'request failed: '.$result->{'code'}."\n".Dumper($result);
+        my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
+        _debug(Dumper($result));
         return($result->{'code'}, $result, $txt) if defined wantarray;
         return $txt;
     }
@@ -531,11 +536,23 @@ sub _error {
 }
 
 ##############################################
+sub _info {
+    return _debug($_[0],'info');
+}
+
+##############################################
+sub _trace {
+    return _debug($_[0],'trace');
+}
+
+##############################################
 sub _debug {
     my($data, $lvl) = @_;
     return unless defined $data;
     $lvl = 'DEBUG' unless defined $lvl;
-    return if($Thruk::Utils::CLI::verbose <= 0 and uc($lvl) ne 'ERROR');
+    return if($Thruk::Utils::CLI::verbose < 3 and uc($lvl) eq 'TRACE');
+    return if($Thruk::Utils::CLI::verbose < 2 and uc($lvl) eq 'DEBUG');
+    return if($Thruk::Utils::CLI::verbose < 1 and uc($lvl) eq 'INFO');
     if(ref $data) {
         return _debug(Dumper($data), $lvl);
     }
