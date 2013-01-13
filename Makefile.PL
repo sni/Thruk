@@ -146,7 +146,9 @@ for my $testdir (glob('plugins/plugins-available/*/t')) {
         next;
     }
     my $target = readlink('t/xt/'.$plugin);
-    if($target ne '../../plugins/plugins-available/'.$plugin.'/t') {
+    if(    $target ne '../../plugins/plugins-available/'.$plugin.'/t'
+       and $target ne '../../plugins/plugins-enabled/'.$plugin.'/t'
+      ) {
         die('t/xt/'.$plugin.' has wrong target: '.$target.' vs. ../../plugins/plugins-available/'.$plugin.'/t');
     }
     $testlinks->{$plugin} = $target;
