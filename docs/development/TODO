@@ -74,6 +74,12 @@ addons:
     - allow multiple filter
 
 
+
+=========================================
+Version 2
+
 Themes:
     - only include Thruk theme and make others downloadable
     - same for plugins
+
+Deprecate reports plugin
