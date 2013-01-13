@@ -1,10 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 106;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'local test only'   if defined $ENV{'CATALYST_SERVER'};
+    plan tests => 106;
 
     # enable plugin
     `cd plugins/plugins-enabled && ln -s ../plugins-available/dashboard .`;
