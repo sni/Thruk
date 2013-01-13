@@ -45,7 +45,8 @@ create CLI tool object
 =cut
 sub new {
     my($class, $options) = @_;
-    $Thruk::Utils::CLI::verbose = $options->{'verbose'} if defined $options->{'verbose'};
+    $options->{'verbose'} = 1 unless defined $options->{'verbose'};
+    $Thruk::Utils::CLI::verbose = $options->{'verbose'};
     my $self  = {
         'opt' => $options,
     };
@@ -409,7 +410,11 @@ sub _cmd_listhosts {
     for my $host (@{$c->{'db'}->get_hosts(sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n";
     }
-    return $output;
+
+    # fix encoding
+    utf8::decode($output);
+
+    return encode_utf8($output);
 }
 
 ##############################################
@@ -419,7 +424,11 @@ sub _cmd_listhostgroups {
     for my $group (@{$c->{'db'}->get_hostgroups(sort => {'ASC' => 'name'})}) {
         $output .= $group->{'name'}."\n";
     }
-    return $output;
+
+    # fix encoding
+    utf8::decode($output);
+
+    return encode_utf8($output);
 }
 
 ##############################################
@@ -818,7 +827,7 @@ sub _cmd_configtool {
 ##############################################
 sub _cmd_raw {
     my($c, $opt) = @_;
-    my $sub  = $opt->{'sub'};
+    my $function  = $opt->{'sub'};
 
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
@@ -826,25 +835,25 @@ sub _cmd_raw {
     my @keys = keys %{$Thruk::peers};
     my $key = $keys[0];
     die("no backends...") unless $key;
-    if($sub eq 'get_logs') {
+    if($function eq 'get_logs') {
         $c->{'db'}->renew_logcache($c);
     }
 
     # config tool commands
-    elsif($sub eq 'configtool') {
+    elsif($function eq 'configtool') {
         return _cmd_configtool($c, $key, $opt);
     }
 
     # result for external job
-    elsif($sub eq 'job') {
+    elsif($function eq 'job') {
         return _cmd_ext_job($c, $key, $opt);
     }
 
-    my @res = Thruk::Backend::Manager::_do_on_peer($key, $sub, $opt->{'args'});
+    my @res = Thruk::Backend::Manager::_do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version to processinfo
-    if($sub eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
+    if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings

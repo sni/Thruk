@@ -1671,6 +1671,15 @@ sub get_template_variable {
 }
 
 ########################################
+
+=head2 format_response_error
+
+  format_response_error($response)
+
+return error from response object
+
+=cut
+
 sub format_response_error {
     my($response) = @_;
     return $response->{_rc}.': '.$response->{'_content'};
