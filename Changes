@@ -7,6 +7,8 @@ next:
           - added show_host_attempts config option
           - reports
             - added locales support (en, de, it)
+          - config tool
+            - added one click save & reload button
           - Bug Fixes
             - fixed js error in conf tool
             - fixed removal of deprecated plugins on rpm update

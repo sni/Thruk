@@ -1336,6 +1336,7 @@ themes/themes-available/Classic/images/delete.png
 themes/themes-available/Classic/images/detail.gif
 themes/themes-available/Classic/images/disabled.gif
 themes/themes-available/Classic/images/disk.png
+themes/themes-available/Classic/images/disk_reload.png
 themes/themes-available/Classic/images/down.gif
 themes/themes-available/Classic/images/down.png
 themes/themes-available/Classic/images/downtime.gif
@@ -1486,6 +1487,7 @@ themes/themes-available/Exfoliation/images/delete.png
 themes/themes-available/Exfoliation/images/detail.gif
 themes/themes-available/Exfoliation/images/disabled.gif
 themes/themes-available/Exfoliation/images/disk.png
+themes/themes-available/Exfoliation/images/disk_reload.png
 themes/themes-available/Exfoliation/images/down.gif
 themes/themes-available/Exfoliation/images/down.png
 themes/themes-available/Exfoliation/images/downtime.gif
@@ -1693,6 +1695,7 @@ themes/themes-available/Nuvola/images/delete.png
 themes/themes-available/Nuvola/images/detail.gif
 themes/themes-available/Nuvola/images/disabled.gif
 themes/themes-available/Nuvola/images/disk.png
+themes/themes-available/Nuvola/images/disk_reload.png
 themes/themes-available/Nuvola/images/down.gif
 themes/themes-available/Nuvola/images/down.png
 themes/themes-available/Nuvola/images/downtime.gif
@@ -1893,6 +1896,7 @@ themes/themes-available/Thruk/images/delete.png
 themes/themes-available/Thruk/images/detail.gif
 themes/themes-available/Thruk/images/disabled.gif
 themes/themes-available/Thruk/images/disk.png
+themes/themes-available/Thruk/images/disk_reload.png
 themes/themes-available/Thruk/images/down.gif
 themes/themes-available/Thruk/images/down.png
 themes/themes-available/Thruk/images/downtime.gif
@@ -2033,6 +2037,7 @@ themes/themes-available/Vautour/images/delete.png
 themes/themes-available/Vautour/images/detail.gif
 themes/themes-available/Vautour/images/disabled.gif
 themes/themes-available/Vautour/images/disk.png
+themes/themes-available/Vautour/images/disk_reload.png
 themes/themes-available/Vautour/images/down.gif
 themes/themes-available/Vautour/images/down.png
 themes/themes-available/Vautour/images/downtime.gif
@@ -2230,6 +2235,7 @@ themes/themes-available/Wakizashi/images/delete.png
 themes/themes-available/Wakizashi/images/detail.gif
 themes/themes-available/Wakizashi/images/disabled.gif
 themes/themes-available/Wakizashi/images/disk.png
+themes/themes-available/Wakizashi/images/disk_reload.png
 themes/themes-available/Wakizashi/images/down.gif
 themes/themes-available/Wakizashi/images/down.png
 themes/themes-available/Wakizashi/images/downtime.gif

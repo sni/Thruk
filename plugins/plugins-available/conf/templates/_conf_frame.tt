@@ -41,7 +41,16 @@
               </tr>
             </table>
           </form>
-
+          [% IF last_changed || needs_commit %]
+          <br>
+          <table border="0" class="optBox" style="position: absolute; right: 3px;">
+            <tr>
+              <td>
+                <a href="conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk_reload.png' alt='directly save and reload config changes' title='directly save and reload config changes' width="16" height="16" style="vertical-align: text-top"> save &amp; reload</a>
+              </td>
+            </tr>
+          </table>
+          [% END %]
           [% PROCESS _help.tt topic = "conf" %]
         </td>
       </tr>

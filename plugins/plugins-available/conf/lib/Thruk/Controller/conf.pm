@@ -89,6 +89,9 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{template}              = 'conf.tt';
     $c->stash->{subtitle}              = 'Config Tool';
     $c->stash->{infoBoxTitle}          = 'Config Tool';
+    $c->stash->{'last_changed'}        = 0;
+    $c->stash->{'needs_commit'}        = 0;
+
 
     Thruk::Utils::ssi_include($c);
 
@@ -880,9 +883,6 @@ sub _process_backends_page {
 sub _process_objects_page {
     my( $self, $c ) = @_;
 
-    $c->stash->{'last_changed'} = 0;
-    $c->stash->{'needs_commit'} = 0;
-
     return unless Thruk::Utils::Conf::set_object_model($c);
 
     _check_external_reload($c);
@@ -1031,6 +1031,12 @@ sub _apply_config_changes {
     $c->stash->{'template'}      = 'conf_objects_apply.tt';
     $c->stash->{'output'}        = '';
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
+
+    if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
+        if($c->{'obj_db'}->commit($c)) {
+            $c->{'request'}->{'parameters'}->{'reload'} = 'yes';
+        }
+    }
 
     # get diff of changed files
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
