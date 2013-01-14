@@ -6,6 +6,7 @@ use Data::Dumper;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'local test only'   if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
     plan tests => 4;
 
     # enable plugin
