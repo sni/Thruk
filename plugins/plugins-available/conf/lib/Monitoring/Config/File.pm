@@ -110,10 +110,14 @@ sub update_objects {
     while(my $line = <$fh>) {
         Thruk::Utils::Conf::decode_any($line);
         chomp($line);
-        while(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
+        # connect multiple lines
+        while(substr($line, -1) eq '\\' and (substr($line, 0, 1) ne '#' or $in_disabled_object)) {
             my $newline = <$fh>;
             chomp($newline);
             StripLSpace($newline);
+            if($in_disabled_object) {
+                $newline = substr($newline, 1);
+            }
             $line = substr($line, 0, -1).$newline;
         }
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
