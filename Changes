@@ -6,7 +6,7 @@ next:
           - added noexternalforks parameter to skip forks
           - added show_host_attempts config option
           - reports
-            - added locales support
+            - added locales support (en, de, it)
           - Bug Fixes
             - fixed js error in conf tool
             - fixed removal of deprecated plugins on rpm update

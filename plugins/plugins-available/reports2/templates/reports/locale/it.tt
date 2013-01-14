@@ -1,0 +1,46 @@
+[%
+  locale_name          = 'italian';      # language name should be in english
+  reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
+  reportDateFormat     = '%d %b %Y';
+  weekAbbr             = 'KW';
+  monthNames           = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Aug','Set','Ott','Nov','Dic'];
+  dayNames             = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  translations         = {
+# keep those personal names
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Gruppo di Host:',
+    'Servicegroup:'                         => 'Gruppo di Servizi:',
+    'Event Report'                          => 'Rapporto degli Eventi',
+    'SLA Report'                            => 'Rapporto dello SLA',
+    'Report Timeperiod:'                    => 'Periodo di tempo:',
+    'Legend'                                => 'Leggenda',
+    'Host Alert'                            => 'Allarme Host',
+    'Service Alert'                         => 'Allarme Servizio',
+    'Totals'                                => 'Totali',
+    'Events'                                => 'Eventi',
+    'no events during this timeperiod.'     => 'nessun evento durante questo lasso di tempo.',
+    'SLA Overview Graph'                    => 'Grafico d\'insieme dello SLA',
+    'Availability'                          => 'Disponibilità',
+    'Service: %s on %s'                     => 'Servizio: %s su %s',
+    'Average Availability'                  => 'Disponibilità media',
+    'Total Uptime'                          => 'Tempo di attività totale',
+    'Total Downtime'                        => 'Tempo di inattività totale',
+    'no outages during this timeperiod'     => 'nessuna interruzione durante questo lasso di tempo',
+    'Worst Outages'                         => 'Le più lunghe interruzioni',
+    'Latest Outages'                        => 'L\'ultima interruzione',
+    'Outages'                               => 'Interruzioni',
+    'Report:'                               => 'Rapporto:',
+    'Description:'                          => 'Descrizione:',
+    'Your report is attached.'              => 'Il tuo rapporto è allegato.',
+  }
+%]
