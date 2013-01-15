@@ -207,6 +207,29 @@ sub remove_item {
 
 ##############################################
 
+=head2 has_group
+
+  has_group($c, $group)
+
+returns 1 if the current user has this group
+
+=cut
+sub has_group {
+    my($c, $group) = @_;
+
+    my $cache = $c->cache;
+    my $user  = $c->stash->{'remote_user'};
+    if($cache and $user) {
+        my $contactgroups = $cache->get($user);
+        if($contactgroups and $contactgroups->{'contactgroups'}->{$group}) {
+            return 1;
+       }
+    }
+    return 0;
+}
+
+##############################################
+
 =head2 _renew_navigation
 
   _renew_navigation()
