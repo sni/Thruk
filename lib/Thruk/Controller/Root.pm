@@ -93,7 +93,8 @@ sub begin : Private {
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
     if( defined $c->config->{templates_paths} ) {
-        $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
+        # themes have to override plugins templates
+        $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates', @{ $c->config->{templates_paths} } ];
     }
     else {
         $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
