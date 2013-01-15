@@ -17752,12 +17752,12 @@ users template path
 </li>
 <li>
 <p>
-plugins template path
+themes template path
 </p>
 </li>
 <li>
 <p>
-themes template path
+plugins template path
 </p>
 </li>
 <li>
@@ -19336,6 +19336,11 @@ have several blocks which specify the steps done to produce the report.</p></div
 <div class="ulist"><ul>
 <li>
 <p>
+styles
+</p>
+</li>
+<li>
+<p>
 edit
 </p>
 </li>
@@ -19355,6 +19360,30 @@ mail
 </p>
 </li>
 </ul></div>
+<h4 id="_styles">Styles</h4>
+<div class="paragraph"><p>Customizing css styles of your reports is easy. You need to create a
+new file <em>reports/style/custom.tt</em> below your <em>user_template_path</em>.</p></div>
+<div class="paragraph"><p>For example:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>&lt;style type="text/css"&gt;
+/* override css styles */
+BODY {
+    font-family: arial, sans-serif;
+    font-size: 11px;
+    line-height: 18px;
+    font-size: 16px;
+}
+&lt;/style&gt;
+
+&lt;script language="javascript" type="text/javascript"&gt;
+/* add complete new elements by javascript */
+  jQuery(document).ready(function() {
+    jQuery('&lt;img src="[% url_prefix %]thruk/themes/Thruk/images/logo_thruk.png"&gt;').insertBefore('DIV.page.cover DIV.titletext');
+  });
+&lt;/script&gt;</tt></pre>
+</div></div>
+<div class="paragraph"><p>If thats not enough, you still can change each and every template used to create the reports.</p></div>
 <h4 id="_edit_block">Edit Block</h4>
 <div class="paragraph"><p>The edit block contains configuration items used for this report. They create
 the edit page when someone chooses to create or edit a report of this type.
@@ -19470,7 +19499,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-01-12 18:53:50 CEST
+Last updated 2013-01-15 18:47:39 CEST
 </div>
 </div>
 </body>

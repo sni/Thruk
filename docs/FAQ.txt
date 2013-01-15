@@ -145,6 +145,25 @@ Themes can be disabled by removing the symlink from your
 See the http://thruk.org/themes.html[themes page] for details.
 
 
+=== How can i customize reports?
+Customizing reports is coverd in the http://thruk.org/documentation.html#_customized_reports[official documenation].
+
+=== Why are the PNP graphs missing in my reports?
+First you need a working PNP installation. Then check
+the http://thruk.org/documentation.html#_pnp_export[official documenation].
+
+If nothing helps, add some debug output to the script which is responsible for
+the pnp export (experienced users only).
+
+Add these lines to 'plugins/plugins-available/reports2/script/pnp_export.sh'.
+
+-------
+exec >/tmp/pnp.log 2>&1
+set -x
+-------
+
+Then regenerate a report and investigate that new logfile.
+
 
 == Installation
 

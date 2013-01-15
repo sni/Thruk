@@ -997,8 +997,8 @@ it easy to override thruks own templates.
 Template search order is:
 
  * users template path
- * plugins template path
  * themes template path
+ * plugins template path
  * thruks template path
 
 ex.:
@@ -2516,10 +2516,40 @@ send one report at multiple times.
 Reports can be customized with some HTML and CSS knowledge. Reports in general
 have several blocks which specify the steps done to produce the report.
 
+  * styles
   * edit
   * prepare
   * render
   * mail
+
+==== Styles
+Customizing css styles of your reports is easy. You need to create a
+new file 'reports/style/custom.tt' below your 'user_template_path'.
+
+For example:
+
+------
+<style type="text/css">
+/* override css styles */
+BODY {
+    font-family: arial, sans-serif;
+    font-size: 11px;
+    line-height: 18px;
+    font-size: 16px;
+}
+</style>
+
+<script language="javascript" type="text/javascript">
+/* add complete new elements by javascript */
+  jQuery(document).ready(function() {
+    jQuery('<img src="[% url_prefix %]thruk/themes/Thruk/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+  });
+</script>
+------
+
+If thats not enough, you still can change each and every template used to create the reports.
+
+
 
 ==== Edit Block
 The edit block contains configuration items used for this report. They create
