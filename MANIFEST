@@ -858,6 +858,7 @@ plugins/plugins-available/reports2/templates/reports/sla_hostgroup.tt
 plugins/plugins-available/reports2/templates/reports/sla_service.tt
 plugins/plugins-available/reports2/templates/reports/sla_servicegroup.tt
 plugins/plugins-available/reports2/templates/reports/style/css.tt
+plugins/plugins-available/reports2/templates/reports/style/custom.tt
 plugins/plugins-available/reports2/templates/reports_edit.tt
 plugins/plugins-available/reports2/templates/reports_edit_step2.tt
 plugins/plugins-available/shinken_features/description.txt

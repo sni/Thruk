@@ -9,6 +9,7 @@
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/strftime-min.js"></script>
+  [% PROCESS 'reports/style/custom.tt' %]
 </head>
 <body>
 [% content %]
