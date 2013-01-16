@@ -2433,6 +2433,10 @@ Example: /thruk/cgi-bin/status.cgi?view_mode=json&host=all
 Parameters: all usual status page parameters and filter. Use the gui filter
 and then json export link for maximum convenience.
 
+It is possible to set the columns by using the 'columns' parameter:
+
+Example: /thruk/cgi-bin/status.cgi?view_mode=json&host=all&columns=name,status
+
 
 ==== Availability Data
 

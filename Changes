@@ -5,6 +5,7 @@ next:
           - added json export for availability data
           - added noexternalforks parameter to skip forks
           - added show_host_attempts config option
+          - make colums selectable for json requests
           - reports
             - added locales support (en, de, it)
           - config tool

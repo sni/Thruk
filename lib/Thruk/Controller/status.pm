@@ -311,8 +311,20 @@ sub _process_details_page {
     my $backend_order = $order;
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
+    my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
+    if($c->{'request'}->{'parameters'}->{'columns'}) {
+        @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
+        my $col_hash = Thruk::Utils::array2hash($columns);
+        $keep_peer_addr   = delete $col_hash->{'peer_addr'};
+        $keep_peer_name   = delete $col_hash->{'peer_name'};
+        $keep_peer_key    = delete $col_hash->{'peer_key'};
+        $keep_last_state  = delete $col_hash->{'last_state_change_plus'};
+        $keep_state_order = delete $col_hash->{'state_order'};
+        @{$columns} = keys %{$col_hash};
+    }
+
     # get all services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns  );
 
     if(scalar @{$services} == 0) {
         # try to find matching hosts, maybe we got some hosts without service
@@ -329,6 +341,16 @@ sub _process_details_page {
         return $c->detach('View::Excel');
     }
     if ( defined $view_mode and $view_mode eq 'json' ) {
+        # remove unwanted colums
+        if($columns) {
+            for my $s (@{$services}) {
+                delete $s->{'peer_addr'}              unless $keep_peer_addr;
+                delete $s->{'peer_name'}              unless $keep_peer_name;
+                delete $s->{'peer_key'}               unless $keep_peer_key;
+                delete $s->{'last_state_change_plus'} unless $keep_last_state;
+                delete $s->{'state_order'}            unless $keep_state_order;
+            }
+        }
         $c->stash->{'json'} = $services;
         return $c->detach('View::JSON');
     }
@@ -370,8 +392,19 @@ sub _process_hostdetails_page {
     my $backend_order = $order;
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
+    my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
+    if($c->{'request'}->{'parameters'}->{'columns'}) {
+        @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
+        my $col_hash = Thruk::Utils::array2hash($columns);
+        $keep_peer_addr  = delete $col_hash->{'peer_addr'};
+        $keep_peer_name  = delete $col_hash->{'peer_name'};
+        $keep_peer_key   = delete $col_hash->{'peer_key'};
+        $keep_last_state = delete $col_hash->{'last_state_change_plus'};
+        @{$columns} = keys %{$col_hash};
+    }
+
     # get hosts
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1 );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns );
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
@@ -383,6 +416,15 @@ sub _process_hostdetails_page {
         return $c->detach('View::Excel');
     }
     if ( defined $view_mode and $view_mode eq 'json' ) {
+        # remove unwanted colums
+        if($columns) {
+            for my $h (@{$hosts}) {
+                delete $h->{'peer_addr'}              unless $keep_peer_addr;
+                delete $h->{'peer_name'}              unless $keep_peer_name;
+                delete $h->{'peer_key'}               unless $keep_peer_key;
+                delete $h->{'last_state_change_plus'} unless $keep_last_state;
+            }
+        }
         $c->stash->{'json'} = $hosts;
         return $c->detach('View::JSON');
     }
