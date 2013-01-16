@@ -20,7 +20,7 @@ Requires:      perl logrotate gd
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron cairo wget xorg-x11-server-extra
 %else
-Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb
+Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-serif-fonts
 %endif
 
 %description
