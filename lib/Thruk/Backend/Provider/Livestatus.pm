@@ -1015,8 +1015,10 @@ sub _get_query_size {
     my $stats = [
         'total' => { -isa => [ $key => { '!=' => undef } ]},
     ];
+    my $oldcolumns = delete $options->{'columns'};
     my $class = $self->_get_class($table, $options);
     my $rows = $class->stats($stats)->hashref_array();
+    $options->{'columns'} = $oldcolumns if $oldcolumns;
     my $size = $rows->[0]->{'total'};
     return unless defined $size;
 
