@@ -6,7 +6,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1043;
+    plan tests => 1059;
 }
 
 BEGIN {
@@ -142,8 +142,10 @@ $pages = [
 # view_mode json export which result in an Array
     '/thruk/cgi-bin/status.cgi?host=all&view_mode=json',
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=json',
+    '/thruk/cgi-bin/status.cgi?host=all&view_mode=json&columns=host_name,description,state',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=json',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json&columns=state,name',
 ];
 
 for my $url (@{$pages}) {
