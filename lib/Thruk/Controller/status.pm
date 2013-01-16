@@ -283,6 +283,8 @@ sub _process_search_request {
 sub _process_details_page {
     my( $self, $c ) = @_;
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
@@ -312,7 +314,7 @@ sub _process_details_page {
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
-    if($c->{'request'}->{'parameters'}->{'columns'}) {
+    if($view_mode eq 'json' and $c->{'request'}->{'parameters'}->{'columns'}) {
         @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
         my $col_hash = Thruk::Utils::array2hash($columns);
         $keep_peer_addr   = delete $col_hash->{'peer_addr'};
@@ -332,15 +334,14 @@ sub _process_details_page {
         $c->stash->{'num_hosts'} = $host_stats->{'total'};
     }
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
-    if( defined $view_mode and $view_mode eq 'xls' ) {
+    if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
         return $c->detach('View::Excel');
     }
-    if ( defined $view_mode and $view_mode eq 'json' ) {
+    if ( $view_mode eq 'json' ) {
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
@@ -365,6 +366,8 @@ sub _process_details_page {
 # create the hostdetails page
 sub _process_hostdetails_page {
     my( $self, $c ) = @_;
+
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
@@ -393,7 +396,7 @@ sub _process_hostdetails_page {
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
-    if($c->{'request'}->{'parameters'}->{'columns'}) {
+    if($view_mode eq 'json' and $c->{'request'}->{'parameters'}->{'columns'}) {
         @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
         my $col_hash = Thruk::Utils::array2hash($columns);
         $keep_peer_addr  = delete $col_hash->{'peer_addr'};
@@ -406,8 +409,7 @@ sub _process_hostdetails_page {
     # get hosts
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns );
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
-    if( defined $view_mode and $view_mode eq 'xls' ) {
+    if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         my $filename = 'status.xls';
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
@@ -415,7 +417,7 @@ sub _process_hostdetails_page {
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
         return $c->detach('View::Excel');
     }
-    if ( defined $view_mode and $view_mode eq 'json' ) {
+    if ( $view_mode eq 'json' ) {
         # remove unwanted colums
         if($columns) {
             for my $h (@{$hosts}) {
@@ -885,7 +887,7 @@ sub _process_combined_page {
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
-    if( defined $view_mode and $view_mode eq 'xls' ) {
+    if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'hosts'}    = $hosts;
@@ -893,7 +895,7 @@ sub _process_combined_page {
         $c->stash->{'template'} = 'excel/status_combined.tt';
         return $c->detach('View::Excel');
     }
-    if ( defined $view_mode and $view_mode eq 'json' ) {
+    if ( $view_mode eq 'json' ) {
         $c->stash->{'json'} = {
             'hosts'    => $hosts,
             'services' => $services,
