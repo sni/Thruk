@@ -66,9 +66,10 @@ create folder recursive
 
 sub mkdir_r {
     for my $dirname (@_) {
-        my $path = "";
+        my $path = '';
         for my $part (split/(\/)/mx, $dirname) {
             $path .= $part;
+            next if $path eq '';
             Thruk::Utils::IO::mkdir($path) unless -d $path;
         }
     }
