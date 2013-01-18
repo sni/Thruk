@@ -7,6 +7,7 @@ use Data::Dumper;
 use JSON::XS;
 use LWP::UserAgent;
 use LWP::ConnCache;
+use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -711,7 +712,7 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    die(Dumper($response));
+    die(Thruk::Utils::format_response_error($response));
     return;
 }
 

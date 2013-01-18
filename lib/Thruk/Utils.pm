@@ -1682,7 +1682,11 @@ return error from response object
 
 sub format_response_error {
     my($response) = @_;
-    return $response->{_rc}.': '.$response->{'_content'};
+    if(defined $response) {
+        return $response->code().': '.$response->message();
+    } else {
+        return Dumper($response);
+    }
 }
 
 ########################################
