@@ -102,6 +102,10 @@ function remove_conf_attribute(key, nr) {
 
 /* initialize all buttons */
 function init_conf_tool_buttons() {
+    jQuery('INPUT.conf_button').button();
+    jQuery('BUTTON.conf_button').button();
+    jQuery('.radioset').buttonset();
+
     jQuery('.conf_save_button').button({
         icons: {primary: 'ui-save-button'}
     });
@@ -110,6 +114,9 @@ function init_conf_tool_buttons() {
     });
     jQuery('.conf_back_button').button({
         icons: {primary: 'ui-l-arrow-button'}
+    });
+    jQuery('.conf_save_reload_button').button({
+        icons: {primary: 'ui-save_reload-button'}
     });
 
     jQuery('.conf_preview_button').button({

@@ -1035,6 +1035,8 @@ sub _apply_config_changes {
     if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
         if($c->{'obj_db'}->commit($c)) {
             $c->{'request'}->{'parameters'}->{'reload'} = 'yes';
+        } else {
+            return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
         }
     }
 

@@ -78,6 +78,7 @@ our %config = ('name'                   => 'Thruk',
                                           'set_favicon_counter' => \&Thruk::Utils::Status::set_favicon_counter,
                                           'get_pnp_url'         => \&Thruk::Utils::get_pnp_url,
                                           'make_test_mode'      => (defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST') ? 1 : 0,
+                                          'button'              => \&Thruk::Utils::Filter::button,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

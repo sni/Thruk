@@ -682,6 +682,33 @@ sub logline_icon {
 
 ########################################
 
+=head2 button
+
+  my $html = button($link, $value, $class)
+
+returns button html source
+
+=cut
+sub button {
+    my($link, $value, $class) = @_;
+
+    my($page, $args) = split(/\?/mx, $link, 2);
+    $args =~ s/&amp;/&/gmx;
+
+    my $html = '<form action="'.$page.'" method="POST">';
+    for my $a (split/\&/mx, $args) {
+        my($k,$v) = split(/=/mx,$a,2);
+        $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
+    }
+    $html   .= '<button class="conf_save_reload_button">save &amp; reload</button>';
+    $html   .= '</form>';
+    return $html;
+}
+
+
+
+########################################
+
 1;
 
 =head1 AUTHOR

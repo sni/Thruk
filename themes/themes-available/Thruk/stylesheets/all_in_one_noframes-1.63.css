@@ -822,6 +822,10 @@ SPAN.deleteicon INPUT {
 .ui-appsidetree-button {
   background-image: url(../images/application_side_tree.png) !important;
 }
+.ui-save_reload-button {
+  background-image: url(../images/disk_reload.png) !important;
+  margin-top: -7px !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }
