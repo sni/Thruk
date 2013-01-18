@@ -128,6 +128,31 @@ sub new {
     return $current_object;
 }
 
+##########################################################
+
+=head2 format_comments
+
+    format_comments($comments)
+
+returns formated comments from config files
+
+=cut
+
+sub format_comments {
+    my($comments) = @_;
+    my $text = '';
+    for my $line (@{$comments}) {
+        $line =~ s/^\#\s*//gmxo;
+        $line =~ s/^;\s*//gmxo;
+        unless(substr($line,0,1) eq '#') {
+            $line = ' '.$line;
+        }
+        $line =~ s/\s+$//gmx;
+        $text .= '#'.$line."\n";
+    }
+    return $text;
+}
+
 
 ##########################################################
 

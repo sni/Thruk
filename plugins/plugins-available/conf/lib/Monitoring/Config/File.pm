@@ -105,6 +105,7 @@ sub update_objects {
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
+    $self->{'comments'}     = [];
 
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
@@ -129,8 +130,13 @@ sub update_objects {
     }
 
     # add trailing comments to last object
-    if(defined $comments and scalar @{$comments} > 0 and scalar @{$self->{'objects'}} > 0) {
-        push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
+    if(defined $comments and scalar @{$comments} > 0) {
+        # only if we have at least one object
+        if(scalar @{$self->{'objects'}} > 0) {
+            push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
+        } else {
+            $self->{'comments'} = $comments;
+        }
     }
 
     Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
@@ -163,6 +169,7 @@ sub update_objects_from_text {
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
+    $self->{'comments'}     = [];
 
     my $linenr = 1;
     my $buffer = '';
@@ -196,7 +203,12 @@ sub update_objects_from_text {
 
     # add trailing comments to last object
     if(defined $comments and scalar @{$comments} > 0) {
-        push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
+        # only if we have at least one object
+        if(scalar @{$self->{'objects'}} > 0) {
+            push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
+        } else {
+            $self->{'comments'} = $comments;
+        }
     }
 
     $self->{'parsed'}  = 1;
@@ -522,13 +534,19 @@ returns the current raw file content
 =cut
 sub _get_new_file_content {
     my $self        = shift;
-    my $new_content = "";
+    my $new_content = '';
 
     return $new_content if $self->{'deleted'};
 
     return encode_utf8(read_file($self->{'path'})) unless $self->{'changed'};
 
     my $linenr = 1;
+
+    # file with comments only
+    if($self->{'comments'}) {
+        $new_content  = Monitoring::Config::Object::format_comments($self->{'comments'});
+        $linenr      += scalar @{$self->{'comments'}};
+    }
 
     # sort by line number, but put line 0 at the end
     for my $obj (sort { $b->{'line'} > 0 <=> $a->{'line'} > 0 || $a->{'line'} <=> $b->{'line'} } @{$self->{'objects'}}) {

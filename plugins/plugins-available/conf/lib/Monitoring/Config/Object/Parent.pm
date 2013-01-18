@@ -111,18 +111,8 @@ sub as_text {
     my $disabled = $self->{'disabled'} ? '#' : '';
 
     # save comments
-    my $text             = "";
     my $nr_object_lines  = 0;
-    for my $line (@{$self->{'comments'}}) {
-        $line =~ s/^\#\s*//gmxo;
-        $line =~ s/^;\s*//gmxo;
-        unless(substr($line,0,1) eq '#') {
-            $line = ' '.$line;
-        }
-        $line =~ s/\s+$//gmx;
-        $text .= '#'.$line."\n";
-    }
-
+    my $text             = Monitoring::Config::Object::format_comments($self->{'comments'});
     my $nr_comment_lines = scalar @{$self->{'comments'}};
 
     # remove completly empty comments
