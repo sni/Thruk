@@ -7,7 +7,7 @@ next:
           - added show_host_attempts config option
           - make colums selectable for json requests
           - reports
-            - added locales support (en, de, it)
+            - added locales support (en, de, it, es)
           - config tool
             - added one click save & reload button
           - Bug Fixes

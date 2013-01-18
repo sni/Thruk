@@ -1,0 +1,46 @@
+[%
+  locale_name          = 'spanish';      # language name should be in english
+  reportDateTimeFormat = '%d-%m-%Y  %H:%M:%S';
+  reportDateFormat     = '%d-%m-%Y';
+  weekAbbr             = 'Sem.';
+  monthNames           = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  dayNames             = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
+  translations         = {
+# keep those personal names
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Grupo de Equipos:',
+    'Servicegroup:'                         => 'Grupo de Servicios:',
+    'Event Report'                          => 'Informe de Eventos',
+    'SLA Report'                            => 'Informe de SLA',
+    'Report Timeperiod:'                    => 'Periodo del Informe:',
+    'Legend'                                => 'Leyenda',
+    'Host Alert'                            => 'Alerta de Equipo',
+    'Service Alert'                         => 'Alerta de Servicio',
+    'Totals'                                => 'Totales',
+    'Events'                                => 'Eventos',
+    'no events during this timeperiod.'     => 'No existen eventos en ese periodo de tiempo.',
+    'SLA Overview Graph'                    => 'Grafico general SLA',
+    'Availability'                          => 'Disponibilidad',
+    'Service: %s on %s'                     => 'Servicio: %s en %s',
+    'Average Availability'                  => 'Disponibilidad media',
+    'Total Uptime'                          => 'Tiempo total de actividad',
+    'Total Downtime'                        => 'Tiempo total de parada',
+    'no outages during this timeperiod'     => 'No hay cortes en este periodo de tiempo',
+    'Worst Outages'                         => 'Peores cortes',
+    'Latest Outages'                        => 'Ultimos cortes',
+    'Outages'                               => 'Cortes',
+    'Report:'                               => 'Informe:',
+    'Description:'                          => 'Descripcion:',
+    'Your report is attached.'              => 'Su informe se ha adjuntado.',
+  }
+%]
