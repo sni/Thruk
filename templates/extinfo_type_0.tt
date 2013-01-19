@@ -238,7 +238,7 @@
                       <td class='dataVar' nowrap>Data Source:</td>
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal dataSource'>
-                        [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr %]
+                        [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr.replace('/thruk/cgi-bin/remote.cgi', '') %]
                       </td>
                       [% END %]
                     </tr>
