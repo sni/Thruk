@@ -35,7 +35,7 @@ sub new {
 
     my $self = {
         'timeout'              => 10,
-        'logs_timeout'         => 120,
+        'logs_timeout'         => 35,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
         'key'                  => '',
@@ -126,7 +126,7 @@ sub reconnect {
     $self->{'addr'} .= '/thruk/cgi-bin/remote.cgi';
 
     $self->{'ua'} = LWP::UserAgent->new;
-    $self->{'ua'}->timeout(30);
+    $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->conn_cache(LWP::ConnCache->new());
     $self->{'ua'}->agent('Thruk ');
@@ -665,12 +665,15 @@ sub _req {
     };
     $options->{'auth'} = $args->{'auth'} if defined $args and ref $args eq 'HASH' and defined $args->{'auth'};
 
-    my $response = $self->{'ua'}->post($self->{'addr'}, {
-        data => encode_json({
-            credential => $self->{'auth'},
-            options    => $options,
-        })
-    });
+    my $response = _ua_post_with_timeout(
+                        $self->{'ua'},
+                        $self->{'addr'},
+                        { data => encode_json({
+                                    credential => $self->{'auth'},
+                                    options    => $options,
+                                })
+                        }
+                    );
 
     if($response->{'_request'}->{'_uri'} =~ m/job\.cgi\?job=(.*)$/mx) {
         $self->_wait_for_remote_job($1);
@@ -714,6 +717,37 @@ sub _req {
     }
     die(Thruk::Utils::format_response_error($response));
     return;
+}
+
+##########################################################
+
+=head2 _ua_post_with_timeout
+
+  _ua_post_with_timeout($ua, $url, $data)
+
+return http response but ensure timeout on request.
+
+=cut
+
+sub _ua_post_with_timeout {
+    my($ua, $url, $data) = @_;
+    my  $timeout_for_client = $ua->timeout();
+
+    # set alarm
+    local $SIG{ALRM} = sub { die("hit ".$timeout_for_client."s timeout on ".$url) };
+    alarm($timeout_for_client);
+
+    # make sure nobody else calls alarm in between
+    *CORE::GLOBAL::alarm = sub {};
+
+    # try to fetch result
+    my $res = $ua->post($url, $data);
+
+    # restore alarm handler and disable alarm
+    *CORE::GLOBAL::alarm = *CORE::alarm;
+    alarm(0);
+
+    return $res;
 }
 
 ##########################################################
