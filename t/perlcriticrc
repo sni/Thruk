@@ -133,8 +133,6 @@ severity   = 3
 [Perl::Critic::Policy::Miscellanea::ProhibitTies]
 severity   = 4
 
-[-Perl::Critic::Policy::Miscellanea::RequireRcsKeywords]
-
 [Perl::Critic::Policy::Modules::ProhibitAutomaticExportation]
 severity   = 4
 
