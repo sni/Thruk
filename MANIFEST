@@ -242,6 +242,7 @@ plugins/plugins-available/conf/templates/conf_objects_tree.tt
 plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
 plugins/plugins-available/dashboard/description.txt
+plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardHTTP.pm
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm
 plugins/plugins-available/dashboard/lib/Thruk/Controller/dashboard.pm
 plugins/plugins-available/dashboard/preview.png
