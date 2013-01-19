@@ -591,6 +591,7 @@ sub set_backend_state_from_local_connections {
         };
         if($@) {
             $self->{'c'}->log->error("failed setting states by local check: ".$@);
+            $self->{'c'}->stash->{'failed_backends'} = {}; # reset failed states, otherwise retry would be useless
             sleep(1);
         } else {
             last;
@@ -1083,16 +1084,21 @@ sub _get_result_serial {
 
     for my $key (@{$peers}) {
         $self->{'c'}->stats->profile( begin => "_get_result_serial($key)");
-        my @res = _do_on_peer($key, $function, $arg);
-        my $res = shift @res;
-        my($typ, $size, $data, $last_error) = @{$res};
-        if(!$last_error and defined $size) {
-            $totalsize += $size;
-            $type       = $typ;
-            $result->{ $key } = $data;
-        }
         my $peer = $self->get_peer_by_key($key);
-        $peer->{'last_error'} = $last_error;
+
+        # skip already failed peers for this request
+        if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
+            my @res = _do_on_peer($key, $function, $arg);
+            my $res = shift @res;
+            my($typ, $size, $data, $last_error) = @{$res};
+            if(!$last_error and defined $size) {
+                $totalsize += $size;
+                $type       = $typ;
+                $result->{ $key } = $data;
+            }
+            $self->{'c'}->stash->{'failed_backends'}->{$key} = $last_error;
+            $peer->{'last_error'} = $last_error;
+        }
         $self->{'c'}->stats->profile( end => "_get_result_serial($key)");
     }
     return($result, $type, $totalsize);
@@ -1116,12 +1122,15 @@ sub _get_result_parallel {
 
     my %ids;
     for my $key (@{$peers}) {
-        my $id;
-        eval {
-            $id = $Thruk::pool->add($key, $function, $arg);
-        };
-        confess($@) if $@;
-        $ids{$id} = $key;
+        # skip already failed peers for this request
+        if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
+            my $id;
+            eval {
+                $id = $Thruk::pool->add($key, $function, $arg);
+                $ids{$id} = $key;
+            };
+            confess($@) if $@;
+        }
     }
 
     for my $id (keys %ids) {
@@ -1130,6 +1139,7 @@ sub _get_result_parallel {
         my($typ, $size, $data, $last_error) = @{$res};
         my $key = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
+        $self->{'c'}->stash->{'failed_backends'}->{$key} = $last_error;
         $peer->{'last_error'} = $last_error;
         if(!$last_error and defined $size) {
             $totalsize += $size;
