@@ -34,6 +34,7 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
+        'procinfo_timeout'     => 10,
         'timeout'              => 100,
         'logs_timeout'         => 100,
         'config'               => $config,
@@ -214,7 +215,9 @@ return the process info
 =cut
 sub get_processinfo {
     my $self = shift;
+    $self->{'ua'}->timeout($self->{'procinfo_timeout'});
     my $res = $self->_req('get_processinfo');
+    $self->{'ua'}->timeout($self->{'timeout'});
     my($typ, $size, $data) = @{$res};
     if($data) {
         # set remote key from data
