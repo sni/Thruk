@@ -6,7 +6,6 @@ use Carp;
 use Data::Dumper;
 use JSON::XS;
 use LWP::UserAgent;
-use LWP::ConnCache;
 use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -129,7 +128,6 @@ sub reconnect {
     $self->{'ua'} = LWP::UserAgent->new;
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
-    $self->{'ua'}->conn_cache(LWP::ConnCache->new());
     $self->{'ua'}->agent('Thruk ');
     if($self->{'proxy'}) {
         $self->{'ua'}->proxy(['http'], $self->{'proxy'});
