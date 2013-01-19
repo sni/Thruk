@@ -34,8 +34,8 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
-        'timeout'              => 10,
-        'logs_timeout'         => 35,
+        'timeout'              => 100,
+        'logs_timeout'         => 100,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
         'key'                  => '',
