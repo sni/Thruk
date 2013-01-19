@@ -384,6 +384,7 @@ sub set_default_config {
         'cookie_auth_session_cache_timeout' => 5,
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
+        'ssl_verify_hostnames'              => 1,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
@@ -427,6 +428,8 @@ sub set_default_config {
             unshift @{$config->{templates_paths}}, $config->{'user_template_path'};
         }
     }
+
+    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
 
     return;
 }

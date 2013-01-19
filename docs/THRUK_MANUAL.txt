@@ -1533,6 +1533,15 @@ ex.:
   delay_pages_after_backend_reload = 10
 
 
+==== ssl_verify_hostnames
+
+Can be set to enable / disable hostname verification for https connections. For
+example for the cookie login or the http backend.
+
+ex.:
+
+  ssl_verify_hostnames = 1
+
 
 
 
