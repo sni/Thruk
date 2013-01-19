@@ -1,33 +1,7 @@
-Thruk Development Guide
-=======================
+== Thruk Development Guide
 
-Unsorted things you may want to do during development:
+=== Logo
 
-
-Install a Clean Nagios From Source
-----------------------------------
-
------
-use this command line to setup a test nagios installation
-
-export TARGET_DIR=/Users/sven/projects/nagios/nagios3.2.0
-./configure --prefix=$TARGET_DIR \
-            --with-nagios-user=`whoami` \
-            --with-nagios-group=`groups | awk '{ print $1 }'` \
-            --with-init-dir=$TARGET_DIR/init.d \
-            --with-httpd-conf=$TARGET_DIR/apache.conf.d/
-make all && make install
------
-
-
-Generate a Test Configuration
------------------------------
-
-you may use Nagios::Generator::TestConfig for this step
-
-
-Logo
-----
 Logo has been rendered with
 http://cooltext.com/
 Text Color: 414141
@@ -36,23 +10,117 @@ Font: Futuristic Fonts -> Oscilloscope 4
 Size: 90
 
 
-Setup Package Build Environment
--------------------------------
+=== Javascript Section Tags
 
-----
-1.  install debian netinst
-      - minimal inst
-2.  create a new clean user, ex.: thruk
-3.  add "contrib non-free" to /etc/apt/sources.list
-4.  #> apt-get update && apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl \
-    libmodule-install-perl make gcc git git-core libgd2-xpm-dev
-5.  install with local::lib like described in the users guide
-6.  %> ./script/thruk_create_package.pl
-----
-
-Create Tags For Javascript File
--------------------------------
 just use figlet for that:
 ----
   %> figlet -w 900 -f univers SEARCH
 ----
+
+
+
+=== Environment Variables
+
+the following environment variables are used within Thruk:
+
+
+
+==== CATALYST_CONFIG
+Specify location of config files.
+
+
+==== CATALYST_SERVER
+Used to specify catalyst url during tests.
+
+
+==== HTTP_RESULT
+temporary storage of http result used in cli tool.
+
+
+==== NO_DISABLED_PLUGINS_TEST
+Can be set to skip tests of disabled plugins.
+
+
+==== NO_EXTERNAL_JOBS
+Override 'no_external_job_forks' config setting.
+
+
+==== REMOTE_USER
+Will be set to the current username.
+
+
+==== REMOTEURL
+Start url for init script.
+
+
+==== STARTURL
+Same like REMOTEURL.
+
+
+==== TEST_AUTHOR
+Can be set to run author specific tests which may fail in
+certain cases.
+
+
+==== TEST_ERROR
+Suppress logging of errors.
+
+
+==== THRUK_BACKENDS
+Override currently used backends. Comma seperated list.
+
+
+==== THRUK_BIN
+Can be set to specify location of the thruk binary used for tests.
+
+
+==== THRUK_CONFIG
+Specify location of config files. Overrides CATALYST_CONFIG.
+
+
+==== THRUK_DEBUG
+Set debug level.
+
+
+==== THRUK_GROUP_ID
+Contains thruks primary group id.
+
+
+==== THRUK_GROUPS
+Contains all groups.
+
+
+==== THRUK_NO_COMMANDS
+Don't send commands from cmd.cgi.
+
+
+==== THRUK_NO_CONNECTION_POOL
+Skip connection pool and do all requests serial.
+
+Can be used whenever backends will be accessed.
+
+
+==== THRUK_NO_TOUCH_PERM
+Do not touch permissions of opened files.
+
+
+==== THRUK_PLUGIN_DEBUG
+Can be used to get more details when loading plugins.
+
+
+==== THRUK_SRC
+
+Can be one of:
+
+    - SCRIPTS
+    - CLI
+    - FastCGI
+    - TEST
+
+
+==== THRUK_TEST_CMD_NO_LOG
+Don't log sent test commands from cmd.cgi.
+
+
+==== THRUK_USER_ID
+Contains thruks user id.
