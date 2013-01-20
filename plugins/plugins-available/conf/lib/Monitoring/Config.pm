@@ -1698,12 +1698,17 @@ sub _all_object_links_callback {
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
                         next if $ref2 eq '';
-                        &$cb($file, $obj, $key, $link, $ref2);
+                        my $args;
+                        # list of commands, like eventhandlers
+                        if($obj->{'default'}->{$key}->{'link'} eq 'command') {
+                            ($ref2,$args) = split(/!/mx, $ref2, 2);
+                        }
+                        &$cb($file, $obj, $key, $link, $ref2, $args);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                     my($cmd,$args) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                    &$cb($file, $obj, $key, $link, $cmd);
+                    &$cb($file, $obj, $key, $link, $cmd, $args);
                 }
             }
         }
