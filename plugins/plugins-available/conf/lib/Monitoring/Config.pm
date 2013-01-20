@@ -682,6 +682,8 @@ sub update_object {
         $com =~ s/^\s+//gmx
     }
 
+    return 0 unless(defined $file and $file->{'path'});
+
     push @{$file->{'objects'}}, $obj;
 
     my $newname = $obj->get_name();

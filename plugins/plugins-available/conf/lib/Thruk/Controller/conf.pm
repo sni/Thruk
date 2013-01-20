@@ -1459,6 +1459,8 @@ sub _set_files_stash {
         my $dirs = Thruk::Utils::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
         if(defined $dirs->[0]) {
             $files_root = $dirs->[0];
+            $files_root =~ s/\/*$//gmx;
+            $files_root = $files_root.'/';
         }
     }
 
