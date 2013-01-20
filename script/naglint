@@ -181,13 +181,13 @@ sub run {
             if($_ =~ m/^\s*}\s*$/mx) {
                 $file->update_objects_from_text($text);
                 $errors += Thruk::Utils::Scripts::print_errors($file);
-                print $file->_get_new_file_content();
+                print $file->get_new_file_content();
                 $text = '';
             }
         }
         $file->update_objects_from_text($text);
         $errors += Thruk::Utils::Scripts::print_errors($file);
-        print $file->_get_new_file_content();
+        print $file->get_new_file_content();
         exit $errors;
     }
 
@@ -235,7 +235,7 @@ sub _process_file {
         $file->save();
         print STDERR "wrote ", $filename, "\n";
     } else {
-        print $file->_get_new_file_content();
+        print $file->get_new_file_content();
     }
     return 0;
 }
