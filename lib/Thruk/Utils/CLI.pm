@@ -757,13 +757,13 @@ sub _cmd_import_logs {
 ##########################################################
 sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
-    my $res        = "unknown configtool command";
+    my $res        = undef;
     my $last_error = undef;
     my $peer       = $Thruk::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
 
     if(!Thruk::Utils::Conf::set_object_model($c)) {
-        $last_error = "failed to set objects model";
+        return("failed to set objects model", 1);
     }
     # outgoing file sync
     elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
@@ -826,6 +826,8 @@ sub _cmd_configtool {
             }
         }
         $res = "saved";
+    } else {
+        return("unknown configtool command", 1);
     }
     return([undef, 1, $res, $last_error], 0);
 }
