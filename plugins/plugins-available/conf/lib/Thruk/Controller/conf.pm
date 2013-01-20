@@ -1284,7 +1284,7 @@ sub _get_context_object {
         $obj = Monitoring::Config::Object->new( type     => $c->stash->{'type'},
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
-        my $files_root = $self->_set_files_stash($c, 1);
+        my $files_root = $c->{'obj_db'}->get_files_root();
         if($files_root eq '') {
             $c->stash->{'new_file'} = '';
             Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.' );
@@ -1302,7 +1302,12 @@ sub _get_context_object {
             $obj->{'file'} = $file;
         } else {
             # new file
-            my $file = Monitoring::Config::File->new($files_root.$new_file, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
+            my $remotepath = $files_root.$new_file;
+            my $localpath  = $remotepath;
+            if($c->{'obj_db'}->is_remote()) {
+                $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.$localpath;
+            }
+            my $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
             if(defined $file and $file->readonly()) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
                 $c->stash->{'new_file'} = '/'.$new_file;

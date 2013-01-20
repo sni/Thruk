@@ -699,7 +699,7 @@ sub _req {
             if($data->{'version'} < $self->{'min_backend_version'}) {
                 die('backend too old, version returned: '.$remote_version);
             }
-            die($data->{'output'});
+            die('protocol error: '.$data->{'output'});
         }
         if(ref $data->{'output'} eq 'ARRAY') {
             # type, size, data

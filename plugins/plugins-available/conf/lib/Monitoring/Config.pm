@@ -1044,10 +1044,8 @@ sub get_files_root {
 
     # file root is empty when there are no files (yet)
     if($root eq '') {
+        return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
         my $dirs = Thruk::Utils::list($self->{'config'}->{'obj_dir'});
-        if($self->is_remote()) {
-            $dirs = Thruk::Utils::list($self->{'config'}->{'localdir'});
-        }
         if(defined $dirs->[0]) {
             $root = $dirs->[0];
         }
@@ -1777,15 +1775,26 @@ sub _list {
 # do something on remote site
 sub _remote_do {
     my($self, $c, $sub, $args) = @_;
-    my $res = $self->{'remotepeer'}
+    my $res;
+    eval {
+        $res = $self->{'remotepeer'}
                    ->{'class'}
                    ->_req('configtool', {
                             auth => $c->stash->{'remote_user'},
                             sub  => $sub,
                             args => $args,
                     });
-    die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
-    return $res->[2];
+    };
+    if($@) {
+        my $msg = $@;
+        $c->log->error($@);
+        $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
+        Thruk::Utils::set_message( $c, 'fail_message', $msg );
+        return;
+    } else {
+        die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+        return $res->[2];
+    }
 }
 
 ##########################################################
@@ -1839,6 +1848,7 @@ sub remote_file_sync {
         };
     }
     my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });
+    return unless $remotefiles;
 
     my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
@@ -1866,6 +1876,16 @@ sub remote_file_sync {
             $c->log->debug('keeping file: '.$f->{'display'});
         }
     }
+
+    # if there are no files (yet), we need the files root
+    if(scalar @{$self->{'files'}} == 0) {
+        my $settings = $self->_remote_do($c, 'configsettings');
+        return unless $settings;
+        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.$settings->{'files_root'});
+        $self->{'config'}->{'files_root'} = $settings->{'files_root'}.'/';
+        $self->{'config'}->{'files_root'} =~ s|/+|/|gmx;
+    }
+
     return;
 }
 
