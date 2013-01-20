@@ -141,15 +141,23 @@ returns formated comments from config files
 sub format_comments {
     my($comments) = @_;
     my $text = '';
+    my $num  = scalar @{$comments};
     for my $l (@{$comments}) {
         my $line = ''.$l;
+        $line =~ s/^;/\#/gmxo;
+        $line =~ s/^\#([^\#])/#\ $1/gmxo;
         $line =~ s/^\#\s+//gmxo;
-        $line =~ s/^;\s+//gmxo;
-        unless(substr($line,0,1) eq '#') {
-            $line = ' '.$line;
-        }
         $line =~ s/\s+$//gmxo;
-        $text .= '#'.$line."\n";
+        last if $num == 1 and ($line eq '' or $line eq '#');
+        if(substr($line,0,1) eq '#') {
+            $text .= $line."\n";
+        }
+        elsif($line eq '') {
+            $text .= "#\n";
+        }
+        else {
+            $text .= '# '.$line."\n";
+        }
     }
     return $text;
 }
