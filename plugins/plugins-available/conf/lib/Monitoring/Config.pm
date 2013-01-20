@@ -1040,7 +1040,19 @@ sub get_files_root {
     for my $file (@{$self->{'files'}}) {
         push @{$files}, $file->{'path'};
     }
-    return Thruk::Utils::Conf::get_root_folder($files);
+    my $root = Thruk::Utils::Conf::get_root_folder($files);
+
+    # file root is empty when there are no files (yet)
+    if($root eq '') {
+        my $dirs = Thruk::Utils::list($self->{'config'}->{'obj_dir'});
+        if($self->is_remote()) {
+            $dirs = Thruk::Utils::list($self->{'config'}->{'localdir'});
+        }
+        if(defined $dirs->[0]) {
+            $root = $dirs->[0];
+        }
+    }
+    return $root;
 }
 
 ##########################################################

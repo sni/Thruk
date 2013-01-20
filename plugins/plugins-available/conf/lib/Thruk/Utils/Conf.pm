@@ -657,6 +657,7 @@ sub get_root_folder {
         $splited->{$file} = \@paths;
     }
     my $root = "";
+    return $root if scalar @{$files} == 0;
     my $x = 0;
     while($x < 100) {
         my $cur   = undef;

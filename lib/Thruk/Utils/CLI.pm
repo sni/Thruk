@@ -779,6 +779,12 @@ sub _cmd_configtool {
         }
         $res = $transfer;
     }
+    # some settings
+    elsif($opt->{'args'}->{'sub'} eq 'configsettings') {
+        $res = {
+            'files_root' => $c->{'obj_db'}->get_files_root(),
+        };
+    }
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
