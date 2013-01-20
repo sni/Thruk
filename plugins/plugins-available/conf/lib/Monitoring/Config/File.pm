@@ -455,7 +455,7 @@ sub save {
         return;
     }
 
-    my $content = $self->_get_new_file_content();
+    my $content = $self->get_new_file_content();
     open(my $fh, '>', $self->{'path'}) or do {
         push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
         return;
@@ -482,7 +482,7 @@ sub diff {
     my ( $self ) = @_;
 
     my ($fh, $filename) = tempfile();
-    my $content         = $self->_get_new_file_content();
+    my $content         = $self->get_new_file_content();
     print $fh $content;
     Thruk::Utils::IO::close($fh, $filename);
 
@@ -521,19 +521,7 @@ returns the current raw file content
 
 =cut
 sub get_new_file_content {
-    my $self = shift;
-    return $self->_get_new_file_content();
-}
-
-##########################################################
-
-=head2 _get_new_file_content
-
-returns the current raw file content
-
-=cut
-sub _get_new_file_content {
-    my $self        = shift;
+    my($self)       = @_;
     my $new_content = '';
 
     return $new_content if $self->{'deleted'};
