@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 377;
+    plan tests => 379;
 }
 
 BEGIN {
@@ -24,6 +24,7 @@ if(defined $ENV{'CATALYST_SERVER'}) {
 }
 use_ok 'Monitoring::Config';
 use_ok 'Monitoring::Config::Help';
+use_ok 'Monitoring::Config::Object';
 use_ok 'Thruk::Utils::Conf::Defaults';
 use_ok 'Thruk::Utils::Conf';
 
@@ -315,3 +316,18 @@ is(scalar @{$objs}, 2, "number of objects");
 @{$objs} = sort {uc($a->get_name()) cmp uc($b->get_name())} @{$objs};
 is($objs->[0]->{'disabled'}, 0, "first object is enabled");
 is($objs->[1]->{'disabled'}, 1, "second object is disabled");
+
+###########################################################
+my @comments = split/\n/mx,"
+###############################################################################
+#
+# SERVICES
+#
+#    http://nagios.sourceforge.net/docs/2_0/xodtemplate.html#service
+#
+###############################################################################
+###BLAH by BLUB
+#";
+my $orig_comments = dclone(\@comments);
+my $com = Monitoring::Config::Object::format_comments(\@comments);
+is_deeply($orig_comments, \@comments, 'comments shouldn\'t change');
