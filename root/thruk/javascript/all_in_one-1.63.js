@@ -2873,6 +2873,7 @@ var ajax_search = {
     update_interval : 3600, // update at least every hour
     search_type     : 'all',
     size            : 150,
+    updating        : false,
 
     hideTimer       : undefined,
     base            : new Array(),
@@ -3156,12 +3157,18 @@ var ajax_search = {
             ajax_search.base = options.data;
             ajax_search.suggest();
         } else {
+             ajax_search.updating=true;
+
+            // show searching results
+            ajax_search.base = {};
+            ajax_search.suggest();
 
              // fill data store
             jQuery.ajax({
                 url: search_url,
                 type: 'POST',
                 success: function(data) {
+                    ajax_search.updating=false;
                     ajax_search.base = data;
                     if(ajax_search.autoopen == true) {
                         ajax_search.suggest();
@@ -3169,6 +3176,7 @@ var ajax_search = {
                     ajax_search.autoopen = true;
                 },
                 error: function() {
+                    ajax_search.updating=false;
                     ajax_search.initialized = false;
                 }
             });
@@ -3413,7 +3421,11 @@ var ajax_search = {
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.length == 0) {
-            resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
+            if(ajax_search.updating) {
+                resultHTML += '<a href="#"><img src="'+ url_prefix + 'thruk/themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
+            } else {
+                resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
+            }
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
                 return;
