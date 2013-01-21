@@ -66,6 +66,10 @@ sub new {
         return;
     }
 
+    # no double slashes in paths
+    $self->{'path'}    =~ s|/+|/|gmx;
+    $self->{'display'} =~ s|/+|/|gmx;
+
     # readonly file?
     $self->update_readonly_status($readonlypattern);
 

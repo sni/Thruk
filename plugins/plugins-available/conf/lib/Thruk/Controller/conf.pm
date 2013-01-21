@@ -1309,10 +1309,10 @@ sub _get_context_object {
             $obj->{'file'} = $file;
         } else {
             # new file
-            my $remotepath = $files_root.$new_file;
+            my $remotepath = $files_root.'/'.$new_file;
             my $localpath  = $remotepath;
             if($c->{'obj_db'}->is_remote()) {
-                $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.$localpath;
+                $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
             }
             my $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
             if(defined $file and $file->readonly()) {
