@@ -1299,7 +1299,7 @@ sub _get_context_object {
         }
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
-        my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
+        my $file       = $c->{'obj_db'}->get_file_by_path($files_root.'/'.$new_file);
         if(defined $file) {
             if(defined $file and $file->readonly()) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
