@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <table border="0" class='data confTable' style="width:400px">
+  <table border="0" class='data confTable' style="width:470px">
     <tr>
       <th class='data conftoolheader' colspan=2>General Configuration</th>
     </tr>
@@ -36,7 +36,7 @@
 
   [% IF has_obj_conf %]
   <br>
-  <table border="0" class='data confTable' style="width:400px">
+  <table border="0" class='data confTable' style="width:470px">
     <tr>
       <th class='data conftoolheader' colspan=2>Site Configuration</th>
     </tr>
