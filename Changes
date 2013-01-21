@@ -8,7 +8,7 @@ next:
           - added ssl_verify_hostnames config option
           - make colums selectable for json requests
           - reports
-            - added locales support (en, de, it, es)
+            - added locales support (en, de, it, es, fr)
           - config tool
             - added one click save & reload button
           - Bug Fixes
