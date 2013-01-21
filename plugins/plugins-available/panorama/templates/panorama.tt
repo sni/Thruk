@@ -39,7 +39,7 @@
 [% END %]
 <!--[IF IE]>Thruks Panorama View does not support Internet Explorer.<![ENDIF]-->
 [%+ FOREACH i = preload_img %]
-<img src="[% url_prefix %]thruk/plugins/panorama/images/[% i %]" alt="preloader" height=0 width=0>
+<img src="[% url_prefix %]thruk/plugins/panorama/images/[% i %]" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 [%+ END %]
 </body>
 </html>

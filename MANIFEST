@@ -1373,6 +1373,7 @@ themes/themes-available/Classic/images/json.png
 themes/themes-available/Classic/images/left.gif
 themes/themes-available/Classic/images/lightning_go.png
 themes/themes-available/Classic/images/link.png
+themes/themes-available/Classic/images/loading-icon.gif
 themes/themes-available/Classic/images/logo_thruk.png
 themes/themes-available/Classic/images/logo_thruk_mid.png
 themes/themes-available/Classic/images/logo_thruk_small.png
@@ -1525,6 +1526,7 @@ themes/themes-available/Exfoliation/images/json.png
 themes/themes-available/Exfoliation/images/left.gif
 themes/themes-available/Exfoliation/images/lightning_go.png
 themes/themes-available/Exfoliation/images/link.png
+themes/themes-available/Exfoliation/images/loading-icon.gif
 themes/themes-available/Exfoliation/images/logo_thruk.png
 themes/themes-available/Exfoliation/images/logo_thruk_mid.png
 themes/themes-available/Exfoliation/images/logo_thruk_small.png
@@ -1733,6 +1735,7 @@ themes/themes-available/Nuvola/images/json.png
 themes/themes-available/Nuvola/images/left.gif
 themes/themes-available/Nuvola/images/lightning_go.png
 themes/themes-available/Nuvola/images/link.png
+themes/themes-available/Nuvola/images/loading-icon.gif
 themes/themes-available/Nuvola/images/logo_thruk.png
 themes/themes-available/Nuvola/images/logo_thruk_mid.png
 themes/themes-available/Nuvola/images/logo_thruk_small.png
@@ -1934,6 +1937,7 @@ themes/themes-available/Thruk/images/json.png
 themes/themes-available/Thruk/images/left.gif
 themes/themes-available/Thruk/images/lightning_go.png
 themes/themes-available/Thruk/images/link.png
+themes/themes-available/Thruk/images/loading-icon.gif
 themes/themes-available/Thruk/images/logo_thruk.png
 themes/themes-available/Thruk/images/logo_thruk_mid.png
 themes/themes-available/Thruk/images/logo_thruk_small.png
@@ -2082,6 +2086,7 @@ themes/themes-available/Vautour/images/json.png
 themes/themes-available/Vautour/images/left.gif
 themes/themes-available/Vautour/images/lightning_go.png
 themes/themes-available/Vautour/images/link.png
+themes/themes-available/Vautour/images/loading-icon.gif
 themes/themes-available/Vautour/images/logo_thruk.png
 themes/themes-available/Vautour/images/logo_thruk_mid.png
 themes/themes-available/Vautour/images/logo_thruk_small.png
@@ -2312,6 +2317,7 @@ themes/themes-available/Wakizashi/images/link_processes.gif
 themes/themes-available/Wakizashi/images/link_queue.gif
 themes/themes-available/Wakizashi/images/link_reporting.gif
 themes/themes-available/Wakizashi/images/link_search.gif
+themes/themes-available/Wakizashi/images/loading-icon.gif
 themes/themes-available/Wakizashi/images/logo_thruk.png
 themes/themes-available/Wakizashi/images/logo_thruk_mid.png
 themes/themes-available/Wakizashi/images/logo_thruk_small.png
