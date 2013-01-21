@@ -29,13 +29,13 @@
 <br><br>
 
 [% IF show_user %]
+<table><tr><td valign="top">
 <form action="conf.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
-<table><tr><td valign="top">
   <table border="0" class='data conftoolusers'>
     <tr>
       <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name %]</td>
