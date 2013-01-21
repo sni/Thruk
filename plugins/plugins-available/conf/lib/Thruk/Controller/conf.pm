@@ -666,9 +666,16 @@ sub _process_users_page {
         $c->stash->{'has_contact'} = 0;
         my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
         if(defined $contacts and scalar @{$contacts} >= 1) {
-            $c->stash->{'has_contact'} = 1;
+            $c->stash->{'has_contact'}    = 1;
+            $c->stash->{'contact'}        = $contacts->[0];
         }
 
+        $c->stash->{'contact_groups'} = $c->{'db'}->get_contactgroups_by_contact($c, $name);
+        my($croles, $can_submit_commands, $calias, $roles_by_group)
+                = Thruk::Utils::get_dynamic_roles($c, $name);
+        $c->stash->{'contact_roles'}  = $croles;
+        $c->stash->{'contact_can_submit_commands'} = $can_submit_commands;
+        $c->stash->{'roles_by_group'} = $roles_by_group;
     }
 
     $c->stash->{'subtitle'} = "User Configuration";

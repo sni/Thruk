@@ -430,20 +430,17 @@ sub get_start_end_for_timeperiod_from_param {
 
 ########################################
 
-=head2 set_dynamic_roles
+=head2 get_dynamic_roles
 
-  set_dynamic_roles($c)
+  get_dynamic_roles($c, $user)
 
-sets the authorized_for_read_only role and group based roles
+gets the authorized_for_read_only role and group based roles
 
 =cut
-sub set_dynamic_roles {
-    my $c = shift;
+sub get_dynamic_roles {
+    my($c, $username, $user) = @_;
 
-    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
-    my $username = $c->request->{'user'}->{'username'};
-
-    return unless defined $username;
+    $user = Catalyst::Authentication::Store::FromCGIConf->find_user( { username => $username }, $c ) unless defined $user;
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data);
@@ -466,27 +463,30 @@ sub set_dynamic_roles {
         }
     }
 
-    if(defined $alias) {
-        $c->request->{'user'}->{'alias'} = $alias;
-    }
     if(!defined $can_submit_commands) {
         $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
     }
 
+    # set initial roles from user
+    my $roles = [];
+    for my $r (@{$user->{'roles'}}) {
+        push @{$roles}, $r;
+    }
+
     # override can_submit_commands from cgi.cfg
-    if(grep /authorized_for_all_host_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
+    if(grep /authorized_for_all_host_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
     }
-    elsif(grep /authorized_for_all_service_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_all_service_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
     }
-    elsif(grep /authorized_for_system_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_system_commands/mx, @{$roles}) {
         $can_submit_commands = 1;
     }
 
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        push @{$c->request->{'user'}->{'roles'}}, 'authorized_for_read_only';
+        push @{$roles}, 'authorized_for_read_only';
     }
 
     my $groups = $cached_data->{'contactgroups'};
@@ -502,16 +502,50 @@ sub set_dynamic_roles {
                       'authorized_contactgroup_for_system_information'        => 'authorized_for_system_information',
                       'authorized_contactgroup_for_read_only'                 => 'authorized_for_read_only',
                     };
+    my $roles_by_group = {};
     for my $key (keys %{$possible_roles}) {
         my $role = $possible_roles->{$key};
         if(defined $c->config->{'cgi_cfg'}->{$key}) {
             my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key};
             for my $contactgroup (keys %{contactgroups}) {
-                push @{$c->request->{'user'}->{'roles'}}, $role if ( defined $groups->{$contactgroup} or $contactgroup eq '*' );
+                if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
+                    $roles_by_group->{$role} = [] unless defined $roles_by_group->{$role};
+                    push @{$roles_by_group->{$role}}, $contactgroup;
+                    push @{$roles}, $role
+                }
             }
         }
     }
 
+    return($roles, $can_submit_commands, $alias, $roles_by_group);
+}
+
+########################################
+
+=head2 set_dynamic_roles
+
+  set_dynamic_roles($c)
+
+sets the authorized_for_read_only role and group based roles
+
+=cut
+sub set_dynamic_roles {
+    my $c = shift;
+
+    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
+    my $username = $c->request->{'user'}->{'username'};
+
+    return unless defined $username;
+
+    my($roles, $can_submit_commands, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
+
+    if(defined $alias) {
+        $c->request->{'user'}->{'alias'} = $alias;
+    }
+
+    for my $role (@{$roles}) {
+        push @{$c->request->{'user'}->{'roles'}}, $role;
+    }
 
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
     return 1;

@@ -35,9 +35,10 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
+<table><tr><td valign="top">
   <table border="0" class='data conftoolusers'>
     <tr>
-      <td colspan=2 class='dataVar dataUserVar'>[% user_name %]</td>
+      <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name %]</td>
     </tr>
     <tr>
       <td class='dataVar' align="left">Contact Exists</td>
@@ -85,6 +86,63 @@
     </tr>
   </table>
 </form>
+</td>
+<td style="padding-left:20px;" valign="top">
+
+    <table border="0" class='data conftoolusers'>
+      <tr>
+        <td colspan=2 class='dataVar dataUserVar'>Contact Information</td>
+      </tr>
+      <tr>
+        <td class='dataVar' align="left">Groups</td>
+        <td class='dataVal'>[% contact_groups.keys.sort.join(', ') %][% IF contact_groups.keys.size == 0 %]this contact has no groups.[% END %]</td>
+      </tr>
+      [% IF has_contact %]
+      <tr>
+        <td class='dataVar' align="left">E-Mail</td>
+        <td class='dataVal'><a href="mailto:[% contact.email %]">[% contact.email %]</a></td>
+      </tr>
+      <tr>
+        <td class='dataVar' align="left">Host Notification Period</td>
+        <td class='dataVal'>[% contact.host_notification_period %]</td>
+      </tr>
+      <tr>
+        <td class='dataVar' align="left">Service Notification Period</td>
+        <td class='dataVal'>[% contact.service_notification_period %]</td>
+      </tr>
+      [% IF contact.pager %]
+      <tr>
+        <td class='dataVar' align="left">Pager</td>
+        <td class='dataVal'>[% contact.pager %]</td>
+      </tr>
+      [% END %]
+      [% END %]
+      <tr>
+        <td class='dataVar' align="left" nowrap>Can Submit Commands</td>
+        <td class='dataVal'>[% IF contact_can_submit_commands %]Yes[% ELSE %]No[% END %]</td>
+      </tr>
+      <tr>
+        <td class='dataVar' align="left">Roles</td>
+        <td class='dataVal'>
+            [% IF contact_roles.list.size == 0 %]
+              none
+            [% ELSE %]
+            <table cellpadding=0 cellspacing=0>
+              [% FOREACH r = contact_roles.list.sort %]
+              <tr>
+                <td>[% r %]</td>
+                <td style="padding-left: 8px;">[% IF roles_by_group.exists(r) %](from group: [% roles_by_group.$r.join(', ') %])[% ELSE %](from cgi.cfg)[% END %]</td>
+              </tr>
+              [% END %]
+            </table>
+            [% END %]
+        </td>
+      </tr>
+    </table>
+
+</td></tr></table>
+
+
 [% END %]
 
 </div>
