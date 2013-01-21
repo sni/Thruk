@@ -103,11 +103,11 @@
         <td class='dataVal'><a href="mailto:[% contact.email %]">[% contact.email %]</a></td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Host Notification Period</td>
+        <td class='dataVar' align="left" nowrap>Host Notification Period</td>
         <td class='dataVal'>[% contact.host_notification_period %]</td>
       </tr>
       <tr>
-        <td class='dataVar' align="left">Service Notification Period</td>
+        <td class='dataVar' align="left" nowrap>Service Notification Period</td>
         <td class='dataVal'>[% contact.service_notification_period %]</td>
       </tr>
       [% IF contact.pager %]
