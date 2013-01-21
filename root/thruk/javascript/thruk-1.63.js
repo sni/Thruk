@@ -3505,6 +3505,11 @@ var ajax_search = {
             setCaretToPos(input, cursorpos);
         }
 
+        // close suggestions after select
+        window.clearTimeout(ajax_search.timer);
+        ajax_search.dont_hide==false;
+        window.setTimeout('ajax_search.hide_results(null, 1);', 100);
+
         if(ajax_search.onselect != undefined) {
             return ajax_search.onselect();
         }
