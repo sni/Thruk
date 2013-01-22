@@ -305,6 +305,9 @@ TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
 
 /* create performance bar */
 TP.render_perfbar = function(v, td, item, row, col, store, view) {
+    if(perf_bar_mode == 'off') {
+        return "";
+    }
     var r =  perf_table(false, item.data.state, item.data.plugin_output, item.data.perf_data, item.data.check_command, "");
     if(r == false) { return ""; }
     td.tdCls = "less_padding";
