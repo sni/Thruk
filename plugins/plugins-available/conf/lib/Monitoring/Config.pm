@@ -1322,7 +1322,13 @@ sub _get_files_names {
         push @{$self->{'parse_errors'}}, "you need to configure paths (obj_dir, obj_file)";
     }
 
-    my @uniqfiles = keys %{$files};
+    my $cleanfiles = {};
+    for my $f (keys %{$files}) {
+        $f =~ s|/+|/|gmx;
+        $cleanfiles->{$f} = 1;
+    }
+
+    my @uniqfiles = keys %{$cleanfiles};
     return \@uniqfiles;
 }
 
