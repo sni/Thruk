@@ -43,5 +43,6 @@ js_eval_ok($jsfiles[0]);
 
 js_eval_ok('t/data/javascript_tests.js');
 js_is("test1()", '1', 'test1()');
+js_is("test2()", '1', 'test2()');
 
 done_testing();
