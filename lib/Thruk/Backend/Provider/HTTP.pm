@@ -226,16 +226,6 @@ sub get_processinfo {
         }
         $data->{$self->{'key'}} = delete $data->{$self->{'remotekey'}};
         $data->{$self->{'key'}}->{'peer_key'} = $self->{'key'};
-
-        # update configtool settings
-        for my $key (keys %{$self->{'config'}->{'configtool'}}) {
-            delete $self->{'config'}->{'configtool'}->{$key};
-        }
-        if($data->{$self->{'key'}}->{'configtool'}) {
-            for my $key (keys %{$data->{$self->{'key'}}->{'configtool'}}) {
-                $self->{'config'}->{'configtool'}->{$key} = $data->{$self->{'key'}}->{'configtool'}->{$key};
-            }
-        }
     }
     return($data, $typ, $size);
 }

@@ -889,6 +889,22 @@ sub _do_on_peers {
     }
     $type = '' unless defined $type;
 
+    # extract some extra data
+    if($function eq 'get_processinfo') {
+        # update configtool settings
+        for my $key (keys %{$result}) {
+            my $res = $result->{$key}->{$key};
+            next unless defined $res;
+            next unless defined $res->{'configtool'};
+            my $peer = $self->get_peer_by_key($key);
+            $peer->{'configtool'} = {};
+            for my $attr (keys %{$res->{'configtool'}}) {
+                $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
+            }
+        }
+    }
+
+
     # howto merge the answers?
     my $data;
     if( lc $type eq 'uniq' ) {
