@@ -58,7 +58,6 @@ for my $o (@{$contacts}) {
     for my $attr (@{$def}) {
         if(!defined $o->{'conf'}->{$attr}) {
             print ";" unless $first;
-            $first = 1;
         } else {
             if(ref $o->{'conf'}->{$attr} eq 'ARRAY') {
                 print join(',', @{$o->{'conf'}->{$attr}}), ";";
@@ -66,6 +65,7 @@ for my $o (@{$contacts}) {
                 print $o->{'conf'}->{$attr}, ";";
             }
         }
+        $first = 0;
     }
     my $name = $o->{'conf'}->{'contact_name'};
     print join(',', keys %{$groups_by_contact->{$name}});
