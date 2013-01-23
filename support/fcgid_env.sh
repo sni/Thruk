@@ -10,6 +10,7 @@ fi
 if [ -f /etc/default/thruk ]; then
   . /etc/default/thruk
 fi
+[ -e ~/.thruk ] && . ~/.thruk
 
 # execute fastcgi server
 exec /usr/share/thruk/script/thruk_fastcgi.pl
