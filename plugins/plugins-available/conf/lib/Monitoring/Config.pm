@@ -1234,9 +1234,11 @@ sub _get_files_for_folder {
 
         my $localdir = $self->{'config'}->{'localdir'};
         if($localdir) {
-            my $display = $dir."/".$file;
+            my $display = $dir.'/'.$file;
             $display    =~ s/^$localdir\///mx;
-            $self->{'file_trans'}->{$dir."/".$file} = $display;
+            my $d = $dir.'/'.$file;
+            $d    =~ s|/+|/|gmx;
+            $self->{'file_trans'}->{$d} = $display;
         }
 
         push @files, $dir."/".$file;
@@ -1287,6 +1289,7 @@ sub _get_files_names {
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
                 Thruk::Utils::Conf::decode_any($file);
+                $file =~ s|/+|/|gmx;
                 $files->{$file} = 1;
             }
         }
@@ -1312,6 +1315,7 @@ sub _get_files_names {
             if($self->{'config'}->{'localdir'}) {
                 my $display = $file;
                 $file       = $self->{'config'}->{'localdir'}.'/'.$file;
+                $file =~ s|/+|/|gmx;
                 $self->{'file_trans'}->{$file} = $display;
             }
             $files->{$file} = 1;
