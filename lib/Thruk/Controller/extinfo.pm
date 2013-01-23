@@ -456,7 +456,7 @@ sub _process_host_page {
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
         if(defined $host) {
-            my $command            = $c->{'db'}->expand_command('host' => $host );
+            my $command            = $c->{'db'}->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
     }
@@ -570,7 +570,7 @@ sub _process_service_page {
         }
         $c->stash->{'command'}  = '';
         if(defined $host and defined $service) {
-            my $command            = $c->{'db'}->expand_command('host' => $host, 'service' => $service );
+            my $command            = $c->{'db'}->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
     }

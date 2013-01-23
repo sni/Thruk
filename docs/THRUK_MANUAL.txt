@@ -1360,6 +1360,20 @@ ex.:
   show_full_commandline = 0
 
 
+
+==== show_full_commandline_source
+Usually the source of your expanded check_command should
+be the check_command attribute of your host / service. But under
+certain circumstances you might want to use display expanded
+commands from a custom variable. In this case, set
+'show_full_commandline_source' to '_CUST_VAR_NAME'.
+
+ex.:
+
+  show_full_commandline_source = check_command
+
+
+
 ==== show_long_plugin_output
 
 When a plugin returns more than one line of output, the

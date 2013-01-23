@@ -476,11 +476,23 @@ sub expand_command {
     my $host     = $data{'host'};
     my $service  = $data{'service'};
     my $command  = $data{'command'};
+    my $source   = $data{'source'};
 
+    my $obj          = $host;
     my $command_name = $host->{'check_command'};
     if(defined $service) {
         $command_name = $service->{'check_command'};
+        $obj          = $service;
     }
+
+    # different source?
+    if(defined $source and $source ne 'check_command') {
+        $source  = uc($source);
+        $source  =~ s/^_//mx;
+        my $vars = Thruk::Utils::get_custom_vars($obj);
+        $command_name = $vars->{$source} || '';
+    }
+
     my($name, @com_args) = split(/!/mx, $command_name, 255);
 
     # it is possible to define hosts without a command

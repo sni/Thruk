@@ -860,6 +860,34 @@ sub set_paging_steps {
 
 ########################################
 
+=head2 get_custom_vars
+
+  get_custom_vars($obj)
+
+return custom variables in a hash
+
+=cut
+sub get_custom_vars {
+    my $data = shift;
+
+    my $custom_vars = {};
+
+    return unless defined $data;
+    return unless defined $data->{'custom_variable_names'};
+
+    my $x = 0;
+    while(defined $data->{'custom_variable_names'}->[$x]) {
+        my $cust_name  = $data->{'custom_variable_names'}->[$x];
+        my $cust_value = $data->{'custom_variable_values'}->[$x];
+        $custom_vars->{$cust_name} = $cust_value;
+        $x++;
+    }
+    return $custom_vars;
+}
+
+
+########################################
+
 =head2 set_custom_vars
 
   set_custom_vars($c)
@@ -880,10 +908,10 @@ sub set_custom_vars {
     my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
     my $test = array2hash($vars);
 
-    my $x = 0;
-    while(defined $data->{'custom_variable_names'}->[$x]) {
-        my $cust_name  = $data->{'custom_variable_names'}->[$x];
-        my $cust_value = $data->{'custom_variable_values'}->[$x];
+    my $custom_vars = get_custom_vars($data);
+
+    for my $cust_name (keys %{$custom_vars}) {
+        my $cust_value = $custom_vars->{$cust_name};
         my $found      = 0;
         if(defined $test->{$cust_name} or defined $test->{'_'.$cust_name}) {
             $found = 1;
@@ -900,7 +928,6 @@ sub set_custom_vars {
         if($found) {
             $c->stash->{'custom_vars'}->{$cust_name} = $cust_value;
         }
-        $x++;
     }
     return;
 }
