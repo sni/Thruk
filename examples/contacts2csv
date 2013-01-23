@@ -54,10 +54,9 @@ print join(';', map(ucfirst, @{$def})), ";Groups\n";
 
 # print data
 for my $o (@{$contacts}) {
-    my $first = 1;
     for my $attr (@{$def}) {
         if(!defined $o->{'conf'}->{$attr}) {
-            print ";" unless $first;
+            print ";";
         } else {
             if(ref $o->{'conf'}->{$attr} eq 'ARRAY') {
                 print join(',', @{$o->{'conf'}->{$attr}}), ";";
@@ -65,7 +64,6 @@ for my $o (@{$contacts}) {
                 print $o->{'conf'}->{$attr}, ";";
             }
         }
-        $first = 0;
     }
     my $name = $o->{'conf'}->{'contact_name'};
     print join(',', keys %{$groups_by_contact->{$name}});
