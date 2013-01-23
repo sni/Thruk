@@ -246,13 +246,11 @@ sub _display_alert_totals {
     elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Hostgroup';
         my $tmp = $c->{'db'}->get_hostgroups();
-        Thruk::Utils::array2hash($tmp, 'name');
         $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Host';
         my $tmp = $c->{'db'}->get_hosts(columns => [qw/name alias/]);
-        Thruk::Utils::array2hash($tmp, 'name');
         $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
@@ -261,7 +259,6 @@ sub _display_alert_totals {
     elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Servicegroup';
         my $tmp = $c->{'db'}->get_servicegroups();
-        Thruk::Utils::array2hash($tmp, 'name');
         $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
 
