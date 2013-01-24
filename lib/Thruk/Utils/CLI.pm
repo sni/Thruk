@@ -295,8 +295,14 @@ sub _from_fcgi {
     } else {
         $res = _run_commands($c, $data->{'options'}, 'fcgi');
     }
-
-    return encode_json($res);
+    my $res_json;
+    eval {
+        $res_json = encode_json($res);
+    };
+    if($@) {
+        die("unable to encode to json: ".Dumper($res));
+    }
+    return $res_json;
 }
 
 ##############################################
@@ -880,6 +886,11 @@ sub _cmd_raw {
                 'obj_reload_cmd' => exists $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
             };
         }
+    }
+
+    # remove useless mongodb _id if using logcache
+    if($function eq 'get_logs' and $c->config->{'logcache'} and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'ARRAY') {
+        for (@{$res->[2]}) { delete $_->{'_id'} }
     }
 
     return($res, 0);
