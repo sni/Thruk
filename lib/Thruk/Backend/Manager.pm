@@ -9,6 +9,7 @@ use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
 use Encode;
 use Thruk::Utils;
+use Storable qw/dclone/;
 
 our $AUTOLOAD;
 
@@ -1114,9 +1115,12 @@ sub _get_result_serial {
         $self->{'c'}->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);
 
+        # options may be changed from backend, so give a clone to each
+        my $cloned_arg = dclone($arg);
+
         # skip already failed peers for this request
         if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
-            my @res = _do_on_peer($key, $function, $arg);
+            my @res = _do_on_peer($key, $function, $cloned_arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
             if(!$last_error and defined $size) {
@@ -1150,11 +1154,15 @@ sub _get_result_parallel {
 
     my %ids;
     for my $key (@{$peers}) {
+
+        # options may be changed from backend, so give a clone to each
+        my $cloned_arg = dclone($arg);
+
         # skip already failed peers for this request
         if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
             my $id;
             eval {
-                $id = $Thruk::pool->add($key, $function, $arg);
+                $id = $Thruk::pool->add($key, $function, $cloned_arg);
                 $ids{$id} = $key;
             };
             confess($@) if $@;
