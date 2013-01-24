@@ -649,6 +649,10 @@ returns result for given request
 sub _req {
     my($self, $sub, $args, $redirects) = @_;
     $redirects = 0 unless defined $redirects;
+
+    # clean code refs
+    _clean_code_refs($args);
+
     my $options = {
         'action' => 'raw',
         'sub'    => $sub,
@@ -783,6 +787,30 @@ sub _replace_peer_key {
         $r->{'peer_key'} = $self->{'key'} if defined $r->{'peer_key'};
     }
     return $data;
+}
+
+##############################################
+sub _clean_code_refs {
+    my($var,$lvl) = @_;
+    if(ref $var eq 'ARRAY') {
+        for (@{$var}) {
+            if(ref $_ eq 'CODE') {
+                $_ = '';
+            } else {
+                _clean_code_refs($_);
+            }
+        }
+    }
+    elsif(ref $var eq 'HASH') {
+        for my $key (keys %{$var}) {
+            if(ref $var->{$key} eq 'CODE') {
+                delete $var->{$key};
+            } else {
+                _clean_code_refs($var->{$key});
+            }
+        }
+    }
+    return;
 }
 
 ##########################################################
