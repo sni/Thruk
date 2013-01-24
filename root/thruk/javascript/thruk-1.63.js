@@ -441,6 +441,26 @@ function toggleSection(section) {
     });
 }
 
+/* toggle all backends for all sections */
+function toggleAllSections(reverse) {
+    var state = 0;
+    if(jQuery('#all_backends').attr('checked')) {
+        state = 1;
+    }
+    if(reverse != undefined) {
+        if(state == 0) { state = 1; } else { state = 0; }
+    }
+    jQuery('TABLE.site_panel DIV.backend INPUT').each(function(i, b) {
+        var id = b.id.replace(/^button_/, '');
+        toggleBackend(id, state);
+    });
+    if(state == 1) {
+        jQuery('#all_backends').attr('checked', true);
+    } else {
+        jQuery('#all_backends').attr('checked', false);
+    }
+}
+
 /* toogle checkbox by id */
 function toggleCheckBox(id) {
   var box = document.getElementById(id);

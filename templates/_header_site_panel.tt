@@ -55,7 +55,17 @@
       <div class="shadow"><div class="shadowcontent">
       <table class="site_panel" cellspacing=0 cellpadding=0 width="100%">
         <tr>
-            <th colspan=2>Choose your sites</th>
+            <th colspan=[% sections.keys.size %] align="center">
+              <table border=0 cellpadding=0 cellspacing=0 width="100%" style="padding-bottom: 10px;">
+                <tr>
+                  <td width="20"></td>
+                  <td width="70"></td>
+                  <td style="padding-right: 20px;">Choose your sites</td>
+                  <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">check all</td>
+                  <td align="left" width="20"><input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();"></td>
+                </tr>
+              </table>
+            </th>
         </tr>
         <tr>
             [% FOREACH section IN sections.keys.sort %]
@@ -66,7 +76,7 @@
         </tr>
         <tr>
             [% FOREACH section IN sections.keys.sort %]
-            <td valign="top" class="site_panel[% UNLESS loop.first %] notfirst[% END %]">
+            <td valign="top" class="site_panel[% UNLESS loop.first %] notfirst[% END %]" align="center">
             <table cellpadding=0 cellspacing=0 border=0><tr>
             <td valign="top">
             [% count = 0 %]
@@ -92,6 +102,15 @@
       %]<div class='backend'><input type="button" class="[% IF down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]" value="[% down %] down" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleSitePanel()"></div>
       [% END %]
       [% popup %]
+      [% IF disabled == 0 %]
+        <script type="text/javascript">
+        <!--
+          jQuery(function() {
+            jQuery('#all_backends').attr('checked', true);
+          });
+        -->
+        </script>
+      [% END %]
 
     [% ELSIF show_sitepanel == 'list' %]
       [% section = '' %]

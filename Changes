@@ -7,6 +7,7 @@ next:
           - added show_host_attempts config option
           - added ssl_verify_hostnames config option
           - added show_full_commandline_source config option
+          - added check all switch to site panel
           - make colums selectable for json requests
           - reports
             - added locales support (en, de, it, es, fr)
