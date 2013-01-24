@@ -587,9 +587,7 @@ sub _clean_code_refs {
 sub _reconnect {
     my($c) = @_;
     $c->{'db'}->reconnect() or do {
-        my $err = $@;
-        $err =~ s/\s+at\s+[\w\/\.\-]+\.pm\s+line\s+\d+\.//gmx;
-        print STDERR "reconnect failed: $err";
+        print STDERR "reconnect failed: ".$@;
         kill($$);
     };
     return;
