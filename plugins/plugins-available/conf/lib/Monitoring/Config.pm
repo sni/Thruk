@@ -68,6 +68,7 @@ initialize configs
 =cut
 sub init {
     my($self, $config, $stats, $remotepeer) = @_;
+    delete $self->{'remotepeer'};
     if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
         $self->{'remotepeer'} = $remotepeer;
     }
@@ -88,6 +89,7 @@ sub init {
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
 
+    delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
         $self->{'config'}->{$key} = $config->{$key};
     }

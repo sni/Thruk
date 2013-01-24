@@ -844,7 +844,6 @@ sub _cmd_raw {
     my $key = $keys[0];
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
-use Data::Dumper; print STDERR Dumper($opt->{'remote_name'});
         my $peer = $c->{'db'}->get_peer_by_name($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();

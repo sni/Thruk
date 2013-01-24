@@ -68,6 +68,19 @@ sub peer_key {
 
 ##########################################################
 
+=head2 peer_name
+
+return peer name
+
+=cut
+
+sub peer_name {
+    my($self) = @_;
+    return $self->{'class'}->peer_name();
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()
