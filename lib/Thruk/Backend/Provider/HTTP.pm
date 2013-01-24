@@ -43,6 +43,7 @@ sub new {
         'addr'                 => $options->{'peer'},
         'auth'                 => $options->{'auth'},
         'proxy'                => $options->{'proxy'},
+        'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.59,
     };
@@ -654,9 +655,10 @@ sub _req {
     _clean_code_refs($args);
 
     my $options = {
-        'action' => 'raw',
-        'sub'    => $sub,
-        'args'   => $args,
+        'action'        => 'raw',
+        'sub'           => $sub,
+        'remote_name'   => $self->{'remote_name'},
+        'args'          => $args,
     };
     $options->{'auth'} = $args->{'auth'} if defined $args and ref $args eq 'HASH' and defined $args->{'auth'};
 

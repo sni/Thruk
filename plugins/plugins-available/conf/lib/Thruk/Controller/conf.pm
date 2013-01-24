@@ -795,9 +795,10 @@ sub _process_backends_page {
                 'section' => $c->request->parameters->{'section'.$x},
                 'options' => {},
             };
-            $backend->{'options'}->{'peer'}  = $c->request->parameters->{'peer'.$x}  if $c->request->parameters->{'peer'.$x};
-            $backend->{'options'}->{'auth'}  = $c->request->parameters->{'auth'.$x}  if $c->request->parameters->{'auth'.$x};
-            $backend->{'options'}->{'proxy'} = $c->request->parameters->{'proxy'.$x} if $c->request->parameters->{'proxy'.$x};
+            $backend->{'options'}->{'peer'}         = $c->request->parameters->{'peer'.$x}        if $c->request->parameters->{'peer'.$x};
+            $backend->{'options'}->{'auth'}         = $c->request->parameters->{'auth'.$x}        if $c->request->parameters->{'auth'.$x};
+            $backend->{'options'}->{'proxy'}        = $c->request->parameters->{'proxy'.$x}       if $c->request->parameters->{'proxy'.$x};
+            $backend->{'options'}->{'remote_name'}  = $c->request->parameters->{'remote_name'.$x} if $c->request->parameters->{'remote_name'.$x};
             $x++;
             $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} and $backend->{'options'}->{'peer'});
             next unless $backend->{'name'};
@@ -825,16 +826,17 @@ sub _process_backends_page {
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
-        my $peer  = $c->request->parameters->{'peer'};
-        my $type  = $c->request->parameters->{'type'};
-        my $auth  = $c->request->parameters->{'auth'};
-        my $proxy = $c->request->parameters->{'proxy'};
+        my $peer        = $c->request->parameters->{'peer'};
+        my $type        = $c->request->parameters->{'type'};
+        my $auth        = $c->request->parameters->{'auth'};
+        my $proxy       = $c->request->parameters->{'proxy'};
+        my $remote_name = $c->request->parameters->{'remote_name'};
         my @test;
         eval {
             my $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
-                                                 options => { peer => $peer, auth => $auth, proxy => $proxy },
+                                                 options => { peer => $peer, auth => $auth, proxy => $proxy, remote_name => $remote_name },
                                                 });
             @test   = $con->{'class'}->get_processinfo();
         };
@@ -870,13 +872,14 @@ sub _process_backends_page {
     }
     # set ids
     for my $b (@{$backends}) {
-        $b->{'key'}     = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
-        $b->{'addr'}    = $b->{'options'}->{'peer'}  || '';
-        $b->{'auth'}    = $b->{'options'}->{'auth'}  || '';
-        $b->{'proxy'}   = $b->{'options'}->{'proxy'} || '';
-        $b->{'hidden'}  = 0 unless defined $b->{'hidden'};
-        $b->{'section'} = '' unless defined $b->{'section'};
-        $b->{'type'}    = lc($b->{'type'});
+        $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
+        $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
+        $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
+        $b->{'remote_name'} = $b->{'options'}->{'remote_name'} || '';
+        $b->{'hidden'}      = 0 unless defined $b->{'hidden'};
+        $b->{'section'}     = '' unless defined $b->{'section'};
+        $b->{'type'}        = lc($b->{'type'});
     }
     $c->stash->{'sites'}    = $backends;
     $c->stash->{'subtitle'} = "Thruk Backends Manager";

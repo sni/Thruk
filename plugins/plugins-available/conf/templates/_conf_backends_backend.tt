@@ -41,6 +41,12 @@
     <input type="text" name="proxy[% x %]" value="[% b.proxy %]" style="width: 200px;" placeholder="http://proxyhost:proxyport">
   </td>
 </tr>
+<tr class="backend_conf_[% x %] backend_remote_name">
+  <td class='dataVar' align="left">Remote Name</td>
+  <td class='dataVal' colspan=2 nowrap>
+    <input type="text" name="remote_name[% x %]" value="[% b.remote_name %]" style="width: 200px;" placeholder="name of remote peer">
+  </td>
+</tr>
 <tr class="backend_conf_[% x %] backend_hidden">
   <td class='dataVar' align="left">Hidden</td>
   <td class='dataVal' colspan=2>

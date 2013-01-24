@@ -27,7 +27,7 @@ Note: some options are not accessible here for security reasons.
       </a>
     </td>
   </tr>
-  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', key => '', hidden => 0, type => 'livestatus', section => '' } x = 0 %]
+  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', key => '', hidden => 0, type => 'livestatus', section => '' } x = 0 %]
   <tr>
     <td colspan=3 style="text-align:center; padding-bottom: 7px;">
       <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"[% IF readonly %] disabled[% END %]>
@@ -69,12 +69,13 @@ Note: some options are not accessible here for security reasons.
 
   var orig_src;
   function conf_test_connection(btn) {
-    var nr    = btn.name.substr(4);
-    var peer  = jQuery('INPUT[name=peer'+nr+']').val();
-    var typ   = jQuery('SELECT[name=type'+nr+']').val();
-    var auth  = jQuery('INPUT[name=auth'+nr+']').val();
-    var proxy = jQuery('INPUT[name=proxy'+nr+']').val();
-    var img   = jQuery('#testimg'+nr)[0];
+    var nr          = btn.name.substr(4);
+    var peer        = jQuery('INPUT[name=peer'+nr+']').val();
+    var typ         = jQuery('SELECT[name=type'+nr+']').val();
+    var auth        = jQuery('INPUT[name=auth'+nr+']').val();
+    var proxy       = jQuery('INPUT[name=proxy'+nr+']').val();
+    var remote_name = jQuery('INPUT[name=remote_name'+nr+']').val();
+    var img         = jQuery('#testimg'+nr)[0];
     if(orig_src == undefined) {
       orig_src = img.src;
     } else {
@@ -86,12 +87,13 @@ Note: some options are not accessible here for security reasons.
     jQuery.ajax({
         url:  'conf.cgi',
         data: {
-                sub:    'backends',
-                action: 'check_con',
-                peer:   peer,
-                type:   typ,
-                auth:   auth,
-                proxy:  proxy
+                sub:         'backends',
+                action:      'check_con',
+                peer:         peer,
+                type:         typ,
+                auth:         auth,
+                proxy:        proxy,
+                remote_name:  remote_name
         },
         type: 'POST',
         cache: false,
@@ -118,6 +120,7 @@ Note: some options are not accessible here for security reasons.
     jQuery('.backend_conf_'+nr+'.backend_connection').hide();
     jQuery('.backend_conf_'+nr+'.backend_auth').hide();
     jQuery('.backend_conf_'+nr+'.backend_proxy').hide();
+    jQuery('.backend_conf_'+nr+'.backend_remote_name').hide();
 
     if(value == 'livestatus' || value == 'http') {
       jQuery('.backend_conf_'+nr+'.backend_connection').show();
@@ -125,6 +128,7 @@ Note: some options are not accessible here for security reasons.
     if(value == 'http') {
       jQuery('.backend_conf_'+nr+'.backend_auth').show();
       jQuery('.backend_conf_'+nr+'.backend_proxy').show();
+      jQuery('.backend_conf_'+nr+'.backend_remote_name').show();
       jQuery('INPUT[name=peer'+nr+']').attr('placeholder', 'https://server/[sitename]');
     }
 
