@@ -1038,11 +1038,17 @@ return root folder for config files
 =cut
 sub get_files_root {
     my ( $self ) = @_;
+
+    return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
     my $files = [];
     for my $file (@{$self->{'files'}}) {
         push @{$files}, $file->{'path'};
     }
     my $root = Thruk::Utils::Conf::get_root_folder($files);
+    if($root ne '' and $self->is_remote()) {
+        my $localdir = $self->{'config'}->{'localdir'};
+        $root =~ s|^$localdir||mx;
+    }
 
     # file root is empty when there are no files (yet)
     if($root eq '') {

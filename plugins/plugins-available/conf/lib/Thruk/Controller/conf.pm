@@ -1301,8 +1301,9 @@ sub _get_context_object {
             return $obj;
         }
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
-        $new_file      =~ s/^\///gmx;
-        my $file       = $c->{'obj_db'}->get_file_by_path($files_root.'/'.$new_file);
+        my $fullpath   = $files_root.'/'.$new_file;
+        $fullpath      =~ s|\/+|\/|gmx;
+        my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
         if(defined $file) {
             if(defined $file and $file->readonly()) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
@@ -1312,7 +1313,7 @@ sub _get_context_object {
             $obj->{'file'} = $file;
         } else {
             # new file
-            my $remotepath = $files_root.'/'.$new_file;
+            my $remotepath = $fullpath;
             my $localpath  = $remotepath;
             if($c->{'obj_db'}->is_remote()) {
                 $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
