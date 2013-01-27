@@ -217,7 +217,8 @@ sub _process_file {
             return 1;
         } else {
             my $errors = 0;
-            my $files = Monitoring::Config->_get_files_for_folder($filename);
+            my $mc     = Monitoring::Config->new();
+            my $files  = $mc->_get_files_for_folder($filename);
             for my $f (@{$files}) {
                 $errors += $self->_process_file($f);
             }

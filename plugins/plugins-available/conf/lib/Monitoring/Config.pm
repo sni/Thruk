@@ -24,7 +24,15 @@ Provides access to core objects like hosts, services etc...
 
 =head2 new
 
-    new($config)
+    new({
+        core_conf           => path to core config
+        obj_file            => path to core config file
+        obj_dir             => path to core config path
+        obj_resource_file   => path to resource.cfg file
+        obj_readonly        => readonly pattern
+        obj_exclude         => exclude pattern
+        localdir            => local path used for remote configs
+    })
 
 return new objects database
 
