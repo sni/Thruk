@@ -28,7 +28,7 @@
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
   [%# report settings #%]
-  [% PROCESS 'reports/locale/en.tt' %]
+  [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
   [%
     title        = loc('SLA Report')
     subtitle     = r.name
