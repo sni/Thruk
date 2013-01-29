@@ -463,6 +463,9 @@ sub _process_host_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
+    
+     # graph
+    $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
 
     # recurring downtimes
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
@@ -577,6 +580,9 @@ sub _process_service_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
+    
+    # graph?
+    $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $service);
 
     # recurring downtimes
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);

@@ -1,0 +1,17 @@
+[% USE date %]
+
+<div id="third_graph_pane" style="position: relative; border-color:#C4C2C2; border-style:ridge; border-width:2px; border-collapse: separate; border-spacing:2px; width:825px; margin-right:275px;">
+<div class="commentTitle">Performance Graph</div>
+</br></br>
+
+<!-- This page is the iframe . It is only diplayed if there is a word 'google' (specified in the thruk_local.conf)-->
+
+<!-- iframe -->
+
+<iframe name="graph" id="graph" src="[% graph_url %]" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"></iframe>
+
+</div>
+<td>
+
+
+

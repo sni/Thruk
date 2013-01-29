@@ -1,0 +1,491 @@
+﻿[% USE date %]
+[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+[% PROCESS custom_perf_bar_adjustments.tt %]
+
+[% SET peer_key      = host.peer_key %]
+[% SET program_start = pi_detail.$peer_key.program_start %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='status.cgi?host=[% host.name | uri %]'>View Status Detail For This Host</a><br>
+                [% IF host.childs.size > 0 %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Childs Hosts For This Host</a><br>[% END %]
+                [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts For This Problem</a><br>[% END %]
+                [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View Root Problem For This Impact</a><br>[% END %]
+                <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a><br>
+                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'>View Trends For This Host</a><br>[% END %]
+                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
+                <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
+                <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
+                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                <br><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a>
+                [% END %]
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td align="center" valign="middle" width="33%" class="ext_head_attributes">
+          <div class='data'>Host</div>
+          <div class='dataTitle'>[% host.alias %]</div>
+          <div class='dataTitle'>([% host.display_name %])</div><br>
+          <script language="JavaScript">
+	    document.title=('[[% host.alias %]]');
+	  </script>
+          [% IF matching_backends.size > 1 %]
+          <div class='data'>
+            <form action="extinfo.cgi" method="GET">
+              <input type="hidden" name="type" value="1">
+              <input type="hidden" name="host" value="[% host.name %]">
+              This host is ambiguous:
+              <select name="backend">
+                [% FOREACH b IN matching_backends %]
+                [% SET name = pi_detail.$b.peer_name %]
+                <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
+                [% END %]
+              </select>
+              <input type="submit" name="go" value="go">
+            </form>
+          </div>
+          [% END %]
+          [% IF host.parents.size > 0 %]
+          <div class='data'>Parents:</div>
+          <div class='dataTitle'>
+            [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
+          </div><br>
+          [% END %]
+          [% IF host.groups.size > 0 %]
+          <div class='data'>Member of</div>
+          <div class='dataTitle'>
+            [% FOREACH group IN host.groups.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
+          </div><br>
+          [% END %]
+
+          <div class='data'>[% host.address %]</div>
+          [% IF host.icon_image_expanded %]
+          <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
+          [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt %] )</i></font>[% END %]
+          [% END %]
+          [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
+        </td>
+        <td align="right" valign="bottom" width="33%" class="notesCell">
+          <table border='0'>
+          [% IF enable_shinken_features %]
+          <tr>
+            <td align='right'>
+              [% prio = host.criticity %]
+              <div class='dataTitle'>Priority [% host.criticity %]/5
+                <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
+              </div>
+            </td>
+          </tr>
+          [% END %]
+
+          [% IF host.action_url_expanded %]
+            <tr>
+              <td align='right'>
+                <a href='[% host.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(host, host_action_icon) %]' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
+                <font size="-1"><i>Extra Actions</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% IF host.notes_url_expanded %]
+            <tr>
+              <td align='right'>
+                <a href='[% host.notes_url_expanded %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40"></a><br clear="all">
+                <font size="-1"><i>Extra Notes</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% IF custom_vars.keys.size > 0 %]
+            <tr>
+              <td align='right'>
+                <table>
+                  [% FOREACH cust = custom_vars.keys.sort %]
+                  <tr>
+                    <td style="padding-right: 7px;">
+                      <font size="-1"><i>[% cust %]</i></font><br clear="all">
+                    </td>
+                    <td>
+                      <font size="-1">[% custom_vars.$cust %]</font>
+                    </td>
+                  </tr>
+                  [% END %]
+                </table>
+              </td>
+            </tr>
+          [% END %]
+          </table>
+          [% PROCESS _help.tt topic = "extinfo_1" %]
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div align="center">
+      <table border="0" cellpadding="0" width="100%" class="extdetails">
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'>
+            <div class='dataTitle'>Host State Information</div>
+            <table border="0">
+              <tr>
+                <td>
+                  <table border="1" cellspacing="0" cellpadding="0" class="data extdetails2" style="align:center;margin-left:30%;">
+                    <tr>
+                      <td class='stateInfoTable1 extdetails'>
+                        <table border="0">
+                          <tr>
+                            <td class='dataVar'>Host Status:</td>
+                            <td class='dataVal'>
+                              [% IF host.has_been_checked == 0 %]
+                              <div class='hostPENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 0 %]
+                              <div class='hostUP'>&nbsp;&nbsp;UP&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 1 %]
+                              <div class='hostDOWN'>&nbsp;&nbsp;DOWN&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 2 %]
+                              <div class='hostUNREACHABLE'>&nbsp;&nbsp;UNREACHABLE&nbsp;&nbsp;</div>
+                              [% END %]
+                              &nbsp;(for [% IF host.last_state_change %][% duration(date.now - host.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
+                              [% IF host.acknowledged %]
+                              &nbsp;(Has been acknowledged)
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' valign='top'>Status Information:</td>
+                            <td class='dataVal detail_plugin_output'>
+                              [% IF host.has_been_checked == 0 %]host has not been checked yet[% END %]
+                              [% IF escape_html_tags %][% escape_html(host.plugin_output) %][% ELSE %][% host.plugin_output %][% END %]
+                              [% IF host.long_plugin_output %]
+                              <br>[% IF escape_html_tags %][% nl2br(escape_html(host.long_plugin_output)) %][% ELSE %][% nl2br(host.long_plugin_output) %][% END %]
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' valign='top'>Performance Data:</td>
+                            <td class='dataVal'>
+                                [% PROCESS _perfdata_table.tt write="true" state=host.state plugin_output=host.plugin_output perfdata=host.perf_data check_command=host.check_command hst=host.name svc="_HOST_" %]
+                                [% host.perf_data %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Current Attempt:</td>
+                            <td class='dataVal'>[% host.current_attempt %]/[% host.max_check_attempts %]&nbsp;&nbsp;([% IF host.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Check Time:</td>
+                            <td class='dataVal'>[% IF host.last_check %][% date_format(c, host.last_check) %][% ELSE %]never[% END %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Check Type:</td>
+                            <td class='dataVal'>[% IF host.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' nowrap>Check Latency / Duration:</td>
+                            <td class='dataVal'>
+                              [% IF host.check_type == 0 %]
+                                [% FILTER format('%.3f') %][% host.latency %][% END %]
+                              [% ELSE %]
+                                N/A
+                              [% END %]
+                              &nbsp;/&nbsp;
+                              [% FILTER format('%.3f') %][% host.execution_time %][% END %] seconds
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
+                            <td class='dataVal'>
+                              [% IF host.next_check %][% date_format(c, host.next_check) %][% ELSE %]N/A[% END %]
+                              [% IF host.is_executing > 0 %]<img src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last State Change:</td>
+                            <td class='dataVal'>[% date_format(c, host.last_state_change) %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Notification:</td>
+                            <td class='dataVal'>
+                              [% IF host.last_notification != 0 %]
+                              [% date_format(c, host.last_notification) %]
+                              [% ELSE %]
+                              N/A
+                              [% END %]
+                              &nbsp;(notification [% host.current_notification_number %])
+                              [% IF host.current_notification_number == 0 && host.first_notification_delay > 0 %]
+                                [% first_remaining = calculate_first_notification_delay_remaining(host) %]
+                                [% IF first_remaining >= 0 %]
+                                  &nbsp;<span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
+                                [% END %]
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Is This Host Flapping?</td>
+                            <td class='dataVal'>
+                              [% IF host.flap_detection_enabled %]
+                                [% IF host.is_flapping %]
+                                <div class='flapping'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                [% ELSE %]
+                                <div class='notflapping'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                [% END %]
+                                &nbsp;([% FILTER format('%.2f') %][% host.percent_state_change %][% END %]% state change)
+                              [% ELSE %]
+                                N/A
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>In Scheduled Downtime?</td>
+                            <td class='dataVal'>
+                              [% IF host.scheduled_downtime_depth > 0 %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>In Check Period?</td>
+                            <td class='dataVal'>
+                              [% IF host.in_check_period %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>In Notification Period?</td>
+                            <td class='dataVal'>
+                              [% IF host.in_notification_period %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Update:</td>
+                            <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                          </tr>
+                          [% IF show_modified_attributes %]
+                          <tr>
+                            <td class='dataVar'>Modified Attributes</td>
+                            <td class='dataVal'>[% IF host.modified_attributes_list.size > 0 %]<div class='serviceWARNING' style="padding-right: 4px; padding-left: 4px;">[% host.modified_attributes_list.join(', ') %]</div>[% ELSE %]none[% END %]</td>
+                          </tr>
+                          [% END %]
+                          [% IF backends && backends.size > 1 %]
+                          <tr>
+                            <td class='dataVar'>Monitored by:</td>
+                            <td class='dataVal'>[% host.peer_name %]</td>
+                          </tr>
+                          [% END %]
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
+                    <tr>
+                      <td class='stateInfoTable2 checkstatus'>
+                        <table border="0">
+                          <tr>
+                            <td class='dataVar'>Active Checks:</td>
+                            <td class='dataVal'>
+                              [% IF host.checks_enabled %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Passive Checks:</td>
+                            <td class='dataVal'>
+                              [% IF host.accept_passive_checks %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Obsessing:</td>
+                            <td class='dataVal'>
+                              [% IF host.obsess_over_host %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Notifications:</td>
+                            <td class='dataVal'>
+                              [% IF host.notifications_enabled %]
+                              <div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='notificationsDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Event Handler:</td>
+                            <td class='dataVal'>
+                              [% IF host.event_handler_enabled %]
+                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Flap Detection:</td>
+                            <td class='dataVal'>
+                              [% IF host.flap_detection_enabled %]
+                              <div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp; </div>
+                              [% ELSE %]
+                              <div class='flapdetectionDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp; </div>
+                              [% END %]
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+          <td align="center" valign="top" class="action_menu">
+            [% IF c.config.use_new_command_box %]
+              [% PROCESS _host_command_box.tt %]
+            [% ELSE %]
+              [% PROCESS _host_command_box_full.tt %]
+            [% END %]
+          </td>
+        </tr>
+       [% IF graph_url %]
+        <tr>
+          <td colspan="2" align="center">
+          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
+          </td>
+        </tr>
+        [% END %]
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+          [% IF c.check_cmd_permissions('host', host.name) %]
+            <a name="comments" id="comments"></a>
+            <div class='commentTitle'>Host Comments</div>
+            <table border="0">
+              <tr>
+                [% UNLESS c.config.command_disabled.exists('1') %]
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new comment</a></td>
+                [% END %]
+                [% IF comments %]
+                [% UNLESS c.config.command_disabled.exists('20') %]
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all comments</a></td>
+                [% END %]
+                [% END %]
+              </tr>
+            </table>
+            [% IF comments.size > 0 %]
+              [% PROCESS _comments_table.tt comments = comments type='host' names=0 %]
+            [% END %]
+          [% END %]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+          [% IF c.check_user_roles_wrapper('authorized_for_read_only') %]
+          [% ELSE %]
+            <br>
+            <a name="downtimes" id="downtimes"></a>
+            <div class='commentTitle'>Host Downtimes</div>
+            <table border="0">
+              <tr>
+                [% UNLESS c.config.command_disabled.exists('55') %]
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'>
+                  <a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a> |
+                  <a href='extinfo.cgi?type=6&amp;recurring=add_host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add recurring downtime</a>
+                </td>
+                [% END %]
+                [% IF downtimes %]
+                [% UNLESS c.config.command_disabled.exists('5') %]
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' class='comment'>Delete all downtimes</a></td>
+                [% END %]
+                [% END %]
+              </tr>
+            </table>
+            [% IF downtimes.size > 0 %]
+              [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
+            [% END %]
+            [% IF recurring_downtimes.size > 0 %]
+              <div class='commentTitle'>Recurring Host Downtime</div>
+              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
+            [% END %]
+          [% END %]
+          </td>
+        </tr>
+
+        [% IF   show_full_commandline == 2 ||
+              ( show_full_commandline == 1 && c.check_user_roles_wrapper('authorized_for_configuration_information') )
+        %]
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+            <br>
+            <a name="command" id="command"></a>
+            <div class='commentTitle'>Configuration Information</div>
+            <table border="0">
+              <tr>
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
+                [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                <td valign="middle"><a href='conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Configure This Host</a></td>
+                [% ELSE %]
+                <td valign="middle"><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a></td>
+                [% END %]
+              </tr>
+            </table>
+            <table border="0" class="commandPanel">
+              <tr>
+                <th class='comment' nowrap>Check Command</th>
+                <td class='comment'>
+                <pre class="no_margin command_line config_info">[% command.line | html %]</pre></td>
+              </tr>
+              <tr>
+                <th class='comment' nowrap>Expanded Command</th>
+                <td class='comment'>
+                  [% IF command.note %]
+                  <i class="commandNote"><b>Note:</b> [% command.note %]</i>
+                  <br><br>
+                  [% END %]
+                  <pre class="no_margin command_line config_info">[% command.line_expanded | html %]</pre>
+                </td>
+              </tr>
+            </table>
+            <br>
+            <br>
+          </td>
+        </tr>
+        [% END %]
+      </table>
+    </div>
+
+
+[% PROCESS _footer.tt %]
