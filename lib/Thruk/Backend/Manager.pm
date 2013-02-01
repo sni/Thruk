@@ -79,7 +79,12 @@ sub init {
 
     for my $peer (@{$self->get_peers()}) {
         $peer->{'local'} = 1;
-        if($peer->{'addr'} =~ m/^(.*):/mx and $1 ne 'localhost' and $1 ne '127.0.0.1') {
+        my $addr = $peer->{'addr'};
+        if($peer->{'type'} eq 'http') {
+            $addr =~ s/^http(|s):\/\///mx;
+            $addr =~ s/\/.*$//mx;
+        }
+        if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./) {
             $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
