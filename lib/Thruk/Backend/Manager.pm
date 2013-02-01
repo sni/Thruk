@@ -1443,6 +1443,7 @@ sub reset_failed_backends {
     my $self = shift;
     my $c    = shift || $self->{'c'};
     $c->stash->{'failed_backends'} = {};
+    return;
 }
 
 ##########################################################
