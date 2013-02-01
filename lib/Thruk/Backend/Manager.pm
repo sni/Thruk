@@ -84,7 +84,7 @@ sub init {
             $addr =~ s/^http(|s):\/\///mx;
             $addr =~ s/\/.*$//mx;
         }
-        if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./) {
+        if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./mx) {
             $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
