@@ -58,7 +58,7 @@ while (<STDIN>) {
     chomp(my $in = $_);
 
     my $t0 = [gettimeofday];
-    print STDERR "thruk_auth: url '$in'" if $verbose > 1;
+    print STDERR "thruk_auth: url '$in' " if $verbose > 1;
     print process($in);
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
@@ -70,6 +70,9 @@ sub process {
 
     if($in =~ $line_regex) {
         my($cookies, $remote, $path) = ($1, $2, $3);
+
+        # remove last &
+        $path = substr($path, 0, -1) if(substr($path, -1, 1) eq '&');
 
         # some urls must pass
         if($path =~ $pass_regex) {
