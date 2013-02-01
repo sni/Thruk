@@ -685,7 +685,7 @@ sub _req {
         eval {
             $data = decode_json($data_str);
         };
-        die($@."\ngot: '".$data_str."'") if $@;
+        die($@."\nrequest:\n".Dumper($response)) if $@;
         if($data->{'rc'} == 1) {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
