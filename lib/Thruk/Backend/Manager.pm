@@ -1130,6 +1130,7 @@ sub _get_result_serial {
             my @res = _do_on_peer($key, $function, $arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
+            chomp($last_error) if $last_error;
             if(!$last_error and defined $size) {
                 $totalsize += $size;
                 $type       = $typ;

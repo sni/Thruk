@@ -182,6 +182,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         if($code >= 500) {
             $c->log->error($errors->{$arg1}->{'mess'});
             $c->log->error("on page: ".$c->request->uri) if defined $c->request->uri;
+            if($errors->{$arg1}->{'details'}) {
+                for my $row (split(/\n/mx, $errors->{$arg1}->{'details'})) {
+                    $c->log->error($row);
+                }
+            }
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
             $c->log->debug("on page: ".$c->request->uri) if defined $c->request->uri;
@@ -244,7 +249,7 @@ sub _get_connection_details {
     my $detail = '';
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {
         next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
-        $detail .= ($c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '').' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').')<br>';
+        $detail .= ($c->stash->{'backend_detail'}->{$pd}->{'last_error'} || '').' ('.($c->stash->{'backend_detail'}->{$pd}->{'addr'} || '').")\n";
     };
     return $detail;
 }
