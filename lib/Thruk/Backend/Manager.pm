@@ -877,7 +877,6 @@ sub _do_on_peers {
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
-    my $last_error;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     if(!defined $result and $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
@@ -890,9 +889,12 @@ sub _do_on_peers {
         }
         elsif($err =~ m|(hit\s\+.*?timeout\s+on.*?)\s+at\s+|mx) {
             die($1);
+        }
+        elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {
+            die($1);
         } else {
             local $Data::Dumper::Deepcopy = 1;
-            confess("Error in _do_on_peers: ".$err."called as ".Dumper($function)."with args: ".Dumper(\%arg));
+            confess("Error in _do_on_peers: '".$err."'\ncalled as '".(ref $function ? Dumper($function) : $function)."'\nwith args: ".Dumper(\%arg));
         }
     }
     $type = '' unless defined $type;
