@@ -608,7 +608,8 @@ sub set_backend_state_from_local_connections {
         };
         if($@) {
             $self->{'c'}->log->error("failed setting states by local check: ".$@);
-            $self->{'c'}->stash->{'failed_backends'} = {}; # reset failed states, otherwise retry would be useless
+            # reset failed states, otherwise retry would be useless
+            $self->reset_failed_backends();
             sleep(1);
         } else {
             last;
@@ -1422,6 +1423,25 @@ sub _page_data {
     $c->stash->{'pager_next_page'}     = $pager->next_page()     || 0;
 
     return $data;
+}
+
+########################################
+
+=head2 reset_failed_backends
+
+  reset_failed_backends([ $c ])
+
+Reset failed backends cache. Retries
+are useless unless reseting this cache
+because failed backends won't be asked
+twice per request.
+
+=cut
+
+sub reset_failed_backends {
+    my $self = shift;
+    my $c    = shift || $self->{'c'};
+    $c->stash->{'failed_backends'} = {};
 }
 
 ##########################################################
