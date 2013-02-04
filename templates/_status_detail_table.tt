@@ -111,6 +111,7 @@
             [% END %]
             >
             [% pnp_url = get_pnp_url(c, s, 1) %]
+            [% graphite_url = get_graphite_url(c, s, 1) %]
             [% PROCESS _perfdata_table.tt write="true" state=s.state plugin_output=s.plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]
 
             [% IF s.long_plugin_output and show_long_plugin_output == 'popup' %]
