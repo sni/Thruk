@@ -3668,6 +3668,119 @@ var ajax_search = {
     }
 }
 
+
+/*******************************************************************************
+GRAPHITE
+*******************************************************************************/
+function format_date(date) {
+       
+
+        var d1=new Date(date*1000);
+
+        var curr_year = d1.getFullYear();
+
+        var curr_month = d1.getMonth() + 1; //Months are zero based
+        if (curr_month < 10)
+            curr_month = "0" + curr_month;
+
+        var curr_date = d1.getDate();
+        if (curr_date < 10)
+            curr_date = "0" + curr_date;
+
+        var curr_hour = d1.getHours();
+        if (curr_hour < 10)
+            curr_hour = "0" + curr_hour;
+
+        var curr_min = d1.getMinutes();
+        if (curr_min < 10)
+            curr_min = "0" + curr_min;
+
+        return curr_hour + "%3A" + curr_min + "_" +curr_year + curr_month + curr_date ;
+}
+function unformat_date(str) {
+       
+       console.log("STR : "+str);
+       //23:59_20130125
+       var year,month,hour,day,minute;
+       hour=str.substring(0,2);
+	   minute=str.substring(3,5);
+	   year=str.substring(6,10);
+	   month=str.substring(10,12)-1;
+	   day=str.substring(12,14);
+	    console.log(year, month, day, hour, minute);
+	   var date=new Date(year, month, day, hour, minute);
+	   
+	    console.log("date"+date);
+	   return date.getTime()/1000;
+        
+}
+
+function set_graphite_img(start, end, id) {
+   
+    //23:59_20130125
+    var date_start = new Date(start * 1000);
+    var date_end = new Date(end * 1000);
+    
+    var newUrl = graphite_url + "&from=" + format_date(start) + "&until=" + format_date(end);
+    console.log(newUrl);
+
+    jQuery('#pnpwaitimg').css('display', 'block');
+    jQuery('#graphiteimg').attr('src', newUrl);
+
+    jQuery('#graphiteimg').load(function() {
+      jQuery('#graphiteimg').css('display' , 'block');
+      jQuery('#pnpwaitimg').css('display', 'none');
+    });
+
+    // set style of buttons
+    if(id) {
+		 id=id.replace(/^#/g, '');
+        for(x=1;x<=5;x++) {
+            obj = document.getElementById("graphite_th"+x);
+            styleElements(obj, "original", 1);
+        }
+        obj = document.getElementById(id);
+        styleElements(obj, "commentEven pnpSelected", 1);
+    } else {
+        // get id from hash
+        if(window.location.hash != '#') {
+            var values = window.location.hash.split("/");
+            if(values[0]) {
+                id = values[0].replace(/^#/, '');
+            }
+        }
+    }
+
+    if(id) {
+        // replace history otherwise we have to press back twice
+        var newhash = "#" + id + "/" + start + "/" + end;
+        if (history.replaceState) {
+            history.replaceState({}, "", newhash);
+        } else {
+            window.location.replace(newhash);
+        }
+    }
+
+    // reset reload timer for page
+    resetRefresh();
+
+    return false;
+}
+function move_graphite_img(factor) {
+    var urlArgs = new Object(toQueryParams(jQuery('#graphiteimg').attr('src')));
+
+	
+    start = unformat_date(urlArgs["from"]);
+    end   = unformat_date(urlArgs["until"]);
+      
+    diff  = end - start;
+
+    start = parseInt(diff * factor) + parseInt(start);
+    end   = parseInt(diff * factor) + parseInt(end);
+
+    return set_graphite_img(start, end);
+}
+
 /*******************************************************************************
 88888888ba  888b      88 88888888ba
 88      "8b 8888b     88 88      "8b
