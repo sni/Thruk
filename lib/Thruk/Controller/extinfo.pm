@@ -470,6 +470,9 @@ sub _process_host_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
+    
+    # graphite graph?
+    $c->stash->{'graphite_url'} = Thruk::Utils::get_graphite_url($c, $host);
 
     # recurring downtimes
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
