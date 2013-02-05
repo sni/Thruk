@@ -3718,7 +3718,7 @@ function set_graphite_img(start, end, id) {
     var date_start = new Date(start * 1000);
     var date_end = new Date(end * 1000);
     
-    var newUrl = graphite_url + "&from=" + format_date(start) + "&until=" + format_date(end);
+    var newUrl = graph_url + "&from=" + format_date(start) + "&until=" + format_date(end);
     console.log(newUrl);
 
     jQuery('#pnpwaitimg').css('display', 'block');
