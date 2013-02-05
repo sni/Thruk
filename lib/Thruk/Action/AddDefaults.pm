@@ -125,6 +125,8 @@ sub add_defaults {
         last unless $@;
         $c->log->debug("retry $x, data source error: $@");
         last if $x == $retrys;
+        # reset failed states, otherwise retry would be useless
+        $c->{'db'}->reset_failed_backends();
         sleep 1;
     }
     if($@) {

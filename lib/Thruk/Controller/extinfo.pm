@@ -461,6 +461,13 @@ sub _process_host_page {
         }
     }
 
+    # object source
+    $c->stash->{'source'} = '';
+    my $custvars = Thruk::Utils::get_custom_vars($host);
+    if(defined $custvars->{'SRC'}) {
+        $c->stash->{'source'} = $custvars->{'SRC'};
+    }
+
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
     
@@ -576,6 +583,13 @@ sub _process_service_page {
             my $command            = $c->{'db'}->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
+    }
+
+    # object source
+    $c->stash->{'source'} = '';
+    my $custvars = Thruk::Utils::get_custom_vars($service);
+    if(defined $custvars->{'SRC'}) {
+        $c->stash->{'source'} = $custvars->{'SRC'};
     }
 
     # pnp graph?

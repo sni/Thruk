@@ -38,7 +38,7 @@
   <br>
   <div class='errorDescription' style="text-align: left">
   Details:<br>
-  [% errorDetails %]
+  [% errorDetails | nl2br %]
   </div><br>
   [% END %]
 

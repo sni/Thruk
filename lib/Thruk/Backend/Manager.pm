@@ -79,7 +79,12 @@ sub init {
 
     for my $peer (@{$self->get_peers()}) {
         $peer->{'local'} = 1;
-        if($peer->{'addr'} =~ m/^(.*):/mx and $1 ne 'localhost' and $1 ne '127.0.0.1') {
+        my $addr = $peer->{'addr'};
+        if($peer->{'type'} eq 'http') {
+            $addr =~ s/^http(|s):\/\///mx;
+            $addr =~ s/\/.*$//mx;
+        }
+        if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./mx) {
             $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
@@ -603,7 +608,8 @@ sub set_backend_state_from_local_connections {
         };
         if($@) {
             $self->{'c'}->log->error("failed setting states by local check: ".$@);
-            $self->{'c'}->stash->{'failed_backends'} = {}; # reset failed states, otherwise retry would be useless
+            # reset failed states, otherwise retry would be useless
+            $self->reset_failed_backends();
             sleep(1);
         } else {
             last;
@@ -872,7 +878,6 @@ sub _do_on_peers {
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
-    my $last_error;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     if(!defined $result and $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
@@ -882,9 +887,15 @@ sub _do_on_peers {
         }
         elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
             die($1);
+        }
+        elsif($err =~ m|(hit\s\+.*?timeout\s+on.*?)\s+at\s+|mx) {
+            die($1);
+        }
+        elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {
+            die($1);
         } else {
             local $Data::Dumper::Deepcopy = 1;
-            confess("Error in _do_on_peers: ".$err."called as ".Dumper($function)."with args: ".Dumper(\%arg));
+            confess("Error in _do_on_peers: '".$err."'\ncalled as '".(ref $function ? Dumper($function) : $function)."'\nwith args: ".Dumper(\%arg));
         }
     }
     $type = '' unless defined $type;
@@ -1119,6 +1130,7 @@ sub _get_result_serial {
             my @res = _do_on_peer($key, $function, $arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
+            chomp($last_error) if $last_error;
             if(!$last_error and defined $size) {
                 $totalsize += $size;
                 $type       = $typ;
@@ -1412,6 +1424,26 @@ sub _page_data {
     $c->stash->{'pager_next_page'}     = $pager->next_page()     || 0;
 
     return $data;
+}
+
+########################################
+
+=head2 reset_failed_backends
+
+  reset_failed_backends([ $c ])
+
+Reset failed backends cache. Retries
+are useless unless reseting this cache
+because failed backends won't be asked
+twice per request.
+
+=cut
+
+sub reset_failed_backends {
+    my $self = shift;
+    my $c    = shift || $self->{'c'};
+    $c->stash->{'failed_backends'} = {};
+    return;
 }
 
 ##########################################################

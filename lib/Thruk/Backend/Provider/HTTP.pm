@@ -672,8 +672,8 @@ sub _req {
                         }
                     );
 
-    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi\?job=(.*)$/mx) {
-        $self->_wait_for_remote_job($1);
+    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&)job=(.*)$/mx) {
+        $self->_wait_for_remote_job($2);
         $redirects++;
         die("too many redirects") if $redirects > 2;
         return $self->_req($sub, $args, $redirects);
@@ -685,7 +685,7 @@ sub _req {
         eval {
             $data = decode_json($data_str);
         };
-        die($@."\ngot: '".$data_str."'") if $@;
+        die($@."\nrequest:\n".Dumper($response)) if $@;
         if($data->{'rc'} == 1) {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};

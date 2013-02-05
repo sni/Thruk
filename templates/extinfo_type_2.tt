@@ -464,6 +464,12 @@
               </tr>
             </table>
             <table border="0" class="commandPanel">
+              [% IF source %]
+              <tr>
+                <th class='comment' nowrap>Source</th>
+                <td class='comment'><pre class="no_margin config_info">[% source %]</pre></td>
+              </tr>
+              [% END %]
               <tr>
                 <th class='comment' nowrap>Check Command</th>
                 <td class='comment'><pre class="no_margin config_info">[% command.line | html %]</pre></td>

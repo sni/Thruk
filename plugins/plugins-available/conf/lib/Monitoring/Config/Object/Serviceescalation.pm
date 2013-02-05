@@ -25,6 +25,7 @@ $Monitoring::Config::Object::Serviceescalation::Defaults = {
     'host_name'              => { type => 'STRING', 'link' => 'host' },
     'hostgroup_name'         => { type => 'LIST', 'link' => 'hostgroup' },
     'service_description'    => { type => 'STRING' },
+    'servicegroup_name'      => { type => 'LIST', 'link' => 'servicegroup' },
     'contacts'               => { type => 'LIST', 'link' => 'contact' },
     'contact_groups'         => { type => 'LIST', 'link' => 'contactgroup' },
     'first_notification'     => { type => 'INT' },

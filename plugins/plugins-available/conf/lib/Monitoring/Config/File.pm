@@ -57,12 +57,14 @@ sub new {
     confess('no core type!') unless defined $coretype;
 
     # dont save relative paths
-    if($file =~ m/\.\./mx) {
+    if(!$force && $file =~ m/\.\./mx) {
+        warn("won't open relative path: $file");
         return;
     }
 
     # config files must end on .cfg
     if(!$force && $file !~ m/\.cfg$/mx) {
+        warn("unknown suffix for file $file. Should be '.cfg'.");
         return;
     }
 

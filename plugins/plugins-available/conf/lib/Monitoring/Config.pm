@@ -32,6 +32,7 @@ Provides access to core objects like hosts, services etc...
         obj_readonly        => readonly pattern
         obj_exclude         => exclude pattern
         localdir            => local path used for remote configs
+        relative            => allow relative paths
     })
 
 return new objects database
@@ -1120,7 +1121,7 @@ sub _update_core_conf {
 
     if(!defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
         if($core_conf) {
-            $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+            $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'relative'});
         } else {
             $self->{'_corefile'} = undef;
             return;
@@ -1279,7 +1280,9 @@ sub _get_files {
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'config'}->{'force'}, $self->{'file_trans'}->{$filename});
+        my $force = 0;
+        $force    = 1 if $self->{'config'}->{'force'} or $self->{'config'}->{'relative'};
+        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $force, $self->{'file_trans'}->{$filename});
         if(defined $file) {
             push @files, $file;
         } else {
@@ -1815,7 +1818,8 @@ sub _remote_do {
         my $msg = $@;
         $c->log->error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
-        Thruk::Utils::set_message( $c, 'fail_message', $msg );
+        my @text = split(/\n/mx, $msg);
+        Thruk::Utils::set_message( $c, 'fail_message', $text[0] );
         return;
     } else {
         die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);

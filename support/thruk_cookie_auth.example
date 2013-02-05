@@ -3,7 +3,7 @@ RewriteMap  users prg:/usr/share/thruk/script/thruk_auth
 
 # make all cookies accessible by the url
 RewriteCond %{REQUEST_URI}           !^/thruk/cgi-bin/restricted.cgi
-RewriteRule ^/(.*)$                  /%{HTTP_COOKIE}/%{REMOTE_ADDR}/____/$1 [C,NS]
+RewriteRule ^/(.*)$                  /%{HTTP_COOKIE}/%{REMOTE_ADDR}/____/$1&%{QUERY_STRING} [C,NS]
 RewriteRule ^(.*)$                   ${users:$1|/loginbad/}  [C,NS]
 RewriteRule ^/pass/(.*)$             /$1 [NS,PT,L,E=!REMOTE_USER]
 RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]
