@@ -9,6 +9,7 @@ next:
           - added show_full_commandline_source config option
           - added check all switch to site panel
           - make colums selectable for json requests
+          - use user sort for show_custom_vars
           - reports
             - added locales support (en, de, it, es, fr)
           - config tool

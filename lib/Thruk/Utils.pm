@@ -899,24 +899,26 @@ sub set_custom_vars {
     my $c    = shift;
     my $data = shift;
 
-    $c->stash->{'custom_vars'} = {};
+    $c->stash->{'custom_vars'} = [];
 
     return unless defined $data;
     return unless defined $data->{'custom_variable_names'};
     return unless defined $c->config->{'show_custom_vars'};
 
     my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
-    my $test = array2hash($vars);
 
     my $custom_vars = get_custom_vars($data);
 
-    for my $cust_name (keys %{$custom_vars}) {
-        my $cust_value = $custom_vars->{$cust_name};
-        my $found      = 0;
-        if(defined $test->{$cust_name} or defined $test->{'_'.$cust_name}) {
-            $found = 1;
-        } else {
-            for my $v (keys %{$test}) {
+    my $already_added = {};
+    for my $test (@{$vars}) {
+        for my $cust_name (%{$custom_vars}) {
+            next if defined $already_added->{$cust_name};
+            my $cust_value = $custom_vars->{$cust_name};
+            my $found      = 0;
+            if($test eq $cust_name or $test eq '_'.$cust_name) {
+                $found = 1;
+            } else {
+                my $v = "".$test;
                 next if CORE::index($v, '*') == -1;
                 $v =~ s/\*/.*/gmx;
                 if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
@@ -924,9 +926,9 @@ sub set_custom_vars {
                     last;
                 }
             }
-        }
-        if($found) {
-            $c->stash->{'custom_vars'}->{$cust_name} = $cust_value;
+            if($found) {
+                push @{$c->stash->{'custom_vars'}}, [ $cust_name, $cust_value ];
+            }
         }
     }
     return;

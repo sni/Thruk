@@ -100,17 +100,17 @@
               </td>
             </tr>
           [% END %]
-          [% IF custom_vars.keys.size > 0 %]
+          [% IF custom_vars.size > 0 %]
             <tr>
               <td align='right'>
                 <table>
-                  [% FOREACH cust = custom_vars.keys.sort %]
+                  [% FOREACH cust = custom_vars %]
                   <tr>
                     <td style="padding-right: 7px;">
-                      <font size="-1"><i>[% cust %]</i></font><br clear="all">
+                      <font size="-1"><i>[% cust.0 %]</i></font><br clear="all">
                     </td>
                     <td>
-                      <font size="-1">[% custom_vars.$cust %]</font>
+                      <font size="-1">[% cust.1 %]</font>
                     </td>
                   </tr>
                   [% END %]
