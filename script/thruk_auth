@@ -72,7 +72,8 @@ sub process {
         my($cookies, $remote, $path) = ($1, $2, $3);
 
         # remove last &
-        $path = substr($path, 0, -1) if(substr($path, -1, 1) eq '&');
+        $path =~ s|/____/|?|mx;
+        $path =~ s|\?$||mx;
 
         # some urls must pass
         if($path =~ $pass_regex) {

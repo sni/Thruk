@@ -53,36 +53,38 @@ sub index :Path :Args(0) {
     my $sdir = $c->config->{'tmp_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
-    if($c->req->query_keywords eq 'logout') {
-        my $cookie = $c->request->cookie('thruk_auth');
-        $c->res->cookies->{'thruk_auth'} = {
-            value   => '',
-            expires => '-1M',
-            path    => $cookie_path,
-            domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-        };
-        if(defined $cookie and defined $cookie->value) {
-            my $sessionid = $cookie->value;
-            if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
-                unlink($sdir.'/'.$sessionid);
+    if(defined $c->req->query_keywords) {
+        if($c->req->query_keywords eq 'logout') {
+            my $cookie = $c->request->cookie('thruk_auth');
+            $c->res->cookies->{'thruk_auth'} = {
+                value   => '',
+                expires => '-1M',
+                path    => $cookie_path,
+                domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
+            };
+            if(defined $cookie and defined $cookie->value) {
+                my $sessionid = $cookie->value;
+                if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
+                    unlink($sdir.'/'.$sessionid);
+                }
             }
+
+            Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi");
         }
 
-        Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi");
-    }
-
-    if($c->req->query_keywords eq 'nocookie') {
-        Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
-    }
-    if($c->req->query_keywords =~ /^expired\&(.*)$/mx or $c->req->query_keywords eq 'expired') {
-        Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
-    }
-    if($c->req->query_keywords =~ /^invalid\&(.*)$/mx or $c->req->query_keywords eq 'invalid') {
-        Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
-    }
-    if($c->req->query_keywords =~ /^problem\&(.*)$/mx or $c->req->query_keywords eq 'problem') {
-        Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
+        if($c->req->query_keywords eq 'nocookie') {
+            Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
+        }
+        if($c->req->query_keywords =~ /^expired\&(.*)$/mx or $c->req->query_keywords eq 'expired') {
+            Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
+        }
+        if($c->req->query_keywords =~ /^invalid\&(.*)$/mx or $c->req->query_keywords eq 'invalid') {
+            Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
+        }
+        if($c->req->query_keywords =~ /^problem\&(.*)$/mx or $c->req->query_keywords eq 'problem') {
+            Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
+        }
     }
 
     my $login   = $c->request->parameters->{'login'}    || '';
