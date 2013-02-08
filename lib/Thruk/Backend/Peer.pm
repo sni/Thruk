@@ -7,7 +7,6 @@ use Carp;
 use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
-use Scalar::Util qw/ looks_like_number /;
 use Encode;
 use Thruk::Utils;
 

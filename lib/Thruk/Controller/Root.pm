@@ -118,13 +118,12 @@ sub begin : Private {
         $c->{'db'} = $c->model('Thruk');
         if( defined $c->{'db'} ) {
             $c->{'db'}->init(
-                'c'             => $c,
                 'backend_debug' => $c->config->{'backend_debug'},
             );
         }
     }
     # needed for the autoload methods
-    $Thruk::Backend::Manager::stats = $c->stats;
+    $Thruk::Backend::Manager::c     = $c;
 
     # menu cookie set?
     my $menu_states = {};

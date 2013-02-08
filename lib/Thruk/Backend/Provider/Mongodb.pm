@@ -1742,7 +1742,7 @@ sub _update_logcache {
     $c->stats->profile(end => "get livestatus timestamp");
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
-    my $col = $db->$table;
+    my $col  = $db->$table;
     $self->_ensure_index($col);
     while($time <= $end) {
         my $stime = scalar localtime $time;
@@ -1789,6 +1789,7 @@ sub _update_logcache {
             $col->insert($l, {safe => 1});
         }
         $c->stats->profile(end => $stime);
+
         print "\n" if $verbose;
     }
     return $log_count;

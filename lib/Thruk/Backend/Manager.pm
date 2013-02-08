@@ -40,7 +40,6 @@ sub new {
     my( $class ) = @_;
     my $self = {
         'initialized'         => 0,
-        'c'                   => undef,
         'state_hosts'         => {},
         'local_hosts'         => {},
         'backends'            => [],
@@ -554,7 +553,8 @@ enables/disables remote backends based on a state from local instances
 sub set_backend_state_from_local_connections {
     my( $self, $cache, $disabled ) = @_;
 
-    $self->{'c'}->stats->profile( begin => "set_backend_state_from_local_connections() " );
+    my $c = $Thruk::Backend::Manager::c;
+    $c->stats->profile( begin => "set_backend_state_from_local_connections() " );
 
     return $disabled unless scalar keys %{$self->{'local_hosts'}} >= 1;
     return $disabled unless scalar keys %{$self->{'state_hosts'}} >= 1;
@@ -592,12 +592,12 @@ sub set_backend_state_from_local_connections {
                     my $peer = $self->get_peer_by_key($key);
 
                     if($host->{'state'} == 0) {
-                        $self->{'c'}->log->debug($key." -> enabled by local state check (".$host->{'name'}.")");
+                        $c->log->debug($key." -> enabled by local state check (".$host->{'name'}.")");
                         $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
                         $peer->{'runnning'}   = 1;
                         $peer->{'last_error'} = 'UP: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
                     } else {
-                        $self->{'c'}->log->debug($key." -> disabled by local state check (".$host->{'name'}.")");
+                        $c->log->debug($key." -> disabled by local state check (".$host->{'name'}.")");
                         $self->disable_backend($key);
                         $peer->{'runnning'}   = 0;
                         $peer->{'last_error'} = 'ERROR: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
@@ -607,7 +607,7 @@ sub set_backend_state_from_local_connections {
             }
         };
         if($@) {
-            $self->{'c'}->log->error("failed setting states by local check: ".$@);
+            $c->log->error("failed setting states by local check: ".$@);
             # reset failed states, otherwise retry would be useless
             $self->reset_failed_backends();
             sleep(1);
@@ -616,7 +616,7 @@ sub set_backend_state_from_local_connections {
         }
     }
 
-    $self->{'c'}->stats->profile( end => "set_backend_state_from_local_connections() " );
+    $c->stats->profile( end => "set_backend_state_from_local_connections() " );
 
     return $disabled;
 }
@@ -793,13 +793,14 @@ set host macros
 
 sub _set_host_macros {
     my( $self, $host, $macros ) = @_;
+    my $c = $Thruk::Backend::Manager::c;
 
     # normal host macros
     $macros->{'$HOSTADDRESS$'}       = $host->{'address'};
     $macros->{'$HOSTNAME$'}          = $host->{'name'};
     $macros->{'$HOSTALIAS$'}         = $host->{'alias'};
     $macros->{'$HOSTSTATEID$'}       = $host->{'state'};
-    $macros->{'$HOSTSTATE$'}         = $self->{'c'}->config->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}};
+    $macros->{'$HOSTSTATE$'}         = $c->config->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}};
     $macros->{'$HOSTLATENCY$'}       = $host->{'latency'};
     $macros->{'$HOSTOUTPUT$'}        = $host->{'plugin_output'};
     $macros->{'$HOSTPERFDATA$'}      = $host->{'perf_data'};
@@ -828,11 +829,12 @@ sets service macros
 
 sub _set_service_macros {
     my( $self, $service, $macros ) = @_;
+    my $c = $Thruk::Backend::Manager::c;
 
     # normal service macros
     $macros->{'$SERVICEDESC$'}         = $service->{'description'};
     $macros->{'$SERVICESTATEID$'}      = $service->{'state'};
-    $macros->{'$SERVICESTATE$'}        = $self->{'c'}->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
+    $macros->{'$SERVICESTATE$'}        = $c->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
     $macros->{'$SERVICELATENCY$'}      = $service->{'latency'};
     $macros->{'$SERVICEOUTPUT$'}       = $service->{'plugin_output'};
     $macros->{'$SERVICEPERFDATA$'}     = $service->{'perf_data'};
@@ -866,15 +868,16 @@ returns a result for a sub called for all peers
 
 sub _do_on_peers {
     my( $self, $function, $arg, $force_serial) = @_;
+    my $c = $Thruk::Backend::Manager::c;
 
-    $self->{'c'}->stats->profile( begin => '_do_on_peers('.$function.')');
+    $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
     my($get_results_for, $arg_array, $arg_hash) = $self->_select_backends($function, $arg);
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    $self->{'c'}->log->debug($function);
-    $self->{'c'}->log->debug(Dumper($get_results_for));
+    $c->log->debug($function);
+    $c->log->debug(Dumper($get_results_for));
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
@@ -1014,7 +1017,7 @@ sub _do_on_peers {
         }
     }
 
-    $self->{'c'}->stats->profile( end => '_do_on_peers('.$function.')');
+    $c->stats->profile( end => '_do_on_peers('.$function.')');
 
     return $data;
 }
@@ -1031,6 +1034,7 @@ select backends we want to run functions on
 
 sub _select_backends {
     my( $self, $function, $arg) = @_;
+    my $c = $Thruk::Backend::Manager::c;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
@@ -1053,14 +1057,14 @@ sub _select_backends {
         }
         if(exists $arg{'pager'}) {
             delete $arg{'pager'};
-            if($self->{'c'}->stash->{'use_pager'}) {
+            if($c->stash->{'use_pager'}) {
                 $arg{'pager'} = {
-                    entries  => $self->{'c'}->{'request'}->{'parameters'}->{'entries'} || $self->{'c'}->stash->{'default_page_size'},
-                    page     => $self->{'c'}->{'request'}->{'parameters'}->{'page'} || 1,
-                    next     => exists $self->{'c'}->{'request'}->{'parameters'}->{'next'}      || $self->{'c'}->{'request'}->{'parameters'}->{'next.x'},
-                    previous => exists $self->{'c'}->{'request'}->{'parameters'}->{'previous'}  || $self->{'c'}->{'request'}->{'parameters'}->{'previous.x'},
-                    first    => exists $self->{'c'}->{'request'}->{'parameters'}->{'first'}     || $self->{'c'}->{'request'}->{'parameters'}->{'first.x'},
-                    last     => exists $self->{'c'}->{'request'}->{'parameters'}->{'last'}      || $self->{'c'}->{'request'}->{'parameters'}->{'last.x'},
+                    entries  => $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'},
+                    page     => $c->{'request'}->{'parameters'}->{'page'} || 1,
+                    next     => exists $c->{'request'}->{'parameters'}->{'next'}      || $c->{'request'}->{'parameters'}->{'next.x'},
+                    previous => exists $c->{'request'}->{'parameters'}->{'previous'}  || $c->{'request'}->{'parameters'}->{'previous.x'},
+                    first    => exists $c->{'request'}->{'parameters'}->{'first'}     || $c->{'request'}->{'parameters'}->{'first.x'},
+                    last     => exists $c->{'request'}->{'parameters'}->{'last'}      || $c->{'request'}->{'parameters'}->{'last.x'},
                 };
             } else {
                 $arg{'pager'} = {};
@@ -1076,7 +1080,7 @@ sub _select_backends {
             next unless defined $backends->{$peer->{'key'}};
         }
         unless($peer->{'enabled'} == 1) {
-            $self->{'c'}->log->debug("skipped peer: ".$peer->{'name'});
+            $c->log->debug("skipped peer: ".$peer->{'name'});
             next;
         }
         push @{$get_results_for}, $peer->{'key'};
@@ -1120,13 +1124,14 @@ returns result for given function
 sub _get_result_serial {
     my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
+    my $c = $Thruk::Backend::Manager::c;
 
     for my $key (@{$peers}) {
-        $self->{'c'}->stats->profile( begin => "_get_result_serial($key)");
+        $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);
 
         # skip already failed peers for this request
-        if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
+        if(!$c->stash->{'failed_backends'}->{$key}) {
             my @res = _do_on_peer($key, $function, $arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
@@ -1136,10 +1141,10 @@ sub _get_result_serial {
                 $type       = $typ;
                 $result->{ $key } = $data;
             }
-            $self->{'c'}->stash->{'failed_backends'}->{$key} = $last_error;
+            $c->stash->{'failed_backends'}->{$key} = $last_error;
             $peer->{'last_error'} = $last_error;
         }
-        $self->{'c'}->stats->profile( end => "_get_result_serial($key)");
+        $c->stats->profile( end => "_get_result_serial($key)");
     }
     return($result, $type, $totalsize);
 }
@@ -1157,13 +1162,14 @@ returns result for given function and args using the worker pool
 sub _get_result_parallel {
     my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
+    my $c = $Thruk::Backend::Manager::c;
 
-    $self->{'c'}->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
+    $c->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
 
     my %ids;
     for my $key (@{$peers}) {
         # skip already failed peers for this request
-        if(!$self->{'c'}->stash->{'failed_backends'}->{$key}) {
+        if(!$c->stash->{'failed_backends'}->{$key}) {
             my $id;
             eval {
                 $id = $Thruk::pool->add($key, $function, $arg);
@@ -1179,7 +1185,7 @@ sub _get_result_parallel {
         my($typ, $size, $data, $last_error) = @{$res};
         my $key = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
-        $self->{'c'}->stash->{'failed_backends'}->{$key} = $last_error;
+        $c->stash->{'failed_backends'}->{$key} = $last_error;
         $peer->{'last_error'} = $last_error;
         if(!$last_error and defined $size) {
             $totalsize += $size;
@@ -1188,7 +1194,7 @@ sub _get_result_parallel {
         }
     }
 
-    $self->{'c'}->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
+    $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
 }
 
@@ -1254,8 +1260,9 @@ removes duplicate entries from a array of hashes
 sub _remove_duplicates {
     my $self = shift;
     my $data = shift;
+    my $c    = $Thruk::Backend::Manager::c;
 
-    $self->{'c'}->stats->profile( begin => "Utils::remove_duplicates()" );
+    $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
     # calculate md5 sums
     my $uniq = {};
@@ -1297,7 +1304,7 @@ sub _remove_duplicates {
 
     }
 
-    $self->{'c'}->stats->profile( end => "Utils::remove_duplicates()" );
+    $c->stats->profile( end => "Utils::remove_duplicates()" );
     return ($return);
 }
 
@@ -1315,7 +1322,7 @@ The pager itself as 'pager'
 
 sub _page_data {
     my $self                = shift;
-    my $c                   = shift || $self->{'c'};
+    my $c                   = shift || $Thruk::Backend::Manager::c;
     my $data                = shift || [];
     return $data unless defined $c;
     my $default_result_size = shift || $c->stash->{'default_page_size'};
@@ -1482,12 +1489,13 @@ sub _merge_answer {
     my $self   = shift;
     my $data   = shift;
     my $type   = shift;
+    my $c      = $Thruk::Backend::Manager::c;
     my $return = [];
     if( defined $type and lc $type eq 'hash' ) {
         $return = {};
     }
 
-    $self->{'c'}->stats->profile( begin => "_merge_answer()" );
+    $c->stats->profile( begin => "_merge_answer()" );
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
@@ -1507,7 +1515,7 @@ sub _merge_answer {
         }
     }
 
-    $self->{'c'}->stats->profile( end => "_merge_answer()" );
+    $c->stats->profile( end => "_merge_answer()" );
 
     return ($return);
 }
@@ -1517,9 +1525,10 @@ sub _merge_answer {
 sub _merge_hostgroup_answer {
     my $self   = shift;
     my $data   = shift;
+    my $c      = $Thruk::Backend::Manager::c;
     my $groups = {};
 
-    $self->{'c'}->stats->profile( begin => "_merge_hostgroup_answer()" );
+    $c->stats->profile( begin => "_merge_hostgroup_answer()" );
 
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
@@ -1549,7 +1558,7 @@ sub _merge_hostgroup_answer {
     }
     my @return = values %{$groups};
 
-    $self->{'c'}->stats->profile( end => "_merge_hostgroup_answer()" );
+    $c->stats->profile( end => "_merge_hostgroup_answer()" );
 
     return ( \@return );
 }
@@ -1559,9 +1568,10 @@ sub _merge_hostgroup_answer {
 sub _merge_servicegroup_answer {
     my $self   = shift;
     my $data   = shift;
+    my $c      = $Thruk::Backend::Manager::c;
     my $groups = {};
 
-    $self->{'c'}->stats->profile( begin => "_merge_servicegroup_answer()" );
+    $c->stats->profile( begin => "_merge_servicegroup_answer()" );
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
         next if !defined $data->{$key};
@@ -1590,7 +1600,7 @@ sub _merge_servicegroup_answer {
 
     my @return = values %{$groups};
 
-    $self->{'c'}->stats->profile( end => "_merge_servicegroup_answer()" );
+    $c->stats->profile( end => "_merge_servicegroup_answer()" );
 
     return ( \@return );
 }
@@ -1599,9 +1609,10 @@ sub _merge_servicegroup_answer {
 sub _merge_stats_answer {
     my $self = shift;
     my $data = shift;
+    my $c    = $Thruk::Backend::Manager::c;
     my $return;
 
-    $self->{'c'}->stats->profile( begin => "_merge_stats_answer()" );
+    $c->stats->profile( begin => "_merge_stats_answer()" );
 
     for my $peername ( keys %{$data} ) {
         if( ref $data->{$peername} eq 'HASH' ) {
@@ -1669,7 +1680,7 @@ sub _merge_stats_answer {
         }
     }
 
-    $self->{'c'}->stats->profile( end => "_merge_stats_answer()" );
+    $c->stats->profile( end => "_merge_stats_answer()" );
 
     return $return;
 }
@@ -1678,9 +1689,10 @@ sub _merge_stats_answer {
 sub _sum_answer {
     my $self = shift;
     my $data = shift;
+    my $c    = $Thruk::Backend::Manager::c;
     my $return;
 
-    $self->{'c'}->stats->profile( begin => "_sum_answer()" );
+    $c->stats->profile( begin => "_sum_answer()" );
 
     for my $peername ( keys %{$data} ) {
         if( ref $data->{$peername} eq 'HASH' ) {
@@ -1701,7 +1713,7 @@ sub _sum_answer {
         }
     }
 
-    $self->{'c'}->stats->profile( end => "_sum_answer()" );
+    $c->stats->profile( end => "_sum_answer()" );
 
     return $return;
 }
@@ -1732,6 +1744,7 @@ sub _sort {
     my $self   = shift;
     my $data   = shift;
     my $sortby = shift;
+    my $c      = $Thruk::Backend::Manager::c;
     my( @sorted, $key, $order );
 
     $key = $sortby;
@@ -1750,7 +1763,7 @@ sub _sort {
 
     if( !defined $key ) { confess('missing options in sort()'); }
 
-    $self->{'c'}->stats->profile( begin => "_sort()" ) if $self->{'c'};
+    $c->stats->profile( begin => "_sort()" ) if $c;
 
     $order = "ASC" if !defined $order;
 
@@ -1791,7 +1804,7 @@ sub _sort {
     use warnings;
     ## use critic
 
-    $self->{'c'}->stats->profile( end => "_sort()" ) if $self->{'c'};
+    $c->stats->profile( end => "_sort()" ) if $c;
 
     return ( \@sorted );
 }
@@ -1834,6 +1847,7 @@ sets the USER1-256 macros from a resource file
 
 sub _set_user_macros {
     my($self, $peer_key, $macros, $file) = @_;
+    my $c = $Thruk::Backend::Manager::c;
 
     my $res;
     if(defined $file) {
@@ -1846,7 +1860,7 @@ sub _set_user_macros {
         }
     }
     unless(defined $res) {
-        $res = Thruk::Utils::read_resource_file($self->{'c'}->config->{'resource_file'});
+        $res = Thruk::Utils::read_resource_file($c->config->{'resource_file'});
     }
 
     if(defined $res) {
