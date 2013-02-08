@@ -17,6 +17,7 @@ next:
           - Bug Fixes
             - fixed js error in conf tool
             - fixed removal of deprecated plugins on rpm update
+            - fixed memory leak in livestatus accessor
 
 1.62     Sun Jan  6 21:20:16 CET 2013
           - added filter to comments / downtimes page

@@ -955,6 +955,9 @@ sub _get_table {
 
     my $class = $self->_get_class($table, $options);
     my $data  = $class->hashref_array() || [];
+    # prevents memory leak in Monitoring::Livestatus::Class
+    delete $class->{filter_obj};
+    delete $class->{stats_obj};
     return $data;
 }
 
