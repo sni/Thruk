@@ -1669,12 +1669,13 @@ imports logs into mongodb
 =cut
 
 sub _import_logs {
-    my($self, $c, $mode, $verbose, $backends) = @_;
+    my($self, $c, $mode, $verbose, $backends, $blocksize) = @_;
 
     $c->stats->profile(begin => "Mongodb::_import_logs($mode)");
 
     my $backend_count = 0;
     my $log_count     = 0;
+    my $log_skipped   = 0;
 
     if(!defined $backends) {
         Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
@@ -1694,7 +1695,7 @@ sub _import_logs {
         print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
         if($mode eq 'update' or $mode eq 'import') {
-            $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose);
+            $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose, $blocksize);
         }
         elsif($mode eq 'authupdate') {
             $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
@@ -1710,7 +1711,9 @@ sub _import_logs {
 
 ##########################################################
 sub _update_logcache {
-    my($self, $c, $mode, $peer, $db, $table, $verbose) = @_;
+    my($self, $c, $mode, $peer, $db, $table, $verbose, $blocksize) = @_;
+
+    $blocksize = 86400 unless defined $blocksize;
 
     my $log_count = 0;
 
@@ -1746,29 +1749,37 @@ sub _update_logcache {
         $c->stats->profile(begin => $stime);
         my $lookup = {};
         print scalar localtime $time if $verbose;
-        my($logs) = $peer->{'class'}->get_logs(nocache => 1,
-                                               filter  => [{ '-and' => [
-                                                                        { time => { '>=' => $time } },
-                                                                        { time => { '<'  => $time + 86400 } }
-                                                          ]}],
-                                               columns => [qw/
-                                                            class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
-                                                         /],
-                                              );
-        if($mode eq 'update') {
-            # get already stored logs to filter duplicates
-            my($mlogs) = $peer->{'class'}->get_logs(
-                                                filter  => [{ '-and' => [
-                                                                        { time => { '>=' => $time } },
-                                                                        { time => { '<=' => $time + 86400 } }
-                                                           ]}]
-                                      );
-            for my $l (@{$mlogs}) {
-                $lookup->{$l->{'message'}} = 1;
+        my $logs = [];
+        eval {
+            ($logs) = $peer->{'class'}->get_logs(nocache => 1,
+                                                   filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<'  => $time + $blocksize } }
+                                                              ]}],
+                                                   columns => [qw/
+                                                                class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
+                                                             /],
+                                                  );
+            if($mode eq 'update') {
+                # get already stored logs to filter duplicates
+                my($mlogs) = $peer->{'class'}->get_logs(
+                                                    filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<=' => $time + $blocksize } }
+                                                               ]}]
+                                          );
+                for my $l (@{$mlogs}) {
+                    $lookup->{$l->{'message'}} = 1;
+                }
             }
+        };
+        if($@) {
+            my $err = $@;
+            chomp($err);
+            print $err;
         }
 
-        $time = $time + 86400;
+        $time = $time + $blocksize;
         for my $l (@{$logs}) {
             if($mode eq 'update') {
                 next if defined $lookup->{$l->{'message'}};

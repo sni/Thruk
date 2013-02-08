@@ -387,8 +387,8 @@ sub _run_commands {
     }
 
     # import mongodb logs
-    elsif($action eq 'logcacheimport') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src);
+    elsif($action =~ /logcacheimport($|=(\d+))/) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2);
     }
     elsif($action eq 'logcacheupdate') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
@@ -717,7 +717,7 @@ sub _cmd_url {
 
 ##############################################
 sub _cmd_import_logs {
-    my($c, $mode, $src) = @_;
+    my($c, $mode, $src, $blocksize) = @_;
     $c->stats->profile(begin => "_cmd_import_logs()");
 
     if($src ne 'local' and $mode eq 'import') {
@@ -752,11 +752,13 @@ sub _cmd_import_logs {
         $c->stats->profile(end => "_cmd_import_logs()");
         return($stats."\n", 0);
     } else {
-        my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose);
+        my $t1 = time();
+        my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+        my $t2 = time();
         $c->stats->profile(end => "_cmd_import_logs()");
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
-        return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+        return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully in ".($t2-$t1)."s\n", 0);
     }
 }
 
