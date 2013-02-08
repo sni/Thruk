@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2013-01-12" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2013-02-08" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -144,27 +144,7 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 \&  \-b, \-\-backend=<backend>       Comma seperated list of backends/sites
 \&                                which should be used for querys.
 \&  \-l, \-\-list\-backends           List available backends/sites.
-\&  \-a, \-\-action=<action>         Perform this action:
-\&                                  \- url=<url>           output url result
-\&                                  \- report=<nr>         generate report
-\&                                  \- reportmail=<nr>     send report by mail
-\&
-\&                               Mongodb Logcache:
-\&                                  \- logcacheimport      initial logcache import
-\&                                  \- logcacheupdate      update logcache
-\&                                  \- logcacheauthupdate  update logcache authorization information
-\&                                  \- logcachestats       print logcache statistics
-\&
-\&                               Internal Commands
-\&                                  \- installcron         update cronjobs for downtimes and reports
-\&                                                        (only needed during package installation)
-\&                                  \- uninstallcron       remove all thruk cronjobs
-\&                                                        (only needed during package deinstallation)
-\&                               Testing Commands
-\&                                  \- listbackends        list all backends
-\&                                  \- listhosts           list hostnames
-\&                                  \- listhostgroups      list hostgroupnames
-\&
+\&  \-a, \-\-action=<action>         Perform given action. see below for a list.
 \&
 \&  \-A, \-\-auth=<auth>             Set username for querys
 \&
@@ -173,6 +153,8 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 \&                                remote\-url.
 \&  \-r, \-\-remote\-url=<url>        URL to remote installation.
 \&      \-\-local                   Don\*(Aqt try to connect fastcgi daemon first.
+\&
+\&  \-y, \-\-yes                     answer yes to all given questions.
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -211,13 +193,27 @@ script has the following arguments
 .Ve
 .IP "\fB\-a\fR \fIaction\fR, \fB\-\-action\fR=\fIaction\fR" 4
 .IX Item "-a action, --action=action"
-.Vb 1
+.Vb 4
 \&    perform selected action:
+\&      \- url=<url>                   output url result
+\&      \- report=<nr>                 generate report
+\&      \- reportmail=<nr>             send report by mail
 \&
-\&    \- url=<url>     request this url. Url can be shortened and the
-\&                    leading /thruk/cgi\-bin/ can be stripped.
+\&    Mongodb Logcache:
+\&      \- logcacheimport(=blocksize)  initial logcache import. blocksize is in seconds and defaults to one day.
+\&      \- logcacheupdate              update logcache
+\&      \- logcacheauthupdate          update logcache authorization information
+\&      \- logcachestats               print logcache statistics
 \&
-\&    \- report=<nr>   generate report by specifying its id.
+\&    Internal Commands
+\&      \- installcron                 update cronjobs for downtimes and reports
+\&                                    (only needed during package installation)
+\&      \- uninstallcron               remove all thruk cronjobs
+\&                                    (only needed during package deinstallation)
+\&    Testing Commands
+\&      \- listbackends                list all backends
+\&      \- listhosts                   list hostnames
+\&      \- listhostgroups              list hostgroupnames
 .Ve
 .IP "\fB\-A\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
 .IX Item "-A authname, --auth=authname"
@@ -242,6 +238,11 @@ script has the following arguments
 .Vb 2
 \&    Don\*(Aqt contact remote server. Normally remote\-url is tried first for
 \&    faster access.
+.Ve
+.IP "\fB\-y\fR , \fB\-\-yes\fR" 4
+.IX Item "-y , --yes"
+.Vb 1
+\&    answer yes to a given questions during commands.
 .Ve
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"

@@ -50,6 +50,7 @@ GetOptions (
    "b|backend=s"        =>  $options->{'backends'},
    "A|auth=s"           => \$options->{'auth'},
    "a|action=s"         => \$options->{'action'},
+   "y|yes"              => \$options->{'yes'},
    "<>"                 => sub { $options->{'url'} = "".shift },
 ) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
 
@@ -82,7 +83,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
   -b, --backend=<backend>       Comma seperated list of backends/sites
                                 which should be used for querys.
   -l, --list-backends           List available backends/sites.
-  -a, --action=<action>         Perform given action
+  -a, --action=<action>         Perform given action. see below for a list.
 
   -A, --auth=<auth>             Set username for querys
 
@@ -91,6 +92,8 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                 remote-url.
   -r, --remote-url=<url>        URL to remote installation.
       --local                   Don't try to connect fastcgi daemon first.
+
+  -y, --yes                     answer yes to all given questions.
 
 =head1 DESCRIPTION
 
@@ -169,6 +172,10 @@ script has the following arguments
 
     Don't contact remote server. Normally remote-url is tried first for
     faster access.
+
+=item B<-y> , B<--yes>
+
+    answer yes to a given questions during commands.
 
 =back
 

@@ -388,7 +388,7 @@ sub _run_commands {
 
     # import mongodb logs
     elsif($action =~ /logcacheimport($|=(\d+))/) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
     elsif($action eq 'logcacheupdate') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
@@ -717,13 +717,13 @@ sub _cmd_url {
 
 ##############################################
 sub _cmd_import_logs {
-    my($c, $mode, $src, $blocksize) = @_;
+    my($c, $mode, $src, $blocksize, $opt) = @_;
     $c->stats->profile(begin => "_cmd_import_logs()");
 
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
-    if($mode eq 'import') {
+    if($mode eq 'import' and !$opt->{'yes'}) {
         print "import removes current data and imports all logfile data, continue? [n]: ";
         my $buf;
         sysread STDIN, $buf, 1;
