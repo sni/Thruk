@@ -18,6 +18,7 @@ use threads;
 use utf8;
 use Thruk::Pool::Simple;
 use Carp;
+use Moose;
 use GD;
 use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
@@ -62,6 +63,16 @@ our $VERSION = '1.63';
 ###################################################
 # load config loader
 __PACKAGE__->config(%Thruk::Config::config);
+
+###################################################
+# install leak checker
+if(__PACKAGE__->config->{'thruk_debug'}) {
+    eval {
+        with 'CatalystX::LeakChecker';
+        $Devel::Cycle::already_warned{'GLOB'} = 1;
+    };
+    print STDERR "failed to load CatalystX::LeakChecker: ".$@ if $@;
+}
 
 ###################################################
 # Start the application and make __PACKAGE__->config
@@ -232,6 +243,31 @@ sub check_user_roles_wrapper {
         return 1;
     }
     return 0;
+}
+
+###################################################
+
+=head2 found_leaks
+
+called by CatalystX::LeakChecker and used for testing purposes only
+
+=cut
+sub found_leaks {
+    my ($c, @leaks) = @_;
+    return unless scalar @leaks > 0;
+    my $sym = 'a';
+    print STDERR "found leaks:\n";
+    for my $leak (@leaks) {
+        my $msg = (CatalystX::LeakChecker::format_leak($leak, \$sym));
+        $c->log->error($msg);
+        print STDERR $msg,"\n";
+    }
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST_LEAK') {
+        die("tests die, exit otherwise");
+    }
+    # die() won't let our tests exit, so we use exit here
+    exit 1;
+    return;
 }
 
 =head1 SEE ALSO

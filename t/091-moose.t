@@ -18,8 +18,10 @@ for my $cmd (@{$cmds}) {
     my $line = $_;
     chomp($line);
     $line =~ s/:\d+$//gmx;
+    $line =~ s|/./|/|gmx;
     `grep make_immutable $line`;
     if($? != 0) {
+        next if $line eq 'lib/Thruk.pm';
         fail($line);
     }
   }

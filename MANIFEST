@@ -98,6 +98,7 @@ lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm
 lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
+lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Model/Thruk.pm
 lib/Thruk/Pool/Simple.pm
@@ -1030,6 +1031,7 @@ t/300-controller_showlog.t
 t/300-controller_status.t
 t/300-controller_summary.t
 t/300-controller_tac.t
+t/300-controller_test.t
 t/300-controller_trends.t
 t/400-recurring_downtime.t
 t/900-firefox-js.t

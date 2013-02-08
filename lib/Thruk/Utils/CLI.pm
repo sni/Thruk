@@ -387,7 +387,7 @@ sub _run_commands {
     }
 
     # import mongodb logs
-    elsif($action =~ /logcacheimport($|=(\d+))/) {
+    elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
     elsif($action eq 'logcacheupdate') {
