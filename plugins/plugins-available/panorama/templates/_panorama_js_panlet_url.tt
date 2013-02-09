@@ -1,4 +1,4 @@
-Ext.define('TP.PanletUrl', {
+﻿Ext.define('TP.PanletUrl', {
     extend: 'TP.Panlet',
 
     title: 'url panlet',

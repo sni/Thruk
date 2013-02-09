@@ -1,4 +1,4 @@
-Ext.define('TP.PanletGridCoreMetrics', {
+﻿Ext.define('TP.PanletGridCoreMetrics', {
     extend: 'TP.PanletGrid',
 
     title:  'Core Performance Metrics',

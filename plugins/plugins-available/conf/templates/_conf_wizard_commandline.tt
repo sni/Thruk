@@ -1,4 +1,4 @@
-<button class="conf_button plugin_wzd_button" id="[% id %]_btn">&nbsp;</button>
+﻿<button class="conf_button plugin_wzd_button" id="[% id %]_btn">&nbsp;</button>
 <input type="hidden" id="[% id %]_orig_inp" value="[% inp %]">
 
 <div id="[% id %]_dialog" title="Command Line Wizzard" style="display: none;">

@@ -1,4 +1,4 @@
-[% WRAPPER _conf_objects_frame.tt %]
+﻿[% WRAPPER _conf_objects_frame.tt %]
 
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="objects">

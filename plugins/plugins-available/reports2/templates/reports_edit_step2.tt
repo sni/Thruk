@@ -1,4 +1,4 @@
-[% temp = 'reports/' _ r.template %]
+﻿[% temp = 'reports/' _ r.template %]
 [% PROCESS $temp block = 'edit' %]
   [% FOREACH f = required_fields %]
   [% key     = f.keys.0 %]

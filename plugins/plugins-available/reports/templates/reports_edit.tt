@@ -1,4 +1,4 @@
-[% PROCESS _header.tt css="thruk/plugins/reports/reports.css" js="thruk/plugins/reports/reports.js" %]
+﻿[% PROCESS _header.tt css="thruk/plugins/reports/reports.css" js="thruk/plugins/reports/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 

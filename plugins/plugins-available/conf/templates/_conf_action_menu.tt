@@ -1,4 +1,4 @@
-[% IF action != "editor" %]
+﻿[% IF action != "editor" %]
 <table border='0' cellpadding="0" cellspacing="0">
   <tr>
     <td align="center" valign="top" class='confPanel'>

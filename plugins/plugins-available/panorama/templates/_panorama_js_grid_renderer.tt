@@ -1,4 +1,4 @@
-/* render date */
+﻿/* render date */
 TP.render_date = function(v, td, item) {
     if(v == 0) { return 'never'; }
     return TP.date_format(v);

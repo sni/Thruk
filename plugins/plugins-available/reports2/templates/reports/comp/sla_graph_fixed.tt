@@ -1,4 +1,4 @@
-[% nr = uniqnumber() %]
+﻿[% nr = uniqnumber() %]
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
 <script type="text/javascript">
   var d1 = {

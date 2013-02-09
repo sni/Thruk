@@ -1,1 +1,1 @@
-[% pdf.prDoc( pdf_file ) %]
+﻿[% pdf.prDoc( pdf_file ) %]

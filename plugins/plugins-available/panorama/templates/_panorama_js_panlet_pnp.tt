@@ -1,4 +1,4 @@
-Ext.define('TP_Sources', {
+﻿Ext.define('TP_Sources', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'image_url', type: 'string'},

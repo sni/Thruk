@@ -1,4 +1,4 @@
-/* show settings window */
+﻿/* show settings window */
 TP.settingsWindow = function() {
 
     /* stop rotation */

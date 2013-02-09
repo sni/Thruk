@@ -1,4 +1,4 @@
-[% available = get_availability_percents() %]
+﻿[% available = get_availability_percents() %]
 [% IF available.keys.size < 15 %]
   [% PROCESS 'reports/comp/sla_graph_fixed.tt' data = available %]
   [% PROCESS 'reports/comp/sla_table.tt' %]

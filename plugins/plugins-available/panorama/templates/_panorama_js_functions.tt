@@ -1,4 +1,4 @@
-/* send debug output to firebug console */
+﻿/* send debug output to firebug console */
 function debug(str) {
     if (window.console != undefined) {
         console.debug(str);

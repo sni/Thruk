@@ -1,4 +1,4 @@
-[%# PREPARE REPORT #%]
+﻿[%# PREPARE REPORT #%]
 [% IF block == 'prepare' %]
   [%
     set_unavailable_states(param.unavailable);

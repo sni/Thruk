@@ -1,4 +1,4 @@
-[% WRAPPER _conf_frame.tt %]
+﻿[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
 <form action="conf.cgi" method="POST">

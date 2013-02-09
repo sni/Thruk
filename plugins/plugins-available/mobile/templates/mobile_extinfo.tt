@@ -1,4 +1,4 @@
-<!-- Extinfo Page -->
+﻿<!-- Extinfo Page -->
 <div id="[% type %]" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>

@@ -1,4 +1,4 @@
-[% WRAPPER _conf_frame.tt %]
+﻿[% WRAPPER _conf_frame.tt %]
 <script src="[% url_prefix %]thruk/plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">

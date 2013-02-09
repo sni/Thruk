@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <!-- Cmd -->
 <div id="[% type %]_cmd" data-role="page">
   <div data-role="header">

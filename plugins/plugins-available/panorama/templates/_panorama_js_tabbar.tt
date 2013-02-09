@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
 

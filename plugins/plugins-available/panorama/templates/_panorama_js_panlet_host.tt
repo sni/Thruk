@@ -1,4 +1,4 @@
-/* Add new downtime menu item */
+﻿/* Add new downtime menu item */
 TP.host_downtime_menu = function() {
     var fields = [{
             fieldLabel: 'Comment',

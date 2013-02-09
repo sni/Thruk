@@ -1,4 +1,4 @@
-[%# SENDING MAIL #%]
+﻿[%# SENDING MAIL #%]
 [% IF block == 'mail' +%]
 SUBJECT: [% loc("Report:") %] [% r.name %]
 

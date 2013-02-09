@@ -1,4 +1,4 @@
-<!--
+ï»¿<!--
 ################################################################
 #                     SIGMA Informatique
 ################################################################
@@ -11,10 +11,10 @@
 #
 #
 ################################################################
-# Copyright © 2011 Sigma Informatique. All rights reserved.
-# Copyright © 2010 Thruk Developer Team.
-# Copyright © 2009 Nagios Core Development Team and Community Contributors.
-# Copyright © 1999-2009 Ethan Galstad.
+# Copyright Â© 2011 Sigma Informatique. All rights reserved.
+# Copyright Â© 2010 Thruk Developer Team.
+# Copyright Â© 2009 Nagios Core Development Team and Community Contributors.
+# Copyright Â© 1999-2009 Ethan Galstad.
 ################################################################
 -->
 [% dashboard_header = BLOCK %]

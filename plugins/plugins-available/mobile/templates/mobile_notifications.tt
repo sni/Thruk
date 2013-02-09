@@ -1,4 +1,4 @@
-<!-- Last Notification List -->
+﻿<!-- Last Notification List -->
 <div id="notifications" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>

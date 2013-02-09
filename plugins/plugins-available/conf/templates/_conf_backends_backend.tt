@@ -1,4 +1,4 @@
-<tr class="backend_conf_[% x %]">
+﻿<tr class="backend_conf_[% x %]">
   <td class='dataVar' align="left">Name</td>
   <td class='dataVal'>
     <input type="hidden" name="id[% x %]" value="[% b.key %]">

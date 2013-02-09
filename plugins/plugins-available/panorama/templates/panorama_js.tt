@@ -1,4 +1,4 @@
-Ext.BLANK_IMAGE_URL        = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
+﻿Ext.BLANK_IMAGE_URL        = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
 var theme                  = '[% theme %]';
 var url_prefix             = '[% url_prefix %]';
 var cookie_path            = '[% cookie_path %]';

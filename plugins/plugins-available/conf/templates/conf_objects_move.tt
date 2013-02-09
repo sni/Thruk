@@ -1,4 +1,4 @@
-[% WRAPPER _conf_objects_frame.tt %]
+﻿[% WRAPPER _conf_objects_frame.tt %]
 <script type="text/javascript">
 <!--
     var data = [% filenames_json %];

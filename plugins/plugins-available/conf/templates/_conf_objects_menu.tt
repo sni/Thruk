@@ -1,4 +1,4 @@
-<tr>
+﻿<tr>
   <th class='data[% IF type == 'host'         %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=host">Hosts</a></th>
   <th class='data[% IF type == 'service'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=service">Services</a></th>
   <th class='data[% IF type == 'command'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=command">Commands</a></th>
@@ -22,4 +22,3 @@
     [% END %]
   </th>
 </tr>
-

@@ -1,4 +1,4 @@
-Ext.define('TP.PanletService', {
+﻿Ext.define('TP.PanletService', {
     extend: 'TP.Panlet',
 
     title: 'Service',
@@ -198,4 +198,3 @@ TP.service_reschedule_menu = function() {
     }];
     return TP.ext_menu_command('Reschedule', 7, fields);
 }
-
