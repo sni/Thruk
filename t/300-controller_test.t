@@ -11,9 +11,13 @@ BEGIN {
 }
 
 BEGIN {
+    $ENV{'THRUK_LEAK_CHECK'} = '1';
     use lib('t');
     require TestUtils;
     import TestUtils;
+}
+END {
+    delete $ENV{'THRUK_LEAK_CHECK'};
 }
 BEGIN { use_ok 'Thruk::Controller::test' }
 
@@ -39,3 +43,4 @@ like($str, '/found leaks:/', 'got leak str');
 like($str, '/\$ctx->{stash}->{ctx}/', 'got leaks location');
 
 $ENV{'THRUK_SRC'} = 'TEST';
+

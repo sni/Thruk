@@ -66,7 +66,7 @@ __PACKAGE__->config(%Thruk::Config::config);
 
 ###################################################
 # install leak checker
-if(__PACKAGE__->config->{'thruk_debug'}) {
+if($ENV{THRUK_LEAK_CHECK}) {
     eval {
         with 'CatalystX::LeakChecker';
         $Devel::Cycle::already_warned{'GLOB'} = 1;
