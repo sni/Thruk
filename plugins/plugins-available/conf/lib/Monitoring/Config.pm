@@ -62,7 +62,7 @@ sub new {
     $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
 
     # creates circular dependency otherwise
-    weaken $self->{'config'};
+    weaken $self->{'config'}->{'configs'};
 
     bless $self, $class;
 
