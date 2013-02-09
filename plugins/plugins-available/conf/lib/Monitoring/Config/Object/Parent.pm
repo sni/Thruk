@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw(dclone);
+use Scalar::Util qw/weaken/;
 use Monitoring::Config::Help;
 
 =head1 NAME
@@ -705,6 +706,20 @@ sub set_name {
     return;
 }
 
+##########################################################
+
+=head2 set_file
+
+sets a new file
+
+=cut
+sub set_file {
+    my($self, $newfile) = @_;
+    $self->{'file'} = $newfile;
+    # otherwise we create circular references
+    weaken $self->{'file'};
+    return;
+}
 
 ##########################################################
 

@@ -3,6 +3,7 @@ package Monitoring::Config;
 use strict;
 use warnings;
 use Carp qw/cluck/;
+use Scalar::Util qw/weaken/;
 use Monitoring::Config::File;
 use Data::Dumper;
 use Carp;
@@ -59,6 +60,9 @@ sub new {
     };
 
     $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
+
+    # creates circular dependency otherwise
+    weaken $self->{'config'};
 
     bless $self, $class;
 
@@ -778,6 +782,7 @@ sub move_object {
     $self->delete_object($obj, 1);
 
     $obj->{'line'} = 0; # put new object at the end
+    $obj->set_file($newfile);
     push @{$newfile->{'objects'}}, $obj;
 
     $self->_rebuild_index() if $rebuild;

@@ -94,7 +94,7 @@ sub new {
 
     $current_object->{'conf'}     = dclone( $conf->{'conf'} || {} );
     $current_object->{'line'}     = $conf->{'line'} || 0;
-    $current_object->{'file'}     = $conf->{'file'} if defined $conf->{'file'};
+    $current_object->set_file($conf->{'file'}) if defined $conf->{'file'};
     $current_object->{'comments'} = [];
     $current_object->{'id'}       = 'new';
     $current_object->{'disabled'} = defined $conf->{'disabled'} ? $conf->{'disabled'} : 0;
