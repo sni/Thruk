@@ -25,7 +25,10 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    die("test.cgi is disabled unless in test mode!") unless $c->config->{'thruk_debug'};
+    if(   (!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'TEST_LEAK' and $ENV{'THRUK_SRC'} ne 'TEST'))
+       and !$c->config->{'thruk_debug'}) {
+        die("test.cgi is disabled unless in test mode!");
+    }
 
     $c->stash->{'template'} = 'main.tt';
 
