@@ -857,7 +857,7 @@ sub _process_combined_page {
 
     my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                        pager  => 0 );
+                                                      );
     $c->stash->{'services'} = $services;
     if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
@@ -881,7 +881,7 @@ sub _process_combined_page {
 
     my $hosts            = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                  pager  => 0 );
+                                                );
     $c->stash->{'hosts'} = $hosts;
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
