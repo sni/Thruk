@@ -137,10 +137,11 @@ script has the following arguments
       - reportmail=<nr>             send report by mail
 
     Mongodb Logcache:
-      - logcacheimport(=blocksize)  initial logcache import. blocksize is in seconds and defaults to one day.
+      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day.
       - logcacheupdate              update logcache
       - logcacheauthupdate          update logcache authorization information
       - logcachestats               print logcache statistics
+      - logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
 
     Internal Commands
       - installcron                 update cronjobs for downtimes and reports

@@ -399,8 +399,11 @@ sub _run_commands {
     elsif($action eq 'logcacheauthupdate') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src);
     }
+    elsif($action =~ /logcacheclean($|=(\d+))/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2);
+    }
     else {
-        $data->{'output'} = "FAILED - no such command: ".$action."\n";
+        $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
         $data->{'rc'}     = 1;
     }
 
@@ -758,6 +761,7 @@ sub _cmd_import_logs {
         $c->stats->profile(end => "_cmd_import_logs()");
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
+        $action    = "removed" if $mode eq 'clean';
         return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully in ".($t2-$t1)."s\n", 0);
     }
 }

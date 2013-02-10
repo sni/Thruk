@@ -14,6 +14,8 @@ next:
             - added locales support (en, de, it, es, fr)
           - config tool
             - added one click save & reload button
+          - logcache
+            - added new command logcacheclean to remove old log entries
           - Bug Fixes
             - fixed js error in conf tool
             - fixed removal of deprecated plugins on rpm update

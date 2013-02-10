@@ -1694,7 +1694,7 @@ sub _import_logs {
 
         print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
-        if($mode eq 'update' or $mode eq 'import') {
+        if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
             $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose, $blocksize);
         }
         elsif($mode eq 'authupdate') {
@@ -1713,12 +1713,25 @@ sub _import_logs {
 sub _update_logcache {
     my($self, $c, $mode, $peer, $db, $table, $verbose, $blocksize) = @_;
 
-    $blocksize = 86400 unless defined $blocksize;
+    unless(defined $blocksize) {
+        $blocksize = 86400;
+        $blocksize = 365 if $mode eq 'clean';
+    }
 
+    my $col       = $db->$table;
     my $log_count = 0;
 
     if($mode eq 'import') {
         $db->run_command({drop => $table});
+    }
+
+    if($mode eq 'clean') {
+        my $start = time() - ($blocksize * 86400);
+        print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
+        $col->remove({ time => { '$lt' => $start } });
+        my $err = $db->last_error({w => 1});
+        $log_count += $err->{'n'} if $err->{'ok'} == 1;
+        return $log_count;
     }
 
     # get start / end timestamp
@@ -1742,7 +1755,6 @@ sub _update_logcache {
     $c->stats->profile(end => "get livestatus timestamp");
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
-    my $col  = $db->$table;
     $self->_ensure_index($col);
     while($time <= $end) {
         my $stime = scalar localtime $time;
