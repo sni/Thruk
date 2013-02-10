@@ -42,7 +42,7 @@
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_remote_name">
-  <td class='dataVar' align="left">Remote Name</td>
+  <td class='dataVar' align="left" style="white-space: nowrap;">Remote Name</td>
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="remote_name[% x %]" value="[% b.remote_name %]" style="width: 200px;" placeholder="name of remote peer">
   </td>
