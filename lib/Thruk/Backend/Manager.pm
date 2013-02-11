@@ -455,12 +455,11 @@ runs reconnect on all peers
 
 sub reconnect {
     my( $self ) = @_;
+    my $c = $Thruk::Backend::Manager::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@_);
     };
-    if($@) {
-        return;
-    }
+    $c->log->debug($@) if $@;
     return 1;
 }
 

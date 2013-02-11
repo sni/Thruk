@@ -380,6 +380,7 @@ sub job_page {
         return $c->detach('/error/index/22') unless defined $dir;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
         if(defined $err and $err ne '') {
+            $c->error($err);
             $c->log->error($err);
             return $c->detach('/error/index/23')
         }
