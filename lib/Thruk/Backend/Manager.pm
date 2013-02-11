@@ -45,6 +45,7 @@ sub new {
         'backends'            => [],
         'backend_debug'       => 0,
         'sections'            => {},
+        'failed_backends'     => {},
     };
     bless $self, $class;
     return $self;
@@ -1076,10 +1077,17 @@ sub _select_backends {
     my $get_results_for = [];
     for my $peer ( @{ $self->get_peers() } ) {
         if(defined $backends) {
-            next unless defined $backends->{$peer->{'key'}};
+            unless(defined $backends->{$peer->{'key'}}) {
+                $c->log->debug("skipped peer (undef): ".$peer->{'name'});
+                next;
+            }
+        }
+        if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
+            $c->log->debug("skipped peer (down): ".$peer->{'name'});
+            next;
         }
         unless($peer->{'enabled'} == 1) {
-            $c->log->debug("skipped peer: ".$peer->{'name'});
+            $c->log->debug("skipped peer (disabled): ".$peer->{'name'});
             next;
         }
         push @{$get_results_for}, $peer->{'key'};

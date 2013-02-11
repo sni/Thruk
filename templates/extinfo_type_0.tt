@@ -42,7 +42,7 @@
                     <tr>
                       <td class='dataVar' nowrap>Backend Name:</td>
                       [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal' width="180">
+                      <td class='dataVal' width="180" title="id: [% pd %]">
                         [% IF backend_detail.$pd.name %]
                           [% backend_detail.$pd.name %]
                         [% ELSE %]
