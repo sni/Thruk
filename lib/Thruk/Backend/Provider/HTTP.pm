@@ -45,7 +45,7 @@ sub new {
         'proxy'                => $options->{'proxy'},
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
-        'min_backend_version'  => 1.59,
+        'min_backend_version'  => 1.63,
     };
     bless $self, $class;
 

@@ -1058,7 +1058,7 @@ sub _get_logs_start_end {
                                 'end'   => { -isa => [ -max => 'time' ]}
                              ])
                       ->hashref_array();
-    return($rows->[0]->{'start'}, $rows->[0]->{'end'});
+    return([$rows->[0]->{'start'}, $rows->[0]->{'end'}]);
 }
 
 ##########################################################

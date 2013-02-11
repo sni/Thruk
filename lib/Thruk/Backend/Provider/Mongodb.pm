@@ -1612,7 +1612,7 @@ sub _get_logs_start_end {
                       ->limit(1)
                       ->all();
     $end = $data[0]->{'time'} if defined $data[0];
-    return($start, $end);
+    return([$start, $end]);
 }
 
 ##########################################################
@@ -1694,12 +1694,16 @@ sub _import_logs {
 
         print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
-        if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
-            $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose, $blocksize);
-        }
-        elsif($mode eq 'authupdate') {
-            $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
-        }
+        # backends maybe down, we still want to continue updates
+        eval {
+            if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
+                $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose, $blocksize);
+            }
+            elsif($mode eq 'authupdate') {
+                $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
+            }
+        };
+        print "ERROR: ", $@,"\n" if $@ and $verbose;
 
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
@@ -1742,7 +1746,7 @@ sub _update_logcache {
         $c->stats->profile(begin => "get last mongo timestamp");
         # get last timestamp from mongodb
         my $mfilter = [];
-        ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table);
+        ($mstart, $mend) = @{$peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table)};
         if(defined $mend) {
             print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
             push @{$filter}, {time => { '>=' => $mend }};
@@ -1750,7 +1754,7 @@ sub _update_logcache {
         $c->stats->profile(end => "get last mongo timestamp");
     }
     $c->stats->profile(begin => "get livestatus timestamp");
-    ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
+    ($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
