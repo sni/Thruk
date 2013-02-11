@@ -230,6 +230,22 @@ sub has_group {
 
 ##############################################
 
+=head2 has_role
+
+  has_role($c, $role)
+
+returns 1 if the current user has this role
+
+=cut
+sub has_role {
+    my($c, $role) = @_;
+
+    return 1 if $c->check_user_roles($role);
+    return 0;
+}
+
+##############################################
+
 =head2 _renew_navigation
 
   _renew_navigation()

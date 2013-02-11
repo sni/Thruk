@@ -678,12 +678,14 @@ any passwords though the webinterface.</p></div>
 recommended apply changes only to your menu_local.conf in order to
 avoid conflicts on updating Thruk.</p></div>
 <div class="paragraph"><p>Open your menu_local.conf (create one if it does not exists) with your
-preferred text editor and check the config. You can add new sections
-with:</p></div>
+preferred text editor and check the config.</p></div>
+<h4 id="_adding_new_section">Adding new Section</h4>
+<div class="paragraph"><p>You can add new sections with:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>add_section('name' =&gt; 'General');</tt></pre>
 </div></div>
+<h4 id="_adding_a_new_link">Adding a new Link</h4>
 <div class="paragraph"><p>To add a new link use the following syntax:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -716,6 +718,9 @@ icon: Used for themes which support icons.
 <div class="content">
 <pre><tt>add_link('name' =&gt; 'Nagios, 'href' =&gt; '/nagios', 'target' =&gt; '_new');</tt></pre>
 </div></div>
+<div class="paragraph"><p><em>add_link</em> always adds the new link to the last section. Use <em>insert_item</em> to
+add a link to any section.</p></div>
+<h4 id="_including_original_side_navigation">Including original side navigation</h4>
 <div class="paragraph"><p>You can include the main menu config with the perl do statement.
 Ex.: If you just want to add a new link to your config menu, your
 menu_local.conf could look like this:</p></div>
@@ -727,16 +732,38 @@ add_link('name' =&gt; 'Wato', 'href' =&gt; '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.
 <div class="paragraph"><p>This example just puts the Wato link from check_mks Multisite in your
 config section. Replace the ENV part with a proper path if you do not
 use <a href="http://omdistro.org">OMD</a>.</p></div>
+<h4 id="_inserting_item_in_existing_section">Inserting item in existing Section</h4>
 <div class="paragraph"><p>Adding Items to existing sections can also be achieved by
 <em>insert_item</em>:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>insert_item('General', { 'href' =&gt; 'http://your-company.com', 'name' =&gt; 'Company' });</tt></pre>
+<pre><tt>do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+insert_item('General', { 'href' =&gt; 'http://your-company.com', 'name' =&gt; 'Company' });</tt></pre>
 </div></div>
+<h4 id="_removing_item_in_existing_section">Removing item in existing Section</h4>
 <div class="paragraph"><p>Existing Items can be removed with the <em>remove_item</em> function:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>remove_item('Reports', 'Availability');</tt></pre>
+<pre><tt>do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Reports', 'Availability');</tt></pre>
+</div></div>
+<h4 id="_make_item_available_for_some_groups_only">Make item available for some groups only</h4>
+<div class="paragraph"><p>Just wrap your changes in a <em>has_group</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>if(has_group($c, 'Admins')) {
+  add_section('name' =&gt; 'Admins Only');
+  add_link('name' =&gt; 'Admin Link', 'href' =&gt; '.../only_for_admins.html');
+}</tt></pre>
+</div></div>
+<h4 id="_make_item_available_for_some_roles_only">Make item available for some roles only</h4>
+<div class="paragraph"><p>Just wrap your changes in a <em>has_role</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>if(has_role($c, 'authorized_for_configuration_information')) {
+  add_section('name' =&gt; 'Some Roles Only');
+  add_link('name' =&gt; 'Admin Link', 'href' =&gt; '.../only_for_some_roles.html');
+}</tt></pre>
 </div></div>
 <h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Integrating Nagivs is currently only possible when frames are enabled.
@@ -789,7 +816,7 @@ set -x</tt></pre>
 <div class="sectionbody">
 <h3 id="_is_it_possible_to_operate_thruk_in_a_cluster">Is it possible to operate Thruk in a cluster?</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Yes, just put a load balancer before 2 (or more) Thruk installations
-and make sure the <em>var</em> directory is shared between all instances ( by
+and make sure the <em>var_path</em> directory is shared between all instances ( by
 NFS, DRBD or similar ). There is usually not much traffic in this
 folder.</p></div>
 <h3 id="_how_can_i_enable_debug_mode">How can i enable debug mode?</h3><div style="clear:left"></div>
@@ -858,7 +885,7 @@ boxes.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-01-15 19:03:29 CEST
+Last updated 2013-02-11 13:13:47 CEST
 </div>
 </div>
 </body>
