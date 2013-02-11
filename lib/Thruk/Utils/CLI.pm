@@ -863,7 +863,8 @@ sub _cmd_raw {
         $key = $keys[0];
     }
     die("no backends...") unless $key;
-    if($function eq 'get_logs') {
+
+    if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
         $c->{'db'}->renew_logcache($c);
     }
 
