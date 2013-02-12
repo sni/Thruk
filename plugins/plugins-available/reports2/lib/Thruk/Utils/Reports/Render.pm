@@ -709,8 +709,16 @@ sub _read_static_content_file {
     my $file;
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
-        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}."/themes";
+        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
         $file = $themes_dir . '/themes-enabled/' . $url;
+        if(!-e $file) {
+            # disabled theme? try available folder
+            $file = $themes_dir . '/themes-available/' . $url;
+        }
+        # still no luck?
+        if(!-e $file) {
+            $file = $c->config->{'project_root'}.'/themes/themes-available/' . $url;
+        }
     }
     elsif($url =~ m|^plugins/|mx) {
         $url =~ s|^plugins/([^/]+)/|$1/root/|gmx;
