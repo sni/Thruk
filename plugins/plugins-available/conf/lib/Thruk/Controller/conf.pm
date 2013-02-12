@@ -186,6 +186,12 @@ sub _process_json_page {
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
         my $dir        = $c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos";
         $dir =~ s/\/$//gmx;
+        if(!-d $dir.'/.') {
+            # try to create that folder, it might not exist yet
+            eval {
+                Thruk::Utils::IO::mkdir_r($dir);
+            };
+        }
         my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
         for my $file (@{$files}) {
             $file =~ s/$dir\///gmx;
