@@ -3,7 +3,6 @@ package Monitoring::Config;
 use strict;
 use warnings;
 use Carp qw/cluck/;
-use Scalar::Util qw/weaken/;
 use Monitoring::Config::File;
 use Data::Dumper;
 use Carp;
@@ -44,7 +43,7 @@ sub new {
     my $config = shift;
 
     my $self = {
-        'config'             => $config,
+        'config'             => {},
         'errors'             => [],
         'parse_errors'       => [],
         'files'              => [],
@@ -61,8 +60,10 @@ sub new {
 
     $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
 
-    # creates circular dependency otherwise
-    weaken $self->{'config'}->{'configs'};
+    for my $key (keys %{$config}) {
+        next if $key eq 'configs'; # creates circular dependency otherwise
+        $self->{'config'}->{$key} = $config->{$key};
+    }
 
     bless $self, $class;
 
@@ -104,6 +105,7 @@ sub init {
 
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
+        next if $key eq 'configs'; # creates circular dependency otherwise
         $self->{'config'}->{$key} = $config->{$key};
     }
     $self->update();
