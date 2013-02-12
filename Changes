@@ -12,6 +12,7 @@ next:
           - use user sort for show_custom_vars
           - reports
             - added locales support (en, de, it, es, fr)
+            - fixed url reports containing icon images
           - config tool
             - added one click save & reload button
           - logcache

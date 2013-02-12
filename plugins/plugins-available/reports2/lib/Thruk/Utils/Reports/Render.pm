@@ -707,6 +707,12 @@ sub _read_static_content_file {
         $url   =~ s|[^/\.]+/\.\./||mx;
     }
     my $file;
+
+    my $logo_path_prefix = $c->config->{'logo_path_prefix'};
+    my $logo_url         = $url;
+    $logo_url            =~ s/^$logo_path_prefix//gmx;
+
+    # image from theme
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
@@ -722,17 +728,29 @@ sub _read_static_content_file {
             $file = $c->config->{'project_root'}.'/themes/themes-available/' . $url;
         }
     }
+
+    # image from plugin
     elsif($url =~ m|^plugins/|mx) {
         $url =~ s|^plugins/([^/]+)/|$1/root/|gmx;
         my $plugins_dir = $c->config->{'plugin_path'} || $c->config->{'project_root'}."/plugins";
         $file = $plugins_dir . '/plugins-enabled/' . $url;
-    } else {
+    }
+
+    # icon image?
+    elsif(-e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
+        $file = $c->config->{'physical_logo_path'}.'/'.$logo_url;
+    }
+
+    else {
         $file = $c->config->{'project_root'}."/root/thruk/".$url;
     }
+
+
     return '' if $url eq '';
     if(-e $file) {
         return read_file($file);
     }
+
     croak("_read_static_content_file($url) $file: $!") if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
     $c->log->debug("_read_static_content_file($url) $file: $!");
     return "";
