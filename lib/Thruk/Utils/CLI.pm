@@ -149,16 +149,17 @@ sub _read_secret {
     my($self) = @_;
     my $files = [];
     push @{$files}, 'thruk.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
     push @{$files}, 'thruk_local.conf';
+    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
     push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
     my $var_path = './var';
-    for my $file (@{$files}) {
+    for my $file (reverse @{$files}) {
         next unless -f $file;
-        open(my $fh, $file);
+        open(my $fh, '<', $file) or die("open file $file failed (id: ".`id -a`.", pwd: ".`pwd`."): ".$!);
         while(my $line = <$fh>) {
             next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mx;
             $var_path = $1;
+            last if $1;
         }
         Thruk::Utils::IO::close($fh, $file, 1);
     }
