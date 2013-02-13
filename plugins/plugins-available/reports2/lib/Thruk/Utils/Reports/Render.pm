@@ -737,7 +737,7 @@ sub _read_static_content_file {
     }
 
     # icon image?
-    elsif(-e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
+    elsif(defined $c->config->{'physical_logo_path'} and -e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
         $file = $c->config->{'physical_logo_path'}.'/'.$logo_url;
     }
 
