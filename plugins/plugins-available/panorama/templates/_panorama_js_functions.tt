@@ -386,9 +386,7 @@ var TP = {
             if(msg) {
                 TP.Msg.msg(msg);
                 // clear message
-                var now = new Date();
-                var expires = new Date(now.getTime() - (10*365*86400*1000)); // let the cookie expire 10 year ago
-                Ext.util.Cookies.set('thruk_message', null, expires);
+                Ext.util.Cookies.clear('thruk_message', '[% cookie_path %]');
             }
             if(data.errors) {
                 for(var nr in data.errors) {
