@@ -533,6 +533,7 @@ sub _task_hosts {
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
+            { 'header' => 'Parents',                  dataIndex => 'parents',                     hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
             { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
             { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
             { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },

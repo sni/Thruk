@@ -274,6 +274,20 @@ TP.render_clickable_host = function(v, td, item, row, col, store, view) {
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
 }
 
+/* make host clickable */
+TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
+    td.tdCls += ' clickable';
+    var msg = '';
+    for(var nr in v) {
+        host = v[nr];
+        msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";
+        if(nr+1 < v.length) {
+            msg += ", ";
+        }
+    }
+    return msg;
+}
+
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
