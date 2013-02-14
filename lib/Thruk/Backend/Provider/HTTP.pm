@@ -672,7 +672,7 @@ sub _req {
                         }
                     );
 
-    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&)job=(.*)$/mx) {
+    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&|%3f)job=(.*)$/mx) {
         $self->_wait_for_remote_job($2);
         $redirects++;
         die("too many redirects") if $redirects > 2;
