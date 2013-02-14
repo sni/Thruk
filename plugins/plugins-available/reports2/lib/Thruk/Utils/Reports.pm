@@ -345,9 +345,23 @@ sub generate_report {
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
         $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
     }
+    # set custom render helper
+    my $custom = [];
+    eval {
+        require Thruk::Utils::Reports::CustomRender;
+        Thruk::Utils::Reports::CustomRender->import;
+        $custom = Class::Inspector->functions('Thruk::Utils::Reports::CustomRender');
+    };
+    # show errors if module was found
+    if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
+        $c->log->error($@);
+    }
+    for my $s (@{$custom}) {
+        $c->stash->{$s} = \&{'Thruk::Utils::Reports::CustomRender::'.$s};
+    }
     # initialize localization
     if($options->{'params'}->{'language'}) {
-        $c->stash->{'loc'} = \&{'Thruk::Utils::Reports::Render::_locale'};
+        $c->stash->{'loc'} = $c->stash->{'_locale'};
         $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
     }
 

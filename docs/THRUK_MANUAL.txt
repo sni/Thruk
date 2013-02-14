@@ -2680,6 +2680,13 @@ We use the report name 'r.name' as subject and put the report description 'r.des
 in the body.
 
 
+==== Custom Perl Render Helper
+You may create a Perl Module named
+'Thruk::Utils::Reports::CustomRender' which will be automatically made
+available to the stash, so functions from this module can be used in
+the reporting templates.
+
+
 
 
 
