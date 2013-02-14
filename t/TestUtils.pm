@@ -257,6 +257,7 @@ sub test_page {
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mx;
+            next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mx;
             if($test_url !~ m/^(http|\/)/gmx) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url);
 
