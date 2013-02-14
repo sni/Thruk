@@ -59,3 +59,4 @@ debian/files
 debian/thruk.debhelper.log
 my_templates/
 panorama_default_view
+themes/themes-available/.*/images/logos/.*server.png
