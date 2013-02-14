@@ -278,6 +278,14 @@ TP.render_clickable_host = function(v, td, item, row, col, store, view) {
 TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
     td.tdCls += ' clickable';
     var msg = '';
+    // in service view, only for the first line of this host
+    if(item.data.description != undefined && item.data.description == "") {
+        if(row == 0 || view.lastHost == undefined || view.lastHost != d.host_display_name) {
+            view.lastHost = d.host_display_name;
+        } else {
+            return '';
+        }
+    }
     for(var nr in v) {
         host = v[nr];
         msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";

@@ -381,7 +381,7 @@ sub get_services {
             state state_type modified_attributes_list
             last_time_critical last_time_ok last_time_unknown last_time_warning
             display_name host_display_name host_custom_variable_names host_custom_variable_values
-            in_check_period in_notification_period
+            in_check_period in_notification_period host_parents
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
