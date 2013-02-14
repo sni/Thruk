@@ -1756,6 +1756,30 @@ sub format_response_error {
 }
 
 ########################################
+
+=head2 load_lwp_curl
+
+  load_lwp_curl()
+
+load curls lwp replacement
+
+=cut
+
+sub load_lwp_curl {
+    my $options = {};
+    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
+        $options = {
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_SSL_VERIFYHOST => 0,
+        };
+    }
+    require LWP::Protocol::Net::Curl;
+    LWP::Protocol::Net::Curl->import(%{$options});
+
+    return;
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

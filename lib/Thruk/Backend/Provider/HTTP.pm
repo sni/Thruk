@@ -119,15 +119,7 @@ sub reconnect {
 
     # try to use LWP::Protocol::Net::Curl to speed things up
     if(!defined $self->{'config'}->{'use_curl'} or $self->{'config'}->{'use_curl'} == 1) {
-        my $options = {};
-        if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
-            $options = {
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_SSL_VERIFYHOST => 0,
-            };
-        }
-        require LWP::Protocol::Net::Curl;
-        LWP::Protocol::Net::Curl->import(%{$options});
+        Thruk::Utils::load_lwp_curl();
     }
 
     # correct address

@@ -6,8 +6,6 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Thruk::Utils::CookieAuth;
 
-use LWP::UserAgent;
-
 =head1 NAME
 
 Thruk::Controller::login - Catalyst Controller

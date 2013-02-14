@@ -20,6 +20,7 @@ use Thruk::Utils::IO;
 
 ##############################################
 BEGIN {
+    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
     eval {
         # required for new IO::Socket::SSL versions
         require IO::Socket::SSL;
@@ -122,6 +123,7 @@ returns user agent used for external requests
 
 =cut
 sub get_user_agent {
+    Thruk::Utils::load_lwp_curl() unless(defined $ENV{'USE_CURL'} and $ENV{'USE_CURL'} == 0);
     my $ua = LWP::UserAgent->new;
     $ua->timeout(30);
     $ua->agent("thruk_auth");

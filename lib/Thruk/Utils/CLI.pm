@@ -182,7 +182,7 @@ sub _run {
     my($c, $failed);
     _debug("_run(): ".Dumper($self->{'opt'}));
     unless($self->{'opt'}->{'local'}) {
-        ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        ($result,$response) = $self->_request($c, $self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
             _debug(" -> ".Dumper($response));
@@ -218,8 +218,11 @@ sub _run {
 
 ##############################################
 sub _request {
-    my($self, $credential, $url, $options) = @_;
+    my($c, $self, $credential, $url, $options) = @_;
     _debug("_request(".$url.")");
+    if(!defined $c->config->{'use_curl'} or $c->config->{'use_curl'} == 1) {
+        Thruk::Utils::load_lwp_curl();
+    }
     my $ua       = LWP::UserAgent->new;
     my $response = $ua->post($url, {
         data => encode_json({
