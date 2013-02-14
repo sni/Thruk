@@ -1083,7 +1083,7 @@ sub _read_static_content_file {
     if(-e $file) {
         return read_file($file);
     }
-    croak("_read_static_content_file($url) $file: $!");
+    croak("_read_static_content_file($url) $file: $!") if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
     return "";
 }
 
