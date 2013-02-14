@@ -1557,6 +1557,17 @@ ex.:
   ssl_verify_hostnames = 1
 
 
+==== use_curl
+
+Enable curl library to speed up http connections, for example used by
+the HTTP backend provider. Enabled by default.
+
+ex.:
+
+  use_curl = 0
+
+
+
 
 
 === Cookie Authentication Settings

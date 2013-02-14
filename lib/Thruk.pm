@@ -89,11 +89,13 @@ $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_confi
 $peer_configs    = [] unless defined $peer_configs;
 my $num_peers    = scalar @{$peer_configs};
 my $pool_size    = __PACKAGE__->config->{'connection_pool_size'};
+my $use_curl     = __PACKAGE__->config->{'use_curl'};
 if($num_peers > 0) {
     my  $peer_keys   = {};
     our $peer_order  = [];
     our $peers       = {};
     for my $peer_config (@{$peer_configs}) {
+        $peer_config->{'use_curl'} = $use_curl;
         my $peer = Thruk::Backend::Peer->new( $peer_config, __PACKAGE__->config->{'logcache'}, $peer_keys );
         $peer_keys->{$peer->{'key'}} = 1;
         $peers->{$peer->{'key'}}     = $peer;
