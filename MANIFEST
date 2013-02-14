@@ -835,6 +835,7 @@ plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
+plugins/plugins-available/reports2/templates/custom_reports_edit_step2.tt
 plugins/plugins-available/reports2/templates/reports.tt
 plugins/plugins-available/reports2/templates/reports/comp/mail.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_cover.tt
