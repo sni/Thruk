@@ -517,6 +517,9 @@ sub get_dynamic_roles {
         }
     }
 
+    # roles could be duplicated
+    $roles = array_uniq($roles);
+
     return($roles, $can_submit_commands, $alias, $roles_by_group);
 }
 
