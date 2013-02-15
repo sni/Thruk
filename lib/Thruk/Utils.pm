@@ -1767,6 +1767,7 @@ load curls lwp replacement
 
 sub load_lwp_curl {
     my($proxy) = @_;
+    return if(defined $ENV{'USE_CURL'} and $ENV{'USE_CURL'} == 0);
     my $options = {};
     if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
         $options = {
@@ -1792,6 +1793,7 @@ sub load_lwp_curl {
             delete $ENV{'https_proxy'};
         }
     };
+    $ENV{'THRUK_CURL_ERROR'} = $@ if $@;
 
     return;
 }

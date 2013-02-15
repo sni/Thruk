@@ -123,7 +123,7 @@ returns user agent used for external requests
 
 =cut
 sub get_user_agent {
-    Thruk::Utils::load_lwp_curl() unless(defined $ENV{'USE_CURL'} and $ENV{'USE_CURL'} == 0);
+    Thruk::Utils::load_lwp_curl();
     my $ua = LWP::UserAgent->new;
     $ua->timeout(30);
     $ua->agent("thruk_auth");

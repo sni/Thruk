@@ -118,7 +118,7 @@ sub reconnect {
     }
 
     # try to use LWP::Protocol::Net::Curl to speed things up
-    if(!defined $self->{'config'}->{'use_curl'} or $self->{'config'}->{'use_curl'} == 1) {
+    if($self->{'config'}->{'use_curl'}) {
         Thruk::Utils::load_lwp_curl($self->{'config'}->{'options'}->{'proxy'});
     }
 
