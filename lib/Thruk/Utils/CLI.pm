@@ -220,8 +220,6 @@ sub _run {
 sub _request {
     my($self, $credential, $url, $options) = @_;
     _debug("_request(".$url.")");
-    Thruk::Utils::load_lwp_curl();
-    _error($ENV{'THRUK_CURL_ERROR'}) if $ENV{'THRUK_CURL_ERROR'};
     my $ua       = LWP::UserAgent->new;
     my $response = $ua->post($url, {
         data => encode_json({
