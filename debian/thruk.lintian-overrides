@@ -44,6 +44,7 @@ thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i686-linux-gnu-thread-m
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i686-linux-gnu-thread-multi/auto/Time/HiRes/HiRes.so /lib/i386-linux-gnu
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i686-linux-gnu-thread-multi/auto/XML/Parser/Expat/Expat.so /lib/i386-linux-gnu
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i686-linux-gnu-thread-multi/auto/Net/Curl/Curl.so /lib/i386-linux-gnu
+thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i686-linux-gnu-thread-multi/auto/Net/Curl/Curl.so /usr/lib
 # Ubuntu 11.04 64
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Cairo/Cairo.so /usr/lib/x86_64-linux-gnu
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Cairo/Cairo.so /usr/lib
