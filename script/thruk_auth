@@ -52,6 +52,7 @@ my $pass_regex          = qr#^$urlprefix/(startup\.html|themes|javascript|cgi\-b
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = time();
+$ENV{'USE_CURL'}        = $config->{'use_curl'};
 
 ##########################################################
 while (<STDIN>) {

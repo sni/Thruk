@@ -1766,6 +1766,7 @@ load curls lwp replacement
 =cut
 
 sub load_lwp_curl {
+    my($proxy) = @_;
     my $options = {};
     if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
         $options = {
@@ -1773,8 +1774,24 @@ sub load_lwp_curl {
             CURLOPT_SSL_VERIFYHOST => 0,
         };
     }
-    require LWP::Protocol::Net::Curl;
-    LWP::Protocol::Net::Curl->import(%{$options});
+    eval {
+        require LWP::Protocol::Net::Curl;
+        LWP::Protocol::Net::Curl->import(%{$options});
+
+        if($proxy) {
+            # curl uses env proxy
+            $ENV{'HTTP_PROXY'}  = $proxy;
+            $ENV{'http_proxy'}  = $proxy;
+            $ENV{'HTTPS_PROXY'} = $proxy;
+            $ENV{'https_proxy'} = $proxy;
+        } else {
+            # remove proxy from env if load succeded
+            delete $ENV{'HTTP_PROXY'};
+            delete $ENV{'http_proxy'};
+            delete $ENV{'HTTPS_PROXY'};
+            delete $ENV{'https_proxy'};
+        }
+    };
 
     return;
 }

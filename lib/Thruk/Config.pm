@@ -385,7 +385,7 @@ sub set_default_config {
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
-        'use_curl'                          => 1,
+        'use_curl'                          => 0,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

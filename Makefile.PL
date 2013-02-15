@@ -19,7 +19,6 @@ requires 'Config::Any'                            => 0;     # required by Thruk:
 requires 'Class::Data::Inheritable'               => 0;     # required by Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam
 requires 'MRO::Compat'                            => 0;     # required by Catalyst::Plugin::Unicode::Encoding
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::Utils::CLI
-requires 'LWP::Protocol::Net::Curl'               => 0;     # required by Thruk::Backend::Provider::HTTP
 requires 'Net::HTTP'                              => 6.02;  # required for HTTP connections. Version required due to timeout bug
 requires 'Class::C3::Adopt::NEXT'                 => 0;     # required by Catalyst::View::GD
 requires 'Class::C3::XS'                          => 0;     # speed up class things
@@ -108,6 +107,11 @@ feature     ('plugin_reports2',
   -default                                        => 0,
   'MIME::Lite'                                    => 0,
   'Class::Inspector'                              => 0,
+);
+# reporting2 plugin
+feature     ('curl_support',
+  -default                                        => 0,
+  'LWP::Protocol::Net::Curl'                      => 0,     # required by Thruk::Backend::Provider::HTTP
 );
 
 # requirements test requirements

@@ -1560,11 +1560,11 @@ ex.:
 ==== use_curl
 
 Enable curl library to speed up http connections, for example used by
-the HTTP backend provider. Enabled by default.
+the HTTP backend provider. Disabled by default.
 
 ex.:
 
-  use_curl = 0
+  use_curl = 1
 
 
 
