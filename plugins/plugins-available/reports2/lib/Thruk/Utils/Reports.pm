@@ -93,6 +93,13 @@ sub report_show {
             $c->res->content_type('application/pdf');
             $c->res->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
         }
+    } else {
+        if($Thruk::Utils::Reports::error) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'generating report failed: '.$Thruk::Utils::Reports::error );
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'generating report failed' );
+        }
+        return $c->response->redirect('reports2.cgi');
     }
     return 1;
 }
@@ -264,7 +271,10 @@ sub generate_report {
 
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
-    return unless defined $options;
+    unless(defined $options) {
+        $Thruk::Utils::Reports::error = 'got no report options';
+        return;
+    }
 
     # do we have errors in our options, ex.: missing required fields?
     if(defined $options->{'var'}->{'opt_errors'}) {
@@ -354,6 +364,7 @@ sub generate_report {
     };
     # show errors if module was found
     if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
+        $Thruk::Utils::Reports::error = $@;
         $c->log->error($@);
     }
     for my $s (@{$custom}) {
@@ -372,6 +383,7 @@ sub generate_report {
     };
     if($@) {
         Thruk::Utils::CLI::_error($@);
+        $Thruk::Utils::Reports::error = $@;
         return $c->detach('/error/index/13');
     }
 
@@ -383,6 +395,7 @@ sub generate_report {
     };
     if($@) {
         Thruk::Utils::CLI::_error($@);
+        $Thruk::Utils::Reports::error = $@;
         return $c->detach('/error/index/13');
     }
 
@@ -398,6 +411,11 @@ sub generate_report {
 
     # update report runtime data
     set_running($c, $nr, 0, undef, time());
+
+    # set error if not already set
+    if(!-f $attachment and !$Thruk::Utils::Reports::error) {
+        $Thruk::Utils::Reports::error = read_file($logfile);
+    }
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;
@@ -845,7 +863,7 @@ sub _convert_to_pdf {
     my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
     my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$wkhtmltopdf.'"';
     `$cmd`;
-    move($attachment.'.pdf', $attachment);
+    move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
     return;
 }
