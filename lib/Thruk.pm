@@ -107,7 +107,7 @@ if($num_peers > 0) {
         my $minworker = $pool_size;
         $minworker    = $num_peers if $minworker > $num_peers; # no need for more threads than sites
         my $maxworker = $minworker; # static pool size
-        $SIG{'USR1'} = undef;
+        $SIG{'USR1'}  = undef;
         our $pool = Thruk::Pool::Simple->new(
             min      => $minworker,
             max      => $maxworker,

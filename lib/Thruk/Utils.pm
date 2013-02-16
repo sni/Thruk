@@ -1793,9 +1793,12 @@ sub load_lwp_curl {
             delete $ENV{'https_proxy'};
         }
     };
-    $ENV{'THRUK_CURL_ERROR'} = $@ if $@;
+    if($@) {
+        $ENV{'THRUK_CURL_ERROR'} = $@;
+        return;
+    }
 
-    return;
+    return 1;
 }
 
 ########################################

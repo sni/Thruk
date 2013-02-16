@@ -46,6 +46,7 @@ sub new {
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.63,
+        'has_curl'             => 0,
     };
     bless $self, $class;
 
@@ -119,7 +120,9 @@ sub reconnect {
 
     # try to use LWP::Protocol::Net::Curl to speed things up
     if($self->{'config'}->{'use_curl'}) {
-        Thruk::Utils::load_lwp_curl($self->{'config'}->{'options'}->{'proxy'});
+        if(Thruk::Utils::load_lwp_curl($self->{'config'}->{'options'}->{'proxy'})) {
+            $self->{'has_curl'} = 1;
+        }
     }
 
     # correct address
