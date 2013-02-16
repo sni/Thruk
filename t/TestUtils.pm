@@ -113,6 +113,7 @@ sub get_test_timeperiod {
     unlike          => (list of) regular expressions which must not match page content
     content_type    => match this content type
     skip_html_lint  => skip html lint check
+    sleep           => sleep this amount of seconds after the request
   }
 
 =cut
@@ -296,6 +297,11 @@ sub test_page {
             }
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );
+    }
+
+    # sleep after the request?
+    if(defined $opts->{'sleep'}) {
+        ok(sleep($opts->{'sleep'}), "slept $opts->{'sleep'} seconds");
     }
 
     return $return;
