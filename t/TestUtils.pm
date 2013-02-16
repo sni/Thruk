@@ -114,6 +114,7 @@ sub get_test_timeperiod {
     content_type    => match this content type
     skip_html_lint  => skip html lint check
     sleep           => sleep this amount of seconds after the request
+    waitfor         => wait till regex occurs (max 60sec)
   }
 
 =cut
@@ -121,6 +122,7 @@ sub test_page {
     my(%opts) = @_;
     my $return = {};
 
+    my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
 
     ok($opts->{'url'}, $opts->{'url'});
@@ -144,7 +146,27 @@ sub test_page {
         }
     }
 
+    # wait for something?
     $return->{'content'} = $request->content;
+    if(defined $opts->{'waitfor'}) {
+        my $now = time();
+        my $waitfor = $opts->{'waitfor'};
+        my $found   = 0;
+        while($now > $start - 60) {
+            if($return->{'content'} =~ m/$waitfor/mx) {
+                ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
+                $found = 1;
+                last;
+            }
+            sleep(1);
+            $now = time();
+            $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
+            $return->{'content'} = $request->content;
+        }
+        fail("content did not occur within 60 seconds") unless $found;
+        return $return;
+    }
+
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/) {
         # is it a background job page?
         wait_for_job($1);
