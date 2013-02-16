@@ -152,7 +152,7 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now > $start - 60) {
+        while($now < $start + 60) {
             if($return->{'content'} =~ m/$waitfor/mx) {
                 ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
                 $found = 1;
