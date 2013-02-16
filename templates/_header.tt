@@ -69,8 +69,12 @@
         <td>
           <table width="450">
             <tr>
+              <th colspan=2 align="center" style="border-bottom: 1px dotted grey">User Settings</th>
+            </tr>
+            <tr>
               <th width="100">Theme:</th>
               <td>
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:top;">
                 <select name="theme" id="pref_theme">
                   [% FOR t = themes %]
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
@@ -128,6 +132,7 @@
             <tr>
               <th>Page Refresh:</th>
               <td nowrap>
+              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
               [% IF refresh_rate %]
               <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
               [% ELSE %]
