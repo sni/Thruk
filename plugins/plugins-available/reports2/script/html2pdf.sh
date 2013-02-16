@@ -50,4 +50,4 @@ if [ -e "$OUTPUT" -a $UID == 0 ]; then
 fi
 
 kill $xpid >/dev/null 2>&1
-rm -f $TMPLOG
+rm -f $TMPLOG $XAUTHORITY
