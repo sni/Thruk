@@ -96,6 +96,26 @@ sub get_test_timeperiod {
 }
 
 #########################
+
+=head2 test_page
+
+  check a page
+
+  needs test hash
+  {
+    url             => url to test
+    follow          => follow redirects
+    fail            => request should fail
+    redirect        => request should redirect
+    location        => redirect location
+    fail_message_ok => page can contain error message without failing
+    like            => (list of) regular expressions which have to match page content
+    unlike          => (list of) regular expressions which must not match page content
+    content_type    => match this content type
+    skip_html_lint  => skip html lint check
+  }
+
+=cut
 sub test_page {
     my(%opts) = @_;
     my $return = {};
