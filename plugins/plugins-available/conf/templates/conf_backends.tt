@@ -143,10 +143,6 @@ Note: some options are not accessible here for security reasons.
   var sel = document.getElementById('sel_type[% x %]');
   check_backends_config(sel);
   [%+ END %]
-
-  [% IF sites.size == 0 %]
-  conf_sites_add();
-  [%+ END %]
 -->
 </script>
 

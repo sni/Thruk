@@ -876,6 +876,10 @@ sub _process_backends_page {
             }
         }
     }
+    if(scalar @{$backends} == 0) {
+        # add empty sample backend
+        push @{$backends}, { 'name' => '' };
+    }
     # set ids
     for my $b (@{$backends}) {
         $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
