@@ -28,6 +28,12 @@ TMPLOG=`mktemp`;
 Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP >$TMPLOG 2>&1 &
 xpid=$!
 
+# wait for xauth
+for x in seq 10; do
+    [ -e $XAUTHORITY ] && break;
+    sleep 1;
+done
+
 rm -f $OUTPUT
 DISPLAY=:$DISP $WKHTMLTOPDF \
         --use-xserver \
