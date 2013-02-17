@@ -636,6 +636,7 @@ function on_empty_click(inp) {
     var v = input.value;
     input.value = 'customvariable';
     newid = on_attr_select();
+    newid = newid.replace(/^#/, '');
     var newin = document.getElementById(newid);
     var tr = newin.parentNode.parentNode;
     var td = tr.cells[0].firstChild;
