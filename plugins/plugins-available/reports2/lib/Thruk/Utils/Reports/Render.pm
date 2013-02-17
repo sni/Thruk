@@ -530,7 +530,7 @@ sub get_pnp_image {
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
-        return 'data:image/png;base64,'.encode_base64($imgdata);
+        return 'data:image/png;base64,'.encode_base64($imgdata, '');
     }
     unlink($filename);
     return "";
