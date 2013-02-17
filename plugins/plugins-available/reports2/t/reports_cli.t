@@ -19,7 +19,7 @@ BEGIN {
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
+#$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
 # get test host
 my $test = { cmd  => $BIN.' -a listhosts' };
