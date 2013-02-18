@@ -32,7 +32,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi' },
     { url => '/thruk/cgi-bin/reports2.cgi?action=save&report=999&name=Service%20SLA%20Report%20for%20'.$hostname.'%20-%20'.$servicename.'&template=sla_service.tt&params.sla=95&params.timeperiod=last12months&params.host='.$hostname.'&params.service='.$servicename.'&params.breakdown=months&params.unavailable=critical&params.unavailable=unknown&params.decimals=2&params.graph_min_sla=90', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=update', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
-    { url => '/thruk/cgi-bin/reports2.cgi', waitfor => 'reports2.cgi\?report=999\&amp;refresh=0' },
+    { url => '/thruk/cgi-bin/reports2.cgi', waitfor => 'reports2.cgi\?report=999\&amp;refresh=0', unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999', like => [ '%PDF-1.4', '%%EOF' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&html=1', like => [ 'SLA Report' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=edit' },

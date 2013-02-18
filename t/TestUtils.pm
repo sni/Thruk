@@ -153,6 +153,16 @@ sub test_page {
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
         while($now < $start + 60) {
+            # text that shouldn't appear
+            if(defined $opts->{'unlike'}) {
+                for my $unlike (@{_list($opts->{'unlike'})}) {
+                    if($return->{'content'} =~ m/$unlike/mx) {
+                        fail("Content should not contain: ".(defined $1 ? $1 : $unlike)) or diag($opts->{'url'});
+                        return $return;
+                    }
+                }
+            }
+
             if($return->{'content'} =~ m/$waitfor/mx) {
                 ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
                 $found = 1;
@@ -207,23 +217,15 @@ sub test_page {
 
     # text that should appear
     if(defined $opts->{'like'}) {
-        if(ref $opts->{'like'} eq '') {
-            like($return->{'content'}, qr/$opts->{'like'}/, "Content should contain: ".$opts->{'like'}) or diag($opts->{'url'});
-        } elsif(ref $opts->{'like'} eq 'ARRAY') {
-            for my $like (@{$opts->{'like'}}) {
-                like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
-            }
+        for my $like (@{_list($opts->{'like'})}) {
+            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
         }
     }
 
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
-        if(ref $opts->{'unlike'} eq '') {
-            unlike($return->{'content'}, qr/$opts->{'unlike'}/, "Content should not contain: ".$opts->{'unlike'}) or diag($opts->{'url'});
-        } elsif(ref $opts->{'unlike'} eq 'ARRAY') {
-            for my $unlike (@{$opts->{'unlike'}}) {
-                unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
-            }
+        for my $unlike (@{_list($opts->{'unlike'})}) {
+            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
         }
     }
 
@@ -454,7 +456,7 @@ sub test_command {
 
     # matches on stdout?
     if(defined $test->{'like'}) {
-        for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
+        for my $expr (@{_list($test->{'like'})}) {
             like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"); $return = 0 };
         }
     }
@@ -462,7 +464,7 @@ sub test_command {
     # matches on stderr?
     $test->{'errlike'} = '/^\s*$/' unless exists $test->{'errlike'};
     if(defined $test->{'errlike'}) {
-        for my $expr (ref $test->{'errlike'} eq 'ARRAY' ? @{$test->{'errlike'}} : $test->{'errlike'} ) {
+        for my $expr (@{_list($test->{'errlike'})}) {
             like($stderr, $expr, "stderr like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed"); $return = 0 };
         }
     }
@@ -552,6 +554,12 @@ sub bail_out_req {
     return;
 }
 
+#########################
+sub _list {
+    my($data) = @_;
+    return $data if ref $data eq 'ARRAY';
+    return([$data]);
+}
 #########################
 
 1;
