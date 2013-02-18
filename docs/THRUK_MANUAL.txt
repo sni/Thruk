@@ -394,6 +394,13 @@ Open your browser and open http://<your_host>:3000
 
 == Apache Configuration
 
+[TIP]
+.apache is preconfigured when using packages
+=======
+Apache configuration is not needed if you use OMD or packages. Apache
+is already preconfigured in that case.
+=======
+
 Integration in the Apache webserver is done by fastcgi.  There are two
 fastcgi modules for Apache at the moment. Choose the one which fits
 best into your environment. If unsure, use <<_mod_fcgid,mod_fcgid>>.
@@ -2098,6 +2105,7 @@ both groups, but the 'Admins' overrides will be superseded by the 'Superadmins'.
 
 ex.:
 
+...................................
     # disable all commands, except reschedule for all users
     command_disabled = 0-6,8-95,97-999
 
@@ -2105,6 +2113,7 @@ ex.:
         # enable commands for admins again
         command_disabled =
     </Group>
+...................................
 
 
 ==== Users
@@ -2112,6 +2121,7 @@ The users directive overrides specific config settings for one user only.
 
 ex.:
 
+...................................
     <User guest>
         # override single configuration item
         show_error_reports  = 0
@@ -2123,6 +2133,7 @@ ex.:
           default_view    = /etc/thruk/default_panorama_view_guest
         </Component>
     </User>
+...................................
 
 
 
