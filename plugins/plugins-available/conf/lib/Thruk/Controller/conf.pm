@@ -882,6 +882,7 @@ sub _process_backends_page {
     }
     # set ids
     for my $b (@{$backends}) {
+        $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
         $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
