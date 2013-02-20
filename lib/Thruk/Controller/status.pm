@@ -359,6 +359,13 @@ sub _process_details_page {
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
 
+    $c->stash->{'custom_vars'} = [];
+    if($c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
+        my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        # set allowed custom vars into stash
+        Thruk::Utils::set_custom_vars($c, $hosts->[0]);
+    }
+
     return 1;
 }
 
