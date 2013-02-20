@@ -361,6 +361,7 @@ sub _process_details_page {
     $c->stash->{'orderdir'} = $order;
 
     if($c->config->{'show_custom_vars'}
+       and defined $c->stash->{'host_stats'}->{'up'}
        and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
         my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
         # set allowed custom vars into stash
