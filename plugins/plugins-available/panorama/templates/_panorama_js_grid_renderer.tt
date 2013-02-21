@@ -184,6 +184,13 @@ TP.render_plugin_output = function(v, td, item) {
             return(type+' check scheduled for '+TP.date_format(item.data.next_check));
         }
     }
+    if(item.data.long_plugin_output) {
+        var long_plugin_output = item.data.long_plugin_output.replace(/'/g, "");
+        long_plugin_output     = long_plugin_output.replace(/"/g, "");
+        long_plugin_output     = long_plugin_output.replace(/\\n/g, "<br>");
+        long_plugin_output     = long_plugin_output.replace(/(\r\n|\n|\r)/gm,"");
+        return "<div class='clickable' style='color:blue;' onClick=\"Ext.Msg.alert('Plugin Output', '"+long_plugin_output+"')\">"+v+"<\/div>";
+    }
     return v;
 }
 
@@ -271,7 +278,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
 TP.render_clickable_host = function(v, td, item, row, col, store, view) {
     td.tdCls += ' clickable';
     var host  = item.data.host_name ? item.data.host_name : item.data.name;
-    host      = host.replace('\\', '\\\\');
+    host      = host.replace(/\\/g, '\\\\');
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
 }
 
@@ -298,8 +305,8 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
-    var description = item.data.description.replace('\\', '\\\\');
-    var host_name   = item.data.host_name.replace('\\', '\\\\');
+    var description = item.data.description.replace(/\\/g, '\\\\');
+    var host_name   = item.data.host_name.replace(/\\/g, '\\\\');
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
 
@@ -335,6 +342,16 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     if(r == false) { return ""; }
     td.tdCls = "less_padding";
     return r;
+}
+
+
+/* make long pluginout not break layout */
+TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
+    v = v.replace(/\\n/g, "");
+    v = v.replace(/(\r\n|\n|\r)/gm,"");
+    v = v.replace(/</gm,"&lt;");
+    v = v.replace(/>/gm,"&gt;");
+    return v;
 }
 
 /* format timestamp */

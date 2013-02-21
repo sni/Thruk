@@ -556,6 +556,7 @@ sub _task_hosts {
             { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
             { 'header' => 'Last Time Up',          dataIndex => 'last_time_up',          hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
@@ -623,6 +624,7 @@ sub _task_services {
             { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
             { 'header' => 'Host Parents',                   dataIndex => 'host_parents',                  hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
             { 'header' => 'Host Status',                    dataIndex => 'host_state',                    hidden => JSON::XS::true, renderer => 'TP.render_host_status' },
