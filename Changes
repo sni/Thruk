@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - added missing newline in services availability
+
 1.64     Fri Feb 15 22:50:55 CET 2013
           - added user & group specific config overrides
           - added json export for availability data
