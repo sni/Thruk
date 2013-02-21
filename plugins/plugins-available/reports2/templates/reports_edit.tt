@@ -46,7 +46,7 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <select id="backends" name="backends" multiple style="min-width: 180px;">
+      <select id="report_backends" name="report_backends" multiple style="min-width: 180px;">
         [% FOREACH b = backends %]
         <option value="[% b %]"[% FOREACH rb = r.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]

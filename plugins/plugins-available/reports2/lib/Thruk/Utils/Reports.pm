@@ -444,13 +444,13 @@ sub get_report_data_from_param {
 
     my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
-        'name'       => $params->{'name'}        || 'New Report',
-        'desc'       => $params->{'desc'}        || '',
-        'template'   => $params->{'template'}    || 'sla.tt',
-        'is_public'  => $params->{'is_public'}   || 0,
-        'to'         => $params->{'to'}          || '',
-        'cc'         => $params->{'cc'}          || '',
-        'backends'   => $params->{'backends'}    || [],
+        'name'       => $params->{'name'}            || 'New Report',
+        'desc'       => $params->{'desc'}            || '',
+        'template'   => $params->{'template'}        || 'sla.tt',
+        'is_public'  => $params->{'is_public'}       || 0,
+        'to'         => $params->{'to'}              || '',
+        'cc'         => $params->{'cc'}              || '',
+        'backends'   => $params->{'report_backends'} || [],
         'params'     => $p,
         'send_types' => $send_types,
     };
