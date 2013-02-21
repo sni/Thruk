@@ -6,7 +6,7 @@
 
 LOGFILE="$3";
 if [ "$LOGFILE" != "" ]; then
-  exec > $LOGFILE 2>&1
+  exec >>$LOGFILE 2>&1
 fi
 
 INPUT=$1

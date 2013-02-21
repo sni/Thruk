@@ -38,9 +38,16 @@
           <option value="custom"[% IF       value == 'custom'       %] selected[% END %]>Custom</option>
         </select>
         <div [% IF value != 'custom' %]style="display:none"[% END %] id="custom_timeperiod">
-        <input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input"> <a href="javascript:show_cal('t1')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
-        <br>to<br>
-        <input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input"> <a href="javascript:show_cal('t2')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+        <table>
+          <tr>
+            <td>Start</td>
+            <td><input type="text" value="[% IF format_date(t1, '%S') == "00" %][% format_date(t1, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t1, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t1" name="t1" size="20" class="date_input"> <a href="javascript:show_cal('t1')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          </tr>
+          <tr>
+            <td>End</td>
+            <td><input type="text" value="[% IF format_date(t2, '%S') == "00" %][% format_date(t2, '%Y-%m-%d %H:%M') %][% ELSE %][% format_date(t2, '%Y-%m-%d %H:%M:%S') %][% END %]" id="t2" name="t2" size="20" class="date_input"> <a href="javascript:show_cal('t2')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          </tr>
+        </table>
         </div>
       [% ELSIF type == 'breakdowns' %]
         <select name="params.[% key %]">
