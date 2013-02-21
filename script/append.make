@@ -7,5 +7,5 @@ version:
 
 .PHONY: docs
 
-make docs:
+docs:
 	script/thruk_update_docs.sh
