@@ -2899,6 +2899,7 @@ var ajax_search = {
     search_type     : 'all',
     size            : 150,
     updating        : false,
+    error           : false,
 
     hideTimer       : undefined,
     base            : new Array(),
@@ -3183,6 +3184,7 @@ var ajax_search = {
             ajax_search.suggest();
         } else {
              ajax_search.updating=true;
+             ajax_search.error=false;
 
             // show searching results
             ajax_search.base = {};
@@ -3200,8 +3202,10 @@ var ajax_search = {
                     }
                     ajax_search.autoopen = true;
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    ajax_search.error=errorThrown;
                     ajax_search.updating=false;
+                    ajax_search.show_results([]);
                     ajax_search.initialized = false;
                 }
             });
@@ -3446,7 +3450,10 @@ var ajax_search = {
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.length == 0) {
-            if(ajax_search.updating) {
+            if(ajax_search.error) {
+                resultHTML += '<a href="#"><span style="color:red;">error: '+ajax_search.error+'</span></a>';
+            }
+            else if(ajax_search.updating) {
                 resultHTML += '<a href="#"><img src="'+ url_prefix + 'thruk/themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
             } else {
                 resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
