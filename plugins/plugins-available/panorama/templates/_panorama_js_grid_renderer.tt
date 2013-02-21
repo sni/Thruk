@@ -271,6 +271,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
 TP.render_clickable_host = function(v, td, item, row, col, store, view) {
     td.tdCls += ' clickable';
     var host  = item.data.host_name ? item.data.host_name : item.data.name;
+    host      = host.replace('\\', '\\\\');
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
 }
 
@@ -297,7 +298,9 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
-    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+item.data.host_name+"', service: '"+item.data.description+"'}}})\">"+v+"<\/div>";
+    var description = item.data.description.replace('\\', '\\\\');
+    var host_name   = item.data.host_name.replace('\\', '\\\\');
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
 
 /* render url */
