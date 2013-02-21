@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - config tool
+            - save & reload page display already saved changes
           - Bug Fixes
             - added missing newline in services availability
 
