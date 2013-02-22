@@ -96,14 +96,12 @@ sub authenticate {
     my $authenticated = 0;
 
     # authenticated by ssl
-    if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1) {
-        if(defined $c->engine->env->{'SSL_CLIENT_S_DN_CN'}) {
+    if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
+        and defined $c->engine->env->{'SSL_CLIENT_S_DN_CN'}) {
             $username = $c->engine->env->{'SSL_CLIENT_S_DN_CN'};
-        }
     }
-
     # from cli
-    if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
+    elsif(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
         $username = $c->stash->{'remote_user'};
     }
     # basic authentication
