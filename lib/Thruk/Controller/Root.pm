@@ -8,6 +8,8 @@ use Data::Dumper;
 use URI::Escape;
 use File::Slurp;
 use JSON::XS;
+use POSIX qw/strftime/;
+use Thruk::Utils::Filter;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -728,6 +730,30 @@ sub end : ActionClass('RenderView') {
         return $c->detach('/error/index/13');
     }
 
+    if($c->stash->{'debug_info'}) {
+        # save debug info into tmp file
+        my $tmp = $c->config->{'tmp_path'}.'/debug';
+        Thruk::Utils::IO::mkdir_r($tmp);
+        my $tmpfile = $tmp.'/'.strftime('%Y-%m-%d_%H_%M_%S', localtime).'.log';
+        open(my $fh, '>', $tmpfile);
+        print $fh 'Uri: '.Thruk::Utils::Filter::full_uri($c)."\n";
+        print $fh "*************************************\n";
+        print $fh "version: ".Thruk::Utils::Filter::fullversion($c)."\n";
+        print $fh "parameters:\n";
+        print $fh Dumper($c->{'request'}->{'parameters'});
+        print $fh "debug info:\n";
+        print $fh Thruk::Utils::get_debug_details();
+        if($c->stash->{'original_url'}) {
+            print $fh "*************************************\n";
+            print $fh "job:\n";
+            print $fh 'Uri: '.$c->stash->{'original_url'}."\n";
+        }
+        print $fh "*************************************\n";
+        print $fh "\n";
+        print $fh $c->stash->{'debug_info'};
+        Thruk::Utils::IO::close($fh, $tmpfile);
+    }
+
     return 1;
 }
 
@@ -735,7 +761,7 @@ sub end : ActionClass('RenderView') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-2013, <nierlein@cpan.org>
 
 =head1 LICENSE
 

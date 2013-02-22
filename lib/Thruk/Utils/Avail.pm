@@ -13,6 +13,7 @@ Utilities Collection for Availability Calculation
 use strict;
 use warnings;
 use Carp;
+use Data::Dumper;
 
 ##############################################
 
@@ -466,7 +467,18 @@ sub calculate_availability {
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
     $c->stats->profile(begin => "calculate availability");
-    my $ma = Monitoring::Availability->new(
+    my $ma = Monitoring::Availability->new();
+    if(Thruk->debug) {
+        $ma->{'verbose'} = 1;
+        $ma->{'logger'}  = $c->log;
+    }
+    my $ma_options = {
+        'start'                        => $start,
+        'end'                          => $end,
+        'log_livestatus'               => $logs,
+        'hosts'                        => $hosts,
+        'services'                     => $services,
+        'initial_states'               => $initial_states,
         'rpttimeperiod'                => $rpttimeperiod,
         'assumeinitialstates'          => $assumeinitialstates,
         'assumestateretention'         => $assumestateretention,
@@ -476,20 +488,14 @@ sub calculate_availability {
         'initialassumedservicestate'   => Thruk::Utils::_initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
         'breakdown'                    => $breakdown,
-    );
-    if(Thruk->debug) {
-        $ma->{'verbose'} = 1;
-        $ma->{'logger'}  = $c->log;
-    }
-    $c->stash->{avail_data} = $ma->calculate(
-        'start'                        => $start,
-        'end'                          => $end,
-        'log_livestatus'               => $logs,
-        'hosts'                        => $hosts,
-        'services'                     => $services,
-        'initial_states'               => $initial_states,
-    );
+    };
+    $c->stash->{avail_data} = $ma->calculate(%{$ma_options});
     $c->stats->profile(end => "calculate availability");
+
+    if($c->{'request'}->{'parameters'}->{'debug'}) {
+        $c->stash->{'debug_info'} .= "\$ma_options\n";
+        $c->stash->{'debug_info'} .= Dumper($ma_options);
+    }
 
     if($full_log_entries) {
         $c->stash->{'logs'} = $ma->get_full_logs() || [];

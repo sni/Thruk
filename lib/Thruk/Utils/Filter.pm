@@ -706,6 +706,30 @@ sub button {
 }
 
 
+########################################
+
+=head2 fullversion
+
+  my $str = fullversion($c)
+
+returns full version string
+
+=cut
+sub fullversion {
+    my($c) = @_;
+    die("no c") unless defined $c;
+    my $str = $c->config->{'version'};
+    if($c->config->{'branch'}) {
+        $str .= '~'.$c->config->{'branch'};
+    }
+    if($c->config->{'omd_version'}) {
+        $str .= '/ OMD '.$c->config->{'omd_version'};
+    }
+    $str = '' unless defined $str;
+    return $str;
+}
+
+
 
 ########################################
 

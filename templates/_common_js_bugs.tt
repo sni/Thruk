@@ -1,4 +1,4 @@
-﻿var version_info = '[% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] / OMD [% c.config.omd_version %][% END %]';
+﻿var version_info = '[% fullversion(c) %]';
 var thruk_errors = [];
 [%+ IF show_error_reports +%]
 window.onerror = function(msg, url, line) {
