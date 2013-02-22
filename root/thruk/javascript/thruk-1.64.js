@@ -3688,7 +3688,6 @@ var ajax_search = {
 *******************************************************************************/
 
 function set_png_img(start, end, id) {
-    id=id.replace(/^#/g, '');
     var newUrl = pnp_url + "&start=" + start + "&end=" + end;
     //debug(newUrl);
 
@@ -3702,6 +3701,7 @@ function set_png_img(start, end, id) {
 
     // set style of buttons
     if(id) {
+        id=id.replace(/^#/g, '');
         for(x=1;x<=5;x++) {
             obj = document.getElementById("pnp_th"+x);
             styleElements(obj, "original", 1);
