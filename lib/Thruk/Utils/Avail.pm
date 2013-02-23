@@ -98,7 +98,7 @@ sub calculate_availability {
         $c->stash->{timeperiod} = '';
     }
 
-    my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'};
+    my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'} || '';
     my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};
     my $assumestateretention         = $c->{'request'}->{'parameters'}->{'assumestateretention'};
     my $assumestatesduringnotrunning = $c->{'request'}->{'parameters'}->{'assumestatesduringnotrunning'};
