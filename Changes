@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.64-2   Sat Feb 23 17:14:11 CET 2013
           - config tool
             - save & reload page display already saved changes
           - Bug Fixes
