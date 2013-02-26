@@ -1,60 +1,26 @@
-﻿var version_info = '[% fullversion(c) %]';
-var thruk_errors = [];
-[%+ IF show_error_reports +%]
+﻿[%+ IF show_error_reports +%]
+var version_info   = '[% fullversion(c) %]';
+var thruk_errors   = [];
+var bug_email_rcpt = "[% bug_email_rcpt %]";
 window.onerror = function(msg, url, line) {
   try {
     thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
-
     // hide errors from saved pages
     if(window.location.protocol != 'http:' && window.location.protocol != 'https:') { return false; }
-
     // hide errors in line 0
     if(line == 0) { return false; }
-
     // skip some errors
     [%+ FOREACH skip = skip_js_errors.list %]
-    if(msg.match(/[% skip %]/)) {
-      return false;
-    }
+    if(msg.match(/[% skip %]/)) { return false; }
     [% END +%]
-
-    var link = document.getElementById('bug_report-btnEl');
-    if(link) {
-        var text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n";
-        text = text + "Version:    " + version_info+"\n";
-        text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
-        text = text + "Browser:    " + navigator.userAgent + "\n";
-        text = text + "Backends:   ";
-        var first = 1;
-        for(var nr in initial_backends) {
-            if(!first) { text = text + '            '; }
-            text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
-            first = 0;
-        }
-        text = text + "[% debug_details.replace('\n', '\\n') %]\n";
-        text = text + "Stacktrace:\n";
-        for(var nr in thruk_errors) {
-            text = text + thruk_errors[nr]+"\n";
-        }
-        link.href="mailto:[% bug_email_rcpt %]?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
-    }
-    showBugReport('bug_report');
+    var text = getErrorText("[% debug_details.replace('\n', '\\n') %]\n");
+    [%+ IF show_error_reports == "server" %]
+    sendJSError("[% url_prefix %]thruk/cgi-bin/remote.cgi?log", text);
+    [% ELSE %]
+    showBugReport('bug_report', text);
+    [% END +%]
   }
-  catch(e) {}
-
+  catch(e) { debug(e); }
   return false;
 };
 [%+ END +%]
-
-function showBugReport(id) {
-  var obj = document.getElementById(id);
-  try {
-    Ext.getCmp(id).show();
-  }
-  catch(e) {
-    if(obj) {
-      obj.style.display    = '';
-      obj.style.visibility = 'visible';
-    }
-  }
-}

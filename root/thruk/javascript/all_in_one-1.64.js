@@ -933,6 +933,60 @@ function do_table_search() {
     });
 }
 
+/* show bug report icon */
+function showBugReport(id, text) {
+    var link = document.getElementById('bug_report-btnEl');
+    if(link) {
+        text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
+        link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+    }
+
+    var obj = document.getElementById(id);
+    try {
+        Ext.getCmp(id).show();
+    }
+    catch(e) {
+        if(obj) {
+            obj.style.display    = '';
+            obj.style.visibility = 'visible';
+        }
+    }
+}
+
+/* create error text for bug reports */
+function getErrorText(details) {
+    var text = "";
+    text = text + "Version:    " + version_info+"\n";
+    text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
+    text = text + "Browser:    " + navigator.userAgent + "\n";
+    text = text + "Backends:   ";
+    var first = 1;
+    for(var nr in initial_backends) {
+        if(!first) { text = text + '            '; }
+        text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
+        first = 0;
+    }
+    text = text + details;
+    text = text + "Stacktrace:\n";
+    for(var nr in thruk_errors) {
+        text = text + thruk_errors[nr]+"\n";
+    }
+    return(text);
+}
+
+/* create error text for bug reports */
+function sendJSError(scripturl, text) {
+    if(window.XMLHttpRequest) {
+        var xhr = new XMLHttpRequest();
+        text = '---------------\nJS-Error:\n'+text+'---------------\n';
+        xhr.open("POST", scripturl);
+        xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        xhr.send(text);
+        thruk_errors = [];
+    }
+    return;
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b

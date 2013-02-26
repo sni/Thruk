@@ -1453,6 +1453,7 @@ ex.:
 
 ==== show_error_reports
 Show link to bug reports when internal errors occur.
+Set to 'server' to log js error server side.
 
 ex.:
   show_error_reports = 1

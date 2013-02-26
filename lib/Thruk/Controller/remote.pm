@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use Data::Dumper;
 use Thruk::Utils::CLI;
+use File::Slurp;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -46,6 +47,16 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->{'request'}->{'parameters'}->{'data'});
     }
     $c->stash->{'template'} = 'passthrough.tt';
+
+    # log requests?
+    if($c->{'request'}->query_keywords() and $c->{'request'}->query_keywords() eq 'log') {
+        my $file = "".$c->{'request'}->body();
+        my $msg = read_file($file);
+        unlink($file);
+        $c->log->error($msg);
+        return;
+    }
+
     return;
 }
 

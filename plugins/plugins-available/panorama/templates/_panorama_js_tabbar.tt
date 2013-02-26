@@ -23,7 +23,14 @@ Ext.define('TP.TabBar', {
             style:    'margin-top: 3px',
             width:    35,
             height:   16
-        }, {
+        },/* {
+            id:       'test error',
+            closable:  false,
+            minWidth:  28,
+            handler:   function() { alert(asdasd); return false; },
+            html:      'Err',
+            tooltip:  'Create Test Error'
+        },*/ {
             id:       'bug_report',
             closable:  false,
             minWidth:  28,
