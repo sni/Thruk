@@ -803,10 +803,20 @@ sub _task_servicesminemap {
 
     my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $servicefilter);
 
+    # automatically adjust service column hight
+    my $longest_description = 0;
+    for my $svc (sort keys %{$uniq_services}) {
+        my $l = length($svc);
+        $longest_description = $l if $l > $longest_description;
+    }
+    my $height = $longest_description * 6;
+    $height    =  40 if $height <  40;
+    $height    = 250 if $height > 250;
+
     my $service2index = {};
     my $json = {
         columns => [
-            { 'header' => '<div class="minemap_first_col">Hostname</div>', width => 120, height => 120, dataIndex => 'host_display_name' },
+            { 'header' => '<div class="minemap_first_col" style="top: '.($height/2-10).'px;">Hostname</div>', width => 120, height => $height, dataIndex => 'host_display_name' },
         ],
         data        => [],
         pi_detail   => $c->stash->{pi_detail},
@@ -817,9 +827,9 @@ sub _task_servicesminemap {
         my $index = 'col'.$x;
         $service2index->{$svc} = $index;
         push @{$json->{'columns'}}, {
-                    'header'    => '<div class="vertical">'.$svc.'</div>',
+                    'header'    => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
                     'width'     => 20,
-                    'height'    => 120,
+                    'height'    => $height,
                     'dataIndex' => $index,
                     'align'     => 'center',
                     'tdCls'     => 'mine_map_cell'

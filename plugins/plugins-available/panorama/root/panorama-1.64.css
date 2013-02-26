@@ -124,7 +124,6 @@ DIV.TP_PanletGridHosts TD.x-grid-cell, DIV.TP_PanletGridServices TD.x-grid-cell 
 /* vertical column header for minemap */
 DIV.x-grid-header-ct DIV.vertical {
   position: relative;
-  top: 50px;
   text-align: left;
   -webkit-transform: rotate(-90deg);
   -moz-transform: rotate(-90deg);
@@ -133,7 +132,6 @@ DIV.x-grid-header-ct DIV.vertical {
 }
 DIV.x-grid-header-ct DIV.minemap_first_col {
   position: relative;
-  top: 50px;
 }
 DIV.mine_map_state0, DIV.mine_map_state1, DIV.mine_map_state2, DIV.mine_map_state3, DIV.mine_map_state4 {
   width:  16px;
