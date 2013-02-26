@@ -570,6 +570,10 @@ sub _task_hosts {
         pi_detail   => $c->stash->{pi_detail},
     };
 
+    if($c->stash->{'escape_html_tags'}) {
+        for my $h ( @{$c->stash->{'data'}}) { _escape($h); }
+    }
+
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
 }
@@ -654,6 +658,10 @@ sub _task_services {
         paging      => JSON::XS::true,
         pi_detail   => $c->stash->{pi_detail},
     };
+
+    if($c->stash->{'escape_html_tags'}) {
+        for my $s ( @{$c->stash->{'data'}}) { _escape($s); }
+    }
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
@@ -912,8 +920,12 @@ sub _task_host_detail {
     my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
-        sort => { 'DESC' => 'id' } );
+        sort => { 'DESC' => 'id' }
+    );
     if(defined $hosts and scalar @{$hosts} > 0) {
+        if($c->stash->{'escape_html_tags'}) {
+            _escape($hosts->[0]);
+        }
         $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
     }
     return $c->forward('Thruk::View::JSON');
@@ -945,8 +957,12 @@ sub _task_service_detail {
     my $services  = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
-        sort => { 'DESC' => 'id' } );
+        sort => { 'DESC' => 'id' }
+    );
     if(defined $services and scalar @{$services} > 0) {
+        if($c->stash->{'escape_html_tags'}) {
+            _escape($services->[0]);
+        }
         $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
     }
     return $c->forward('Thruk::View::JSON');
@@ -1051,6 +1067,14 @@ sub _do_filter {
 sub _generate_service_popup {
     my ($self, $c, $service) = @_;
     return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'" onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.Thruk::Utils::Filter::escape_bslash($service->{'host_name'}).'\', service: \''.Thruk::Utils::Filter::escape_bslash($service->{'description'}).'\', }}})"';
+}
+
+##########################################################
+sub _escape {
+    my($o) = @_;
+    $o->{'plugin_output'}      = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'plugin_output'}));
+    $o->{'long_plugin_output'} = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'long_plugin_output'}));
+    return $o;
 }
 
 ##########################################################

@@ -185,10 +185,10 @@ TP.render_plugin_output = function(v, td, item) {
         }
     }
     if(item.data.long_plugin_output) {
-        var long_plugin_output = item.data.long_plugin_output.replace(/'/g, "");
-        long_plugin_output     = long_plugin_output.replace(/"/g, "");
+        var long_plugin_output     = item.data.long_plugin_output.replace(/"/g, "&quot;");
         long_plugin_output     = long_plugin_output.replace(/\\n/g, "<br>");
         long_plugin_output     = long_plugin_output.replace(/(\r\n|\n|\r)/gm,"");
+        long_plugin_output     = long_plugin_output.replace(/&/g, "&amp;");
         return "<div class='clickable' style='color:blue;' onClick=\"Ext.Msg.alert('Plugin Output', '"+long_plugin_output+"')\">"+v+"<\/div>";
     }
     return v;
