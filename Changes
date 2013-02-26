@@ -5,6 +5,7 @@ next:
           - panorama view:
             - auto adjust minemap column height
             - use escape_html setting from cgi.cfg
+            - support show_long_plugin_output inline
 
 1.64-2   Sat Feb 23 17:14:11 CET 2013
           - config tool

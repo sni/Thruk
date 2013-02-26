@@ -570,8 +570,11 @@ sub _task_hosts {
         pi_detail   => $c->stash->{pi_detail},
     };
 
-    if($c->stash->{'escape_html_tags'}) {
-        for my $h ( @{$c->stash->{'data'}}) { _escape($h); }
+    if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
+        for my $h ( @{$c->stash->{'data'}}) {
+            _escape($h)      if $c->stash->{'escape_html_tags'};
+            _long_plugin($h) if $c->stash->{'show_long_plugin_output'} eq 'inline';
+        }
     }
 
     $c->stash->{'json'} = $json;
@@ -659,8 +662,11 @@ sub _task_services {
         pi_detail   => $c->stash->{pi_detail},
     };
 
-    if($c->stash->{'escape_html_tags'}) {
-        for my $s ( @{$c->stash->{'data'}}) { _escape($s); }
+    if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
+        for my $s ( @{$c->stash->{'data'}}) {
+            _escape($s)      if $c->stash->{'escape_html_tags'};
+            _long_plugin($s) if $c->stash->{'show_long_plugin_output'} eq 'inline';
+        }
     }
 
     $c->stash->{'json'} = $json;
@@ -1074,6 +1080,16 @@ sub _escape {
     my($o) = @_;
     $o->{'plugin_output'}      = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'plugin_output'}));
     $o->{'long_plugin_output'} = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'long_plugin_output'}));
+    return $o;
+}
+
+##########################################################
+sub _long_plugin {
+    my($o) = @_;
+    if($o->{'long_plugin_output'}) {
+        $o->{'plugin_output'}      = $o->{'plugin_output'}.'<br>'.$o->{'long_plugin_output'};
+        $o->{'long_plugin_output'} = '';
+    }
     return $o;
 }
 
