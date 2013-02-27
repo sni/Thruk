@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - added naglintrc config file
+            - made indention and sort order configurable
           - added optional server side js error logging
           - panorama view:
             - auto adjust minemap column height

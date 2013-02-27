@@ -19,6 +19,45 @@ Provides access to core objects like hosts, services etc...
 
 =cut
 
+$Monitoring::Config::save_options = {
+    indent_object_key           => 2,
+    indent_object_value         => 30,
+    indent_object_comments      => 68,
+    list_join_string            => ',',
+    break_long_arguments        => 1,
+    object_attribute_key_order  => [
+                                    'name',
+                                    'service_description',
+                                    'host_name',
+                                    'timeperiod_name',
+                                    'contact_name',
+                                    'contactgroup_name',
+                                    'hostgroup_name',
+                                    'servicegroup_name',
+                                    'command_name',
+                                    'alias',
+                                    'address',
+                                    'parents',
+                                    'use',
+                                    'monday',
+                                    'tuesday',
+                                    'wednesday',
+                                    'thursday',
+                                    'friday',
+                                    'saturday',
+                                    'sunday',
+                                    'module_name',
+                                    'module_type',
+                                    'path',
+                                    'args',
+                                ],
+      object_cust_var_order     => [
+                                   '_TYPE',
+                                   '_TAGS',
+                                   '_APPS',
+                                ]
+};
+$Monitoring::Config::key_sort = undef;
 
 ##########################################################
 
@@ -67,6 +106,9 @@ sub new {
 
     bless $self, $class;
 
+    # read rc file
+    $self->read_rc_file();
+
     return $self;
 }
 
@@ -102,6 +144,9 @@ sub init {
 
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
+
+    # read rc file
+    $self->read_rc_file();
 
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
@@ -1982,14 +2027,96 @@ sub remote_file_save {
 
     read_rc_file()
 
-read rc file and return settings hash
+read naglint rc file and create sort function
 
 =cut
 sub read_rc_file {
     my($self, $file) = @_;
-    my $conf = new Config::General($file);
-    my %settings = $conf->getall();
-    return \%settings;
+    my @rcfiles  = glob($file || '~/.naglintrc /etc/thruk/naglint.conf '.(defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/etc/thruk/naglint.conf' : ''));
+    for my $f (@rcfiles) {
+        if(defined $f || -r $f) {
+            $file = $f;
+            last;
+        }
+    }
+
+    my %settings;
+    if($file and -r $file) {
+        my $conf = new Config::General($file);
+        %settings = $conf->getall();
+        for my $key (qw/object_attribute_key_order object_cust_var_order/) {
+            next unless defined $settings{$key};
+            $settings{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
+            $settings{$key} = [ split/\s+/mx, $settings{$key} ];
+        }
+    }
+    $self->set_save_config(\%settings);
+    return;
+}
+
+##########################################################
+
+=head2 set_save_config
+
+updates file save config
+
+=cut
+sub set_save_config {
+    my($self, $settings) = @_;
+
+    my $cfg = $Monitoring::Config::save_options;
+    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    return $cfg unless defined $settings;
+
+    for my $key (keys %{$settings}) {
+        $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
+    }
+
+    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+
+    return $cfg;
+}
+
+##########################################################
+
+=head2 _sort_by_object_keys
+
+sort function for object keys
+
+=cut
+sub _sort_by_object_keys {
+    my($attr_keys, $cust_var_keys) = @_;
+
+    return sub {
+        $a = $Monitoring::Config::Object::Parent::a;
+        $b = $Monitoring::Config::Object::Parent::b;
+        my $order = $attr_keys;
+        my $num   = scalar @{$attr_keys} + 5;
+
+        for my $ord (@{$order}) {
+            if($a eq $ord) { return -$num; }
+            if($b eq $ord) { return  $num; }
+            $num--;
+        }
+
+        my $result = $a cmp $b;
+
+        if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
+            # prefer some custom variables
+            my $cust_order = $cust_var_keys;
+            my $cust_num   = scalar @{$cust_var_keys} + 3;
+            for my $ord (@{$cust_order}) {
+                if($a eq $ord) { return -$cust_num; }
+                if($b eq $ord) { return  $cust_num; }
+                $cust_num--;
+            }
+            return $result;
+        }
+        if(substr($a, 0, 1) eq '_') { return -$result; }
+        if(substr($b, 0, 1) eq '_') { return -$result; }
+
+        return $result;
+    }
 }
 
 ##########################################################

@@ -20,6 +20,7 @@ Object Configuration Template
 
 =cut
 
+
 ##########################################################
 
 =head2 parse
@@ -107,22 +108,11 @@ in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 
 =cut
 sub as_text {
-    my($self, $settings) = @_;
+    my($self) = @_;
 
     my $disabled = $self->{'disabled'} ? '#' : '';
 
-    my $cfg = {
-        indent_object_key       => 2,
-        indent_object_value     => 30,
-        indent_object_comments  => 68,
-        list_join_string        => ',',
-        break_long_arguments    => 1,
-    };
-    if(defined $settings) {
-        for my $key (keys %{$settings}) {
-            $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
-        }
-    }
+    my $cfg = $Monitoring::Config::save_options;
 
     # save comments
     my $nr_object_lines  = 0;
@@ -364,7 +354,8 @@ sub get_sorted_keys {
     } else {
         @keys = @{$conf};
     }
-    @keys = sort _sort_by_object_keys @keys;
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
+    @keys = sort $Monitoring::Config::key_sort @keys;
     return \@keys;
 }
 
@@ -419,7 +410,8 @@ sub get_computed_config {
         }
     }
 
-    my @keys = sort _sort_by_object_keys keys %{$conf};
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
+    my @keys = sort $Monitoring::Config::key_sort keys %{$conf};
     $self->{'cache'}->{'computed'}->{$self->{'id'}} = [\@keys, $conf];
     return(\@keys, $conf);
 }
@@ -443,9 +435,10 @@ sub get_default_keys {
         push @{$categories->{$cat}}, $key;
     }
 
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
     my @result;
     for my $cat (sort _sort_by_category_keys keys %{$categories}) {
-        my @keys = sort _sort_by_object_keys @{$categories->{$cat}};
+        my @keys = sort $Monitoring::Config::key_sort @{$categories->{$cat}};
         push @result, { name => $cat, keys => \@keys };
     }
 
@@ -736,71 +729,6 @@ sub set_file {
     # otherwise we create circular references
     weaken $self->{'file'};
     return;
-}
-
-##########################################################
-
-=head2 _sort_by_object_keys
-
-sort function for object keys
-
-=cut
-sub _sort_by_object_keys {
-
-    my $num = 30;
-    my $order = [
-        "name",
-        "service_description",
-        "host_name",
-        "timeperiod_name",
-        "contact_name",
-        "contactgroup_name",
-        "hostgroup_name",
-        "servicegroup_name",
-        "command_name",
-        "alias",
-        "address",
-        "parents",
-        "use",
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-        "module_name",
-        "module_type",
-        "path",
-        "args",
-    ];
-    for my $ord (@{$order}) {
-        if($a eq $ord) { return -$num; }
-        if($b eq $ord) { return  $num; }
-        $num--;
-    }
-
-    my $result = $a cmp $b;
-
-    if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
-        # prefer some custom variables
-        my $cust_num = 10;
-        my $cust_order = [
-            "_TYPE",
-            "_TAGS",
-            "_APPS",
-        ];
-        for my $ord (@{$cust_order}) {
-            if($a eq $ord) { return -$cust_num; }
-            if($b eq $ord) { return  $cust_num; }
-            $cust_num--;
-        }
-        return $result;
-    }
-    if(substr($a, 0, 1) eq '_') { return -$result; }
-    if(substr($b, 0, 1) eq '_') { return -$result; }
-
-    return $result;
 }
 
 

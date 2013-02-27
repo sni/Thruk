@@ -914,6 +914,8 @@ sub _process_objects_page {
     $c->stash->{'coretype'}        = $c->{'obj_db'}->{'coretype'};
     $c->stash->{'bare'}            = $c->{'request'}->{'parameters'}->{'bare'} || 0;
 
+    $c->{'obj_db'}->read_rc_file();
+
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {
         return if $self->_apply_config_changes($c);

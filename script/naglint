@@ -46,10 +46,10 @@ naglint - beautify nagios config files
   -h, --help                    Show this help message and exit
   -v, --verbose                 Print verbose output
   -V, --version                 Print version
-      --config                  config file. Default is ~/.naglintrc
+  -c, --config                  config file. Default is ~/.naglintrc
   -i                            replace content inline instead of printing to stdout
   -r                            read directories recursivly
-  -c, --core                    core type can be nagios, icinga or shinken. Will be
+      --core                    core type can be nagios, icinga or shinken. Will be
                                 autodetected unless specified.
 
 =head1 DESCRIPTION
@@ -77,7 +77,7 @@ naglint has the following arguments:
 
     print verbose output too
 
-=item B<--config>
+=item B<-c> , B<--config>
 
     use different config file. Default locations are ~/.naglintrc and /etc/thruk/naglint.conf
 
@@ -85,7 +85,7 @@ naglint has the following arguments:
 
     print version and exit
 
-=item B<-c> , B<--core>
+=item B<--core>
 
     use specific config type. can be 'nagios', 'icinga' or 'shinken'.
     enables core type specific attributes. Will be autodetected unless
@@ -130,6 +130,14 @@ see FILES section for where to store config options.
 =item break_long_arguments
 
     Should long arguments be broken into multiple lines. Default 1
+
+=item object_attribute_key_order
+
+    list of attributes which should be on top of the object
+
+=item object_cust_var_order
+
+    list of custom variables which will be put on top of other custom variables
 
 =back
 
@@ -212,14 +220,7 @@ sub run {
     pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
 
     # do we have a rc file?
-    $self->{'rcfile'} = {};
-    my @rcfiles  = glob($self->{'opt'}->{'config'} || '~/.naglintrc /etc/thruk/naglint.conf '.(defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/etc/thruk/naglint.conf' : ''));
-    for my $rcfile (@rcfiles) {
-        if(-r $rcfile) {
-            $self->{'rcfile'} = Monitoring::Config->read_rc_file($rcfile);
-            last;
-        }
-    }
+    Monitoring::Config->read_rc_file($self->{'opt'}->{'config'});
 
     ##############################################
     # make sure we don't touch owner and permissions
@@ -236,13 +237,13 @@ sub run {
             if($_ =~ m/^\s*}\s*$/mx) {
                 $file->update_objects_from_text($text);
                 $errors += Thruk::Utils::Scripts::print_errors($file);
-                print $file->get_new_file_content($self->{'rcfile'});
+                print $file->get_new_file_content();
                 $text = '';
             }
         }
         $file->update_objects_from_text($text);
         $errors += Thruk::Utils::Scripts::print_errors($file);
-        print $file->get_new_file_content($self->{'rcfile'});
+        print $file->get_new_file_content();
         exit $errors;
     }
 
@@ -297,10 +298,10 @@ sub _process_file {
     $file->{'changed'} = 1; # new content will only be returned for changed files
     return 1 if Thruk::Utils::Scripts::print_errors($file);
     if($self->{'opt'}->{'inline'}) {
-        $file->save($self->{'rcfile'});
+        $file->save();
         print STDERR "wrote ", $filename, "\n";
     } else {
-        print $file->get_new_file_content($self->{'rcfile'});
+        print $file->get_new_file_content();
     }
     return 0;
 }

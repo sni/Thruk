@@ -10,7 +10,42 @@ indent_object_value     = 30
 indent_object_comments  = 68
 
 # should list attributes be joined with space or not
-list_join_string        = ", "
+list_join_string        = ','
 
 # should long arguments be broken into multiple lines
 break_long_arguments    = 1
+
+# sort order for object attributes
+object_attribute_key_order = [ \
+    name \
+    service_description  \
+    host_name \
+    timeperiod_name \
+    contact_name \
+    contactgroup_name \
+    hostgroup_name \
+    servicegroup_name \
+    command_name \
+    alias \
+    address \
+    parents \
+    use \
+    monday \
+    tuesday \
+    wednesday \
+    thursday \
+    friday \
+    saturday \
+    sunday \
+    module_name \
+    module_type \
+    path \
+    args \
+]
+
+# sort order for custom variables
+object_cust_var_order = [ \
+    _TYPE \
+    _TAGS \
+    _APPS \
+]

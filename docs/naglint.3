@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "naglint 3"
-.TH naglint 3 "2013-02-27" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH naglint 3 "2013-02-28" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -140,10 +140,10 @@ naglint \- beautify nagios config files
 \&  \-h, \-\-help                    Show this help message and exit
 \&  \-v, \-\-verbose                 Print verbose output
 \&  \-V, \-\-version                 Print version
-\&      \-\-config                  config file. Default is ~/.naglintrc
+\&  \-c, \-\-config                  config file. Default is ~/.naglintrc
 \&  \-i                            replace content inline instead of printing to stdout
 \&  \-r                            read directories recursivly
-\&  \-c, \-\-core                    core type can be nagios, icinga or shinken. Will be
+\&      \-\-core                    core type can be nagios, icinga or shinken. Will be
 \&                                autodetected unless specified.
 .Ve
 .SH "DESCRIPTION"
@@ -171,8 +171,8 @@ naglint has the following arguments:
 .Vb 1
 \&    print verbose output too
 .Ve
-.IP "\fB\-\-config\fR" 4
-.IX Item "--config"
+.IP "\fB\-c\fR , \fB\-\-config\fR" 4
+.IX Item "-c , --config"
 .Vb 1
 \&    use different config file. Default locations are ~/.naglintrc and /etc/thruk/naglint.conf
 .Ve
@@ -181,8 +181,8 @@ naglint has the following arguments:
 .Vb 1
 \&    print version and exit
 .Ve
-.IP "\fB\-c\fR , \fB\-\-core\fR" 4
-.IX Item "-c , --core"
+.IP "\fB\-\-core\fR" 4
+.IX Item "--core"
 .Vb 3
 \&    use specific config type. can be \*(Aqnagios\*(Aq, \*(Aqicinga\*(Aq or \*(Aqshinken\*(Aq.
 \&    enables core type specific attributes. Will be autodetected unless
@@ -228,6 +228,16 @@ see \s-1FILES\s0 section for where to store config options.
 .IX Item "break_long_arguments"
 .Vb 1
 \&    Should long arguments be broken into multiple lines. Default 1
+.Ve
+.IP "object_attribute_key_order" 4
+.IX Item "object_attribute_key_order"
+.Vb 1
+\&    list of attributes which should be on top of the object
+.Ve
+.IP "object_cust_var_order" 4
+.IX Item "object_cust_var_order"
+.Vb 1
+\&    list of custom variables which will be put on top of other custom variables
 .Ve
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
