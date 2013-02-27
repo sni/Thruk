@@ -105,6 +105,34 @@ naglint has the following arguments:
 
 returns 0 on success or number of errors otherwise
 
+=head1 CONFIG
+
+see FILES section for where to store config options.
+
+=over
+
+=item indent_object_key
+
+    Number of spaces before object attribute names. Default 2
+
+=item indent_object_value
+
+    Number of spaces before objects attribute values. Default 30
+
+=item indent_object_comments
+
+    Number of spaces before inline comments. Default 68
+
+=item list_join_string
+
+    Should list attributes be joined with space or not. Default ','
+
+=item break_long_arguments
+
+    Should long arguments be broken into multiple lines. Default 1
+
+=back
+
 =head1 EXAMPLES
 
 Beautify single config file
@@ -178,7 +206,7 @@ sub run {
        "i"                  => \$self->{'opt'}->{'inline'},
        "r"                  => \$self->{'opt'}->{'recursive'},
        "<>"                 => sub { push @{$self->{'opt'}->{'files'}}, $_[0] },
-    ) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
+    ) or _usage('error in options');
 
     if($self->{'opt'}->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
     pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
@@ -186,8 +214,11 @@ sub run {
     # do we have a rc file?
     $self->{'rcfile'} = {};
     my @rcfiles  = glob($self->{'opt'}->{'config'} || '~/.naglintrc /etc/thruk/naglint.conf '.(defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/etc/thruk/naglint.conf' : ''));
-    if(scalar @rcfiles > 0) {
-        $self->{'rcfile'} = Monitoring::Config->read_rc_file($rcfiles[0]);
+    for my $rcfile (@rcfiles) {
+        if(-r $rcfile) {
+            $self->{'rcfile'} = Monitoring::Config->read_rc_file($rcfile);
+            last;
+        }
     }
 
     ##############################################
@@ -215,7 +246,7 @@ sub run {
         exit $errors;
     }
 
-    pod2usage( { -verbose => 2, -exit => 3 } ) if scalar @{$self->{'opt'}->{'files'}} == 0;
+    _usage('no input files!') if scalar @{$self->{'opt'}->{'files'}} == 0;
 
     # iterate all given files
     for my $filename (@{$self->{'opt'}->{'files'}}) {
@@ -228,6 +259,15 @@ sub run {
 
 ##############################################
 # SUBS
+##############################################
+sub _usage {
+    my($msg) = @_;
+    print $msg."\n" if $msg;
+    print "Usage: naglint [options] <file> [<files...>]\n";
+    print "Detailed help available with --help\n";
+    exit;
+}
+
 ##############################################
 sub _process_file {
     my($self, $filename) = @_;
