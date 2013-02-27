@@ -1978,6 +1978,22 @@ sub remote_file_save {
 
 ##########################################################
 
+=head2 read_rc_file
+
+    read_rc_file()
+
+read rc file and return settings hash
+
+=cut
+sub read_rc_file {
+    my($self, $file) = @_;
+    my $conf = new Config::General($file);
+    my %settings = $conf->getall();
+    return \%settings;
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2011, <nierlein@cpan.org>

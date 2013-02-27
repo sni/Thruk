@@ -107,9 +107,22 @@ in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 
 =cut
 sub as_text {
-    my($self) = @_;
+    my($self, $settings) = @_;
 
     my $disabled = $self->{'disabled'} ? '#' : '';
+
+    my $cfg = {
+        indent_object_key       => 2,
+        indent_object_value     => 30,
+        indent_object_comments  => 68,
+        list_join_string        => ',',
+        break_long_arguments    => 1,
+    };
+    if(defined $settings) {
+        for my $key (keys %{$settings}) {
+            $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
+        }
+    }
 
     # save comments
     my $nr_object_lines  = 0;
@@ -133,7 +146,7 @@ sub as_text {
               or $self->{'default'}->{$key}->{'type'} eq 'ENUM'
             )
         ) {
-            $value = join(',', @{$self->{'conf'}->{$key}});
+            $value = join($cfg->{'list_join_string'}, @{$self->{'conf'}->{$key}});
         } else {
             $value = $self->{'conf'}->{$key};
         }
@@ -142,7 +155,7 @@ sub as_text {
         $value = '' unless defined $value;
 
         # break very long lines
-        if($key eq 'command_line' and length($key) + length($value) > 120) {
+        if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
             my $long_command = $self->_break_long_command($key, $value, $disabled);
             $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
             $nr_object_lines += scalar @{$long_command};
@@ -152,19 +165,23 @@ sub as_text {
                 my $lastline = substr($text, $ind+1);
                 $text        = substr($text, 0, $ind);
                 $text       .= "\n";
-                $text       .= sprintf "%-68s %s\n", $lastline, $self->{'inl_comments'}->{$key};
+                my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
+                $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
             }
         } else {
             $text .= $disabled;
             my $line;
             if($value ne '') {
-                $line = sprintf "  %-30s %s", $key, $value;
+                my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+                $line = sprintf $format, "", $key, $value;
             } else {
                 # empty values are allowed
-                $line = sprintf "  %s", $key;
+                my $format = "%-".$cfg->{'indent_object_key'}."s%s";
+                $line = sprintf $format, "", $key;
             }
             if($self->{'inl_comments'}->{$key}) {
-                $text .= sprintf "%-68s %s", $line, $self->{'inl_comments'}->{$key};
+                my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
+                $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
             } else {
                 $text .= $line;
             }
@@ -766,6 +783,18 @@ sub _sort_by_object_keys {
     my $result = $a cmp $b;
 
     if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
+        # prefer some custom variables
+        my $cust_num = 10;
+        my $cust_order = [
+            "_TYPE",
+            "_TAGS",
+            "_APPS",
+        ];
+        for my $ord (@{$cust_order}) {
+            if($a eq $ord) { return -$cust_num; }
+            if($b eq $ord) { return  $cust_num; }
+            $cust_num--;
+        }
         return $result;
     }
     if(substr($a, 0, 1) eq '_') { return -$result; }

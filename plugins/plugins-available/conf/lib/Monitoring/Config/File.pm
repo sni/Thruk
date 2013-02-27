@@ -432,7 +432,7 @@ save changes to disk
 
 =cut
 sub save {
-    my ( $self ) = @_;
+    my ($self, $rcfile) = @_;
 
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
@@ -461,7 +461,7 @@ sub save {
         return;
     }
 
-    my $content = $self->get_new_file_content();
+    my $content = $self->get_new_file_content($rcfile);
     open(my $fh, '>', $self->{'path'}) or do {
         push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
         return;
@@ -527,13 +527,20 @@ returns the current raw file content
 
 =cut
 sub get_new_file_content {
-    my($self)       = @_;
+    my($self, $rcfile) = @_;
     my $new_content = '';
 
     return $new_content if $self->{'deleted'};
 
     return encode_utf8(read_file($self->{'path'})) unless $self->{'changed'};
 
+    my $settings = {};
+    if(defined $rcfile and ref $rcfile eq 'HASH') {
+        $settings = $rcfile;
+    }
+    elsif(defined $rcfile and -r $rcfile) {
+        $settings = Monitoring::Config->read_rc_file($rcfile);
+    }
     my $linenr = 1;
 
     # file with comments only
@@ -545,7 +552,7 @@ sub get_new_file_content {
     # sort by line number, but put line 0 at the end
     for my $obj (sort { $b->{'line'} > 0 <=> $a->{'line'} > 0 || $a->{'line'} <=> $b->{'line'} } @{$self->{'objects'}}) {
 
-        my($text, $nr_comment_lines, $nr_object_lines) = $obj->as_text();
+        my($text, $nr_comment_lines, $nr_object_lines) = $obj->as_text($settings);
         $new_content .= $text;
         $linenr      += $nr_comment_lines;
 

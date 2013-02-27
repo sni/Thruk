@@ -1,0 +1,16 @@
+# sample configuration for Thruks Naglint
+
+# number of spaces before object attribute names
+indent_object_key       = 2
+
+# number of spaces before objects attribute values
+indent_object_value     = 30
+
+# number of spaces before inline comments
+indent_object_comments  = 68
+
+# should list attributes be joined with space or not
+list_join_string        = ", "
+
+# should long arguments be broken into multiple lines
+break_long_arguments    = 1
