@@ -1803,6 +1803,15 @@ sub load_lwp_curl {
 }
 
 ##############################################
+
+=head2 precompile_templates
+
+  precompile_templates($c)
+
+precompile and load templates into memory
+
+=cut
+
 sub precompile_templates {
     my($c) = @_;
     my $t0 = [gettimeofday];
@@ -1828,6 +1837,15 @@ sub precompile_templates {
 }
 
 ##########################################################
+
+=head2 find_files
+
+  find_files($folder, $pattern)
+
+return list of files for folder and pattern
+
+=cut
+
 sub find_files {
     my ( $dir, $match ) = @_;
     my @files;
