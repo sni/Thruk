@@ -18,11 +18,11 @@ Patch2:        0004-thruk_fastcgi.pl.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd
 # https://fedoraproject.org/wiki/Packaging:DistTag
+# http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron cairo wget xorg-x11-server-extra
 %else
-%{?el5:Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-fonts}
-%{?el6:Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-serif-fonts}
+Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-fonts-common
 %endif
 
 %description
