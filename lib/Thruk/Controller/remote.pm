@@ -58,7 +58,6 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
             $c->log->info("started ($$)");
             $c->stash->{'text'} = 'startup done';
             if($c->config->{'precompile_templates'}) {
-                $c->config->{'precompile_templates'} = 0;
                 # compile templates in background
                 my $url = "".$c->request->uri;
                 $url    =~ s/\?startup$/?compile/gmx;
@@ -70,8 +69,12 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
 
     # compile request?
     if($action eq 'compile') {
-        $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
-        $c->log->info($c->stash->{'text'});
+        if($c->config->{'precompile_templates'}) {
+            $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
+            $c->log->info($c->stash->{'text'});
+        } else {
+            $c->stash->{'text'} = 'disabled or already compiled';
+        }
         return;
     }
 

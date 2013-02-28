@@ -1822,6 +1822,7 @@ sub precompile_templates {
             $c->view("TT")->render($c, $file);
         };
     }
+    $c->config->{'precompile_templates'} = 0;
     my $elapsed = tv_interval ( $t0 );
     return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
 }
