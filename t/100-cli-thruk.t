@@ -82,4 +82,10 @@ TestUtils::test_command({
     like => ['/^\s*0$/' ],
 });
 
+# precompile
+TestUtils::test_command({
+    cmd  => $BIN.' -a compile',
+    like => ['/^\d{3} templates precompiled/'],
+});
+
 done_testing();

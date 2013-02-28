@@ -387,6 +387,11 @@ sub _run_commands {
         $data->{'output'} = _cmd_uninstallcron($c);
     }
 
+    # precompile templates
+    elsif($action eq 'compile') {
+        $data->{'output'} = _cmd_precompile($c);
+    }
+
     # import mongodb logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
@@ -611,6 +616,15 @@ sub _cmd_uninstallcron {
     Thruk::Utils::update_cron_file($c);
     $c->stats->profile(end => "_cmd_uninstallcron()");
     return "cron entries removed\n";
+}
+
+##############################################
+sub _cmd_precompile {
+    my($c) = @_;
+    $c->stats->profile(begin => "_cmd_precompile()");
+    my $msg = Thruk::Utils::precompile_templates($c);
+    $c->stats->profile(end => "_cmd_precompile()");
+    return $msg;
 }
 
 ##############################################

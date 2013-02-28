@@ -1801,6 +1801,61 @@ sub load_lwp_curl {
     return 1;
 }
 
+##############################################
+sub precompile_templates {
+    my($c) = @_;
+    my $num      = 0;
+    my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
+    my $uniq     = {};
+    for my $path (@includes) {
+        my $files = find_files($path, '\.tt$');
+        for my $file (@{$files}) {
+            $file =~ s|^$path/||gmx;
+            $uniq->{$file} = 1;
+            $num++;
+        }
+    }
+    for my $file (keys %{$uniq}) {
+        eval {
+            $c->view("TT")->render($c, $file);
+        };
+    }
+    return $num." templates precompiled\n";
+}
+
+##########################################################
+sub find_files {
+    my ( $dir, $match ) = @_;
+    my @files;
+    $dir =~ s/\/$//gmxo;
+
+    my @tmpfiles;
+    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
+    while(my $file = readdir $dh) {
+        next if $file eq '.';
+        next if $file eq '..';
+        push @tmpfiles, $file;
+    }
+    closedir $dh;
+
+    for my $file (@tmpfiles) {
+        # follow sub directories
+        if(-d $dir."/".$file."/.") {
+            push @files, @{find_files($dir."/".$file, $match)};
+        }
+
+        # if its a file, make sure it matches our pattern
+        if(defined $match) {
+            my $test = $dir."/".$file;
+            next unless $test =~ m/$match/mx;
+        }
+
+        push @files, $dir."/".$file;
+    }
+
+    return \@files;
+}
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;

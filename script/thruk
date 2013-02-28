@@ -148,6 +148,8 @@ script has the following arguments
                                     (only needed during package installation)
       - uninstallcron               remove all thruk cronjobs
                                     (only needed during package deinstallation)
+      - compile                     compile templates for faster access
+
     Testing Commands
       - listbackends                list all backends
       - listhosts                   list hostnames

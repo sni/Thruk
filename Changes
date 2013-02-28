@@ -4,6 +4,7 @@ next:
           - added naglintrc config file
             - made indention and sort order configurable
           - added optional server side js error logging
+          - added 'compile' cli command to precompile templates
           - panorama view:
             - auto adjust minemap column height
             - use escape_html setting from cgi.cfg
