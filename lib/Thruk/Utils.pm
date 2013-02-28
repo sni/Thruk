@@ -23,6 +23,7 @@ use Template::Plugin::Date;
 use File::Copy;
 use File::Temp qw/tempfile/;
 use Excel::Template::Plus;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 ##############################################
 =head1 METHODS
@@ -1804,6 +1805,7 @@ sub load_lwp_curl {
 ##############################################
 sub precompile_templates {
     my($c) = @_;
+    my $t0 = [gettimeofday];
     my $num      = 0;
     my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
     my $uniq     = {};
@@ -1820,7 +1822,8 @@ sub precompile_templates {
             $c->view("TT")->render($c, $file);
         };
     }
-    return $num." templates precompiled\n";
+    my $elapsed = tv_interval ( $t0 );
+    return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
 }
 
 ##########################################################

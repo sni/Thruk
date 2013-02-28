@@ -388,6 +388,7 @@ sub set_default_config {
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
         'use_curl'                          => 0,
+        'precompile_templates'              => 1,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

@@ -48,8 +48,35 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
     $c->stash->{'template'} = 'passthrough.tt';
 
+    my $action = $c->{'request'}->query_keywords();
+    return unless $action;
+
+    # startup request?
+    if($action eq 'startup') {
+        if(!$c->config->{'started'}) {
+            $c->config->{'started'} = 1;
+            $c->log->info("started ($$)");
+            $c->stash->{'text'} = 'startup done';
+            if($c->config->{'precompile_templates'}) {
+                $c->config->{'precompile_templates'} = 0;
+                # compile templates in background
+                my $url = "".$c->request->uri;
+                $url    =~ s/\?startup$/?compile/gmx;
+                `bash -l -c "echo \$(nohup wget -q -O - '$url' > /dev/null 2>&1 &)"`;
+            }
+        }
+        return;
+    }
+
+    # compile request?
+    if($action eq 'compile') {
+        $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
+        $c->log->info($c->stash->{'text'});
+        return;
+    }
+
     # log requests?
-    if($c->{'request'}->query_keywords() and $c->{'request'}->query_keywords() eq 'log') {
+    if($action eq 'log') {
         my $file = "".$c->{'request'}->body();
         my $msg = read_file($file);
         unlink($file);
