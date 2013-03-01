@@ -1826,11 +1826,21 @@ sub precompile_templates {
             $num++;
         }
     }
+    my $stderr_output;
+    # First, save away STDERR
+    open my $savestderr, ">&STDERR";
+    close STDERR;
+    open STDERR, ">", \$stderr_output;
+
     for my $file (keys %{$uniq}) {
         eval {
             $c->view("TT")->render($c, $file);
         };
     }
+    # Now close and restore STDERR to original condition.
+    close STDERR;
+    open STDERR, ">&".$savestderr;
+
     $c->config->{'precompile_templates'} = 0;
     my $elapsed = tv_interval ( $t0 );
     return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
