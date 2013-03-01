@@ -65,7 +65,7 @@
     }
   -->
   </script>
-  <img src="[% url_prefix %]thruk/cgi-bin/remote.cgi?compile" border=0 height=1 width=1>
+  <img src="[% url_prefix %]thruk/cgi-bin/remote.cgi?compile" border=0 height=1 width=1 alt="">
   [% ssi_footer %]
   </body>
 </html>
