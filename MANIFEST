@@ -80,6 +80,7 @@ lib/Thruk/Backend/Provider/ConfigOnly.pm
 lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mongodb.pm
+lib/Thruk/Backend/Provider/Mysql.pm
 lib/Thruk/Config.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/cmd.pm
@@ -1005,6 +1006,7 @@ t/098-Pod-Coverage.t
 t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mongodb.t
+t/100-backend_mysql.t
 t/100-backend_shinken.t
 t/100-cli-examples.t
 t/100-cli-naglint.t

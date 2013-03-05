@@ -31,6 +31,7 @@ $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Mongodb',
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
+          'Thruk::Backend::Provider::Mysql',
 ];
 
 ##########################################################
@@ -154,12 +155,21 @@ sub _initialise_peer {
 
     # log cache?
     if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
-        require Thruk::Backend::Provider::Mongodb;
-        Thruk::Backend::Provider::Mongodb->import;
-        $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
-                                                peer     => $logcache,
-                                                peer_key => $self->{'key'},
-                                            });
+        if($logcache =~ m/^mysql/mxi) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $self->{'logcache'} = Thruk::Backend::Provider::Mysql->new({
+                                                    peer     => $logcache,
+                                                    peer_key => $self->{'key'},
+                                                });
+        } else {
+            require Thruk::Backend::Provider::Mongodb;
+            Thruk::Backend::Provider::Mongodb->import;
+            $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
+                                                    peer     => $logcache,
+                                                    peer_key => $self->{'key'},
+                                                });
+        }
         $self->{'class'}->{'logcache'} = $self->{'logcache'};
     }
 

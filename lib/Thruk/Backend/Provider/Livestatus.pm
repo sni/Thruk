@@ -536,7 +536,7 @@ sub get_logs {
         return $self->{'logcache'}->get_logs(%options);
     }
     $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message options contact_name command_name state_type
+        class time type state host_name service_description plugin_output message options state_type
         /] unless defined $options{'columns'};
     my @logs = reverse @{$self->_get_table('log', \%options)};
     return \@logs;

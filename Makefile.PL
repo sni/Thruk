@@ -108,10 +108,17 @@ feature     ('plugin_reports2',
   'MIME::Lite'                                    => 0,
   'Class::Inspector'                              => 0,
 );
-# reporting2 plugin
+# curl support
 feature     ('curl_support',
   -default                                        => 0,
   'LWP::Protocol::Net::Curl'                      => 0,     # required by Thruk::Backend::Provider::HTTP
+);
+
+# mysql logcache support
+feature     ('mysql_support',
+  -default                                        => 0,
+  'DBI'                                           => 0,     # required by Thruk::Backend::Provider::Mysql
+  'DBD::mysql'                                    => 0,     # required by Thruk::Backend::Provider::Mysql
 );
 
 # requirements test requirements

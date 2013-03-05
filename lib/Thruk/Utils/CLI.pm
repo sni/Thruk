@@ -392,7 +392,7 @@ sub _run_commands {
         $data->{'output'} = _cmd_precompile($c);
     }
 
-    # import mongodb logs
+    # import mongodb/mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
@@ -738,6 +738,10 @@ sub _cmd_import_logs {
     my($c, $mode, $src, $blocksize, $opt) = @_;
     $c->stats->profile(begin => "_cmd_import_logs()");
 
+    if(!defined $c->config->{'logcache'}) {
+        return("FAILED - logcache is not enabled\n", 1);
+    }
+
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
@@ -750,28 +754,42 @@ sub _cmd_import_logs {
         }
     }
 
+    my $type = 'mongodb';
+    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+
     my $verbose = 0;
     $verbose = 1 if $src eq 'local';
 
     eval {
-        require Thruk::Backend::Provider::Mongodb;
-        Thruk::Backend::Provider::Mongodb->import;
+        if($type eq 'mysql') {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+        } else {
+            require Thruk::Backend::Provider::Mongodb;
+            Thruk::Backend::Provider::Mongodb->import;
+        }
     };
     if($@) {
-        return("FAILED - failed to load mongodb support: ".$@."\n", 1);
-    }
-
-    if(!defined $c->config->{'logcache'}) {
-        return("FAILED - logcache is not enabled\n", 1);
+        return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
     if($mode eq 'stats') {
-        my $stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        my $stats;
+        if($type eq 'mysql') {
+            $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
+        } else {
+            $stats= Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        }
         $c->stats->profile(end => "_cmd_import_logs()");
         return($stats."\n", 0);
     } else {
         my $t1 = time();
-        my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+        my($backend_count, $log_count);
+        if($type eq 'mysql') {
+            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize);
+        } else {
+            ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+        }
         my $t2 = time();
         $c->stats->profile(end => "_cmd_import_logs()");
         my $action = "imported";
@@ -912,7 +930,10 @@ sub _cmd_raw {
 
     # remove useless mongodb _id if using logcache
     if($function eq 'get_logs' and $c->config->{'logcache'} and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'ARRAY') {
-        for (@{$res->[2]}) { delete $_->{'_id'} }
+        if($c->config->{'logcache'} =~ m/^mysql/mx) {
+        } else {
+            for (@{$res->[2]}) { delete $_->{'_id'} }
+        }
     }
 
     return($res, 0);

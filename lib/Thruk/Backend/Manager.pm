@@ -650,15 +650,22 @@ sub renew_logcache {
     }
 
     if($check) {
-        my @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        my $type = 'mongodb';
+        $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+        my @stats;
+        if($type eq 'mysql') {
+            @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
+        } else {
+            @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        }
         my $stats = Thruk::Utils::array2hash(\@stats, 'key');
         my $backends2import = [];
         for my $key (@{$get_results_for}) {
             push @{$backends2import}, $key unless defined $stats->{$key};
         }
         if(scalar @{$backends2import} > 0) {
-            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::Mongodb->_import_logs($c, "import")',
-                                                      message   => 'please stand by while your logfiles will be imported...',
+            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                                      message   => 'please stand by while your initial logfile cache will be created...',
                                                       forward   => $c->request->uri(),
                                                       backends  => $backends2import,
                                                       nofork    => $noforks,

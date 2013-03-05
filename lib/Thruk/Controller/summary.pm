@@ -154,8 +154,11 @@ sub _create_report {
     # get filter from parameters
     my($hostfilter, $servicefilter) = $self->_get_filter($c);
 
-    push @{$hostfilter},    { -and => [ time => { '>=' => $start }, time => { '<=' => $end } ] };
-    push @{$servicefilter}, { -and => [ time => { '>=' => $start }, time => { '<=' => $end } ] };
+    unshift @{$hostfilter}, { time => { '<=' => $end }};
+    unshift @{$hostfilter}, { time => { '>=' => $start }};
+
+    unshift @{$servicefilter}, { time => { '<=' => $end }};
+    unshift @{$servicefilter}, { time => { '>=' => $start }};
 
     my $alertlogs = $self->_get_alerts_from_log($c, $hostfilter, $servicefilter);
 
@@ -376,13 +379,13 @@ sub _get_alerts_from_log {
 
     if($c->stash->{alerttypefilter} ne "Service") {
         $c->stats->profile(begin => "summary.pm fetch host logs");
-        $hostlogs = $c->{'db'}->get_logs(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'log'), $hostfilter]);
+        $hostlogs = $c->{'db'}->get_logs(filter => [$hostfilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')]);
         $c->stats->profile(end   => "summary.pm fetch host logs");
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
         $c->stats->profile(begin => "summary.pm fetch service logs");
-        $servicelogs = $c->{'db'}->get_logs(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'log'), $servicefilter]);
+        $servicelogs = $c->{'db'}->get_logs(filter => [$servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'log')]);
         $c->stats->profile(end   => "summary.pm fetch service logs");
     }
 
@@ -415,13 +418,13 @@ sub _get_filter {
     my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'} || 3;
     if($statetypes == AE_SOFT) {
         $c->stash->{statetypefilter} = "Soft";
-        push @servicefilter, { options => { '~' => ';SOFT;' }};
-        push @hostfilter,    { options => { '~' => ';SOFT;' }};
+        push @servicefilter, { state_type => { '=' => 'SOFT' }};
+        push @hostfilter,    { state_type => { '=' => 'SOFT' }};
     }
     elsif($statetypes == AE_HARD) {
         $c->stash->{statetypefilter} = "Hard";
-        push @servicefilter, { options => { '~' => ';HARD;' }};
-        push @hostfilter,    { options => { '~' => ';HARD;' }};
+        push @servicefilter, { state_type => { '=' => 'HARD' }};
+        push @hostfilter,    { state_type => { '=' => 'HARD' }};
     }
     else {
         $c->stash->{statetypefilter} = "Hard &amp; Soft";

@@ -221,9 +221,9 @@ sub get_events {
         # host states
         my $hst_softlogfilter;
         if($hst_states eq 'hard') {
-            $hst_softlogfilter = { options => { '~' => ';HARD;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($hst_states eq 'soft') {
-            $hst_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/up down unreachable/) {
             if(defined $typeshash->{'host_'.$state}) {
@@ -238,9 +238,9 @@ sub get_events {
         # service states
         my $svc_softlogfilter;
         if($svc_states eq 'hard') {
-            $svc_softlogfilter = { options => { '~' => ';HARD;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($svc_states eq 'soft') {
-            $svc_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/ok warning unknown critical/) {
             if(defined $typeshash->{'service_'.$state}) {

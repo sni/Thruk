@@ -88,7 +88,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     elsif($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
-        push @{$filter}, { contact_name => $contact } if $contact ne 'all';
+        push @{$filter}, { message => { '~' => ';'.$contact.';' }} if $contact ne 'all';
     }
 
     push @{$filter}, { class => 3 };
@@ -174,22 +174,22 @@ sub _get_log_prop_filter {
             push @prop_filter, { -and => [ state => 0, service_description => undef ]};
         }
         if($bits[9]) {  # 512 - Service acknowledgements
-            push @prop_filter, { -and => [ options => { '~' => ';ACKNOWLEDGEMENT' }, service_description => { '!=' => undef }]};
+            push @prop_filter, { -and => [ message => { '~' => ';ACKNOWLEDGEMENT' }, service_description => { '!=' => undef }]};
         }
         if($bits[10]) {  # 1024 - Host acknowledgements
-            push @prop_filter, { -and => [ options => { '~' => ';ACKNOWLEDGEMENT' }, service_description => undef ]};
+            push @prop_filter, { -and => [ message => { '~' => ';ACKNOWLEDGEMENT' }, service_description => undef ]};
         }
         if($bits[11]) {  # 2048 - Service flapping
-            push @prop_filter, { -and => [ options => { '~' => ';FLAPPING' }, service_description => { '!=' => undef }]};
+            push @prop_filter, { -and => [ message => { '~' => ';FLAPPING' }, service_description => { '!=' => undef }]};
         }
         if($bits[12]) {  # 4096 - Host flapping
-            push @prop_filter, { -and => [ options => { '~' => ';FLAPPING' }, service_description => undef ]};
+            push @prop_filter, { -and => [ message => { '~' => ';FLAPPING' }, service_description => undef ]};
         }
         if($bits[13]) {  # 8192 - Service custom
-            push @prop_filter, { -and => [ options => { '~' => ';CUSTOM' }, service_description => { '!=' => undef }]};
+            push @prop_filter, { -and => [ message => { '~' => ';CUSTOM' }, service_description => { '!=' => undef }]};
         }
         if($bits[14]) {  # 16384 - Host custom
-            push @prop_filter, { -and => [ options => { '~' => ';CUSTOM' }, service_description => undef ]};
+            push @prop_filter, { -and => [ message => { '~' => ';CUSTOM' }, service_description => undef ]};
         }
     }
     return Thruk::Utils::combine_filter('-or', \@prop_filter);

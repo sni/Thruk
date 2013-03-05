@@ -188,7 +188,7 @@ sub calculate_availability {
 
     my $softlogfilter;
     if(!$includesoftstates or $includesoftstates eq 'no') {
-        $softlogfilter = { options => { '~' => ';HARD;' }};
+        $softlogfilter = { state_type => { '=' => 'HARD' }};
     }
 
     my $logs;
@@ -464,7 +464,7 @@ sub calculate_availability {
     $c->{'db'}->renew_logcache($c, 1);
     $c->stats->profile(end   => "avail.pm updatecache");
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type options/ ]);
+    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ]);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
     $c->stats->profile(begin => "calculate availability");
