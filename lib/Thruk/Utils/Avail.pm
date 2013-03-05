@@ -201,6 +201,7 @@ sub calculate_availability {
     ]};
 
     # services
+    $c->stash->{'services'} = {};
     if(defined $service) {
         my $all_services;
         my @servicefilter;
