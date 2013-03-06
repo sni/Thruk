@@ -178,7 +178,7 @@ sub _js {
     $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
 
     unless($only_data) {
-        $c->res->content_type('text/javascript');
+        $c->res->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';
     }
     return 1;
