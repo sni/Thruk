@@ -795,6 +795,7 @@ sub _cmd_import_logs {
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
+        return("\n", 0) if $log_count == -1;
         return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully in ".($t2-$t1)."s\n", 0);
     }
 }

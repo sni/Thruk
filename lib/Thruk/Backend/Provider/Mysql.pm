@@ -892,12 +892,6 @@ sub _update_logcache {
 
     my $log_count = 0;
 
-    if($mode eq 'import') {
-        for my $stm (@{_get_create_statements($prefix)}) {
-            $dbh->do($stm);
-        }
-    }
-
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
@@ -905,6 +899,27 @@ sub _update_logcache {
         return $log_count;
     }
 
+    # check if there is already a update / import running
+    my $skip = 0;
+    eval {
+        my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM '.$prefix.'_status WHERE status_id = 2 LIMIT 1')};
+        if(scalar @pids > 0 and $pids[0]) {
+            if(kill(0, $pids[0])) {
+                print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
+                $skip = 1;
+            }
+        }
+    };
+    return(-1) if $skip;
+
+    if($mode eq 'import') {
+        for my $stm (@{_get_create_statements($prefix)}) {
+            $dbh->do($stm);
+        }
+    }
+
+    $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 1");
+    $dbh->do("UPDATE ".$prefix."_status SET value=".$$." WHERE status_id = 2");
 
     my $host_lookup    = {};
     my $service_lookup = {};
@@ -1005,6 +1020,9 @@ sub _update_logcache {
         print "updateing auth cache\n" if $verbose;
         $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
     }
+
+    $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 1");
+    $dbh->do("UPDATE ".$prefix."_status SET value='' WHERE status_id = 2");
 
     return $log_count;
 }
@@ -1317,6 +1335,17 @@ sub _get_create_statements {
           service_description varchar(150) COLLATE utf8_unicode_ci NOT NULL,
           PRIMARY KEY (service_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+
+        "DROP TABLE IF EXISTS ".$prefix."_status",
+        "CREATE TABLE ".$prefix."_status (
+          status_id smallint(4) unsigned NOT NULL AUTO_INCREMENT,
+          name varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+          value varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (status_id)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+
+        "INSERT INTO ".$prefix."_status (name, value) VALUES('last_update', '')",
+        "INSERT INTO ".$prefix."_status (name, value) VALUES('update_pid', '')",
     );
     return \@statements;
 }
