@@ -82,7 +82,7 @@
             <table>
               [% FOREACH cust = custom_vars %]
               <tr>
-                <td style="padding-right: 7px;">
+                <td style="padding-right: 7px;" valign="top">
                   <font size="-1"><i>[% cust.0 %]</i></font><br clear="all">
                 </td>
                 <td>
