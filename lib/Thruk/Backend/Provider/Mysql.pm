@@ -1082,6 +1082,15 @@ sub _update_logcache_auth {
     $dbh->commit;
     print "\n" if $verbose;
 
+    # update sort order every day
+    my @times = @{$dbh->selectcol_arrayref('SELECT value FROM '.$prefix.'_status WHERE status_id = 3 LIMIT 1')};
+    if($times[0] < time()-86400) {
+        print "update logs table order..." if $verbose;
+        $dbh->do("ALTER TABLE ".$prefix."_log ORDER BY time");
+        $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 3");
+        print "done\n" if $verbose;
+    }
+
     return(scalar @{$hosts} + scalar @{$services});
 }
 
@@ -1295,6 +1304,7 @@ sub _trim_log_entry {
 sub _get_create_statements {
     my($prefix) = @_;
     my @statements = (
+    # contact
         "DROP TABLE IF EXISTS ".$prefix."_contact",
         "CREATE TABLE ".$prefix."_contact (
           contact_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -1302,6 +1312,7 @@ sub _get_create_statements {
           PRIMARY KEY (contact_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # contact_host_rel
         "DROP TABLE IF EXISTS ".$prefix."_contact_host_rel",
         "CREATE TABLE ".$prefix."_contact_host_rel (
           contact_id mediumint(8) unsigned NOT NULL,
@@ -1309,6 +1320,7 @@ sub _get_create_statements {
           PRIMARY KEY (contact_id,host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # contact_service_rel
         "DROP TABLE IF EXISTS ".$prefix."_contact_service_rel",
         "CREATE TABLE ".$prefix."_contact_service_rel (
           contact_id mediumint(8) unsigned NOT NULL,
@@ -1316,6 +1328,7 @@ sub _get_create_statements {
           PRIMARY KEY (contact_id,service_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # host
         "DROP TABLE IF EXISTS ".$prefix."_host",
         "CREATE TABLE ".$prefix."_host (
           host_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -1323,10 +1336,10 @@ sub _get_create_statements {
           PRIMARY KEY (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # log
         "DROP TABLE IF EXISTS ".$prefix."_log",
-
         "CREATE TABLE IF NOT EXISTS ".$prefix."_log (
-          time int(11) unsigned NOT NULL,
+          time int(10) unsigned NOT NULL,
           class tinyint(3) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') COLLATE utf8_unicode_ci DEFAULT NULL,
           state tinyint(2) unsigned DEFAULT NULL,
@@ -1336,15 +1349,17 @@ sub _get_create_statements {
           plugin_output mediumint(8) NOT NULL,
           message mediumint(8) NOT NULL,
           KEY time (time)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci PACK_KEYS=1",
 
+    # plugin_output
         "DROP TABLE IF EXISTS ".$prefix."_plugin_output",
         "CREATE TABLE ".$prefix."_plugin_output (
           output_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-          output text NOT NULL,
+          output mediumtext COLLATE utf8_unicode_ci NOT NULL,
           PRIMARY KEY (output_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # service
         "DROP TABLE IF EXISTS ".$prefix."_service",
         "CREATE TABLE ".$prefix."_service (
           service_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -1353,6 +1368,7 @@ sub _get_create_statements {
           PRIMARY KEY (service_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
+    # status
         "DROP TABLE IF EXISTS ".$prefix."_status",
         "CREATE TABLE ".$prefix."_status (
           status_id smallint(4) unsigned NOT NULL AUTO_INCREMENT,
@@ -1361,8 +1377,9 @@ sub _get_create_statements {
           PRIMARY KEY (status_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
-        "INSERT INTO ".$prefix."_status (name, value) VALUES('last_update', '')",
-        "INSERT INTO ".$prefix."_status (name, value) VALUES('update_pid', '')",
+        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(1, 'last_update', '')",
+        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(2, 'update_pid', '')",
+        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(3, 'last_reorder', '')",
     );
     return \@statements;
 }
