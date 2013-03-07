@@ -892,6 +892,8 @@ sub _update_logcache {
 
     my $log_count = 0;
 
+    $Thruk::Backend::Provider::Mysql::skip_db_lookup = 0;
+
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
@@ -913,6 +915,7 @@ sub _update_logcache {
     return(-1) if $skip;
 
     if($mode eq 'import') {
+        $Thruk::Backend::Provider::Mysql::skip_db_lookup = 1;
         for my $stm (@{_get_create_statements($prefix)}) {
             $dbh->do($stm);
         }
@@ -949,6 +952,7 @@ sub _update_logcache {
     $c->stats->profile(end => "get livestatus timestamp");
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
+    my $stm = "INSERT INTO ".$prefix."_log (time,class,type,state,state_type,host_id,service_id,plugin_output,message) VALUES";
 
     while($time <= $end) {
         my $stime = scalar localtime $time;
@@ -986,7 +990,6 @@ sub _update_logcache {
         }
 
         $time = $time + $blocksize;
-        my $stm = "INSERT INTO ".$prefix."_log (time,class,type,state,state_type,host_id,service_id,plugin_output,message) VALUES";
         my @values;
         for my $l (@{$logs}) {
             if($mode eq 'update') {
@@ -998,7 +1001,7 @@ sub _update_logcache {
             $log_count++;
             print '.' if $log_count%100 == 0 and $verbose;
             my $type    = $l->{'type'};
-            $type = 'TIMEPERIOD TRANSITION' if $type =~ m/TIMEPERIOD\ TRANSITION/mx;
+            $type = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
             my $state   = $l->{'state'};
             if($state eq '') { $state = 'NULL'; }
             my $state_type = $l->{'state_type'};
@@ -1008,7 +1011,13 @@ sub _update_logcache {
             _trim_log_entry($l);
             my $plugin  = _plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
             my $message = _plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$host.','.$svc.','.$plugin.','.$message.')'
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$host.','.$svc.','.$plugin.','.$message.')';
+
+            # commit every 1000th to avoid to large blocks
+            if($log_count%1000) {
+                $dbh->do($stm.join(',', @values));
+                @values = ();
+            }
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
         $dbh->commit; # commit every block
@@ -1164,11 +1173,13 @@ sub _plugin_lookup {
     return $id if $id;
 
     # check database first
-    my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM '.$prefix.'_plugin_output WHERE output = '.$dbh->quote($look).' LIMIT 1')};
-    if(scalar @ids > 0) {
-        $id = $ids[0]->[0];
-        $hash->{$look} = $id;
-        return $id;
+    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
+        my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM '.$prefix.'_plugin_output WHERE output = '.$dbh->quote($look).' LIMIT 1')};
+        if(scalar @ids > 0) {
+            $id = $ids[0]->[0];
+            $hash->{$look} = $id;
+            return $id;
+        }
     }
 
     $dbh->do("INSERT INTO ".$prefix."_plugin_output (output) VALUES(".$dbh->quote($look).")");
@@ -1186,11 +1197,13 @@ sub _host_lookup {
     return $id if $id;
 
     # check database first
-    my @ids = @{$dbh->selectall_arrayref('SELECT host_id FROM '.$prefix.'_host WHERE host_name = '.$dbh->quote($host_name).' LIMIT 1')};
-    if(scalar @ids > 0) {
-        $id = $ids[0]->[0];
-        $host_lookup->{$host_name} = $id;
-        return $id;
+    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
+        my @ids = @{$dbh->selectall_arrayref('SELECT host_id FROM '.$prefix.'_host WHERE host_name = '.$dbh->quote($host_name).' LIMIT 1')};
+        if(scalar @ids > 0) {
+            $id = $ids[0]->[0];
+            $host_lookup->{$host_name} = $id;
+            return $id;
+        }
     }
 
     $dbh->do("INSERT INTO ".$prefix."_host (host_name) VALUES(".$dbh->quote($host_name).")");
@@ -1211,11 +1224,13 @@ sub _service_lookup {
     my $host_id = _host_lookup($host_lookup, $host_name, $dbh, $prefix);
 
     # check database first
-    my @ids = @{$dbh->selectall_arrayref('SELECT service_id FROM '.$prefix.'_service WHERE host_id = '.$host_id.' AND service_description = '.$dbh->quote($service_description).' LIMIT 1')};
-    if(scalar @ids > 0) {
-        $id = $ids[0]->[0];
-        $service_lookup->{$host_name}->{$service_description} = $id;
-        return $id;
+    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
+        my @ids = @{$dbh->selectall_arrayref('SELECT service_id FROM '.$prefix.'_service WHERE host_id = '.$host_id.' AND service_description = '.$dbh->quote($service_description).' LIMIT 1')};
+        if(scalar @ids > 0) {
+            $id = $ids[0]->[0];
+            $service_lookup->{$host_name}->{$service_description} = $id;
+            return $id;
+        }
     }
 
     $dbh->do("INSERT INTO ".$prefix."_service (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
@@ -1234,11 +1249,13 @@ sub _contact_lookup {
     return $id if $id;
 
     # check database first
-    my @ids = @{$dbh->selectall_arrayref('SELECT contact_id FROM '.$prefix.'_contact WHERE name = '.$dbh->quote($contact_name).' LIMIT 1')};
-    if(scalar @ids > 0) {
-        $id = $ids[0]->[0];
-        $contact_lookup->{$contact_name} = $id;
-        return $id;
+    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
+        my @ids = @{$dbh->selectall_arrayref('SELECT contact_id FROM '.$prefix.'_contact WHERE name = '.$dbh->quote($contact_name).' LIMIT 1')};
+        if(scalar @ids > 0) {
+            $id = $ids[0]->[0];
+            $contact_lookup->{$contact_name} = $id;
+            return $id;
+        }
     }
 
     $dbh->do("INSERT INTO ".$prefix."_contact (name) VALUES(".$dbh->quote($contact_name).")");
