@@ -921,7 +921,7 @@ sub _update_logcache {
         }
     }
 
-    $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 1");
+    $dbh->do("UPDATE ".$prefix."_status SET value=UNIX_TIMESTAMP() WHERE status_id = 1");
     $dbh->do("UPDATE ".$prefix."_status SET value=".$$." WHERE status_id = 2");
 
     my $host_lookup    = {};
@@ -1030,7 +1030,7 @@ sub _update_logcache {
         $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
     }
 
-    $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 1");
+    $dbh->do("UPDATE ".$prefix."_status SET value=UNIX_TIMESTAMP() WHERE status_id = 1");
     $dbh->do("UPDATE ".$prefix."_status SET value='' WHERE status_id = 2");
 
     return $log_count;
@@ -1082,13 +1082,22 @@ sub _update_logcache_auth {
     $dbh->commit;
     print "\n" if $verbose;
 
-    # update sort order every day
+    # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM '.$prefix.'_status WHERE status_id = 3 LIMIT 1')};
-    if($times[0] < time()-86400) {
+    if(scalar @times <= 0 or !$times[0] or $times[0] < time()-86400) {
         print "update logs table order..." if $verbose;
         $dbh->do("ALTER TABLE ".$prefix."_log ORDER BY time");
-        $dbh->do("UPDATE ".$prefix."_status SET value=NOW() WHERE status_id = 3");
+        $dbh->do("UPDATE ".$prefix."_status SET value=UNIX_TIMESTAMP() WHERE status_id = 3");
         print "done\n" if $verbose;
+
+        # repair / optimize tables
+        print "optimizing / repairing tables\n" if $verbose;
+        for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_lookup service status/) {
+            print $table.'...' if $verbose;
+            $dbh->do("REPAIR TABLE ".$prefix."_".$table);
+            $dbh->do("OPTIMIZE TABLE ".$prefix."_".$table);
+            print "OK\n" if $verbose;
+        }
     }
 
     return(scalar @{$hosts} + scalar @{$services});
