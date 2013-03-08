@@ -75,6 +75,12 @@ my $test_pdf_reports = [{
         'params.js'             => 'no',
         'params.css'            => 'yes',
         'params.theme'          => 'Thruk',
+    }, {
+        'name'                  => 'Event Report',
+        'template'              => 'eventlog.tt',
+        'params.timeperiod'     => 'last24hours',
+        'params.pattern'        => '',
+        'params.exclude_pattern'=> '',
     }
 ];
 

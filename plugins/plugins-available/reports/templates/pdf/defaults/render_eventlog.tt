@@ -55,7 +55,11 @@
       log_icon(x, y - 6, pic, path_to_template('pdf/icons.pdf'));
       pdf.prText(x + 25,y, "[ " _ format_date(l.time, datetime_format) _ "] " _ l.type);
       y = y - 15;
-      pdf.prText(x,y, l.options.substr(,0, 100));
+      options = message;
+      IF has_type;
+        options = options.substr(l.type.length + 2);
+      END;
+      pdf.prText(x,y, options.substr(0, 100));
       y = y - 20;
     END;
   END;

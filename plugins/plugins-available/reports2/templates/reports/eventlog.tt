@@ -94,7 +94,12 @@
                 [% format_date(l.time, reportDateTimeFormat) %]
                 <span class="logtype">[% IF has_type %][% l.type %][% END %]</span>
               </div>
-              <div class="logoptions">[% IF has_type %][% l.options.substr(,0, 130) %][% ELSE %][% message.substr(,0, 130) %][% END %]</div>
+              [% options = message;
+                 IF has_type;
+                   options = options.substr(l.type.length + 2);
+                 END;
+              %]
+              <div class="logoptions">[% options.substr(0, 130) %]</div>
             [% END %]
         [% END %]
         [% counter = counter + 1 %]
