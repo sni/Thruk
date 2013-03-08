@@ -74,7 +74,7 @@ sub new {
         $dbname = $5;
         $dbpass =~ s/^://gmx;
         $dbport =~ s/^://gmx;
-        if($dbhost =~ m|/|) {
+        if($dbhost =~ m|/|mx) {
             $dbsock = $dbhost;
             $dbhost = 'localhost';
         }
