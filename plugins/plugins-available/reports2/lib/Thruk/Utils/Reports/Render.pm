@@ -571,6 +571,14 @@ sub _replace_css_and_images {
                ("|')
                ([^>]*>)
               /&_replace_img($1,$2,$3,$4,$5)/gemx;
+    # replace images for already existing css
+    while(
+    $text =~ s/(<style.*?)
+              (url\()
+              ([^:)]*)
+              (\))
+              (.*?<\/style>)
+             /&_replace_css_img('',$2,$3,$4,$1,$5)/gemxs) {}
     return $text;
 }
 
@@ -687,16 +695,20 @@ sub _replace_js {
 
 ##############################################
 sub _replace_css_img {
-    my($css, $a,$file,$b) = @_;
+    my($css, $a,$file,$b,$pre,$post) = @_;
+    $pre  = '' unless defined $pre;
+    $post = '' unless defined $post;
     # static images
+    $file =~ s/^('|")//gmx;
+    $file =~ s/('|")$//gmx;
     if($file =~ m/\.(\w+)$/mx) {
         my $data = "data:image/$1;base64,";
         # get basename of css file
         $css =~ s|/[^/]*$||mx;
         $data .= encode_base64(_read_static_content_file($css.'/'.$file), '');
-        return "$a$data$b";
+        return "$pre$a$data$b$post";
     }
-    return "";
+    return($pre.$post);
 }
 
 ##############################################
