@@ -18308,14 +18308,20 @@ Disabled when set to 0. (experimental feature)</p></div>
 <pre><tt>connection_pool_size = 0</tt></pre>
 </div></div>
 <h4 id="_logcache">logcache</h4>
-<div class="paragraph"><p>Enables caching logfiles for faster access. Cache supports MongoDB
-only. Format is a MongoDB connection string like <em>hostname:port/db</em>.
-Using a cache dramatically decreases cpu and memory usage of Thruk
-when accessing logfiles, for example when creating reports.</p></div>
+<div class="paragraph"><p>Enables caching logfiles for faster access and less memory usage for
+the nagios process. Cache supports MongoDB and Mysql only. Prefered
+type is Mysql. Format is a Mysql/MongoDB connection string like
+<em>mysql://hostname:port/db</em>. Using a cache dramatically decreases cpu and
+memory usage of Thruk and Nagios when accessing logfiles, for example when
+creating reports.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>logcache = localhost:27017/thruk_log_cache</tt></pre>
+<pre><tt>logcache = mysql://user:password@localhost:3306/thruk_log_cache</tt></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>logcache = mongodb://localhost:27017/thruk_log_cache</tt></pre>
 </div></div>
 <h4 id="_delay_pages_after_backend_reload">delay_pages_after_backend_reload</h4>
 <div class="paragraph"><p>Delay the page delivery until the backends uptime is at least this
@@ -19619,7 +19625,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-02-26 18:20:38 CEST
+Last updated 2013-03-08 15:40:33 CEST
 </div>
 </div>
 </body>

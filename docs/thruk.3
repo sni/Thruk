@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2013-02-28" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2013-03-08" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -134,7 +134,7 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 .Vb 1
-\&  Usage: thruk [options] | url]
+\&  Usage: thruk [options] [url|files...]
 \&
 \&  Options:
 \&  \-h, \-\-help                    Show this help message and exit
@@ -155,6 +155,7 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 \&      \-\-local                   Don\*(Aqt try to connect fastcgi daemon first.
 \&
 \&  \-y, \-\-yes                     answer yes to all given questions.
+\&  \-f, \-\-force                   some actions need to be forced
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -205,6 +206,7 @@ script has the following arguments
 \&      \- logcacheauthupdate          update logcache authorization information
 \&      \- logcachestats               print logcache statistics
 \&      \- logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
+\&      \- logcacheoptimize            optimize and repair logcache (mysql only)
 \&
 \&    Internal Commands
 \&      \- installcron                 update cronjobs for downtimes and reports

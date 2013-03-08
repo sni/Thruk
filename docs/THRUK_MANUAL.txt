@@ -1530,14 +1530,19 @@ ex.:
 
 
 ==== logcache
-Enables caching logfiles for faster access. Cache supports MongoDB
-only. Format is a MongoDB connection string like 'hostname:port/db'.
-Using a cache dramatically decreases cpu and memory usage of Thruk
-when accessing logfiles, for example when creating reports.
+Enables caching logfiles for faster access and less memory usage for
+the nagios process. Cache supports MongoDB and Mysql only. Prefered
+type is Mysql. Format is a Mysql/MongoDB connection string like
+'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
+memory usage of Thruk and Nagios when accessing logfiles, for example when
+creating reports.
 
 ex.:
 
-  logcache = localhost:27017/thruk_log_cache
+  logcache = mysql://user:password@localhost:3306/thruk_log_cache
+
+  logcache = mongodb://localhost:27017/thruk_log_cache
+
 
 ==== delay_pages_after_backend_reload
 

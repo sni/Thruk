@@ -6,8 +6,9 @@ use Data::Dumper;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $replace = {
-    'Log::Log4perl::Catalyst' => 'Log::Log4perl',
-    'LWP::ConnCache'          => 'LWP::UserAgent',
+    'Log::Log4perl::Catalyst'        => 'Log::Log4perl',
+    'LWP::ConnCache'                 => 'LWP::UserAgent',
+    'Monitoring::Availability::Logs' => 'Monitoring::Availability',
 };
 
 # first get all we have already

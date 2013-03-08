@@ -30,7 +30,7 @@ create new manager
 sub new {
     my( $class, $peer_config, $config ) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = mongodb_host:port/dbname</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = mongodb://mongodb_host:port/dbname</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     $peer_config->{'name'} = 'mongo' unless defined $peer_config->{'name'};
     if(!defined $peer_config->{'peer_key'}) {
@@ -38,6 +38,7 @@ sub new {
         $peer_config->{'peer_key'} = $key;
     }
     my($dbhost, $dbname);
+    $peer_config->{'peer'} =~ s/^mongodb:\/\///mx;
     if($peer_config->{'peer'} =~ m/^(.*):(\d+)\/(.*)$/mx) {
         $dbhost = $1.":".$2;
         $dbname = $3;
@@ -1701,6 +1702,8 @@ sub _import_logs {
             }
             elsif($mode eq 'authupdate') {
                 $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
+            } else {
+                print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
         };
         print "ERROR: ", $@,"\n" if $@ and $verbose;

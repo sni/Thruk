@@ -332,8 +332,8 @@ sub _run_commands {
 
     # which command to run?
     my $action = $opt->{'action'};
-    if(defined $opt->{'url'} and $opt->{'url'} ne '') {
-        $action = 'url='.$opt->{'url'};
+    if(!$action and defined $opt->{'url'} and scalar @{$opt->{'url'}} > 0) {
+        $action = 'url='.$opt->{'url'}->[0];
     }
     if(defined $opt->{'listbackends'}) {
         $action = 'listbackends';
@@ -397,16 +397,19 @@ sub _run_commands {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
     elsif($action eq 'logcacheupdate') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src, undef, $opt);
     }
     elsif($action eq 'logcachestats') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src, undef, $opt);
     }
     elsif($action eq 'logcacheauthupdate') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src, undef, $opt);
+    }
+    elsif($action eq 'logcacheoptimize') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'optimize', $src, undef, $opt);
     }
     elsif($action =~ /logcacheclean($|=(\d+))/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2, $opt);
     }
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
@@ -746,7 +749,8 @@ sub _cmd_import_logs {
         return("ERROR - please run the initial import with --local\n", 1);
     }
     if($mode eq 'import' and !$opt->{'yes'}) {
-        print "import removes current data and imports all logfile data, continue? [n]: ";
+        print "import removes current cache and imports new logfile data.\n";
+        print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
         sysread STDIN, $buf, 1;
         if($buf !~ m/^(y|j)/mxi) {
@@ -786,7 +790,7 @@ sub _cmd_import_logs {
         my $t1 = time();
         my($backend_count, $log_count);
         if($type eq 'mysql') {
-            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize);
+            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         } else {
             ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
         }
@@ -795,8 +799,15 @@ sub _cmd_import_logs {
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
-        return("\n", 0) if $log_count == -1;
-        return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully in ".($t2-$t1)."s\n", 0);
+        return("\n", 1) if $log_count == -1;
+        return(sprintf("OK - %s %i log items from %i site%s successfully in %is (%i/s)\n",
+                       $action,
+                       $log_count,
+                       $backend_count,
+                       ($backend_count == 1 ? '' : 's'),
+                       ($t2-$t1),
+                       (($t2-$t1) > 0 ? ($log_count / ($t2-$t1)) : $log_count),
+                       ), 0);
     }
 }
 

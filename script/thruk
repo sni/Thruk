@@ -35,6 +35,7 @@ $branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 my $options = {
     'verbose'  => 1,
     'backends' => [],
+    'url'      => [],
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
@@ -51,12 +52,13 @@ GetOptions (
    "A|auth=s"           => \$options->{'auth'},
    "a|action=s"         => \$options->{'action'},
    "y|yes"              => \$options->{'yes'},
-   "<>"                 => sub { $options->{'url'} = "".shift },
+   "f|force"            => \$options->{'force'},
+   "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
 
 if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
 pod2usage( { -verbose => 2, -exit => 3 } ) if $options->{'help'};
-pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
+pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and scalar @{$options->{'url'}} == 0 and !$options->{'listbackends'};
 $options->{'verbose'} = 0 if $options->{'quiet'};
 
 use Thruk::Utils::CLI;
@@ -73,7 +75,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
 
 =head1 SYNOPSIS
 
-  Usage: thruk [options] | url]
+  Usage: thruk [options] [url|files...]
 
   Options:
   -h, --help                    Show this help message and exit
@@ -94,6 +96,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
       --local                   Don't try to connect fastcgi daemon first.
 
   -y, --yes                     answer yes to all given questions.
+  -f, --force                   some actions need to be forced
 
 =head1 DESCRIPTION
 
@@ -142,6 +145,7 @@ script has the following arguments
       - logcacheauthupdate          update logcache authorization information
       - logcachestats               print logcache statistics
       - logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
+      - logcacheoptimize            optimize and repair logcache (mysql only)
 
     Internal Commands
       - installcron                 update cronjobs for downtimes and reports

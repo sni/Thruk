@@ -1007,6 +1007,7 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mongodb.t
 t/100-backend_mysql.t
+t/100-backend_mysql_utf8.t
 t/100-backend_shinken.t
 t/100-cli-examples.t
 t/100-cli-naglint.t
@@ -1043,6 +1044,7 @@ t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
 t/data/log4perl.conf
+t/data/mysql/archive.log
 t/data/naglint/basic/in.cfg
 t/data/naglint/basic/out.cfg
 t/data/naglint/commands/in.cfg
