@@ -1,13 +1,74 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 44;
+use Test::More tests => 88;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
 
-my $m = Thruk::Backend::Provider::Mysql->new({peer => 'mysql://test:test@:12345/dbname'});
+my $m = Thruk::Backend::Provider::Mysql->new({peer => 'mysql://test:test@host:3306/dbname'});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
+
+#####################################################################
+# test some connection examples
+my $connection_strings = [
+    'mysql://test:test@host:3306/dbname' => {
+        'dbhost' => 'host',
+        'dbport' => '3306',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => 'test',
+    },
+    'mysql://test@host:3306/dbname' => {
+        'dbhost' => 'host',
+        'dbport' => '3306',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => '',
+    },
+    'mysql://test:test@host/dbname' => {
+        'dbhost' => 'host',
+        'dbport' => '',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => 'test',
+    },
+    'mysql://test@host/dbname' => {
+        'dbhost' => 'host',
+        'dbport' => '',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => '',
+    },
+    'mysql://test:test@/tmp/mysql.sock/dbname' => {
+        'dbhost' => 'localhost',
+        'dbsock' => '/tmp/mysql.sock',
+        'dbport' => '',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => 'test',
+    },
+    'mysql://test@/tmp/mysql.sock/dbname' => {
+        'dbsock' => '/tmp/mysql.sock',
+        'dbhost' => 'localhost',
+        'dbport' => '',
+        'dbname' => 'dbname',
+        'dbuser' => 'test',
+        'dbpass' => '',
+    }
+];
+my $x = 0;
+while($x < scalar @{$connection_strings}) {
+    my $con = $connection_strings->[$x];
+    my $exp = $connection_strings->[$x+1];
+    ok($con, $con);
+    my $m   = Thruk::Backend::Provider::Mysql->new({peer => $con});
+    isa_ok($m, 'Thruk::Backend::Provider::Mysql');
+    for my $key (sort keys %{$exp}) {
+        is($m->{$key}, $exp->{$key}, $key.' config');
+    }
+    $x = $x + 2;
+}
 
 #####################################################################
 test_filter(

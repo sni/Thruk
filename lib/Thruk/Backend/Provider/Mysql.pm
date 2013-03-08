@@ -65,13 +65,19 @@ sub new {
         my $key = md5_hex($peer_config->{'name'}.$peer_config->{'peer'});
         $peer_config->{'peer_key'} = $key;
     }
-    my($dbhost, $dbport, $dbuser, $dbpass, $dbname);
-    if($peer_config->{'peer'} =~ m/^mysql:\/\/(.*?):(.*?)@(.*?):(\d+)\/(.*)$/mx) {
+    my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
+    if($peer_config->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
         $dbuser = $1;
         $dbpass = $2;
         $dbhost = $3;
         $dbport = $4;
         $dbname = $5;
+        $dbpass =~ s/^://gmx;
+        $dbport =~ s/^://gmx;
+        if($dbhost =~ m|/|) {
+            $dbsock = $dbhost;
+            $dbhost = 'localhost';
+        }
     } else {
         die('Mysql connection must match this form: mysql://user:password@host:port/dbname');
     }
@@ -82,6 +88,7 @@ sub new {
         'dbname'      => $dbname,
         'dbuser'      => $dbuser,
         'dbpass'      => $dbpass,
+        'dbsock'      => $dbsock,
         'config'      => $config,
         'peer_config' => $peer_config,
         'stash'       => undef,
@@ -119,11 +126,11 @@ try to connect to database and return database handle
 sub _dbh {
     my($self) = @_;
     if(!defined $self->{'mysql'}) {
-        my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'}.";port=".$self->{'dbport'};
+        my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
+        $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
+        $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
         $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1});
-        #$self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
-        #$self->{'mysql'}->do("SET CHARACTER SET utf8");
     }
     return $self->{'mysql'};
 }
