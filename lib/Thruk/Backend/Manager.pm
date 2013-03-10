@@ -989,7 +989,7 @@ sub _do_on_peers {
         }
 
         if( $arg{'sort'} ) {
-            if($type ne 'sorted') {
+            if($type ne 'sorted' or scalar keys %{$result} > 1) {
                 $data = $self->_sort( $data, $arg{'sort'} );
             }
         }

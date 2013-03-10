@@ -348,8 +348,10 @@ sub get_logs {
     my($self, %options) = @_;
 
     my $orderby = '';
+    my $sorted  = 0;
     if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
         $orderby = ' ORDER BY l.time DESC';
+        $sorted  = 1;
     }
     my($where,$contact,$system,$strict) = $self->_get_filter($options{'filter'});
 
@@ -384,61 +386,36 @@ sub get_logs {
         '.$orderby.'
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
-    my $data = $dbh->selectall_arrayref($sql, { Slice => {} });
-    # authorization
+    # querys with authorization
+    my $data;
     if($contact) {
-        my @new_data;
-        my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM ".$prefix."_host h, ".$prefix."_contact_host_rel chr, ".$prefix."_contact c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ".$dbh->quote($contact))};
-        my $hosts_lookup = {};
-        for my $h (@hosts) { $hosts_lookup->{$h->[0]} = 1; }
+        my $sth = $dbh->prepare($sql);
+        $sth->execute;
 
-        my $sql = "SELECT h.host_name, s.service_description
-                   FROM
-                     ".$prefix."_service s,
-                     ".$prefix."_host h,
-                     ".$prefix."_contact_host_rel chr,
-                     ".$prefix."_contact c1,
-                     ".$prefix."_contact_service_rel csr,
-                     ".$prefix."_contact c2
-                   WHERE
-                     s.host_id = h.host_id
-                     AND h.host_id = chr.host_id
-                     AND c1.contact_id = chr.contact_id
-                     AND c2.contact_id = csr.contact_id
-                     AND s.service_id = csr.service_id
-                     AND (c1.name = ".$dbh->quote($contact)."
-                       OR c2.name = ".$dbh->quote($contact).")"
-                   ;
-        my $services        = $dbh->selectall_arrayref($sql);
-        my $services_lookup = {};
-        for my $s (@{$services}) { $services_lookup->{$s->[0]}->{$s->[1]} = 1; }
-        for my $r (@{$data}) {
+        my $hosts_lookup    = $self->_get_log_host_auth($dbh, $prefix, $contact);
+        my $services_lookup = $self->_get_log_service_auth($dbh, $prefix, $contact);
+
+        while(my $r = $sth->fetchrow_hashref()) {
             if($r->{'service_description'}) {
                 if($strict) {
-                    if(!defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}}) {
-                        next;
-                    }
+                    next if(!defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 } else {
-                    if(!defined $hosts_lookup->{$r->{'host_name'}} and !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}}) {
-                        next;
-                    }
+                    next if(!defined $hosts_lookup->{$r->{'host_name'}} and !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 }
             }
             elsif($r->{'host_name'}) {
-                if(!defined $hosts_lookup->{$r->{'host_name'}}) {
-                    next;
-                }
+                next if !defined $hosts_lookup->{$r->{'host_name'}};
             }
             else {
-                if(!$system) {
-                    next;
-                }
+                next if !$system;
             }
-            push @new_data, $r;
+            push @{$data}, $r;
         }
-        $data = \@new_data;
     }
-    return($data, 'sorted');
+    else {
+        $data = $dbh->selectall_arrayref($sql, { Slice => {} });
+    }
+    return($data, ($sorted ? 'sorted' : ''));
 }
 
 ##########################################################
@@ -1208,6 +1185,42 @@ sub _host_lookup {
     $host_lookup->{$host_name} = $id;
 
     return $id;
+}
+
+##########################################################
+sub _get_log_host_auth {
+    my($self,$dbh, $prefix, $contact) = @_;
+    my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM ".$prefix."_host h, ".$prefix."_contact_host_rel chr, ".$prefix."_contact c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ".$dbh->quote($contact))};
+    my $hosts_lookup = {};
+    for my $h (@hosts) { $hosts_lookup->{$h->[0]} = 1; }
+    return $hosts_lookup;
+}
+
+##########################################################
+sub _get_log_service_auth {
+    my($self,$dbh, $prefix, $contact) = @_;
+
+    my $sql = "SELECT h.host_name, s.service_description
+               FROM
+                 ".$prefix."_service s,
+                 ".$prefix."_host h,
+                 ".$prefix."_contact_host_rel chr,
+                 ".$prefix."_contact c1,
+                 ".$prefix."_contact_service_rel csr,
+                 ".$prefix."_contact c2
+               WHERE
+                 s.host_id = h.host_id
+                 AND h.host_id = chr.host_id
+                 AND c1.contact_id = chr.contact_id
+                 AND c2.contact_id = csr.contact_id
+                 AND s.service_id = csr.service_id
+                 AND (c1.name = ".$dbh->quote($contact)."
+                   OR c2.name = ".$dbh->quote($contact).")"
+               ;
+    my $services        = $dbh->selectall_arrayref($sql);
+    my $services_lookup = {};
+    for my $s (@{$services}) { $services_lookup->{$s->[0]}->{$s->[1]} = 1; }
+    return $services_lookup;
 }
 
 ##########################################################
