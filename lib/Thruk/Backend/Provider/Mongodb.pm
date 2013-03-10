@@ -1642,14 +1642,15 @@ sub _log_stats {
         my $stats = $db->run_command({collStats => $table});
         if(ref $stats eq 'HASH') {
             # http://docs.mongodb.org/manual/reference/collection-statistics/
-            my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1000);
-            my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1000);
+            my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1024);
+            my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1024);
             $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $stats->{'count'});
             push @result, {
-                key   => $key,
-                name  => $c->stash->{'backend_detail'}->{$key}->{'name'},
-                index => $val1.' '.$unit1,
-                size  => $val2.' '.$unit2,
+                key         => $key,
+                name        => $c->stash->{'backend_detail'}->{$key}->{'name'},
+                index_size  => $stats->{'totalIndexSize'},
+                data_size   => $stats->{'size'},
+                items       => $stats->{'count'},
             };
         }
     }

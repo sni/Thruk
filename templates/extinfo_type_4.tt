@@ -439,6 +439,40 @@
           </td>
         </tr>
 -->
+
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Logcache Statistics:</div></td>
+          <td valign="top" colspan=2>
+            <table border="1" cellspacing="0" cellpadding="0" class="data logcache_stats">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Backend</th>
+                      <th class='data'>Data Usage</th>
+                      <th class='data'>Index Usage</th>
+                      <th class='data'>Items</th>
+                      <th class='data'>Oldest Item</th>
+                      <th class='data'>Latest Item</th>
+                    </tr>
+                    [% FOREACH peer_key = logcache_stats.keys %]
+                    [% s = logcache_stats.$peer_key %]
+                    <tr>
+                      <td class='dataVal'>[% s.name %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
+                      <td class='dataVal'>[% sprintf('%d', s.items) %]</td>
+                      <td class='dataVal'>[% format_date(s.start, datetime_format) %]</td>
+                      <td class='dataVal'>[% format_date(s.end, datetime_format) %]</td>
+                    </tr>
+                    [% END %]
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
       </table>
     </div>
 

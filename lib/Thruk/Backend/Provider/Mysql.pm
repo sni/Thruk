@@ -852,10 +852,11 @@ sub _log_stats {
         my($val2,$unit2) = Thruk::Utils::reduce_number($data_size, 'B', 1024);
         $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $res->{$key.'_log'}->{'Rows'});
         push @result, {
-            key   => $key,
-            name  => $c->stash->{'backend_detail'}->{$key}->{'name'},
-            index => $val1.' '.$unit1,
-            size  => $val2.' '.$unit2,
+            key         => $key,
+            name        => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            index_size  => $index_size,
+            data_size   => $data_size,
+            items       => $res->{$key.'_log'}->{'Rows'},
         };
     }
 

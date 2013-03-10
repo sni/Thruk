@@ -958,6 +958,13 @@ DIV.perf_bar_crit {
 
 TD.toolbar IMG {
   vertical-align: text-bottom;
+}
+
+TABLE.logcache_stats TABLE {
+  width: 600px;
+}
+TABLE.logcache_stats TD.dataVal {
+  text-align: center;
 }#currentversioninfo {
   font-size:14px;
 }

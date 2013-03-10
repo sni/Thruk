@@ -80,6 +80,7 @@ our %config = ('name'                   => 'Thruk',
                                           'make_test_mode'      => (defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST') ? 1 : 0,
                                           'button'              => \&Thruk::Utils::Filter::button,
                                           'fullversion'         => \&Thruk::Utils::Filter::fullversion,
+                                          'reduce_number'       => \&Thruk::Utils::reduce_number,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

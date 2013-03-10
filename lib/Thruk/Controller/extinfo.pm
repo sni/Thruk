@@ -662,6 +662,13 @@ sub _process_perf_info_page {
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
+    # add logfile cache statistics
+    $c->stash->{'has_logcache'} = 0;
+    if($c->config->{'logcache'}) {
+        $c->stash->{'logcache_stats'} = $c->{'db'}->logcache_stats($c, 1);
+        $c->stash->{'has_logcache'} = 1;
+    }
+
     return 1;
 }
 

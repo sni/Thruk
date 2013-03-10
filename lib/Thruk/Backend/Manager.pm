@@ -623,6 +623,42 @@ sub set_backend_state_from_local_connections {
 
 ########################################
 
+=head2 logcache_stats
+
+  logcache_stats($c)
+
+return logcache statistics
+
+=cut
+
+sub logcache_stats {
+    my($self, $c, $with_dates) = @_;
+    return unless defined $c->config->{'logcache'};
+
+    my $type = 'mongodb';
+    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    my(@stats);
+    if($type eq 'mysql') {
+        @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
+    } else {
+        @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+    }
+    my $stats = Thruk::Utils::array2hash(\@stats, 'key');
+
+    if($with_dates) {
+        for my $key (keys %{$stats}) {
+            my $peer = $self->get_peer_by_key($key);
+            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end()};
+            $stats->{$key}->{'start'} = $start;
+            $stats->{$key}->{'end'}   = $end;
+        }
+    }
+
+    return $stats;
+}
+
+########################################
+
 =head2 renew_logcache
 
   renew_logcache($c)
@@ -652,13 +688,7 @@ sub renew_logcache {
     if($check) {
         my $type = 'mongodb';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
-        my @stats;
-        if($type eq 'mysql') {
-            @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
-        } else {
-            @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
-        }
-        my $stats = Thruk::Utils::array2hash(\@stats, 'key');
+        my $stats = $self->logcache_stats($c);
         my $backends2import = [];
         for my $key (@{$get_results_for}) {
             push @{$backends2import}, $key unless defined $stats->{$key};
