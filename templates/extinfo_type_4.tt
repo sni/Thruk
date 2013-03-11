@@ -440,6 +440,7 @@
         </tr>
 -->
 
+        [% IF has_logcache %]
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Logcache Statistics:</div></td>
           <td valign="top" colspan=2>
@@ -472,6 +473,7 @@
             </table>
           </td>
         </tr>
+        [% END %]
 
       </table>
     </div>
