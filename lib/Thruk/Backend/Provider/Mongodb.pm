@@ -8,6 +8,7 @@ use Thruk::Utils;
 use Digest::MD5 qw/md5_hex/;
 use MongoDB;
 use Tie::IxHash;
+use File::Temp qw/tempfile/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -588,11 +589,22 @@ sub get_logs {
         $sorted = 1;
     }
     my $collection= $options{'collection'} || 'logs';
-    @data = $self->_db->$collection
-                      ->find($self->_get_filter($options{'filter'}))
-                      ->sort($sort)
-                      ->all;
-    return(\@data, ($sorted ? 'sorted' : ''));
+    my $res = $self->_db->$collection
+                        ->find($self->_get_filter($options{'filter'}))
+                        ->sort($sort);
+
+    if($options{'file'}) {
+        my($fh, $filename) = tempfile();
+        open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+        while(my $r = $res->next) {
+            print $fh $r->{'message'},"\n";
+        }
+        Thruk::Utils::IO::close($fh, $filename);
+        return($filename, 'file');
+    } else {
+        my @data = $res->all;
+        return(\@data, ($sorted ? 'sorted' : ''));
+    }
 }
 
 ##########################################################

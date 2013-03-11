@@ -955,10 +955,12 @@ sub _do_on_peers {
         }
     }
 
-
     # howto merge the answers?
     my $data;
-    if( lc $type eq 'uniq' ) {
+    if( lc $type eq 'file' ) {
+        $data = $result;
+    }
+    elsif( lc $type eq 'uniq' ) {
         $data = $self->_merge_answer( $result, $type );
         my %seen = ();
         my @uniq = sort( grep { !$seen{$_}++ } @{$data} );
@@ -979,7 +981,6 @@ sub _do_on_peers {
     else {
         $data = $self->_merge_answer( $result, $type );
     }
-
 
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
@@ -1003,56 +1004,7 @@ sub _do_on_peers {
         }
     }
 
-    # set some defaults if no backends where selected
-    if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
-        $data = {};
-        for my $type (qw{hosts services}) {
-            for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
-                            _passive_sum _passive_1_sum _passive_5_sum _passive_15_sum _passive_60_sum _passive_all_sum
-                            _execution_time_sum _latency_sum _active_state_change_sum _execution_time_min _latency_min _active_state_change_min _execution_time_max _latency_max
-                            _active_state_change_max _passive_state_change_sum _passive_state_change_min _passive_state_change_max
-                            _execution_time_avg _latency_avg }) {
-                $data->{$type.$key} = 0;
-            }
-        }
-    }
-    elsif($function eq "get_service_stats" and ref $data eq 'ARRAY') {
-        $data = {};
-        for my $key (qw{
-                        total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
-                        warning warning_and_disabled warning_and_scheduled warning_and_ack warning_on_down_host warning_and_unhandled critical
-                        critical_and_disabled critical_and_scheduled critical_and_ack critical_on_down_host critical_and_unhandled
-                        unknown unknown_and_disabled unknown_and_scheduled unknown_and_ack unknown_on_down_host unknown_and_unhandled
-                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled
-                        critical_and_disabled_active critical_and_disabled_passive warning_and_disabled_active warning_and_disabled_passive
-                        unknown_and_disabled_active unknown_and_disabled_passive ok_and_disabled_active ok_and_disabled_passive
-                        active_checks_disabled_active active_checks_disabled_passive
-                     }) {
-            $data->{$key} = 0;
-        }
-    }
-    elsif($function eq "get_host_stats" and ref $data eq 'ARRAY') {
-        $data = {};
-        for my $key (qw{
-                        total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
-                        down down_and_ack down_and_scheduled down_and_disabled down_and_unhandled unreachable unreachable_and_ack unreachable_and_scheduled
-                        unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
-                        down_and_disabled_active down_and_disabled_passive unreachable_and_disabled_active unreachable_and_disabled_passive up_and_disabled_active
-                        up_and_disabled_passive active_checks_disabled_active active_checks_disabled_passive
-                     }) {
-            $data->{$key} = 0;
-        }
-    }
-    elsif($function eq "get_extra_perf_stats" and ref $data eq 'ARRAY') {
-        $data = {};
-        for my $key (qw{
-                        cached_log_messages connections connections_rate host_checks
-                        host_checks_rate requests requests_rate service_checks
-                        service_checks_rate neb_callbacks neb_callbacks_rate
-                     }) {
-            $data->{$key} = 0;
-        }
-    }
+    $self->_set_result_defaults($function, $data);
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
@@ -1932,6 +1884,70 @@ sub _do_thread {
     return(_do_on_peer($key, $function, $arg));
 }
 
+########################################
+
+=head2 _set_result_defaults
+
+  _set_result_defaults()
+
+set defaults for some results
+
+=cut
+
+sub _set_result_defaults {
+    my($self, $function, $data) = @_;
+    # set some defaults if no backends where selected
+    if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $type (qw{hosts services}) {
+            for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
+                            _passive_sum _passive_1_sum _passive_5_sum _passive_15_sum _passive_60_sum _passive_all_sum
+                            _execution_time_sum _latency_sum _active_state_change_sum _execution_time_min _latency_min _active_state_change_min _execution_time_max _latency_max
+                            _active_state_change_max _passive_state_change_sum _passive_state_change_min _passive_state_change_max
+                            _execution_time_avg _latency_avg }) {
+                $data->{$type.$key} = 0;
+            }
+        }
+    }
+    elsif($function eq "get_service_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
+                        warning warning_and_disabled warning_and_scheduled warning_and_ack warning_on_down_host warning_and_unhandled critical
+                        critical_and_disabled critical_and_scheduled critical_and_ack critical_on_down_host critical_and_unhandled
+                        unknown unknown_and_disabled unknown_and_scheduled unknown_and_ack unknown_on_down_host unknown_and_unhandled
+                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled
+                        critical_and_disabled_active critical_and_disabled_passive warning_and_disabled_active warning_and_disabled_passive
+                        unknown_and_disabled_active unknown_and_disabled_passive ok_and_disabled_active ok_and_disabled_passive
+                        active_checks_disabled_active active_checks_disabled_passive
+                     }) {
+            $data->{$key} = 0;
+        }
+    }
+    elsif($function eq "get_host_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
+                        down down_and_ack down_and_scheduled down_and_disabled down_and_unhandled unreachable unreachable_and_ack unreachable_and_scheduled
+                        unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
+                        down_and_disabled_active down_and_disabled_passive unreachable_and_disabled_active unreachable_and_disabled_passive up_and_disabled_active
+                        up_and_disabled_passive active_checks_disabled_active active_checks_disabled_passive
+                     }) {
+            $data->{$key} = 0;
+        }
+    }
+    elsif($function eq "get_extra_perf_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        cached_log_messages connections connections_rate host_checks
+                        host_checks_rate requests requests_rate service_checks
+                        service_checks_rate neb_callbacks neb_callbacks_rate
+                     }) {
+            $data->{$key} = 0;
+        }
+    }
+    return;
+}
 
 =head1 AUTHOR
 

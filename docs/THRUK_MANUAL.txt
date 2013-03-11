@@ -807,6 +807,18 @@ ex.:
   first_day_of_week = 0
 
 
+==== report_use_temp_files
+Large reports will use temp files to avoid extreme memory usage.
+With 'report_use_temp_files' you may set the report duration in days
+which will trigger the use of temp files. Default is 14days, so
+for example the 'last31days' report will use temp files, the 'thisweek'
+not. Can be disabled by setting to 0.
+
+ex.:
+
+  report_use_temp_files = 14
+
+
 ==== start_page
 
 This link is used as startpage and points usually to the main.html

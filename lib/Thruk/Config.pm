@@ -390,6 +390,7 @@ sub set_default_config {
         'ssl_verify_hostnames'              => 1,
         'use_curl'                          => 0,
         'precompile_templates'              => 1,
+        'report_use_temp_files'             => 14,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

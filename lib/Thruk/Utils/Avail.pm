@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
+use File::Temp qw/tempfile/;
 
 ##############################################
 
@@ -463,9 +464,26 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm updatecache");
     $c->{'db'}->renew_logcache($c, 1);
     $c->stats->profile(end   => "avail.pm updatecache");
+
+    # use tempfiles for reports > 14 days
+    my $file = 0;
+    if($c->config->{'report_use_temp_files'} and ($end - $logstart) / 86400 > $c->config->{'report_use_temp_files'}) {
+        $file = 1;
+    }
+
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ]);
+    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
+
+    if($file) {
+        my($fh,$tempfile) = tempfile();
+        $c->stats->profile(begin => "avail.pm sort logs");
+        my $cmd = 'sort -k 1,12 -o '.$tempfile.' '.join(' ', values %{$logs});
+        `$cmd > $tempfile`;
+        unlink(values %{$logs});
+        $c->stats->profile(end   => "avail.pm sort logs");
+        $file = $tempfile;
+    }
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new();
@@ -490,8 +508,14 @@ sub calculate_availability {
         'backtrack'                    => $backtrack,
         'breakdown'                    => $breakdown,
     };
+    if($file) {
+        delete $ma_options->{'log_livestatus'};
+        $ma_options->{'log_file'} = $file;
+    }
     $c->stash->{avail_data} = $ma->calculate(%{$ma_options});
     $c->stats->profile(end => "calculate availability");
+
+    unlink($file) if $file;
 
     if($c->{'request'}->{'parameters'}->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";

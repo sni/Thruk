@@ -7,6 +7,7 @@ use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
 use utf8;
 use DBI;
+use File::Temp qw/tempfile/;
 use Thruk::Utils;
 use Monitoring::Availability::Logs;
 use parent 'Thruk::Backend::Provider::Base';
@@ -386,6 +387,14 @@ sub get_logs {
         '.$orderby.'
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
+
+    # logfiles into tmp file
+    my($fh, $filename);
+    if($options{'file'}) {
+        ($fh, $filename) = tempfile();
+        open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+    }
+
     # querys with authorization
     my $data;
     if($contact) {
@@ -409,13 +418,30 @@ sub get_logs {
             else {
                 next if !$system;
             }
-            push @{$data}, $r;
+            if($fh) {
+                print $fh $r->{'message'},"\n";
+            } else {
+                push @{$data}, $r;
+            }
         }
     }
     else {
-        $data = $dbh->selectall_arrayref($sql, { Slice => {} });
+        if($fh) {
+            my $sth = $dbh->prepare($sql);
+            $sth->execute;
+            while(my $r = $sth->fetchrow_arrayref()) {
+                print $fh $r->[8],"\n";
+            }
+        } else {
+            $data = $dbh->selectall_arrayref($sql, { Slice => {} });
+        }
     }
-    return($data, ($sorted ? 'sorted' : ''));
+    if($fh) {
+        Thruk::Utils::IO::close($fh, $filename);
+        return($filename, 'file');
+    } else {
+        return($data, ($sorted ? 'sorted' : ''));
+    }
 }
 
 ##########################################################

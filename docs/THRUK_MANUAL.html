@@ -17342,6 +17342,8 @@ logfile cache:</p></div>
 
 <div class='toclevel4'><a href='#_first_day_of_week'>first_day_of_week</a></div>
 
+<div class='toclevel4'><a href='#_report_use_temp_files'>report_use_temp_files</a></div>
+
 <div class='toclevel4'><a href='#_start_page'>start_page</a></div>
 
 <div class='toclevel4'><a href='#_documentation_link'>documentation_link</a></div>
@@ -17684,6 +17686,17 @@ the themes folder.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>first_day_of_week = 0</tt></pre>
+</div></div>
+<h4 id="_report_use_temp_files">report_use_temp_files</h4>
+<div class="paragraph"><p>Large reports will use temp files to avoid extreme memory usage.
+With <em>report_use_temp_files</em> you may set the report duration in days
+which will trigger the use of temp files. Default is 14days, so
+for example the <em>last31days</em> report will use temp files, the <em>thisweek</em>
+not. Can be disabled by setting to 0.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>report_use_temp_files = 14</tt></pre>
 </div></div>
 <h4 id="_start_page">start_page</h4>
 <div class="paragraph"><p>This link is used as startpage and points usually to the main.html
@@ -19625,7 +19638,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-03-08 15:40:33 CEST
+Last updated 2013-03-11 17:39:47 CEST
 </div>
 </div>
 </body>

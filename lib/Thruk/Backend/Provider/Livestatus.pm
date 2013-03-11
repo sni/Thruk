@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
+use File::Temp qw/tempfile/;
 use Monitoring::Livestatus::Class;
 use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
@@ -538,8 +539,19 @@ sub get_logs {
     $options{'columns'} = [qw/
         class time type state host_name service_description plugin_output message options state_type
         /] unless defined $options{'columns'};
+
     my @logs = reverse @{$self->_get_table('log', \%options)};
-    return \@logs;
+    if($options{'file'}) {
+        my($fh, $filename) = tempfile();
+        open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+        for my $r (@logs) {
+            print $fh $r->{'message'},"\n";
+        }
+        Thruk::Utils::IO::close($fh, $filename);
+        return($filename, 'file');
+    } else {
+        return \@logs;
+    }
 }
 
 
