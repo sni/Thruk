@@ -48,8 +48,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
     $c->stash->{'template'} = 'passthrough.tt';
 
-    my $action = $c->{'request'}->query_keywords();
-    return unless $action;
+    my $action = $c->{'request'}->query_keywords() || '';
 
     # startup request?
     if($action eq 'startup') {
@@ -68,7 +67,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
 
     # compile request?
-    if($action eq 'compile') {
+    if($action eq 'compile' or exists $c->{'request'}->{'parameters'}->{'compile'}) {
         if($c->config->{'precompile_templates'}) {
             $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
             $c->log->info($c->stash->{'text'});

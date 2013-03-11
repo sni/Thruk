@@ -63,9 +63,20 @@
       ref = ref.replace(/^\?/, '/');
       jQuery('#referer').val(ref);
     }
+    [%+ IF c.config.precompile_templates +%]
+    jQuery(document).ready(function() {
+      // init up to 8 threads
+      for(x=0;x<8;x++) {
+        jQuery.ajax({
+            url: '[% url_prefix %]thruk/cgi-bin/remote.cgi?compile&x='+x,
+            type: 'GET',
+            success: function() {}
+        });
+      }
+    });
+  [%+ END +%]
   -->
   </script>
-  <img src="[% url_prefix %]thruk/cgi-bin/remote.cgi?compile" border=0 height=1 width=1 alt="">
   [% ssi_footer %]
   </body>
 </html>
