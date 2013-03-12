@@ -881,7 +881,6 @@ plugins/plugins-available/shinken_features/templates/shinken_status_bothtypes.tt
 plugins/plugins-available/statusmap/description.txt
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
 plugins/plugins-available/statusmap/preview.png
-plugins/plugins-available/statusmap/root/excanvas.js
 plugins/plugins-available/statusmap/root/jit-yc.js
 plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
@@ -924,6 +923,7 @@ root/thruk/javascript/cal/img/time-down.png
 root/thruk/javascript/cal/img/time-up.png
 root/thruk/javascript/cal/jscal2.css
 root/thruk/javascript/cal/jscal2.js
+root/thruk/javascript/excanvas.js
 root/thruk/javascript/jquery-1.7.2.min.js
 root/thruk/javascript/jquery-fieldselection.js
 root/thruk/javascript/jquery-ui/css/smoothness/images/pbar-ani.gif

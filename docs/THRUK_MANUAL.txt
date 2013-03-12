@@ -1440,7 +1440,7 @@ ex.:
   perf_bar_mode = match
 
 
-==== perf_bar_pnp_popup = 1
+==== perf_bar_pnp_popup
 Show pnp popup if performance data are available and
 pnp is used as graph engine.
 
