@@ -463,8 +463,8 @@
                       <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% sprintf('%d', s.items) %]</td>
-                      <td class='dataVal'>[% format_date(s.start, datetime_format) %]</td>
-                      <td class='dataVal'>[% format_date(s.end, datetime_format) %]</td>
+                      <td class='dataVal'>[% date_format(c, s.start,) %]</td>
+                      <td class='dataVal'>[% date_format(c, s.end,) %]</td>
                     </tr>
                     [% END %]
                   </table>
