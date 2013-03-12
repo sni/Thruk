@@ -687,6 +687,9 @@ sub _replace_js {
     if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
         return "";
     }
+    if($url =~ m/excanvas\.js$/mx) {
+        return "<script language='javascript' type='text/javascript' src='".$url."'></script>";
+    }
     my $text = "<script type='text/javascript'>\n<!--\n";
     $text .= _read_static_content_file($url);
     $text .= "\n-->\n</script>\n";
