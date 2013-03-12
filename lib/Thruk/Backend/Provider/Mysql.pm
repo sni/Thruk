@@ -1032,7 +1032,7 @@ sub _update_logcache_auth {
     my $stm = "INSERT INTO ".$prefix."_contact_host_rel (contact_id, host_id) VALUES";
     $dbh->do("TRUNCATE TABLE ".$prefix."_contact_host_rel");
     for my $host (@{$hosts}) {
-        my $host_id    = _host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
+        my $host_id    = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
         my @values;
         for my $contact (@{$host->{'contacts'}}) {
             my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
@@ -1049,7 +1049,7 @@ sub _update_logcache_auth {
     $stm = "INSERT INTO ".$prefix."_contact_service_rel (contact_id, service_id) VALUES";
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts/]);
     for my $service (@{$services}) {
-        my $service_id = _service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
+        my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
         my @values;
         for my $contact (@{$service->{'contacts'}}) {
             my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
@@ -1131,7 +1131,7 @@ sub _get_service_lookup {
     my @values;
     for my $s (@{$services}) {
         next if defined $services_lookup->{$s->{'host_name'}}->{$s->{'description'}};
-        my $host_id = _host_lookup($hosts_lookup, $s->{'host_name'}, $dbh, $prefix);
+        my $host_id = &_host_lookup($hosts_lookup, $s->{'host_name'}, $dbh, $prefix);
         push @values, '('.$host_id.','.$dbh->quote($s->{'service_description'}).')';
     }
     if(scalar @values > 0) {
@@ -1257,7 +1257,7 @@ sub _service_lookup {
     my $id = $service_lookup->{$host_name}->{$service_description};
     return $id if $id;
 
-    my $host_id = _host_lookup($host_lookup, $host_name, $dbh, $prefix);
+    my $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix);
 
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
@@ -1424,12 +1424,12 @@ sub _import_logcache_from_file {
         open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
         while(my $line = <$fh>) {
             chomp($line);
-            Thruk::Utils::Conf::decode_any($line);
+            &Thruk::Utils::Conf::decode_any($line);
             if($mode eq 'update') {
                 next if defined $duplicate_lookup->{$line};
             }
             $log_count++;
-            my $l = Monitoring::Availability::Logs->_parse_line($line);
+            my $l = &Monitoring::Availability::Logs::parse_line($line);
             next unless defined $l->{'time'};
             $l->{'state_type'} = '';
             if(exists $l->{'hard'}) {
@@ -1447,17 +1447,17 @@ sub _import_logcache_from_file {
             my $state             = $l->{'state'};
             my $state_type        = $l->{'state_type'};
             $type                 = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
-            $l->{'class'}         = _get_class($l, $type);
+            $l->{'class'}         = &_get_class($l, $type);
             if($type eq 'TIMEPERIOD TRANSITION') {
                 $l->{'plugin_output'} = '';
             }
             if($state eq '')      { $state      = 'NULL'; }
             if($state_type eq '') { $state_type = 'NULL'; }
-            my $host    = _host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-            my $svc     = _service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
-            _trim_log_entry($l);
-            my $plugin  = _plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-            my $message = _plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+            my $host    = &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+            my $svc     = &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
+            &_trim_log_entry($l);
+            my $plugin  = &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
+            my $message = &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
 
             push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$host.','.$svc.','.$plugin.','.$message.')';
 
@@ -1520,11 +1520,11 @@ sub _insert_logs {
         if($state eq '') { $state = 'NULL'; }
         my $state_type = $l->{'state_type'};
         if($state_type eq '') { $state_type = 'NULL'; }
-        my $host    = _host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-        my $svc     = _service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
-        _trim_log_entry($l);
-        my $plugin  = _plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-        my $message = _plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+        my $host    = &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+        my $svc     = &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
+        &_trim_log_entry($l);
+        my $plugin  = &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
+        my $message = &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
         push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$host.','.$svc.','.$plugin.','.$message.')';
 
         # commit every 1000th to avoid to large blocks
