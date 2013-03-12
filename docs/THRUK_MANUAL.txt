@@ -1440,6 +1440,15 @@ ex.:
   perf_bar_mode = match
 
 
+==== perf_bar_pnp_popup = 1
+Show pnp popup if performance data are available and
+pnp is used as graph engine.
+
+ex.:
+
+  perf_bar_pnp_popup = 1
+
+
 ==== shown_inline_pnp
 Show inline pnp graph if available. If a service or host has a
 pnp4nagios action or notes url set. Thruk will show a inline graph on the

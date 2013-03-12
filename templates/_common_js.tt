@@ -7,6 +7,7 @@
   var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
   var fav_counter            = [% IF fav_counter +%]true[% ELSE %]false[% END %];
   var perf_bar_mode          = '[% perf_bar_mode %]';
+  var perf_bar_pnp_popup     = '[% perf_bar_pnp_popup %]';
   var internetExplorer       = false;
 -->
 </script>
