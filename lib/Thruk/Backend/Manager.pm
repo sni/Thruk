@@ -1504,6 +1504,7 @@ sub _merge_answer {
         }
         elsif ( ref $data->{$key} eq 'HASH' ) {
             $return = {} unless defined $return;
+            $return = {} unless ref $return eq 'HASH';
             $return = { %{$return}, %{ $data->{$key} } };
         }
         else {
