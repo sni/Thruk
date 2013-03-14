@@ -8,6 +8,7 @@ next:
           - added optional server side js error logging
           - added 'compile' cli command to precompile templates
           - added 'perf_bar_pnp_popup' option to control pnp popups in perfbar
+          - added logs link for hosts/services to directly filter logfiles
           - panorama view:
             - auto adjust minemap column height
             - use escape_html setting from cgi.cfg

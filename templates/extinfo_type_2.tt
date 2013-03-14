@@ -15,7 +15,7 @@
               <td class='linkBox'>
                 <a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>View Information For This Host</a><br>
                 <a href='status.cgi?host=[% service.host_name | uri %]'>View Status Detail For This Host</a><br>
-                <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a><br>
+                <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a> (<a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>Logs</a>)<br>
                 [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]'>View Impacts For This Problem</a><br>[% END %]
                 [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]'>View Root Problem For This Impact</a><br>[% END %]
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Trends For This Service</a><br>[% END %]

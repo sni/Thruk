@@ -80,6 +80,18 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         push @{$filter}, { message => { '!~~' => $exclude_pattern }};
     }
 
+    my $host    = $c->{'request'}->{'parameters'}->{'host'}    || '';
+    my $service = $c->{'request'}->{'parameters'}->{'service'} || '';
+    if($service) {
+        push @{$filter}, { host_name           => $host };
+        push @{$filter}, { service_description => $service };
+    }
+    elsif($host) {
+        push @{$filter}, { host_name           => $host };
+    }
+    $c->stash->{'host'}    = $host;
+    $c->stash->{'service'} = $service;
+
     my $order = "DESC";
     if($oldestfirst) {
         $order = "ASC";
