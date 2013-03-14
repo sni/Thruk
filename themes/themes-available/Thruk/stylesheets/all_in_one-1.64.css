@@ -2110,3 +2110,7 @@ TD.tableRowSelected, TH.tableRowSelected {
 BODY.docs DIV.infoBoxTitle {
   line-height: 13px;
 }
+
+.has_long_plugin_output {
+  color: #B94413;
+}

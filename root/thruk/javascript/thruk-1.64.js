@@ -471,7 +471,7 @@ function toggleCheckBox(id) {
   }
 }
 
-// unselect current text seletion
+/* unselect current text seletion */
 function unselectCurrentSelection(obj) {
     if (document.selection && document.selection.empty)
     {
@@ -482,6 +482,19 @@ function unselectCurrentSelection(obj) {
         window.getSelection().removeAllRanges();
     }
     return true;
+}
+
+/* return selected text */
+function getTextSelection() {
+    var t = '';
+    if(window.getSelection) {
+        t = window.getSelection();
+    } else if(document.getSelection) {
+        t = document.getSelection();
+    } else if(document.selection) {
+        t = document.selection.createRange().text;
+    }
+    return ''+t;
 }
 
 /* returns true if the shift key is pressed for that event */
@@ -1549,6 +1562,13 @@ function highlightHostRow() {
 
 /* select this service */
 function selectService(event, state) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return;
+    }
+
     unselectCurrentSelection();
     var row_id;
     // find id of current row
@@ -1649,8 +1669,13 @@ function selectServiceById(row_id, state) {
 }
 
 /* select this host */
-function selectHost(event, state)
-{
+function selectHost(event, state) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return;
+    }
     unselectCurrentSelection();
 
     var row_id;
