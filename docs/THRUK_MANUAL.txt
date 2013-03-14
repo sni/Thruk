@@ -1405,6 +1405,15 @@ ex.:
   show_long_plugin_output = popup
 
 
+==== status_color_background
+Color complete status line with status colour or just the status
+itself.
+
+ex.:
+
+  status_color_background=0
+
+
 ==== show_modified_attributes
 
 Show if a host / service has modified attributes.

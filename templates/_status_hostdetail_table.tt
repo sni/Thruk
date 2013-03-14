@@ -43,17 +43,22 @@
           [% class = 'statusBGDOWN' %]
         [% END %]
 
+        [% IF !status_color_background %]
+          [% SET class = 'statusEven' IF loop.odd %]
+          [% SET class = 'statusOdd'  IF loop.even %]
+        [% END %]
+
         <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'host')"[% END %]>
           [% IF show_backends_in_table == 2 %]
           <td class='[% class %] backend_[% peer_key %]' align="center" nowrap>[% h.peer_name %]</td>
           [% END %]
-          <td class='[% statusClass %]'>
+          <td class='[% class %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="middle" class='[% statusClass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]' title='[% h.address %]'>[% h.display_name %]</a>&nbsp;</td>
+                      <td align="left" valign="middle" class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]' title='[% h.address %]'>[% h.display_name %]</a>&nbsp;</td>
                     </tr>
                   </table>
                 </td>

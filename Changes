@@ -9,6 +9,7 @@ next:
           - added 'compile' cli command to precompile templates
           - added 'perf_bar_pnp_popup' option to control pnp popups in perfbar
           - added logs link for hosts/services to directly filter logfiles
+          - removed background color from status page (can be reenabled by 'status_color_background')
           - panorama view:
             - auto adjust minemap column height
             - use escape_html setting from cgi.cfg

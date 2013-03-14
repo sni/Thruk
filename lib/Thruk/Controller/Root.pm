@@ -51,6 +51,7 @@ sub begin : Private {
                   show_backends_in_table host_action_icon service_action_icon cookie_path
                   use_feature_trends show_error_reports skip_js_errors perf_bar_mode
                   bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
+                  status_color_background
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

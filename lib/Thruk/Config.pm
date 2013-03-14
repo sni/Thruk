@@ -392,6 +392,7 @@ sub set_default_config {
         'precompile_templates'              => 1,
         'report_use_temp_files'             => 14,
         'perf_bar_pnp_popup'                => 1,
+        'status_color_background'           => 0,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
