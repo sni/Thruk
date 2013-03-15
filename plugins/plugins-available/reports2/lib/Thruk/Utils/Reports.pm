@@ -416,6 +416,7 @@ sub generate_report {
     if(!-f $attachment and !$Thruk::Utils::Reports::error) {
         $Thruk::Utils::Reports::error = read_file($logfile);
     }
+    Thruk::Utils::CLI::_error($Thruk::Utils::Reports::error);
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;
@@ -729,6 +730,7 @@ sub _read_report_file {
 
         # nice error message
         if($report->{'error'} =~ m/\[ERROR\]\s+(.*?)\s+at\s+[\w\/\.\-]+\.pm\s+line\s+\d+\./gmx) {
+            $report->{'long_error'} = $report->{'error'};
             $report->{'error'} = $1;
             $report->{'error'} =~ s/^'//mx;
             $report->{'error'} =~ s/\\'/'/gmx;

@@ -51,9 +51,7 @@
     </td>
     <td class="status [% rowclass %]">
       [% IF r.failed %]
-        <span class="clickable" style="color: red;" [% info_popup_event_type %]="return overlib('[% escape_quotes(r.error) | nl2br %]',CAPTION,'report error',WIDTH,700,[% c.config.info_popup_options %]);">
-        failed
-        </span>
+        <span style="color: red;">failed</span>
       [% ELSE %]
         [% IF r.var.start_time %]
           [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
@@ -95,6 +93,12 @@
     <td class="status [% rowclass %]"></td>
     <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
       [% r.error | nl2br %]
+      [% IF r.exists('long_error') %]
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
+      <div id='long_error_[% r.nr %]' style="display:none;">
+      [% r.long_error | nl2br %]
+      </div>
+      [% END %]
     </td>
   </tr>
   [% END %]
