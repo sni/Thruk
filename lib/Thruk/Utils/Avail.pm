@@ -475,7 +475,7 @@ sub calculate_availability {
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    if($file) {
+    if($file and ref $logs eq 'HASH') {
         my($fh,$tempfile) = tempfile();
         $c->stats->profile(begin => "avail.pm sort logs");
         my $cmd = 'sort -k 1,12 -o '.$tempfile.' '.join(' ', values %{$logs});

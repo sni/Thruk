@@ -1894,6 +1894,27 @@ sub find_files {
     return \@files;
 }
 
+##########################################################
+
+=head2 save_logs_to_tempfile
+
+  save_logs_to_tempfile($logs)
+
+save logfiles to tempfile
+
+=cut
+
+sub save_logs_to_tempfile {
+    my($data) = @_;
+    my($fh, $filename) = tempfile();
+    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+    for my $r (@{$data}) {
+        print $fh $r->{'message'},"\n";
+    }
+    Thruk::Utils::IO::close($fh, $filename);
+    return($filename);
+}
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;

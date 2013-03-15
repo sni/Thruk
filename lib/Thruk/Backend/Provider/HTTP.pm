@@ -6,7 +6,6 @@ use Carp;
 use Data::Dumper;
 use JSON::XS;
 use LWP::UserAgent;
-use File::Temp qw/tempfile/;
 use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -484,7 +483,9 @@ sub get_logs {
 
     if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
         push @options, 'collection', 'logs_'.$self->peer_key();
-        return $self->{'logcache'}->get_logs(@options);
+        my($data) = $self->{'logcache'}->get_logs(@options);
+        return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
+        return $data;
     }
     # increased timeout for logs
     $self->{'ua'}->timeout($self->{'logs_timeout'});
@@ -492,17 +493,8 @@ sub get_logs {
     my($typ, $size, $data) = @{$res};
     $self->{'ua'}->timeout($self->{'timeout'});
 
-    if($use_file) {
-        my($fh, $filename) = tempfile();
-        open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
-        for my $r (@{$data}) {
-            print $fh $r->{'message'},"\n";
-        }
-        Thruk::Utils::IO::close($fh, $filename);
-        return($filename, 'file');
-    } else {
-        return $data;
-    }
+    return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
+    return $data;
 }
 
 
