@@ -12,13 +12,14 @@ Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use utf8;
 use Config::General;
 use Carp;
 use Data::Dumper;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use Date::Manip;
 use File::Slurp;
-use Encode qw/decode/;
+use Encode qw/encode_utf8 decode/;
 use Template::Plugin::Date;
 use File::Copy;
 use File::Temp qw/tempfile/;
@@ -1909,7 +1910,7 @@ sub save_logs_to_tempfile {
     my($fh, $filename) = tempfile();
     open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     for my $r (@{$data}) {
-        print $fh $r->{'message'},"\n";
+        print $fh encode_utf8($r->{'message'}),"\n";
     }
     Thruk::Utils::IO::close($fh, $filename);
     return($filename);
