@@ -440,6 +440,7 @@ sub get_report_data_from_param {
             # remove empty elements
             @{$params->{$key}} = grep(!/^$/mx, @{$params->{$key}});
         }
+        if($1 eq 'sla') { $params->{$key} =~ s/,/./gmx }
         $p->{$1} = $params->{$key};
     }
 
