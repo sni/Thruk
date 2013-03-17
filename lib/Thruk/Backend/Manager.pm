@@ -1004,7 +1004,7 @@ sub _do_on_peers {
         }
     }
 
-    $self->_set_result_defaults($function, $data);
+    $data = $self->_set_result_defaults($function, $data);
 
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
@@ -1897,6 +1897,7 @@ set defaults for some results
 
 sub _set_result_defaults {
     my($self, $function, $data) = @_;
+
     # set some defaults if no backends where selected
     if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
         $data = {};
@@ -1947,7 +1948,7 @@ sub _set_result_defaults {
             $data->{$key} = 0;
         }
     }
-    return;
+    return $data;
 }
 
 =head1 AUTHOR
