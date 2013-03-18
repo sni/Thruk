@@ -378,11 +378,11 @@ sub get_logs {
                    p1.output
                 ) as message
         FROM
-            '.$prefix.'_log l
-            LEFT JOIN '.$prefix.'_host h ON l.host_id = h.host_id
-            LEFT JOIN '.$prefix.'_service s ON l.service_id = s.service_id
-            LEFT JOIN '.$prefix.'_plugin_output p1 ON l.plugin_output = p1.output_id
-            LEFT JOIN '.$prefix.'_plugin_output p2 ON l.message = p2.output_id
+            `'.$prefix.'_log` l
+            LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
+            LEFT JOIN `'.$prefix.'_service` s ON l.service_id = s.service_id
+            LEFT JOIN `'.$prefix.'_plugin_output` p1 ON l.plugin_output = p1.output_id
+            LEFT JOIN `'.$prefix.'_plugin_output` p2 ON l.message = p2.output_id
         '.$where.'
         '.$orderby.'
     ';
@@ -820,7 +820,7 @@ sub _get_logs_start_end {
     my $prefix = $options{'collection'} || $self->{'peer_config'}->{'peer_key'};
     $prefix    =~ s/^logs_//gmx;
     my $dbh  = $self->_dbh();
-    my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM '.$prefix.'_log LIMIT 1', { Slice => {} })};
+    my @data = @{$dbh->selectall_arrayref('SELECT MIN(time) as mi, MAX(time) as ma FROM `'.$prefix.'_log` LIMIT 1', { Slice => {} })};
     $start   = $data[0]->{'mi'} if defined $data[0];
     $end     = $data[0]->{'ma'} if defined $data[0];
     return([$start, $end]);
@@ -955,7 +955,7 @@ sub _update_logcache {
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
-        $log_count += $dbh->do("DELETE FROM ".$prefix."_log WHERE time < ".$start);
+        $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
         return $log_count;
     }
 
@@ -968,7 +968,7 @@ sub _update_logcache {
         $mode = 'import';
     } else {
         eval {
-            my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM '.$prefix.'_status WHERE status_id = 2 LIMIT 1')};
+            my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
             if(scalar @pids > 0 and $pids[0]) {
                 if(kill(0, $pids[0])) {
                     print "logcache update already running with pid ".$pids[0]."\n" if $verbose;
@@ -987,10 +987,10 @@ sub _update_logcache {
         $self->_create_tables($dbh, $prefix);
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_status (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO ".$prefix."_status (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
 
-    my $stm            = "INSERT INTO ".$prefix."_log (time,class,type,state,state_type,host_id,service_id,plugin_output,message) VALUES";
+    my $stm            = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,host_id,service_id,plugin_output,message) VALUES";
     my $host_lookup    = {};
     my $service_lookup = {};
     my $plugin_lookup  = {};
@@ -1010,8 +1010,8 @@ sub _update_logcache {
         $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_status (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO ".$prefix."_status (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
 
     return $log_count;
 }
@@ -1021,7 +1021,7 @@ sub _update_logcache {
 sub _update_logcache_auth {
     my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
 
-    $dbh->do("TRUNCATE TABLE ".$prefix."_contact");
+    $dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
     my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix);
     my $host_lookup    = _get_host_lookup($dbh,$peer,$prefix);
     my $service_lookup = _get_service_lookup($dbh,$peer,$prefix);
@@ -1029,8 +1029,8 @@ sub _update_logcache_auth {
     # update hosts
     my($hosts)    = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
     print "hosts" if $verbose;
-    my $stm = "INSERT INTO ".$prefix."_contact_host_rel (contact_id, host_id) VALUES";
-    $dbh->do("TRUNCATE TABLE ".$prefix."_contact_host_rel");
+    my $stm = "INSERT INTO `".$prefix."_contact_host_rel` (contact_id, host_id) VALUES";
+    $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
     for my $host (@{$hosts}) {
         my $host_id    = &_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
         my @values;
@@ -1045,8 +1045,8 @@ sub _update_logcache_auth {
 
     # update services
     print "services" if $verbose;
-    $dbh->do("TRUNCATE TABLE ".$prefix."_contact_service_rel");
-    $stm = "INSERT INTO ".$prefix."_contact_service_rel (contact_id, service_id) VALUES";
+    $dbh->do("TRUNCATE TABLE `".$prefix."_contact_service_rel`");
+    $stm = "INSERT INTO `".$prefix."_contact_service_rel` (contact_id, service_id) VALUES";
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts/]);
     for my $service (@{$services}) {
         my $service_id = &_service_lookup($service_lookup, $host_lookup, $service->{'host_name'}, $service->{'description'}, $dbh, $prefix);
@@ -1069,23 +1069,23 @@ sub _update_logcache_optimize {
     my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
 
     # update sort order / optimize every day
-    my @times = @{$dbh->selectcol_arrayref('SELECT value FROM '.$prefix.'_status WHERE status_id = 3 LIMIT 1')};
+    my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
     if(!$options->{'force'} and scalar @times > 0 and $times[0] and $times[0] > time()-86400) {
         print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose;
         return(-1);
     }
 
     print "update logs table order..." if $verbose;
-    $dbh->do("ALTER TABLE ".$prefix."_log ORDER BY time");
-    $dbh->do("INSERT INTO ".$prefix."_status (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
+    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     print "done\n" if $verbose;
 
     # repair / optimize tables
     print "optimizing / repairing tables\n" if $verbose;
     for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
         print $table.'...' if $verbose;
-        $dbh->do("REPAIR TABLE ".$prefix."_".$table);
-        $dbh->do("OPTIMIZE TABLE ".$prefix."_".$table);
+        $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
+        $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
         print "OK\n" if $verbose;
     }
 
@@ -1096,13 +1096,13 @@ sub _update_logcache_optimize {
 sub _get_host_lookup {
     my($dbh,$peer,$prefix) = @_;
 
-    my $sth = $dbh->prepare("SELECT host_id, host_name FROM ".$prefix."_host");
+    my $sth = $dbh->prepare("SELECT host_id, host_name FROM `".$prefix."_host`");
     $sth->execute;
     my $hosts_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $hosts_lookup->{$r->[1]} = $r->[0]; }
 
     my($hosts) = $peer->{'class'}->get_hosts(columns => [qw/name/]);
-    my $stm = "INSERT INTO ".$prefix."_host (host_name) VALUES";
+    my $stm = "INSERT INTO `".$prefix."_host` (host_name) VALUES";
     my @values;
     for my $h (@{$hosts}) {
         next if defined $hosts_lookup->{$h->{'name'}};
@@ -1121,13 +1121,13 @@ sub _get_host_lookup {
 sub _get_service_lookup {
     my($dbh,$peer,$prefix,$hosts_lookup) = @_;
 
-    my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM ".$prefix."_service s, ".$prefix."_host h WHERE s.host_id = h.host_id");
+    my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM `".$prefix."_service` s, `".$prefix."_host` h WHERE s.host_id = h.host_id");
     $sth->execute;
     my $services_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $services_lookup->{$r->[1]}->{$r->[2]} = $r->[0]; }
 
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description/]);
-    my $stm = "INSERT INTO ".$prefix."_service (host_id, service_description) VALUES";
+    my $stm = "INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES";
     my @values;
     for my $s (@{$services}) {
         next if defined $services_lookup->{$s->{'host_name'}}->{$s->{'description'}};
@@ -1146,13 +1146,13 @@ sub _get_service_lookup {
 sub _get_contact_lookup {
     my($dbh,$peer,$prefix) = @_;
 
-    my $sth = $dbh->prepare("SELECT contact_id, name FROM ".$prefix."_contact");
+    my $sth = $dbh->prepare("SELECT contact_id, name FROM `".$prefix."_contact`");
     $sth->execute;
     my $contact_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $contact_lookup->{$r->[1]} = $r->[0]; }
 
     my($contacts) = $peer->{'class'}->get_contacts(columns => [qw/name/]);
-    my $stm = "INSERT INTO ".$prefix."_contact (name) VALUES";
+    my $stm = "INSERT INTO `".$prefix."_contact` (name) VALUES";
     my @values;
     for my $c (@{$contacts}) {
         next if defined $contact_lookup->{$c->{'name'}};
@@ -1174,7 +1174,7 @@ sub _plugin_lookup {
 
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM '.$prefix.'_plugin_output WHERE output = '.$dbh->quote($look).' LIMIT 1')};
+        my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM `'.$prefix.'_plugin_output` WHERE output = '.$dbh->quote($look).' LIMIT 1')};
         if(scalar @ids > 0) {
             $id = $ids[0]->[0];
             $hash->{$look} = $id;
@@ -1182,7 +1182,7 @@ sub _plugin_lookup {
         }
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_plugin_output (output) VALUES(".$dbh->quote($look).")");
+    $dbh->do("INSERT INTO `".$prefix."_plugin_output` (output) VALUES(".$dbh->quote($look).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $hash->{$look} = $id;
     return $id;
@@ -1198,7 +1198,7 @@ sub _host_lookup {
 
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT host_id FROM '.$prefix.'_host WHERE host_name = '.$dbh->quote($host_name).' LIMIT 1')};
+        my @ids = @{$dbh->selectall_arrayref('SELECT host_id FROM `'.$prefix.'_host` WHERE host_name = '.$dbh->quote($host_name).' LIMIT 1')};
         if(scalar @ids > 0) {
             $id = $ids[0]->[0];
             $host_lookup->{$host_name} = $id;
@@ -1206,7 +1206,7 @@ sub _host_lookup {
         }
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_host (host_name) VALUES(".$dbh->quote($host_name).")");
+    $dbh->do("INSERT INTO `".$prefix."_host` (host_name) VALUES(".$dbh->quote($host_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $host_lookup->{$host_name} = $id;
 
@@ -1216,7 +1216,7 @@ sub _host_lookup {
 ##########################################################
 sub _get_log_host_auth {
     my($self,$dbh, $prefix, $contact) = @_;
-    my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM ".$prefix."_host h, ".$prefix."_contact_host_rel chr, ".$prefix."_contact c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ".$dbh->quote($contact))};
+    my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM `".$prefix."_host` h, `".$prefix."_contact_host_rel` chr, `".$prefix."_contact` c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ".$dbh->quote($contact))};
     my $hosts_lookup = {};
     for my $h (@hosts) { $hosts_lookup->{$h->[0]} = 1; }
     return $hosts_lookup;
@@ -1228,12 +1228,12 @@ sub _get_log_service_auth {
 
     my $sql = "SELECT h.host_name, s.service_description
                FROM
-                 ".$prefix."_service s,
-                 ".$prefix."_host h,
-                 ".$prefix."_contact_host_rel chr,
-                 ".$prefix."_contact c1,
-                 ".$prefix."_contact_service_rel csr,
-                 ".$prefix."_contact c2
+                 `".$prefix."_service` s,
+                 `".$prefix."_host` h,
+                 `".$prefix."_contact_host_rel` chr,
+                 `".$prefix."_contact` c1,
+                 `".$prefix."_contact_service_rel` csr,
+                 `".$prefix."_contact` c2
                WHERE
                  s.host_id = h.host_id
                  AND h.host_id = chr.host_id
@@ -1261,7 +1261,7 @@ sub _service_lookup {
 
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT service_id FROM '.$prefix.'_service WHERE host_id = '.$host_id.' AND service_description = '.$dbh->quote($service_description).' LIMIT 1')};
+        my @ids = @{$dbh->selectall_arrayref('SELECT service_id FROM `'.$prefix.'_service` WHERE host_id = '.$host_id.' AND service_description = '.$dbh->quote($service_description).' LIMIT 1')};
         if(scalar @ids > 0) {
             $id = $ids[0]->[0];
             $service_lookup->{$host_name}->{$service_description} = $id;
@@ -1269,7 +1269,7 @@ sub _service_lookup {
         }
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_service (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
+    $dbh->do("INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $service_lookup->{$host_name}->{$service_description} = $id;
 
@@ -1286,7 +1286,7 @@ sub _contact_lookup {
 
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT contact_id FROM '.$prefix.'_contact WHERE name = '.$dbh->quote($contact_name).' LIMIT 1')};
+        my @ids = @{$dbh->selectall_arrayref('SELECT contact_id FROM `'.$prefix.'_contact` WHERE name = '.$dbh->quote($contact_name).' LIMIT 1')};
         if(scalar @ids > 0) {
             $id = $ids[0]->[0];
             $contact_lookup->{$contact_name} = $id;
@@ -1294,7 +1294,7 @@ sub _contact_lookup {
         }
     }
 
-    $dbh->do("INSERT INTO ".$prefix."_contact (name) VALUES(".$dbh->quote($contact_name).")");
+    $dbh->do("INSERT INTO `".$prefix."_contact` (name) VALUES(".$dbh->quote($contact_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $contact_lookup->{$contact_name} = $id;
 
@@ -1550,7 +1550,7 @@ sub _create_tables {
 sub _drop_tables {
     my($self, $dbh, $prefix) = @_;
     for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
-        $dbh->do("DROP TABLE IF EXISTS ".$prefix."_".$table);
+        $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
     }
     return;
 }
@@ -1582,40 +1582,40 @@ sub _get_create_statements {
     my($prefix) = @_;
     my @statements = (
     # contact
-        "DROP TABLE IF EXISTS ".$prefix."_contact",
-        "CREATE TABLE ".$prefix."_contact (
+        "DROP TABLE IF EXISTS `".$prefix."_contact`",
+        "CREATE TABLE `".$prefix."_contact` (
           contact_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
           name varchar(150) NOT NULL,
           PRIMARY KEY (contact_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # contact_host_rel
-        "DROP TABLE IF EXISTS ".$prefix."_contact_host_rel",
-        "CREATE TABLE ".$prefix."_contact_host_rel (
+        "DROP TABLE IF EXISTS `".$prefix."_contact_host_rel`",
+        "CREATE TABLE `".$prefix."_contact_host_rel` (
           contact_id mediumint(8) unsigned NOT NULL,
           host_id mediumint(8) unsigned NOT NULL,
           PRIMARY KEY (contact_id,host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # contact_service_rel
-        "DROP TABLE IF EXISTS ".$prefix."_contact_service_rel",
-        "CREATE TABLE ".$prefix."_contact_service_rel (
+        "DROP TABLE IF EXISTS `".$prefix."_contact_service_rel`",
+        "CREATE TABLE `".$prefix."_contact_service_rel` (
           contact_id mediumint(8) unsigned NOT NULL,
           service_id mediumint(8) unsigned NOT NULL,
           PRIMARY KEY (contact_id,service_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # host
-        "DROP TABLE IF EXISTS ".$prefix."_host",
-        "CREATE TABLE ".$prefix."_host (
+        "DROP TABLE IF EXISTS `".$prefix."_host`",
+        "CREATE TABLE `".$prefix."_host` (
           host_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
           host_name varchar(150) NOT NULL,
           PRIMARY KEY (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # log
-        "DROP TABLE IF EXISTS ".$prefix."_log",
-        "CREATE TABLE IF NOT EXISTS ".$prefix."_log (
+        "DROP TABLE IF EXISTS `".$prefix."_log`",
+        "CREATE TABLE IF NOT EXISTS `".$prefix."_log` (
           time int(10) unsigned NOT NULL,
           class tinyint(3) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
@@ -1629,16 +1629,16 @@ sub _get_create_statements {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
 
     # plugin_output
-        "DROP TABLE IF EXISTS ".$prefix."_plugin_output",
-        "CREATE TABLE ".$prefix."_plugin_output (
+        "DROP TABLE IF EXISTS `".$prefix."_plugin_output`",
+        "CREATE TABLE `".$prefix."_plugin_output` (
           output_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
           output mediumtext NOT NULL,
           PRIMARY KEY (output_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # service
-        "DROP TABLE IF EXISTS ".$prefix."_service",
-        "CREATE TABLE ".$prefix."_service (
+        "DROP TABLE IF EXISTS `".$prefix."_service`",
+        "CREATE TABLE `".$prefix."_service` (
           service_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
           host_id mediumint(8) unsigned NOT NULL,
           service_description varchar(150) NOT NULL,
@@ -1646,17 +1646,17 @@ sub _get_create_statements {
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # status
-        "DROP TABLE IF EXISTS ".$prefix."_status",
-        "CREATE TABLE ".$prefix."_status (
+        "DROP TABLE IF EXISTS `".$prefix."_status`",
+        "CREATE TABLE `".$prefix."_status` (
           status_id smallint(4) unsigned NOT NULL AUTO_INCREMENT,
           name varchar(150) NOT NULL,
           value varchar(150) DEFAULT NULL,
           PRIMARY KEY (status_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
-        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(1, 'last_update', '')",
-        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(2, 'update_pid', '')",
-        "INSERT INTO ".$prefix."_status (status_id, name, value) VALUES(3, 'last_reorder', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(1, 'last_update', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(2, 'update_pid', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(3, 'last_reorder', '')",
     );
     return \@statements;
 }
