@@ -321,6 +321,18 @@ sub generate_report {
     my($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
     Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
 
+    # check backend connections
+    my $processinfo = $c->{'db'}->get_processinfo();
+    if($options->{'backends'}) {
+        my @failed;
+        for my $b (@{$options->{'backends'}}) {
+            if($c->stash->{'failed_backends'}->{$b}) {
+                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+            }
+        }
+        die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
+    }
+
     # set some defaults
     Thruk::Utils::Reports::Render::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
@@ -417,6 +429,20 @@ sub generate_report {
         $Thruk::Utils::Reports::error = read_file($logfile);
     }
     Thruk::Utils::CLI::_error($Thruk::Utils::Reports::error);
+
+    # check backend errors from during report generation
+    if($options->{'backends'}) {
+        my @failed;
+        for my $b (@{$options->{'backends'}}) {
+            if($c->stash->{'failed_backends'}->{$b}) {
+                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+            }
+        }
+        if(scalar @failed > 0) {
+            unlink($attachment);
+            die("Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n")
+        }
+    }
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;
