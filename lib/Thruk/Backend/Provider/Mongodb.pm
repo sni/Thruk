@@ -8,6 +8,7 @@ use Thruk::Utils;
 use Digest::MD5 qw/md5_hex/;
 use MongoDB;
 use Tie::IxHash;
+use Encode qw/encode_utf8/;
 use File::Temp qw/tempfile/;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -597,7 +598,7 @@ sub get_logs {
         my($fh, $filename) = tempfile();
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
         while(my $r = $res->next) {
-            print $fh $r->{'message'},"\n";
+            print $fh encode_utf8($r->{'message'}),"\n";
         }
         Thruk::Utils::IO::close($fh, $filename);
         return($filename, 'file');

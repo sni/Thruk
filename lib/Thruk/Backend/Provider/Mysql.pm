@@ -9,6 +9,7 @@ use utf8;
 use DBI;
 use File::Temp qw/tempfile/;
 use Thruk::Utils;
+use Encode qw/encode_utf8/;
 use Monitoring::Availability::Logs;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -425,7 +426,7 @@ sub get_logs {
                 next if !$system;
             }
             if($fh) {
-                print $fh $r->{'message'},"\n";
+                print $fh encode_utf8($r->{'message'}),"\n";
             } else {
                 push @{$data}, $r;
             }
@@ -436,7 +437,7 @@ sub get_logs {
             my $sth = $dbh->prepare($sql);
             $sth->execute;
             while(my $r = $sth->fetchrow_arrayref()) {
-                print $fh $r->[9],"\n";
+                print $fh encode_utf8($r->[9]),"\n";
             }
         } else {
             $data = $dbh->selectall_arrayref($sql, { Slice => {} });
