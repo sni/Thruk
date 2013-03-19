@@ -1791,7 +1791,7 @@ sub _update_logcache {
                                                                             { time => { '<'  => $time + $blocksize } }
                                                               ]}],
                                                    columns => [qw/
-                                                                class time type state host_name service_description plugin_output message options state_type current_service_contacts current_host_contacts current_service_groups current_host_groups
+                                                                class time type state host_name service_description plugin_output message options state_type current_service_contacts command_name contact_name current_host_contacts current_service_groups current_host_groups
                                                              /],
                                                   );
             if($mode eq 'update') {

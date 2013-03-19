@@ -69,6 +69,8 @@ lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/Script/Thrukembedded.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
+lib/Monitoring/Availability.pm
+lib/Monitoring/Availability/Logs.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm

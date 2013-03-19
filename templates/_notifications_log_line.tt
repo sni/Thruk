@@ -2,6 +2,7 @@
 
 [% SET message = n.message.substr(13) %]
 [% options = message.split(';') %]
+
 [% state_color = 'grey' %]
 [% IF n.type == 'SERVICE NOTIFICATION' %]
     [% SET level = options.3 %]
@@ -15,6 +16,7 @@
     [% ELSIF level.match('FLAPPINGSTOP\ \(')    %][% level = 'FLAPPING STOP'  statusclass = 'notificationsUNKNOWN' %]
     [% ELSE                                      %][%   statusclass = 'notificationsUNKNOWN' %]
     [% END %]
+    [% IF !n.defined('command_name') %][% n.command_name = options.4 %][% END %]
 [% ELSE %]
     [% SET level = options.2 %]
     [%    IF level == 'UP'          %][% level = 'HOST UP'          statusclass = 'notificationsHOSTUP' state_color = 'green' %]
@@ -27,4 +29,5 @@
     [% ELSIF level.match('FLAPPINGSTOP\ \(')    %][% level = 'FLAPPING STOP'  statusclass = 'notificationsUNKNOWN' %]
     [% ELSE                                      %][%    statusclass = 'notificationsUNKNOWN' %]
     [% END %]
+    [% IF !n.defined('command_name') %][% n.command_name = options.3 %][% END %]
 [% END %]
