@@ -873,17 +873,18 @@ return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my $data = shift;
+    my($data,$prefix) = @_;
+    $prefix = '' unless defined $prefix;
 
     my $custom_vars = {};
 
     return unless defined $data;
-    return unless defined $data->{'custom_variable_names'};
+    return unless defined $data->{$prefix.'custom_variable_names'};
 
     my $x = 0;
-    while(defined $data->{'custom_variable_names'}->[$x]) {
-        my $cust_name  = $data->{'custom_variable_names'}->[$x];
-        my $cust_value = $data->{'custom_variable_values'}->[$x];
+    while(defined $data->{$prefix.'custom_variable_names'}->[$x]) {
+        my $cust_name  = $data->{$prefix.'custom_variable_names'}->[$x];
+        my $cust_value = $data->{$prefix.'custom_variable_values'}->[$x];
         $custom_vars->{$cust_name} = $cust_value;
         $x++;
     }
@@ -901,18 +902,18 @@ set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my $c    = shift;
-    my $data = shift;
+    my($c ,$data, $prefix) = @_;
+    $prefix = '' unless defined $prefix;
 
     $c->stash->{'custom_vars'} = [];
 
     return unless defined $data;
-    return unless defined $data->{'custom_variable_names'};
+    return unless defined $data->{$prefix.'custom_variable_names'};
     return unless defined $c->config->{'show_custom_vars'};
 
     my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
 
-    my $custom_vars = get_custom_vars($data);
+    my $custom_vars = get_custom_vars($data, $prefix);
 
     my $already_added = {};
     for my $test (@{$vars}) {
