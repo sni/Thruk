@@ -26,11 +26,9 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use Thruk::Utils;
 
 our $VERSION = '1.64';
 my $branch   = '';
-$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 
 my $options = {
     'verbose'  => 1,
@@ -55,13 +53,18 @@ GetOptions (
    "f|force"            => \$options->{'force'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
-
-if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
 pod2usage( { -verbose => 2, -exit => 3 } ) if $options->{'help'};
-pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and scalar @{$options->{'url'}} == 0 and !$options->{'listbackends'};
+require Thruk::Utils;
+$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
+if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
 $options->{'verbose'} = 0 if $options->{'quiet'};
+if(!$options->{'action'} and scalar @{$options->{'url'}} == 0 and !$options->{'listbackends'}) {
+    print "usage: $0 [options]\nsee --help for complete help.\n";
+    exit 3;
+}
 
-use Thruk::Utils::CLI;
+require Thruk::Utils::CLI;
+Thruk::Utils::CLI->import;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 
