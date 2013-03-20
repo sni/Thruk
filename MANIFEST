@@ -108,6 +108,7 @@ lib/Thruk/Pool/Simple.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
+lib/Thruk/Utils/CleanINC.pm
 lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm

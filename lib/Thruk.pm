@@ -13,6 +13,7 @@ Catalyst based monitoring web interface for Nagios, Icinga and Shinken
 use 5.008000;
 use strict;
 use warnings;
+use Thruk::Utils::CleanINC;
 use threads;
 
 use utf8;

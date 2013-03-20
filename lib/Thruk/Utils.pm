@@ -17,13 +17,11 @@ use Config::General;
 use Carp;
 use Data::Dumper;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
-use Date::Manip;
 use File::Slurp;
 use Encode qw/encode_utf8 decode/;
 use Template::Plugin::Date;
 use File::Copy;
 use File::Temp qw/tempfile/;
-use Excel::Template::Plus;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 ##############################################
@@ -1094,6 +1092,9 @@ sub logs2xls {
     Thruk::Utils::Status::set_selected_columns($c);
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
 
+    # Excel::Template::Plus pulls in Moose, so load this later
+    require Excel::Template::Plus;
+    Excel::Template::Plus->import();
     my $template = Excel::Template::Plus->new(
         engine   => 'TT',
         template => $c->stash->{'template'},
@@ -1954,6 +1955,9 @@ sub _parse_date {
 
     # everything else
     else {
+        # Date::Manip increases start time, so load it here upon request
+        require Date::Manip;
+        Date::Manip->import(qw/UnixDate/);
         $timestamp = UnixDate($string, '%s');
         $c->log->debug("not a valid date: ".$string);
         if(!defined $timestamp) {
