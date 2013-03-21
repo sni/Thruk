@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
-use URI::Escape;
+use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
 use POSIX qw/strftime/;

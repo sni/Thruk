@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use JSON::XS;
-use URI::Escape;
+use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
 use Thruk::Utils::PanoramaCpuStats;

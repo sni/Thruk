@@ -15,7 +15,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
-use URI::Escape;
+use URI::Escape qw/uri_escape/;
 use JSON::XS;
 
 ##############################################
