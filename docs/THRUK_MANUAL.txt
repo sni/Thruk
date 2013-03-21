@@ -2065,6 +2065,7 @@ ex.:
     report_base_url   = http://host.local/thruk/cgi-bin/
     wkhtmltopdf       = /usr/bin/wkhtmltopdf
     pnp_export        = plugins/plugins-enabled/reports2/script/pnp_export.sh
+    report_from_email = User Name <example@mail.com>
   </Component>
 
 ==== report_nice_level
@@ -2103,6 +2104,10 @@ ex.:
   export PNP_URL_PREFIX="http://demo.thruk.org"
 
 
+==== report_from_email
+
+Set the from address used in e-mail reports.
+Format is "User Name <example@mail.com>"
 
 === Component Thruk::Plugin::Statusmap
 

@@ -16,6 +16,7 @@ next:
             - support show_long_plugin_output inline
           - reports
             - use temp files for large reports
+            - added 'report_from_email' option
           - Bug Fixes
             - make text selections in status page easier
 

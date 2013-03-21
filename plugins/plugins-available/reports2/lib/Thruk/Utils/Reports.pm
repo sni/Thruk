@@ -158,7 +158,7 @@ sub report_send {
         }
         my $msg = MIME::Lite->new();
         $msg->build(
-                 From    => $report->{'from'}    || $mailheader->{'from'},
+                 From    => $report->{'from'}    || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'},
                  To      => $report->{'to'}      || $mailheader->{'to'},
                  Cc      => $report->{'cc'}      || $mailheader->{'cc'},
                  Bcc     => $report->{'bcc'}     || $mailheader->{'bcc'},
