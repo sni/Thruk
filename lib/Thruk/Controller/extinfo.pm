@@ -367,7 +367,7 @@ sub _get_downtime_cmd {
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
     Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
-    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/cron.log",
+    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>>%s/cron.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
