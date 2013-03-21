@@ -2123,6 +2123,13 @@ function check_quick_command() {
 
 /* select this service */
 function toggle_comment(event) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return false;
+    }
+
     if(!event) {
         event = this;
     }
@@ -2150,9 +2157,6 @@ function toggle_comment(event) {
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
         no_more_events = 1;
-        var id1         = parseInt(row_id.substring(4));
-        var id2         = parseInt(lastRowSelected.substring(4));
-        var pane_prefix = row_id.substring(0,4);
 
         // all selected should get the same state
         state = false;
@@ -2160,18 +2164,29 @@ function toggle_comment(event) {
             state = true;
         }
 
-        // selected top down?
-        if(id1 > id2) {
-            var tmp = id2;
-            id2 = id1;
-            id1 = tmp;
-        }
-
-        for(var x = id1; x < id2; x++) {
-            if(document.getElementById(pane_prefix+x)) {
-                selectCommentById(pane_prefix+x, state);
+        var inside = false;
+        jQuery("TR.clickable").each(function(nr, elem) {
+          if(elem.style.display == 'none') {
+            return true;
+          }
+          if(inside == true) {
+            if(elem.id == lastRowSelected || elem.id == row_id) {
+                return false;
             }
-        }
+          }
+          else {
+            if(elem.id == lastRowSelected || elem.id == row_id) {
+              inside = true;
+            }
+          }
+          if(inside == true) {
+            selectCommentById(elem.id, state);
+          }
+          return true;
+        });
+
+        // selectCommentById(pane_prefix+x, state);
+
         lastRowSelected = undefined;
         no_more_events  = 0;
     } else {
