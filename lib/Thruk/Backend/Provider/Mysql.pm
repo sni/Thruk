@@ -995,9 +995,12 @@ sub _update_logcache {
     return(-1) if $skip;
 
     if($cache_version < $Thruk::Backend::Provider::Mysql::cache_version) {
-        my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
-        print "WARNING: ".$msg."\n" if $verbose;
-        $c->log->info($msg);
+        # only log message if not importing already
+        if($mode ne 'import') {
+            my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$Thruk::Backend::Provider::Mysql::cache_version.'...';
+            print "WARNING: ".$msg."\n" if $verbose;
+            $c->log->info($msg);
+        }
         $mode = 'import';
     }
 
