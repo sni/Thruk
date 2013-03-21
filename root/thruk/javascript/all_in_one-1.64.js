@@ -3423,7 +3423,13 @@ var ajax_search = {
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
-                          var re    = new RegExp(sub_pattern, "gi");
+                          var re;
+                          try {
+                            re = new RegExp(sub_pattern, "gi");
+                          } catch(e) {
+                            debug('regex failed: ' + sub_pattern);
+                            debug(e);
+                          }
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -3431,7 +3437,7 @@ var ajax_search = {
                               } else {
                                   result_obj.relevance += 1;
                               }
-                          } else if(ajax_search.regex_matching && data.match(re)) {
+                          } else if(re != undefined && ajax_search.regex_matching && data.match(re)) {
                               found++;
                               result_obj.relevance += 1;
                           }
