@@ -13,14 +13,12 @@ Utilities Collection for Thruk
 use strict;
 use warnings;
 use utf8;
-use Config::General;
 use Carp;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Encode qw/encode_utf8 decode/;
-use Template::Plugin::Date;
-use File::Copy;
+use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -68,7 +66,11 @@ return date from timestamp in given format
 sub format_date {
     my($timestamp, $format) = @_;
     our($tpd);
-    $tpd = Template::Plugin::Date->new() unless defined $tpd;
+    if(!defined $tpd) {
+        require Template::Plugin::Date;
+        Template::Plugin::Date->import();
+        $tpd = Template::Plugin::Date->new()
+    }
     my $date = $tpd->format($timestamp, $format);
     return decode("utf-8", $date);
 }
@@ -193,6 +195,7 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
+        require Config::General;
         my $conf = new Config::General($file);
         %{$config->{'cgi_cfg'}} = $conf->getall;
     }

@@ -14,13 +14,13 @@ structures and change config information.
 use warnings;
 use strict;
 use Carp;
-use Data::Dumper;
-use LWP::UserAgent;
-use JSON::XS;
-use File::Slurp;
-use URI::Escape;
+use Data::Dumper qw/Dumper/;
+use LWP::UserAgent qw//;
+use JSON::XS qw/encode_json decode_json/;
+use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
-use Thruk::Utils::IO;
+use Thruk::Utils qw//;
+use Thruk::Utils::IO qw//;
 
 $Thruk::Utils::CLI::verbose = 0;
 $Thruk::Utils::CLI::c       = undef;
@@ -157,7 +157,7 @@ sub _read_secret {
         next unless -f $file;
         open(my $fh, '<', $file) or die("open file $file failed (id: ".`id -a`.", pwd: ".`pwd`."): ".$!);
         while(my $line = <$fh>) {
-            next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mx;
+            next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mxo;
             $var_path = $1;
             last if $1;
         }
@@ -166,11 +166,11 @@ sub _read_secret {
     my $secret;
     my $secretfile = $var_path.'/secret.key';
     if(-e $secretfile) {
-        _debug("reading secret file: ".$secretfile);
+        _debug("reading secret file: ".$secretfile) if $Thruk::Utils::CLI::verbose >= 2;
         $secret = read_file($var_path.'/secret.key');
         chomp($secret);
     } else {
-        _debug("reading secret file ".$secretfile." failed: ".$!);
+        _error("reading secret file ".$secretfile." failed: ".$!);
     }
     return $secret;
 }
@@ -180,12 +180,12 @@ sub _run {
     my($self) = @_;
     my($result, $response);
     my($c, $failed);
-    _debug("_run(): ".Dumper($self->{'opt'}));
+    _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
-            _debug(" -> ".Dumper($response));
+            _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
         }
     }
@@ -219,8 +219,8 @@ sub _run {
 ##############################################
 sub _request {
     my($self, $credential, $url, $options) = @_;
-    _debug("_request(".$url.")");
-    my $ua       = LWP::UserAgent->new;
+    _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
+    my $ua       = _get_user_agent();
     my $response = $ua->post($url, {
         data => encode_json({
             credential => $credential,
@@ -228,7 +228,7 @@ sub _request {
         })
     });
     if($response->is_success) {
-        _debug(" -> success");
+        _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
         my $data_str = $response->decoded_content;
         my $data;
         eval {
@@ -238,19 +238,19 @@ sub _request {
             _error(" -> decode failed: ".Dumper($response));
             return(undef, $response);
         }
-        _debug("   -> ".Dumper($response));
-        _debug("   -> ".Dumper($data));
+        _debug("   -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+        _debug("   -> ".Dumper($data))     if $Thruk::Utils::CLI::verbose >= 2;
         return($data, $response);
     }
 
-    _debug(" -> failed: ".Dumper($response));
+    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
     return(undef, $response);
 }
 
 ##############################################
 sub _dummy_c {
     my($self) = @_;
-    _debug("_dummy_c()");
+    _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
@@ -262,7 +262,7 @@ sub _dummy_c {
 ##############################################
 sub _from_local {
     my($self, $c, $options) = @_;
-    _debug("_from_local()");
+    _debug("_from_local()") if $Thruk::Utils::CLI::verbose >= 2;
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     return _run_commands($c, $options, 'local');
 }
@@ -542,13 +542,13 @@ sub _request_url {
     }
     elsif($result->{'code'} == 500) {
         my $txt = 'request failed: '.$result->{'code'}." - internal error, please consult your logfiles\n";
-        _debug(Dumper($result));
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
         return($result->{'code'}, $result, $txt) if wantarray;
         return $txt;
     }
     elsif($result->{'code'} != 200) {
         my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
-        _debug(Dumper($result));
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
         return($result->{'code'}, $result, $txt) if defined wantarray;
         return $txt;
     }
@@ -689,21 +689,22 @@ sub _cmd_downtimetask {
         $minutes  = $downtime->{'duration'}%60;
     }
 
+    require URI::Escape;
     my $output     = '';
     # convert to normal url request
     my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s',
                       $downtime->{'service'} ? 56 : 55,
-                      uri_escape($downtime->{'host'}),
-                      uri_escape($downtime->{'comment'}),
+                      URI::Escape::uri_escape($downtime->{'host'}),
+                      URI::Escape::uri_escape($downtime->{'comment'}),
                       '(cron)',
-                      uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
                       $hours,
                       $minutes,
                       ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
+                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
@@ -971,6 +972,13 @@ sub _cmd_ext_job {
         };
     }
     return([undef, 1, $res, $last_error], 0);
+}
+##############################################
+sub _get_user_agent {
+    Thruk::Utils::load_lwp_curl();
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("thruk_cli");
+    return $ua;
 }
 
 ##############################################
