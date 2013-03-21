@@ -88,8 +88,10 @@ sub index :Path :Args(0) {
     my $login   = $c->request->parameters->{'login'}    || '';
     my $pass    = $c->request->parameters->{'password'} || '';
     my $submit  = $c->request->parameters->{'submit'}   || '';
-    my $referer = $c->request->parameters->{'referer'}  || $c->stash->{'url_prefix'}.'thruk/';
-    $referer    =~ s#^//#/#gmx; # strip double slashes
+    my $referer = $c->request->parameters->{'referer'}  || '';
+    $referer    =~ s#^//#/#gmx;         # strip double slashes
+    $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
+    $referer    = $c->stash->{'url_prefix'}.'thruk/' unless $referer;
 
     if($submit ne '') {
         my $testcookie = $c->request->cookie('thruk_test');
