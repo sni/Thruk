@@ -24,7 +24,6 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 
 use strict;
 use warnings;
-use Thruk::Utils::CleanINC;
 use Getopt::Long;
 use Pod::Usage;
 
