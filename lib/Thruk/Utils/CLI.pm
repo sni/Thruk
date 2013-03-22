@@ -170,7 +170,9 @@ sub _read_secret {
         $secret = read_file($var_path.'/secret.key');
         chomp($secret);
     } else {
-        _error("reading secret file ".$secretfile." failed: ".$!);
+        # don't print error unless in debug mode.
+        # will be printed in debians postinst installcron otherwise
+        _debug("reading secret file ".$secretfile." failed: ".$!) if $Thruk::Utils::CLI::verbose >= 2;
     }
     return $secret;
 }
