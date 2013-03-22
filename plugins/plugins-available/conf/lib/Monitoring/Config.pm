@@ -812,10 +812,7 @@ move object to different file
 
 =cut
 sub move_object {
-    my $self    = shift;
-    my $obj     = shift;
-    my $newfile = shift;
-    my $rebuild = shift;
+    my($self, $obj, $newfile, $rebuild) = @_;
     $rebuild    = 1 unless defined $rebuild;
 
     return unless defined $newfile;

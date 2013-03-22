@@ -1310,46 +1310,10 @@ sub _get_context_object {
         $obj = Monitoring::Config::Object->new( type     => $c->stash->{'type'},
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
-        my $files_root = $c->{'obj_db'}->get_files_root();
-        if($files_root eq '') {
-            $c->stash->{'new_file'} = '';
-            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.' );
-            return $obj;
-        }
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
-        my $fullpath   = $files_root.'/'.$new_file;
-        $fullpath      =~ s|\/+|\/|gmx;
-        my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
-        if(defined $file) {
-            if(defined $file and $file->readonly()) {
-                Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
-                $c->stash->{'new_file'} = '/'.$new_file;
-                return $obj;
-            }
-            $obj->set_file($file);
-        } else {
-            # new file
-            my $remotepath = $fullpath;
-            my $localpath  = $remotepath;
-            if($c->{'obj_db'}->is_remote()) {
-                $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
-            }
-            my $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
-            if(defined $file and $file->readonly()) {
-                Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
-                $c->stash->{'new_file'} = '/'.$new_file;
-                return $obj;
-            }
-            elsif(defined $file) {
-                $obj->set_file($file);
-                $c->{'obj_db'}->file_add($file);
-            }
-            else {
-                $c->stash->{'new_file'} = '';
-                Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
-                return $obj;
-            }
-        }
+        my $file = $self->_get_context_file($c, $obj, $new_file);
+        return $obj unless $file;
+        $obj->set_file($file);
         $obj->set_uniq_id($c->{'obj_db'});
         return $obj;
     }
@@ -1404,6 +1368,49 @@ sub _get_context_object {
     }
 
     return $obj;
+}
+
+##########################################################
+sub _get_context_file {
+    my($self, $c, $obj, $new_file) = @_;
+    my $files_root = $c->{'obj_db'}->get_files_root();
+    if($files_root eq '') {
+        $c->stash->{'new_file'} = '';
+        Thruk::Utils::set_message($c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.');
+        return;
+    }
+    my $fullpath   = $files_root.'/'.$new_file;
+    $fullpath      =~ s|\/+|\/|gmx;
+    my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
+    if(defined $file) {
+        if(defined $file and $file->readonly()) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
+            $c->stash->{'new_file'} = '/'.$new_file;
+            return;
+        }
+    } else {
+        # new file
+        my $remotepath = $fullpath;
+        my $localpath  = $remotepath;
+        if($c->{'obj_db'}->is_remote()) {
+            $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
+        }
+        $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
+        if(defined $file and $file->readonly()) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
+            $c->stash->{'new_file'} = '/'.$new_file;
+            return;
+        }
+        elsif(defined $file) {
+            $c->{'obj_db'}->file_add($file);
+        }
+        else {
+            $c->stash->{'new_file'} = '';
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
+            return;
+        }
+    }
+    return $file;
 }
 
 ##########################################################
@@ -1632,14 +1639,9 @@ sub _object_move {
     my $files_root = $self->_set_files_stash($c, 1);
     if($c->stash->{action} eq 'movefile') {
         my $new_file = $c->{'request'}->{'parameters'}->{'newfile'};
-        $new_file    =~ s/^\///gmx;
-        my $file     = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
-        if(!defined $file) {
-            Thruk::Utils::set_message( $c, 'fail_message', $files_root.$new_file." is not a valid file!" );
-        } elsif($c->{'obj_db'}->move_object($obj, $file)) {
+        my $file     = $self->_get_context_file($c, $obj, $new_file);
+        if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
-        } else {
-            Thruk::Utils::set_message( $c, 'fail_message', "Failed to move ".ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\'' );
         }
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }

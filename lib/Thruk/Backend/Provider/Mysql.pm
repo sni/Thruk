@@ -961,7 +961,7 @@ sub _update_logcache {
 
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
-        print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
+        print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
         $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
         return $log_count;
     }
