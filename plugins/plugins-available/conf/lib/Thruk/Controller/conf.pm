@@ -1326,7 +1326,7 @@ sub _get_context_object {
                 $c->stash->{'new_file'} = '/'.$new_file;
                 return $obj;
             }
-            $obj->{'file'} = $file;
+            $obj->set_file($file);
         } else {
             # new file
             my $remotepath = $fullpath;
@@ -1341,7 +1341,7 @@ sub _get_context_object {
                 return $obj;
             }
             elsif(defined $file) {
-                $obj->{'file'}         = $file;
+                $obj->set_file($file);
                 $c->{'obj_db'}->file_add($file);
             }
             else {
@@ -1582,6 +1582,7 @@ sub _object_save {
     my $old_comment = join("\n", @{$obj->{'comments'}});
     my $new_comment = $c->{'request'}->{'parameters'}->{'conf_comment'};
     $new_comment    =~ s/\r//gmx;
+    my $new         = $c->{'request'}->{'parameters'}->{'data.id'} eq 'new' ? 1 : 0;
 
     # save object
     $obj->{'file'}->{'errors'} = [];
@@ -1608,7 +1609,8 @@ sub _object_save {
                 $c->{'obj_db'}->_rebuild_index();
                 Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
             } else {
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' );
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
             }
         }
         if($c->{'request'}->{'parameters'}->{'referer'}) {
