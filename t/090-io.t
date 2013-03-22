@@ -30,6 +30,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m|Thruk::Utils::IO::mkdir|mx;
     next if $line =~ m|CORE::|mx;
     next if $line =~ m|lib/Monitoring/Availability|mx;
+    next if $line =~ m|lib/Monitoring/Livestatus|mx;
 
     push @fails, $line;
   }

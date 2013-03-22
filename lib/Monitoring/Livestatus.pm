@@ -50,7 +50,7 @@ path to the UNIX socket of check_mk livestatus
 
 =item server
 
-use this server for a TCP connection
+uses this server for a TCP connection
 
 =item peer
 
@@ -264,7 +264,7 @@ to get an array of hash references from the first 2 returned rows only
       "GET hosts", { Slice => {} }, 2
     );
 
-use limit to limit the result to this number of rows
+you may use limit to limit the result to this number of rows
 
 column aliases can be defined with a rename hash
 
@@ -908,6 +908,14 @@ sub _send {
     eval {
         $result = decode_json($body);
     };
+    # fix low/high surrogate errors
+    if($@ and $@ =~ m/missing\ (high|low)\ surrogate\ character\ in\ surrogate\ pair\E/mx) {
+        # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
+        $body =~ s/\\uD(8|9|A|B|C|D)\w{2}/\\ufffd/gmxi;
+        eval {
+            $result = decode_json($body);
+        };
+    }
     if($@) {
         my $message = "ERROR ".$@." in text: '".$body."'\" for statement: '$statement'\n";
         $self->{'logger'}->error($message) if $self->{'verbose'};

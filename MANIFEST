@@ -71,6 +71,10 @@ lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Monitoring/Availability.pm
 lib/Monitoring/Availability/Logs.pm
+lib/Monitoring/Livestatus.pm
+lib/Monitoring/Livestatus/INET.pm
+lib/Monitoring/Livestatus/MULTI.pm
+lib/Monitoring/Livestatus/UNIX.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
