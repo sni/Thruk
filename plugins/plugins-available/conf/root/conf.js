@@ -118,6 +118,9 @@ function init_conf_tool_buttons() {
     jQuery('.conf_save_reload_button').button({
         icons: {primary: 'ui-save_reload-button'}
     });
+    jQuery('.conf_delete_button').button({
+        icons: {primary: 'ui-delete-button'}
+    });
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}

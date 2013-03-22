@@ -699,7 +699,7 @@ sub button {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
     }
-    $html   .= '<button class="conf_save_reload_button">save &amp; reload</button>';
+    $html   .= '<button class="'.$class.'">'.$value.'</button>';
     $html   .= '</form>';
     return $html;
 }

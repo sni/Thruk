@@ -1,6 +1,23 @@
 ﻿[% WRAPPER _conf_objects_frame.tt %]
 
 <table border="0" class='data conftoolobj'>
+  [% IF force_delete %]
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming References of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
+  </tr>
+  <tr>
+    <td class='dataVar' style="text-align:center" colspan=2>
+      <br>
+      [% link = "conf.cgi?sub=objects&action=delete&force=1&data.id=" _ object.get_id() %]
+      [% text = "Really delete this " _ object.get_type() | ucfirst %]
+      [% button(link, text, 'conf_delete_button') %]
+      <br>
+      [% object.get_type() | ucfirst %] has remaining references!
+      <br>
+      <br>
+    </td>
+  </tr>
+  [% END %]
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Incoming References of [% object.get_type() | ucfirst +%] [%+ object.get_name() %]</a></th>
   </tr>

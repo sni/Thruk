@@ -1560,14 +1560,16 @@ sub _object_delete {
     my $c    = shift;
     my $obj  = shift;
 
-    my $refs = $c->{'obj_db'}->get_references($obj);
-    if(scalar keys %{$refs}) {
-        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' has remaining references' );
-        return $c->response->redirect('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id());
+    if(!$c->{'request'}->{'parameters'}->{'force'}) {
+        my $refs = $c->{'obj_db'}->get_references($obj);
+        if(scalar keys %{$refs}) {
+            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($obj->get_type()).' has remaining references' );
+            return $c->response->redirect('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
+        }
     }
     $c->{'obj_db'}->delete_object($obj);
-    Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' removed successfully' );
-    return $c->response->redirect('conf.cgi?sub=objects&type='.$c->stash->{'type'});
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
+    return $c->response->redirect('conf.cgi?sub=objects&type='.$obj->get_type());
 }
 
 ##########################################################
@@ -1910,6 +1912,9 @@ sub _list_references {
             $outgoing->{$obj->get_type()}->{$t} = '';
         }
     }
+
+    # linked from delete object page?
+    $c->stash->{'force_delete'} = $c->{'request'}->{'parameters'}->{'show_force'} ? 1 : 0;
 
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;
