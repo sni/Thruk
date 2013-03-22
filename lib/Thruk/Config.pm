@@ -375,7 +375,7 @@ sub set_default_config {
                     '3'                     => 'Wednesday',
                     '4'                     => 'Thursday',
                     '5'                     => 'Friday',
-                    '6'                     => 'Saterday',
+                    '6'                     => 'Saturday',
                     '7'                     => 'Sunday',
                                            },
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
