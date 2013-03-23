@@ -83,11 +83,29 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $host    = $c->{'request'}->{'parameters'}->{'host'}    || '';
     my $service = $c->{'request'}->{'parameters'}->{'service'} || '';
     if($service) {
-        push @{$filter}, { host_name           => $host };
-        push @{$filter}, { service_description => $service };
+        push @{$filter}, {
+                -or => [
+                        { -and => [
+                            { host_name           => $host },
+                            { service_description => $service},
+                        ]},
+                        { -and => [
+                            {type    => 'EXTERNAL COMMAND' },
+                            {message => { '~~' => '(\s|;)'.$host.';'.$service.'(;|$)' }}
+                        ]},
+                ]
+        };
     }
     elsif($host) {
-        push @{$filter}, { host_name           => $host };
+        push @{$filter}, {
+                -or => [
+                        { host_name => $host },
+                        { -and => [
+                            {type    => 'EXTERNAL COMMAND' },
+                            {message => { '~~' => '(\s|;)'.$host.'(;|$)' }}
+                        ]},
+                ]
+        };
     }
     $c->stash->{'host'}    = $host;
     $c->stash->{'service'} = $service;
@@ -139,7 +157,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-2013, <nierlein@cpan.org>
 
 =head1 LICENSE
 
