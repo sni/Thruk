@@ -1229,6 +1229,7 @@ sub _do_on_peer {
             $last_error = $@;
             $last_error =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
             $last_error =~ s/thread\s+\d+//gmx;
+            $last_error =~ s/^ERROR:\ //gmx;
             $last_error = "ERROR: ".$last_error;
             $errors++;
             if($last_error =~ m/can't\ get\ db\ response,\ not\ connected\ at/mx) {

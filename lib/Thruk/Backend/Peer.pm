@@ -140,6 +140,7 @@ sub _initialise_peer {
     # shorten backend id
     my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
     $key    = $config->{'id'} if defined $config->{'id'};
+    $key    =~ s/[^a-zA-Z0-9]//gmx;
 
     # make sure id is uniq
     my $x      = 0;

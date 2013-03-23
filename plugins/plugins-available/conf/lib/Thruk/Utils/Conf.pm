@@ -654,6 +654,7 @@ sub get_root_folder {
     my($files) = @_;
     my $splited = {};
     for my $file (@{$files}) {
+        $file =~ s|/[^/]+$||gmx;
         my @paths = split(/\//mx, $file);
         $splited->{$file} = \@paths;
     }

@@ -76,8 +76,7 @@ sub cmd {
 
         $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
 
-        exec($cmd);
-        exit(1); # just to be sure
+        exec($cmd) or exit(1); # just to be sure
     }
 }
 

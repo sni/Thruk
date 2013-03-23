@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp qw/cluck/;
 use Monitoring::Config::File;
+use Encode qw/decode_utf8/;
 use Data::Dumper;
 use Carp;
 
@@ -210,7 +211,7 @@ sub commit {
         unless($file->save()) {
             $rc = 0;
         }
-        push @{$files->{'changed'}}, [ $file->{'display'}, "".$file->get_new_file_content(), $file->{'mtime'} ] unless $file->{'deleted'};
+        push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }
 
     # remove deleted files from files
@@ -1856,14 +1857,15 @@ sub _remote_do {
     my $res;
     eval {
         $res = $self->{'remotepeer'}
-                   ->{'class'}
-                   ->_req('configtool', {
+                    ->{'class'}
+                    ->_req('configtool', {
                             auth => $c->stash->{'remote_user'},
                             sub  => $sub,
                             args => $args,
                     });
     };
     if($@) {
+        warn($@) if $ENV{'THRUK_SRC'} eq 'TEST';
         my $msg = $@;
         $c->log->error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
@@ -1936,7 +1938,7 @@ sub remote_file_sync {
     for my $path (keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
-            my $localpath = $localdir.$path;
+            my $localpath = $localdir.'/'.$path;
             $c->log->debug('updating file: '.$path);
             my $dir       = $localpath;
             $dir          =~ s/\/[^\/]+$//mx;
@@ -1960,7 +1962,7 @@ sub remote_file_sync {
     if(scalar @{$self->{'files'}} == 0) {
         my $settings = $self->_remote_do($c, 'configsettings');
         return unless $settings;
-        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.$settings->{'files_root'});
+        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.'/'.$settings->{'files_root'});
         $self->{'config'}->{'files_root'} = $settings->{'files_root'}.'/';
         $self->{'config'}->{'files_root'} =~ s|/+|/|gmx;
     }
