@@ -20,6 +20,7 @@ for my $cmd (@{$cmds}) {
   while(<$ph>) {
     my $line = $_;
     chomp($line);
+    $line =~ s|//|/|gmx;
 
     next unless $line =~ m/\.pm:\d+/mx;
     next if $line =~ m|STDERR|mx;

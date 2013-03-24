@@ -94,7 +94,7 @@ if(!$socketpid) {
                 print $socket '200          19',"\n";
                 print $socket '[[1,"thrukadmin"]]',"\n\n";
             } else {
-                use Data::Dumper; print STDERR Dumper("unknown", $query);
+                diag(Dumper("unknown", $query));
             }
         }
     }

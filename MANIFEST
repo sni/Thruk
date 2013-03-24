@@ -207,6 +207,7 @@ plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.t
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js
 plugins/plugins-available/conf/t/conf_utils.t
+plugins/plugins-available/conf/t/conf_utils_api.t
 plugins/plugins-available/conf/t/controller_conf.t
 plugins/plugins-available/conf/t/data/1/host.cfg
 plugins/plugins-available/conf/t/data/2/host.cfg
@@ -220,6 +221,10 @@ plugins/plugins-available/conf/t/data/6/servicegroups_iso-8859.cfg
 plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
 plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/data/8/commented_object.cfg
+plugins/plugins-available/conf/t/data/http_api/thruk_local.conf
+plugins/plugins-available/conf/t/data/local/core.d/utf8.cfg
+plugins/plugins-available/conf/t/data/local/thruk_local.conf
+plugins/plugins-available/conf/t/data/local/var/secret.key
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_backends_backend.tt

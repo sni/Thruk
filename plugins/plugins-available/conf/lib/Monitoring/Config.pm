@@ -6,6 +6,7 @@ use Carp qw/cluck/;
 use Monitoring::Config::File;
 use Encode qw/decode_utf8/;
 use Data::Dumper;
+use Config::General;
 use Carp;
 
 =head1 NAME
