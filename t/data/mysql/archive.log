@@ -2,3 +2,4 @@
 [1362662646] EXTERNAL COMMAND: SCHEDULE_HOST_DOWNTIME;züürps;1362662599;1362669799;1;0;7200;thrukadmin;test
 [1362662647] HOST DOWNTIME ALERT: züürps;STARTED; Host has entered a period of scheduled downtime
 [1363704695] SERVICE NOTIFICATION: contact2;child;check_logfiles-3.5.3;CUSTOM (CRITICAL);service-notify-by-email;CRITICAL - (1 errors)
+[1364135380] SERVICE NOTIFICATION: contact;child;check_logfiles-3.5.3;ACKNOWLEDGEMENT (CRITICAL);service-notify-by-email;CRITICAL - (1 errors) - tag attr=blah;thrukadmin;bekannt

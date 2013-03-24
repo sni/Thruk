@@ -17,6 +17,7 @@
     [% ELSE                                      %][%   statusclass = 'notificationsUNKNOWN' %]
     [% END %]
     [% IF !n.defined('command_name') %][% n.command_name = options.4 %][% END %]
+    [% IF !n.plugin_output %][% n.plugin_output = options.5 %][% END %]
 [% ELSE %]
     [% SET level = options.2 %]
     [%    IF level == 'UP'          %][% level = 'HOST UP'          statusclass = 'notificationsHOSTUP' state_color = 'green' %]
@@ -30,4 +31,5 @@
     [% ELSE                                      %][%    statusclass = 'notificationsUNKNOWN' %]
     [% END %]
     [% IF !n.defined('command_name') %][% n.command_name = options.3 %][% END %]
+    [% IF !n.plugin_output %][% n.plugin_output = options.4 %][% END %]
 [% END %]

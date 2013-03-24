@@ -50,7 +50,7 @@ $Thruk::Backend::Provider::Mysql::types = {
     'EXTERNAL COMMAND'        => 5, # LOGCLASS_COMMAND
 };
 
-$Thruk::Backend::Provider::Mysql::cache_version = 2;
+$Thruk::Backend::Provider::Mysql::cache_version = 3;
 
 ##########################################################
 
@@ -1546,6 +1546,9 @@ sub _insert_logs {
         $type = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
         if($type eq 'TIMEPERIOD TRANSITION') {
             $l->{'plugin_output'} = '';
+        }
+        if($type eq 'SERVICE NOTIFICATION' or $type eq 'HOST NOTIFICATION') {
+            $l->{'plugin_output'} = ''; # would result in duplicate output otherwise
         }
         my $state       = $l->{'state'};
         $state          = 'NULL' if $state eq '';
