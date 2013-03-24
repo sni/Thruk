@@ -497,7 +497,7 @@ sub expand_command {
         $command_name = $vars->{$source} || '';
     }
 
-    my($name, @com_args) = split(/!/mx, $command_name, 255);
+    my($name, @com_args) = split(/(?<!\\)!/mx, $command_name, 255);
 
     # it is possible to define hosts without a command
     if(!defined $name or $name =~ m/^\s*$/mx) {
