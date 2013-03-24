@@ -716,7 +716,7 @@ var hide_activity_icons_timer;
 function hide_activity_icons() {
     jQuery('img').each(function(i, e) {
         if(e.src.indexOf("/images/waiting.gif") > 0) {
-            e.style.display = "none";
+            e.style.visibility = "hidden";
         }
     });
 }
@@ -1606,8 +1606,9 @@ function selectService(event, state) {
 }
 
 /* select this service */
-function selectServiceByIdEvent(row_id, state, event)
-{
+function selectServiceByIdEvent(row_id, state, event) {
+    row_id = row_id.replace(/_s_exec$/, '');
+
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
       var id1         = parseInt(row_id.substring(5));
@@ -1644,6 +1645,7 @@ function selectServiceByIdEvent(row_id, state, event)
 
 /* select service row by id */
 function selectServiceById(row_id, state) {
+    row_id = row_id.replace(/_s_exec$/, '');
     var targetState;
     if(state != undefined) {
         targetState = state;
@@ -1716,6 +1718,7 @@ function selectHost(event, state) {
 
 /* select this service */
 function selectHostByIdEvent(row_id, state, event) {
+    row_id = row_id.replace(/_h_exec$/, '');
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
@@ -1752,6 +1755,7 @@ function selectHostByIdEvent(row_id, state, event) {
 
 /* set host row selected */
 function selectHostById(row_id, state) {
+    row_id = row_id.replace(/_h_exec$/, '');
     var targetState;
     if(state != undefined) {
         targetState = state;
