@@ -15,14 +15,22 @@ BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'local test only' if defined $ENV{'CATALYST_SERVER'};
     plan tests => 27;
+    alarm(60);
 }
 
-my($http_dir, $local_dir);
+my($http_dir, $local_dir, $input_dir,$test_name);
 BEGIN {
     ###########################################################
+    if($ENV{THRUK_LEAK_CHECK}) {
+        $input_dir = 'core.d';
+        $test_name = 'testname';
+    } else {
+        $input_dir = 'core.d.utf8';
+        $test_name = 'utf8-é';
+    }
     # prepare sites
-    $http_dir  = tempdir(CLEANUP => 1);
-    $local_dir = tempdir(CLEANUP => 1);
+    $http_dir  = tempdir();
+    $local_dir = tempdir();
     ok(-d $http_dir, 'got http folder: '.$http_dir);
     ok(-d $local_dir, 'got local folder: '.$local_dir);
     mkdir($http_dir.'/tmp');
@@ -39,7 +47,7 @@ BEGIN {
     print $fh "var_path  = ".$http_dir."/var\n";
     print $fh "tmp_path  = ".$http_dir."/tmp\n";
     close($fh);
-    my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/core.d|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
+    my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/$input_dir|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
     `$cmd`;
 
     $ENV{'CATALYST_CONFIG'} = $http_dir;
@@ -63,6 +71,7 @@ for my $x (1..20) {
     sleep(0.2);
 }
 ok($httppid, 'test server started: '.$httppid);
+sleep(2);
 
 ###########################################################
 # start fake live socket
@@ -119,22 +128,23 @@ is($c->{'obj_db'}->is_remote(), 1, 'got a remote peer');
 # check remote config settings
 my $settings = $c->{'obj_db'}->_remote_do($c, 'configsettings');
 is_deeply($settings,
-          { 'files_root' => $local_dir.'/core.d' },
+          { 'files_root' => $local_dir.'/'.$input_dir },
           'got remote config settings'
 );
 
 ###########################################################
 # config mirror created?
 TestUtils::test_command({
-    cmd   => '/usr/bin/diff -ru '.$http_dir.'/tmp/localconfcache/http'.$local_dir.'/core.d/'.
-                                ' plugins/plugins-available/conf/t/data/local/core.d/',
+    cmd   => '/usr/bin/diff -ru '.$http_dir.'/tmp/localconfcache/http'.$local_dir.'/'.$input_dir.'/'.
+                                ' plugins/plugins-available/conf/t/data/local/'.$input_dir.'/',
     like => ['/^$/'],
 });
+
 my $service = $c->{'obj_db'}->{'files'}->[0]->{'objects'}->[0];
 isa_ok($service, 'Monitoring::Config::Object::Service');
 is_deeply($service->{'conf'},
           {
-            'name'                  => 'utf8-é',
+            'name'                  => $test_name,
             'notification_interval' => '0',
             'register'              => 0
           },
@@ -152,8 +162,8 @@ $c->{'obj_db'}->commit($c);
 
 # should differ
 TestUtils::test_command({
-    cmd   => '/usr/bin/diff -ru '.$local_dir.'/core.d/'.
-                                ' plugins/plugins-available/conf/t/data/local/core.d/',
+    cmd   => '/usr/bin/diff -ru '.$local_dir.'/'.$input_dir.'/'.
+                                ' plugins/plugins-available/conf/t/data/local/'.$input_dir.'',
     like => ['/notification_interval\s+1/'],
     exit => 1,
 });
@@ -167,8 +177,8 @@ $c->{'obj_db'}->commit($c);
 
 # should not differ
 TestUtils::test_command({
-    cmd   => '/usr/bin/diff -ru '.$local_dir.'/core.d/'.
-                                ' plugins/plugins-available/conf/t/data/local/core.d/',
+    cmd   => '/usr/bin/diff -ru '.$local_dir.'/'.$input_dir.'/'.
+                                ' plugins/plugins-available/conf/t/data/local/'.$input_dir.'/',
     like => ['/^$/'],
 });
 
@@ -176,18 +186,16 @@ TestUtils::test_command({
 # clean up
 ###########################################################
 # stop test server
-my $nr = kill(2, $httppid);
+my $nr = kill(2, $httppid, ($httppid+1));
 ok($nr, 'test http server killed');
 $nr = kill(2, $socketpid);
 ok($nr, 'test live server killed');
+sleep(1);
 
 ###########################################################
 # really stop test server
-sub kill_test_server {
-    kill(2, $httppid)   if $httppid;
-    kill(2, $socketpid) if $socketpid;
-    `rm -rf $http_dir $local_dir`;
-}
 END {
-    kill_test_server();
+    kill(9, $httppid)   if $httppid;
+    kill(9, $socketpid) if $socketpid;
+    `rm -rf $http_dir $local_dir`;
 }
