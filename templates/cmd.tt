@@ -46,6 +46,13 @@
                               <option value="[% b %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
                             [% END %]
                           </select>
+                          <select name="backend.orig" size="5" multiple>
+                            [% FOREACH b IN backends %]
+                              [% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %]
+                              <input type="hidden" name="backend.orig" value="[% b %]">
+                              [% END %]
+                            [% END %]
+                          </select>
                         </td>
                       </tr>
                       <tr>
