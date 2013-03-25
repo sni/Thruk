@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use Carp;
 use utf8;
 use Test::More;
 use Data::Dumper;
@@ -14,7 +15,8 @@ my $testport = 50080;
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'local test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 27;
+    plan tests => 28;
+    $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
 }
 
@@ -63,15 +65,17 @@ use Catalyst::Test 'Thruk';
 my $httppid = fork();
 if(!$httppid) {
     mkdir('/tmp/');
-    exec("CATALYST_CONFIG=".$local_dir." ./script/thruk_server.pl -p ".$testport) or exit 1;
+    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport) or exit 1;
 }
-for my $x (1..20) {
+my $now = time();
+for my $x (1..15) {
     my $socket = IO::Socket::INET->new('localhost:'.$testport);
     last if($socket and $socket->connected());
-    sleep(0.2);
+    sleep(1);
 }
 ok($httppid, 'test server started: '.$httppid);
 sleep(2);
+alarm(30);
 
 ###########################################################
 # start fake live socket
@@ -111,10 +115,24 @@ if(!$socketpid) {
 ok($socketpid, 'live socket started: '.$socketpid);
 
 ###########################################################
+# wait till server starts
+my $started = 0;
+for my $x (1..30) {
+    my($res, $c) = ctx_request('/thruk/cgi-bin/extinfo.cgi?type=0');
+    if(exists $c->stash->{'failed_backends'}->{'http'} and !defined $c->stash->{'failed_backends'}->{'http'}) {
+        ok(1, 'server started in '.(time() - $now).'s');
+        $started = 1;
+        last;
+    }
+    sleep(1);
+}
+bail_out_with_kill('server did not start') unless $started;
+
+###########################################################
 # init our components
 my($res, $c) = ctx_request('/thruk/cgi-bin/conf.cgi?sub=objects');
 is(scalar @{$c->stash->{'backends'}}, 1, 'number of backends');
-is($c->stash->{'failed_backends'}->{'http'}, undef, 'test connection successful') or BAIL_OUT("got no connection");
+is($c->stash->{'failed_backends'}->{'http'}, undef, 'test connection successful') or bail_out_with_kill("got no connection");
 
 ###########################################################
 # config backend intialized?
@@ -186,7 +204,7 @@ TestUtils::test_command({
 # clean up
 ###########################################################
 # stop test server
-my $nr = kill(2, $httppid, ($httppid+1));
+my $nr = kill(2, $httppid);
 ok($nr, 'test http server killed');
 $nr = kill(2, $socketpid);
 ok($nr, 'test live server killed');
@@ -195,7 +213,16 @@ sleep(1);
 ###########################################################
 # really stop test server
 END {
-    kill(9, $httppid)   if $httppid;
+    `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1` if $httppid;
     kill(9, $socketpid) if $socketpid;
     `rm -rf $http_dir $local_dir`;
+}
+
+###########################################################
+sub bail_out_with_kill {
+    my($msg) = @_;
+    `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1`;
+    kill(9, $socketpid)             if $socketpid;
+    `rm -rf $http_dir $local_dir`;
+    BAIL_OUT($msg);
 }
