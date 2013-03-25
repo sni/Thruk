@@ -136,6 +136,33 @@ sub font {
 
 ##########################################################
 
+=head2 prFont
+
+  prFont($font)
+
+try to set Truetype font if exists, use internal fallback font otherwise.
+Truetype fonts are required for UTF-8 characters.
+
+=cut
+sub prFont {
+    my($font) = @_;
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    my $fontfolders = [
+
+    ];
+    if($font eq 'Helvetica-Bold' and -e '/usr/share/fonts/truetype/msttcorefonts/Trebuchet_MS_Bold.ttf') {
+        $pdf->prTTFont('/usr/share/fonts/truetype/msttcorefonts/Trebuchet_MS_Bold.ttf');
+    }
+    elsif($font eq 'Calibri' and -e '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf') {
+        $pdf->prTTFont('/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf');
+    } else {
+        $pdf->prFont($font);
+    }
+    return 1;
+}
+
+##########################################################
+
 =head2 outages
 
   outages($logs, $start, $end, $x, $y, $step1, $step2, $max)
