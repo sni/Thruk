@@ -664,6 +664,7 @@ sub _get_filter {
     }
 
     $filter =~ s/\ AND\ \)/)/gmx;
+    $filter =~ s/\(\ AND\ \(/((/gmx;
     $filter = '' if $filter eq ' WHERE ';
 
     return($filter, $contact, $system, $strict);
