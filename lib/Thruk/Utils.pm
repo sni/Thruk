@@ -1604,10 +1604,13 @@ write data to datafile
 sub write_data_file {
     my($filename, $data) = @_;
 
+    # make data::dumper save utf-8 directly
+    local $Data::Dumper::Useqq = 1;
+
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>'.$filename) or confess('cannot write to '.$filename.": ".$!);
+    open(my $fh, '>:utf8', $filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $filename);
 
