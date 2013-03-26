@@ -1610,7 +1610,7 @@ sub write_data_file {
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>:utf8', $filename) or confess('cannot write to '.$filename.": ".$!);
+    open(my $fh, '>:encoding(UTF-8)', $filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $filename);
 
