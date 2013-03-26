@@ -603,6 +603,10 @@ div.quoteblock { border-left-width: 3px; margin-left: 0; margin-right: 0;}
 div.admonitionblock td.content { border-left: 3px solid #E8E8E8; }
 
 
+
+
+
+/* adjustments for thruk */
 DIV.subtoc div.toclevel3 {
   margin-left: 2em;
 }
@@ -611,6 +615,25 @@ DIV.subtoc div.toclevel4 {
 }
 #footnotes {
   display: none;
+}
+DIV.literalblock pre {
+   line-height: 12px;
+ }
+DIV.literalblock > div.content {
+  border-color: #E8E8E8;
+  border-width: 0 0 0 3px;
+}
+div.literalblock > div.content {
+  -moz-border-bottom-colors: none;
+  -moz-border-left-colors: none;
+  -moz-border-right-colors: none;
+  -moz-border-top-colors: none;
+  background: none repeat scroll 0 0 #F8F8F8;
+  border-color: #DDDDDD #DDDDDD #DDDDDD #F0F0F0;
+  border-image: none;
+  border-style: solid;
+  border-width: 1px 1px 1px 5px;
+  padding: 0.5em;
 }</style>
 
 </head>
@@ -629,6 +652,7 @@ DIV.subtoc div.toclevel4 {
 <div class='toclevel2'><a href='#_customization'>Customization</a></div>
 <div class='toclevel3'><a href='#_how_to_change_the_side_menu'>How to change the side menu</a></div>
 <div class='toclevel3'><a href='#_how_can_i_integrate_nagvis_maps'>How can i integrate Nagvis Maps</a></div>
+<div class='toclevel3'><a href='#_how_can_i_integrate_nagvis_maps_in_the_panorama_dashboard'>How can i integrate Nagvis Maps in the Panorama Dashboard</a></div>
 <div class='toclevel3'><a href='#_how_can_i_add_more_themes'>How can i add more themes?</a></div>
 <div class='toclevel3'><a href='#_how_can_i_disable_themes'>How can i disable themes?</a></div>
 <div class='toclevel3'><a href='#_how_can_i_customize_reports'>How can i customize reports?</a></div>
@@ -790,6 +814,15 @@ add_sub_link('name' =&gt; "demo",       'href' =&gt; '/nagvis/frontend/nagvis-js
 add_sub_link('name' =&gt; "demo-map2",  'href' =&gt; '/nagvis/frontend/nagvis-js/index.php?mod=Map&amp;act=view&amp;show=demo-map2');</tt></pre>
 </div></div>
 <div class="paragraph"><p>Thruk has to be restarted.</p></div>
+<h3 id="_how_can_i_integrate_nagvis_maps_in_the_panorama_dashboard">How can i integrate Nagvis Maps in the Panorama Dashboard</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Choose <em>Generic Url Panlet</em> from the <em>New Panlet</em> list. Then enter
+the following url:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>/nagvis/frontend/nagvis-js/index.php?mod=Map&amp;act=view&amp;show=demo-automap</tt></pre>
+</div></div>
+<div class="paragraph"><p>Replace demo-automap with the name of your map. If you use OMD, you have
+to prepend the site name to the url.</p></div>
 <h3 id="_how_can_i_add_more_themes">How can i add more themes?</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Themes are located under <em>themes</em>. Just copy and modify the one you
 like. See the <a href="http://thruk.org/themes.html">themes page</a> for details.</p></div>
@@ -885,7 +918,7 @@ boxes.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-02-11 13:13:47 CEST
+Last updated 2013-03-26 15:15:08 CEST
 </div>
 </div>
 </body>

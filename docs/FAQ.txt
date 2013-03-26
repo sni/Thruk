@@ -176,6 +176,17 @@ add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index
 Thruk has to be restarted.
 
 
+=== How can i integrate Nagvis Maps in the Panorama Dashboard
+
+Choose 'Generic Url Panlet' from the 'New Panlet' list. Then enter
+the following url:
+....
+/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-automap
+....
+Replace demo-automap with the name of your map. If you use OMD, you have
+to prepend the site name to the url.
+
+
 === How can i add more themes?
 
 Themes are located under 'themes'. Just copy and modify the one you
