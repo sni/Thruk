@@ -83,15 +83,23 @@ sub report_show {
             $c->stash->{'text'} = $report_text;
         }
         elsif($report->{'var'}->{'attachment'}) {
-            $c->stash->{'text'} = read_file($report_file);
-            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$report->{'var'}->{'attachment'}.'"' );
+            my $name = $report->{'var'}->{'attachment'};
+            $name    =~ s/\s+/_/gmx;
+            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
+            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
+            open(my $fh, '<', $report_file);
+            binmode $fh;
+            $c->res->body($fh);
         } else {
             my $name = $report->{'name'};
-            $name    =~ s/\s/_/gmx;
-            $c->stash->{'text'} = read_file($report_file);
+            $name    =~ s/\s+/_/gmx;
+            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
             $c->res->content_type('application/pdf');
             $c->res->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
+            open(my $fh, '<', $report_file);
+            binmode $fh;
+            $c->res->body($fh);
         }
     } else {
         if($Thruk::Utils::Reports::error) {
