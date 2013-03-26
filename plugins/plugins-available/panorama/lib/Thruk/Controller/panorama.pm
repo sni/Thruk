@@ -823,7 +823,7 @@ sub _task_servicesminemap {
         my $l = length($svc);
         $longest_description = $l if $l > $longest_description;
     }
-    my $height = $longest_description * 6;
+    my $height = 15 + int($longest_description * 5.70);
     $height    =  40 if $height <  40;
     $height    = 250 if $height > 250;
 
