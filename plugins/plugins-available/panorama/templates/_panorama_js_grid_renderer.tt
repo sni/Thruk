@@ -21,7 +21,7 @@ TP.render_icon_log = function(v, td, item) {
 
 /* render site status icon */
 TP.render_icon_site = function(v, td, item) {
-    title="";
+    var title="";
     if(item.data.runtime=="") {
         title="title=\""+item.data.version+"\"";
     };
