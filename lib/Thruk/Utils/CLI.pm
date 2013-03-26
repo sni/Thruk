@@ -22,8 +22,9 @@ use Encode qw(encode_utf8);
 use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
 
-$Thruk::Utils::CLI::verbose = 0;
-$Thruk::Utils::CLI::c       = undef;
+$Thruk::Utils::CLI::verbose  = 0;
+$Thruk::Utils::CLI::c        = undef;
+$Thruk::Utils::CLI::use_curl = 0;
 
 ##############################################
 
@@ -149,17 +150,21 @@ sub _read_secret {
     my($self) = @_;
     my $files = [];
     push @{$files}, 'thruk.conf';
-    push @{$files}, 'thruk_local.conf';
     push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, 'thruk_local.conf';
     push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
     my $var_path = './var';
-    for my $file (reverse @{$files}) {
+    for my $file (@{$files}) {
         next unless -f $file;
         open(my $fh, '<', $file) or die("open file $file failed (id: ".`id -a`.", pwd: ".`pwd`."): ".$!);
         while(my $line = <$fh>) {
-            next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mxo;
-            $var_path = $1;
-            last if $1;
+            next if substr($line, 0, 1) eq '#';
+            if($line =~ m/^\s*var_path\s*=\s*(.*?)\s*$/mxo) {
+                $var_path = $1;
+            }
+            if($line =~ m/^\s*use_curl\s*=\s*(.*?)\s*$/mxo) {
+                $Thruk::Utils::CLI::use_curl = $1;
+            }
         }
         Thruk::Utils::IO::close($fh, $file, 1);
     }
@@ -978,7 +983,10 @@ sub _cmd_ext_job {
 }
 ##############################################
 sub _get_user_agent {
-    Thruk::Utils::load_lwp_curl();
+    if($Thruk::Utils::CLI::use_curl) {
+        _debug("enabled curl support") if $Thruk::Utils::CLI::verbose >= 2;
+        Thruk::Utils::load_lwp_curl();
+    }
     my $ua = LWP::UserAgent->new;
     $ua->agent("thruk_cli");
     return $ua;
