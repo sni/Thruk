@@ -4,6 +4,7 @@ next:
           - better utf-8 support in report mails
           - Bug Fixes
             - fixed translation issue in italian reports
+            - fixed utf-8 problem in report month names
 
 1.66     Tue Mar 26 18:43:48 CET 2013
           - added mysql logfile cache

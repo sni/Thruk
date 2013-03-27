@@ -17,6 +17,7 @@ use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
 use JSON::XS;
+use Encode qw/decode_utf8/;
 
 ##############################################
 
@@ -379,12 +380,13 @@ sub json_encode {
 
 =head2 encode_json_obj
 
-  encode_json_obj(array)
+  encode_json_obj(array, [decode])
 
 returns json encoded object
 
 =cut
 sub encode_json_obj {
+    return decode_utf8(JSON::XS::encode_json($_[0])) if $_[1];
     return JSON::XS::encode_json($_[0]);
 }
 

@@ -25,7 +25,7 @@
       },
       xaxis: {
         mode: "time",
-        dayNames:   [% encode_json_obj(dayNames) %],
+        dayNames:   [% encode_json_obj(dayNames, 1) %],
         ticks:      ticks
       },
       yaxis: {
@@ -39,7 +39,7 @@
   });
 
   function calc_time_markings_and_ticks(data, breakdown) {
-    var monthNames = [% encode_json_obj(monthNames) %];
+    var monthNames = [% encode_json_obj(monthNames, 1) %];
     var ticks      = [];
     var markings   = [];
 
