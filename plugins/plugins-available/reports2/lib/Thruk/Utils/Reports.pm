@@ -20,7 +20,7 @@ use Thruk::Utils::CLI;
 use Thruk::Utils::Reports::Render;
 use MIME::Lite;
 use File::Copy;
-use Encode qw(encode_utf8 decode_utf8);
+use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
 
 ##########################################################
@@ -170,7 +170,7 @@ sub report_send {
                  To      => $report->{'to'}      || $mailheader->{'to'},
                  Cc      => $report->{'cc'}      || $mailheader->{'cc'},
                  Bcc     => $report->{'bcc'}     || $mailheader->{'bcc'},
-                 Subject => $report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report',
+                 Subject => encode("MIME-B", ($report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report')),
                  Type    => 'multipart/mixed',
         );
         for my $key (keys %{$mailheader}) {
@@ -183,8 +183,8 @@ sub report_send {
             next if $key eq 'subject';
             $msg->add($key => $mailheader->{$key});
         }
-        $msg->attach(Type     => 'TEXT',
-                     Data     => $mailbody,
+        $msg->attach(Type     => 'text/plain; charset=UTF-8',
+                     Data     => encode_utf8($mailbody),
         );
 
         if($report->{'var'}->{'attachment'}) {
