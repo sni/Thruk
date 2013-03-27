@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - better utf-8 support in report mails
+          - Bug Fixes
+            - fixed translation issue in italian reports
+
 1.66     Tue Mar 26 18:43:48 CET 2013
           - added mysql logfile cache
           - added logcache statistics to performance info page
