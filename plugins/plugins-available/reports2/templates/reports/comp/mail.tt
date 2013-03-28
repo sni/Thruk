@@ -14,7 +14,7 @@ SUBJECT: [% loc("Report:") +%] [%+ r.name +%]
 [%+ ELSIF param.exists('servicegroup') +%]
 [% loc("Servicegroup:") +%] [%+ param.servicegroup %]
 [%+ END +%]
-[% IF start %]
+[%+ IF start +%]
 [% loc("Report Timeperiod:") +%] [%+ format_date(start, reportDateFormat) %] - [% format_date((end - 1), reportDateFormat) %]
 [% END +%]
 
