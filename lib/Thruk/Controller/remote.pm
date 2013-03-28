@@ -80,9 +80,13 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     # log requests?
     if($action eq 'log') {
         my $file = "".$c->{'request'}->body();
-        my $msg = read_file($file);
-        unlink($file);
-        $c->log->error($msg);
+        if(-e $file) {
+            my $msg = read_file($file);
+            unlink($file);
+            $c->log->error($msg);
+        } else {
+            $c->log->error('log request without a file: '.Dumper($c->{'request'}));
+        }
         return;
     }
 
