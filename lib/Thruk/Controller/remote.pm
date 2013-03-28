@@ -78,9 +78,9 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
 
     # log requests?
-    if($action eq 'log') {
+    if($action eq 'log' and $c->{'request'}->{'method'} eq 'POST') {
         my $file = "".$c->{'request'}->body();
-        if(-e $file) {
+        if($file and -e $file) {
             my $msg = read_file($file);
             unlink($file);
             $c->log->error($msg);
