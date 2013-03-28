@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - better utf-8 support in report mails
+          - ensure image data is a pnp file
           - Bug Fixes
             - fixed translation issue in italian reports
             - fixed utf-8 problem in report month names

@@ -530,6 +530,7 @@ sub get_pnp_image {
     if(-s $filename) {
         my $imgdata  = read_file($filename);
         unlink($filename);
+        return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
         return 'data:image/png;base64,'.encode_base64($imgdata, '');
     }
     unlink($filename);
