@@ -112,7 +112,7 @@ function hideElement(id, icon) {
   pane.style.visibility = 'hidden';
 
   var img = document.getElementById(icon);
-  if(img) {
+  if(img && img.src) {
     img.src = img.src.replace(/icon_minimize\.gif/g, "icon_maximize.gif");
   }
 }
@@ -134,7 +134,7 @@ function showElement(id, icon) {
   pane.style.visibility = 'visible';
 
   var img = document.getElementById(icon);
-  if(img) {
+  if(img && img.src) {
     img.src = img.src.replace(/icon_maximize\.gif/g, "icon_minimize.gif");
   }
 }
