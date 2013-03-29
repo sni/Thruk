@@ -47,11 +47,10 @@ format: 0d 0h 29m 43s
 
 =cut
 sub duration {
-    my $duration = shift;
-    my $withdays = shift;
+    my($duration, $withdays) = @_;
     my $minus    = '';
 
-    croak("undef duration in duration(): ".$duration) unless defined $duration;
+    confess("undef duration in duration(): ".$duration) unless defined $duration;
     if($duration < 0) {
         $duration = $duration * -1;
         $minus    = '-';
@@ -59,7 +58,7 @@ sub duration {
 
     $withdays = 1 unless defined $withdays;
 
-    croak("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
+    confess("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
 
     my $days    = 0;
     my $hours   = 0;

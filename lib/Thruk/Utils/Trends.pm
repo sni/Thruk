@@ -528,6 +528,7 @@ sub _draw_time_breakdowns {
     if(defined $service){
 
         my $avail_data = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
+        return unless defined $avail_data;
         my $total_time =
               $avail_data->{'time_ok'}
             + $avail_data->{'time_warning'}
@@ -560,6 +561,7 @@ sub _draw_time_breakdowns {
     else{
 
         my $avail_data = $c->stash->{'avail_data'}->{'hosts'}->{$host};
+        return unless defined $avail_data;
         my $total_time =
               $avail_data->{'time_up'}
             + $avail_data->{'time_down'}
