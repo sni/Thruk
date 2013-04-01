@@ -1648,10 +1648,19 @@ sub _set_breakpoints {
     my $cur = $self->{'report_options'}->{'start'};
     # round to next 0:00
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
+    my $last_isdst = $isdst;
     $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
     while($cur < $self->{'report_options'}->{'end'}) {
         push @{$self->{'breakpoints'}}, $cur;
         $cur = $cur + 86400;
+        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
+        # compensate daylight savings change
+        if($last_isdst != $isdst) {
+            $cur = $cur - 43200;
+            my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
+            $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $last_isdst);
+        }
+        $last_isdst = $isdst;
     }
     return;
 }

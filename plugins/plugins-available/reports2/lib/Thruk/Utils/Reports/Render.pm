@@ -427,6 +427,7 @@ sub get_availability_percents {
         my $t = $avail->{'breakdown'}->{$name};
 
         my($percent, $time) = _sum_availability($t, $u);
+        confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
         $values->{$name} = [
             $t->{'timestamp'}*1000,
             $percent,
