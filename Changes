@@ -1,11 +1,12 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.66-2   Mon Apr  1 22:59:55 CEST 2013
           - better utf-8 support in report mails
           - ensure image data is a pnp file
           - Bug Fixes
             - fixed translation issue in italian reports
             - fixed utf-8 problem in report month names
+            - fixed daylight saving issue in reports
 
 1.66     Tue Mar 26 18:43:48 CET 2013
           - added mysql logfile cache
