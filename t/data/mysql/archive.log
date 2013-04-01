@@ -3,3 +3,4 @@
 [1362662647] HOST DOWNTIME ALERT: züürps;STARTED; Host has entered a period of scheduled downtime
 [1363704695] SERVICE NOTIFICATION: contact2;child;check_logfiles-3.5.3;CUSTOM (CRITICAL);service-notify-by-email;CRITICAL - (1 errors)
 [1364135380] SERVICE NOTIFICATION: contact;child;check_logfiles-3.5.3;ACKNOWLEDGEMENT (CRITICAL);service-notify-by-email;CRITICAL - (1 errors) - tag attr=blah;thrukadmin;bekannt
+[1364135381] Event broker module '/usr/lib64/mod_gearman/mod_gearman.o' initialized successfully.

@@ -49,7 +49,7 @@ $peer->{'class'}->{'logcache'} = $m;
 $m->_drop_tables($dbh, $prefix);
 $m->_create_tables($dbh, $prefix);
 my($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files);
-is($logcount, 5, 'imported all items from '.$files->[0]);
+is($logcount, 6, 'imported all items from '.$files->[0]);
 
 #####################################################################
 # check duplicate detection

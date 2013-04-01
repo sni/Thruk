@@ -1598,6 +1598,10 @@ sub _get_class {
     my($l, $type) = @_;
     my $class;
     $class = $Thruk::Backend::Provider::Mysql::types->{$type} if defined $type;
+    if(!defined $class and !defined $l->{'message'}) {
+        $class          = 0; # LOGCLASS_INFO
+        $l->{'message'} = $type;
+    }
     if(!defined $class) {
         if(   $l->{'message'} =~ m/starting\.\.\./mx
            or $l->{'message'} =~ m/shutting\ down\.\.\./mx
