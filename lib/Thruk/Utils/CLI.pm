@@ -19,6 +19,7 @@ use LWP::UserAgent qw//;
 use JSON::XS qw/encode_json decode_json/;
 use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
+use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
 
@@ -796,26 +797,26 @@ sub _cmd_import_logs {
         $c->stats->profile(end => "_cmd_import_logs()");
         return($stats."\n", 0);
     } else {
-        my $t1 = time();
+        my $t0 = [gettimeofday];
         my($backend_count, $log_count);
         if($type eq 'mysql') {
             ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         } else {
             ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
         }
-        my $t2 = time();
+        my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
         return("\n", 1) if $log_count == -1;
-        return(sprintf("OK - %s %i log items from %i site%s successfully in %is (%i/s)\n",
+        return(sprintf("OK - %s %i log items from %i site%s successfully in %.2fs (%i/s)\n",
                        $action,
                        $log_count,
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
-                       ($t2-$t1),
-                       (($t2-$t1) > 0 ? ($log_count / ($t2-$t1)) : $log_count),
+                       ($elapsed),
+                       (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
                        ), 0);
     }
 }
