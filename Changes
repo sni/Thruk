@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed adding multiple recurring downtimes for a single host
+
 1.66-2   Mon Apr  1 22:59:55 CEST 2013
           - better utf-8 support in report mails
           - ensure image data is a pnp file
