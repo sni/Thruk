@@ -229,36 +229,46 @@ NFS, DRBD or similar ). There is usually not much traffic in this
 folder.
 
 
-=== How can i enable debug mode?
-==== Thruk Server
-For a quick test without authorization, you can start the thruk server
-with './script/thruk_server.pl -d'. Make sure your log4perl.conf has
-DEBUG theshold configured. You can also move your log4perl.conf away,
-so all debug output will be sent to the terminal.
 
-==== FastCGI Server
-This is a bit more complicate.
-First you have to enable debuging for your thruk application.
-Add '-Debug' to the use Catalyst in your lib/Thruk.pm. The part
-should look like this:
-------------------
-  use Catalyst qw/
-                -Debug
-                Unicode::Encoding
-                Authentication
-                Authorization::ThrukRoles
-                CustomErrorMessage
-                ConfigLoader
-                StackTrace
-                Static::Simple
-                Redirect
-                Compress::Gzip
-                /;
-  our $VERSION = '0.60';
-------------------
+== Hacking Thruk
+=== Within OMD
+If you are using OMD, then you just might want to follow this guide:
+https://github.com/sni/omd_utils/tree/master/thruk_developer
+Which connects a test OMD site to the git version of Thruk. This works quite
+well as long as there are only small changes in the perl module dependencies.
 
-Then make sure you have a log4perl.conf with DEBUG threshold configured.
-Finally restart your fastcgi server.
+The installer adds a new OMD daemon which restarts Thruk whenever you change
+a perl file or template.
+
+=== Install Test Environment from Source
+ 1. First get a fresh copy of the sources:
+
+  /tmp %> git clone git://github.com/sni/Thruk.git
+
+ 2. Create a .author file which prevents some caching mechanisms.
+
+  /tmp %> cd Thruk && touch .author
+
+3. use perl dependencies from existing installation.
+
+  /tmp/Thruk %> export PERL5LIB=/usr/lib/thruk/perl5
++
+Refer to the official documentation on how to install Thruk: http://www.thruk.org/documentation.html#_installation
+
+4. start development server
+
+  /tmp/Thruk %> ./script/thruk_server.pl -r
+  HTTP::Server::PSGI: Accepting connections at http://0:3000/
+
+5. hack Thruk...
+
+6. create a git patch
++
+review and commit your changes, then create a patch file which can be sent upstream to the author.
+
+  /tmp/Thruk %> git commit -av
+  /tmp/Thruk %> git format-patch -o /tmp/ --signoff -1
+
 
 
 == Errors

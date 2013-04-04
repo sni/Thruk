@@ -659,7 +659,9 @@ div.literalblock > div.content {
 <div class='toclevel3'><a href='#_why_are_the_pnp_graphs_missing_in_my_reports'>Why are the PNP graphs missing in my reports?</a></div>
 <div class='toclevel2'><a href='#_installation'>Installation</a></div>
 <div class='toclevel3'><a href='#_is_it_possible_to_operate_thruk_in_a_cluster'>Is it possible to operate Thruk in a cluster?</a></div>
-<div class='toclevel3'><a href='#_how_can_i_enable_debug_mode'>How can i enable debug mode?</a></div>
+<div class='toclevel2'><a href='#_hacking_thruk'>Hacking Thruk</a></div>
+<div class='toclevel3'><a href='#_within_omd'>Within OMD</a></div>
+<div class='toclevel3'><a href='#_install_test_environment_from_source'>Install Test Environment from Source</a></div>
 <div class='toclevel2'><a href='#_errors'>Errors</a></div>
 <div class='toclevel3'><a href='#_backend_not_available'>Backend not available</a></div>
 <div class='toclevel3'><a href='#_undefined_symbol_perl_istack_sp_ptr'>undefined symbol: Perl_Istack_sp_ptr</a></div>
@@ -852,35 +854,73 @@ set -x</tt></pre>
 and make sure the <em>var_path</em> directory is shared between all instances ( by
 NFS, DRBD or similar ). There is usually not much traffic in this
 folder.</p></div>
-<h3 id="_how_can_i_enable_debug_mode">How can i enable debug mode?</h3><div style="clear:left"></div>
-<h4 id="_thruk_server">Thruk Server</h4>
-<div class="paragraph"><p>For a quick test without authorization, you can start the thruk server
-with <em>./script/thruk_server.pl -d</em>. Make sure your log4perl.conf has
-DEBUG theshold configured. You can also move your log4perl.conf away,
-so all debug output will be sent to the terminal.</p></div>
-<h4 id="_fastcgi_server">FastCGI Server</h4>
-<div class="paragraph"><p>This is a bit more complicate.
-First you have to enable debuging for your thruk application.
-Add <em>-Debug</em> to the use Catalyst in your lib/Thruk.pm. The part
-should look like this:</p></div>
-<div class="listingblock">
+</div>
+<h2 id="_hacking_thruk">Hacking Thruk</h2>
+<div class="sectionbody">
+<h3 id="_within_omd">Within OMD</h3><div style="clear:left"></div>
+<div class="paragraph"><p>If you are using OMD, then you just might want to follow this guide:
+<a href="https://github.com/sni/omd_utils/tree/master/thruk_developer">https://github.com/sni/omd_utils/tree/master/thruk_developer</a>
+Which connects a test OMD site to the git version of Thruk. This works quite
+well as long as there are only small changes in the perl module dependencies.</p></div>
+<div class="paragraph"><p>The installer adds a new OMD daemon which restarts Thruk whenever you change
+a perl file or template.</p></div>
+<h3 id="_install_test_environment_from_source">Install Test Environment from Source</h3><div style="clear:left"></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+First get a fresh copy of the sources:
+</p>
+<div class="literalblock">
 <div class="content">
-<pre><tt>  use Catalyst qw/
-                -Debug
-                Unicode::Encoding
-                Authentication
-                Authorization::ThrukRoles
-                CustomErrorMessage
-                ConfigLoader
-                StackTrace
-                Static::Simple
-                Redirect
-                Compress::Gzip
-                /;
-  our $VERSION = '0.60';</tt></pre>
+<pre><tt>/tmp %&gt; git clone git://github.com/sni/Thruk.git</tt></pre>
 </div></div>
-<div class="paragraph"><p>Then make sure you have a log4perl.conf with DEBUG threshold configured.
-Finally restart your fastcgi server.</p></div>
+</li>
+<li>
+<p>
+Create a .author file which prevents some caching mechanisms.
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><tt>/tmp %&gt; cd Thruk &amp;&amp; touch .author</tt></pre>
+</div></div>
+</li>
+<li>
+<p>
+use perl dependencies from existing installation.
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><tt>/tmp/Thruk %&gt; export PERL5LIB=/usr/lib/thruk/perl5</tt></pre>
+</div></div>
+<div class="paragraph"><p>Refer to the official documentation on how to install Thruk: <a href="http://www.thruk.org/documentation.html#_installation">http://www.thruk.org/documentation.html#_installation</a></p></div>
+</li>
+<li>
+<p>
+start development server
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><tt>/tmp/Thruk %&gt; ./script/thruk_server.pl -r
+HTTP::Server::PSGI: Accepting connections at http://0:3000/</tt></pre>
+</div></div>
+</li>
+<li>
+<p>
+hack Thruk&#8230;
+</p>
+</li>
+<li>
+<p>
+create a git patch
+</p>
+<div class="paragraph"><p>review and commit your changes, then create a patch file which can be sent upstream to the author.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>/tmp/Thruk %&gt; git commit -av
+/tmp/Thruk %&gt; git format-patch -o /tmp/ --signoff -1</tt></pre>
+</div></div>
+</li>
+</ol></div>
 </div>
 <h2 id="_errors">Errors</h2>
 <div class="sectionbody">
@@ -918,7 +958,7 @@ boxes.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-03-26 15:15:08 CEST
+Last updated 2013-04-04 22:09:02 CEST
 </div>
 </div>
 </body>
