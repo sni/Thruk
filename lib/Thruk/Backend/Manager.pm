@@ -814,10 +814,19 @@ sub _get_replaced_string {
         }
         $res .= $block;
     }
+    if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
+        eval {
+            $res =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+        };
+    }
+    if (defined $macros->{'$_HOSTOBFUSCATE_ME$'}) {
+        eval {
+            $res =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+        };
+    }
 
     return($res, $rc);
 }
-
 ########################################
 
 =head2 _set_host_macros
