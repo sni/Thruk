@@ -661,17 +661,42 @@ sub logcache_stats {
 
 =head2 renew_logcache
 
-  renew_logcache($c)
+  renew_logcache($c, [$noforks])
 
 update the logcache
 
 =cut
 
 sub renew_logcache {
-    my $self    = shift;
-    my $c       = $_[0];
-    my $noforks = $_[1] || 0;
+    my($self, $c, $noforks) = @_;
+    $noforks = 0 unless defined $noforks;
     return unless defined $c->config->{'logcache'};
+    eval {
+        return $self->_renew_logcache($c, $noforks);
+    };
+    if($@) {
+        $c->log->error($@);
+        $c->stash->{errorMessage}     = "Logfilecache Unavailable";
+        $c->stash->{errorDescription} = $@;
+        $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
+        return $c->detach('/error/index/99');
+    }
+    return;
+}
+
+########################################
+
+=head2 _renew_logcache
+
+  _renew_logcache($c)
+
+update the logcache (internal sub)
+
+=cut
+
+sub _renew_logcache {
+    my $self = shift;
+    my($c, $noforks) = @_;
 
     # check if this is the first import at all
     # and do a external import in that case
@@ -940,6 +965,9 @@ sub _do_on_peers {
             die($1);
         }
         elsif($err =~ m|(hit\s\+.*?timeout\s+on.*?)\s+at\s+|mx) {
+            die($1);
+        }
+        elsif($err =~ m|^(DBI\s+.*?)\s+at\s+|mx) {
             die($1);
         }
         elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {

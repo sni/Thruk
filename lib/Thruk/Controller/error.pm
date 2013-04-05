@@ -16,6 +16,17 @@ Thruk::Controller::error - Catalyst Controller
 
 Catalyst Controller.
 
+    predefined errors:
+
+        return $c->detach('/error/index/<nr>');
+
+
+    custom errors:
+
+        $c->stash->{errorMessage}       = "short error";
+        $c->stash->{errorDescription}   = "error description";
+        return $c->detach('/error/index/99');
+
 =head1 METHODS
 
 =cut
