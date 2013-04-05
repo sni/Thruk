@@ -2079,9 +2079,12 @@ sub _config_reload {
     for(1..30) {
         sleep(1);
         eval {
+            $c->{'db'}->reset_failed_backends();
             $c->{'db'}->get_processinfo();
         };
-        last unless $@;
+        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
+            last;
+        }
     }
 
     # reload navigation, probably some names have changed
