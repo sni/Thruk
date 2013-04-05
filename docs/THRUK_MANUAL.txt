@@ -1469,6 +1469,29 @@ ex.:
   shown_inline_pnp = 1
 
 
+==== graph_word
+graph_word is a regexp used to display any graph on the details page.
+if a service or host has a graph url in action url (or notes url) set
+it can be displayed by specifying a regular expression that always appears
+in this url.
+
+sample service configuration for graphite:
+
+.....
+  define service{
+    service_description   Load
+    host_name             localhost
+    use                   generic-service
+    action_url            http://YOURGRAPHITE/render/?lineMode=connected&width=586&height=308&_salt=1355923874.899&target=cactiStyle($HOSTNAME$.$SERVICEDESC$.*)&xFormat=%25H%3A%25M&tz=Europe/Paris
+    check_command         check_load
+  }
+.....
+
+ex.:
+
+  graph_word = /pnp4nagios/   # for pnp4nagios
+  graph_word = /render/       # for graphite
+
 
 ==== show_custom_vars
 Show custom vars in host / service ext info. List variable names to

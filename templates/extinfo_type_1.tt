@@ -382,6 +382,13 @@
           </td>
         </tr>
         [% END %]
+        [% IF graph_url %]
+        <tr>
+          <td colspan="2" align="center">
+          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
+          </td>
+        </tr>
+        [% END %]
 
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>

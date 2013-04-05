@@ -1138,6 +1138,7 @@ templates/_status_host_attributes.tt
 templates/_status_hostdetail_table.tt
 templates/_status_service_attributes.tt
 templates/_table_search_field.tt
+templates/_third_graph.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt

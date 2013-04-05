@@ -1133,15 +1133,42 @@ sub get_pnp_url {
     return '' unless $c->config->{'shown_inline_pnp'} || $force;
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
+        next unless defined $obj->{$type};
         for my $regex (qw/pnp4nagios pnp/) {
-            if(defined $obj->{$type} and $obj->{$type} =~ m|(^.*?/$regex/)|mx) {
-                return($1.'index.php');
-            }
+            return($1.'index.php') if $obj->{$type} =~ m|(^.*?/$regex/)|mx;
         }
     }
 
     return '';
 }
+
+########################################
+
+=head2 get_graph_url
+
+  get_graph_url($c, $object)
+
+return graph url for object (host/service)
+
+=cut
+
+sub get_graph_url {
+    my $c = shift;
+    my $obj   = shift;
+    my $force = shift;
+    my $graph_word = $c->config->{'graph_word'};
+    return '' unless $graph_word;
+    return '' unless $c->config->{'shown_inline_pnp'} || $force;
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        next unless defined $obj->{$type};
+        for my $regex (@{list($graph_word)}) {
+            return($obj->{$type}) if $obj->{$type} =~ m|$regex|mx;
+        }
+    }
+    return '';
+}
+
 
 ########################################
 
