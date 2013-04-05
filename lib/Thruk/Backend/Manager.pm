@@ -814,6 +814,7 @@ sub _get_replaced_string {
         }
         $res .= $block;
     }
+    ## no critic
     if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
         eval {
             $res =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
@@ -824,6 +825,7 @@ sub _get_replaced_string {
             $res =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
         };
     }
+    ## use critic
 
     return($res, $rc);
 }
