@@ -1115,6 +1115,38 @@ sub logs2xls {
     return;
 }
 
+
+########################################
+
+=head2 get_graphite_url
+
+  get_graphite_url($c, $object)
+
+return graphite url for object (host/service)
+
+=cut
+
+sub get_graphite_url {
+  
+	$c->log->error("Entering graphite url");
+	
+    my $c     = shift;
+    my $obj   = shift;
+    my $force = shift;
+
+    return '' unless $c->config->{'shown_inline_graphite'} || $force;
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        for my $regex (qw/render/) {
+            if(defined $obj->{$type} and $obj->{$type} =~ m|(^.*?/$regex/)|mx) {
+                return($obj->{$type});
+            }
+        }
+    }
+
+    return '';
+}
+
 ########################################
 
 =head2 get_pnp_url
