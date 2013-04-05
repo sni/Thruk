@@ -1,0 +1,37 @@
+THIS IS A FORK REPOSITORY OF THRUK
+
+It's an example on how graphics can be inserted on details pages.
+
+This working example show an iframe containing a google webpage on details pages of host or services.
+
+You have to change the "graph_word" variable declared in thruk_local.conf in order to match with your graphics broker.
+
+And of course you have to specify the link of your graph in your action_url (shinken).
+
+####### example usage ################
+
+--In your shinken configuration, insert an action_url on a service that contain the word "services"
+
+	## for example ##
+
+	# And the Trending service that check it
+	define service{
+        	service_description             LocalLoad__load1_Trending
+        	use                             local-service         ; Name of service template to use
+        	host_name                       localhost
+		action_url 			http://www.google.fr/services/
+        	check_command                   check_trending!LocalLoad!load1!20%!50%
+        	check_interval                  1
+        	}
+	################
+
+--Then launch your Thruk.
+
+--Go see the status of this service, and you will see an iframe containing the google web page...
+
+
+
+######################################
+explanations are in progress, please be patient, i'm working on it just 2 days per week...(internship)
+
+

@@ -1145,6 +1145,34 @@ sub get_pnp_url {
 
 ########################################
 
+=head2 get_graph_url
+
+  get_graph_url($c, $object)
+
+return graph url for object (host/service)
+
+=cut
+
+sub get_graph_url {
+    my $c = shift;
+    my $obj   = shift;
+    my $force = shift;
+    my $graph_word = $c->config->{'graph_word'};
+    return '' unless $c->config->{'shown_inline_pnp'} || $force;
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        for my $regex ($graph_word) {
+            if(defined $obj->{$type} and $obj->{$type} =~ m|(^.*?/$regex/)|mx) {
+                return($obj->{$type});
+            }
+        }	
+    }
+    return '';
+}
+
+
+########################################
+
 =head2 list
 
   list($ref)

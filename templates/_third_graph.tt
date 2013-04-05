@@ -1,0 +1,62 @@
+﻿[% USE date %]
+<script type="text/javascript">
+  var graph_url = "[% graph_url %]";
+  
+if (/render/.test('[% graph_url %]')) {
+  
+document.write('<div class="commentTitle">Performance Graph<\/div>');
+document.write('<table border="0" class="comment blockHeadBorder">');
+document.write('<tr class="comment" style="cursor:pointer">');
+    document.write('<th class="comment" width="20" nowrap>');
+      document.write('<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_graphite_img(-0.5)">');
+    document.write('<\/th>');
+    document.write('<th id="graphite_th1" class="comment" style="text-align:center" width="18%" nowrap onclick="return set_graphite_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours<\/th>');
+    document.write('<th id="graphite_th2" class="comment" style="text-align:center" width="18%" nowrap onclick="return set_graphite_img([% date.now -    90000 %], [% date.now %], this.id)">day<\/th>');
+    document.write('<th id="graphite_th3" class="comment" style="text-align:center" width="18%" nowrap onclick="return set_graphite_img([% date.now -   540000 %], [% date.now %], this.id)">week<\/th>');
+    document.write('<th id="graphite_th4" class="comment" style="text-align:center" width="18%" nowrap onclick="return set_graphite_img([% date.now -  2764800 %], [% date.now %], this.id)">month<\/th>');
+    document.write('<th id="graphite_th5" class="comment" style="text-align:center" width="18%" nowrap onclick="return set_graphite_img([% date.now - 30067200 %], [% date.now %], this.id)">year<\/th>');
+    document.write('<th class="comment" width="20" nowrap>');
+      document.write('<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_graphite_img(0.5)">');
+    document.write('<\/th>');
+  document.write('<\/tr>');
+  document.write('<tr>');
+    document.write('<td colspan=7 align="center">');
+      document.write('<div id="pnp_graph_pane" style="position: relative;">');
+        document.write('<a href="[% graph_url %]">');
+          document.write('<img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">');
+          document.write('<img id="graphiteimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="graphite graph">');
+        document.write('<\/a>');
+      document.write('<\/div>');
+    document.write('<\/td>');
+  document.write('<\/tr>');
+document.write('<\/table>');
+
+  var graphite_id    = 'graphite_th2';
+  var graphite_start = [% date.now - 90000 %];
+  var graphite_end   = [% date.now %];
+  if(window.location.hash != '#') {
+    var values = window.location.hash.split("/");
+    if(values[0]) {
+      graphite_id = values[0].replace(/^#/, '');
+    }
+    if(values[1]) {
+      graphite_start = values[1];
+    }
+    if(values[2]) {
+      graphite_end = values[2];
+    }
+  }
+  set_graphite_img(graphite_start, graphite_end, graphite_id);
+
+} else {
+
+document.write('<div id="third_graph_pane" style="position: relative; border-color:#C4C2C2; border-style:ridge; border-width:2px; border-collapse: separate; border-spacing:2px; width:825px; margin-right:275px;">');
+document.write('<div class="commentTitle">Performance Graph<\/div>');
+document.write('<\/br><\/br>');
+document.write('<iframe name="graph" id="graph" src="[% graph_url %]" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"><\/iframe>');
+document.write('<\/div>');
+}
+</script>
+
+<td>
+
