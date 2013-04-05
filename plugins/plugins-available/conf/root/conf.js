@@ -118,6 +118,9 @@ function init_conf_tool_buttons() {
     jQuery('.conf_save_reload_button').button({
         icons: {primary: 'ui-save_reload-button'}
     });
+    jQuery('.conf_delete_button').button({
+        icons: {primary: 'ui-delete-button'}
+    });
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
@@ -636,6 +639,7 @@ function on_empty_click(inp) {
     var v = input.value;
     input.value = 'customvariable';
     newid = on_attr_select();
+    newid = newid.replace(/^#/, '');
     var newin = document.getElementById(newid);
     var tr = newin.parentNode.parentNode;
     var td = tr.cells[0].firstChild;

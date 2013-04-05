@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 
 [%# RENDERING PDF #%]
 [% IF block == 'render' %]
@@ -7,7 +7,7 @@
 
   # PAGE 1
   pdf.prForm(path_to_template('pdf/eventlog.pdf'), 1);
-  pdf.prFont('Helvetica-Bold');
+  prFont('Helvetica-Bold');
   font(20, 'light blue');
   pdf.prText(40,400,'Event Report');
   font(15, 'dark grey');
@@ -17,7 +17,7 @@
   # PAGE 2
   # legend
   pdf.prPage();
-  pdf.prFont('Calibri');
+  prFont('Calibri');
   pdf.prForm(path_to_template('pdf/eventlog.pdf'), 3);
   font(20, 'dark grey');
   pdf.prText(40,680, 'Legend');
@@ -55,7 +55,11 @@
       log_icon(x, y - 6, pic, path_to_template('pdf/icons.pdf'));
       pdf.prText(x + 25,y, "[ " _ format_date(l.time, datetime_format) _ "] " _ l.type);
       y = y - 15;
-      pdf.prText(x,y, l.options.substr(,0, 100));
+      options = message;
+      IF has_type;
+        options = options.substr(l.type.length + 2);
+      END;
+      pdf.prText(x,y, options.substr(0, 100));
       y = y - 20;
     END;
   END;

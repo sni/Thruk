@@ -1,4 +1,4 @@
-<table class="availability_details [% param.breakdown +%] [%+ param.breakdown %][% available.keys.size %]">
+﻿<table class="availability_details [% param.breakdown +%] [%+ param.breakdown %][% available.keys.size %]">
   <tr>
     [% FOREACH key = available.keys %]
     <th>

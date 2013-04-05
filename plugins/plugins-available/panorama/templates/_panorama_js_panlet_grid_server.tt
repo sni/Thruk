@@ -1,4 +1,4 @@
-Ext.define('TP.PanletGridServer', {
+﻿Ext.define('TP.PanletGridServer', {
     extend: 'TP.PanletGrid',
 
     title:  'Site Status',

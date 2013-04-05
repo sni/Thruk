@@ -52,6 +52,8 @@ my $pass_regex          = qr#^$urlprefix/(startup\.html|themes|javascript|cgi\-b
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
 my $last_cache_clean    = time();
+my $curl_error_printed  = 0;
+$ENV{'USE_CURL'}        = $config->{'use_curl'};
 
 ##########################################################
 while (<STDIN>) {
@@ -62,6 +64,10 @@ while (<STDIN>) {
     print process($in);
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
+    if($curl_error_printed == 0 && $ENV{'THRUK_CURL_ERROR'}) {
+        printf STDERR $ENV{'THRUK_CURL_ERROR'};
+        $curl_error_printed = 1;
+    }
 }
 
 ##########################################################
@@ -72,7 +78,8 @@ sub process {
         my($cookies, $remote, $path) = ($1, $2, $3);
 
         # remove last &
-        $path = substr($path, 0, -1) if(substr($path, -1, 1) eq '&');
+        $path =~ s|/____/|?|mxo;
+        $path =~ s|\?$||mxo;
 
         # some urls must pass
         if($path =~ $pass_regex) {

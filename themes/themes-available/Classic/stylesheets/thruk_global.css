@@ -826,6 +826,9 @@ SPAN.deleteicon INPUT {
   background-image: url(../images/disk_reload.png) !important;
   margin-top: -7px !important;
 }
+.ui-delete-button {
+  background-image: url(../images/delete.gif) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }
@@ -958,4 +961,11 @@ DIV.perf_bar_crit {
 
 TD.toolbar IMG {
   vertical-align: text-bottom;
+}
+
+TABLE.logcache_stats TABLE {
+  width: 600px;
+}
+TABLE.logcache_stats TD.dataVal {
+  text-align: center;
 }

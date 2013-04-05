@@ -1,4 +1,4 @@
-Ext.define('TP.Pantab', {
+﻿Ext.define('TP.Pantab', {
     extend: 'Ext.panel.Panel',
 
     title:       'Dashboard',

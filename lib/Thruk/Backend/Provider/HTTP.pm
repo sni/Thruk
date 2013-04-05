@@ -45,7 +45,8 @@ sub new {
         'proxy'                => $options->{'proxy'},
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
-        'min_backend_version'  => 1.59,
+        'min_backend_version'  => 1.63,
+        'has_curl'             => 0,
     };
     bless $self, $class;
 
@@ -115,6 +116,13 @@ sub reconnect {
 
     if(defined $self->{'logcache'}) {
         $self->{'logcache'}->reconnect();
+    }
+
+    # try to use LWP::Protocol::Net::Curl to speed things up
+    if($self->{'config'}->{'use_curl'}) {
+        if(Thruk::Utils::load_lwp_curl($self->{'config'}->{'options'}->{'proxy'})) {
+            $self->{'has_curl'} = 1;
+        }
     }
 
     # correct address
@@ -466,15 +474,26 @@ returns logfile entries
 sub get_logs {
     my($self, @options) = @_;
     my %options = @options;
+    my $use_file = 0;
+    if($options{'file'}) {
+        # remote backends should not save to files
+        $use_file = delete $options{'file'};
+        @options = %options;
+    }
+
     if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
-        $options{'collection'} = 'logs_'.$self->peer_key();
-        return $self->{'logcache'}->get_logs(@options);
+        push @options, 'collection', 'logs_'.$self->peer_key();
+        my($data) = $self->{'logcache'}->get_logs(@options);
+        return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
+        return $data;
     }
     # increased timeout for logs
     $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
     my($typ, $size, $data) = @{$res};
     $self->{'ua'}->timeout($self->{'timeout'});
+
+    return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
     return $data;
 }
 
@@ -672,7 +691,7 @@ sub _req {
                         }
                     );
 
-    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&)job=(.*)$/mx) {
+    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&|%3f)job=(.*)$/mx) {
         $self->_wait_for_remote_job($2);
         $redirects++;
         die("too many redirects") if $redirects > 2;

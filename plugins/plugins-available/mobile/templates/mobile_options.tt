@@ -1,4 +1,4 @@
-<div id="options" data-role="page">
+﻿<div id="options" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back" id="button_options_back">Back</a>
     <h1>[% title_prefix %]Options</h1>

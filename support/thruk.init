@@ -18,13 +18,13 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=thruk
 PIDFILE=/var/cache/thruk/thruk.pid
-STARTURL="http://localhost/thruk/cgi-bin/remote.cgi"
+STARTURL="http://localhost/thruk/cgi-bin/remote.cgi?startup"
 STARTTIMEOUT=15
 STARTLOG="/tmp/thrukstart.log"
 WGET="/usr/bin/wget"
 
 if [ ! -z $OMD_SITE ]; then
-    STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
+    STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi?startup"
     STARTLOG="$OMD_ROOT/tmp/thrukstart.log"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
     . $OMD_ROOT/etc/omd/site.conf

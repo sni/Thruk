@@ -20,7 +20,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.63';
+our $VERSION = '1.66';
 
 my $project_root = Catalyst::Utils::home('Thruk::Config');
 my $branch       = '';
@@ -30,7 +30,7 @@ $branch          = $gitbranch unless $branch ne '';
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'January 12, 2013',
+              'released'               => 'April 01, 2013',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -80,6 +80,8 @@ our %config = ('name'                   => 'Thruk',
                                           'get_graph_url' => \&Thruk::Utils::get_graph_url,
                                           'make_test_mode'      => (defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST') ? 1 : 0,
                                           'button'              => \&Thruk::Utils::Filter::button,
+                                          'fullversion'         => \&Thruk::Utils::Filter::fullversion,
+                                          'reduce_number'       => \&Thruk::Utils::reduce_number,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
@@ -123,6 +125,7 @@ our %config = ('name'                   => 'Thruk',
                                           'menu_states_json' => "{}",
                                           'cookie_auth'      => 0,
                                           'space'          => ' ',
+                                          'debug_info'     => '',
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,
@@ -373,7 +376,7 @@ sub set_default_config {
                     '3'                     => 'Wednesday',
                     '4'                     => 'Thursday',
                     '5'                     => 'Friday',
-                    '6'                     => 'Saterday',
+                    '6'                     => 'Saturday',
                     '7'                     => 'Sunday',
                                            },
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
@@ -386,6 +389,11 @@ sub set_default_config {
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
+        'use_curl'                          => 0,
+        'precompile_templates'              => 1,
+        'report_use_temp_files'             => 14,
+        'perf_bar_pnp_popup'                => 1,
+        'status_color_background'           => 0,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

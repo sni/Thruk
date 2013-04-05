@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw(dclone);
+use Scalar::Util qw/weaken/;
 use Monitoring::Config::Help;
 
 =head1 NAME
@@ -18,6 +19,7 @@ Object Configuration Template
 =head1 METHODS
 
 =cut
+
 
 ##########################################################
 
@@ -110,6 +112,8 @@ sub as_text {
 
     my $disabled = $self->{'disabled'} ? '#' : '';
 
+    my $cfg = $Monitoring::Config::save_options;
+
     # save comments
     my $nr_object_lines  = 0;
     my $text             = Monitoring::Config::Object::format_comments($self->{'comments'});
@@ -132,7 +136,7 @@ sub as_text {
               or $self->{'default'}->{$key}->{'type'} eq 'ENUM'
             )
         ) {
-            $value = join(',', @{$self->{'conf'}->{$key}});
+            $value = join($cfg->{'list_join_string'}, @{$self->{'conf'}->{$key}});
         } else {
             $value = $self->{'conf'}->{$key};
         }
@@ -141,7 +145,7 @@ sub as_text {
         $value = '' unless defined $value;
 
         # break very long lines
-        if($key eq 'command_line' and length($key) + length($value) > 120) {
+        if($key eq 'command_line' and $cfg->{'break_long_arguments'} and length($key) + length($value) > 120) {
             my $long_command = $self->_break_long_command($key, $value, $disabled);
             $text .= $disabled.join(" \\\n".$disabled, @{$long_command})."\n";
             $nr_object_lines += scalar @{$long_command};
@@ -151,19 +155,23 @@ sub as_text {
                 my $lastline = substr($text, $ind+1);
                 $text        = substr($text, 0, $ind);
                 $text       .= "\n";
-                $text       .= sprintf "%-68s %s\n", $lastline, $self->{'inl_comments'}->{$key};
+                my $format   = "%-".$cfg->{'indent_object_comments'}."s %s\n";
+                $text       .= sprintf $format, $lastline, $self->{'inl_comments'}->{$key};
             }
         } else {
             $text .= $disabled;
             my $line;
             if($value ne '') {
-                $line = sprintf "  %-30s %s", $key, $value;
+                my $format = "%-".$cfg->{'indent_object_key'}."s%-".$cfg->{'indent_object_value'}."s %s";
+                $line = sprintf $format, "", $key, $value;
             } else {
                 # empty values are allowed
-                $line = sprintf "  %s", $key;
+                my $format = "%-".$cfg->{'indent_object_key'}."s%s";
+                $line = sprintf $format, "", $key;
             }
             if($self->{'inl_comments'}->{$key}) {
-                $text .= sprintf "%-68s %s", $line, $self->{'inl_comments'}->{$key};
+                my $format = "%-".$cfg->{'indent_object_comments'}."s %s";
+                $text .= sprintf $format, $line, $self->{'inl_comments'}->{$key};
             } else {
                 $text .= $line;
             }
@@ -346,7 +354,8 @@ sub get_sorted_keys {
     } else {
         @keys = @{$conf};
     }
-    @keys = sort _sort_by_object_keys @keys;
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
+    @keys = sort $Monitoring::Config::key_sort @keys;
     return \@keys;
 }
 
@@ -401,7 +410,8 @@ sub get_computed_config {
         }
     }
 
-    my @keys = sort _sort_by_object_keys keys %{$conf};
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
+    my @keys = sort $Monitoring::Config::key_sort keys %{$conf};
     $self->{'cache'}->{'computed'}->{$self->{'id'}} = [\@keys, $conf];
     return(\@keys, $conf);
 }
@@ -425,9 +435,10 @@ sub get_default_keys {
         push @{$categories->{$cat}}, $key;
     }
 
+    defined $Monitoring::Config::key_sort or confess('uninitialized');
     my @result;
     for my $cat (sort _sort_by_category_keys keys %{$categories}) {
-        my @keys = sort _sort_by_object_keys @{$categories->{$cat}};
+        my @keys = sort $Monitoring::Config::key_sort @{$categories->{$cat}};
         push @result, { name => $cat, keys => \@keys };
     }
 
@@ -705,58 +716,19 @@ sub set_name {
     return;
 }
 
-
 ##########################################################
 
-=head2 _sort_by_object_keys
+=head2 set_file
 
-sort function for object keys
+sets a new file
 
 =cut
-sub _sort_by_object_keys {
-
-    my $num = 30;
-    my $order = [
-        "name",
-        "service_description",
-        "host_name",
-        "timeperiod_name",
-        "contact_name",
-        "contactgroup_name",
-        "hostgroup_name",
-        "servicegroup_name",
-        "command_name",
-        "alias",
-        "address",
-        "parents",
-        "use",
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-        "module_name",
-        "module_type",
-        "path",
-        "args",
-    ];
-    for my $ord (@{$order}) {
-        if($a eq $ord) { return -$num; }
-        if($b eq $ord) { return  $num; }
-        $num--;
-    }
-
-    my $result = $a cmp $b;
-
-    if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
-        return $result;
-    }
-    if(substr($a, 0, 1) eq '_') { return -$result; }
-    if(substr($b, 0, 1) eq '_') { return -$result; }
-
-    return $result;
+sub set_file {
+    my($self, $newfile) = @_;
+    $self->{'file'} = $newfile;
+    # otherwise we create circular references
+    weaken $self->{'file'};
+    return;
 }
 
 

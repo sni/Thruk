@@ -1,4 +1,4 @@
-/* render date */
+﻿/* render date */
 TP.render_date = function(v, td, item) {
     if(v == 0) { return 'never'; }
     return TP.date_format(v);
@@ -21,7 +21,7 @@ TP.render_icon_log = function(v, td, item) {
 
 /* render site status icon */
 TP.render_icon_site = function(v, td, item) {
-    title="";
+    var title="";
     if(item.data.runtime=="") {
         title="title=\""+item.data.version+"\"";
     };
@@ -184,6 +184,13 @@ TP.render_plugin_output = function(v, td, item) {
             return(type+' check scheduled for '+TP.date_format(item.data.next_check));
         }
     }
+    if(item.data.long_plugin_output) {
+        var long_plugin_output     = item.data.long_plugin_output.replace(/"/g, "&quot;");
+        long_plugin_output     = long_plugin_output.replace(/\\n/g, "<br>");
+        long_plugin_output     = long_plugin_output.replace(/(\r\n|\n|\r)/gm,"");
+        long_plugin_output     = long_plugin_output.replace(/&/g, "&amp;");
+        return "<div class='clickable' style='color:blue;' onClick=\"Ext.Msg.alert('Plugin Output', '"+long_plugin_output+"')\">"+v+"<\/div>";
+    }
     return v;
 }
 
@@ -271,13 +278,36 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
 TP.render_clickable_host = function(v, td, item, row, col, store, view) {
     td.tdCls += ' clickable';
     var host  = item.data.host_name ? item.data.host_name : item.data.name;
+    host      = host.replace(/\\/g, '\\\\');
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
+}
+
+/* make host clickable */
+TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
+    td.tdCls += ' clickable';
+    var msg = '';
+    var host  = item.data.host_name ? item.data.host_name : item.data.name;
+    if(row == 0 || view.lastHostParent == undefined || view.lastHostParent != host) {
+        view.lastHostParent = host;
+    } else {
+        return '';
+    }
+    for(var nr in v) {
+        host = v[nr];
+        msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";
+        if(nr+1 < v.length) {
+            msg += ", ";
+        }
+    }
+    return msg;
 }
 
 /* make service description clickable */
 TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     td.tdCls = 'clickable';
-    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+item.data.host_name+"', service: '"+item.data.description+"'}}})\">"+v+"<\/div>";
+    var description = item.data.description.replace(/\\/g, '\\\\');
+    var host_name   = item.data.host_name.replace(/\\/g, '\\\\');
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
 
 /* render url */
@@ -312,6 +342,16 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     if(r == false) { return ""; }
     td.tdCls = "less_padding";
     return r;
+}
+
+
+/* make long pluginout not break layout */
+TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
+    v = v.replace(/\\n/g, "");
+    v = v.replace(/(\r\n|\n|\r)/gm,"");
+    v = v.replace(/</gm,"&lt;");
+    v = v.replace(/>/gm,"&gt;");
+    return v;
 }
 
 /* format timestamp */

@@ -1,4 +1,4 @@
-[% WRAPPER "_conf_bare.tt" body_class="bare_tree" %]
+﻿[% WRAPPER "_conf_bare.tt" body_class="bare_tree" %]
 
 <script type="text/javascript">
 <!--

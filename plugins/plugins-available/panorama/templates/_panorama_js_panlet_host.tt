@@ -1,4 +1,4 @@
-/* Add new downtime menu item */
+﻿/* Add new downtime menu item */
 TP.host_downtime_menu = function() {
     var fields = [{
             fieldLabel: 'Comment',
@@ -105,7 +105,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         var panel     = this.items.getAt(1);
         var statename = this.type == 'host' ? TP.render_host_status(d.state, {}, data) : TP.render_service_status(d.state, {}, data) ;
         panel.getComponent('current_status').update('<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
-        panel.getComponent('status_information').update(d.plugin_output);
+        panel.getComponent('status_information').update(d.plugin_output+'<br>'+d.long_plugin_output);
         panel.getComponent('perf_data').update(d.perf_data);
         panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
         panel.getComponent('last_check_time').update(TP.date_format(d.last_check));

@@ -212,6 +212,8 @@ sub _process_recurring_downtimes_page {
     my $service     = $c->{'request'}->{'parameters'}->{'service'}      || '';
     my $old_host    = $c->{'request'}->{'parameters'}->{'old_host'}     || '';
     my $old_service = $c->{'request'}->{'parameters'}->{'old_service'}  || '';
+    my $old_nr      = $c->{'request'}->{'parameters'}->{'old_nr'}       || '';
+    my $nr          = $c->{'request'}->{'parameters'}->{'nr'}           || 'new';
 
     my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
 
@@ -219,6 +221,7 @@ sub _process_recurring_downtimes_page {
         my $rd = {
             'host'          => $host,
             'service'       => $service,
+            'nr'            => $nr,
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
             'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || 5,
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || '',
@@ -248,18 +251,21 @@ sub _process_recurring_downtimes_page {
             }
         }
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
-        my $file = $self->_get_data_file_name($c, $host, $service);
-        Thruk::Utils::write_data_file($file, $rd);
-        if($old_host and ($old_host ne $host or $old_service ne $service)) {
-            my $oldfile = $self->_get_data_file_name($c, $old_host, $old_service);
+        if($old_host and ($old_host ne $host or $old_service ne $service or $old_nr ne $nr)) {
+            my $oldfile = $self->_get_data_file_name($c, $old_host, $old_service, $old_nr);
             unlink($oldfile) if -f $oldfile;
+            $nr = 'new';
         }
+        my $file = $self->_get_data_file_name($c, $host, $service, $nr);
+        $file =~ m/_(\d+).tsk$/mx;
+        $rd->{'nr'} = $1 or confess('invalid filename: '.$file);
+        Thruk::Utils::write_data_file($file, $rd);
         $self->_update_cron_file($c);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
     }
     if($task eq 'add_host' or $task eq 'add_service' or $task eq 'edit') {
-        my $file = $self->_get_data_file_name($c, $host, $service);
+        my $file = $self->_get_data_file_name($c, $host, $service, $nr);
         if(-s $file) {
             $c->stash->{rd} = Thruk::Utils::read_data_file($file);
         }
@@ -272,7 +278,7 @@ sub _process_recurring_downtimes_page {
         $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
     }
     elsif($task eq 'remove') {
-        my $file = $self->_get_data_file_name($c, $host, $service);
+        my $file = $self->_get_data_file_name($c, $host, $service, $nr);
         if(-s $file) {
             unlink($file);
         }
@@ -321,12 +327,13 @@ sub _get_downtimes_list {
 
     my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
     my $downtimes = [];
-    my @pattern = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
+    my @files;
     if(defined $host) {
-        my $file = $self->_get_data_file_name($c, $host, $service);
-        @pattern = ($file);
+        @files = glob($self->_get_data_file_name($c, $host, $service, 'all'));
+    } else {
+        @files = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
     }
-    for my $dfile (@pattern) {
+    for my $dfile (@files) {
         next unless -f $dfile;
         my $d = Thruk::Utils::read_data_file($dfile);
         $d->{'file'} = $dfile;
@@ -339,10 +346,10 @@ sub _get_downtimes_list {
         }
         # set some defaults
         for my $key (keys %{$default_rd}) {
-            $d->{$key} = $default_rd->{$key}  unless defined $d->{$key};
+            $d->{$key} = $default_rd->{$key} unless defined $d->{$key};
         }
 
-        push @{$downtimes}, $d if defined $d;
+        push @{$downtimes}, $d;
     }
 
     # sort by host & service
@@ -367,7 +374,7 @@ sub _get_downtime_cmd {
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
     Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
-    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/cron.log",
+    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>>%s/cron.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
@@ -380,14 +387,31 @@ sub _get_downtime_cmd {
 ##########################################################
 # return filename for data file
 sub _get_data_file_name {
-    my($self, $c, $host, $service) = @_;
+    my($self, $c, $host, $service, $nr) = @_;
+    confess('no nr') unless defined $nr;
     my $name = 'hst_'.$host;
     if($service) {
         $name = 'svc_'.$host.'_'.$service;
     }
     $name =~ s/[^\w_\-\.]/_/gmx;
-    my $file = $c->config->{'var_path'}.'/downtimes/'.$name.'.tsk';
-    return $file;
+    if($nr eq 'new') {
+        my $nr = 1;
+        while(-f $c->config->{'var_path'}.'/downtimes/'.$name.'_'.$nr.'.tsk') {
+            $nr++;
+        }
+        return $c->config->{'var_path'}.'/downtimes/'.$name.'_'.$nr.'.tsk';
+    }
+    elsif($nr eq 'all') {
+        $name .= '_*';
+    }
+    elsif($nr =~ m/^\d+$/mx) {
+        $name .= '_'.$nr;
+    }
+    elsif($nr eq '') {
+    } else {
+        confess('wrong nr: '.$nr);
+    }
+    return $c->config->{'var_path'}.'/downtimes/'.$name.'.tsk';
 }
 
 ##########################################################
@@ -667,6 +691,13 @@ sub _process_perf_info_page {
 
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+
+    # add logfile cache statistics
+    $c->stash->{'has_logcache'} = 0;
+    if($c->config->{'logcache'}) {
+        $c->stash->{'logcache_stats'} = $c->{'db'}->logcache_stats($c, 1);
+        $c->stash->{'has_logcache'} = 1;
+    }
 
     return 1;
 }

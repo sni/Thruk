@@ -212,7 +212,7 @@ the thruk_local.conf where all settings can be overridden.
 ==== Debian / Ubuntu
 
 -------
-  #> dpkg -i thruk_1.63_debian6_amd64.deb
+  #> dpkg -i thruk_1.66_debian6_amd64.deb
 -------
 
 In case of dependency errors, run 'apt-get -f install' and try the
@@ -222,7 +222,7 @@ In case of dependency errors, run 'apt-get -f install' and try the
 ==== Centos / Redhat
 
 -------
-  #> yum install --nogpgcheck thruk-1.63-1.rhel6.x86_64.rpm
+  #> yum install --nogpgcheck thruk-1.66-1.rhel6.x86_64.rpm
 -------
 
 You may need to include an external repository for mod_fastcgi module.
@@ -232,7 +232,7 @@ Epel or Rpmforge should do it.
 ==== SLES
 
 -------
-  #> zypper install thruk-1.63-1.sles11.x86_64.rpm
+  #> zypper install thruk-1.66-1.sles11.x86_64.rpm
 -------
 
 You may need the SLES sdk dvd for additional dependencies.
@@ -393,6 +393,13 @@ Open your browser and open http://<your_host>:3000
 
 
 == Apache Configuration
+
+[TIP]
+.apache is preconfigured when using packages
+=======
+Apache configuration is not needed if you use OMD or packages. Apache
+is already preconfigured in that case.
+=======
 
 Integration in the Apache webserver is done by fastcgi.  There are two
 fastcgi modules for Apache at the moment. Choose the one which fits
@@ -798,6 +805,18 @@ Set first day of week. Used in reports.
 ex.:
 
   first_day_of_week = 0
+
+
+==== report_use_temp_files
+Large reports will use temp files to avoid extreme memory usage.
+With 'report_use_temp_files' you may set the report duration in days
+which will trigger the use of temp files. Default is 14days, so
+for example the 'last31days' report will use temp files, the 'thisweek'
+not. Can be disabled by setting to 0.
+
+ex.:
+
+  report_use_temp_files = 14
 
 
 ==== start_page
@@ -1386,6 +1405,15 @@ ex.:
   show_long_plugin_output = popup
 
 
+==== status_color_background
+Color complete status line with status colour or just the status
+itself.
+
+ex.:
+
+  status_color_background=0
+
+
 ==== show_modified_attributes
 
 Show if a host / service has modified attributes.
@@ -1421,6 +1449,15 @@ ex.:
   perf_bar_mode = match
 
 
+==== perf_bar_pnp_popup
+Show pnp popup if performance data are available and
+pnp is used as graph engine.
+
+ex.:
+
+  perf_bar_pnp_popup = 1
+
+
 ==== shown_inline_pnp
 Show inline pnp graph if available. If a service or host has a
 pnp4nagios action or notes url set. Thruk will show a inline graph on the
@@ -1446,6 +1483,7 @@ ex.:
 
 ==== show_error_reports
 Show link to bug reports when internal errors occur.
+Set to 'server' to log js error server side.
 
 ex.:
   show_error_reports = 1
@@ -1522,14 +1560,19 @@ ex.:
 
 
 ==== logcache
-Enables caching logfiles for faster access. Cache supports MongoDB
-only. Format is a MongoDB connection string like 'hostname:port/db'.
-Using a cache dramatically decreases cpu and memory usage of Thruk
-when accessing logfiles, for example when creating reports.
+Enables caching logfiles for faster access and less memory usage for
+the nagios process. Cache supports MongoDB and Mysql only. Prefered
+type is Mysql. Format is a Mysql/MongoDB connection string like
+'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
+memory usage of Thruk and Nagios when accessing logfiles, for example when
+creating reports.
 
 ex.:
 
-  logcache = localhost:27017/thruk_log_cache
+  logcache = mysql://user:password@localhost:3306/thruk_log_cache
+
+  logcache = mongodb://localhost:27017/thruk_log_cache
+
 
 ==== delay_pages_after_backend_reload
 
@@ -1555,6 +1598,17 @@ example for the cookie login or the http backend.
 ex.:
 
   ssl_verify_hostnames = 1
+
+
+==== use_curl
+
+Enable curl library to speed up http connections, for example used by
+the HTTP backend provider. Disabled by default.
+
+ex.:
+
+  use_curl = 1
+
 
 
 
@@ -2011,6 +2065,7 @@ ex.:
     report_base_url   = http://host.local/thruk/cgi-bin/
     wkhtmltopdf       = /usr/bin/wkhtmltopdf
     pnp_export        = plugins/plugins-enabled/reports2/script/pnp_export.sh
+    report_from_email = User Name <example@mail.com>
   </Component>
 
 ==== report_nice_level
@@ -2049,6 +2104,10 @@ ex.:
   export PNP_URL_PREFIX="http://demo.thruk.org"
 
 
+==== report_from_email
+
+Set the from address used in e-mail reports.
+Format is "User Name <example@mail.com>"
 
 === Component Thruk::Plugin::Statusmap
 
@@ -2087,6 +2146,7 @@ both groups, but the 'Admins' overrides will be superseded by the 'Superadmins'.
 
 ex.:
 
+...................................
     # disable all commands, except reschedule for all users
     command_disabled = 0-6,8-95,97-999
 
@@ -2094,6 +2154,7 @@ ex.:
         # enable commands for admins again
         command_disabled =
     </Group>
+...................................
 
 
 ==== Users
@@ -2101,6 +2162,7 @@ The users directive overrides specific config settings for one user only.
 
 ex.:
 
+...................................
     <User guest>
         # override single configuration item
         show_error_reports  = 0
@@ -2112,6 +2174,7 @@ ex.:
           default_view    = /etc/thruk/default_panorama_view_guest
         </Component>
     </User>
+...................................
 
 
 
@@ -2678,6 +2741,13 @@ Your report is attached.
 
 We use the report name 'r.name' as subject and put the report description 'r.desc'
 in the body.
+
+
+==== Custom Perl Render Helper
+You may create a Perl Module named
+'Thruk::Utils::Reports::CustomRender' which will be automatically made
+available to the stash, so functions from this module can be used in
+the reporting templates.
 
 
 

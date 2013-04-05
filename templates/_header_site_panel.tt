@@ -19,13 +19,14 @@
       [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
 
       [% SET class = 'button_peerDOWN'                                    %]
-      [% SET class = 'button_peerUP'  IF backend_detail.$pd.running       %]
-      [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
-      [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %][%# hidden by backend param #%]
-      [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
-      [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %][%# hidden by config tool #%]
-      [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %][%# active by config tool #%]
-      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %] section_[% section.replace(' ', '_') %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
+      [% SET class = 'button_peerUP'   IF backend_detail.$pd.running       %]
+      [% SET class = 'button_peerDIS'  IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
+      [% SET class = 'button_peerHID'  IF backend_detail.$pd.disabled == 3 %][%# hidden by backend param #%]
+      [% SET class = 'button_peerHID'  IF param_backend && pd != param_backend %]
+      [% SET class = 'button_peerDIS'  IF backend_detail.$pd.disabled == 6 %][%# hidden by config tool #%]
+      [% SET class = 'button_peerUP'   IF backend_detail.$pd.disabled == 7 %][%# active by config tool #%]
+      [% SET class = 'button_peerDOWN' IF failed_backends.defined(pd) %][%# other errors #%]
+      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %] section_[% section.replace(' ', '_') %]" value="[% name %]" title="[% IF failed_backends.defined(pd) %][% escape_js(failed_backends.$pd) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
       [% IF class == 'button_peerUP'   %][% up       = up       + 1 %][% END %]
       [% IF class == 'button_peerHID'  %][% disabled = disabled + 1 %][% END %]
       [% IF class == 'button_peerDIS'  %][% disabled = disabled + 1 %][% END %]

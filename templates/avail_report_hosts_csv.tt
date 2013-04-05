@@ -50,7 +50,5 @@
 [% space %][% avail_data.hosts.$host.time_indeterminate_nodata %],
 [% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %],
 [% space %][% total_time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]
-
-
-[% END %]
+[% space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]
+[%+ END %]

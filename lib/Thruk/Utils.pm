@@ -12,17 +12,15 @@ Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Config::General;
+use utf8;
 use Carp;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
-use Date::Manip;
-use File::Slurp;
-use Encode qw/decode/;
-use Template::Plugin::Date;
-use File::Copy;
+use File::Slurp qw/read_file/;
+use Encode qw/encode_utf8 decode/;
+use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
-use Excel::Template::Plus;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 ##############################################
 =head1 METHODS
@@ -68,7 +66,11 @@ return date from timestamp in given format
 sub format_date {
     my($timestamp, $format) = @_;
     our($tpd);
-    $tpd = Template::Plugin::Date->new() unless defined $tpd;
+    if(!defined $tpd) {
+        require Template::Plugin::Date;
+        Template::Plugin::Date->import();
+        $tpd = Template::Plugin::Date->new()
+    }
     my $date = $tpd->format($timestamp, $format);
     return decode("utf-8", $date);
 }
@@ -193,6 +195,7 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
+        require Config::General;
         my $conf = new Config::General($file);
         %{$config->{'cgi_cfg'}} = $conf->getall;
     }
@@ -516,6 +519,9 @@ sub get_dynamic_roles {
             }
         }
     }
+
+    # roles could be duplicated
+    $roles = array_uniq($roles);
 
     return($roles, $can_submit_commands, $alias, $roles_by_group);
 }
@@ -868,17 +874,18 @@ return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my $data = shift;
+    my($data,$prefix) = @_;
+    $prefix = '' unless defined $prefix;
 
     my $custom_vars = {};
 
     return unless defined $data;
-    return unless defined $data->{'custom_variable_names'};
+    return unless defined $data->{$prefix.'custom_variable_names'};
 
     my $x = 0;
-    while(defined $data->{'custom_variable_names'}->[$x]) {
-        my $cust_name  = $data->{'custom_variable_names'}->[$x];
-        my $cust_value = $data->{'custom_variable_values'}->[$x];
+    while(defined $data->{$prefix.'custom_variable_names'}->[$x]) {
+        my $cust_name  = $data->{$prefix.'custom_variable_names'}->[$x];
+        my $cust_value = $data->{$prefix.'custom_variable_values'}->[$x];
         $custom_vars->{$cust_name} = $cust_value;
         $x++;
     }
@@ -896,27 +903,29 @@ set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my $c    = shift;
-    my $data = shift;
+    my($c ,$data, $prefix) = @_;
+    $prefix = '' unless defined $prefix;
 
-    $c->stash->{'custom_vars'} = {};
+    $c->stash->{'custom_vars'} = [];
 
     return unless defined $data;
-    return unless defined $data->{'custom_variable_names'};
+    return unless defined $data->{$prefix.'custom_variable_names'};
     return unless defined $c->config->{'show_custom_vars'};
 
     my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
-    my $test = array2hash($vars);
 
-    my $custom_vars = get_custom_vars($data);
+    my $custom_vars = get_custom_vars($data, $prefix);
 
-    for my $cust_name (keys %{$custom_vars}) {
-        my $cust_value = $custom_vars->{$cust_name};
-        my $found      = 0;
-        if(defined $test->{$cust_name} or defined $test->{'_'.$cust_name}) {
-            $found = 1;
-        } else {
-            for my $v (keys %{$test}) {
+    my $already_added = {};
+    for my $test (@{$vars}) {
+        for my $cust_name (%{$custom_vars}) {
+            next if defined $already_added->{$cust_name};
+            my $cust_value = $custom_vars->{$cust_name};
+            my $found      = 0;
+            if($test eq $cust_name or $test eq '_'.$cust_name) {
+                $found = 1;
+            } else {
+                my $v = "".$test;
                 next if CORE::index($v, '*') == -1;
                 $v =~ s/\*/.*/gmx;
                 if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
@@ -924,9 +933,9 @@ sub set_custom_vars {
                     last;
                 }
             }
-        }
-        if($found) {
-            $c->stash->{'custom_vars'}->{$cust_name} = $cust_value;
+            if($found) {
+                push @{$c->stash->{'custom_vars'}}, [ $cust_name, $cust_value ];
+            }
         }
     }
     return;
@@ -1086,6 +1095,9 @@ sub logs2xls {
     Thruk::Utils::Status::set_selected_columns($c);
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
 
+    # Excel::Template::Plus pulls in Moose, so load this later
+    require Excel::Template::Plus;
+    Excel::Template::Plus->import();
     my $template = Excel::Template::Plus->new(
         engine   => 'TT',
         template => $c->stash->{'template'},
@@ -1620,10 +1632,13 @@ write data to datafile
 sub write_data_file {
     my($filename, $data) = @_;
 
+    # make data::dumper save utf-8 directly
+    local $Data::Dumper::Useqq = 1;
+
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>'.$filename) or confess('cannot write to '.$filename.": ".$!);
+    open(my $fh, '>:encoding(UTF-8)', $filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $filename);
 
@@ -1779,6 +1794,165 @@ sub format_response_error {
 }
 
 ########################################
+
+=head2 load_lwp_curl
+
+  load_lwp_curl()
+
+load curls lwp replacement
+
+=cut
+
+sub load_lwp_curl {
+    my($proxy) = @_;
+    return if(defined $ENV{'USE_CURL'} and $ENV{'USE_CURL'} == 0);
+    my $options = {};
+    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
+        $options = {
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_SSL_VERIFYHOST => 0,
+        };
+    }
+    eval {
+        require LWP::Protocol::Net::Curl;
+        LWP::Protocol::Net::Curl->import(%{$options});
+
+        if($proxy) {
+            # curl uses env proxy
+            $ENV{'HTTP_PROXY'}  = $proxy;
+            $ENV{'http_proxy'}  = $proxy;
+            $ENV{'HTTPS_PROXY'} = $proxy;
+            $ENV{'https_proxy'} = $proxy;
+        } else {
+            # remove proxy from env if load succeded
+            delete $ENV{'HTTP_PROXY'};
+            delete $ENV{'http_proxy'};
+            delete $ENV{'HTTPS_PROXY'};
+            delete $ENV{'https_proxy'};
+        }
+    };
+    if($@) {
+        $ENV{'THRUK_CURL_ERROR'} = $@;
+        return;
+    }
+
+    return 1;
+}
+
+##############################################
+
+=head2 precompile_templates
+
+  precompile_templates($c)
+
+precompile and load templates into memory
+
+=cut
+
+sub precompile_templates {
+    my($c) = @_;
+    my $t0 = [gettimeofday];
+    my $num      = 0;
+    my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
+    my $uniq     = {};
+    for my $path (@includes) {
+        my $files = find_files($path, '\.tt$');
+        for my $file (@{$files}) {
+            $file =~ s|^$path/||gmx;
+            $uniq->{$file} = 1;
+            $num++;
+        }
+    }
+    my $stderr_output;
+    # First, save away STDERR
+    open my $savestderr, ">&STDERR";
+    eval {
+        # breaks on fastcgi server with strange error
+        close STDERR;
+        open(STDERR, ">", \$stderr_output);
+    };
+
+    for my $file (keys %{$uniq}) {
+        eval {
+            $c->view("TT")->render($c, $file);
+        };
+    }
+    # Now close and restore STDERR to original condition.
+    eval {
+        # breaks on fastcgi server with strange error
+        close STDERR;
+        open STDERR, ">&".$savestderr;
+    };
+
+    $c->config->{'precompile_templates'} = 0;
+    my $elapsed = tv_interval ( $t0 );
+    return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
+}
+
+##########################################################
+
+=head2 find_files
+
+  find_files($folder, $pattern)
+
+return list of files for folder and pattern
+
+=cut
+
+sub find_files {
+    my ( $dir, $match ) = @_;
+    my @files;
+    $dir =~ s/\/$//gmxo;
+
+    my @tmpfiles;
+    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
+    while(my $file = readdir $dh) {
+        next if $file eq '.';
+        next if $file eq '..';
+        push @tmpfiles, $file;
+    }
+    closedir $dh;
+
+    for my $file (@tmpfiles) {
+        # follow sub directories
+        if(-d $dir."/".$file."/.") {
+            push @files, @{find_files($dir."/".$file, $match)};
+        }
+
+        # if its a file, make sure it matches our pattern
+        if(defined $match) {
+            my $test = $dir."/".$file;
+            next unless $test =~ m/$match/mx;
+        }
+
+        push @files, $dir."/".$file;
+    }
+
+    return \@files;
+}
+
+##########################################################
+
+=head2 save_logs_to_tempfile
+
+  save_logs_to_tempfile($logs)
+
+save logfiles to tempfile
+
+=cut
+
+sub save_logs_to_tempfile {
+    my($data) = @_;
+    my($fh, $filename) = tempfile();
+    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+    for my $r (@{$data}) {
+        print $fh encode_utf8($r->{'message'}),"\n";
+    }
+    Thruk::Utils::IO::close($fh, $filename);
+    return($filename);
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 
@@ -1815,6 +1989,9 @@ sub _parse_date {
 
     # everything else
     else {
+        # Date::Manip increases start time, so load it here upon request
+        require Date::Manip;
+        Date::Manip->import(qw/UnixDate/);
         $timestamp = UnixDate($string, '%s');
         $c->log->debug("not a valid date: ".$string);
         if(!defined $timestamp) {

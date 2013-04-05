@@ -69,6 +69,12 @@ lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/Script/Thrukembedded.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
+lib/Monitoring/Availability.pm
+lib/Monitoring/Availability/Logs.pm
+lib/Monitoring/Livestatus.pm
+lib/Monitoring/Livestatus/INET.pm
+lib/Monitoring/Livestatus/MULTI.pm
+lib/Monitoring/Livestatus/UNIX.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
@@ -80,6 +86,7 @@ lib/Thruk/Backend/Provider/ConfigOnly.pm
 lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mongodb.pm
+lib/Thruk/Backend/Provider/Mysql.pm
 lib/Thruk/Config.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/cmd.pm
@@ -98,6 +105,7 @@ lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm
 lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
+lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Model/Thruk.pm
 lib/Thruk/Pool/Simple.pm
@@ -199,6 +207,7 @@ plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.t
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js
 plugins/plugins-available/conf/t/conf_utils.t
+plugins/plugins-available/conf/t/conf_utils_api.t
 plugins/plugins-available/conf/t/controller_conf.t
 plugins/plugins-available/conf/t/data/1/host.cfg
 plugins/plugins-available/conf/t/data/2/host.cfg
@@ -212,6 +221,11 @@ plugins/plugins-available/conf/t/data/6/servicegroups_iso-8859.cfg
 plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
 plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/data/8/commented_object.cfg
+plugins/plugins-available/conf/t/data/http_api/thruk_local.conf
+plugins/plugins-available/conf/t/data/local/core.d.utf8/utf8.cfg
+plugins/plugins-available/conf/t/data/local/core.d/test.cfg
+plugins/plugins-available/conf/t/data/local/thruk_local.conf
+plugins/plugins-available/conf/t/data/local/var/secret.key
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_backends_backend.tt
@@ -287,8 +301,8 @@ plugins/plugins-available/mobile/root/jqm/images/icons-36-white.png
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router-0.6.js
-plugins/plugins-available/mobile/root/mobile-1.63.css
-plugins/plugins-available/mobile/root/mobile-1.63.js
+plugins/plugins-available/mobile/root/mobile-1.66.css
+plugins/plugins-available/mobile/root/mobile-1.66.js
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
@@ -741,7 +755,7 @@ plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
-plugins/plugins-available/panorama/root/panorama-1.63.css
+plugins/plugins-available/panorama/root/panorama-1.66.css
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/templates/_panorama_js_elements.tt
@@ -834,6 +848,7 @@ plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
+plugins/plugins-available/reports2/templates/custom_reports_edit_step2.tt
 plugins/plugins-available/reports2/templates/reports.tt
 plugins/plugins-available/reports2/templates/reports/comp/mail.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_cover.tt
@@ -878,7 +893,6 @@ plugins/plugins-available/shinken_features/templates/shinken_status_bothtypes.tt
 plugins/plugins-available/statusmap/description.txt
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
 plugins/plugins-available/statusmap/preview.png
-plugins/plugins-available/statusmap/root/excanvas.js
 plugins/plugins-available/statusmap/root/jit-yc.js
 plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
@@ -906,7 +920,7 @@ root/thruk/faq.html
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-1.63.js
+root/thruk/javascript/all_in_one-1.66.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png
@@ -921,6 +935,7 @@ root/thruk/javascript/cal/img/time-down.png
 root/thruk/javascript/cal/img/time-up.png
 root/thruk/javascript/cal/jscal2.css
 root/thruk/javascript/cal/jscal2.js
+root/thruk/javascript/excanvas.js
 root/thruk/javascript/jquery-1.7.2.min.js
 root/thruk/javascript/jquery-fieldselection.js
 root/thruk/javascript/jquery-ui/css/smoothness/images/pbar-ani.gif
@@ -940,7 +955,7 @@ root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_cd0a0a_256x240.pn
 root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css
 root/thruk/javascript/jquery-ui/js/jquery-ui-1.8.16.custom.min.js
 root/thruk/javascript/overlib.js
-root/thruk/javascript/thruk-1.63.js
+root/thruk/javascript/thruk-1.66.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav
@@ -969,6 +984,7 @@ script/thruk_test.pl
 script/thruk_update.sh
 script/thruk_update_help.pl
 script/thruk_version.sh
+script/waitmax
 ssi/README
 ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
@@ -978,6 +994,7 @@ support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
 support/menu_local.conf
+support/naglint.conf.example
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
@@ -1002,6 +1019,8 @@ t/098-Pod-Coverage.t
 t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mongodb.t
+t/100-backend_mysql.t
+t/100-backend_mysql_utf8.t
 t/100-backend_shinken.t
 t/100-cli-examples.t
 t/100-cli-naglint.t
@@ -1030,6 +1049,7 @@ t/300-controller_showlog.t
 t/300-controller_status.t
 t/300-controller_summary.t
 t/300-controller_tac.t
+t/300-controller_test.t
 t/300-controller_trends.t
 t/400-recurring_downtime.t
 t/900-firefox-js.t
@@ -1037,6 +1057,7 @@ t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
 t/data/log4perl.conf
+t/data/mysql/archive.log
 t/data/naglint/basic/in.cfg
 t/data/naglint/basic/out.cfg
 t/data/naglint/commands/in.cfg
@@ -1070,6 +1091,7 @@ t/data/resource2.cfg
 t/data/test_c_style.conf
 t/perlcriticrc
 t/TestUtils.pm
+t/timed_test.sh
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_comments_table.tt
@@ -2001,8 +2023,8 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-1.63.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.63.css
+themes/themes-available/Thruk/stylesheets/all_in_one-1.66.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.66.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css

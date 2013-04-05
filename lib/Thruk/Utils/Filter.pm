@@ -15,9 +15,9 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
-use Date::Manip;
-use URI::Escape;
+use URI::Escape qw/uri_escape/;
 use JSON::XS;
+use Encode qw/decode_utf8/;
 
 ##############################################
 
@@ -47,11 +47,10 @@ format: 0d 0h 29m 43s
 
 =cut
 sub duration {
-    my $duration = shift;
-    my $withdays = shift;
+    my($duration, $withdays) = @_;
     my $minus    = '';
 
-    croak("undef duration in duration(): ".$duration) unless defined $duration;
+    confess("undef duration in duration(): ".$duration) unless defined $duration;
     if($duration < 0) {
         $duration = $duration * -1;
         $minus    = '-';
@@ -59,7 +58,7 @@ sub duration {
 
     $withdays = 1 unless defined $withdays;
 
-    croak("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
+    confess("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
 
     my $days    = 0;
     my $hours   = 0;
@@ -380,12 +379,13 @@ sub json_encode {
 
 =head2 encode_json_obj
 
-  encode_json_obj(array)
+  encode_json_obj(array, [decode])
 
 returns json encoded object
 
 =cut
 sub encode_json_obj {
+    return decode_utf8(JSON::XS::encode_json($_[0])) if $_[1];
     return JSON::XS::encode_json($_[0]);
 }
 
@@ -700,9 +700,33 @@ sub button {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
     }
-    $html   .= '<button class="conf_save_reload_button">save &amp; reload</button>';
+    $html   .= '<button class="'.$class.'">'.$value.'</button>';
     $html   .= '</form>';
     return $html;
+}
+
+
+########################################
+
+=head2 fullversion
+
+  my $str = fullversion($c)
+
+returns full version string
+
+=cut
+sub fullversion {
+    my($c) = @_;
+    die("no c") unless defined $c;
+    my $str = $c->config->{'version'};
+    if($c->config->{'branch'}) {
+        $str .= '~'.$c->config->{'branch'};
+    }
+    if($c->config->{'omd_version'}) {
+        $str .= '/ OMD '.$c->config->{'omd_version'};
+    }
+    $str = '' unless defined $str;
+    return $str;
 }
 
 

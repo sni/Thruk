@@ -826,6 +826,9 @@ SPAN.deleteicon INPUT {
   background-image: url(../images/disk_reload.png) !important;
   margin-top: -7px !important;
 }
+.ui-delete-button {
+  background-image: url(../images/delete.gif) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }
@@ -958,6 +961,41 @@ DIV.perf_bar_crit {
 
 TD.toolbar IMG {
   vertical-align: text-bottom;
+}
+
+TABLE.logcache_stats TABLE {
+  width: 600px;
+}
+TABLE.logcache_stats TD.dataVal {
+  text-align: center;
+}
+/* navbar */
+div.navbar {
+  background-color: black;
+  color: white;
+  width: 172px;
+  height: 100%;
+  position:fixed;
+  z-index:100;
+  border-top: 0px solid black;
+  border-bottom: 0px solid black;
+  border-right: 0px solid black;
+  border-left: 2px solid black;
+  padding-right: 3px;
+  overflow:auto;
+  top: 0px;
+  left: 0px;
+  text-align: left;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0px;
+  margin-left: 183px;
+}
+
+DIV#site_panel {
+  left: 195px;
 }#currentversioninfo {
   font-size:14px;
 }
@@ -2102,4 +2140,8 @@ TD.tableRowSelected, TH.tableRowSelected {
 
 BODY.docs DIV.infoBoxTitle {
   line-height: 13px;
+}
+
+.has_long_plugin_output {
+  color: #B94413;
 }

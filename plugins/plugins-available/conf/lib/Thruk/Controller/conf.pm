@@ -186,6 +186,12 @@ sub _process_json_page {
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'home'}."/themes";
         my $dir        = $c->config->{'physical_logo_path'} || $themes_dir."/themes-available/Thruk/images/logos";
         $dir =~ s/\/$//gmx;
+        if(!-d $dir.'/.') {
+            # try to create that folder, it might not exist yet
+            eval {
+                Thruk::Utils::IO::mkdir_r($dir);
+            };
+        }
         my $files = _find_files($c, $dir, '\.(png|gif|jpg)$');
         for my $file (@{$files}) {
             $file =~ s/$dir\///gmx;
@@ -870,8 +876,13 @@ sub _process_backends_page {
             }
         }
     }
+    if(scalar @{$backends} == 0) {
+        # add empty sample backend
+        push @{$backends}, { 'name' => '' };
+    }
     # set ids
     for my $b (@{$backends}) {
+        $b->{'type'}        = 'livestatus' unless defined $b->{'type'};
         $b->{'key'}         = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
         $b->{'addr'}        = $b->{'options'}->{'peer'}  || '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
@@ -902,6 +913,8 @@ sub _process_objects_page {
     $c->stash->{'file_link'}       = "";
     $c->stash->{'coretype'}        = $c->{'obj_db'}->{'coretype'};
     $c->stash->{'bare'}            = $c->{'request'}->{'parameters'}->{'bare'} || 0;
+
+    $c->{'obj_db'}->read_rc_file();
 
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {
@@ -1044,6 +1057,9 @@ sub _apply_config_changes {
 
     if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
         if($c->{'obj_db'}->commit($c)) {
+            # update changed files
+            $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
+            # set flag to do the reload
             $c->{'request'}->{'parameters'}->{'reload'} = 'yes';
         } else {
             return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
@@ -1294,46 +1310,10 @@ sub _get_context_object {
         $obj = Monitoring::Config::Object->new( type     => $c->stash->{'type'},
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
-        my $files_root = $c->{'obj_db'}->get_files_root();
-        if($files_root eq '') {
-            $c->stash->{'new_file'} = '';
-            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.' );
-            return $obj;
-        }
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
-        my $fullpath   = $files_root.'/'.$new_file;
-        $fullpath      =~ s|\/+|\/|gmx;
-        my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
-        if(defined $file) {
-            if(defined $file and $file->readonly()) {
-                Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
-                $c->stash->{'new_file'} = '/'.$new_file;
-                return $obj;
-            }
-            $obj->{'file'} = $file;
-        } else {
-            # new file
-            my $remotepath = $fullpath;
-            my $localpath  = $remotepath;
-            if($c->{'obj_db'}->is_remote()) {
-                $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
-            }
-            my $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
-            if(defined $file and $file->readonly()) {
-                Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
-                $c->stash->{'new_file'} = '/'.$new_file;
-                return $obj;
-            }
-            elsif(defined $file) {
-                $obj->{'file'}         = $file;
-                $c->{'obj_db'}->file_add($file);
-            }
-            else {
-                $c->stash->{'new_file'} = '';
-                Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
-                return $obj;
-            }
-        }
+        my $file = $self->_get_context_file($c, $obj, $new_file);
+        return $obj unless $file;
+        $obj->set_file($file);
         $obj->set_uniq_id($c->{'obj_db'});
         return $obj;
     }
@@ -1388,6 +1368,49 @@ sub _get_context_object {
     }
 
     return $obj;
+}
+
+##########################################################
+sub _get_context_file {
+    my($self, $c, $obj, $new_file) = @_;
+    my $files_root = $c->{'obj_db'}->get_files_root();
+    if($files_root eq '') {
+        $c->stash->{'new_file'} = '';
+        Thruk::Utils::set_message($c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.');
+        return;
+    }
+    my $fullpath   = $files_root.'/'.$new_file;
+    $fullpath      =~ s|\/+|\/|gmx;
+    my $file       = $c->{'obj_db'}->get_file_by_path($fullpath);
+    if(defined $file) {
+        if(defined $file and $file->readonly()) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
+            $c->stash->{'new_file'} = '/'.$new_file;
+            return;
+        }
+    } else {
+        # new file
+        my $remotepath = $fullpath;
+        my $localpath  = $remotepath;
+        if($c->{'obj_db'}->is_remote()) {
+            $localpath  = $c->{'obj_db'}->{'config'}->{'localdir'}.'/'.$localpath;
+        }
+        $file = Monitoring::Config::File->new($localpath, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'}, undef, $remotepath);
+        if(defined $file and $file->readonly()) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
+            $c->stash->{'new_file'} = '/'.$new_file;
+            return;
+        }
+        elsif(defined $file) {
+            $c->{'obj_db'}->file_add($file);
+        }
+        else {
+            $c->stash->{'new_file'} = '';
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
+            return;
+        }
+    }
+    return $file;
 }
 
 ##########################################################
@@ -1544,14 +1567,16 @@ sub _object_delete {
     my $c    = shift;
     my $obj  = shift;
 
-    my $refs = $c->{'obj_db'}->get_references($obj);
-    if(scalar keys %{$refs}) {
-        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' has remaining references' );
-        return $c->response->redirect('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id());
+    if(!$c->{'request'}->{'parameters'}->{'force'}) {
+        my $refs = $c->{'obj_db'}->get_references($obj);
+        if(scalar keys %{$refs}) {
+            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($obj->get_type()).' has remaining references' );
+            return $c->response->redirect('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id().'&show_force=1');
+        }
     }
     $c->{'obj_db'}->delete_object($obj);
-    Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' removed successfully' );
-    return $c->response->redirect('conf.cgi?sub=objects&type='.$c->stash->{'type'});
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
+    return $c->response->redirect('conf.cgi?sub=objects&type='.$obj->get_type());
 }
 
 ##########################################################
@@ -1564,6 +1589,7 @@ sub _object_save {
     my $old_comment = join("\n", @{$obj->{'comments'}});
     my $new_comment = $c->{'request'}->{'parameters'}->{'conf_comment'};
     $new_comment    =~ s/\r//gmx;
+    my $new         = $c->{'request'}->{'parameters'}->{'data.id'} eq 'new' ? 1 : 0;
 
     # save object
     $obj->{'file'}->{'errors'} = [];
@@ -1590,7 +1616,8 @@ sub _object_save {
                 $c->{'obj_db'}->_rebuild_index();
                 Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
             } else {
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' );
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' ) if !$new;
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' created successfully' ) if  $new;
             }
         }
         if($c->{'request'}->{'parameters'}->{'referer'}) {
@@ -1612,14 +1639,9 @@ sub _object_move {
     my $files_root = $self->_set_files_stash($c, 1);
     if($c->stash->{action} eq 'movefile') {
         my $new_file = $c->{'request'}->{'parameters'}->{'newfile'};
-        $new_file    =~ s/^\///gmx;
-        my $file     = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
-        if(!defined $file) {
-            Thruk::Utils::set_message( $c, 'fail_message', $files_root.$new_file." is not a valid file!" );
-        } elsif($c->{'obj_db'}->move_object($obj, $file)) {
+        my $file     = $self->_get_context_file($c, $obj, $new_file);
+        if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
-        } else {
-            Thruk::Utils::set_message( $c, 'fail_message', "Failed to move ".ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\'' );
         }
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
@@ -1894,6 +1916,9 @@ sub _list_references {
             $outgoing->{$obj->get_type()}->{$t} = '';
         }
     }
+
+    # linked from delete object page?
+    $c->stash->{'force_delete'} = $c->{'request'}->{'parameters'}->{'show_force'} ? 1 : 0;
 
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;

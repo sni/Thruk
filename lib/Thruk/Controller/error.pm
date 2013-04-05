@@ -175,6 +175,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
+    if($c->config->{'thruk_debug'}) {
+        $c->stash->{errorDetails} = join('<br>', @{$c->error});
+    }
+
     Thruk->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
     Thruk->config->{'custom-error-message'}->{'response-status'}   = $code;
     $c->response->status($code);

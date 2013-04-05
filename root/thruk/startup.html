@@ -6,7 +6,7 @@
 
 
 
-    <link rel='stylesheet' type='text/css' href='themes/Thruk/stylesheets/all_in_one-1.63.css' />
+    <link rel='stylesheet' type='text/css' href='themes/Thruk/stylesheets/all_in_one-1.66.css' />
 
 
 
@@ -20,7 +20,7 @@
         }
         function check_reload() {
             jQuery.ajax({
-                url: 'cgi-bin/remote.cgi',
+                url: 'cgi-bin/remote.cgi?startup',
                 type: 'POST',
                 success: function() {
                     jQuery('#msg').html(' <font color="green"><b>done.<\/b><\/font><br>You will be redirected...');

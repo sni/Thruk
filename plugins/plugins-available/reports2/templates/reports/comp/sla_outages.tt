@@ -1,4 +1,4 @@
-[% outages = outages(logs, start, end) %]
+﻿[% outages = outages(logs, start, end) %]
 [% IF outages.size == 0 %]
   [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Outages") %]
     [% loc("no outages during this timeperiod") %]

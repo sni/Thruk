@@ -1,4 +1,4 @@
-[% FOREACH o = outages %]
+﻿[% FOREACH o = outages %]
 <div class="outages">
   [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
   <span class="duration">([% duration(o.duration) %])</span>

@@ -1,4 +1,4 @@
-[% SET value = "" %]
+﻿[% SET value = "" %]
 [% IF obj_conf.defined(key) %]
   [% SET value = obj_conf.$key %]
 [% END %]

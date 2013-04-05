@@ -42,7 +42,7 @@
                     <tr>
                       <td class='dataVar' nowrap>Backend Name:</td>
                       [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal' width="180">
+                      <td class='dataVal' width="180" title="id: [% pd %]">
                         [% IF backend_detail.$pd.name %]
                           [% backend_detail.$pd.name %]
                         [% ELSE %]
@@ -251,6 +251,14 @@
                         [% ELSE %]
                           [% backend_detail.$pd.last_error %]
                         [% END %]
+                      </td>
+                      [% END %]
+                    </tr>
+                    <tr>
+                      <td class='dataVar' nowrap>&nbsp;</td>
+                      [% FOREACH pd IN tmpbackends %]
+                      <td class='dataVal dataValMisc'>
+                        [% IF backend_detail.$pd.has_curl %](curl enabled)[% END %]
                       </td>
                       [% END %]
                     </tr>

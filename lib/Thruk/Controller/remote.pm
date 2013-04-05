@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use Data::Dumper;
 use Thruk::Utils::CLI;
+use File::Slurp;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -46,6 +47,49 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->{'request'}->{'parameters'}->{'data'});
     }
     $c->stash->{'template'} = 'passthrough.tt';
+
+    my $action = $c->{'request'}->query_keywords() || '';
+
+    # startup request?
+    if($action eq 'startup') {
+        if(!$c->config->{'started'}) {
+            $c->config->{'started'} = 1;
+            $c->log->info("started ($$)");
+            $c->stash->{'text'} = 'startup done';
+            if($c->config->{'precompile_templates'}) {
+                # compile templates in background
+                my $url = "".$c->request->uri;
+                $url    =~ s/\?startup$/?compile/gmx;
+                `bash -l -c "echo \$(nohup wget -q -O - '$url' > /dev/null 2>&1 &)"`;
+            }
+        }
+        return;
+    }
+
+    # compile request?
+    if($action eq 'compile' or exists $c->{'request'}->{'parameters'}->{'compile'}) {
+        if($c->config->{'precompile_templates'}) {
+            $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
+            $c->log->info($c->stash->{'text'});
+        } else {
+            $c->stash->{'text'} = 'disabled or already compiled';
+        }
+        return;
+    }
+
+    # log requests?
+    if($action eq 'log' and $c->{'request'}->{'method'} eq 'POST') {
+        my $file = "".$c->{'request'}->body();
+        if($file and -e $file) {
+            my $msg = read_file($file);
+            unlink($file);
+            $c->log->error($msg);
+        } else {
+            $c->log->error('log request without a file: '.Dumper($c->{'request'}));
+        }
+        return;
+    }
+
     return;
 }
 

@@ -1,6 +1,6 @@
 Name:          thruk
-Version:       1.63
-Release: 1%{?dist}
+Version:       1.66
+Release: 2%{?dist}
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
@@ -17,10 +17,12 @@ Patch1:        0002-log4perl.conf.patch
 Patch2:        0004-thruk_fastcgi.pl.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd
+# https://fedoraproject.org/wiki/Packaging:DistTag
+# http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron cairo wget xorg-x11-server-extra
 %else
-Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-serif-fonts
+Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-fonts-common
 %endif
 
 %description
@@ -112,6 +114,7 @@ mv %{buildroot}%{_datadir}/thruk/ssi %{buildroot}%{_sysconfdir}/thruk/
 mv %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi-pnp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi
 cp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi     %{buildroot}%{_sysconfdir}/thruk/ssi/extinfo-header.ssi
 mv %{buildroot}%{_datadir}/thruk/support/thruk_local.conf.example %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
+mv %{buildroot}%{_datadir}/thruk/support/naglint.conf.example %{buildroot}%{_sysconfdir}/thruk/naglint.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
 mv %{buildroot}%{_datadir}/thruk/script/thruk %{buildroot}%{_bindir}/thruk
 mv %{buildroot}%{_datadir}/thruk/script/naglint %{buildroot}%{_bindir}/naglint
@@ -238,6 +241,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg
+%config(noreplace) %{_sysconfdir}/thruk/naglint.conf
 %config(noreplace) %{_sysconfdir}/thruk/htpasswd
 %config(noreplace) %{_sysconfdir}/logrotate.d/thruk
 %if %{defined suse_version}

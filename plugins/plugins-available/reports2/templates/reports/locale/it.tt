@@ -1,4 +1,4 @@
-[%
+﻿[%
   locale_name          = 'italian';      # language name should be in english
   reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
   reportDateFormat     = '%d %b %Y';
@@ -37,7 +37,7 @@
     'Total Downtime'                        => 'Tempo di inattività totale',
     'no outages during this timeperiod'     => 'nessuna interruzione durante questo lasso di tempo',
     'Worst Outages'                         => 'Le più lunghe interruzioni',
-    'Latest Outages'                        => 'L\'ultima interruzione',
+    'Latest Outages'                        => 'Le ultime interruzioni',
     'Outages'                               => 'Interruzioni',
     'Report:'                               => 'Rapporto:',
     'Description:'                          => 'Descrizione:',

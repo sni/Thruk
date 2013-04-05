@@ -373,6 +373,20 @@ sub _redirect_or_success {
         $wait = 0;
     }
 
+    # only wait if we got original backends
+    if($wait and defined $c->{'request'}->{'parameters'}->{'backend.orig'}) {
+        my $backends = $c->{'request'}->{'parameters'}->{'backend'};
+        if(ref $c->{'request'}->{'parameters'}->{'backend'} eq 'ARRAY') {
+            $backends = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
+        }
+        my $backendsorig = $c->{'request'}->{'parameters'}->{'backend.orig'};
+        if(ref $c->{'request'}->{'parameters'}->{'backend.orig'} eq 'ARRAY') {
+            $backendsorig = join('|', @{$c->{'request'}->{'parameters'}->{'backend.orig'}});
+        }
+        $wait = 0 if $backends ne $backendsorig;
+    }
+
+
     $c->stash->{how_far_back} = $how_far_back;
 
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';

@@ -331,6 +331,7 @@ sub _set_possible_backends {
             if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
                 $backend_detail{$back}->{'running'} = 1;
             }
+            $backend_detail{$back}->{'has_curl'} = $peer->{'class'}->{'has_curl'} || 0;
             # set combined state
             $backend_detail{$back}->{'state'} = 1; # down
             if($backend_detail{$back}->{'running'}) { $backend_detail{$back}->{'state'} = 0; }       # up

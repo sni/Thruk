@@ -20,7 +20,7 @@ use Thruk::Utils::CLI;
 use Thruk::Utils::Reports::Render;
 use MIME::Lite;
 use File::Copy;
-use Encode qw(encode_utf8 decode_utf8);
+use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
 
 ##########################################################
@@ -83,16 +83,31 @@ sub report_show {
             $c->stash->{'text'} = $report_text;
         }
         elsif($report->{'var'}->{'attachment'}) {
-            $c->stash->{'text'} = read_file($report_file);
-            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$report->{'var'}->{'attachment'}.'"' );
+            my $name = $report->{'var'}->{'attachment'};
+            $name    =~ s/\s+/_/gmx;
+            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
+            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
+            open(my $fh, '<', $report_file);
+            binmode $fh;
+            $c->res->body($fh);
         } else {
             my $name = $report->{'name'};
-            $name    =~ s/\s/_/gmx;
-            $c->stash->{'text'} = read_file($report_file);
+            $name    =~ s/\s+/_/gmx;
+            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
             $c->res->content_type('application/pdf');
             $c->res->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
+            open(my $fh, '<', $report_file);
+            binmode $fh;
+            $c->res->body($fh);
         }
+    } else {
+        if($Thruk::Utils::Reports::error) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'generating report failed: '.$Thruk::Utils::Reports::error );
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'generating report failed' );
+        }
+        return $c->response->redirect('reports2.cgi');
     }
     return 1;
 }
@@ -151,11 +166,11 @@ sub report_send {
         }
         my $msg = MIME::Lite->new();
         $msg->build(
-                 From    => $report->{'from'}    || $mailheader->{'from'},
+                 From    => $report->{'from'}    || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'},
                  To      => $report->{'to'}      || $mailheader->{'to'},
                  Cc      => $report->{'cc'}      || $mailheader->{'cc'},
                  Bcc     => $report->{'bcc'}     || $mailheader->{'bcc'},
-                 Subject => $report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report',
+                 Subject => encode("MIME-B", ($report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report')),
                  Type    => 'multipart/mixed',
         );
         for my $key (keys %{$mailheader}) {
@@ -168,8 +183,8 @@ sub report_send {
             next if $key eq 'subject';
             $msg->add($key => $mailheader->{$key});
         }
-        $msg->attach(Type     => 'TEXT',
-                     Data     => $mailbody,
+        $msg->attach(Type     => 'text/plain; charset=UTF-8',
+                     Data     => encode_utf8($mailbody),
         );
 
         if($report->{'var'}->{'attachment'}) {
@@ -264,7 +279,10 @@ sub generate_report {
 
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
-    return unless defined $options;
+    unless(defined $options) {
+        $Thruk::Utils::Reports::error = 'got no report options';
+        return;
+    }
 
     # do we have errors in our options, ex.: missing required fields?
     if(defined $options->{'var'}->{'opt_errors'}) {
@@ -311,6 +329,18 @@ sub generate_report {
     my($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
     Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
 
+    # check backend connections
+    my $processinfo = $c->{'db'}->get_processinfo();
+    if($options->{'backends'}) {
+        my @failed;
+        for my $b (@{$options->{'backends'}}) {
+            if($c->stash->{'failed_backends'}->{$b}) {
+                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+            }
+        }
+        die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
+    }
+
     # set some defaults
     Thruk::Utils::Reports::Render::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
@@ -345,9 +375,24 @@ sub generate_report {
     for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
         $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
     }
+    # set custom render helper
+    my $custom = [];
+    eval {
+        require Thruk::Utils::Reports::CustomRender;
+        Thruk::Utils::Reports::CustomRender->import;
+        $custom = Class::Inspector->functions('Thruk::Utils::Reports::CustomRender');
+    };
+    # show errors if module was found
+    if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
+        $Thruk::Utils::Reports::error = $@;
+        $c->log->error($@);
+    }
+    for my $s (@{$custom}) {
+        $c->stash->{$s} = \&{'Thruk::Utils::Reports::CustomRender::'.$s};
+    }
     # initialize localization
     if($options->{'params'}->{'language'}) {
-        $c->stash->{'loc'} = \&{'Thruk::Utils::Reports::Render::_locale'};
+        $c->stash->{'loc'} = $c->stash->{'_locale'};
         $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
     }
 
@@ -358,6 +403,7 @@ sub generate_report {
     };
     if($@) {
         Thruk::Utils::CLI::_error($@);
+        $Thruk::Utils::Reports::error = $@;
         return $c->detach('/error/index/13');
     }
 
@@ -369,6 +415,7 @@ sub generate_report {
     };
     if($@) {
         Thruk::Utils::CLI::_error($@);
+        $Thruk::Utils::Reports::error = $@;
         return $c->detach('/error/index/13');
     }
 
@@ -384,6 +431,26 @@ sub generate_report {
 
     # update report runtime data
     set_running($c, $nr, 0, undef, time());
+
+    # set error if not already set
+    if(!-f $attachment and !$Thruk::Utils::Reports::error) {
+        $Thruk::Utils::Reports::error = read_file($logfile);
+    }
+    Thruk::Utils::CLI::_error($Thruk::Utils::Reports::error);
+
+    # check backend errors from during report generation
+    if($options->{'backends'}) {
+        my @failed;
+        for my $b (@{$options->{'backends'}}) {
+            if($c->stash->{'failed_backends'}->{$b}) {
+                push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
+            }
+        }
+        if(scalar @failed > 0) {
+            unlink($attachment);
+            die("Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n")
+        }
+    }
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;
@@ -407,18 +474,19 @@ sub get_report_data_from_param {
             # remove empty elements
             @{$params->{$key}} = grep(!/^$/mx, @{$params->{$key}});
         }
+        if($1 eq 'sla') { $params->{$key} =~ s/,/./gmx }
         $p->{$1} = $params->{$key};
     }
 
     my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
-        'name'       => $params->{'name'}        || 'New Report',
-        'desc'       => $params->{'desc'}        || '',
-        'template'   => $params->{'template'}    || 'sla.tt',
-        'is_public'  => $params->{'is_public'}   || 0,
-        'to'         => $params->{'to'}          || '',
-        'cc'         => $params->{'cc'}          || '',
-        'backends'   => $params->{'backends'}    || [],
+        'name'       => $params->{'name'}            || 'New Report',
+        'desc'       => $params->{'desc'}            || '',
+        'template'   => $params->{'template'}        || 'sla.tt',
+        'is_public'  => $params->{'is_public'}       || 0,
+        'to'         => $params->{'to'}              || '',
+        'cc'         => $params->{'cc'}              || '',
+        'backends'   => $params->{'report_backends'} || [],
         'params'     => $p,
         'send_types' => $send_types,
     };
@@ -697,6 +765,7 @@ sub _read_report_file {
 
         # nice error message
         if($report->{'error'} =~ m/\[ERROR\]\s+(.*?)\s+at\s+[\w\/\.\-]+\.pm\s+line\s+\d+\./gmx) {
+            $report->{'long_error'} = $report->{'error'};
             $report->{'error'} = $1;
             $report->{'error'} =~ s/^'//mx;
             $report->{'error'} =~ s/\\'/'/gmx;
@@ -763,7 +832,9 @@ sub _get_report_cmd {
 sub _get_required_fields {
     my($c, $report) = @_;
 
-    return Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' });
+    my $fields = Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' });
+    confess("no fields? -> ".Dumper($report)) unless(defined $fields and ref $fields eq 'ARRAY');
+    return $fields;
 }
 
 ##########################################################
@@ -831,7 +902,7 @@ sub _convert_to_pdf {
     my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
     my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$wkhtmltopdf.'"';
     `$cmd`;
-    move($attachment.'.pdf', $attachment);
+    move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
     return;
 }

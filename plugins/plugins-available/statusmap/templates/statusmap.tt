@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt
         js           => [ "thruk/plugins/statusmap/jit-yc.js", "thruk/plugins/statusmap/statusmap.js" ]
         css          => "thruk/plugins/statusmap/Treemap.css",
-        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "thruk/plugins/statusmap/excanvas.js'></script><![endif]-->"
+        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "thruk/javascript/excanvas.js'></script><![endif]-->"
 %]
 
 <form method="get" action="statusmap.cgi">

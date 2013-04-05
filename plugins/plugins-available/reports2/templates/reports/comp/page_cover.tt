@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% current_page = current_page(0) %]
 <a name="page[% current_page %]"></a>
 <div class="page cover">

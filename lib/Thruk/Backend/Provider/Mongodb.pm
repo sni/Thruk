@@ -8,6 +8,8 @@ use Thruk::Utils;
 use Digest::MD5 qw/md5_hex/;
 use MongoDB;
 use Tie::IxHash;
+use Encode qw/encode_utf8/;
+use File::Temp qw/tempfile/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -30,7 +32,7 @@ create new manager
 sub new {
     my( $class, $peer_config, $config ) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = mongodb_host:port/dbname</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = mongodb://mongodb_host:port/dbname</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     $peer_config->{'name'} = 'mongo' unless defined $peer_config->{'name'};
     if(!defined $peer_config->{'peer_key'}) {
@@ -38,6 +40,7 @@ sub new {
         $peer_config->{'peer_key'} = $key;
     }
     my($dbhost, $dbname);
+    $peer_config->{'peer'} =~ s/^mongodb:\/\///mx;
     if($peer_config->{'peer'} =~ m/^(.*):(\d+)\/(.*)$/mx) {
         $dbhost = $1.":".$2;
         $dbname = $3;
@@ -580,16 +583,29 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     my @data;
+    my $sorted = 0;
     my $sort = {'time' => 1};
     if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
-        $sort = {'time' => -1};
+        $sort   = {'time' => -1};
+        $sorted = 1;
     }
     my $collection= $options{'collection'} || 'logs';
-    @data = $self->_db->$collection
-                      ->find($self->_get_filter($options{'filter'}))
-                      ->sort($sort)
-                      ->all;
-    return(\@data, 'sorted');
+    my $res = $self->_db->$collection
+                        ->find($self->_get_filter($options{'filter'}))
+                        ->sort($sort);
+
+    if($options{'file'}) {
+        my($fh, $filename) = tempfile();
+        open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+        while(my $r = $res->next) {
+            print $fh encode_utf8($r->{'message'}),"\n";
+        }
+        Thruk::Utils::IO::close($fh, $filename);
+        return($filename, 'file');
+    } else {
+        my @data = $res->all;
+        return(\@data, ($sorted ? 'sorted' : ''));
+    }
 }
 
 ##########################################################
@@ -1612,7 +1628,7 @@ sub _get_logs_start_end {
                       ->limit(1)
                       ->all();
     $end = $data[0]->{'time'} if defined $data[0];
-    return($start, $end);
+    return([$start, $end]);
 }
 
 ##########################################################
@@ -1641,14 +1657,15 @@ sub _log_stats {
         my $stats = $db->run_command({collStats => $table});
         if(ref $stats eq 'HASH') {
             # http://docs.mongodb.org/manual/reference/collection-statistics/
-            my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1000);
-            my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1000);
+            my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1024);
+            my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1024);
             $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %7d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $stats->{'count'});
             push @result, {
-                key   => $key,
-                name  => $c->stash->{'backend_detail'}->{$key}->{'name'},
-                index => $val1.' '.$unit1,
-                size  => $val2.' '.$unit2,
+                key         => $key,
+                name        => $c->stash->{'backend_detail'}->{$key}->{'name'},
+                index_size  => $stats->{'totalIndexSize'},
+                data_size   => $stats->{'size'},
+                items       => $stats->{'count'},
             };
         }
     }
@@ -1669,12 +1686,13 @@ imports logs into mongodb
 =cut
 
 sub _import_logs {
-    my($self, $c, $mode, $verbose, $backends) = @_;
+    my($self, $c, $mode, $verbose, $backends, $blocksize) = @_;
 
     $c->stats->profile(begin => "Mongodb::_import_logs($mode)");
 
     my $backend_count = 0;
     my $log_count     = 0;
+    my $log_skipped   = 0;
 
     if(!defined $backends) {
         Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
@@ -1693,12 +1711,18 @@ sub _import_logs {
 
         print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
-        if($mode eq 'update' or $mode eq 'import') {
-            $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose);
-        }
-        elsif($mode eq 'authupdate') {
-            $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
-        }
+        # backends maybe down, we still want to continue updates
+        eval {
+            if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
+                $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose, $blocksize);
+            }
+            elsif($mode eq 'authupdate') {
+                $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
+            } else {
+                print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
+            }
+        };
+        print "ERROR: ", $@,"\n" if $@ and $verbose;
 
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
@@ -1710,12 +1734,27 @@ sub _import_logs {
 
 ##########################################################
 sub _update_logcache {
-    my($self, $c, $mode, $peer, $db, $table, $verbose) = @_;
+    my($self, $c, $mode, $peer, $db, $table, $verbose, $blocksize) = @_;
 
+    unless(defined $blocksize) {
+        $blocksize = 86400;
+        $blocksize = 365 if $mode eq 'clean';
+    }
+
+    my $col       = $db->$table;
     my $log_count = 0;
 
     if($mode eq 'import') {
         $db->run_command({drop => $table});
+    }
+
+    if($mode eq 'clean') {
+        my $start = time() - ($blocksize * 86400);
+        print "cleaning logs older than:  ", scalar localtime $start, "\n" if $verbose;
+        $col->remove({ time => { '$lt' => $start } });
+        my $err = $db->last_error({w => 1});
+        $log_count += $err->{'n'} if $err->{'ok'} == 1;
+        return $log_count;
     }
 
     # get start / end timestamp
@@ -1726,7 +1765,7 @@ sub _update_logcache {
         $c->stats->profile(begin => "get last mongo timestamp");
         # get last timestamp from mongodb
         my $mfilter = [];
-        ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table);
+        ($mstart, $mend) = @{$peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table)};
         if(defined $mend) {
             print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
             push @{$filter}, {time => { '>=' => $mend }};
@@ -1734,41 +1773,48 @@ sub _update_logcache {
         $c->stats->profile(end => "get last mongo timestamp");
     }
     $c->stats->profile(begin => "get livestatus timestamp");
-    ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
+    ($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
-    my $col = $db->$table;
     $self->_ensure_index($col);
     while($time <= $end) {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
         my $lookup = {};
         print scalar localtime $time if $verbose;
-        my($logs) = $peer->{'class'}->get_logs(nocache => 1,
-                                               filter  => [{ '-and' => [
-                                                                        { time => { '>=' => $time } },
-                                                                        { time => { '<'  => $time + 86400 } }
-                                                          ]}],
-                                               columns => [qw/
-                                                            class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
-                                                         /],
-                                              );
-        if($mode eq 'update') {
-            # get already stored logs to filter duplicates
-            my($mlogs) = $peer->{'class'}->get_logs(
-                                                filter  => [{ '-and' => [
-                                                                        { time => { '>=' => $time } },
-                                                                        { time => { '<=' => $time + 86400 } }
-                                                           ]}]
-                                      );
-            for my $l (@{$mlogs}) {
-                $lookup->{$l->{'message'}} = 1;
+        my $logs = [];
+        eval {
+            ($logs) = $peer->{'class'}->get_logs(nocache => 1,
+                                                   filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<'  => $time + $blocksize } }
+                                                              ]}],
+                                                   columns => [qw/
+                                                                class time type state host_name service_description plugin_output message options state_type current_service_contacts command_name contact_name current_host_contacts current_service_groups current_host_groups
+                                                             /],
+                                                  );
+            if($mode eq 'update') {
+                # get already stored logs to filter duplicates
+                my($mlogs) = $peer->{'class'}->get_logs(
+                                                    filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<=' => $time + $blocksize } }
+                                                               ]}]
+                                          );
+                for my $l (@{$mlogs}) {
+                    $lookup->{$l->{'message'}} = 1;
+                }
             }
+        };
+        if($@) {
+            my $err = $@;
+            chomp($err);
+            print $err;
         }
 
-        $time = $time + 86400;
+        $time = $time + $blocksize;
         for my $l (@{$logs}) {
             if($mode eq 'update') {
                 next if defined $lookup->{$l->{'message'}};
@@ -1778,6 +1824,7 @@ sub _update_logcache {
             $col->insert($l, {safe => 1});
         }
         $c->stats->profile(end => $stime);
+
         print "\n" if $verbose;
     }
     return $log_count;

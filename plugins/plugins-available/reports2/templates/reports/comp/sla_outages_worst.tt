@@ -1,4 +1,4 @@
-[% FOREACH o = sort_by_key(outages, 'duration').reverse %]
+﻿[% FOREACH o = sort_by_key(outages, 'duration').reverse %]
 <div class="outages">
   [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
   <span class="duration">([% duration(o.duration) %])</span>

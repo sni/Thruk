@@ -75,6 +75,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{show_top_pane} = 1;
     $c->stash->{style}         = $style;
     $c->stash->{'num_hosts'}   = 0;
+    $c->stash->{'custom_vars'} = [];
 
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {
@@ -358,6 +359,14 @@ sub _process_details_page {
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
+
+    if($c->config->{'show_custom_vars'}
+       and defined $c->stash->{'host_stats'}
+       and defined $c->stash->{'host_stats'}->{'up'}
+       and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
+        # set allowed custom vars into stash
+        Thruk::Utils::set_custom_vars($c, $c->{'stash'}->{'data'}->[0], 'host_');
+    }
 
     return 1;
 }
@@ -857,7 +866,7 @@ sub _process_combined_page {
 
     my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                        pager  => 1 );
+                                                      );
     $c->stash->{'services'} = $services;
     if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
@@ -881,7 +890,7 @@ sub _process_combined_page {
 
     my $hosts            = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                  pager  => 1 );
+                                                );
     $c->stash->{'hosts'} = $hosts;
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }

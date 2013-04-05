@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use JSON::XS;
-use URI::Escape;
+use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
 use Thruk::Utils::PanoramaCpuStats;
@@ -178,7 +178,7 @@ sub _js {
     $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
 
     unless($only_data) {
-        $c->res->content_type('text/javascript');
+        $c->res->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';
     }
     return 1;
@@ -533,6 +533,7 @@ sub _task_hosts {
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
+            { 'header' => 'Parents',                  dataIndex => 'parents',                     hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
             { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
             { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
             { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },
@@ -555,6 +556,7 @@ sub _task_hosts {
             { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
             { 'header' => 'Last Time Up',          dataIndex => 'last_time_up',          hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
@@ -567,6 +569,13 @@ sub _task_hosts {
         paging      => JSON::XS::true,
         pi_detail   => $c->stash->{pi_detail},
     };
+
+    if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
+        for my $h ( @{$c->stash->{'data'}}) {
+            _escape($h)      if $c->stash->{'escape_html_tags'};
+            _long_plugin($h) if $c->stash->{'show_long_plugin_output'} eq 'inline';
+        }
+    }
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
@@ -622,7 +631,9 @@ sub _task_services {
             { 'header' => 'Icon Image Alt',           dataIndex => 'icon_image_alt',              hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Names',    dataIndex => 'custom_variable_names',       hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Custom Variable Values',   dataIndex => 'custom_variable_values',      hidden => JSON::XS::true, hideable => JSON::XS::false },
+            { 'header' => 'Long Plugin Output',       dataIndex => 'long_plugin_output',          hidden => JSON::XS::true, renderer => 'TP.render_long_pluginoutput' },
 
+            { 'header' => 'Host Parents',                   dataIndex => 'host_parents',                  hidden => JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
             { 'header' => 'Host Status',                    dataIndex => 'host_state',                    hidden => JSON::XS::true, renderer => 'TP.render_host_status' },
             { 'header' => 'Host Notifications Enabled',     dataIndex => 'host_notifications_enabled',    hidden => JSON::XS::true, renderer => 'TP.render_enabled_switch' },
             { 'header' => 'Host Check Type',                dataIndex => 'host_check_type',               hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
@@ -650,6 +661,13 @@ sub _task_services {
         paging      => JSON::XS::true,
         pi_detail   => $c->stash->{pi_detail},
     };
+
+    if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
+        for my $s ( @{$c->stash->{'data'}}) {
+            _escape($s)      if $c->stash->{'escape_html_tags'};
+            _long_plugin($s) if $c->stash->{'show_long_plugin_output'} eq 'inline';
+        }
+    }
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
@@ -799,10 +817,20 @@ sub _task_servicesminemap {
 
     my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $servicefilter);
 
+    # automatically adjust service column hight
+    my $longest_description = 0;
+    for my $svc (sort keys %{$uniq_services}) {
+        my $l = length($svc);
+        $longest_description = $l if $l > $longest_description;
+    }
+    my $height = 15 + int($longest_description * 5.70);
+    $height    =  40 if $height <  40;
+    $height    = 250 if $height > 250;
+
     my $service2index = {};
     my $json = {
         columns => [
-            { 'header' => '<div class="minemap_first_col">Hostname</div>', width => 120, height => 120, dataIndex => 'host_display_name' },
+            { 'header' => '<div class="minemap_first_col" style="top: '.($height/2-10).'px;">Hostname</div>', width => 120, height => $height, dataIndex => 'host_display_name' },
         ],
         data        => [],
         pi_detail   => $c->stash->{pi_detail},
@@ -813,9 +841,9 @@ sub _task_servicesminemap {
         my $index = 'col'.$x;
         $service2index->{$svc} = $index;
         push @{$json->{'columns'}}, {
-                    'header'    => '<div class="vertical">'.$svc.'</div>',
+                    'header'    => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
                     'width'     => 20,
-                    'height'    => 120,
+                    'height'    => $height,
                     'dataIndex' => $index,
                     'align'     => 'center',
                     'tdCls'     => 'mine_map_cell'
@@ -898,8 +926,12 @@ sub _task_host_detail {
     my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
-        sort => { 'DESC' => 'id' } );
+        sort => { 'DESC' => 'id' }
+    );
     if(defined $hosts and scalar @{$hosts} > 0) {
+        if($c->stash->{'escape_html_tags'}) {
+            _escape($hosts->[0]);
+        }
         $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
     }
     return $c->forward('Thruk::View::JSON');
@@ -931,8 +963,12 @@ sub _task_service_detail {
     my $services  = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
-        sort => { 'DESC' => 'id' } );
+        sort => { 'DESC' => 'id' }
+    );
     if(defined $services and scalar @{$services} > 0) {
+        if($c->stash->{'escape_html_tags'}) {
+            _escape($services->[0]);
+        }
         $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
     }
     return $c->forward('Thruk::View::JSON');
@@ -1037,6 +1073,24 @@ sub _do_filter {
 sub _generate_service_popup {
     my ($self, $c, $service) = @_;
     return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'" onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.Thruk::Utils::Filter::escape_bslash($service->{'host_name'}).'\', service: \''.Thruk::Utils::Filter::escape_bslash($service->{'description'}).'\', }}})"';
+}
+
+##########################################################
+sub _escape {
+    my($o) = @_;
+    $o->{'plugin_output'}      = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'plugin_output'}));
+    $o->{'long_plugin_output'} = Thruk::Utils::Filter::escape_quotes(Thruk::Utils::Filter::escape_html($o->{'long_plugin_output'}));
+    return $o;
+}
+
+##########################################################
+sub _long_plugin {
+    my($o) = @_;
+    if($o->{'long_plugin_output'}) {
+        $o->{'plugin_output'}      = $o->{'plugin_output'}.'<br>'.$o->{'long_plugin_output'};
+        $o->{'long_plugin_output'} = '';
+    }
+    return $o;
 }
 
 ##########################################################

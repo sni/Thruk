@@ -1,4 +1,4 @@
-[% WRAPPER _conf_frame.tt %]
+﻿[% WRAPPER _conf_frame.tt %]
 
 <form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)">
 <input type="hidden" name="sub" value="[% sub %]">

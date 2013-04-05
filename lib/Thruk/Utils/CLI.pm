@@ -14,16 +14,18 @@ structures and change config information.
 use warnings;
 use strict;
 use Carp;
-use Data::Dumper;
-use LWP::UserAgent;
-use JSON::XS;
-use File::Slurp;
-use URI::Escape;
+use Data::Dumper qw/Dumper/;
+use LWP::UserAgent qw//;
+use JSON::XS qw/encode_json decode_json/;
+use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
-use Thruk::Utils::IO;
+use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk::Utils qw//;
+use Thruk::Utils::IO qw//;
 
-$Thruk::Utils::CLI::verbose = 0;
-$Thruk::Utils::CLI::c       = undef;
+$Thruk::Utils::CLI::verbose  = 0;
+$Thruk::Utils::CLI::c        = undef;
+$Thruk::Utils::CLI::use_curl = 0;
 
 ##############################################
 
@@ -155,21 +157,28 @@ sub _read_secret {
     my $var_path = './var';
     for my $file (@{$files}) {
         next unless -f $file;
-        open(my $fh, $file);
+        open(my $fh, '<', $file) or die("open file $file failed (id: ".`id -a`.", pwd: ".`pwd`."): ".$!);
         while(my $line = <$fh>) {
-            next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mx;
-            $var_path = $1;
+            next if substr($line, 0, 1) eq '#';
+            if($line =~ m/^\s*var_path\s*=\s*(.*?)\s*$/mxo) {
+                $var_path = $1;
+            }
+            if($line =~ m/^\s*use_curl\s*=\s*(.*?)\s*$/mxo) {
+                $Thruk::Utils::CLI::use_curl = $1;
+            }
         }
         Thruk::Utils::IO::close($fh, $file, 1);
     }
     my $secret;
     my $secretfile = $var_path.'/secret.key';
     if(-e $secretfile) {
-        _debug("reading secret file: ".$secretfile);
+        _debug("reading secret file: ".$secretfile) if $Thruk::Utils::CLI::verbose >= 2;
         $secret = read_file($var_path.'/secret.key');
         chomp($secret);
     } else {
-        _debug("reading secret file ".$secretfile." failed: ".$!);
+        # don't print error unless in debug mode.
+        # will be printed in debians postinst installcron otherwise
+        _debug("reading secret file ".$secretfile." failed: ".$!) if $Thruk::Utils::CLI::verbose >= 2;
     }
     return $secret;
 }
@@ -179,12 +188,12 @@ sub _run {
     my($self) = @_;
     my($result, $response);
     my($c, $failed);
-    _debug("_run(): ".Dumper($self->{'opt'}));
+    _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
-            _debug(" -> ".Dumper($response));
+            _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
         }
     }
@@ -218,8 +227,8 @@ sub _run {
 ##############################################
 sub _request {
     my($self, $credential, $url, $options) = @_;
-    _debug("_request(".$url.")");
-    my $ua       = LWP::UserAgent->new;
+    _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
+    my $ua       = _get_user_agent();
     my $response = $ua->post($url, {
         data => encode_json({
             credential => $credential,
@@ -227,7 +236,7 @@ sub _request {
         })
     });
     if($response->is_success) {
-        _debug(" -> success");
+        _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
         my $data_str = $response->decoded_content;
         my $data;
         eval {
@@ -237,19 +246,19 @@ sub _request {
             _error(" -> decode failed: ".Dumper($response));
             return(undef, $response);
         }
-        _debug("   -> ".Dumper($response));
-        _debug("   -> ".Dumper($data));
+        _debug("   -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+        _debug("   -> ".Dumper($data))     if $Thruk::Utils::CLI::verbose >= 2;
         return($data, $response);
     }
 
-    _debug(" -> failed: ".Dumper($response));
+    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
     return(undef, $response);
 }
 
 ##############################################
 sub _dummy_c {
     my($self) = @_;
-    _debug("_dummy_c()");
+    _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
@@ -261,7 +270,7 @@ sub _dummy_c {
 ##############################################
 sub _from_local {
     my($self, $c, $options) = @_;
-    _debug("_from_local()");
+    _debug("_from_local()") if $Thruk::Utils::CLI::verbose >= 2;
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     return _run_commands($c, $options, 'local');
 }
@@ -331,8 +340,8 @@ sub _run_commands {
 
     # which command to run?
     my $action = $opt->{'action'};
-    if(defined $opt->{'url'} and $opt->{'url'} ne '') {
-        $action = 'url='.$opt->{'url'};
+    if(!$action and defined $opt->{'url'} and scalar @{$opt->{'url'}} > 0) {
+        $action = 'url='.$opt->{'url'}->[0];
     }
     if(defined $opt->{'listbackends'}) {
         $action = 'listbackends';
@@ -386,21 +395,32 @@ sub _run_commands {
         $data->{'output'} = _cmd_uninstallcron($c);
     }
 
-    # import mongodb logs
-    elsif($action eq 'logcacheimport') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src);
+    # precompile templates
+    elsif($action eq 'compile') {
+        $data->{'output'} = _cmd_precompile($c);
+    }
+
+    # import mongodb/mysql logs
+    elsif($action =~ /logcacheimport($|=(\d+))/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
     elsif($action eq 'logcacheupdate') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src, undef, $opt);
     }
     elsif($action eq 'logcachestats') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src, undef, $opt);
     }
     elsif($action eq 'logcacheauthupdate') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src, undef, $opt);
+    }
+    elsif($action eq 'logcacheoptimize') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'optimize', $src, undef, $opt);
+    }
+    elsif($action =~ /logcacheclean($|=(\d+))/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2, $opt);
     }
     else {
-        $data->{'output'} = "FAILED - no such command: ".$action."\n";
+        $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
         $data->{'rc'}     = 1;
     }
 
@@ -517,7 +537,8 @@ sub _request_url {
           and defined $result->{'headers'}->{'Set-Cookie'}
           and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mx
     ) {
-        my $txt = uri_unescape($2);
+        require URI::Escape;
+        my $txt = URI::Escape::uri_unescape($2);
         my $msg = '';
         if($1 eq 'success_message') {
             $msg = 'OK';
@@ -530,13 +551,13 @@ sub _request_url {
     }
     elsif($result->{'code'} == 500) {
         my $txt = 'request failed: '.$result->{'code'}." - internal error, please consult your logfiles\n";
-        _debug(Dumper($result));
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
         return($result->{'code'}, $result, $txt) if wantarray;
         return $txt;
     }
     elsif($result->{'code'} != 200) {
         my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
-        _debug(Dumper($result));
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
         return($result->{'code'}, $result, $txt) if defined wantarray;
         return $txt;
     }
@@ -610,6 +631,15 @@ sub _cmd_uninstallcron {
 }
 
 ##############################################
+sub _cmd_precompile {
+    my($c) = @_;
+    $c->stats->profile(begin => "_cmd_precompile()");
+    my $msg = Thruk::Utils::precompile_templates($c);
+    $c->stats->profile(end => "_cmd_precompile()");
+    return $msg;
+}
+
+##############################################
 sub _cmd_report {
     my($c, $mail, $nr) = @_;
 
@@ -668,21 +698,22 @@ sub _cmd_downtimetask {
         $minutes  = $downtime->{'duration'}%60;
     }
 
+    require URI::Escape;
     my $output     = '';
     # convert to normal url request
     my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s',
                       $downtime->{'service'} ? 56 : 55,
-                      uri_escape($downtime->{'host'}),
-                      uri_escape($downtime->{'comment'}),
+                      URI::Escape::uri_escape($downtime->{'host'}),
+                      URI::Escape::uri_escape($downtime->{'comment'}),
                       '(cron)',
-                      uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
                       $hours,
                       $minutes,
                       ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
+                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
@@ -717,14 +748,19 @@ sub _cmd_url {
 
 ##############################################
 sub _cmd_import_logs {
-    my($c, $mode, $src) = @_;
+    my($c, $mode, $src, $blocksize, $opt) = @_;
     $c->stats->profile(begin => "_cmd_import_logs()");
+
+    if(!defined $c->config->{'logcache'}) {
+        return("FAILED - logcache is not enabled\n", 1);
+    }
 
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
-    if($mode eq 'import') {
-        print "import removes current data and imports all logfile data, continue? [n]: ";
+    if($mode eq 'import' and !$opt->{'yes'}) {
+        print "import removes current cache and imports new logfile data.\n";
+        print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
         sysread STDIN, $buf, 1;
         if($buf !~ m/^(y|j)/mxi) {
@@ -732,31 +768,56 @@ sub _cmd_import_logs {
         }
     }
 
+    my $type = 'mongodb';
+    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+
     my $verbose = 0;
     $verbose = 1 if $src eq 'local';
 
     eval {
-        require Thruk::Backend::Provider::Mongodb;
-        Thruk::Backend::Provider::Mongodb->import;
+        if($type eq 'mysql') {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+        } else {
+            require Thruk::Backend::Provider::Mongodb;
+            Thruk::Backend::Provider::Mongodb->import;
+        }
     };
     if($@) {
-        return("FAILED - failed to load mongodb support: ".$@."\n", 1);
-    }
-
-    if(!defined $c->config->{'logcache'}) {
-        return("FAILED - logcache is not enabled\n", 1);
+        return("FAILED - failed to load ".$type." support: ".$@."\n", 1);
     }
 
     if($mode eq 'stats') {
-        my $stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        my $stats;
+        if($type eq 'mysql') {
+            $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
+        } else {
+            $stats= Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        }
         $c->stats->profile(end => "_cmd_import_logs()");
         return($stats."\n", 0);
     } else {
-        my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose);
+        my $t0 = [gettimeofday];
+        my($backend_count, $log_count);
+        if($type eq 'mysql') {
+            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
+        } else {
+            ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+        }
+        my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
-        return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+        $action    = "removed" if $mode eq 'clean';
+        return("\n", 1) if $log_count == -1;
+        return(sprintf("OK - %s %i log items from %i site%s successfully in %.2fs (%i/s)\n",
+                       $action,
+                       $log_count,
+                       $backend_count,
+                       ($backend_count == 1 ? '' : 's'),
+                       ($elapsed),
+                       (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
+                       ), 0);
     }
 }
 
@@ -807,7 +868,7 @@ sub _cmd_configtool {
         # changed and new files
         for my $f (@{$changed}) {
             my($path,$content, $mtime) = @{$f};
-            next if $path =~ m|/../|gmx; # no relative paths
+            next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             if($file and !$file->readonly()) {
                 # update file
@@ -857,7 +918,8 @@ sub _cmd_raw {
         $key = $keys[0];
     }
     die("no backends...") unless $key;
-    if($function eq 'get_logs') {
+
+    if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
         $c->{'db'}->renew_logcache($c);
     }
 
@@ -890,7 +952,10 @@ sub _cmd_raw {
 
     # remove useless mongodb _id if using logcache
     if($function eq 'get_logs' and $c->config->{'logcache'} and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'ARRAY') {
-        for (@{$res->[2]}) { delete $_->{'_id'} }
+        if($c->config->{'logcache'} =~ m/^mysql/mx) {
+        } else {
+            for (@{$res->[2]}) { delete $_->{'_id'} }
+        }
     }
 
     return($res, 0);
@@ -916,6 +981,16 @@ sub _cmd_ext_job {
         };
     }
     return([undef, 1, $res, $last_error], 0);
+}
+##############################################
+sub _get_user_agent {
+    if($Thruk::Utils::CLI::use_curl) {
+        _debug("enabled curl support") if $Thruk::Utils::CLI::verbose >= 2;
+        Thruk::Utils::load_lwp_curl();
+    }
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("thruk_cli");
+    return $ua;
 }
 
 ##############################################

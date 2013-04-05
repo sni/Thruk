@@ -7,9 +7,10 @@ use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
+    my $tests = 1189;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1136 if !defined $ENV{'CATALYST_SERVER'};
-    plan tests => 1137 if  defined $ENV{'CATALYST_SERVER'};
+    plan tests => $tests     if !defined $ENV{'CATALYST_SERVER'};
+    plan tests => ($tests+1) if  defined $ENV{'CATALYST_SERVER'};
 }
 
 BEGIN {
@@ -167,8 +168,8 @@ for my $url (@{$other_json}) {
         ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
     }
 
-    if(ref $data eq 'ARRAY' 
-       and defined $data->[0]->{'name'} 
+    if(ref $data eq 'ARRAY'
+       and defined $data->[0]->{'name'}
        and $data->[0]->{'name'} eq 'plugins'
        and defined $data->[0]->{'data'}->[0]
     ) {
@@ -176,3 +177,26 @@ for my $url (@{$other_json}) {
     }
 }
 
+
+# create new host
+my $r = TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type=host&data.id=new&action=store&data.file=%2Ftest.cfg&obj.host_name=test&obj.alias=test&obj.address=test&obj.use=generic-host&conf_comment=',
+    'like'    => [ 'Host:\s+test'],
+    'follow'  => 1,
+);
+my($id) = $r->{'content'} =~ m/data\.id=([^']*)'>Clone\ this\ host/;
+isnt($id, undef, 'got id for host: '.$id);
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
+    'like'    => [ 'The following files have been changed', 'test.cfg'],
+);
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&data.id='.$id.'&action=movefile&newfile=test2.cfg&move=move',
+    'like'    => [ 'test2.cfg'],
+    'follow'  => 1,
+);
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&apply=commit&discard=discard+all+unsaved+changes',
+    'like'    => [ 'There are no pending changes to commit'],
+    'follow'  => 1,
+);

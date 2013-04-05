@@ -1,6 +1,45 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Bug Fixes
+            - fixed adding multiple recurring downtimes for a single host
+
+1.66-2   Mon Apr  1 22:59:55 CEST 2013
+          - better utf-8 support in report mails
+          - ensure image data is a pnp file
+          - Bug Fixes
+            - fixed translation issue in italian reports
+            - fixed utf-8 problem in report month names
+            - fixed daylight saving issue in reports
+
+1.66     Tue Mar 26 18:43:48 CET 2013
+          - added mysql logfile cache
+          - added logcache statistics to performance info page
+          - added naglintrc config file
+            - made indention and sort order configurable
+          - added optional server side js error logging
+          - added 'compile' cli command to precompile templates
+          - added 'perf_bar_pnp_popup' option to control pnp popups in perfbar
+          - added logs link for hosts/services to directly filter logfiles
+          - removed background color from status page (can be reenabled by 'status_color_background')
+          - panorama view:
+            - auto adjust minemap column height
+            - use escape_html setting from cgi.cfg
+            - support show_long_plugin_output inline
+          - reports
+            - use temp files for large reports
+            - added 'report_from_email' option
+          - Bug Fixes
+            - make text selections in status page easier
+            - fix utf-8 decoding error: missing high surrogate character in surrogate pair
+
+1.64-2   Sat Feb 23 17:14:11 CET 2013
+          - config tool
+            - save & reload page display already saved changes
+          - Bug Fixes
+            - added missing newline in services availability
+
+1.64     Fri Feb 15 22:50:55 CET 2013
           - added user & group specific config overrides
           - added json export for availability data
           - added noexternalforks parameter to skip forks
@@ -9,13 +48,18 @@ next:
           - added show_full_commandline_source config option
           - added check all switch to site panel
           - make colums selectable for json requests
+          - use user sort for show_custom_vars
           - reports
             - added locales support (en, de, it, es, fr)
+            - fixed url reports containing icon images
           - config tool
             - added one click save & reload button
+          - logcache
+            - added new command logcacheclean to remove old log entries
           - Bug Fixes
             - fixed js error in conf tool
             - fixed removal of deprecated plugins on rpm update
+            - fixed memory leak in livestatus accessor
 
 1.62     Sun Jan  6 21:20:16 CET 2013
           - added filter to comments / downtimes page

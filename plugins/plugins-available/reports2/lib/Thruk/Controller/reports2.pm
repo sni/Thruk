@@ -148,10 +148,8 @@ sub report_edit {
         }
     }
 
-    $c->stash->{r}           = $r;
-    $c->stash->{templates}   = Thruk::Utils::Reports::get_report_templates($c);
-    $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{templates} = Thruk::Utils::Reports::get_report_templates($c);
+    $self->_set_report_data($c, $r);
 
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit.tt';
@@ -180,9 +178,8 @@ sub report_edit_step2 {
     my $template     = $c->{'request'}->{'parameters'}->{'template'};
     $r->{'template'} = $template if defined $template;
 
-    $c->stash->{r}           = $r;
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
-    $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
+    $self->_set_report_data($c, $r);
+
     $c->stash->{template}    = 'reports_edit_step2.tt';
     return;
 }
@@ -196,7 +193,11 @@ sub report_edit_step2 {
 sub report_save {
     my($self, $c, $report_nr) = @_;
 
-    my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
+    my $params = $c->{'request'}->{'parameters'};
+    $params->{'params.t1'} = Thruk::Utils::parse_date($c, $params->{'t1'}) if defined $params->{'t1'};
+    $params->{'params.t2'} = Thruk::Utils::parse_date($c, $params->{'t2'}) if defined $params->{'t2'};
+
+    my($data) = Thruk::Utils::Reports::get_report_data_from_param($params);
     my $msg = 'report updated';
     if($report_nr eq 'new') { $msg = 'report created'; }
     my $report;
@@ -252,6 +253,20 @@ sub report_remove {
     return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
 }
 
+##########################################################
+sub _set_report_data {
+    my($self, $c, $r) = @_;
+
+    $c->stash->{'t1'} = $r->{'params'}->{'t1'} || time() - 86400;
+    $c->stash->{'t2'} = $r->{'params'}->{'t2'} || time();
+    $c->stash->{'t1'} = $c->stash->{'t1'} - $c->stash->{'t1'}%60;
+    $c->stash->{'t2'} = $c->stash->{'t2'} - $c->stash->{'t2'}%60;
+
+    $c->stash->{r}           = $r;
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+    $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
+    return;
+}
 
 ##########################################################
 

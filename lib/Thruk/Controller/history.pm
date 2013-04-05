@@ -91,12 +91,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         push @prop_filter, { -and => [{ type => 'HOST ALERT'} , $typefilter ]};
     }
     elsif($statetype == 1) {
-        push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { options => { '~' => ';SOFT;' }} , $typefilter ]};
-        push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { options => { '~' => ';SOFT;' }} , $typefilter ]};
+        push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { state_type => { '=' => 'SOFT' }} , $typefilter ]};
+        push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { state_type => { '=' => 'SOFT' }} , $typefilter ]};
     }
     if($statetype == 2) {
-        push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { options => { '~' => ';HARD;' }} , $typefilter ]};
-        push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { options => { '~' => ';HARD;' }} , $typefilter ]};
+        push @prop_filter, { -and => [{ type => 'SERVICE ALERT' }, { state_type=> { '=' => 'HARD' }} , $typefilter ]};
+        push @prop_filter, { -and => [{ type => 'HOST ALERT' }, { state_type => { '=' => 'HARD' }} , $typefilter ]};
     }
 
     # add flapping messages
@@ -113,8 +113,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # add system messages
     unless($nosystem) {
-        push @prop_filter, { type => { '~' => 'starting\.\.\.' }};
-        push @prop_filter, { type => { '~' => 'shutting\ down\.\.\.' }};
+        push @prop_filter, { message => { '~' => 'starting\.\.\.' }};
+        push @prop_filter, { message => { '~' => 'shutting\ down\.\.\.' }};
     }
 
     # join type filter together

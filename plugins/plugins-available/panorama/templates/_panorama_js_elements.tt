@@ -1,4 +1,4 @@
-Ext.define('TP.ComboBoxSum', {
+﻿Ext.define('TP.ComboBoxSum', {
     extend: 'Ext.form.field.ComboBox',
 
     alias:  'widget.tp_combobox_sum',

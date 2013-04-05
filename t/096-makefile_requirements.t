@@ -6,8 +6,9 @@ use Data::Dumper;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $replace = {
-    'Log::Log4perl::Catalyst' => 'Log::Log4perl',
-    'LWP::ConnCache'          => 'LWP::UserAgent',
+    'Log::Log4perl::Catalyst'        => 'Log::Log4perl',
+    'LWP::ConnCache'                 => 'LWP::UserAgent',
+    'Monitoring::Availability::Logs' => 'Monitoring::Availability',
 };
 
 # first get all we have already
@@ -21,6 +22,7 @@ for my $file (@{$files}) {
   for my $mod (@{$modules}) {
     next if $mod eq 'MongoDB'     and defined $reqs->{'plugin_shinken'}->{$mod};
     next if $mod eq 'Tie::IxHash' and defined $reqs->{'plugin_shinken'}->{$mod};
+    next if $mod eq 'DBI'         and defined $reqs->{'mysql_support'}->{$mod};
     $mod = $replace->{$mod} if defined $replace->{$mod};
     if(defined $reqs->{$mod}) {
       pass("$mod required by $file exists in Makefile.PL");

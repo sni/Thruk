@@ -80,6 +80,36 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         push @{$filter}, { message => { '!~~' => $exclude_pattern }};
     }
 
+    my $host    = $c->{'request'}->{'parameters'}->{'host'}    || '';
+    my $service = $c->{'request'}->{'parameters'}->{'service'} || '';
+    if($service) {
+        push @{$filter}, {
+                -or => [
+                        { -and => [
+                            { host_name           => $host },
+                            { service_description => $service},
+                        ]},
+                        { -and => [
+                            {type    => 'EXTERNAL COMMAND' },
+                            {message => { '~~' => '(\s|;)'.$host.';'.$service.'(;|$)' }}
+                        ]},
+                ]
+        };
+    }
+    elsif($host) {
+        push @{$filter}, {
+                -or => [
+                        { host_name => $host },
+                        { -and => [
+                            {type    => 'EXTERNAL COMMAND' },
+                            {message => { '~~' => '(\s|;)'.$host.'(;|$)' }}
+                        ]},
+                ]
+        };
+    }
+    $c->stash->{'host'}    = $host;
+    $c->stash->{'service'} = $service;
+
     my $order = "DESC";
     if($oldestfirst) {
         $order = "ASC";
@@ -127,7 +157,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-2013, <nierlein@cpan.org>
 
 =head1 LICENSE
 

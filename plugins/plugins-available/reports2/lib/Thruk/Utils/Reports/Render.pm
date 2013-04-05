@@ -221,9 +221,9 @@ sub get_events {
         # host states
         my $hst_softlogfilter;
         if($hst_states eq 'hard') {
-            $hst_softlogfilter = { options => { '~' => ';HARD;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($hst_states eq 'soft') {
-            $hst_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/up down unreachable/) {
             if(defined $typeshash->{'host_'.$state}) {
@@ -238,9 +238,9 @@ sub get_events {
         # service states
         my $svc_softlogfilter;
         if($svc_states eq 'hard') {
-            $svc_softlogfilter = { options => { '~' => ';HARD;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($svc_states eq 'soft') {
-            $svc_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/ok warning unknown critical/) {
             if(defined $typeshash->{'service_'.$state}) {
@@ -427,6 +427,7 @@ sub get_availability_percents {
         my $t = $avail->{'breakdown'}->{$name};
 
         my($percent, $time) = _sum_availability($t, $u);
+        confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
         $values->{$name} = [
             $t->{'timestamp'}*1000,
             $percent,
@@ -529,7 +530,9 @@ sub get_pnp_image {
     `$cmd`;
     if(-s $filename) {
         my $imgdata  = read_file($filename);
-        return 'data:image/png;base64,'.encode_base64($imgdata);
+        unlink($filename);
+        return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        return 'data:image/png;base64,'.encode_base64($imgdata, '');
     }
     unlink($filename);
     return "";
@@ -570,6 +573,14 @@ sub _replace_css_and_images {
                ("|')
                ([^>]*>)
               /&_replace_img($1,$2,$3,$4,$5)/gemx;
+    # replace images for already existing css
+    while(
+    $text =~ s/(<style.*?)
+              (url\()
+              ([^:)]*)
+              (\))
+              (.*?<\/style>)
+             /&_replace_css_img('',$2,$3,$4,$1,$5)/gemxs) {}
     return $text;
 }
 
@@ -678,6 +689,9 @@ sub _replace_js {
     if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
         return "";
     }
+    if($url =~ m/excanvas\.js$/mx) {
+        return "<script language='javascript' type='text/javascript' src='".$url."'></script>";
+    }
     my $text = "<script type='text/javascript'>\n<!--\n";
     $text .= _read_static_content_file($url);
     $text .= "\n-->\n</script>\n";
@@ -686,16 +700,20 @@ sub _replace_js {
 
 ##############################################
 sub _replace_css_img {
-    my($css, $a,$file,$b) = @_;
+    my($css, $a,$file,$b,$pre,$post) = @_;
+    $pre  = '' unless defined $pre;
+    $post = '' unless defined $post;
     # static images
+    $file =~ s/^('|")//gmx;
+    $file =~ s/('|")$//gmx;
     if($file =~ m/\.(\w+)$/mx) {
         my $data = "data:image/$1;base64,";
         # get basename of css file
         $css =~ s|/[^/]*$||mx;
         $data .= encode_base64(_read_static_content_file($css.'/'.$file), '');
-        return "$a$data$b";
+        return "$pre$a$data$b$post";
     }
-    return "";
+    return($pre.$post);
 }
 
 ##############################################
@@ -707,23 +725,52 @@ sub _read_static_content_file {
         $url   =~ s|[^/\.]+/\.\./||mx;
     }
     my $file;
+
+    my $logo_path_prefix = $c->config->{'logo_path_prefix'};
+    my $logo_url         = $url;
+    $logo_url            =~ s/^$logo_path_prefix//gmx;
+
+    # image from theme
+    my $default = $c->{'config'}->{'default_theme'};
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
-        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}."/themes";
+        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
         $file = $themes_dir . '/themes-enabled/' . $url;
+        if(!-e $file and defined $default) {
+            $url =~ s|^Thruk/|$default/|gmx;
+            # disabled theme? try available folder
+            $file = $themes_dir . '/themes-available/' . $url;
+        }
+        # still no luck?
+        if(!-e $file) {
+            $file = $c->config->{'project_root'}.'/themes/themes-available/' . $url;
+        }
     }
+
+    # image from plugin
     elsif($url =~ m|^plugins/|mx) {
         $url =~ s|^plugins/([^/]+)/|$1/root/|gmx;
         my $plugins_dir = $c->config->{'plugin_path'} || $c->config->{'project_root'}."/plugins";
         $file = $plugins_dir . '/plugins-enabled/' . $url;
-    } else {
+    }
+
+    # icon image?
+    elsif(defined $c->config->{'physical_logo_path'} and -e $c->config->{'physical_logo_path'}.'/'.$logo_url) {
+        $file = $c->config->{'physical_logo_path'}.'/'.$logo_url;
+    }
+
+    else {
         $file = $c->config->{'project_root'}."/root/thruk/".$url;
     }
+
+
     return '' if $url eq '';
     if(-e $file) {
         return read_file($file);
     }
-    croak("_read_static_content_file($url) $file: $!");
+
+    croak("_read_static_content_file($url) $file: $!") if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
+    $c->log->debug("_read_static_content_file($url) $file: $!");
     return "";
 }
 

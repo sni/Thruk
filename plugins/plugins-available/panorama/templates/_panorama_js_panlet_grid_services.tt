@@ -1,4 +1,4 @@
-Ext.define('TP.PanletGridServices', {
+﻿Ext.define('TP.PanletGridServices', {
     extend: 'TP.PanletGrid',
 
     title:  'Services',

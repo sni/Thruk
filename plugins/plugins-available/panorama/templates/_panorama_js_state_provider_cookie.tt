@@ -1,4 +1,4 @@
-/* cookie state provider */
+﻿/* cookie state provider */
 
 Ext.define('TP.CookieProvider', {
     extend: 'Ext.state.CookieProvider',

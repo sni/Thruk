@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 
 [%# RENDERING PDF #%]
 [% IF block == 'render' %]
@@ -7,7 +7,7 @@
 
   # PAGE 1
   pdf.prForm(path_to_template('pdf/sla.pdf'), 1);
-  pdf.prFont('Helvetica-Bold');
+  prFont('Helvetica-Bold');
   font(20, 'light blue');
   IF param.exists('hostgroup');
     pdf.prText(40,400,'Hostgroup: ' _ param.hostgroup );

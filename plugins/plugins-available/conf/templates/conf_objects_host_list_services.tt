@@ -1,4 +1,4 @@
-[% WRAPPER _conf_objects_frame.tt %]
+﻿[% WRAPPER _conf_objects_frame.tt %]
 
 <table border="0" class='data conftoolobj'>
   <tr>

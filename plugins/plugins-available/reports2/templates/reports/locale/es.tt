@@ -1,4 +1,4 @@
-[%
+﻿[%
   locale_name          = 'spanish';      # language name should be in english
   reportDateTimeFormat = '%d-%m-%Y  %H:%M:%S';
   reportDateFormat     = '%d-%m-%Y';

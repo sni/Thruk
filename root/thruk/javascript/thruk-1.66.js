@@ -112,7 +112,7 @@ function hideElement(id, icon) {
   pane.style.visibility = 'hidden';
 
   var img = document.getElementById(icon);
-  if(img) {
+  if(img && img.src) {
     img.src = img.src.replace(/icon_minimize\.gif/g, "icon_maximize.gif");
   }
 }
@@ -134,7 +134,7 @@ function showElement(id, icon) {
   pane.style.visibility = 'visible';
 
   var img = document.getElementById(icon);
-  if(img) {
+  if(img && img.src) {
     img.src = img.src.replace(/icon_maximize\.gif/g, "icon_minimize.gif");
   }
 }
@@ -471,7 +471,7 @@ function toggleCheckBox(id) {
   }
 }
 
-// unselect current text seletion
+/* unselect current text seletion */
 function unselectCurrentSelection(obj) {
     if (document.selection && document.selection.empty)
     {
@@ -482,6 +482,19 @@ function unselectCurrentSelection(obj) {
         window.getSelection().removeAllRanges();
     }
     return true;
+}
+
+/* return selected text */
+function getTextSelection() {
+    var t = '';
+    if(window.getSelection) {
+        t = window.getSelection();
+    } else if(document.getSelection) {
+        t = document.getSelection();
+    } else if(document.selection) {
+        t = document.selection.createRange().text;
+    }
+    return ''+t;
 }
 
 /* returns true if the shift key is pressed for that event */
@@ -700,7 +713,7 @@ var hide_activity_icons_timer;
 function hide_activity_icons() {
     jQuery('img').each(function(i, e) {
         if(e.src.indexOf("/images/waiting.gif") > 0) {
-            e.style.display = "none";
+            e.style.visibility = "hidden";
         }
     });
 }
@@ -930,6 +943,60 @@ function do_table_search() {
     });
 }
 
+/* show bug report icon */
+function showBugReport(id, text) {
+    var link = document.getElementById('bug_report-btnEl');
+    if(link) {
+        text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
+        link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+    }
+
+    var obj = document.getElementById(id);
+    try {
+        Ext.getCmp(id).show();
+    }
+    catch(e) {
+        if(obj) {
+            obj.style.display    = '';
+            obj.style.visibility = 'visible';
+        }
+    }
+}
+
+/* create error text for bug reports */
+function getErrorText(details) {
+    var text = "";
+    text = text + "Version:    " + version_info+"\n";
+    text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
+    text = text + "Browser:    " + navigator.userAgent + "\n";
+    text = text + "Backends:   ";
+    var first = 1;
+    for(var nr in initial_backends) {
+        if(!first) { text = text + '            '; }
+        text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
+        first = 0;
+    }
+    text = text + details;
+    text = text + "Stacktrace:\n";
+    for(var nr in thruk_errors) {
+        text = text + thruk_errors[nr]+"\n";
+    }
+    return(text);
+}
+
+/* create error text for bug reports */
+function sendJSError(scripturl, text) {
+    if(window.XMLHttpRequest) {
+        var xhr = new XMLHttpRequest();
+        text = '---------------\nJS-Error:\n'+text+'---------------\n';
+        xhr.open("POST", scripturl);
+        xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        xhr.send(text);
+        thruk_errors = [];
+    }
+    return;
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b
@@ -990,7 +1057,11 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     if(write) {
         if(result != '' && pnp_url != '') {
             var rel_url = pnp_url.replace('\/graph\?', '/popup?');
-            document.write("<a href='"+pnp_url+"' class='tips' rel='"+rel_url+"'>");
+            if(perf_bar_pnp_popup == 1) {
+                document.write("<a href='"+pnp_url+"' class='tips' rel='"+rel_url+"'>");
+            } else {
+                document.write("<a href='"+pnp_url+"'>");
+            }
         }
         document.write(result);
         if(result != '' && pnp_url != '') {
@@ -1491,6 +1562,13 @@ function highlightHostRow() {
 
 /* select this service */
 function selectService(event, state) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return;
+    }
+
     unselectCurrentSelection();
     var row_id;
     // find id of current row
@@ -1525,8 +1603,9 @@ function selectService(event, state) {
 }
 
 /* select this service */
-function selectServiceByIdEvent(row_id, state, event)
-{
+function selectServiceByIdEvent(row_id, state, event) {
+    row_id = row_id.replace(/_s_exec$/, '');
+
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
       var id1         = parseInt(row_id.substring(5));
@@ -1563,6 +1642,7 @@ function selectServiceByIdEvent(row_id, state, event)
 
 /* select service row by id */
 function selectServiceById(row_id, state) {
+    row_id = row_id.replace(/_s_exec$/, '');
     var targetState;
     if(state != undefined) {
         targetState = state;
@@ -1591,8 +1671,13 @@ function selectServiceById(row_id, state) {
 }
 
 /* select this host */
-function selectHost(event, state)
-{
+function selectHost(event, state) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return;
+    }
     unselectCurrentSelection();
 
     var row_id;
@@ -1630,6 +1715,7 @@ function selectHost(event, state)
 
 /* select this service */
 function selectHostByIdEvent(row_id, state, event) {
+    row_id = row_id.replace(/_h_exec$/, '');
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
@@ -1666,6 +1752,7 @@ function selectHostByIdEvent(row_id, state, event) {
 
 /* set host row selected */
 function selectHostById(row_id, state) {
+    row_id = row_id.replace(/_h_exec$/, '');
     var targetState;
     if(state != undefined) {
         targetState = state;
@@ -2040,6 +2127,13 @@ function check_quick_command() {
 
 /* select this service */
 function toggle_comment(event) {
+    var t = getTextSelection();
+    var l = t.split(/\r?\n|\r/).length;
+    if(t != '' && l == 1) {
+        /* make text selections easier */
+        return false;
+    }
+
     if(!event) {
         event = this;
     }
@@ -2067,9 +2161,6 @@ function toggle_comment(event) {
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
         no_more_events = 1;
-        var id1         = parseInt(row_id.substring(4));
-        var id2         = parseInt(lastRowSelected.substring(4));
-        var pane_prefix = row_id.substring(0,4);
 
         // all selected should get the same state
         state = false;
@@ -2077,18 +2168,29 @@ function toggle_comment(event) {
             state = true;
         }
 
-        // selected top down?
-        if(id1 > id2) {
-            var tmp = id2;
-            id2 = id1;
-            id1 = tmp;
-        }
-
-        for(var x = id1; x < id2; x++) {
-            if(document.getElementById(pane_prefix+x)) {
-                selectCommentById(pane_prefix+x, state);
+        var inside = false;
+        jQuery("TR.clickable").each(function(nr, elem) {
+          if(elem.style.display == 'none') {
+            return true;
+          }
+          if(inside == true) {
+            if(elem.id == lastRowSelected || elem.id == row_id) {
+                return false;
             }
-        }
+          }
+          else {
+            if(elem.id == lastRowSelected || elem.id == row_id) {
+              inside = true;
+            }
+          }
+          if(inside == true) {
+            selectCommentById(elem.id, state);
+          }
+          return true;
+        });
+
+        // selectCommentById(pane_prefix+x, state);
+
         lastRowSelected = undefined;
         no_more_events  = 0;
     } else {
@@ -2868,7 +2970,11 @@ function show_cal(id) {
       }
   });
   cal.selection.set(Calendar.dateToInt(dateObj));
-  var pos = ajax_search.get_coordinates(jQuery('#'+id)[0]);
+  var pos    = ajax_search.get_coordinates(jQuery('#'+id)[0]);
+  var scroll = getPageScroll();
+  if(scroll > 0) {
+    pos[1] = pos[1] - scroll;
+  }
   cal.popup(id, "Br/ / /T/r");
   jQuery('.DynarchCalendar-topCont').css('top', (pos[1]+20)+"px");
 }
@@ -2892,6 +2998,7 @@ var ajax_search = {
     search_type     : 'all',
     size            : 150,
     updating        : false,
+    error           : false,
 
     hideTimer       : undefined,
     base            : new Array(),
@@ -3176,6 +3283,7 @@ var ajax_search = {
             ajax_search.suggest();
         } else {
              ajax_search.updating=true;
+             ajax_search.error=false;
 
             // show searching results
             ajax_search.base = {};
@@ -3193,8 +3301,10 @@ var ajax_search = {
                     }
                     ajax_search.autoopen = true;
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    ajax_search.error=errorThrown;
                     ajax_search.updating=false;
+                    ajax_search.show_results([]);
                     ajax_search.initialized = false;
                 }
             });
@@ -3329,7 +3439,13 @@ var ajax_search = {
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
-                          var re    = new RegExp(sub_pattern, "gi");
+                          var re;
+                          try {
+                            re = new RegExp(sub_pattern, "gi");
+                          } catch(e) {
+                            debug('regex failed: ' + sub_pattern);
+                            debug(e);
+                          }
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -3337,7 +3453,7 @@ var ajax_search = {
                               } else {
                                   result_obj.relevance += 1;
                               }
-                          } else if(ajax_search.regex_matching && data.match(re)) {
+                          } else if(re != undefined && ajax_search.regex_matching && data.match(re)) {
                               found++;
                               result_obj.relevance += 1;
                           }
@@ -3439,7 +3555,10 @@ var ajax_search = {
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.length == 0) {
-            if(ajax_search.updating) {
+            if(ajax_search.error) {
+                resultHTML += '<a href="#"><span style="color:red;">error: '+ajax_search.error+'</span></a>';
+            }
+            else if(ajax_search.updating) {
                 resultHTML += '<a href="#"><img src="'+ url_prefix + 'thruk/themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
             } else {
                 resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
@@ -3791,7 +3910,6 @@ function move_graphite_img(factor) {
 *******************************************************************************/
 
 function set_png_img(start, end, id) {
-    id=id.replace(/^#/g, '');
     var newUrl = pnp_url + "&start=" + start + "&end=" + end;
     //debug(newUrl);
 
@@ -3805,6 +3923,7 @@ function set_png_img(start, end, id) {
 
     // set style of buttons
     if(id) {
+        id=id.replace(/^#/g, '');
         for(x=1;x<=5;x++) {
             obj = document.getElementById("pnp_th"+x);
             styleElements(obj, "original", 1);

@@ -15,7 +15,7 @@ else
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
 fi
 
-eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+eval 'exec perl -x $0 ${1+"$@"} ;'
     if 0;
 
 #! -*- perl -*-
@@ -24,21 +24,19 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 
 use strict;
 use warnings;
-use Getopt::Long;
-use Pod::Usage;
-use Thruk::Utils;
+use Getopt::Long qw//;
 
-our $VERSION = '1.63';
+our $VERSION = '1.66';
 my $branch   = '';
-$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 
 my $options = {
     'verbose'  => 1,
     'backends' => [],
+    'url'      => [],
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
-GetOptions (
+Getopt::Long::GetOptions (
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $options->{'verbose'}++ },
    "q|quiet"            => \$options->{'quiet'},
@@ -50,20 +48,31 @@ GetOptions (
    "b|backend=s"        =>  $options->{'backends'},
    "A|auth=s"           => \$options->{'auth'},
    "a|action=s"         => \$options->{'action'},
-   "<>"                 => sub { $options->{'url'} = "".shift },
-) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
-
-if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
-pod2usage( { -verbose => 2, -exit => 3 } ) if $options->{'help'};
-pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
+   "y|yes"              => \$options->{'yes'},
+   "f|force"            => \$options->{'force'},
+   "<>"                 => sub { push @{$options->{'url'}}, "".shift },
+) or print "usage: $0 [<options>] <action>\nsee --help for detailed help.";
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+if($options->{'version'}) {
+    require Thruk::Utils;
+    $branch = Thruk::Utils::get_git_name() unless $branch ne '';
+    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+}
 $options->{'verbose'} = 0 if $options->{'quiet'};
+if(!$options->{'action'} and scalar @{$options->{'url'}} == 0 and !$options->{'listbackends'}) {
+    print "usage: $0 [options]\nsee --help for complete help.\n";
+    exit 3;
+}
 
-use Thruk::Utils::CLI;
+require Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 
 1;
-
+__END__
 ##############################################
 
 =head1 NAME
@@ -72,7 +81,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
 
 =head1 SYNOPSIS
 
-  Usage: thruk [options] | url]
+  Usage: thruk [options] [url|files...]
 
   Options:
   -h, --help                    Show this help message and exit
@@ -82,7 +91,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
   -b, --backend=<backend>       Comma seperated list of backends/sites
                                 which should be used for querys.
   -l, --list-backends           List available backends/sites.
-  -a, --action=<action>         Perform given action
+  -a, --action=<action>         Perform given action. see below for a list.
 
   -A, --auth=<auth>             Set username for querys
 
@@ -91,6 +100,9 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                 remote-url.
   -r, --remote-url=<url>        URL to remote installation.
       --local                   Don't try to connect fastcgi daemon first.
+
+  -y, --yes                     answer yes to all given questions.
+  -f, --force                   some actions need to be forced
 
 =head1 DESCRIPTION
 
@@ -129,25 +141,29 @@ script has the following arguments
 =item B<-a> I<action>, B<--action>=I<action>
 
     perform selected action:
-      - url=<url>           output url result
-      - report=<nr>         generate report
-      - reportmail=<nr>     send report by mail
+      - url=<url>                   output url result
+      - report=<nr>                 generate report
+      - reportmail=<nr>             send report by mail
 
     Mongodb Logcache:
-      - logcacheimport      initial logcache import
-      - logcacheupdate      update logcache
-      - logcacheauthupdate  update logcache authorization information
-      - logcachestats       print logcache statistics
+      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day.
+      - logcacheupdate              update logcache
+      - logcacheauthupdate          update logcache authorization information
+      - logcachestats               print logcache statistics
+      - logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
+      - logcacheoptimize            optimize and repair logcache (mysql only)
 
     Internal Commands
-      - installcron         update cronjobs for downtimes and reports
-                            (only needed during package installation)
-      - uninstallcron       remove all thruk cronjobs
-                            (only needed during package deinstallation)
+      - installcron                 update cronjobs for downtimes and reports
+                                    (only needed during package installation)
+      - uninstallcron               remove all thruk cronjobs
+                                    (only needed during package deinstallation)
+      - compile                     compile templates for faster access
+
     Testing Commands
-      - listbackends        list all backends
-      - listhosts           list hostnames
-      - listhostgroups      list hostgroupnames
+      - listbackends                list all backends
+      - listhosts                   list hostnames
+      - listhostgroups              list hostgroupnames
 
 
 =item B<-A> I<authname>, B<--auth>=I<authname>
@@ -169,6 +185,10 @@ script has the following arguments
 
     Don't contact remote server. Normally remote-url is tried first for
     faster access.
+
+=item B<-y> , B<--yes>
+
+    answer yes to a given questions during commands.
 
 =back
 
@@ -205,6 +225,6 @@ Generate pdf report and send it by mail
 
 =head1 AUTHOR
 
-2012, Sven Nierlein, <sven@nierlein.de>
+2012-2013, Sven Nierlein, <sven@nierlein.de>
 
 =cut

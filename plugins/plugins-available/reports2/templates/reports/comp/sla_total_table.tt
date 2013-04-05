@@ -1,4 +1,4 @@
-<table class="availability_details totals">
+﻿<table class="availability_details totals">
   <tr>
     <th>[% loc("Average Availability") %]</th>
     [% format = '%0.' _ param.decimals _ 'f' %]

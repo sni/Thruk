@@ -13,6 +13,8 @@ Utilities Collection for Availability Calculation
 use strict;
 use warnings;
 use Carp;
+use Data::Dumper;
+use File::Temp qw/tempfile/;
 
 ##############################################
 
@@ -97,7 +99,7 @@ sub calculate_availability {
         $c->stash->{timeperiod} = '';
     }
 
-    my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'};
+    my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'} || '';
     my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};
     my $assumestateretention         = $c->{'request'}->{'parameters'}->{'assumestateretention'};
     my $assumestatesduringnotrunning = $c->{'request'}->{'parameters'}->{'assumestatesduringnotrunning'};
@@ -187,7 +189,7 @@ sub calculate_availability {
 
     my $softlogfilter;
     if(!$includesoftstates or $includesoftstates eq 'no') {
-        $softlogfilter = { options => { '~' => ';HARD;' }};
+        $softlogfilter = { state_type => { '=' => 'HARD' }};
     }
 
     my $logs;
@@ -200,6 +202,7 @@ sub calculate_availability {
     ]};
 
     # services
+    $c->stash->{'services'} = {};
     if(defined $service) {
         my $all_services;
         my @servicefilter;
@@ -461,12 +464,40 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm updatecache");
     $c->{'db'}->renew_logcache($c, 1);
     $c->stats->profile(end   => "avail.pm updatecache");
+
+    # use tempfiles for reports > 14 days
+    my $file = 0;
+    if($c->config->{'report_use_temp_files'} and ($end - $logstart) / 86400 > $c->config->{'report_use_temp_files'}) {
+        $file = 1;
+    }
+
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type options/ ]);
+    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
+    if($file and ref $logs eq 'HASH') {
+        my($fh,$tempfile) = tempfile();
+        $c->stats->profile(begin => "avail.pm sort logs");
+        my $cmd = 'sort -k 1,12 -o '.$tempfile.' '.join(' ', values %{$logs});
+        `$cmd > $tempfile`;
+        unlink(values %{$logs});
+        $c->stats->profile(end   => "avail.pm sort logs");
+        $file = $tempfile;
+    }
+
     $c->stats->profile(begin => "calculate availability");
-    my $ma = Monitoring::Availability->new(
+    my $ma = Monitoring::Availability->new();
+    if(Thruk->debug) {
+        $ma->{'verbose'} = 1;
+        $ma->{'logger'}  = $c->log;
+    }
+    my $ma_options = {
+        'start'                        => $start,
+        'end'                          => $end,
+        'log_livestatus'               => $logs,
+        'hosts'                        => $hosts,
+        'services'                     => $services,
+        'initial_states'               => $initial_states,
         'rpttimeperiod'                => $rpttimeperiod,
         'assumeinitialstates'          => $assumeinitialstates,
         'assumestateretention'         => $assumestateretention,
@@ -476,20 +507,20 @@ sub calculate_availability {
         'initialassumedservicestate'   => Thruk::Utils::_initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
         'breakdown'                    => $breakdown,
-    );
-    if(Thruk->debug) {
-        $ma->{'verbose'} = 1;
-        $ma->{'logger'}  = $c->log;
+    };
+    if($file) {
+        delete $ma_options->{'log_livestatus'};
+        $ma_options->{'log_file'} = $file;
     }
-    $c->stash->{avail_data} = $ma->calculate(
-        'start'                        => $start,
-        'end'                          => $end,
-        'log_livestatus'               => $logs,
-        'hosts'                        => $hosts,
-        'services'                     => $services,
-        'initial_states'               => $initial_states,
-    );
+    $c->stash->{avail_data} = $ma->calculate(%{$ma_options});
     $c->stats->profile(end => "calculate availability");
+
+    unlink($file) if $file;
+
+    if($c->{'request'}->{'parameters'}->{'debug'}) {
+        $c->stash->{'debug_info'} .= "\$ma_options\n";
+        $c->stash->{'debug_info'} .= Dumper($ma_options);
+    }
 
     if($full_log_entries) {
         $c->stash->{'logs'} = $ma->get_full_logs() || [];

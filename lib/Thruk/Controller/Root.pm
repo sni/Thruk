@@ -5,9 +5,11 @@ use warnings;
 use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
-use URI::Escape;
+use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
+use POSIX qw/strftime/;
+use Thruk::Utils::Filter;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -48,7 +50,8 @@ sub begin : Private {
                   priorities show_modified_attributes downtime_duration expire_ack_duration
                   show_backends_in_table host_action_icon service_action_icon cookie_path
                   use_feature_trends show_error_reports skip_js_errors perf_bar_mode
-                  bug_email_rcpt home_link first_day_of_week sitepanel
+                  bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
+                  status_color_background
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }
@@ -118,13 +121,12 @@ sub begin : Private {
         $c->{'db'} = $c->model('Thruk');
         if( defined $c->{'db'} ) {
             $c->{'db'}->init(
-                'c'             => $c,
                 'backend_debug' => $c->config->{'backend_debug'},
             );
         }
     }
     # needed for the autoload methods
-    $Thruk::Backend::Manager::stats = $c->stats;
+    $Thruk::Backend::Manager::c     = $c;
 
     # menu cookie set?
     my $menu_states = {};
@@ -696,6 +698,20 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddSafeDefaults') {
 
 ######################################
 
+=head2 test_cgi
+
+page: /thruk/cgi-bin/test.cgi
+
+=cut
+
+sub test_cgi : Regex('thruk\/cgi\-bin\/test\.cgi') {
+    my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
+    return $c->detach('/test/index');
+}
+
+######################################
+
 =head2 end
 
 check and display errors (if any)
@@ -715,6 +731,30 @@ sub end : ActionClass('RenderView') {
         return $c->detach('/error/index/13');
     }
 
+    if($c->stash->{'debug_info'}) {
+        # save debug info into tmp file
+        my $tmp = $c->config->{'tmp_path'}.'/debug';
+        Thruk::Utils::IO::mkdir_r($tmp);
+        my $tmpfile = $tmp.'/'.strftime('%Y-%m-%d_%H_%M_%S', localtime).'.log';
+        open(my $fh, '>', $tmpfile);
+        print $fh 'Uri: '.Thruk::Utils::Filter::full_uri($c)."\n";
+        print $fh "*************************************\n";
+        print $fh "version: ".Thruk::Utils::Filter::fullversion($c)."\n";
+        print $fh "parameters:\n";
+        print $fh Dumper($c->{'request'}->{'parameters'});
+        print $fh "debug info:\n";
+        print $fh Thruk::Utils::get_debug_details();
+        if($c->stash->{'original_url'}) {
+            print $fh "*************************************\n";
+            print $fh "job:\n";
+            print $fh 'Uri: '.$c->stash->{'original_url'}."\n";
+        }
+        print $fh "*************************************\n";
+        print $fh "\n";
+        print $fh $c->stash->{'debug_info'};
+        Thruk::Utils::IO::close($fh, $tmpfile);
+    }
+
     return 1;
 }
 
@@ -722,7 +762,7 @@ sub end : ActionClass('RenderView') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-2013, <nierlein@cpan.org>
 
 =head1 LICENSE
 

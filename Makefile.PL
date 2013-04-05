@@ -24,9 +24,9 @@ requires 'Class::C3::Adopt::NEXT'                 => 0;     # required by Cataly
 requires 'Class::C3::XS'                          => 0;     # speed up class things
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
 requires 'Moose'                                  => 0;     # required by Thruk::Action::AddDefaults
-requires 'Monitoring::Livestatus'                 => 0.74;
-requires 'Monitoring::Livestatus::Class'          => 0.03;
-requires 'Monitoring::Availability'               => 0.40;  # required by Thruk::Controller::avail
+requires 'Monitoring::Livestatus'                 => 0;     # required by Thruk::Backend::Manager::Provider::Livestatus
+requires 'Monitoring::Livestatus::Class'          => 0.03;  # required by Thruk::Backend::Manager::Provider::Livestatus
+requires 'Monitoring::Availability'               => 0;     # required by Thruk::Controller::avail
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Template::Plugin::Date'                 => 0;     # required by Thruk::Utils
@@ -108,12 +108,25 @@ feature     ('plugin_reports2',
   'MIME::Lite'                                    => 0,
   'Class::Inspector'                              => 0,
 );
+# curl support
+feature     ('curl_support',
+  -default                                        => 0,
+  'LWP::Protocol::Net::Curl'                      => 0,     # required by Thruk::Backend::Provider::HTTP
+);
+
+# mysql logcache support
+feature     ('mysql_support',
+  -default                                        => 0,
+  'DBI'                                           => 0,     # required by Thruk::Backend::Provider::Mysql
+  'DBD::mysql'                                    => 0,     # required by Thruk::Backend::Provider::Mysql
+);
 
 # requirements test requirements
 feature     ('author_test',
   -default                                                                  => 0,
   'Catalyst::Devel'                                                         => 0,
   'Catalyst::Plugin::StackTrace'                                            => 0,
+  'CatalystX::LeakChecker'                                                  => 0,
   'HTML::Lint'                                                              => 0,
   'File::BOM'                                                               => 0,
   'Test::Cmd'                                                               => 0,
@@ -125,6 +138,7 @@ feature     ('author_test',
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
+  'Stream::Buffered'                                                        => 0,
 );
 
 ##################################

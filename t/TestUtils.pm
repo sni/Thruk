@@ -96,10 +96,33 @@ sub get_test_timeperiod {
 }
 
 #########################
+
+=head2 test_page
+
+  check a page
+
+  needs test hash
+  {
+    url             => url to test
+    follow          => follow redirects
+    fail            => request should fail
+    redirect        => request should redirect
+    location        => redirect location
+    fail_message_ok => page can contain error message without failing
+    like            => (list of) regular expressions which have to match page content
+    unlike          => (list of) regular expressions which must not match page content
+    content_type    => match this content type
+    skip_html_lint  => skip html lint check
+    sleep           => sleep this amount of seconds after the request
+    waitfor         => wait till regex occurs (max 60sec)
+  }
+
+=cut
 sub test_page {
     my(%opts) = @_;
     my $return = {};
 
+    my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
 
     ok($opts->{'url'}, $opts->{'url'});
@@ -123,7 +146,37 @@ sub test_page {
         }
     }
 
+    # wait for something?
     $return->{'content'} = $request->content;
+    if(defined $opts->{'waitfor'}) {
+        my $now = time();
+        my $waitfor = $opts->{'waitfor'};
+        my $found   = 0;
+        while($now < $start + 60) {
+            # text that shouldn't appear
+            if(defined $opts->{'unlike'}) {
+                for my $unlike (@{_list($opts->{'unlike'})}) {
+                    if($return->{'content'} =~ m/$unlike/mx) {
+                        fail("Content should not contain: ".(defined $1 ? $1 : $unlike)) or diag($opts->{'url'});
+                        return $return;
+                    }
+                }
+            }
+
+            if($return->{'content'} =~ m/$waitfor/mx) {
+                ok(1, "content ".$waitfor." found after ".($now - $start)."seconds");
+                $found = 1;
+                last;
+            }
+            sleep(1);
+            $now = time();
+            $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
+            $return->{'content'} = $request->content;
+        }
+        fail("content did not occur within 60 seconds") unless $found;
+        return $return;
+    }
+
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/) {
         # is it a background job page?
         wait_for_job($1);
@@ -164,23 +217,15 @@ sub test_page {
 
     # text that should appear
     if(defined $opts->{'like'}) {
-        if(ref $opts->{'like'} eq '') {
-            like($return->{'content'}, qr/$opts->{'like'}/, "Content should contain: ".$opts->{'like'}) or diag($opts->{'url'});
-        } elsif(ref $opts->{'like'} eq 'ARRAY') {
-            for my $like (@{$opts->{'like'}}) {
-                like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
-            }
+        for my $like (@{_list($opts->{'like'})}) {
+            like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
         }
     }
 
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
-        if(ref $opts->{'unlike'} eq '') {
-            unlike($return->{'content'}, qr/$opts->{'unlike'}/, "Content should not contain: ".$opts->{'unlike'}) or diag($opts->{'url'});
-        } elsif(ref $opts->{'unlike'} eq 'ARRAY') {
-            for my $unlike (@{$opts->{'unlike'}}) {
-                unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
-            }
+        for my $unlike (@{_list($opts->{'unlike'})}) {
+            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
         }
     }
 
@@ -250,6 +295,7 @@ sub test_page {
             next if $match =~ m|^/thruk/frame\.html| and defined $ENV{'CATALYST_SERVER'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/;
             next if $match =~ m/\/"\+/;
+            next if $match =~ m/data:image\/png;base64/;
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmx;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmx;
             $links_to_check->{$match} = 1;
@@ -257,6 +303,7 @@ sub test_page {
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mx;
+            next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mx;
             if($test_url !~ m/^(http|\/)/gmx) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url);
 
@@ -275,6 +322,11 @@ sub test_page {
             }
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );
+    }
+
+    # sleep after the request?
+    if(defined $opts->{'sleep'}) {
+        ok(sleep($opts->{'sleep'}), "slept $opts->{'sleep'} seconds");
     }
 
     return $return;
@@ -308,6 +360,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/<IMG\ SRC=".*problem\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*criticity_\d\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*stop\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*notify\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
 
         next if $err_str =~ m/<IMG\ SRC=".*\/conf\/images\/obj_.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
@@ -404,7 +457,7 @@ sub test_command {
 
     # matches on stdout?
     if(defined $test->{'like'}) {
-        for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
+        for my $expr (@{_list($test->{'like'})}) {
             like($t->stdout, $expr, "stdout like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"); $return = 0 };
         }
     }
@@ -412,7 +465,7 @@ sub test_command {
     # matches on stderr?
     $test->{'errlike'} = '/^\s*$/' unless exists $test->{'errlike'};
     if(defined $test->{'errlike'}) {
-        for my $expr (ref $test->{'errlike'} eq 'ARRAY' ? @{$test->{'errlike'}} : $test->{'errlike'} ) {
+        for my $expr (@{_list($test->{'errlike'})}) {
             like($stderr, $expr, "stderr like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed"); $return = 0 };
         }
     }
@@ -502,6 +555,12 @@ sub bail_out_req {
     return;
 }
 
+#########################
+sub _list {
+    my($data) = @_;
+    return $data if ref $data eq 'ARRAY';
+    return([$data]);
+}
 #########################
 
 1;

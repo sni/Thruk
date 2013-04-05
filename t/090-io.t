@@ -20,6 +20,7 @@ for my $cmd (@{$cmds}) {
   while(<$ph>) {
     my $line = $_;
     chomp($line);
+    $line =~ s|//|/|gmx;
 
     next unless $line =~ m/\.pm:\d+/mx;
     next if $line =~ m|STDERR|mx;
@@ -29,6 +30,8 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m|Thruk::Utils::IO::close|mx;
     next if $line =~ m|Thruk::Utils::IO::mkdir|mx;
     next if $line =~ m|CORE::|mx;
+    next if $line =~ m|lib/Monitoring/Availability|mx;
+    next if $line =~ m|lib/Monitoring/Livestatus|mx;
 
     push @fails, $line;
   }

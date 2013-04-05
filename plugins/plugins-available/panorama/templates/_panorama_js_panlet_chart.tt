@@ -1,4 +1,4 @@
-Ext.define('TP.chart.NumericAxis', {
+﻿Ext.define('TP.chart.NumericAxis', {
     extend: 'Ext.chart.axis.Numeric',
     alias:  'axis.tp_numeric',
     constructor: function(config) {

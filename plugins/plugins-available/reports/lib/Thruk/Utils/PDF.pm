@@ -136,6 +136,33 @@ sub font {
 
 ##########################################################
 
+=head2 prFont
+
+  prFont($font)
+
+try to set Truetype font if exists, use internal fallback font otherwise.
+Truetype fonts are required for UTF-8 characters.
+
+=cut
+sub prFont {
+    my($font) = @_;
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    my $fontfolders = [
+
+    ];
+    if($font eq 'Helvetica-Bold' and -e '/usr/share/fonts/truetype/msttcorefonts/Trebuchet_MS_Bold.ttf') {
+        $pdf->prTTFont('/usr/share/fonts/truetype/msttcorefonts/Trebuchet_MS_Bold.ttf');
+    }
+    elsif($font eq 'Calibri' and -e '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf') {
+        $pdf->prTTFont('/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf');
+    } else {
+        $pdf->prFont($font);
+    }
+    return 1;
+}
+
+##########################################################
+
 =head2 outages
 
   outages($logs, $start, $end, $x, $y, $step1, $step2, $max)
@@ -321,9 +348,9 @@ sub get_events {
         # host states
         my $hst_softlogfilter;
         if($hst_states eq 'hard') {
-            $hst_softlogfilter = { options => { '~' => ';HARD;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($hst_states eq 'soft') {
-            $hst_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $hst_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/up down unreachable/) {
             if(defined $typeshash->{'host_'.$state}) {
@@ -338,9 +365,9 @@ sub get_events {
         # service states
         my $svc_softlogfilter;
         if($svc_states eq 'hard') {
-            $svc_softlogfilter = { options => { '~' => ';HARD;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'HARD' }};
         } elsif($svc_states eq 'soft') {
-            $svc_softlogfilter = { options => { '~' => ';SOFT;' }};
+            $svc_softlogfilter = { state_type => { '=' => 'SOFT' }};
         }
         for my $state (qw/ok warning unknown critical/) {
             if(defined $typeshash->{'service_'.$state}) {
@@ -1083,7 +1110,7 @@ sub _read_static_content_file {
     if(-e $file) {
         return read_file($file);
     }
-    croak("_read_static_content_file($url) $file: $!");
+    croak("_read_static_content_file($url) $file: $!") if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
     return "";
 }
 

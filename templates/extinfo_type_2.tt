@@ -15,7 +15,7 @@
               <td class='linkBox'>
                 <a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>View Information For This Host</a><br>
                 <a href='status.cgi?host=[% service.host_name | uri %]'>View Status Detail For This Host</a><br>
-                <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a><br>
+                <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a> (<a href='showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>Logs</a>)<br>
                 [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]'>View Impacts For This Problem</a><br>[% END %]
                 [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]'>View Root Problem For This Impact</a><br>[% END %]
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Trends For This Service</a><br>[% END %]
@@ -96,17 +96,17 @@
             </td>
           </tr>
           [% END %]
-          [% IF custom_vars.keys.size > 0 %]
+          [% IF custom_vars.size > 0 %]
             <tr>
               <td align='right'>
                 <table>
-                  [% FOREACH cust = custom_vars.keys.sort %]
+                  [% FOREACH cust = custom_vars %]
                   <tr>
-                    <td style="padding-right: 7px;">
-                      <font size="-1"><i>[% cust %]</i></font><br clear="all">
+                    <td style="padding-right: 7px;" valign="top">
+                      <font size="-1"><i>[% cust.0 %]</i></font><br clear="all">
                     </td>
                     <td>
-                      <font size="-1">[% custom_vars.$cust %]</font>
+                      <font size="-1">[% cust.1 %]</font>
                     </td>
                   </tr>
                   [% END %]

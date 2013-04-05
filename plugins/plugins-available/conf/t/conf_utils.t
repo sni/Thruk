@@ -126,7 +126,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 my $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/1' });
 $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
-is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files");
+is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files:\n".Dumper($objects));
 my $parsedfile = $objects->{'files'}->[0];
 is( $parsedfile->{'md5'}, 'bf6f91fcc7c569f4cc96bcdf8e926811', 'files md5 sum' );
 like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );

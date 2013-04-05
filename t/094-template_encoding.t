@@ -7,7 +7,7 @@ eval "use File::BOM";
 plan skip_all => 'File::BOM required' if $@;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
-my @dirs = glob("./templates ./plugins/plugins-available/statusmap/templates ./themes/themes-available/*/templates");
+my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
 for my $dir (@dirs) {
     check_templates($dir.'/');
 }

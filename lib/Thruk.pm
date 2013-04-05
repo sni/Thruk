@@ -18,6 +18,7 @@ use threads;
 use utf8;
 use Thruk::Pool::Simple;
 use Carp;
+use Moose;
 use GD;
 use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
@@ -57,11 +58,21 @@ use Catalyst qw/
                 /;
 
 ###################################################
-our $VERSION = '1.63';
+our $VERSION = '1.66';
 
 ###################################################
 # load config loader
 __PACKAGE__->config(%Thruk::Config::config);
+
+###################################################
+# install leak checker
+if($ENV{THRUK_LEAK_CHECK}) {
+    eval {
+        with 'CatalystX::LeakChecker';
+        $Devel::Cycle::already_warned{'GLOB'} = 1;
+    };
+    print STDERR "failed to load CatalystX::LeakChecker: ".$@ if $@;
+}
 
 ###################################################
 # Start the application and make __PACKAGE__->config
@@ -78,11 +89,13 @@ $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_confi
 $peer_configs    = [] unless defined $peer_configs;
 my $num_peers    = scalar @{$peer_configs};
 my $pool_size    = __PACKAGE__->config->{'connection_pool_size'};
+my $use_curl     = __PACKAGE__->config->{'use_curl'};
 if($num_peers > 0) {
     my  $peer_keys   = {};
     our $peer_order  = [];
     our $peers       = {};
     for my $peer_config (@{$peer_configs}) {
+        $peer_config->{'use_curl'} = $use_curl;
         my $peer = Thruk::Backend::Peer->new( $peer_config, __PACKAGE__->config->{'logcache'}, $peer_keys );
         $peer_keys->{$peer->{'key'}} = 1;
         $peers->{$peer->{'key'}}     = $peer;
@@ -94,7 +107,7 @@ if($num_peers > 0) {
         my $minworker = $pool_size;
         $minworker    = $num_peers if $minworker > $num_peers; # no need for more threads than sites
         my $maxworker = $minworker; # static pool size
-        $SIG{'USR1'} = undef;
+        $SIG{'USR1'}  = undef;
         our $pool = Thruk::Pool::Simple->new(
             min      => $minworker,
             max      => $maxworker,
@@ -232,6 +245,31 @@ sub check_user_roles_wrapper {
         return 1;
     }
     return 0;
+}
+
+###################################################
+
+=head2 found_leaks
+
+called by CatalystX::LeakChecker and used for testing purposes only
+
+=cut
+sub found_leaks {
+    my ($c, @leaks) = @_;
+    return unless scalar @leaks > 0;
+    my $sym = 'a';
+    print STDERR "found leaks:\n";
+    for my $leak (@leaks) {
+        my $msg = (CatalystX::LeakChecker::format_leak($leak, \$sym));
+        $c->log->error($msg);
+        print STDERR $msg,"\n";
+    }
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST_LEAK') {
+        die("tests die, exit otherwise");
+    }
+    # die() won't let our tests exit, so we use exit here
+    exit 1;
+    return;
 }
 
 =head1 SEE ALSO

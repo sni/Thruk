@@ -1,4 +1,4 @@
-<button class="conf_button cmd_wzd_button" id="[% id %]_btn">&nbsp;</button>
+﻿<button class="conf_button cmd_wzd_button" id="[% id %]_btn">&nbsp;</button>
 <input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 %]">
 <input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 %]">
 

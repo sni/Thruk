@@ -432,7 +432,7 @@ save changes to disk
 
 =cut
 sub save {
-    my ( $self ) = @_;
+    my ($self) = @_;
 
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
@@ -527,7 +527,7 @@ returns the current raw file content
 
 =cut
 sub get_new_file_content {
-    my($self)       = @_;
+    my($self) = @_;
     my $new_content = '';
 
     return $new_content if $self->{'deleted'};

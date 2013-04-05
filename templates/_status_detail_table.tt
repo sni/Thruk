@@ -44,6 +44,11 @@
         [% serviceclass = 'statusBGUNKNOWN' %]
       [% END %]
 
+      [% IF !status_color_background %]
+        [% SET serviceclass = 'statusOdd'  IF loop.even %]
+        [% SET serviceclass = 'statusEven' IF loop.odd %]
+      [% END %]
+
       [% SET comment_count = s.comments.size %]
       [% SET peer_key      = s.peer_key %]
       [% SET program_start = pi_detail.$peer_key.program_start %]

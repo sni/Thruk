@@ -1,4 +1,4 @@
-[% WRAPPER _conf_frame.tt %]
+﻿[% WRAPPER _conf_frame.tt %]
 [% first_enabled  = 1 %]
 [% first_disabled = 1 %]
 

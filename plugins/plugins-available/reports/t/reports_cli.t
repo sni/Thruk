@@ -75,6 +75,12 @@ my $test_pdf_reports = [{
         'params.js'             => 'no',
         'params.css'            => 'yes',
         'params.theme'          => 'Thruk',
+    }, {
+        'name'                  => 'Event Report',
+        'template'              => 'eventlog.tt',
+        'params.timeperiod'     => 'last24hours',
+        'params.pattern'        => '',
+        'params.exclude_pattern'=> '',
     }
 ];
 
@@ -106,7 +112,7 @@ for my $report (@{$test_pdf_reports}) {
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local',
         like => $like,
-    }) or BAIL_OUT("failed");
+    });
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999',
         like => $like,

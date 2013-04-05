@@ -7,7 +7,6 @@ use Carp;
 use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
-use Scalar::Util qw/ looks_like_number /;
 use Encode;
 use Thruk::Utils;
 
@@ -32,6 +31,7 @@ $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Mongodb',
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
+          'Thruk::Backend::Provider::Mysql',
 ];
 
 ##########################################################
@@ -140,6 +140,7 @@ sub _initialise_peer {
     # shorten backend id
     my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
     $key    = $config->{'id'} if defined $config->{'id'};
+    $key    =~ s/[^a-zA-Z0-9]//gmx;
 
     # make sure id is uniq
     my $x      = 0;
@@ -155,12 +156,21 @@ sub _initialise_peer {
 
     # log cache?
     if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
-        require Thruk::Backend::Provider::Mongodb;
-        Thruk::Backend::Provider::Mongodb->import;
-        $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
-                                                peer     => $logcache,
-                                                peer_key => $self->{'key'},
-                                            });
+        if($logcache =~ m/^mysql/mxi) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $self->{'logcache'} = Thruk::Backend::Provider::Mysql->new({
+                                                    peer     => $logcache,
+                                                    peer_key => $self->{'key'},
+                                                });
+        } else {
+            require Thruk::Backend::Provider::Mongodb;
+            Thruk::Backend::Provider::Mongodb->import;
+            $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
+                                                    peer     => $logcache,
+                                                    peer_key => $self->{'key'},
+                                                });
+        }
         $self->{'class'}->{'logcache'} = $self->{'logcache'};
     }
 

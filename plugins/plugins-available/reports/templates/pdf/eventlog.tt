@@ -1,4 +1,4 @@
-[%# EDIT #%]
+﻿[%# EDIT #%]
 [% IF block == 'edit' %]
   [%
     required_fields = [

@@ -4,7 +4,9 @@ use strict;
 use warnings;
 use Carp qw/cluck/;
 use Monitoring::Config::File;
+use Encode qw/decode_utf8/;
 use Data::Dumper;
+use Config::General;
 use Carp;
 
 =head1 NAME
@@ -19,6 +21,45 @@ Provides access to core objects like hosts, services etc...
 
 =cut
 
+$Monitoring::Config::save_options = {
+    indent_object_key           => 2,
+    indent_object_value         => 30,
+    indent_object_comments      => 68,
+    list_join_string            => ',',
+    break_long_arguments        => 1,
+    object_attribute_key_order  => [
+                                    'name',
+                                    'service_description',
+                                    'host_name',
+                                    'timeperiod_name',
+                                    'contact_name',
+                                    'contactgroup_name',
+                                    'hostgroup_name',
+                                    'servicegroup_name',
+                                    'command_name',
+                                    'alias',
+                                    'address',
+                                    'parents',
+                                    'use',
+                                    'monday',
+                                    'tuesday',
+                                    'wednesday',
+                                    'thursday',
+                                    'friday',
+                                    'saturday',
+                                    'sunday',
+                                    'module_name',
+                                    'module_type',
+                                    'path',
+                                    'args',
+                                ],
+      object_cust_var_order     => [
+                                   '_TYPE',
+                                   '_TAGS',
+                                   '_APPS',
+                                ]
+};
+$Monitoring::Config::key_sort = undef;
 
 ##########################################################
 
@@ -43,7 +84,7 @@ sub new {
     my $config = shift;
 
     my $self = {
-        'config'             => $config,
+        'config'             => {},
         'errors'             => [],
         'parse_errors'       => [],
         'files'              => [],
@@ -60,7 +101,15 @@ sub new {
 
     $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
 
+    for my $key (keys %{$config}) {
+        next if $key eq 'configs'; # creates circular dependency otherwise
+        $self->{'config'}->{$key} = $config->{$key};
+    }
+
     bless $self, $class;
+
+    # read rc file
+    $self->read_rc_file();
 
     return $self;
 }
@@ -98,8 +147,12 @@ sub init {
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
 
+    # read rc file
+    $self->read_rc_file();
+
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
+        next if $key eq 'configs'; # creates circular dependency otherwise
         $self->{'config'}->{$key} = $config->{$key};
     }
     $self->update();
@@ -159,7 +212,7 @@ sub commit {
         unless($file->save()) {
             $rc = 0;
         }
-        push @{$files->{'changed'}}, [ $file->{'display'}, "".$file->get_new_file_content(), $file->{'mtime'} ] unless $file->{'deleted'};
+        push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }
 
     # remove deleted files from files
@@ -761,10 +814,7 @@ move object to different file
 
 =cut
 sub move_object {
-    my $self    = shift;
-    my $obj     = shift;
-    my $newfile = shift;
-    my $rebuild = shift;
+    my($self, $obj, $newfile, $rebuild) = @_;
     $rebuild    = 1 unless defined $rebuild;
 
     return unless defined $newfile;
@@ -778,6 +828,7 @@ sub move_object {
     $self->delete_object($obj, 1);
 
     $obj->{'line'} = 0; # put new object at the end
+    $obj->set_file($newfile);
     push @{$newfile->{'objects'}}, $obj;
 
     $self->_rebuild_index() if $rebuild;
@@ -1807,14 +1858,15 @@ sub _remote_do {
     my $res;
     eval {
         $res = $self->{'remotepeer'}
-                   ->{'class'}
-                   ->_req('configtool', {
+                    ->{'class'}
+                    ->_req('configtool', {
                             auth => $c->stash->{'remote_user'},
                             sub  => $sub,
                             args => $args,
                     });
     };
     if($@) {
+        warn($@) if $ENV{'THRUK_SRC'} eq 'TEST';
         my $msg = $@;
         $c->log->error($@);
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
@@ -1887,7 +1939,7 @@ sub remote_file_sync {
     for my $path (keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
-            my $localpath = $localdir.$path;
+            my $localpath = $localdir.'/'.$path;
             $c->log->debug('updating file: '.$path);
             my $dir       = $localpath;
             $dir          =~ s/\/[^\/]+$//mx;
@@ -1911,7 +1963,7 @@ sub remote_file_sync {
     if(scalar @{$self->{'files'}} == 0) {
         my $settings = $self->_remote_do($c, 'configsettings');
         return unless $settings;
-        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.$settings->{'files_root'});
+        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.'/'.$settings->{'files_root'});
         $self->{'config'}->{'files_root'} = $settings->{'files_root'}.'/';
         $self->{'config'}->{'files_root'} =~ s|/+|/|gmx;
     }
@@ -1967,6 +2019,104 @@ sub remote_file_save {
     return unless $self->is_remote();
     my $res = $self->_remote_do($c, 'configsave', $files);
     return;
+}
+
+##########################################################
+
+=head2 read_rc_file
+
+    read_rc_file()
+
+read naglint rc file and create sort function
+
+=cut
+sub read_rc_file {
+    my($self, $file) = @_;
+    my @rcfiles  = glob($file || '~/.naglintrc /etc/thruk/naglint.conf '.(defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/etc/thruk/naglint.conf' : ''));
+    for my $f (@rcfiles) {
+        if(defined $f || -r $f) {
+            $file = $f;
+            last;
+        }
+    }
+
+    my %settings;
+    if($file and -r $file) {
+        my $conf = new Config::General($file);
+        %settings = $conf->getall();
+        for my $key (qw/object_attribute_key_order object_cust_var_order/) {
+            next unless defined $settings{$key};
+            $settings{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
+            $settings{$key} = [ split/\s+/mx, $settings{$key} ];
+        }
+    }
+    $self->set_save_config(\%settings);
+    return;
+}
+
+##########################################################
+
+=head2 set_save_config
+
+updates file save config
+
+=cut
+sub set_save_config {
+    my($self, $settings) = @_;
+
+    my $cfg = $Monitoring::Config::save_options;
+    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+    return $cfg unless defined $settings;
+
+    for my $key (keys %{$settings}) {
+        $cfg->{$key} = $settings->{$key} if defined $cfg->{$key};
+    }
+
+    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+
+    return $cfg;
+}
+
+##########################################################
+
+=head2 _sort_by_object_keys
+
+sort function for object keys
+
+=cut
+sub _sort_by_object_keys {
+    my($attr_keys, $cust_var_keys) = @_;
+
+    return sub {
+        $a = $Monitoring::Config::Object::Parent::a;
+        $b = $Monitoring::Config::Object::Parent::b;
+        my $order = $attr_keys;
+        my $num   = scalar @{$attr_keys} + 5;
+
+        for my $ord (@{$order}) {
+            if($a eq $ord) { return -$num; }
+            if($b eq $ord) { return  $num; }
+            $num--;
+        }
+
+        my $result = $a cmp $b;
+
+        if(substr($a, 0, 1) eq '_' and substr($b, 0, 1) eq '_') {
+            # prefer some custom variables
+            my $cust_order = $cust_var_keys;
+            my $cust_num   = scalar @{$cust_var_keys} + 3;
+            for my $ord (@{$cust_order}) {
+                if($a eq $ord) { return -$cust_num; }
+                if($b eq $ord) { return  $cust_num; }
+                $cust_num--;
+            }
+            return $result;
+        }
+        if(substr($a, 0, 1) eq '_') { return -$result; }
+        if(substr($b, 0, 1) eq '_') { return -$result; }
+
+        return $result;
+    }
 }
 
 ##########################################################

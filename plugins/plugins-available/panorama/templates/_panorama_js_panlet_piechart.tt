@@ -1,4 +1,4 @@
-Ext.define('TP.PanletPieChart', {
+﻿Ext.define('TP.PanletPieChart', {
     extend: 'TP.Panlet',
 
     title:  'chart',

@@ -1,4 +1,4 @@
-Ext.define('TP.PanletGridHosts', {
+﻿Ext.define('TP.PanletGridHosts', {
     extend: 'TP.PanletGrid',
 
     title:  'Hosts',

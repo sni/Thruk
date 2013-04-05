@@ -6,7 +6,7 @@
 
 LOGFILE="$3";
 if [ "$LOGFILE" != "" ]; then
-  exec > $LOGFILE 2>&1
+  exec >>$LOGFILE 2>&1
 fi
 
 INPUT=$1
@@ -27,6 +27,12 @@ XAUTHORITY=`mktemp`;
 TMPLOG=`mktemp`;
 Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP >$TMPLOG 2>&1 &
 xpid=$!
+
+# wait for xauth
+for x in seq 10; do
+    [ -e $XAUTHORITY ] && break;
+    sleep 1;
+done
 
 rm -f $OUTPUT
 DISPLAY=:$DISP $WKHTMLTOPDF \
@@ -50,4 +56,4 @@ if [ -e "$OUTPUT" -a $UID == 0 ]; then
 fi
 
 kill $xpid >/dev/null 2>&1
-rm -f $TMPLOG
+rm -f $TMPLOG $XAUTHORITY

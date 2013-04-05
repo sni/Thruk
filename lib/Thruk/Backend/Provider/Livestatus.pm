@@ -381,7 +381,7 @@ sub get_services {
             state state_type modified_attributes_list
             last_time_critical last_time_ok last_time_unknown last_time_warning
             display_name host_display_name host_custom_variable_names host_custom_variable_values
-            in_check_period in_notification_period
+            in_check_period in_notification_period host_parents
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
@@ -536,9 +536,11 @@ sub get_logs {
         return $self->{'logcache'}->get_logs(%options);
     }
     $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message options contact_name command_name state_type
+        class time type state host_name service_description plugin_output message options state_type contact_name
         /] unless defined $options{'columns'};
+
     my @logs = reverse @{$self->_get_table('log', \%options)};
+    return(Thruk::Utils::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
     return \@logs;
 }
 
@@ -955,6 +957,9 @@ sub _get_table {
 
     my $class = $self->_get_class($table, $options);
     my $data  = $class->hashref_array() || [];
+    # prevents memory leak in Monitoring::Livestatus::Class
+    delete $class->{filter_obj};
+    delete $class->{stats_obj};
     return $data;
 }
 
@@ -1055,7 +1060,7 @@ sub _get_logs_start_end {
                                 'end'   => { -isa => [ -max => 'time' ]}
                              ])
                       ->hashref_array();
-    return($rows->[0]->{'start'}, $rows->[0]->{'end'});
+    return([$rows->[0]->{'start'}, $rows->[0]->{'end'}]);
 }
 
 ##########################################################
