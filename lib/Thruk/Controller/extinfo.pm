@@ -494,6 +494,9 @@ sub _process_host_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
+    
+    # graphite graph?
+    $c->stash->{'graphite_url'} = Thruk::Utils::get_graphite_url($c, $host);
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
