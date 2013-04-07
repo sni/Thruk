@@ -81,7 +81,7 @@ for my $downtime (@{$test_downtime}) {
 
 # remove downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&host='.$host.'"',
+    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=1&host='.$host.'"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 
