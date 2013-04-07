@@ -1,13 +1,14 @@
 ﻿<tr id="send_pane_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
   <td>
-  <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)">
+    <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)">
       <option value="month"[% IF cr.type == 'month' %] selected[% END %]>monthly</option>
       <option value="week"[% IF cr.type == 'week' %] selected[% END %]>weekly</option>
       <option value="day"[% IF cr.type == 'day' %] selected[% END %]>daily</option>
-  </select>
+      <option value="cust"[% IF cr.type == 'cust' %] selected[% END %]>custom</option>
+    </select>
   </td>
   <td>
-  <div id="div_send_month_[% nr %]">
+    <div id="div_send_month_[% nr %]">
       on day
       <select name="send_day_[% nr %]">
           [% day = 1 %]
@@ -16,8 +17,8 @@
           [% day = day + 1 %]
           [% END %]
       </select>
-  </div>
-  <div id="div_send_week_[% nr %]" style="display: none">
+    </div>
+    <div id="div_send_week_[% nr %]" style="display: none">
       [% lookup = {} %]
       [% FOREACH w = cr.week_day.split(',') %][% lookup.$w = 1 %][% END %]
       <input type="hidden" name="week_day_[% nr %]" value="">
@@ -51,31 +52,33 @@
         [% END %]
       </tr>
       </table>
-  </div>
-  <div id="div_send_day_[% nr %]" style="display: none">
-  </div>
+    </div>
+    <div id="div_send_day_[% nr %]" style="display: none"></div>
+    <div id="div_send_cust_[% nr %]" style="display: none">
+      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); cr.cust; END %]" style="width: 300px;" placeholder="minute hour dom month dow   (cron syntax)">
+    </div>
   </td>
-  <td>
-  at
-  <select name="send_hour_[% nr %]">
+  <td id="hour_select_[% nr %]">
+    at
+    <select name="send_hour_[% nr %]">
       [% hour = 0 %]
       [% WHILE hour < 24 %]
       <option value="[% hour %]"[% IF cr.hour == hour %] selected[% END %]>[% sprintf("%02s", hour) %]</option>
       [% hour = hour + 1 %]
       [% END %]
-  </select>:<select name="send_minute_[% nr %]">
+    </select>:<select name="send_minute_[% nr %]">
       [% min = 0 %]
       [% WHILE min < 60 %]
       <option value="[% min %]"[% IF cr.minute == min %] selected[% END %]>[% sprintf("%02s", min) %]</option>
       [% min = min + 1 %]
       [% END %]
-  </select>
+    </select>
   </td>
   <td class='newfilter' onclick="delete_cron_row(this); return false;"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">
-  <script type="text/javascript">
-  <!--
-  cron_change_date("send_type_[% nr %]");
-  -->
-  </script>
+    <script type="text/javascript">
+    <!--
+    cron_change_date("send_type_[% nr %]");
+    -->
+    </script>
   </td>
 </tr>

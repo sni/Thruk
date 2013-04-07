@@ -66,7 +66,7 @@
     <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
     <td class="dataOdd" align="left" colspan=2>
         <table id="cron_entries">
-          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
+          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
           [% PROCESS _cron_edit.tt nr = 0 %]
           [% FOREACH cr = rd.schedule %]
               [% nr = loop.index + 1 %]

@@ -130,6 +130,14 @@ sub format_cronentry {
     }
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("daily at %02s:%02s", $cr->{'hour'}, $cr->{'minute'});
+    }
+    elsif($cr->{'type'} eq 'cust') {
+        my @tst = split/\s+/, $cr->{'cust'};
+        if(scalar @tst == 5) {
+            $cron = $cr->{'cust'};
+        } else {
+            $cron = '<font color="red" title="invalid cron syntax">'.$cr->{'cust'}.'</font>';
+        }
     } else {
         confess("unknown cron type: ".$cr->{'type'});
     }
@@ -1365,7 +1373,7 @@ sub update_cron_file {
         }
         $sections->{$section} = [];
         for my $entry (@{$entries}) {
-            next unless defined $entry->[0];
+            next unless $entry->[0];
             push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
         }
     }
@@ -1434,6 +1442,12 @@ sub get_cron_time_entry {
     }
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
+    }
+    elsif($cr->{'type'} eq 'cust') {
+        my @tst = split/\s+/, $cr->{'cust'};
+        if(scalar @tst == 5) {
+            $cron = $cr->{'cust'};
+        }
     } else {
         confess("unknown cron type: ".$cr->{'type'});
     }
@@ -1583,12 +1597,15 @@ sub get_cron_entries_from_param {
             $params->{'week_day_'.$x} = [] unless defined $params->{'week_day_'.$x};
             my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
             @weekdays = grep {!/^$/mx} @weekdays;
+            my $type = $params->{'send_type_'.$x} || '';
+            my $cust = $params->{'send_cust_'.$x} || '';
             push @{$cron_entries}, {
-                'type'      => $params->{'send_type_'.$x},
+                'type'      => $type,
                 'hour'      => $params->{'send_hour_'.$x},
                 'minute'    => $params->{'send_minute_'.$x},
                 'week_day'  => join(',', @weekdays),
                 'day'       => $params->{'send_day_'.$x},
+                'cust'      => $cust,
             };
         }
     }
