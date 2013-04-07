@@ -116,7 +116,7 @@
   [% END %]
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;host=[% rd.host | uri %][% IF rd.service %]&amp;service=[% rd.service %][% END %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;nr=[% IF rd.exists('nr'); rd.nr; END %]&amp;host=[% rd.host | uri %][% IF rd.service %]&amp;service=[% rd.service %][% END %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
       <button class="save_button button" style="width: 160px;">Save</button>
     </td>
   </tr>
