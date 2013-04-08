@@ -448,7 +448,7 @@ sub _cmd_listhostgroups {
     my($c) = @_;
     my $output = '';
     for my $group (@{$c->{'db'}->get_hostgroups(sort => {'ASC' => 'name'})}) {
-        $output .= $group->{'name'}."\n";
+        $output .= sprintf("%-30s %s\n", $group->{'name'}, join(',', @{$group->{'members'}}));
     }
 
     # fix encoding

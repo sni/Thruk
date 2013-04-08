@@ -34,7 +34,13 @@ isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($tes
 # get test hostgroup
 $test = { cmd  => $BIN.' -a listhostgroups' };
 TestUtils::test_command($test);
-my $hostgroup = (split(/\n/mx, $test->{'stdout'}))[0];
+my @groups = split(/\n/mx, $test->{'stdout'});
+my $hostgroup;
+for my $group (@groups) {
+    my($name, $members) = split/\s+/, $group, 2;
+    next unless $members;
+    $hostgroup = $name;
+}
 isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT("need test hostgroup");
 
 my $test_pdf_reports = [{
