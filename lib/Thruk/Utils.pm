@@ -132,7 +132,7 @@ sub format_cronentry {
         $cron = sprintf("daily at %02s:%02s", $cr->{'hour'}, $cr->{'minute'});
     }
     elsif($cr->{'type'} eq 'cust') {
-        my @tst = split/\s+/, $cr->{'cust'};
+        my @tst = split/\s+/mx, $cr->{'cust'};
         if(scalar @tst == 5) {
             $cron = $cr->{'cust'};
         } else {
@@ -1444,7 +1444,7 @@ sub get_cron_time_entry {
         $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
     }
     elsif($cr->{'type'} eq 'cust') {
-        my @tst = split/\s+/, $cr->{'cust'};
+        my @tst = split/\s+/mx, $cr->{'cust'};
         if(scalar @tst == 5) {
             $cron = $cr->{'cust'};
         }
