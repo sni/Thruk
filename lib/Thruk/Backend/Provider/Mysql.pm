@@ -962,8 +962,6 @@ sub _update_logcache {
 
     my $log_count = 0;
 
-    $Thruk::Backend::Provider::Mysql::skip_db_lookup = 0;
-
     if($mode eq 'clean') {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
@@ -1009,8 +1007,9 @@ sub _update_logcache {
         $mode = 'import';
     }
 
+    $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
     if($mode eq 'import') {
-        $Thruk::Backend::Provider::Mysql::skip_db_lookup = 1;
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         $self->_create_tables($dbh, $prefix);
     }
 
@@ -1018,15 +1017,10 @@ sub _update_logcache {
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
 
     my $stm            = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,plugin_output,message) VALUES";
-    my $host_lookup    = {};
-    my $service_lookup = {};
-    my $contact_lookup = {};
+    my $host_lookup    = _get_host_lookup(   $dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
+    my $service_lookup = _get_service_lookup($dbh,$peer,$prefix, $host_lookup, $mode eq 'import' ? 0 : 1);
+    my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
     my $plugin_lookup  = {};
-    if($mode eq 'import') {
-        $host_lookup    = _get_host_lookup($dbh,$peer,$prefix);
-        $service_lookup = _get_service_lookup($dbh,$peer,$prefix,$host_lookup);
-        $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix);
-    }
 
     if(defined $files and scalar @{$files} > 0) {
         $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$peer,$contact_lookup);
@@ -1123,12 +1117,13 @@ sub _update_logcache_optimize {
 
 ##########################################################
 sub _get_host_lookup {
-    my($dbh,$peer,$prefix) = @_;
+    my($dbh,$peer,$prefix, $noupdate) = @_;
 
     my $sth = $dbh->prepare("SELECT host_id, host_name FROM `".$prefix."_host`");
     $sth->execute;
     my $hosts_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $hosts_lookup->{$r->[1]} = $r->[0]; }
+    return $hosts_lookup if $noupdate;
 
     my($hosts) = $peer->{'class'}->get_hosts(columns => [qw/name/]);
     my $stm = "INSERT INTO `".$prefix."_host` (host_name) VALUES";
@@ -1148,12 +1143,13 @@ sub _get_host_lookup {
 
 ##########################################################
 sub _get_service_lookup {
-    my($dbh,$peer,$prefix,$hosts_lookup) = @_;
+    my($dbh,$peer,$prefix,$hosts_lookup,$noupdate) = @_;
 
     my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM `".$prefix."_service` s, `".$prefix."_host` h WHERE s.host_id = h.host_id");
     $sth->execute;
     my $services_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $services_lookup->{$r->[1]}->{$r->[2]} = $r->[0]; }
+    return $services_lookup if $noupdate;
 
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description/]);
     my $stm = "INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES";
@@ -1173,12 +1169,13 @@ sub _get_service_lookup {
 
 ##########################################################
 sub _get_contact_lookup {
-    my($dbh,$peer,$prefix) = @_;
+    my($dbh,$peer,$prefix,$noupdate) = @_;
 
     my $sth = $dbh->prepare("SELECT contact_id, name FROM `".$prefix."_contact`");
     $sth->execute;
     my $contact_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $contact_lookup->{$r->[1]} = $r->[0]; }
+    return $contact_lookup if $noupdate;
 
     my($contacts) = $peer->{'class'}->get_contacts(columns => [qw/name/]);
     my $stm = "INSERT INTO `".$prefix."_contact` (name) VALUES";
@@ -1196,13 +1193,24 @@ sub _get_contact_lookup {
 }
 
 ##########################################################
+sub _get_plugin_lookup {
+    my($dbh,$peer,$prefix) = @_;
+
+    my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output`");
+    $sth->execute;
+    my $plugin_lookup = {};
+    for my $o (@{$sth->fetchall_arrayref()}) { $plugin_lookup->{$o->[1]} = $o->[0]; }
+    return $plugin_lookup;
+}
+
+##########################################################
 sub _plugin_lookup {
     my($hash, $look, $dbh, $prefix) = @_;
     my $id = $hash->{$look};
     return $id if $id;
 
     # check database first
-    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
+    unless($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup) {
         my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM `'.$prefix.'_plugin_output` WHERE output = '.$dbh->quote($look).' LIMIT 1')};
         if(scalar @ids > 0) {
             $id = $ids[0]->[0];
@@ -1224,16 +1232,6 @@ sub _host_lookup {
 
     my $id = $host_lookup->{$host_name};
     return $id if $id;
-
-    # check database first
-    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT host_id FROM `'.$prefix.'_host` WHERE host_name = '.$dbh->quote($host_name).' LIMIT 1')};
-        if(scalar @ids > 0) {
-            $id = $ids[0]->[0];
-            $host_lookup->{$host_name} = $id;
-            return $id;
-        }
-    }
 
     $dbh->do("INSERT INTO `".$prefix."_host` (host_name) VALUES(".$dbh->quote($host_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1288,16 +1286,6 @@ sub _service_lookup {
 
     my $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix);
 
-    # check database first
-    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT service_id FROM `'.$prefix.'_service` WHERE host_id = '.$host_id.' AND service_description = '.$dbh->quote($service_description).' LIMIT 1')};
-        if(scalar @ids > 0) {
-            $id = $ids[0]->[0];
-            $service_lookup->{$host_name}->{$service_description} = $id;
-            return $id;
-        }
-    }
-
     $dbh->do("INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $service_lookup->{$host_name}->{$service_description} = $id;
@@ -1312,16 +1300,6 @@ sub _contact_lookup {
 
     my $id = $contact_lookup->{$contact_name};
     return $id if $id;
-
-    # check database first
-    unless($Thruk::Backend::Provider::Mysql::skip_db_lookup) {
-        my @ids = @{$dbh->selectall_arrayref('SELECT contact_id FROM `'.$prefix.'_contact` WHERE name = '.$dbh->quote($contact_name).' LIMIT 1')};
-        if(scalar @ids > 0) {
-            $id = $ids[0]->[0];
-            $contact_lookup->{$contact_name} = $id;
-            return $id;
-        }
-    }
 
     $dbh->do("INSERT INTO `".$prefix."_contact` (name) VALUES(".$dbh->quote($contact_name).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1404,6 +1382,12 @@ sub _import_peer_logfiles {
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
 
+    # increase plugin output lookup performance for larger updates
+    if($end - $start > 86400) {
+        $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+    }
+
     while($time <= $end) {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
@@ -1434,6 +1418,12 @@ sub _import_peer_logfiles {
 
         $time = $time + $blocksize;
 
+        # increase plugin output lookup performance for larger updates
+        if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0 and scalar @{$logs} > 500) {
+            $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+            $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+        }
+
         $log_count += $self->_insert_logs($dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup);
 
         $c->stats->profile(end => $stime);
@@ -1445,6 +1435,13 @@ sub _import_peer_logfiles {
 ##########################################################
 sub _import_logcache_from_file {
     my($self,$mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$peer,$contact_lookup) = @_;
+
+    # increase plugin output lookup performance for larger updates
+    if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
+        $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+    }
+
     my $log_count = 0;
     for my $f (@{$files}) {
         print $f if $verbose;
