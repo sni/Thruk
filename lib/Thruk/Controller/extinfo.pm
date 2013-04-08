@@ -281,9 +281,11 @@ sub _process_recurring_downtimes_page {
         my $file = $self->_get_data_file_name($c, $host, $service, $nr);
         if(-s $file) {
             unlink($file);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
+        } else {
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'no such downtime!' });
         }
         $self->_update_cron_file($c);
-        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
     } else {
         $c->stash->{'downtimes'} = $self->_get_downtimes_list($c);

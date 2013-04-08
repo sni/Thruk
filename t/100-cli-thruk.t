@@ -38,7 +38,7 @@ TestUtils::test_command({
 
 # create recurring downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "/thruk/cgi-bin/extinfo.cgi?type=6&recurring=save&host='.$host.'&duration=5&send_type_1=day&send_hour_1=5&send_minute_1=0"',
+    cmd  => $BIN.' "/thruk/cgi-bin/extinfo.cgi?type=6&recurring=save&host='.$host.'&duration=5&send_type_1=day&send_hour_1=5&send_minute_1=0&nr=999"',
     like => ['/^OK - recurring downtime saved$/'],
 });
 TestUtils::test_command({
@@ -58,7 +58,7 @@ TestUtils::test_command({
 
 # remove recurring downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "/thruk/cgi-bin/extinfo.cgi?type=6&recurring=remove&host='.$host.'"',
+    cmd  => $BIN.' "/thruk/cgi-bin/extinfo.cgi?type=6&recurring=remove&host='.$host.'&nr=999"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 

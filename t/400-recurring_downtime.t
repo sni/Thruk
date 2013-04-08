@@ -39,6 +39,7 @@ my $test_downtime = [{
     'fixed'         => 1,
     'flex_range'    => 720,
     'childoptions'  => 0,
+    'nr'            => 999,
 }];
 
 for my $downtime (@{$test_downtime}) {
@@ -82,7 +83,7 @@ for my $downtime (@{$test_downtime}) {
 
 # remove downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=1&host='.$host.'"',
+    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=999&host='.$host.'"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 
