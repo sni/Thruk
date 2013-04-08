@@ -382,6 +382,7 @@ sub count_event_totals {
     };
 
     for my $l (@{$logs}) {
+        next unless defined $l->{'state'};
         if($l->{'service_description'}) {
             $l->{'state'} == 0 && $totals->{'service'}->{'ok'}++;
             $l->{'state'} == 1 && $totals->{'service'}->{'warning'}++;

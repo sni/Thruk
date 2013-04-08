@@ -495,6 +495,7 @@ sub print_event_totals {
     };
 
     for my $l (@{$c->stash->{'logs'}}) {
+        next unless defined $l->{'state'};
         if($l->{'service_description'}) {
             if($l->{'state'} == 0) {
                 $totals->{'ok'}++;
