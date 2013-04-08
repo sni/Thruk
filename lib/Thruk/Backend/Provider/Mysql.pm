@@ -25,7 +25,7 @@ connection provider for Mysql connections
 
 =cut
 
-$Thruk::Backend::Provider::Mysql::types = {
+$Thruk::Backend::Provider::Mysql::db_types = {
     'INITIAL HOST STATE'      => 6, # LOGCLASS_STATE
     'CURRENT HOST STATE'      => 6, # LOGCLASS_STATE
     'HOST ALERT'              => 1, # LOGCLASS_ALERT
@@ -36,7 +36,6 @@ $Thruk::Backend::Provider::Mysql::types = {
     'CURRENT SERVICE STATE'   => 6, # LOGCLASS_STATE
     'SERVICE ALERT'           => 1, # LOGCLASS_ALERT
     'SERVICE DOWNTIME ALERT'  => 1, # LOGCLASS_ALERT
-
     'SERVICE FLAPPING ALERT'  => 1, # LOGCLASS_ALERT
 
     'TIMEPERIOD TRANSITION'   => 6, # LOGCLASS_STATE
@@ -47,7 +46,11 @@ $Thruk::Backend::Provider::Mysql::types = {
     'PASSIVE SERVICE CHECK'   => 4, # LOGCLASS_PASSIVECHECK
     'PASSIVE HOST CHECK'      => 4, # LOGCLASS_PASSIVECHECK
 
+    'SERVICE EVENT HANDLER'   => 0, # INFO
+    'HOST EVENT HANDLER'      => 0, # INFO
+
     'EXTERNAL COMMAND'        => 5, # LOGCLASS_COMMAND
+    'LOG ROTATION'            => 0, # INFO
 };
 
 $Thruk::Backend::Provider::Mysql::cache_version = 3;
@@ -1353,7 +1356,8 @@ sub _trim_log_entry {
 
     # strip plugin output from the end
     if($l->{'plugin_output'}) {
-        $l->{'message'} =~ s/\Q$l->{'plugin_output'}\E$//mx;
+        my $length = length $l->{'plugin_output'};
+        $l->{'message'} = substr($l->{'message'}, 0, -$length);
     }
     return;
 }
@@ -1461,7 +1465,7 @@ sub _import_logcache_from_file {
             }
             $log_count++;
             my $l = &Monitoring::Availability::Logs::parse_line($line);
-            next unless defined $l->{'time'};
+            next unless $l->{'time'};
             $l->{'state_type'} = '';
             if(exists $l->{'hard'}) {
                 if($l->{'hard'}) {
@@ -1474,14 +1478,9 @@ sub _import_logcache_from_file {
             $l->{'state'}         = '' unless defined $l->{'state'};
             $l->{'plugin_output'} = '' unless defined $l->{'plugin_output'};
             $l->{'message'}       = $line;
-            my $type              = $l->{'type'};
             my $state             = $l->{'state'};
             my $state_type        = $l->{'state_type'};
-            $type                 = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
-            $l->{'class'}         = &_get_class($l, $type);
-            if($type eq 'TIMEPERIOD TRANSITION') {
-                $l->{'plugin_output'} = '';
-            }
+            &_set_class($l);
             if($state eq '')      { $state      = 'NULL'; }
             if($state_type eq '') { $state_type = 'NULL'; }
             my $host    = &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
@@ -1492,7 +1491,7 @@ sub _import_logcache_from_file {
             my $plugin  = &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
             my $message = &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
 
-            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
+            push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000) {
@@ -1594,29 +1593,42 @@ sub _drop_tables {
 }
 
 ##########################################################
-sub _get_class {
-    my($l, $type) = @_;
-    my $class;
-    $class = $Thruk::Backend::Provider::Mysql::types->{$type} if defined $type;
-    if(!defined $class and !defined $l->{'message'}) {
-        $class          = 0; # LOGCLASS_INFO
+sub _set_class {
+    my($l) = @_;
+    my $type = $l->{'type'};
+    $l->{'class'} = $Thruk::Backend::Provider::Mysql::db_types->{$type} if defined $type;
+    return if defined $l->{'class'};
+    if(!defined $l->{'message'}) {
+        $l->{'class'}   = 0; # LOGCLASS_INFO
         $l->{'message'} = $type;
+        $l->{'type'}    = '';
+        return;
     }
-    if(!defined $class) {
-        if(   $l->{'message'} =~ m/starting\.\.\./mx
-           or $l->{'message'} =~ m/shutting\ down\.\.\./mx
-           or $l->{'message'} =~ m/Bailing\ out/mx
-           or $l->{'message'} =~ m/active\ mode\.\.\./mx
-           or $l->{'message'} =~ m/standby\ mode\.\.\./mx
-           or $l->{'message'} =~ m/LOG\ VERSION:/mx
-        ) {
-            $class = 2; # LOGCLASS_PROGRAM
-        }
+
+    if(   $l->{'message'} =~ m/starting\.\.\./mxo
+       or $l->{'message'} =~ m/shutting\ down\.\.\./mxo
+       or $l->{'message'} =~ m/Bailing\ out/mxo
+       or $l->{'message'} =~ m/active\ mode\.\.\./mxo
+       or $l->{'message'} =~ m/standby\ mode\.\.\./mxo
+       or $l->{'message'} =~ m/LOG\ VERSION:/mxo
+    ) {
+        $l->{'class'} = 2; # LOGCLASS_PROGRAM
+        $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if $l->{'type'};
+        $l->{'type'}    = '';
+        return;
     }
-    if(!defined $class) {
-        $class = 0; # LOGCLASS_INFO
+
+    if($type =~ m/^TIMEPERIOD\ TRANSITION/mxo) {
+        $l->{'type'}          = 'TIMEPERIOD TRANSITION';
+        $l->{'plugin_output'} = '';
+        $l->{'class'}         = 6; # LOGCLASS_STATE
+        return;
     }
-    return $class;
+
+    $l->{'message'} = $l->{'type'}.': '.$l->{'message'} if $l->{'type'};
+    $l->{'type'}    = '';
+    $l->{'class'}   = 0; # LOGCLASS_INFO
+    return;
 }
 
 ##########################################################

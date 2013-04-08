@@ -4,3 +4,7 @@
 [1363704695] SERVICE NOTIFICATION: contact2;child;check_logfiles-3.5.3;CUSTOM (CRITICAL);service-notify-by-email;CRITICAL - (1 errors)
 [1364135380] SERVICE NOTIFICATION: contact;child;check_logfiles-3.5.3;ACKNOWLEDGEMENT (CRITICAL);service-notify-by-email;CRITICAL - (1 errors) - tag attr=blah;thrukadmin;bekannt
 [1364135381] Event broker module '/usr/lib64/mod_gearman/mod_gearman.o' initialized successfully.
+[1364135382] CURRENT SERVICE STATE: test_host;test_service;OK;HARD;1;---â‚¬Ã¤Ã¶Ã¼ÃŸ---í¶ƒ---
+[1364135383] Warning: Return code of 126 for check of host 'test' was out of bounds. Make sure the plugin you're trying to run actually exists.
+[1364135384] Cannot lock lockfile '/var/nagios.pid': No locks available. Bailing out...
+[1364135385] Lockfile '/var/nagios.pid' looks like its already held by another instance of Nagios (PID 17886).  Bailing out...
