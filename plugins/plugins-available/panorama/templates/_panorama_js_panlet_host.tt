@@ -110,7 +110,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
         panel.getComponent('last_check_time').update(TP.date_format(d.last_check));
         panel.getComponent('check_type').update(d.check_type == 0 ? 'ACTIVE' : 'PASSIVE');
-        panel.getComponent('check_latency').update(d.latency.toFixed(3) + ' / ' + d.execution_time.toFixed(3) + ' seconds');
+        panel.getComponent('check_latency').update(Number(d.latency).toFixed(3) + ' / ' + Number(d.execution_time).toFixed(3) + ' seconds');
         panel.getComponent('next_check').update(d.next_check ? TP.date_format(d.next_check) : 'N/A');
         panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
         panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
