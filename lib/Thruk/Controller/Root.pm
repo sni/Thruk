@@ -275,7 +275,7 @@ sub index : Path('/') {
 
 redirect from /index.html
 
-beacuse we dont want index.html in the url
+because we dont want index.html in the url
 
 =cut
 
