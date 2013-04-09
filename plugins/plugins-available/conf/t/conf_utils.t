@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 380;
+    plan tests => 414;
 }
 
 BEGIN {
@@ -101,7 +101,7 @@ unlink($filename);
 # check object definitions
 for my $type (@{$Monitoring::Config::Object::Types}) {
     use_ok 'Monitoring::Config::Object::'.ucfirst($type);
-    my $obj = Monitoring::Config::Object->new(type => $type, coretype => 'icinga');
+    my $obj = Monitoring::Config::Object->new(type => $type, coretype => 'any');
     isa_ok( $obj, 'Monitoring::Config::Object::'.ucfirst($type) );
     for my $attr ( keys %{$obj->{'default'}}) {
         my $field = $obj->{'default'}->{$attr};

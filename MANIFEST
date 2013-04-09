@@ -142,6 +142,7 @@ plugins/plugins-available/conf/lib/Monitoring/Config/Object.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Command.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Contact.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Contactgroup.pm
+plugins/plugins-available/conf/lib/Monitoring/Config/Object/Escalation.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Host.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostdependency.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostescalation.pm
@@ -169,6 +170,7 @@ plugins/plugins-available/conf/root/images/file_empty.xcf
 plugins/plugins-available/conf/root/images/obj_command.png
 plugins/plugins-available/conf/root/images/obj_contact.png
 plugins/plugins-available/conf/root/images/obj_contactgroup.png
+plugins/plugins-available/conf/root/images/obj_escalation.png
 plugins/plugins-available/conf/root/images/obj_host.png
 plugins/plugins-available/conf/root/images/obj_hostdependency.png
 plugins/plugins-available/conf/root/images/obj_hostescalation.png

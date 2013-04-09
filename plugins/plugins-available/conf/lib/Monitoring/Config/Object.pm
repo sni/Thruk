@@ -19,6 +19,7 @@ use Monitoring::Config::Object::Timeperiod;
 use Monitoring::Config::Object::Contact;
 use Monitoring::Config::Object::Contactgroup;
 use Monitoring::Config::Object::Module;
+use Monitoring::Config::Object::Escalation;
 
 =head1 NAME
 
@@ -48,6 +49,7 @@ $Monitoring::Config::Object::Types = [
     'contact',
     'contactgroup',
     'module',
+    'escalation',
 ];
 
 ##########################################################
@@ -78,6 +80,7 @@ return a new L<object|Monitoring::Config::Object::Parent> of given type. Type ca
     L<contact|Monitoring::Config::Object::Contact>
     L<contactgroup|Monitoring::Config::Object::Contactgroup>
     L<module|Monitoring::Config::Object::Module>
+    L<escalation|Monitoring::Config::Object::Escalation>
 
 =cut
 sub new {

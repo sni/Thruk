@@ -97,7 +97,7 @@ sub BUILD {
         $Monitoring::Config::Object::Service::Defaults->{'reactionner_tag'}             = { type => 'STRING', cat => 'Extended' };
         $Monitoring::Config::Object::Service::Defaults->{'resultmodulations'}           = { type => 'STRING', cat => 'Extended' };
         $Monitoring::Config::Object::Service::Defaults->{'business_impact_modulations'} = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'escalations'}                 = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Service::Defaults->{'escalations'}                 = { type => 'STRING', 'link' => 'escalation', cat => 'Extended' };
         $Monitoring::Config::Object::Service::Defaults->{'icon_set'}                    = { type => 'STRING', cat => 'Extended' };
     } else {
         delete $Monitoring::Config::Object::Service::Defaults->{'business_impact'};

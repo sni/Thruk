@@ -7,7 +7,7 @@ use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
-    my $tests = 1189;
+    my $tests = 1210;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan tests => $tests     if !defined $ENV{'CATALYST_SERVER'};
     plan tests => ($tests+1) if  defined $ENV{'CATALYST_SERVER'};
@@ -123,6 +123,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array") or diag("got: ".Dumper($data));
     next if $type eq 'module';
+    next if $type eq 'escalation';
     ok(scalar @{$data} == 2, "json result size is: ".(scalar @{$data}));
 
     is($data->[0]->{'name'}, $type."s", "json result has correct type");

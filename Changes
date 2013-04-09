@@ -4,6 +4,8 @@ next:
           - allow custom cron entries for reports / recurring downtimes
           - Logfilecache
             - speed up incremental file import
+          - Shinken
+            - added escalation object to config tool
           - Bug Fixes
             - fixed adding multiple recurring downtimes for a single host
             - no sound alerts if notifications are disabled
