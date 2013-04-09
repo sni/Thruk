@@ -93,6 +93,9 @@ sub index :Path :Args(0) {
     $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
     $referer    = $c->stash->{'url_prefix'}.'thruk/' unless $referer;
 
+    # make lowercase username
+    $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
+
     if($submit ne '') {
         my $testcookie = $c->request->cookie('thruk_test');
         $c->res->cookies->{'thruk_test'} = {
