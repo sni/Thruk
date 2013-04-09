@@ -1,9 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.68     Tue Apr  9 21:04:03 CEST 2013
           - allow custom cron entries for reports / recurring downtimes
           - Logfilecache
             - speed up incremental file import
+            - speed up mysql updates
           - Shinken
             - added escalation object to config tool
           - Bug Fixes
