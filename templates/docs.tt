@@ -24,6 +24,10 @@
       If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
       <br>
       For installation information and general Thruk help look at the <a href="[% url_prefix %]thruk/documentation.html">Documentation</a>
+      <br>
+      <br>
+      <br>
+      <font size="+1"><a href="[% url_prefix %]thruk/documentation.html">continue to the Thruk Documentation</a></font>
     </td>
   </tr>
 </table>
