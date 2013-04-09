@@ -58,7 +58,7 @@ page: /thruk/cgi-bin/dashboard.cgi
 
 =cut
 
-sub index : Path : Args(0) : MyAction('AddDefaults') : Regex('thruk\/cgi\-bin\/dashboard\.cgi') {
+sub index : Path : Args(0) : MyAction('AddDefaults') : Path('/thruk/cgi-bin/dashboard.cgi') {
 my( $self, $c ) = @_;
 
     my $style = $c->{'request'}->{'parameters'}->{'style'} || 'dashboard';

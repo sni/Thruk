@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 87;
+    plan tests => 85;
 }
 
 BEGIN {
@@ -17,9 +17,9 @@ BEGIN { use_ok 'Thruk::Controller::Root' }
 
 my $redirects = [
     '/',
+    '/thruk',
 ];
 my $pages = [
-    '/thruk',
     '/thruk/',
     '/thruk/docs/index.html',
     '/thruk/index.html',
@@ -29,7 +29,7 @@ my $pages = [
 ];
 
 SKIP: {
-    skip 'external tests', 5 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 16 if defined $ENV{'CATALYST_SERVER'};
 
     for my $url (@{$redirects}) {
         TestUtils::test_page(
@@ -41,7 +41,6 @@ SKIP: {
 
 for my $url (@{$pages}) {
     SKIP: {
-        skip 'external tests', 13 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk';
         skip 'external tests', 13 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk/';
 
         TestUtils::test_page(

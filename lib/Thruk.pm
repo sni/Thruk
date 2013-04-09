@@ -25,6 +25,7 @@ use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
+use MRO::Compat;
 use Thruk::Config;
 use Thruk::Backend::Manager;
 use Thruk::Backend::Peer;
@@ -269,6 +270,29 @@ sub found_leaks {
     }
     # die() won't let our tests exit, so we use exit here
     exit 1;
+    return;
+}
+
+###################################################
+
+=head2 prepare_path
+
+called by catalyst to strip path prefixes
+
+=cut
+sub prepare_path {
+    my($c) = @_;
+    $c->maybe::next::method();
+
+    my @path_chunks = split m[/]mxo, $c->request->path, -1;
+    return unless($path_chunks[1] and $path_chunks[1] eq 'thruk');
+
+    my $site = shift @path_chunks;
+    my $path = join('/', @path_chunks) || '/';
+    $c->request->path($path);
+    my $base = $c->request->base;
+    $base->path($base->path.$site.'/');
+
     return;
 }
 

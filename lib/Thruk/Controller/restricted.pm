@@ -21,7 +21,7 @@ page: /thruk/cgi-bin/restricted.cgi
 
 =cut
 
-sub restricted_cgi : Regex('thruk\/cgi\-bin\/restricted\.cgi') {
+sub restricted_cgi : Path('/thruk/cgi-bin/restricted.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/restricted/index');

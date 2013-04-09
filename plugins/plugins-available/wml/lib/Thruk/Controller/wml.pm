@@ -28,7 +28,7 @@ Thruk->config->{'use_feature_wml'} = 1;
 page: /thruk/cgi-bin/statuswml.cgi
 
 =cut
-sub wml_cgi : Regex('thruk\/cgi\-bin\/statuswml\.cgi') {
+sub wml_cgi : Path('/thruk/cgi-bin/statuswml.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/wml/index');

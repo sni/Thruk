@@ -30,7 +30,7 @@ Thruk->config->{'use_feature_statusmap'} = 1;
 page: /thruk/cgi-bin/statusmap.cgi
 
 =cut
-sub statusmap_cgi : Regex('thruk\/cgi\-bin\/statusmap\.cgi') {
+sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/statusmap/index');

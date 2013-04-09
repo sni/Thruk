@@ -37,7 +37,7 @@ Thruk->config->{'use_feature_reports'} = 'reports.cgi';
 page: /thruk/cgi-bin/reports.cgi
 
 =cut
-sub reports_cgi : Regex('thruk\/cgi\-bin\/reports\.cgi') {
+sub reports_cgi : Path('/thruk/cgi-bin/reports.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/reports/index');

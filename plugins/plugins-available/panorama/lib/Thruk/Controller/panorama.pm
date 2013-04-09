@@ -43,7 +43,7 @@ Thruk::Utils::Menu::insert_item('General', {
 page: /thruk/cgi-bin/panorama.cgi
 
 =cut
-sub panorama_cgi : Regex('thruk\/cgi\-bin\/panorama\.cgi') {
+sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/panorama/index');

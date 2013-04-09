@@ -42,7 +42,7 @@ Thruk->config->{'has_feature_minemap'} = 1;
 page: /thruk/cgi-bin/minemap.cgi
 
 =cut
-sub minemap_cgi : Regex('thruk\/cgi\-bin\/minemap\.cgi') {
+sub minemap_cgi : Path('/thruk/cgi-bin/minemap.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/minemap/index');

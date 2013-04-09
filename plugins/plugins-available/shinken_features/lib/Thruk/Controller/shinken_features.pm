@@ -32,7 +32,7 @@ Catalyst Controller.
 page: /thruk/cgi-bin/shinken.cgi
 
 =cut
-sub shinken_cgi : Regex('thruk\/cgi\-bin\/shinken_status\.cgi') {
+sub shinken_cgi : Path('/thruk/cgi-bin/shinken_status.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/shinken_features/shinken_status');
@@ -46,7 +46,7 @@ sub shinken_cgi : Regex('thruk\/cgi\-bin\/shinken_status\.cgi') {
 page: /thruk/cgi-bin/outagespbimp.cgi
 
 =cut
-sub outagespbimp_cgi : Regex('thruk\/cgi\-bin\/outagespbimp\.cgi') {
+sub outagespbimp_cgi : Path('/thruk/cgi-bin/outagespbimp.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/shinken_features/outages_pbimp_index');
@@ -59,7 +59,7 @@ sub outagespbimp_cgi : Regex('thruk\/cgi\-bin\/outagespbimp\.cgi') {
 page: /thruk/cgi-bin/businessview.cgi
 
 =cut
-sub businessview_cgi : Regex('thruk\/cgi\-bin\/businessview\.cgi') {
+sub businessview_cgi : Path('/thruk/cgi-bin/businessview.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/shinken_features/businessview_index');

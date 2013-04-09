@@ -51,7 +51,7 @@ Thruk->config->{'use_feature_configtool'} = 1;
 page: /thruk/cgi-bin/conf.cgi
 
 =cut
-sub conf_cgi : Regex('thruk\/cgi\-bin\/conf\.cgi') {
+sub conf_cgi : Path('/thruk/cgi-bin/conf.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     $c->stash->{'config_backends_only'} = 1;

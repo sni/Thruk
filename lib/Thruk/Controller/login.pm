@@ -22,7 +22,7 @@ page: /thruk/cgi-bin/login.cgi
 
 =cut
 
-sub login_cgi : Regex('thruk\/cgi\-bin\/login\.cgi') {
+sub login_cgi : Path('/thruk/cgi-bin/login.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return $c->detach('/login/index');

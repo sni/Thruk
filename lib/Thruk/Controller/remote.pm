@@ -32,7 +32,7 @@ page: /thruk/cgi-bin/remote.cgi
 
 =cut
 
-sub remote_cgi : Regex('thruk\/cgi\-bin\/remote\.cgi') {
+sub remote_cgi : Path('/thruk/cgi-bin/remote.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     Thruk::Utils::check_pid_file($c);
