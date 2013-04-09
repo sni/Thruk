@@ -240,7 +240,7 @@ sub _process_recurring_downtimes_page {
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
             }
         }
-        if($host) {
+        elsif($host) {
             if(!$c->check_cmd_permissions('host', $host)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host or no permission' });
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
@@ -249,6 +249,9 @@ sub _process_recurring_downtimes_page {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host or no permission' });
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
             }
+        } else {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no host or service specified' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
         }
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
         if($old_host and ($old_host ne $host or $old_service ne $service or $old_nr ne $nr)) {
