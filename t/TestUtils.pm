@@ -98,6 +98,32 @@ sub get_test_timeperiod {
 }
 
 #########################
+sub get_test_host_cli {
+    my($binary) = @_;
+    my $test = { cmd  => $binary.' -a listhosts' };
+    test_command($test);
+    my $host = (split(/\n/mx, $test->{'stdout'}))[0];
+    isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
+    return $host;
+}
+
+#########################
+sub get_test_hostgroup_cli {
+    my($binary) = @_;
+    my $test = { cmd  => $binary.' -a listhostgroups' };
+    TestUtils::test_command($test);
+    my @groups = split(/\n/mx, $test->{'stdout'});
+    my $hostgroup;
+    for my $group (@groups) {
+        my($name, $members) = split/\s+/, $group, 2;
+        next unless $members;
+        $hostgroup = $name;
+    }
+    isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT("need test hostgroup");
+    return $hostgroup;
+}
+
+#########################
 
 =head2 test_page
 

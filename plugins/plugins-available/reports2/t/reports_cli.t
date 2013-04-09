@@ -19,25 +19,10 @@ BEGIN {
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-#$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
-# get test host
-my $test = { cmd  => $BIN.' -a listhosts' };
-TestUtils::test_command($test);
-my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
-
-# get test hostgroup
-$test = { cmd  => $BIN.' -a listhostgroups' };
-TestUtils::test_command($test);
-my @groups = split(/\n/mx, $test->{'stdout'});
-my $hostgroup;
-for my $group (@groups) {
-    my($name, $members) = split/\s+/, $group, 2;
-    next unless $members;
-    $hostgroup = $name;
-}
-isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT("need test hostgroup");
+# get test host / hostgroup
+my $host      = TestUtils::get_test_host_cli($BIN);
+my $hostgroup = TestUtils::get_test_hostgroup_cli($BIN);
 
 my $test_pdf_reports = [{
         'name'                  => 'Host',
