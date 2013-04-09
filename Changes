@@ -6,6 +6,7 @@ next:
             - speed up incremental file import
           - Bug Fixes
             - fixed adding multiple recurring downtimes for a single host
+            - no sound alerts if notifications are disabled
 
 1.66-2   Mon Apr  1 22:59:55 CEST 2013
           - better utf-8 support in report mails
