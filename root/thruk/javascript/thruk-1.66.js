@@ -854,6 +854,7 @@ function cron_change_date(id) {
     hideElement('div_send_month_'+nr);
     hideElement('div_send_week_'+nr);
     hideElement('div_send_day_'+nr);
+    hideElement('div_send_cust_'+nr);
     showElement('div_send_'+type+'_'+nr);
 
     if(type == 'cust') {
