@@ -34,11 +34,13 @@ $SIG{'INT'} = 'save_cache';
 
 my $rcfile = File::Spec->catfile( 't', 'perlcriticrc' );
 Test::Perl::Critic->import( -profile => $rcfile );
-diag("using $cachefile");
-eval {
-    $cache = lock_retrieve($cachefile) if -e $cachefile;
-};
-diag($@) if $@;
+if(-e $cachefile) {
+    eval {
+        $cache = lock_retrieve($cachefile);
+        diag("loaded $cachefile");
+    };
+    diag($@) if $@;
+}
 
 if(scalar @ARGV > 0) {
     plan( tests => scalar @ARGV);
