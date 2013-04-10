@@ -713,9 +713,21 @@ sub single_search {
             push @servicegroupfilter,  { name   => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
-            push @servicefilter,       { contacts => { $listop => $value } };
-            push @hostfilter,          { contacts => { $listop => $value } };
-            push @servicetotalsfilter, { contacts => { $listop => $value } };
+            if($op eq '~~' or $op eq '!~~~') {
+                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'contacts');
+                push @hostfilter,          $hfilter;
+                push @hosttotalsfilter,    $hfilter;
+                push @servicefilter,       $sfilter;
+                push @servicetotalsfilter, $sfilter;
+            } else {
+		push @hostfilter,          { contacts => { $listop => $value } };
+		push @hosttotalsfilter,    { contacts => { $listop => $value } };
+		push @servicefilter,       { contacts => { $listop => $value } };
+		push @servicetotalsfilter, { contacts => { $listop => $value } };
+            }
+#            push @servicefilter,       { contacts => { $listop => $value } };
+#            push @hostfilter,          { contacts => { $listop => $value } };
+#            push @servicetotalsfilter, { contacts => { $listop => $value } };
         }
         elsif ( $filter->{'type'} eq 'next check' ) {
             my $date;
@@ -1344,6 +1356,9 @@ sub get_groups_filter {
     elsif($type eq 'servicegroup') {
         $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { $op => $value }} ] );
     }
+    elsif($type eq 'contacts') {
+        $groups = $c->{'db'}->get_contacts( filter => [ { name => { $op => $value }} ] );
+    }
     my @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
     if(scalar @names == 0) { @names = (''); }
 
@@ -1355,6 +1370,10 @@ sub get_groups_filter {
     if($type eq 'hostgroup') {
         push @hostfilter,    { -or => { groups      => { $group_op => \@names } } };
         push @servicefilter, { -or => { host_groups => { $group_op => \@names } } };
+    }
+    elsif($type eq 'contacts') {
+        push @hostfilter,    { -or => { contacts => { $group_op => \@names } } };
+        push @servicefilter, { -or => { contacts => { $group_op => \@names } } };
     }
     elsif($type eq 'servicegroup') {
         push @servicefilter, { -or => { groups => { $group_op => \@names } } };
