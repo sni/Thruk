@@ -2828,6 +2828,7 @@ function verify_op(event) {
          && selValue != 'hostgroup'
          && selValue != 'servicegroup'
          && selValue != 'timeperiod'
+         && selValue != 'contact'
          && selValue != 'custom variable'
          && selValue != 'comment') {
         // is this currently selected?
