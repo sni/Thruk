@@ -5,13 +5,15 @@
 use strict;
 use warnings;
 use File::Spec;
+use File::Slurp qw/read_file/;
+use Storable qw/nfreeze thaw/;
 use Test::More;
 use English qw(-no_match_vars);
 use Digest::MD5;
-use Storable qw/lock_retrieve lock_store/;
+use Data::Dumper;
 
-my $cachefile        = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.storable';
-my $cache            = {};
+my $cachefile = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.storable';
+my $cache     = {};
 
 if ( not $ENV{TEST_AUTHOR} ) {
     my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
@@ -26,7 +28,9 @@ if ( $EVAL_ERROR ) {
 }
 
 sub save_cache {
-    lock_store($cache, $cachefile);
+    open(my $fh, '>', $cachefile);
+    print $fh nfreeze($cache);
+    close($fh);
     chmod(0666, $cachefile);
     exit;
 }
@@ -36,7 +40,7 @@ my $rcfile = File::Spec->catfile( 't', 'perlcriticrc' );
 Test::Perl::Critic->import( -profile => $rcfile );
 if(-e $cachefile) {
     eval {
-        $cache = lock_retrieve($cachefile);
+        $cache = thaw(scalar read_file($cachefile));
         diag("loaded $cachefile");
     };
     diag($@) if $@;
