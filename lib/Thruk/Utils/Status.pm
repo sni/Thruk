@@ -720,14 +720,11 @@ sub single_search {
                 push @servicefilter,       $sfilter;
                 push @servicetotalsfilter, $sfilter;
             } else {
-		push @hostfilter,          { contacts => { $listop => $value } };
-		push @hosttotalsfilter,    { contacts => { $listop => $value } };
-		push @servicefilter,       { contacts => { $listop => $value } };
-		push @servicetotalsfilter, { contacts => { $listop => $value } };
+                push @hostfilter,          { contacts => { $listop => $value } };
+                push @hosttotalsfilter,    { contacts => { $listop => $value } };
+                push @servicefilter,       { contacts => { $listop => $value } };
+                push @servicetotalsfilter, { contacts => { $listop => $value } };
             }
-#            push @servicefilter,       { contacts => { $listop => $value } };
-#            push @hostfilter,          { contacts => { $listop => $value } };
-#            push @servicetotalsfilter, { contacts => { $listop => $value } };
         }
         elsif ( $filter->{'type'} eq 'next check' ) {
             my $date;
