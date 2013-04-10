@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - added regular expression contact filter (Scott Dworkis)
+          - Bug Fixes
+            - fixed negated regex group search
+
 1.68     Tue Apr  9 21:04:03 CEST 2013
           - allow custom cron entries for reports / recurring downtimes
           - Logfilecache
