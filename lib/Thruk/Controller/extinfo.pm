@@ -230,29 +230,32 @@ sub _process_recurring_downtimes_page {
             'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
             'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,
         };
+        $c->stash->{rd} = $rd;
+        my $failed = 0;
         if($service) {
             if(!$c->check_cmd_permissions('service', $service, $host)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such service or no permission' });
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+                $failed = 1;
             }
             if($old_service and !$c->check_cmd_permissions('service', $old_service, $old_host)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such service or no permission' });
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+                $failed = 1;
             }
         }
         elsif($host) {
             if(!$c->check_cmd_permissions('host', $host)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host or no permission' });
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+                $failed = 1;
             }
             if($old_host and !$c->check_cmd_permissions('host', $host)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host or no permission' });
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+                $failed = 1;
             }
         } else {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no host or service specified' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+            $failed = 1;
         }
+        return _process_recurring_downtimes_page_edit($self, $c, $task, $host, $service, $nr, $default_rd) if $failed;
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
         if($old_host and ($old_host ne $host or $old_service ne $service or $old_nr ne $nr)) {
             my $oldfile = $self->_get_data_file_name($c, $old_host, $old_service, $old_nr);
@@ -268,17 +271,7 @@ sub _process_recurring_downtimes_page {
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
     }
     if($task eq 'add_host' or $task eq 'add_service' or $task eq 'edit') {
-        my $file = $self->_get_data_file_name($c, $host, $service, $nr);
-        if(-s $file) {
-            $c->stash->{rd} = Thruk::Utils::read_data_file($file);
-        }
-        $c->stash->{'no_auto_reload'} = 1;
-        $c->stash->{'task'}   = $task;
-        $c->stash->{rd}       = $default_rd unless defined $c->stash->{rd};
-        for my $key (keys %{$default_rd}) {
-            $c->stash->{rd}->{$key} = $default_rd->{$key}  unless defined $c->stash->{rd}->{$key};
-        }
-        $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
+        return _process_recurring_downtimes_page_edit($self, $c, $task, $host, $service, $nr, $default_rd);
     }
     elsif($task eq 'remove') {
         my $file = $self->_get_data_file_name($c, $host, $service, $nr);
@@ -295,6 +288,22 @@ sub _process_recurring_downtimes_page {
         $c->stash->{template}    = 'extinfo_type_6_recurring.tt';
     }
     return 1;
+}
+
+##########################################################
+sub _process_recurring_downtimes_page_edit {
+    my($self, $c, $task, $host, $service, $nr, $default_rd) = @_;
+    my $file = $self->_get_data_file_name($c, $host, $service, $nr);
+    if(-s $file) {
+        $c->stash->{rd} = Thruk::Utils::read_data_file($file);
+    }
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'task'}   = $task;
+    $c->stash->{rd}       = $default_rd unless defined $c->stash->{rd};
+    for my $key (keys %{$default_rd}) {
+        $c->stash->{rd}->{$key} = $default_rd->{$key}  unless defined $c->stash->{rd}->{$key};
+    }
+    $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
 }
 
 ##########################################################
@@ -322,10 +331,14 @@ sub _update_cron_file {
 sub _get_downtimes_list {
     my($self, $c, $noauth, $host, $service) = @_;
 
+    my $hostfilter    = Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' );
+    my $servicefilter = Thruk::Utils::Auth::get_auth_filter( $c, 'services' );
+    $noauth = 1 if(!$hostfilter and !$servicefilter);
+
     my($hosts, $services);
     unless($noauth) {
         my $host_data    = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-        my $service_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], columns => [qw/host_name description/] );
+        my $service_data = $c->{'db'}->get_services(   filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], columns => [qw/host_name description/] );
         $hosts    = Thruk::Utils::array2hash($host_data);
         $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
     }
@@ -344,9 +357,9 @@ sub _get_downtimes_list {
         $d->{'file'} = $dfile;
         unless($noauth) {
             if($d->{'service'}) {
-                next unless defined $services->{$d->{'host'}}->{$d->{'service'}};
+                next unless(defined $services->{$d->{'host'}}->{$d->{'service'}} and $servicefilter);
             } else {
-                next unless defined $hosts->{$d->{'host'}};
+                next unless(defined $hosts->{$d->{'host'}} and $hostfilter);
             }
         }
         # set some defaults
