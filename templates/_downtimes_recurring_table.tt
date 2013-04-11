@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime' style="min-width: 700px;">
+  <table border="0" class='downtime' style="min-width: 700px;" id="recurring_downtimes_table_[% type %]">
     <tr class='downtime'>
       [% IF names == 1 %]
       <th class='downtime'>Host Name</th>
