@@ -1007,6 +1007,36 @@ function sendJSError(scripturl, text) {
     return;
 }
 
+/* update recurring downtime type select */
+function update_recurring_type_select(select_id) {
+    var sel = document.getElementById(select_id);
+    if(!sel) {
+        return;
+    }
+    var val = sel.options[sel.selectedIndex].value;
+    hideElement('input_host');
+    hideElement('input_host_options');
+    hideElement('input_hostgroup');
+    hideElement('input_service');
+    hideElement('input_servicegroup');
+    if(val == 'Host') {
+        showElement('input_host');
+        showElement('input_host_options');
+    }
+    if(val == 'Hostgroup') {
+        showElement('input_hostgroup');
+        showElement('input_host_options');
+    }
+    if(val == 'Service') {
+        showElement('input_host');
+        showElement('input_service');
+    }
+    if(val == 'Servicegroup') {
+        showElement('input_servicegroup');
+    }
+    return;
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b

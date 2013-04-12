@@ -89,10 +89,10 @@
     <td class="dataOdd" align="left" colspan=2>
         <table id="cron_entries">
           [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
-          [% PROCESS _cron_edit.tt nr = 0 %]
+          [% PROCESS _cron_edit.tt nr=0 can_edit=1 %]
           [% FOREACH cr = r.send_types %]
               [% nr = loop.index + 1 %]
-              [% PROCESS _cron_edit.tt %]
+              [% PROCESS _cron_edit.tt can_edit=1 %]
           [% END %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>

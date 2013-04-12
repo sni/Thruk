@@ -680,6 +680,7 @@ sub _cmd_downtimetask {
     # do auth stuff
     Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
 
+    $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
     my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c);
     for my $key (keys %{$default_rd}) {
@@ -700,10 +701,26 @@ sub _cmd_downtimetask {
 
     require URI::Escape;
     my $output     = '';
+    my $cmd_typ;
+    if(!$downtime->{'target'}) {
+        $downtime->{'target'} = 'host';
+        $downtime->{'target'} = 'service' if $downtime->{'service'};
+    }
+    if($downtime->{'target'} eq 'host') {
+        $cmd_typ = 55;
+    }
+    elsif($downtime->{'target'} eq 'service') {
+        $cmd_typ = 56;
+    }
+    elsif($downtime->{'target'} eq 'hostgroup') {
+        $cmd_typ = 84;
+    }
+    elsif($downtime->{'target'} eq 'servicegroup') {
+        $cmd_typ = 122;
+    }
     # convert to normal url request
-    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s',
-                      $downtime->{'service'} ? 56 : 55,
-                      URI::Escape::uri_escape($downtime->{'host'}),
+    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
+                      $cmd_typ,
                       URI::Escape::uri_escape($downtime->{'comment'}),
                       '(cron)',
                       URI::Escape::uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
@@ -713,7 +730,10 @@ sub _cmd_downtimetask {
                       $minutes,
                       ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
+                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape($downtime->{'host'}) : '',
                       $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
+                      $downtime->{'hostgroup'} ? '&hostgroup='.URI::Escape::uri_escape($downtime->{'hostgroup'}) : '',
+                      $downtime->{'servicegroup'} ? '&servicegroup='.URI::Escape::uri_escape($downtime->{'servicegroup'}) : '',
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;

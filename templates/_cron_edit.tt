@@ -1,6 +1,6 @@
 ﻿<tr id="send_pane_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
   <td>
-    <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)">
+    <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)"[% IF !can_edit %] disabled[% END %]>
       <option value="month"[% IF cr.type == 'month' %] selected[% END %]>monthly</option>
       <option value="week"[% IF cr.type == 'week' %] selected[% END %]>weekly</option>
       <option value="day"[% IF cr.type == 'day' %] selected[% END %]>daily</option>
@@ -10,7 +10,7 @@
   <td>
     <div id="div_send_month_[% nr %]">
       on day
-      <select name="send_day_[% nr %]">
+      <select name="send_day_[% nr %]"[% IF !can_edit %] disabled[% END %]>
           [% day = 1 %]
           [% WHILE day <= 31 %]
           <option value="[% day %]"[% IF cr.day == day %] selected[% END %]>[% sprintf("%02s", day) %]</option>
@@ -39,34 +39,34 @@
         [% END %]
       </tr><tr>
         [% IF first_day_of_week == 0 %]
-        <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
         [% END %]
-        <td><input type="checkbox" name="week_day_[% nr %]" value="1"[% IF lookup.exists('1') %] checked[% END %]></td>
-        <td><input type="checkbox" name="week_day_[% nr %]" value="2"[% IF lookup.exists('2') %] checked[% END %]></td>
-        <td><input type="checkbox" name="week_day_[% nr %]" value="3"[% IF lookup.exists('3') %] checked[% END %]></td>
-        <td><input type="checkbox" name="week_day_[% nr %]" value="4"[% IF lookup.exists('4') %] checked[% END %]></td>
-        <td><input type="checkbox" name="week_day_[% nr %]" value="5"[% IF lookup.exists('5') %] checked[% END %]></td>
-        <td><input type="checkbox" name="week_day_[% nr %]" value="6"[% IF lookup.exists('6') %] checked[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="1"[% IF lookup.exists('1') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="2"[% IF lookup.exists('2') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="3"[% IF lookup.exists('3') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="4"[% IF lookup.exists('4') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="5"[% IF lookup.exists('5') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="6"[% IF lookup.exists('6') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
         [% IF first_day_of_week != 0 %]
-        <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %]></td>
+        <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %][% IF !can_edit %] disabled[% END %]></td>
         [% END %]
       </tr>
       </table>
     </div>
     <div id="div_send_day_[% nr %]" style="display: none"></div>
     <div id="div_send_cust_[% nr %]" style="display: none">
-      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); cr.cust; END %]" style="width: 300px;" placeholder="minute hour dom month dow   (cron syntax)">
+      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); cr.cust; END %]" style="width: 300px;" placeholder="minute hour dom month dow   (cron syntax)"[% IF !can_edit %] disabled[% END %]>
     </div>
   </td>
   <td id="hour_select_[% nr %]">
     at
-    <select name="send_hour_[% nr %]">
+    <select name="send_hour_[% nr %]"[% IF !can_edit %] disabled[% END %]>
       [% hour = 0 %]
       [% WHILE hour < 24 %]
       <option value="[% hour %]"[% IF cr.hour == hour %] selected[% END %]>[% sprintf("%02s", hour) %]</option>
       [% hour = hour + 1 %]
       [% END %]
-    </select>:<select name="send_minute_[% nr %]">
+    </select>:<select name="send_minute_[% nr %]"[% IF !can_edit %] disabled[% END %]>
       [% min = 0 %]
       [% WHILE min < 60 %]
       <option value="[% min %]"[% IF cr.minute == min %] selected[% END %]>[% sprintf("%02s", min) %]</option>
@@ -74,7 +74,7 @@
       [% END %]
     </select>
   </td>
-  <td class='newfilter' onclick="delete_cron_row(this); return false;"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">
+  <td class='newfilter' onclick="delete_cron_row(this); return false;">[% IF can_edit %]<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">[% END %]
     <script type="text/javascript">
     <!--
     cron_change_date("send_type_[% nr %]");

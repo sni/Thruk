@@ -1,12 +1,8 @@
 ﻿<div align="center">
   <table border="0" class='downtime' style="min-width: 700px;" id="recurring_downtimes_table_[% type %]">
     <tr class='downtime'>
-      [% IF names == 1 %]
-      <th class='downtime'>Host Name</th>
-      [% IF type == 'service' %]
-      <th class='downtime'>Service</th>
-      [% END %]
-      [% END %]
+      <th class='downtime'>Type</th>
+      <th class='downtime' colspan=2>Name</th>
       <th class='downtime'>Schedule</th>
       <th class='downtime'>Type</th>
       <th class='downtime'>Duration</th>
@@ -15,28 +11,36 @@
     </tr>
     [% count = 0 %]
     [%  FOREACH d = downtimes %]
-    [% NEXT IF type == 'service' && ! d.service %]
-    [% NEXT IF type == 'host'    &&   d.service %]
+    [%# NEXT IF target == 'service' && ! d.service #%]
+    [%# NEXT IF target == 'host'    &&   d.service #%]
     [% count = count + 1 %]
     [% SET class = 'downtimeOdd' IF loop.even %]
     [% SET class = 'downtimeEven'  IF loop.odd %]
     <tr class='[% class %][% IF count == 1 %] firstrow[% END %]'>
-      [% IF names == 1 %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
-      [% IF type == 'service' %]
-      <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a></td>
-      [% END %]
-      [% END %]
+      <td class='[% class %]'>[% d.target | ucfirst %]</td>
+      <td class='[% class %]'[% IF d.target != 'service' %] colspan=2[% END %]>
+        [% IF d.target == 'host' %]
+        <a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a>
+        [% ELSIF d.target == 'service' %]
+        <a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a>
+        </td><td class='[% class %]'>
+        <a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a>
+        [% ELSIF d.target == 'hostgroup' %]
+        <a href='extinfo.cgi?type=5&amp;hostgroup=[% d.hostgroup | uri %]'>[% d.hostgroup %]</a>
+        [% ELSIF d.target == 'servicegroup' %]
+        <a href='extinfo.cgi?type=8&amp;servicegroup=[% d.servicegroup | uri %]'>[% d.servicegroup %]</a>
+        [% END %]
+      </td>
       <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
       <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
       <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
       <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-      <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;nr=[% IF d.exists('nr'); d.nr; END %]&amp;recurring=edit&amp;host=[% d.host | uri %][% IF type == 'service' %]&amp;service=[% d.service | uri %][% END %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
+      <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;nr=[% IF d.exists('nr'); d.nr; END %]&amp;recurring=edit&amp;src=[% d.file | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
     </tr>
     [% END %]
     [% IF count == 0 %]
     <tr class='downtimeOdd'>
-      <td class='downtimeOdd' colspan="7">There are no recurring [% type %] downtimes</td>
+      <td class='downtimeOdd' colspan="8">There are no recurring [% type %] downtimes</td>
     </tr>
     [% END %]
   </table>

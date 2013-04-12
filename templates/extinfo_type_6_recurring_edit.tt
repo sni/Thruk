@@ -18,11 +18,7 @@
 <form action="extinfo.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="recurring" value="save">
-<input type="hidden" name="old_nr" value="[% IF rd.exists('nr'); rd.nr; END %]">
-<input type="hidden" name="old_host" value="[% rd.host %]">
-[% IF task == 'add_service' OR (task == 'edit' AND rd.service ) %]
-<input type="hidden" name="old_service" value="[% rd.service %]">
-[% END %]
+<input type="hidden" name="src" value="[% rd.file %]">
 <input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
@@ -31,30 +27,53 @@
     <th class='data' style="width:125px;"></th>
   </tr>
   <tr class="firstrow">
+    <td class="dataEven" align="center"><b>Type</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name="target" id="type_select" onchange="update_recurring_type_select('type_select')"[% IF !can_edit %] disabled[% END %]>
+        <option[% IF rd.target == 'host'         %] selected[% END %]>Host</option>
+        <option[% IF rd.target == 'service'      %] selected[% END %]>Service</option>
+        <option[% IF rd.target == 'hostgroup'    %] selected[% END %]>Hostgroup</option>
+        <option[% IF rd.target == 'servicegroup' %] selected[% END %]>Servicegroup</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr id="input_host">
     <td class="dataEven" align="center"><b>Host</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]>
+      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
-  [% IF task == 'add_service' OR (task == 'edit' AND rd.service ) %]
-  <tr>
+  <tr id="input_service">
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %]>
+      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
-  [% END %]
+  <tr id="input_hostgroup">
+    <td class="dataEven" align="center"><b>Hostgroup</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
+    </td>
+  </tr>
+  <tr id="input_servicegroup">
+    <td class="dataEven" align="center"><b>Servicegroup</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
+    </td>
+  </tr>
+
   <tr>
     <td class="dataEven" align="center"><b>Comment</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="comment" value="[% rd.comment %]">
+      <input type="text" name="comment" value="[% rd.comment %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   [% IF backends.size > 1 %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <select name="backends" multiple style="min-width: 180px;">
+      <select name="backends" multiple style="min-width: 180px;"[% IF !can_edit %] disabled[% END %]>
         [% FOREACH b = backends %]
         <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
@@ -72,25 +91,27 @@
               [% nr = loop.index + 1 %]
               [% PROCESS _cron_edit.tt %]
           [% END %]
+          [% IF can_edit %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
                 <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
                 add more
             </td>
           </tr>
+          [% END %]
         </table>
     </td>
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Duration<br>(in minutes)</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="duration" value="[% rd.duration %]">
+      <input type="text" name="duration" value="[% rd.duration %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr>
     <td class='dataEven'>Type:</td>
     <td class="dataOdd" align="left" colspan=2>
-      <select name='fixed'>
+      <select name='fixed'[% IF !can_edit %] disabled[% END %]>
         <option value="1"[% IF rd.fixed == "1" %] selected[% END %]>Fixed </option>
         <option value="0"[% IF rd.fixed == "0" %] selected[% END %]>Flexible </option>
       </select>
@@ -99,25 +120,23 @@
   <tr>
     <td class="dataEven" align="center"><b>If Flexible, Range<br>(in minutes)</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" name="flex_range" value="[% rd.flex_range %]">
+      <input type="text" name="flex_range" value="[% rd.flex_range %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
-  [% IF task == 'add_host' OR (task == 'edit' AND !rd.service ) %]
-  <tr>
+  <tr id="input_host_options">
     <td class="dataEven" align="center"><b>Child Hosts:</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <select name="childoptions">
+      <select name="childoptions"[% IF !can_edit %] disabled[% END %]>
         <option value="0"[% IF rd.childoptions == "0" %] selected[% END %]>Do nothing with child hosts</option>
         <option value="1"[% IF rd.childoptions == "1" %] selected[% END %]>Schedule triggered downtime for all child hosts</option>
         <option value="2"[% IF rd.childoptions == "2" %] selected[% END %]>Schedule non-triggered downtime for all child hosts</option>
       </select>
     </td>
   </tr>
-  [% END %]
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;nr=[% IF rd.exists('nr'); rd.nr; END %]&amp;host=[% rd.host | uri %][% IF rd.service %]&amp;service=[% rd.service %][% END %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
-      <button class="save_button button" style="width: 160px;">Save</button>
+      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;src=[% rd.file %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      <button class="save_button button" style="width: 160px;"[% IF !can_edit %] disabled[% END %]>Save</button>
     </td>
   </tr>
 </table>
@@ -130,5 +149,6 @@
   [%+ IF rd.schedule.size == 0 +%]
   add_cron_row('cron_entries');
   [%+ END +%]
+  update_recurring_type_select('type_select');
 -->
 </script>

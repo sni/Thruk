@@ -24,9 +24,11 @@ TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
 isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
 
-my $comment = 'test downtime '.int(rand(1000000));
+my $rand    = int(rand(1000000));
+my $comment = 'test downtime '.$rand;
 my $test_downtime = [{
     'type'          => 6,
+    'target'        => 'host',
     'host'          => $host,
     'comment'       => $comment,
     'send_type_1'   => 'cust',
@@ -39,7 +41,7 @@ my $test_downtime = [{
     'fixed'         => 1,
     'flex_range'    => 720,
     'childoptions'  => 0,
-    'nr'            => 999,
+    'nr'            => $rand,
 }];
 
 for my $downtime (@{$test_downtime}) {
@@ -83,7 +85,7 @@ for my $downtime (@{$test_downtime}) {
 
 # remove downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=999&host='.$host.'"',
+    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&target=host&nr='.$rand.'&host='.$host.'"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 
