@@ -1,22 +1,3 @@
-function set_sub(nr) {
-    for(x=1;x<=3;x++) {
-        /* reset table rows */
-        if(x != nr) {
-            jQuery('.sub_'+x).css('display', 'none');
-        }
-        jQuery('.sub_'+nr).css('display', '');
-
-        /* reset buttons */
-        obj = document.getElementById("sub_"+x);
-        styleElements(obj, "data", 1);
-    }
-    obj = document.getElementById("sub_"+nr);
-    styleElements(obj, "data confSelected", 1);
-
-
-    return false;
-}
-
 var running_number = 0;
 function add_conf_attribute(table, key, rt) {
 

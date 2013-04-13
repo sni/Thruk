@@ -924,23 +924,32 @@ sub _process_combined_page {
 sub _process_bookmarks {
     my( $self, $c ) = @_;
 
-    my $referer   = $c->{'request'}->{'parameters'}->{'referer'} || 'status.cgi';
-    my $bookmark  = $c->{'request'}->{'parameters'}->{'bookmark'};
-    my $bookmarks = $c->{'request'}->{'parameters'}->{'bookmarks'};
-    my $section   = $c->{'request'}->{'parameters'}->{'section'};
-    my $newname   = $c->{'request'}->{'parameters'}->{'newname'};
-    my $button    = $c->{'request'}->{'parameters'}->{'addb'};
-    my $save      = $c->{'request'}->{'parameters'}->{'saveb'};
+    my $referer    = $c->{'request'}->{'parameters'}->{'referer'} || 'status.cgi';
+    my $bookmark   = $c->{'request'}->{'parameters'}->{'bookmark'};
+    my $bookmarks  = $c->{'request'}->{'parameters'}->{'bookmarks'};
+    my $bookmarksp = $c->{'request'}->{'parameters'}->{'bookmarksp'};
+    my $section    = $c->{'request'}->{'parameters'}->{'section'};
+    my $newname    = $c->{'request'}->{'parameters'}->{'newname'};
+    my $button     = $c->{'request'}->{'parameters'}->{'addb'};
+    my $save       = $c->{'request'}->{'parameters'}->{'saveb'};
+    my $public     = $c->{'request'}->{'parameters'}->{'public'} || 0;
 
-    my $data = Thruk::Utils::get_user_data($c);
-    my $done = 0;
+    # public only allowed for admins
+    if($public) {
+        if(!$c->check_user_roles('authorized_for_system_commands') || !$c->check_user_roles('authorized_for_configuration_information')) {
+            $public = 0;
+        }
+    }
+
+    my $data   = Thruk::Utils::get_user_data($c);
+    my $global = Thruk::Utils::get_global_user_data($c);
+    my $done   = 0;
 
     # remove existing bookmarks
     if(    ( defined $button and $button eq 'add bookmark' )
         or ( defined $save   and $save   eq 'save changes' )) {
-        $bookmarks = ref $bookmarks eq 'ARRAY' ? $bookmarks : [$bookmarks];
-        my $keep   = {};
-        for my $bookmark (@{$bookmarks}) {
+        my $keep = {};
+        for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
             next unless defined $bookmark;
             my($section, $name) = split(/::/mx, $bookmark ,2);
             $keep->{$section}->{$name} = 1;
@@ -959,6 +968,28 @@ sub _process_bookmarks {
             Thruk::Utils::set_message( $c, 'success_message', 'Bookmarks updated' );
         }
         $done++;
+
+        if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+            $keep = {};
+            for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
+                next unless defined $bookmark;
+                my($section, $name) = split(/::/mx, $bookmark ,2);
+                $keep->{$section}->{$name} = 1;
+            }
+
+            $new = {};
+            for my $section (keys %{$global->{'bookmarks'}}) {
+                for my $link ( @{$global->{'bookmarks'}->{$section}} ) {
+                    next unless exists $keep->{$section}->{$link->[0]};
+                    push @{$new->{$section}}, $link;
+                }
+            }
+
+            $global->{'bookmarks'} = $new;
+            Thruk::Utils::store_global_user_data($c, $global);
+            $done++;
+        }
+
     }
 
     # add new bookmark
@@ -969,10 +1000,18 @@ sub _process_bookmarks {
              or ( defined $save   and $save   eq 'save changes' )
            )
     ) {
-        $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
-        push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
-        if(Thruk::Utils::store_user_data($c, $data)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
+        if($public) {
+            $global->{'bookmarks'}->{$section} = [] unless defined $global->{'bookmarks'}->{$section};
+            push @{$global->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
+            if(Thruk::Utils::store_global_user_data($c, $global)) {
+                Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
+            }
+        } else {
+            $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
+            push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
+            if(Thruk::Utils::store_user_data($c, $data)) {
+                Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
+            }
         }
         $done++;
     }

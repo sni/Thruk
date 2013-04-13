@@ -1068,6 +1068,74 @@ sub store_user_data {
 
 ########################################
 
+=head2 get_global_user_data
+
+  get_global_user_data($c)
+
+returns global user data
+
+=cut
+
+sub get_global_user_data {
+    my($c) = @_;
+
+    my $file = $c->config->{'var_path'}."/global_user_data";
+    return {} unless -f $file;
+
+    my $dump = read_file($file) or carp("cannot open file $file");
+    my $VAR1 = {};
+
+    ## no critic
+    eval($dump);
+    ## use critic
+
+    carp("error in file $file: $@") if $@;
+
+    return($VAR1);
+}
+
+
+########################################
+
+=head2 store_global_user_data
+
+  store_global_user_data($c, $data)
+
+store global user data for section
+
+=cut
+
+sub store_global_user_data {
+    my($c, $data) = @_;
+
+    my $dir = $c->config->{'var_path'};
+    if(! -d $dir) {
+        Thruk::Utils::IO::mkdir($dir) or do {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: mkdir '.$dir.': '.$! );
+            return;
+        };
+    }
+
+    my $file = $c->config->{'var_path'}."/global_user_data";
+    open(my $fh, '>', $file.'.new') or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
+        return;
+    };
+    print $fh Dumper($data);
+    Thruk::Utils::IO::close($fh, $file.'.new');
+    Thruk::Utils::IO::ensure_permissions('file', $file);
+
+    move($file.'.new', $file) or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
+        return;
+    };
+
+    return 1;
+}
+
+
+########################################
+
 =head2 array_uniq
 
   array_uniq($array)

@@ -1037,6 +1037,28 @@ function update_recurring_type_select(select_id) {
     return;
 }
 
+/* make table header selectable */
+function set_sub(nr) {
+    for(x=1;x<=10;x++) {
+        /* reset table rows */
+        if(x != nr) {
+            jQuery('.sub_'+x).css('display', 'none');
+        }
+        jQuery('.sub_'+nr).css('display', '');
+
+        /* reset buttons */
+        obj = document.getElementById("sub_"+x);
+        if(obj) {
+            styleElements(obj, "data", 1);
+        }
+    }
+    obj = document.getElementById("sub_"+nr);
+    styleElements(obj, "data dataSelected", 1);
+
+
+    return false;
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b

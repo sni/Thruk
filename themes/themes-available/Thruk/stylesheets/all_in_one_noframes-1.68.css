@@ -666,26 +666,6 @@ TABLE.cmd_pane tbody > tr > th > A > IMG {
   vertical-align: text-bottom;
 }
 
-.bookmarkHead {
-  font-size: 9pt;
-  font-weight: bold;
-  background-color: #DBDBDB;
-  line-height: 13pt;
-}
-
-TABLE.bookmarkTable {
-  border: 0px;
-}
-
-TABLE.bookmarkTable TD {
-  border: 0px;
-}
-
-TABLE.bookmarkTable TD.bookmarkTable {
-  border: 0px;
-}
-
-
 TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.servicedowntimes TD {
   text-align: center;
 }
@@ -2070,14 +2050,10 @@ TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servi
 }
 
 
-TH.pnpSelected {
+TH.pnpSelected, TH.dataSelected {
   background-color: #DEDBD2;
   border: 1px #444444 inset;
   font-size: 12px;
-}
-
-TABLE.bookmarkTable {
-  border: 1px outset #444444;
 }
 
 TABLE.procInfoTable TD.dataVal {

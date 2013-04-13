@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - added public bookmarks
           - added recurring downtimes for host- and servicegroups
           - added regular expression contact filter (Scott Dworkis)
           - Bug Fixes

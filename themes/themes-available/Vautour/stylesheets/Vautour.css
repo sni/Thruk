@@ -44,3 +44,9 @@ BODY.status TABLE.filter {
   margin-top: 4px;
   border: 1px solid grey;
 }
+
+TABLE.bookmarks TH {
+  background-color: #707677;
+  height: 17px;
+}
+
