@@ -329,7 +329,7 @@ sub _update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my $downtimes = $self->_get_downtimes_list($c, 1);
+    my $downtimes = $self->_get_downtimes_list($c, 2);
     for my $d (@{$downtimes}) {
         next unless defined $d->{'schedule'};
         next unless scalar @{$d->{'schedule'}} > 0;
@@ -349,7 +349,9 @@ sub _get_downtimes_list {
 
     my @hostfilter    = (Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ));
     my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
-    $noauth = 1 if(!$hostfilter[0] and !$servicefilter[0]);
+    if(!$noauth) {
+        $noauth = 1 if(!$hostfilter[0] and !$servicefilter[0]);
+    }
     unless($noauth) {
         if($service) {
             push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
@@ -422,6 +424,18 @@ sub _get_downtimes_list {
             if($d->{'target'} eq 'hostgroup') {
                 next unless defined $hostgroups->{$d->{'hostgroup'}};
             }
+        }
+
+        # backend filter?
+        my $backends = Thruk::Utils::list($d->{'backends'});
+        if($noauth != 2 and scalar @{$backends} > 0) {
+            my $found = 0;
+            $found = 1 if $backends->[0] eq ''; # no backends at all
+            for my $b (@{$backends}) {
+                next unless $c->{'stash'}->{'backend_detail'}->{$b};
+                $found = 1 if $c->{'stash'}->{'backend_detail'}->{$b}->{'disabled'} != 2;
+            }
+            next unless $found;
         }
 
         # set some defaults
