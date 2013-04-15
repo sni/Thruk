@@ -16,7 +16,6 @@ general:
     - add backend name to logs
     - add go back button on error page
     - include comments in export
-    - add recurring downtimes for host/servicegroups
     - suggest custom variables?
 
 config:
