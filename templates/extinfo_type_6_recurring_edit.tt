@@ -135,7 +135,7 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;src=[% rd.file %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      [% IF rd.file %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;src=[% rd.file %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
       <button class="save_button button" style="width: 160px;"[% IF !can_edit %] disabled[% END %]>Save</button>
     </td>
   </tr>
