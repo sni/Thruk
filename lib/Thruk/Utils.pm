@@ -78,6 +78,22 @@ sub format_date {
 
 ##############################################
 
+=head2 format_number
+
+  my $string = format_number($number)
+
+return number with thousands seperator
+
+=cut
+sub format_number {
+    my($number) = @_;
+    $number =~ s/(\d{1,3}?)(?=(\d{3})+$)/$1,/gmx;
+    return $number;
+}
+
+
+##############################################
+
 =head2 format_cronentry
 
   my $cron_string = format_cronentry($cron_entry)
