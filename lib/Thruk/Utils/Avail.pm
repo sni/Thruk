@@ -247,7 +247,6 @@ sub calculate_availability {
             push @servicefilter, { 'host_name' => $h };
         }
         my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
-        die('no such service') unless scalar @{$service_data} > 0;
         for my $service (@{$service_data}) {
             $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
             push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
@@ -260,6 +259,7 @@ sub calculate_availability {
             }
         }
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);
+        die('no such host') unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
