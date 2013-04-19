@@ -118,8 +118,8 @@ Return config database as a L<Monitoring::Config|Monitoring::Config> object.
 sub get_object_db {
     my($self) = @_;
     my $c = $self->get_c();
-    die("config tool not enabled") unless $c->config->{'use_feature_configtool'} == 1;
-    Thruk::Utils::Conf::set_object_model($c) or die("failed to set objects model");
+    die("Config tool not enabled!") unless $c->config->{'use_feature_configtool'} == 1;
+    Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model. Object configuration enabled?");
     return $c->{'obj_db'};
 }
 
