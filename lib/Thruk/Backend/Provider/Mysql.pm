@@ -1492,12 +1492,12 @@ sub _import_logcache_from_file {
 
             # commit every 1000th to avoid to large blocks
             if($log_count%1000) {
-                $dbh->do($stm.join(',', @values));
+                $self->_safe_insert($dbh, $stm, \@values, $verbose);
                 @values = ();
             }
             print '.' if $log_count%100 == 0 and $verbose;
         }
-        $dbh->do($stm.join(',', @values)) if scalar @values > 0;
+        $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
         CORE::close($fh);
         print "\n" if $verbose;
     }
@@ -1563,11 +1563,11 @@ sub _insert_logs {
 
         # commit every 1000th to avoid to large blocks
         if($log_count%1000) {
-            $dbh->do($stm.join(',', @values));
+            $self->_safe_insert($dbh, $stm, \@values, $verbose);
             @values = ();
         }
     }
-    $dbh->do($stm.join(',', @values)) if scalar @values > 0;
+    $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
     return $log_count;
 }
 
@@ -1585,6 +1585,27 @@ sub _drop_tables {
     my($self, $dbh, $prefix) = @_;
     for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
         $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
+    }
+    return;
+}
+
+##########################################################
+sub _safe_insert {
+    my($self, $dbh, $stm, $values, $verbose) = @_;
+    eval {
+        $dbh->do($stm.join(',', @{$values}));
+    };
+    if($@) {
+        print "ERROR: ".$@."\n" if $verbose;
+
+        # insert failed for some reason, try them one by one to see which one breaks
+        for my $v (@{$values}) {
+            eval {
+                $dbh->do($stm.$v);
+            };
+            print "ERROR: ".$@."\n"                    if $verbose;
+            print "ERROR: insert failed for: ".$v."\n" if $verbose;
+        }
     }
     return;
 }
