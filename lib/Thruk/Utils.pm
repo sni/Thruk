@@ -1654,7 +1654,7 @@ sub restart_later {
         my $pid = $$;
         system("sleep 1 && kill -HUP $pid &");
         Thruk::Utils::append_message($c, 'Thruk has been restarted.');
-        return $c->response->redirect('../startup.html?wait#'.$redirect);
+        return $c->response->redirect($c->stash->{'url_prefix'}.'thruk/startup.html?wait#'.$redirect);
     } else {
         Thruk::Utils::append_message($c, 'Changes take effect after Restart.');
         return $c->response->redirect($redirect);
