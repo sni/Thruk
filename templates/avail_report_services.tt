@@ -1,5 +1,6 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>

@@ -1,5 +1,6 @@
 ﻿[% USE HTML %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 [% UNLESS nomap %]
 
 <script type="text/javascript">

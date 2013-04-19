@@ -759,6 +759,7 @@ sub end : ActionClass('RenderView') {
         print $fh "\n";
         print $fh $c->stash->{'debug_info'};
         Thruk::Utils::IO::close($fh, $tmpfile);
+        Thruk::Utils::set_message( $c, 'success_message fixed', 'Debug Information written to: '.$tmpfile );
     }
 
     return 1;
