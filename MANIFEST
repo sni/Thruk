@@ -1031,6 +1031,7 @@ t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
+t/101-cli-thruk.t
 t/200-view_Excel.t
 t/200-view_GD.t
 t/200-view_JSON.t
