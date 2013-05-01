@@ -6,6 +6,7 @@ next:
           - added regular expression contact filter (Scott Dworkis)
           - Bug Fixes
             - fixed negated regex group search
+            - fixed encoding in reports / bookmarks
 
 1.68     Tue Apr  9 21:04:03 CEST 2013
           - allow custom cron entries for reports / recurring downtimes

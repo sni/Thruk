@@ -1711,6 +1711,10 @@ sub read_data_file {
 
     my $cont = read_file($filename);
     if ($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
+
+    # ensure right encoding
+    $cont = Thruk::Utils::Conf::decode_any($cont);
+
     my $data;
     ## no critic
     eval('$data = '.$cont.';');
