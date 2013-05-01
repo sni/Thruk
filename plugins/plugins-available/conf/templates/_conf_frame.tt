@@ -41,12 +41,12 @@
               </tr>
             </table>
           </form>
-          [% IF last_changed || needs_commit %]
+          [% IF last_changed || needs_commit || show_save_reload %]
           <br>
           <table border="0" class="optBox" style="position: absolute; right: 3px;">
             <tr>
               <td>
-                [% button('conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes', 'save &amp; reload', 'conf_save_reload_button') %]
+                [% button('conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes', 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(\'' _ show_save_reload _ '\')') %]
               </td>
             </tr>
           </table>

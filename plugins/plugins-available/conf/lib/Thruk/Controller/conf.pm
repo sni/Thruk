@@ -91,7 +91,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{infoBoxTitle}          = 'Config Tool';
     $c->stash->{'last_changed'}        = 0;
     $c->stash->{'needs_commit'}        = 0;
-
+    $c->stash->{'show_save_reload'}    = 0;
 
     Thruk::Utils::ssi_include($c);
 
@@ -908,11 +908,11 @@ sub _process_objects_page {
 
     _check_external_reload($c);
 
-    $c->stash->{'subtitle'}        = "Object Configuration";
-    $c->stash->{'template'}        = 'conf_objects.tt';
-    $c->stash->{'file_link'}       = "";
-    $c->stash->{'coretype'}        = $c->{'obj_db'}->{'coretype'};
-    $c->stash->{'bare'}            = $c->{'request'}->{'parameters'}->{'bare'} || 0;
+    $c->stash->{'subtitle'}         = "Object Configuration";
+    $c->stash->{'template'}         = 'conf_objects.tt';
+    $c->stash->{'file_link'}        = "";
+    $c->stash->{'coretype'}         = $c->{'obj_db'}->{'coretype'};
+    $c->stash->{'bare'}             = $c->{'request'}->{'parameters'}->{'bare'} || 0;
 
     $c->{'obj_db'}->read_rc_file();
 
@@ -937,7 +937,11 @@ sub _process_objects_page {
 
         # save this object
         elsif($c->stash->{action} eq 'store') {
-            return if $self->_object_save($c, $obj);
+            my $rc = $self->_object_save($c, $obj);
+            if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
+                return if $self->_apply_config_changes($c);
+            }
+            return if $rc;
         }
 
         # disable this object temporarily

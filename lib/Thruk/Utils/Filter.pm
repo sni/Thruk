@@ -684,13 +684,13 @@ sub logline_icon {
 
 =head2 button
 
-  my $html = button($link, $value, $class)
+  my $html = button($link, $value, $class, [$onclick])
 
 returns button html source
 
 =cut
 sub button {
-    my($link, $value, $class) = @_;
+    my($link, $value, $class, $onclick) = @_;
 
     my($page, $args) = split(/\?/mx, $link, 2);
     $args =~ s/&amp;/&/gmx;
@@ -700,7 +700,9 @@ sub button {
         my($k,$v) = split(/=/mx,$a,2);
         $html   .= '<input type="hidden" name="'.$k.'" value="'.$v.'">';
     }
-    $html   .= '<button class="'.$class.'">'.$value.'</button>';
+    $html   .= '<button class="'.$class.'"';
+    $html   .= ' onclick="'.$onclick.'"' if $onclick;
+    $html   .= '>'.$value.'</button>';
     $html   .= '</form>';
     return $html;
 }

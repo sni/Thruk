@@ -641,3 +641,18 @@ function conf_validate_object_form(f) {
     }
     return true;
 }
+
+/* if form id is set, append own form value to remote form and submit merged */
+function save_reload_apply(formid) {
+    if(!formid) { return true; }
+    var remoteform = document.getElementById(formid);
+    if(!remoteform) { return true; }
+    var input = jQuery("<input>", { type: "hidden", name: "save_and_reload", value: "1" });
+    jQuery(remoteform).append(jQuery(input));
+    if(remoteform.onsubmit()) {
+        // does not work in firefox (only after removing an attribute)
+        //debug(remoteform.submit());
+        jQuery('button.conf_apply_button')[0].click();
+    }
+    return false;
+}

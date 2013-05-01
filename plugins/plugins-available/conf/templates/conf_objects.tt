@@ -12,7 +12,7 @@
 [% END %]
 
 [% duplicate_keys = {} %]
-<form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);">
+<form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);" id="obj_edit_[% object.get_id() %]">
 <input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="type" value="[% type %]">
@@ -69,6 +69,7 @@
         [% IF object.defined('file') && object.file.readonly %]
           [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
         [% ELSE %]
+          [% show_save_reload = 'obj_edit_' _ object.get_id() %]
           [% PROCESS _conf_object_edit.tt obj = object %]
         [% END %]
         </div>
