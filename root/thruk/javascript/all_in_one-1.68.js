@@ -3597,6 +3597,7 @@ var ajax_search = {
                         file = data.display.split(" - ");
                         name = "<img src='" + file[1] + "' style='vertical-align: text-bottom'> " + file[0];
                     }
+                    name        = name.replace(/\ \(disabled\)$/, '<span style="color: #EB6900; margin-left: 20px;"> (disabled)<\/span>');
                     resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;

@@ -352,6 +352,7 @@ sub _process_json_page {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
             my $name = $use_long ? $dat->get_long_name(undef, '  -  ') : $dat->get_name();
             if(defined $name) {
+                if($dat->{'disabled'}) { $name = $name.' (disabled)' }
                 push @{$objects}, $name
             } else {
                 $c->log->warn("object without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
@@ -1279,6 +1280,7 @@ sub _get_context_object {
     $c->stash->{'file_name'}     = $c->{'request'}->{'parameters'}->{'file'};
     $c->stash->{'file_line'}     = $c->{'request'}->{'parameters'}->{'line'};
     $c->stash->{'data_name'}     =~ s/^(.*)\ \ \-\ \ .*$/$1/gmx;
+    $c->stash->{'data_name'}     =~ s/\ \(disabled\)$//gmx;
     $c->stash->{'type'}          = lc $c->stash->{'type'};
     $c->stash->{'show_object'}   = 0;
     $c->stash->{'show_secondary_select'} = 0;
