@@ -1817,6 +1817,7 @@ sub _object_tree {
         my $templates = {};
         my $objs = $c->{'obj_db'}->get_templates_by_type($type);
         for my $o (@{$objs}) {
+            next if $o->{'disabled'};
             if(!defined $o->{'conf'}->{'use'}) {
                 $templates->{$o->get_template_name()} = $o;
             } else {
