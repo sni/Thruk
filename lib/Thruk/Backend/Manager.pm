@@ -77,17 +77,19 @@ sub init {
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
 
-    for my $peer (@{$self->get_peers()}) {
+    for my $peer (@{$self->get_peers(1)}) {
         $peer->{'local'} = 1;
         my $addr = $peer->{'addr'};
-        if($peer->{'type'} eq 'http') {
-            $addr =~ s/^http(|s):\/\///mx;
-            $addr =~ s/\/.*$//mx;
-        }
-        if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./mx) {
-            $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
-        } else {
-            $self->{'local_hosts'}->{$peer->{'key'}} = 1;
+        if($addr) {
+            if($peer->{'type'} eq 'http') {
+                $addr =~ s/^http(|s):\/\///mx;
+                $addr =~ s/\/.*$//mx;
+            }
+            if($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./mx) {
+                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
+            } else {
+                $self->{'local_hosts'}->{$peer->{'key'}} = 1;
+            }
         }
         $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
         push @{$self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}}}, $peer;
@@ -129,9 +131,9 @@ sub disable_hidden_backends {
 
 =head2 get_peers
 
-  get_peers()
+  get_peers([$all])
 
-returns all configured peers
+returns all configured peers (except config-only)
 
 =cut
 
