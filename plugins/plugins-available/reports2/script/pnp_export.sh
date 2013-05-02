@@ -10,7 +10,7 @@
 PNP_WGET="wget -q"
 
 if [ "$OMD_ROOT" != "" ]; then
-  PNP_ETC=~/etc/pnp4nagios/
+  PNP_ETC=~/etc/pnp4nagios
   PNP_INDEX=~/share/pnp4nagios/htdocs/index.php
 fi
 
@@ -36,6 +36,7 @@ if [ "${PNPURL:0:5}" != "http:" -a "${PNPURL:0:6}" != "https:" ]; then
   # export graph with local php
   [ "$PNP_ETC"   = "" ] && exit 0
   [ "$PNP_INDEX" = "" ] && exit 0
+  [ -d "$PNP_ETC/."   ] || exit 0
   cd $PNP_ETC
   php $PNP_INDEX "$REQUEST_URI" > $TEMPFILE 2>/dev/null
 else
