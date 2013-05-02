@@ -91,6 +91,7 @@ $peer_configs    = [] unless defined $peer_configs;
 my $num_peers    = scalar @{$peer_configs};
 my $pool_size    = __PACKAGE__->config->{'connection_pool_size'};
 my $use_curl     = __PACKAGE__->config->{'use_curl'};
+__PACKAGE__->config->{'deprecations_shown'} = {};
 if($num_peers > 0) {
     my  $peer_keys   = {};
     our $peer_order  = [];
@@ -101,6 +102,10 @@ if($num_peers > 0) {
         $peer_keys->{$peer->{'key'}} = 1;
         $peers->{$peer->{'key'}}     = $peer;
         push @{$peer_order}, $peer->{'key'};
+        if($peer_config->{'groups'} and !__PACKAGE__->config->{'deprecations_shown'}->{'backend_groups'}) {
+            print STDERR "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.\n";
+            __PACKAGE__->config->{'deprecations_shown'}->{'backend_groups'} = 1;
+        }
     }
     if($num_peers > 1 and $pool_size > 1) {
         $Storable::Eval    = 1;

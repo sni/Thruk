@@ -1924,6 +1924,7 @@ for details.
                  without the right contactgroup don't even see
                  that there is a backend. Note that this implies
                  one extra backend request per page.
+                 (deprecated, please do not use)
      ** section  to group backends/sites by different sections, enter a
                  section.
      ** options
