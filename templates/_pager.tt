@@ -2,6 +2,7 @@
 
   <form action="" method="GET">
   [% FOREACH par = c.request.query_params.keys %]
+    [% NEXT IF !c.request.query_params.defined(par) %]
     [% NEXT IF par == 'entries' %]
     [% NEXT IF par == 'next' %]
     [% NEXT IF par == 'next.x' %]
