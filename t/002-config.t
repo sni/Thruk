@@ -20,6 +20,7 @@ for my $key (qw/cgi_cfg_stat
                 use_feature_configtool
                 use_feature_reports
                 root
+                deprecations_shown
                 ssi_includes
                 static
                 secret_key/) {
