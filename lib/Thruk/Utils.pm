@@ -1412,7 +1412,7 @@ sub update_cron_file {
         } else {
             $rc = $rc >> 8;
             # override know error with initial crontab
-            if($rc != 1 or $tmperror !~ m/no\crontab\ for/mx) {
+            if($rc != 1 or $tmperror !~ m/no\ crontab\ for/mx) {
                 die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors)) if $rc != 0;
             }
         }
