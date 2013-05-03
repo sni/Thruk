@@ -825,7 +825,7 @@ sub _task_servicesminemap {
     }
     my $height = 15 + int($longest_description * 5.70);
     $height    =  40 if $height <  40;
-    $height    = 250 if $height > 250;
+    $height    = 300 if $height > 300;
 
     my $service2index = {};
     my $json = {
