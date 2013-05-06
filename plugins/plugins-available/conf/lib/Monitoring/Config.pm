@@ -1122,6 +1122,41 @@ sub get_files_root {
 }
 
 ##########################################################
+
+=head2 is_host_in_hostgroup
+
+    is_host_in_hostgroup()
+
+return list of hostgroups if this host is member of the group
+
+=cut
+sub is_host_in_hostgroup {
+    my($self, $group, $host_name, $hostgroups) = @_;
+
+    my $group_name = $group->get_name();
+    if(defined $hostgroups) {
+        for my $hostgroup (@{$hostgroups}) {
+            return([$group_name]) if $hostgroup eq $group_name;
+        }
+    }
+
+    my($grp_conf_keys, $grp_config) = $group->get_computed_config($self);
+    if(defined $grp_config->{'members'} and grep { $_ eq $host_name} @{$grp_config->{'members'}}) {
+        return $group_name;
+    }
+    if(defined $grp_config->{'hostgroup_members'}) {
+        for my $name (@{$grp_config->{'hostgroup_members'}}) {
+            for my $subgroup (@{$self->get_objects_by_name('hostgroup', $name)}) {
+                my $sg = $self->is_host_in_hostgroup($subgroup, $host_name, $hostgroups);
+                return([@{$sg}, $group_name]) if $sg;
+            }
+        }
+    }
+
+    return;
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _set_config {

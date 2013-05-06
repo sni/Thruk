@@ -381,8 +381,7 @@ return computed config for this object
 
 =cut
 sub get_computed_config {
-    my $self    = shift;
-    my $objects = shift;
+    my($self, $objects) = @_;
 
     my $cache = $self->{'cache'}->{'computed'}->{$self->{'id'}};
     return(@{$cache}) if defined $cache;
@@ -645,8 +644,7 @@ returns config hash with templates resolved
 
 =cut
 sub get_resolved_config {
-    my $self    = shift;
-    my $objects = shift;
+    my($self, $objects) = @_;
 
     confess("no objects") unless defined $objects;
 

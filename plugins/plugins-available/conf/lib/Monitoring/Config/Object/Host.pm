@@ -156,24 +156,24 @@ sub get_groups {
     my @groups;
 
     my $host_name = $self->get_name();
+    my($hst_conf_keys, $hst_config) = $self->get_computed_config($config);
 
     # groups by member
     for my $group (@{$config->get_objects_by_type('hostgroup')}) {
-        my($grp_conf_keys, $grp_config) = $group->get_computed_config($config);
-        if(defined $grp_config->{'members'} and grep { $_ eq $host_name} @{$grp_config->{'members'}}) {
-            push @groups, $group->get_name();
-        }
+        my $groupnames = $config->is_host_in_hostgroup($group, $host_name, $hst_config->{'hostgroups'});
+        push @groups, @{$groupnames} if $groupnames;
     }
 
     # assigned by host
-    my($hst_conf_keys, $hst_config) = $self->get_computed_config($config);
     if(defined $hst_config->{'hostgroups'}) {
         for my $group (@{$hst_config->{'hostgroups'}}) {
             push @groups, $group;
         }
     }
 
-    return \@groups;
+    my %seen = ();
+    my @uniq = sort( grep { !$seen{$_}++ } (@groups) );
+    return \@uniq;
 }
 
 ##########################################################

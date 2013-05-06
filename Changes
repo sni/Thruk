@@ -4,6 +4,8 @@ next:
           - added public bookmarks
           - added recurring downtimes for host- and servicegroups
           - added regular expression contact filter (Scott Dworkis)
+          - config tool:
+            - resolve hostgroup_members when looking for a hosts services
           - Bug Fixes
             - fixed negated regex group search
             - fixed encoding in reports / bookmarks
