@@ -1549,8 +1549,7 @@ sub _rebuild_index {
                     $objects->{'byname'}->{$obj->{'type'}}->{$primary} = $obj->{'id'};
                 }
             } else {
-                my $type = $obj->get_type();
-                if($type ne 'hostescalation' and $type ne 'serviceescalation' and $type ne 'hostgroup') {
+                if($obj->must_have_name()) {
                     push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
                 }
             }

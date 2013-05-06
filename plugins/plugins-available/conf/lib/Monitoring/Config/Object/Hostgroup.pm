@@ -43,10 +43,11 @@ return new object
 sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
-        'type'        => 'hostgroup',
-        'primary_key' => 'hostgroup_name',
-        'default'     => $Monitoring::Config::Object::Hostgroup::Defaults,
-        'standard'    => [ 'hostgroup_name', 'alias', 'members' ],
+        'type'              => 'hostgroup',
+        'primary_key'       => 'hostgroup_name',
+        'default'           => $Monitoring::Config::Object::Hostgroup::Defaults,
+        'standard'          => [ 'hostgroup_name', 'alias', 'members' ],
+        'can_have_no_name'  => 1, # hostgroups with register 0 without names are possible
     };
     bless $self, $class;
     return $self;

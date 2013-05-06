@@ -261,6 +261,19 @@ sub get_type {
     return $self->{'type'};
 }
 
+##########################################################
+
+=head2 must_have_name
+
+returns true if object must have a name
+
+=cut
+sub must_have_name {
+    my $self = shift;
+    return 0 if $self->{'can_have_no_name'};
+    return 1;
+}
+
 
 ##########################################################
 

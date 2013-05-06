@@ -49,9 +49,10 @@ sub BUILD {
     return unless($coretype eq 'any' or $coretype eq 'shinken');
 
     my $self = {
-        'type'        => 'escalation',
-        'primary_key' => [ 'host_name', [ 'hostgroup_name' ] ],
-        'default'     => $Monitoring::Config::Object::Escalation::Defaults,
+        'type'              => 'escalation',
+        'primary_key'       => [ 'host_name', [ 'hostgroup_name' ] ],
+        'default'           => $Monitoring::Config::Object::Escalation::Defaults,
+        'can_have_no_name'  => 1,
     };
     bless $self, $class;
     return $self;

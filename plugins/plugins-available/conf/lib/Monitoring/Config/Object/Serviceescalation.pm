@@ -53,9 +53,10 @@ return new object
 sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
-        'type'        => 'serviceescalation',
-        'primary_key' => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
-        'default'     => $Monitoring::Config::Object::Serviceescalation::Defaults,
+        'type'              => 'serviceescalation',
+        'primary_key'       => [ 'service_description', [ 'host_name', 'hostgroup_name' ] ],
+        'default'           => $Monitoring::Config::Object::Serviceescalation::Defaults,
+        'can_have_no_name'  => 1,
     };
     bless $self, $class;
     return $self;
