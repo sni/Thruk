@@ -374,18 +374,35 @@ sub _redirect_or_success {
     }
 
     # only wait if we got original backends
+    my $backends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend'});
     if($wait and defined $c->{'request'}->{'parameters'}->{'backend.orig'}) {
-        my $backends = $c->{'request'}->{'parameters'}->{'backend'};
-        if(ref $c->{'request'}->{'parameters'}->{'backend'} eq 'ARRAY') {
-            $backends = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
-        }
-        my $backendsorig = $c->{'request'}->{'parameters'}->{'backend.orig'};
-        if(ref $c->{'request'}->{'parameters'}->{'backend.orig'} eq 'ARRAY') {
-            $backendsorig = join('|', @{$c->{'request'}->{'parameters'}->{'backend.orig'}});
-        }
-        $wait = 0 if $backends ne $backendsorig;
+        my $backends_str = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
+        my $backendsorig = join('|', @{Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend.orig'})});
+        $wait = 0 if $backends_str ne $backendsorig;
     }
 
+    my $has_spaces = 0;
+    # skip hosts and services containing spaces
+    # livestatus supports semicolon since version 1.1.11 i3
+    if(   $c->stash->{'lasthost'}    =~ m/\s+/gmx
+       or $c->stash->{'lastservice'} =~ m/\s+/gmx) {
+       $has_spaces = 1;
+    }
+
+    # skip wait feature on old livestatus versions
+    # wait feature has been introduced with version 1.1.3
+    for my $b (@{$backends}) {
+        my $v = $c->stash->{'pi_detail'}->{$b}->{'data_source_version'};
+        next unless defined $v;
+        next unless $v =~ m/^Livestatus\s(.*)$/mx;
+        my $v_num = $1;
+        if(!Thruk::Utils::version_compare($v_num, '1.1.3')) {
+            $wait = 0;
+        }
+        if(!Thruk::Utils::version_compare($v_num, '1.1.12') and $has_spaces) {
+            $wait = 0;
+        }
+    }
 
     $c->stash->{how_far_back} = $how_far_back;
 
@@ -394,7 +411,6 @@ sub _redirect_or_success {
         # send a wait header?
         if(    $wait
            and defined $c->stash->{'lasthost'}
-           and $c->stash->{'lasthost'} !~ m/\s+/gmx
            and defined $c->stash->{'start_time_unix'}
            and $c->stash->{'start_time_unix'} <= $c->stash->{'now'}
         ) {
