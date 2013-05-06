@@ -8,7 +8,7 @@ use Carp;
 use POSIX qw(strftime mktime);
 use Monitoring::Availability::Logs;
 
-our $VERSION = '0.46';
+our $VERSION = '0.48';
 
 
 =head1 NAME
@@ -879,13 +879,13 @@ sub _process_log_line {
     }
 
     # skip hosts we dont need
-    if($report_options_calc_all == 0 and defined $data->{'host_name'} and !defined $self->{'host_data'}->{$data->{'host_name'}} and !defined $self->{'service_data'}->{$data->{'host_name'}}) {
+    if($report_options_calc_all == FALSE and defined $data->{'host_name'} and !defined $self->{'host_data'}->{$data->{'host_name'}} and !defined $self->{'service_data'}->{$data->{'host_name'}}) {
         $self->_log('  -> skipped not needed host event') if $verbose;
         return;
     }
 
     # skip services we dont need
-    if($report_options_calc_all == 0
+    if($report_options_calc_all == FALSE
        and $data->{'host_name'}
        and $data->{'service_description'}
        and !defined $self->{'service_data'}->{$data->{'host_name'}}->{$data->{'service_description'}}
@@ -922,7 +922,7 @@ sub _process_log_line {
             }
         }
         elsif($data->{'type'} eq 'SERVICE DOWNTIME ALERT') {
-            next unless $self->{'report_options'}->{'showscheduleddowntime'};
+            return unless $self->{'report_options'}->{'showscheduleddowntime'};
 
             undef $data->{'state'}; # we dont know the current state, so make sure it wont be overwritten
             &_set_service_event($self,$data->{'host_name'}, $data->{'service_description'}, $result, $data);
@@ -961,6 +961,9 @@ sub _process_log_line {
         my $host_hist = $self->{'host_data'}->{$data->{'host_name'}};
 
         if($data->{'type'} eq 'CURRENT HOST STATE' or $data->{'type'} eq 'HOST ALERT' or $data->{'type'} eq 'INITIAL HOST STATE') {
+            # skip unwanted host events
+            return unless($report_options_calc_all == TRUE or defined $result->{'hosts'}->{$data->{'host_name'}});
+
             &_set_host_event($self,$data->{'host_name'}, $result, $data);
 
             # set a log entry
@@ -983,7 +986,7 @@ sub _process_log_line {
             }
         }
         elsif($data->{'type'} eq 'HOST DOWNTIME ALERT') {
-            next unless $self->{'report_options'}->{'showscheduleddowntime'};
+            return unless $self->{'report_options'}->{'showscheduleddowntime'};
 
             my $last_state_time = $host_hist->{'last_state_time'};
 
