@@ -203,7 +203,7 @@ sub read_cgi_cfg {
             $c->error("cgi.cfg not readable: ".$!);
             return $c->detach('/error/index/4');
         }
-        print STDERR "$file not readable: ".$!."\n\n";
+        print STDERR "$config->{'project_root'}/$file not readable: ".$!."\n\n";
         return;
     }
 
