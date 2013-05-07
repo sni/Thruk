@@ -16,7 +16,9 @@ use strict;
 use Data::Dumper;
 use LWP::UserAgent;
 use Digest::MD5 qw(md5_hex);
+use Thruk::Utils;
 use Thruk::Utils::IO;
+use Encode qw/encode_utf8/;
 
 ##############################################
 BEGIN {
@@ -60,6 +62,8 @@ sub external_authentication {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
             $realm = $1;
+            $login = encode_utf8(Thruk::Utils::decode_any($login));
+            $pass  = encode_utf8(Thruk::Utils::decode_any($pass));
             $ua->credentials( $netloc, $realm, $login, $pass );
             $res = $ua->post($authurl);
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
