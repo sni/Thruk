@@ -1142,7 +1142,7 @@ sub is_host_in_hostgroup {
 
     my($grp_conf_keys, $grp_config) = $group->get_computed_config($self);
     if(defined $grp_config->{'members'} and grep { $_ eq $host_name} @{$grp_config->{'members'}}) {
-        return $group_name;
+        return([$group_name]);
     }
     if(defined $grp_config->{'hostgroup_members'}) {
         for my $name (@{$grp_config->{'hostgroup_members'}}) {
