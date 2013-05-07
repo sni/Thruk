@@ -1713,7 +1713,7 @@ sub read_data_file {
     if ($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
 
     # ensure right encoding
-    $cont = Thruk::Utils::Conf::decode_any($cont);
+    $cont = decode_any($cont);
 
     my $data;
     ## no critic
@@ -1748,6 +1748,22 @@ sub write_data_file {
 
     return;
 }
+
+##########################################################
+
+=head2 decode_any
+
+read and decode string from either utf-8 or iso-8859-1
+
+=cut
+sub decode_any {
+    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
+    if ( $@ ) { # input was not utf8
+        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
+    }
+    return $_[0];
+}
+
 ##############################################
 
 =head2 get_git_name

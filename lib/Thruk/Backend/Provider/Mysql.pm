@@ -1456,7 +1456,7 @@ sub _import_logcache_from_file {
         open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
         while(my $line = <$fh>) {
             chomp($line);
-            &Thruk::Utils::Conf::decode_any($line);
+            &Thruk::Utils::decode_any($line);
             if($mode eq 'update') {
                 next if defined $duplicate_lookup->{$line};
             }

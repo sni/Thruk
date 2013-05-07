@@ -8,6 +8,7 @@ use Monitoring::Config::Object;
 use File::Slurp;
 use utf8;
 use Encode qw(encode_utf8 decode);
+use Thruk::Utils;
 use Thruk::Utils::Conf;
 use Thruk::Utils::IO;
 
@@ -32,8 +33,8 @@ return new host
 =cut
 sub new {
     my ( $class, $file, $readonlypattern, $coretype, $force, $remotepath ) = @_;
-    Thruk::Utils::Conf::decode_any($file);
-    Thruk::Utils::Conf::decode_any($remotepath);
+    Thruk::Utils::decode_any($file);
+    Thruk::Utils::decode_any($remotepath);
     my $self = {
         'path'         => $file,
         'display'      => $remotepath || $file,
@@ -115,7 +116,7 @@ sub update_objects {
 
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
-        Thruk::Utils::Conf::decode_any($line);
+        Thruk::Utils::decode_any($line);
         chomp($line);
         # connect multiple lines
         while(substr($line, -1) eq '\\' and (substr($line, 0, 1) ne '#' or $in_disabled_object)) {
@@ -497,7 +498,7 @@ sub diff {
     open(my $ph, '-|', $cmd);
     while(<$ph>) {
         my $line = $_;
-        Thruk::Utils::Conf::decode_any($line);
+        Thruk::Utils::decode_any($line);
         $diff .= $line;
     }
     unlink($filename);

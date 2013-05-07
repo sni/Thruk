@@ -8,6 +8,7 @@ use Encode qw/decode_utf8/;
 use Data::Dumper;
 use Config::General;
 use Carp;
+use Thruk::Utils;
 
 =head1 NAME
 
@@ -1393,7 +1394,7 @@ sub _get_files_names {
             my $path = $dir;
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
-                Thruk::Utils::Conf::decode_any($file);
+                Thruk::Utils::decode_any($file);
                 $file =~ s|/+|/|gmx;
                 $files->{$file} = 1;
             }
@@ -1416,7 +1417,7 @@ sub _get_files_names {
     # single files
     if(defined $config->{'obj_file'}) {
         for my $file ( ref $config->{'obj_file'} eq 'ARRAY' ? @{$config->{'obj_file'}} : ($config->{'obj_file'}) ) {
-            Thruk::Utils::Conf::decode_any($file);
+            Thruk::Utils::decode_any($file);
             if($self->{'config'}->{'localdir'}) {
                 my $display = $file;
                 $file       = $self->{'config'}->{'localdir'}.'/'.$file;

@@ -8,7 +8,6 @@ use File::Slurp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
 use Data::Dumper;
-use Encode qw(decode);
 use Scalar::Util qw/weaken/;
 
 =head1 NAME
@@ -737,21 +736,6 @@ sub get_default_peer_config {
     $config->{'obj_dir'}        = [] unless defined $config->{'obj_dir'};
     $config->{'obj_file'}       = [] unless defined $config->{'obj_file'};
     return $config;
-}
-
-##########################################################
-
-=head2 decode_any
-
-read and decode string from either utf-8 or iso-8859-1
-
-=cut
-sub decode_any {
-    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
-    if ( $@ ) { # input was not utf8
-        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
-    }
-    return $_[0];
 }
 
 ##########################################################
