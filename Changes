@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed sending commands to multiple backends
+
 1.70     Mon May  6 20:47:31 CEST 2013
           - added public bookmarks
           - added recurring downtimes for host- and servicegroups

@@ -376,7 +376,7 @@ sub _redirect_or_success {
     # only wait if we got original backends
     my $backends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend'});
     if($wait and defined $c->{'request'}->{'parameters'}->{'backend.orig'}) {
-        my $backends_str = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
+        my $backends_str = join('|', @{$backends});
         my $backendsorig = join('|', @{Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend.orig'})});
         $wait = 0 if $backends_str ne $backendsorig;
     }
