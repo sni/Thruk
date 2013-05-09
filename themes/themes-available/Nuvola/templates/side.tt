@@ -123,6 +123,7 @@ document.write([% menu_name %]);
 </script>
 </div>
 [% PROCESS _ajax_search.tt %]
+[% PROCESS _side_js.tt %]
 [% IF use_frames %]
   </body>
 </html>
