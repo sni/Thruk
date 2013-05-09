@@ -1467,6 +1467,9 @@ ex.:
   graph_word = /render/       # for graphite
 
 
+Info : Quotes are supported in the action_url statement, you may want to use it for special graphite function (http://graphite.readthedocs.org/en/1.0/functions.html)
+Do not escape double quotes here, otherwise graph won't work.
+
 ==== show_custom_vars
 Show custom vars in host / service ext info. List variable names to
 display in the host and service extinfo details page. Can be specified
