@@ -2,6 +2,11 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - Bug Fixes
+            - increased range of utf-8 characters removed due to
+              missing high surrogate character in surrogate pair
+
+1.70-2   Wed May  8 22:13:47 CEST 2013
+          - Bug Fixes
             - fixed sending commands to multiple backends
 
 1.70     Mon May  6 20:47:31 CEST 2013

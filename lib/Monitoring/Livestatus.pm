@@ -909,9 +909,11 @@ sub _send {
         $result = decode_json($body);
     };
     # fix low/high surrogate errors
-    if($@ and $@ =~ m/missing\ (high|low)\ surrogate\ character\ in\ surrogate\ pair\E/mx) {
+    # missing high surrogate character in surrogate pair
+    # surrogate pair expected
+    if($@) {
         # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
-        $body =~ s/\\uD(8|9|A|B|C|D)\w{2}/\\ufffd/gmxi;
+        $body =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxi;
         eval {
             $result = decode_json($body);
         };
