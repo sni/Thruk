@@ -7,7 +7,7 @@ var pnp_url = "";
 [% END +%]
 var graph_url = "";
 [%+ IF graph_url %]
-var graph_url = "[% graph_url %]";
+var graph_url = "[% escape_quotes(graph_url) %]";
 [% END +%]
 var data = [% json_encode(plugin_output, perfdata, check_command) %];
 perf_table([% write %], [% state %], data[0], data[1], data[2], pnp_url, [% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]);
