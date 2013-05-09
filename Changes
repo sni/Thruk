@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - reload page after connection errors (only in frames mode)
           - Bug Fixes
             - increased range of utf-8 characters removed due to
               missing high surrogate character in surrogate pair

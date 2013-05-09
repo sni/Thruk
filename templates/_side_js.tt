@@ -30,5 +30,38 @@
             return false;
         });
     });
+
+    function check_frame_loaded() {
+        try {
+            var frameloc = ""+new String(top.frames['main'].location);
+            var body     = top.frames['main'].document.body.innerHTML;
+            if(   frameloc.match('thruk/cgi-bin/')
+               && frameloc.match(/_=\d+/)
+               && !body.match('Produced by Thruk')
+            ) {
+                load_errors++;
+            } else {
+                load_errors = 0;
+            }
+
+            if(load_errors >= 3 && load_errors%5 == 0) {
+                debug("trying to reload");
+                debug(frameloc);
+                frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
+                debug(frameloc);
+                top.frames['main'].location.replace(frameloc);
+            }
+        }
+        catch(e) {
+            debug(e);
+        }
+    }
+
+    var check_interval;
+    var load_errors = 0;
+    var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+    if(top.frames.length > 0) {
+        check_interval = window.setInterval('check_frame_loaded()', 5000);
+    }
 -->
 </script>
