@@ -343,6 +343,16 @@ function reloadPage() {
         updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
     }
 
+    /* set reload mark in side frame */
+    if(window.parent.frames) {
+        try {
+            top.frames['side'].is_reloading = newUrl;
+        }
+        catch(e) {
+            debug(e);
+        }
+    }
+
     /*
      * reload new url and replace history
      * otherwise history will contain every

@@ -32,9 +32,10 @@
     });
 
     function check_frame_loaded() {
+        var frameloc;
         try {
-            var frameloc = ""+new String(top.frames['main'].location);
-            var body     = top.frames['main'].document.body.innerHTML;
+            frameloc = ""+new String(top.frames['main'].location);
+            var body = top.frames['main'].document.body.innerHTML;
             if(   frameloc.match('thruk/cgi-bin/')
                && frameloc.match(/_=\d+/)
                && !body.match('Produced by Thruk')
@@ -43,25 +44,30 @@
             } else {
                 load_errors = 0;
             }
-
-            if(load_errors >= 3 && load_errors%5 == 0) {
-                debug("trying to reload");
-                debug(frameloc);
-                frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
-                debug(frameloc);
-                top.frames['main'].location.replace(frameloc);
-            }
         }
         catch(e) {
             debug(e);
+            // probably permission errors. ex. error message from proxy which results in cross-domain permission errors
+            if(is_reloading) {
+                load_errors++;
+                frameloc = is_reloading;
+            }
+        }
+
+        if(load_errors > 0 && (load_errors == 3 || load_errors%10 == 0)) {
+            debug("trying to reload");
+            frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
+            debug(frameloc);
+            top.frames['main'].location.replace(frameloc);
         }
     }
 
-    var check_interval;
+    var check_frame_loaded_interval;
     var load_errors = 0;
+    var is_reloading;
     var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
     if(top.frames.length > 0) {
-        check_interval = window.setInterval('check_frame_loaded()', 5000);
+        check_frame_loaded_interval = window.setInterval('check_frame_loaded()', 5000);
     }
 -->
 </script>
