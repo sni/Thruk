@@ -2424,7 +2424,7 @@ The MySQL logcache supports import from files too. Duplicates are not imported
 twice, so you can do that safely as often as you like.
 
 -------
-    %> thruk -a logcacheupdate /var/log/nagios/archive/nagios-09-07-2012-00.log
+    %> thruk -a logcacheupdate --local /var/log/nagios/archive/nagios-09-07-2012-00.log
     OK - imported 2 log items from 1 site successfully in 0.01s (247/s)
 -------
 

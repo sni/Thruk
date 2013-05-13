@@ -17801,14 +17801,14 @@ in this url.</p></div>
     check_command         check_load
   }</tt></pre>
 </div></div>
-<div class="paragraph">Info : Quotes are supported in the action_url statement, you may want to use it for special graphite function (<a href="http://graphite.readthedocs.org/en/1.0/functions.html"> see documentation </a>). 
-Do not escape double quotes here, otherwise graph won't work.
-<p>ex.:</p></div>
+<div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>graph_word = /pnp4nagios/   # for pnp4nagios
 graph_word = /render/       # for graphite</tt></pre>
 </div></div>
+<div class="paragraph"><p>Info : Quotes are supported in the action_url statement, you may want to use it for special graphite function (<a href="http://graphite.readthedocs.org/en/1.0/functions.html">http://graphite.readthedocs.org/en/1.0/functions.html</a>)
+Do not escape double quotes here, otherwise graph won&#8217;t work.</p></div>
 <h4 id="_show_custom_vars">show_custom_vars</h4>
 <div class="paragraph"><p>Show custom vars in host / service ext info. List variable names to
 display in the host and service extinfo details page. Can be specified
@@ -19226,7 +19226,7 @@ fast and done automatically whenever you access logfiles via Thruk.</p></div>
 twice, so you can do that safely as often as you like.</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>    %&gt; thruk -a logcacheupdate /var/log/nagios/archive/nagios-09-07-2012-00.log
+<pre><tt>    %&gt; thruk -a logcacheupdate --local /var/log/nagios/archive/nagios-09-07-2012-00.log
     OK - imported 2 log items from 1 site successfully in 0.01s (247/s)</tt></pre>
 </div></div>
 <h3 id="_authentication_update">Authentication Update</h3><div style="clear:left"></div>
@@ -19781,7 +19781,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-06 20:47:32 CEST
+Last updated 2013-05-13 10:53:11 CEST
 </div>
 </div>
 </body>
