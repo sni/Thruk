@@ -984,6 +984,7 @@ function showBugReport(id, text) {
 function getErrorText(details) {
     var text = "";
     text = text + "Version:    " + version_info+"\n";
+    text = text + "Release:    " + released+"\n";
     text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
     text = text + "Browser:    " + navigator.userAgent + "\n";
     text = text + "Backends:   ";

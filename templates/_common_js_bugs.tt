@@ -1,5 +1,6 @@
 ﻿[%+ IF show_error_reports +%]
 var version_info   = '[% fullversion(c) %]';
+var released       = '[% c.config.released %]';
 var thruk_errors   = [];
 var bug_email_rcpt = "[% bug_email_rcpt %]";
 window.onerror = function(msg, url, line) {
