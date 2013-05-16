@@ -17876,11 +17876,11 @@ makes sense when debug logging is activated.</p></div>
 <div class="paragraph"><p>Use connection pool when accessing multiple sites.
 Increases the performance because backends will be queried
 parallel but uses around 50mb of memory per pool member.
-Disabled when set to 0. (experimental feature)</p></div>
+Disabled when set to 0, number of concurrent connections otherwise.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>connection_pool_size = 0</tt></pre>
+<pre><tt>connection_pool_size = 5</tt></pre>
 </div></div>
 <h4 id="_logcache">logcache</h4>
 <div class="paragraph"><p>Enables caching logfiles for faster access and less memory usage for
@@ -19781,7 +19781,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-13 10:53:11 CEST
+Last updated 2013-05-16 11:49:55 CEST
 </div>
 </div>
 </body>

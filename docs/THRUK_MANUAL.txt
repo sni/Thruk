@@ -1552,11 +1552,11 @@ ex.:
 Use connection pool when accessing multiple sites.
 Increases the performance because backends will be queried
 parallel but uses around 50mb of memory per pool member.
-Disabled when set to 0. (experimental feature)
+Disabled when set to 0, number of concurrent connections otherwise.
 
 ex.:
 
-  connection_pool_size = 0
+  connection_pool_size = 5
 
 
 ==== logcache
