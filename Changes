@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed occasional sigpipes on config reload
+
 1.70-3   Tue May 14 17:07:57 CEST 2013
           - reload page after connection errors (only in frames mode)
           - Bug Fixes

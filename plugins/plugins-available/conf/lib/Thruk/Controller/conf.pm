@@ -2086,6 +2086,7 @@ sub _config_reload {
     for(1..30) {
         sleep(1);
         eval {
+            local $SIG{'PIPE'}='IGNORE'; # exits sometimes on reload
             $c->{'db'}->reset_failed_backends();
             $c->{'db'}->get_processinfo();
         };
