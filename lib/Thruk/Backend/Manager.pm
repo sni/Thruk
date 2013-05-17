@@ -976,7 +976,13 @@ sub _do_on_peers {
             die($1);
         } else {
             local $Data::Dumper::Deepcopy = 1;
-            confess("Error in _do_on_peers: '".$err."'\ncalled as '".(ref $function ? Dumper($function) : $function)."'\nwith args: ".Dumper(\%arg));
+            my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
+            for my $b (@{$get_results_for}) {
+                $msg   .= $b.": ".($c->stash->{'failed_backends'}->{$b} || '')."\n";
+            }
+            $msg   .= "called as '".(ref $function ? Dumper($function) : $function)."\n";
+            $msg   .= "with args: ".Dumper(\%arg);
+            confess($msg);
         }
     }
     $type = '' unless defined $type;
