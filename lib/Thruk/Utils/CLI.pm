@@ -846,7 +846,7 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
-    my $peer       = $Thruk::peers->{$peerkey};
+    my $peer       = $Thruk::Backend::Manager::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
 
     if(!Thruk::Utils::Conf::set_object_model($c)) {
@@ -927,7 +927,7 @@ sub _cmd_raw {
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
     }
-    my @keys = keys %{$Thruk::peers};
+    my @keys = keys %{$Thruk::Backend::Manager::peers};
     my $key = $keys[0];
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
@@ -961,11 +961,11 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings
-        if($Thruk::peers->{$key}->{'config'}->{'configtool'}) {
+        if($Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}) {
             $res->[2]->{$key}->{'configtool'} = {
-                'obj_readonly'   => $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
-                'obj_check_cmd'  => exists $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
-                'obj_reload_cmd' => exists $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
+                'obj_readonly'   => $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
+                'obj_check_cmd'  => exists $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
             };
         }
     }

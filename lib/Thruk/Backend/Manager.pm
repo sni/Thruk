@@ -70,8 +70,8 @@ sub init {
 
     # retain order
     $self->{'backends'} = [];
-    for my $key (@{$Thruk::peer_order}) {
-        push @{$self->{'backends'}}, $Thruk::peers->{$key};
+    for my $key (@{$Thruk::Backend::Manager::peer_order}) {
+        push @{$self->{'backends'}}, $Thruk::Backend::Manager::peers->{$key};
     }
 
     # check if we initialized at least one backend
@@ -1215,7 +1215,7 @@ sub _get_result_parallel {
         if(!$c->stash->{'failed_backends'}->{$key}) {
             my $id;
             eval {
-                $id = $Thruk::pool->add($key, $function, $arg);
+                $id = $Thruk::Backend::Manager::pool->add($key, $function, $arg);
                 $ids{$id} = $key;
             };
             confess($@) if $@;
@@ -1223,7 +1223,7 @@ sub _get_result_parallel {
     }
 
     for my $id (keys %ids) {
-        my @res = $Thruk::pool->remove($id);
+        my @res = $Thruk::Backend::Manager::pool->remove($id);
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         my $key = $ids{$id};
@@ -1255,8 +1255,19 @@ run a function on a backend peer
 sub _do_on_peer {
     my($key, $function, $arg) = @_;
 
-    my $peer = $Thruk::peers->{$key};
-    confess("no peer for key: $key, got: ".join(', ', keys %{$Thruk::peers})) unless defined $peer;
+    # make it possible to run code in thread context
+    if(ref $arg eq 'ARRAY') {
+        for(my $x = 0; $x <= scalar @{$arg}; $x++) {
+            if($arg->[$x] and $arg->[$x] eq 'eval') {
+                ## no critic
+                eval($arg->[$x+1]);
+                ## use critic
+            }
+        }
+    }
+
+    my $peer = $Thruk::Backend::Manager::peers->{$key};
+    confess("no peer for key: $key, got: ".join(', ', keys %{$Thruk::Backend::Manager::peers})) unless defined $peer;
     my($type, $size, $data, $last_error);
     my $errors = 0;
     while($errors < 3) {
@@ -1495,6 +1506,64 @@ sub reset_failed_backends {
     my $c    = shift || $Thruk::Backend::Manager::c;
     $c->stash->{'failed_backends'} = {};
     return;
+}
+
+########################################
+
+=head2 init_backend_thread_pool
+
+  init_backend_thread_pool()
+
+init thread connection pool
+
+=cut
+
+sub init_backend_thread_pool {
+    my $config = Thruk::Config::get_config();
+    my $peer_configs = $config->{'Thruk::Backend'}->{'peer'};
+    $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
+    $peer_configs    = [] unless defined $peer_configs;
+    my $num_peers    = scalar @{$peer_configs};
+    my $pool_size    = $config->{'connection_pool_size'};
+    my $use_curl     = $config->{'use_curl'};
+    $config->{'deprecations_shown'} = {};
+    if($num_peers > 0) {
+        my  $peer_keys   = {};
+        our $peer_order  = [];
+        our $peers       = {};
+        for my $peer_config (@{$peer_configs}) {
+            $peer_config->{'use_curl'} = $use_curl;
+            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
+            $peer_keys->{$peer->{'key'}} = 1;
+            $peers->{$peer->{'key'}}     = $peer;
+            push @{$peer_order}, $peer->{'key'};
+            if($peer_config->{'groups'} and !$config->{'deprecations_shown'}->{'backend_groups'}) {
+                print STDERR "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.\n";
+                $config->{'deprecations_shown'}->{'backend_groups'} = 1;
+            }
+        }
+        if($num_peers > 1 and $pool_size > 1) {
+            $Storable::Eval    = 1;
+            $Storable::Deparse = 1;
+            my $minworker = $pool_size;
+            $minworker    = $num_peers if $minworker > $num_peers; # no need for more threads than sites
+            my $maxworker = $minworker; # static pool size
+            $SIG{'USR1'}  = undef;
+            our $pool = Thruk::Pool::Simple->new(
+                min      => $minworker,
+                max      => $maxworker,
+                do       => [\&Thruk::Backend::Manager::_do_thread ],
+                passid   => 0,
+                lifespan => 10000000,
+            );
+            # wait till we got all worker running
+            my $worker = 0;
+            while($worker < $minworker) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
+        } else {
+            $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+        }
+    }
+    return();
 }
 
 ##########################################################

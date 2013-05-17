@@ -17,6 +17,19 @@ use threads;
 
 use utf8;
 use Thruk::Pool::Simple;
+use Thruk::Config;
+use Thruk::Backend::Manager;
+use Thruk::Backend::Peer;
+use Thruk::Utils::IO;
+
+###################################################
+# create connection pool
+# has to be done before the binmode
+# or even earlier to save memory
+BEGIN {
+    Thruk::Backend::Manager::init_backend_thread_pool();
+};
+
 use Carp;
 use Moose;
 use GD;
@@ -26,13 +39,9 @@ use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
 use MRO::Compat;
-use Thruk::Config;
-use Thruk::Backend::Manager;
-use Thruk::Backend::Peer;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;
-use Thruk::Utils::IO;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Avail;
 use Thruk::Utils::External;
@@ -82,52 +91,6 @@ if($ENV{THRUK_LEAK_CHECK}) {
 __PACKAGE__->setup();
 $Thruk::Utils::IO::config = __PACKAGE__->config;
 
-###################################################
-# create connection pool
-# has to be done before the binmode
-my $peer_configs = __PACKAGE__->config->{'Thruk::Backend'}->{'peer'};
-$peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
-$peer_configs    = [] unless defined $peer_configs;
-my $num_peers    = scalar @{$peer_configs};
-my $pool_size    = __PACKAGE__->config->{'connection_pool_size'};
-my $use_curl     = __PACKAGE__->config->{'use_curl'};
-__PACKAGE__->config->{'deprecations_shown'} = {};
-if($num_peers > 0) {
-    my  $peer_keys   = {};
-    our $peer_order  = [];
-    our $peers       = {};
-    for my $peer_config (@{$peer_configs}) {
-        $peer_config->{'use_curl'} = $use_curl;
-        my $peer = Thruk::Backend::Peer->new( $peer_config, __PACKAGE__->config->{'logcache'}, $peer_keys );
-        $peer_keys->{$peer->{'key'}} = 1;
-        $peers->{$peer->{'key'}}     = $peer;
-        push @{$peer_order}, $peer->{'key'};
-        if($peer_config->{'groups'} and !__PACKAGE__->config->{'deprecations_shown'}->{'backend_groups'}) {
-            print STDERR "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.\n";
-            __PACKAGE__->config->{'deprecations_shown'}->{'backend_groups'} = 1;
-        }
-    }
-    if($num_peers > 1 and $pool_size > 1) {
-        $Storable::Eval    = 1;
-        $Storable::Deparse = 1;
-        my $minworker = $pool_size;
-        $minworker    = $num_peers if $minworker > $num_peers; # no need for more threads than sites
-        my $maxworker = $minworker; # static pool size
-        $SIG{'USR1'}  = undef;
-        our $pool = Thruk::Pool::Simple->new(
-            min      => $minworker,
-            max      => $maxworker,
-            do       => [\&Thruk::Backend::Manager::_do_thread ],
-            passid   => 0,
-            lifespan => 10000,
-        );
-        # wait till we got all worker running
-        my $worker = 0;
-        while($worker < $minworker) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
-    } else {
-        $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
-    }
-}
 
 ###################################################
 binmode(STDOUT, ":encoding(UTF-8)");
