@@ -1554,7 +1554,7 @@ sub init_backend_thread_pool {
                 max      => $maxworker,
                 do       => [\&Thruk::Backend::Manager::_do_thread ],
                 passid   => 0,
-                lifespan => 10000000,
+                lifespan => 1000,
             );
             # wait till we got all worker running
             my $worker = 0;

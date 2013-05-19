@@ -50,6 +50,15 @@ sub new {
     };
     bless $self, $class;
 
+    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
+        eval {
+            # required for new IO::Socket::SSL versions
+            require IO::Socket::SSL;
+            IO::Socket::SSL->import();
+            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+        };
+    }
+
     $self->reconnect();
 
     return $self;
