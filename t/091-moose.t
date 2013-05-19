@@ -22,6 +22,7 @@ for my $cmd (@{$cmds}) {
     `grep make_immutable $line`;
     if($? != 0) {
         next if $line eq 'lib/Thruk.pm';
+        next if $line eq 'lib/Monitoring/Livestatus/Class/Base/Table.pm';
         fail($line);
     }
   }
