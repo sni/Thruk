@@ -5,7 +5,7 @@ use threads;
 use threads::shared;
 use warnings;
 use Carp;
-use Storable qw(nfreeze thaw);
+use Storable qw(freeze thaw);
 use Thread::Queue;
 use Thread::Semaphore;
 
@@ -17,8 +17,6 @@ sub new {
       = (min => ($arg{min} || 1),
          max => ($arg{max} || 10),
          load => ($arg{load} || 20),
-         lifespan => ($arg{lifespan} || 50000),
-         passid => ($arg{passid} || 0),
         );
     my %handler;
     for (qw(init pre do post)) {
@@ -90,15 +88,8 @@ sub _handle {
 
     my $do = $handler->{do};
     my $func = defined $do ? shift @$do : undef;
-    my ($lifespan, $passid)
-      = do {
-          lock %{$self->{config}};
-          @{$self->{config}}{qw(lifespan passid)}
-      };
     eval {
-        while (!$self->terminating()
-               && $lifespan--
-              ) {
+        while (!$self->terminating()) {
             my ($id, $job) = unpack 'Na*', $self->{pending}->dequeue();
             $self->_state(-2) && last unless $id;
             $self->_drop($id) && next unless $self->job_exists($id);
@@ -111,7 +102,7 @@ sub _handle {
                         ## no critic
                         no strict 'refs';
                         ## use critic
-                        scalar $func->($passid ? ($id, @$do, @$arg) : (@$do, @$arg));
+                        scalar $func->((@$do, @$arg));
                     };
                     $self->_drop($id);
                     next;
@@ -123,7 +114,7 @@ sub _handle {
                         ## no critic
                         no strict 'refs';
                         ## use critic
-                        $func->($passid ? ($id, @$do, @$arg) : (@$do, @$arg));
+                        $func->((@$do, @$arg));
                     };
                 }
             }
@@ -133,7 +124,7 @@ sub _handle {
                         ## no critic
                         no strict 'refs';
                         ## use critic
-                        $func->($passid ? ($id, @$do, @$arg) : (@$do, @$arg));
+                        $func->((@$do, @$arg));
                     };
                 }
             }
@@ -146,7 +137,7 @@ sub _handle {
             else {
                 unshift @ret, 'n';
             }
-            my $ret = nfreeze(\@ret);
+            my $ret = freeze(\@ret);
             {
                 lock %{$self->{done}};
                 $self->{done}{$id} = $ret;
@@ -243,7 +234,7 @@ sub add {
     my $self = shift;
     my $context = wantarray;
     $context = 2 unless defined $context; # void context = 2
-    my $arg = nfreeze(\@_);
+    my $arg = freeze(\@_);
     my $id;
     while (1) {
         $id = int(rand(time()));
@@ -356,8 +347,6 @@ Thruk::Pool::Simple - A simple thread-pool implementation
                  pre => [\&pre_handle, $arg1, $arg2, ...]   # run after creating worker thread
                  do => [\&do_handle, $arg1, $arg2, ...]     # job handler for each worker
                  post => [\&post_handle, $arg1, $arg2, ...] # run before worker threads end
-                 passid => 1,        # whether to pass the job id as the first argument to the &do_handle
-                 lifespan => 10000,  # total jobs handled by each worker
                );
 
   my ($id1) = $pool->add(@arg1); # call in list context
