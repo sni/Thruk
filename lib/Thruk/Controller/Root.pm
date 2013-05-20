@@ -763,34 +763,36 @@ sub end : ActionClass('RenderView') {
     }
 
     if($ENV{THRUK_LEAK_CHECK}) {
-        $c->config->{'requests'} = 0 unless defined $c->config->{'requests'};
-        $c->config->{'requests'}++;
+        eval {
+            $c->config->{'requests'} = 0 unless defined $c->config->{'requests'};
+            $c->config->{'requests'}++;
 
-        require Devel::Gladiator;
-        Devel::Gladiator->import(qw(arena_ref_counts));
-        my $refs = arena_ref_counts();
-        if($c->config->{'arena'}) {
-            my $res = {};
+            require Devel::Gladiator;
+            Devel::Gladiator->import(qw(arena_ref_counts));
+            my $refs = arena_ref_counts();
+            if($c->config->{'arena'}) {
+                my $res = {};
+                for my $key (keys %{$refs}) {
+                    $c->config->{'arena'}->{$key} = 0 unless defined $c->config->{'arena'}->{$key};
+                    if($c->config->{'arena'}->{$key} > 0 and $c->config->{'arena'}->{$key} < $refs->{$key}) {
+                        $res->{$key} = $refs->{$key} - $c->config->{'arena'}->{$key};
+                    }
+                }
+                # there will be new scalars from time to time
+                delete $res->{'SCALAR'} if $res->{'SCALAR'} and $res->{'SCALAR'} < 10;
+                if($c->config->{'requests'} > 2 && scalar keys %{$res} > 0) {
+                    print STDERR "request: ".$c->config->{'requests'}." (".$c->request->path."):\n";
+                    for my $key (sort { ($res->{$b} <=> $res->{$a}) } keys %{$res}) {
+                        printf(STDERR "+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key});
+                    }
+                }
+            }
             for my $key (keys %{$refs}) {
-                $c->config->{'arena'}->{$key} = 0 unless defined $c->config->{'arena'}->{$key};
-                if($c->config->{'arena'}->{$key} > 0 and $c->config->{'arena'}->{$key} < $refs->{$key}) {
-                    $res->{$key} = $refs->{$key} - $c->config->{'arena'}->{$key};
+                if(!$c->config->{'arena'}->{$key} || $c->config->{'arena'}->{$key} < $refs->{$key}) {
+                    $c->config->{'arena'}->{$key} = $refs->{$key}
                 }
             }
-            # there will be new scalars from time to time
-            delete $res->{'SCALAR'} if $res->{'SCALAR'} and $res->{'SCALAR'} < 10;
-            if($c->config->{'requests'} > 2 && scalar keys %{$res} > 0) {
-                print STDERR "request: ".$c->config->{'requests'}." (".$c->request->path."):\n";
-                for my $key (sort { ($res->{$b} <=> $res->{$a}) } keys %{$res}) {
-                    printf(STDERR "+%-10i %30s  -  total %10i\n", $res->{$key}, $key, $c->config->{'arena'}->{$key});
-                }
-            }
-        }
-        for my $key (keys %{$refs}) {
-            if(!$c->config->{'arena'}->{$key} || $c->config->{'arena'}->{$key} < $refs->{$key}) {
-                $c->config->{'arena'}->{$key} = $refs->{$key}
-            }
-        }
+        };
     }
 
     return 1;
