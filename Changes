@@ -1,10 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.70-4   Tue May 21 11:40:34 CEST 2013
           - Bug Fixes
             - fixed occasional sigpipes on config reload
             - fixed memory leak in livestatus accessor
             - fixed connection leak in logcache
+            - don't strip nasty chars from passwords
 
 1.70-3   Tue May 14 17:07:57 CEST 2013
           - reload page after connection errors (only in frames mode)

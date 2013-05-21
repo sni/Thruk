@@ -261,7 +261,13 @@ sub _dummy_c {
     _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
     delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
     require Catalyst::Test;
+    # temporary close stderr because ubuntu 12.04 (and maybe others) print
+    # Error opening file for reading: Permission denied
+    # due to permission errors on /proc/self/auxv after setuid
+    open(my $saveerr, ">&STDERR");
+    close(STDERR);
     Catalyst::Test->import('Thruk');
+    open(STDERR, ">&", $saveerr);
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
     my $failed = ( $res->code == 200 ? 0 : 1 );
     return($c, $failed);
