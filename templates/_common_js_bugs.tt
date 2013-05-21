@@ -11,7 +11,7 @@ window.onerror = function(msg, url, line) {
     // hide errors in line 0
     if(line == 0) { return false; }
     // hide errors from plugins and addons
-    if(url.match('/^chrome:/')) { return false; }
+    if(url.match(/^chrome:/)) { return false; }
     // skip some errors
     [%+ FOREACH skip = skip_js_errors.list %]
     if(msg.match(/[% skip %]/)) { return false; }
