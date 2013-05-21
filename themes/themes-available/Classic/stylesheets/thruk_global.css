@@ -515,6 +515,7 @@ div.logEntries {
 }
 div.logEntries img {
   vertical-align: middle;
+  margin-right: 3px;
 }
 
 .filter_button_mini {
