@@ -713,6 +713,7 @@ sub _renew_logcache {
     }
 
     if($check) {
+        $c->stash->{'backends'} = $get_results_for;
         my $type = 'mongodb';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         my $stats = $self->logcache_stats($c);
@@ -951,8 +952,10 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    $c->log->debug($function);
-    $c->log->debug(Dumper($get_results_for));
+    if(Thruk->debug) {
+        $c->log->debug($function);
+        $c->log->debug(Dumper($get_results_for));
+    }
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
@@ -1299,6 +1302,12 @@ sub _do_on_peer {
             last;
         }
     }
+
+    # don't keep connections open
+    if($peer->{'logcache'}) {
+        $peer->{'logcache'}->_disconnect();
+    }
+
     return([$type, $size, $data, $last_error]);
 }
 

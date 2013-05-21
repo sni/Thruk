@@ -115,11 +115,23 @@ recreate database connection
 =cut
 sub reconnect {
     my($self) = @_;
+    $self->_disconnect();
+    return;
+}
+
+##########################################################
+
+=head2 _disconnect
+
+close database connection
+
+=cut
+sub _disconnect {
+    my($self) = @_;
     if(defined $self->{'mysql'}) {
         $self->{'mysql'}->disconnect();
         delete $self->{'mysql'};
     }
-    $self->_dbh();
     return;
 }
 

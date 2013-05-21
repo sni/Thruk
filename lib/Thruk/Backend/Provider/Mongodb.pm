@@ -70,8 +70,20 @@ recreate database connection
 =cut
 sub reconnect {
     my($self) = @_;
+    $self->_disconnect();
+    return;
+}
+
+##########################################################
+
+=head2 _disconnect
+
+close database connection
+
+=cut
+sub _disconnect {
+    my($self) = @_;
     delete $self->{'mongo'};
-    $self->_db();
     return;
 }
 
