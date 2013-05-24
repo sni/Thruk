@@ -852,7 +852,7 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
-    my $peer       = $Thruk::Backend::Manager::peers->{$peerkey};
+    my $peer       = $Thruk::Backend::Pool::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
 
     if(!Thruk::Utils::Conf::set_object_model($c)) {
@@ -933,7 +933,7 @@ sub _cmd_raw {
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
     }
-    my @keys = keys %{$Thruk::Backend::Manager::peers};
+    my @keys = keys %{$Thruk::Backend::Pool::peers};
     my $key = $keys[0];
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
