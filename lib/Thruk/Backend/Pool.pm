@@ -43,7 +43,7 @@ sub init_backend_thread_pool {
     my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
     $peer_configs    = [] unless defined $peer_configs;
-    my $pool_size    = $config->{'connection_pool_size'};
+    my $pool_size    = $config->{'connection_pool_size'} || 0;
     my $num_peers    = scalar @{$peer_configs};
     my $use_curl     = $config->{'use_curl'};
     $config->{'deprecations_shown'} = {};
@@ -78,6 +78,7 @@ sub init_backend_thread_pool {
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
     }
+
     return;
 }
 
@@ -93,20 +94,20 @@ do the work on threads
 
 sub _do_thread {
     my($key, $function, $arg) = @_;
-    return(_do_on_peer($key, $function, $arg));
+    return(do_on_peer($key, $function, $arg));
 }
 
 ########################################
 
-=head2 _do_on_peer
+=head2 do_on_peer
 
-  _do_on_peer($key, $function, $args)
+  do_on_peer($key, $function, $args)
 
 run a function on a backend peer
 
 =cut
 
-sub _do_on_peer {
+sub do_on_peer {
     my($key, $function, $arg) = @_;
 
     # make it possible to run code in thread context
@@ -163,6 +164,15 @@ sub _do_on_peer {
 }
 
 ########################################
+
+=head2 get_config
+
+  get_config()
+
+return thruks config
+
+=cut
+
 sub get_config {
     for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
         next unless defined $path;

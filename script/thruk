@@ -57,8 +57,8 @@ if($options->{'help'}) {
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
 }
 if($options->{'version'}) {
-    require Thruk::Utils;
-    $branch = Thruk::Utils::get_git_name() unless $branch ne '';
+    require Thruk::Config;
+    $branch = Thruk::Config::get_git_name() unless $branch ne '';
     print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
 }
 $options->{'verbose'} = 0 if $options->{'quiet'};

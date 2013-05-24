@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
-use Monitoring::Livestatus::Class;
+use Monitoring::Livestatus::Class::Lite;
 use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -32,7 +32,7 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
-        'live'   => Monitoring::Livestatus::Class->new($peer_config),
+        'live'   => Monitoring::Livestatus::Class::Lite->new($peer_config),
         'config' => $config,
         'stash'  => undef,
     };
@@ -915,9 +915,7 @@ generic function to return a table class
 
 =cut
 sub _get_class {
-    my $self      = shift;
-    my $table     = shift;
-    my $options   = shift;
+    my($self, $table, $options) = @_;
 
     my $class = $self->{'live'}->table($table);
     if(defined $options->{'columns'}) {
@@ -951,15 +949,10 @@ generic function to return a table with options
 
 =cut
 sub _get_table {
-    my $self      = shift;
-    my $table     = shift;
-    my $options   = shift;
-
+    my($self, $table, $options) = @_;
     my $class = $self->_get_class($table, $options);
     my $data  = $class->hashref_array() || [];
-    # prevents memory leak in Monitoring::Livestatus::Class
-    delete $class->{filter_obj};
-    delete $class->{stats_obj};
+
     return $data;
 }
 
@@ -973,13 +966,9 @@ generic function to return a hash table with options
 
 =cut
 sub _get_hash_table {
-    my $self      = shift;
-    my $table     = shift;
-    my $key       = shift;
-    my $options   = shift;
-
+    my($self, $table, $key, $options) = @_;
     my $class = $self->_get_class($table, $options);
-    my $data  = $class->hashref_pk() || {};
+    my $data  = $class->hashref_pk($key) || {};
     return $data;
 }
 
@@ -994,12 +983,7 @@ returns the size of a query, used to reduce the amount of transfered data
 
 =cut
 sub _get_query_size {
-    my $self    = shift;
-    my $table   = shift;
-    my $options = shift;
-    my $key     = shift;
-    my $sortby1 = shift;
-    my $sortby2 = shift;
+    my($self, $table, $options, $key, $sortby1, $sortby2) = @_;
 
     # only if paging is enabled
     return unless defined $options->{'pager'};

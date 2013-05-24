@@ -959,7 +959,7 @@ sub _cmd_raw {
         return _cmd_ext_job($c, $key, $opt);
     }
 
-    my @res = Thruk::Backend::Manager::_do_on_peer($key, $function, $opt->{'args'});
+    my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version to processinfo
@@ -967,11 +967,11 @@ sub _cmd_raw {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
         # add config tool settings
-        if($Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}) {
+        if($Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}) {
             $res->[2]->{$key}->{'configtool'} = {
-                'obj_readonly'   => $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
-                'obj_check_cmd'  => exists $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
-                'obj_reload_cmd' => exists $Thruk::Backend::Manager::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
+                'obj_readonly'   => $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
+                'obj_check_cmd'  => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
             };
         }
     }

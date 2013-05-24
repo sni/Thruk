@@ -72,7 +72,7 @@ lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Monitoring/Availability.pm
 lib/Monitoring/Availability/Logs.pm
 lib/Monitoring/Livestatus.pm
-lib/Monitoring/Livestatus/Class/Base/Table.pm
+lib/Monitoring/Livestatus/Class/Lite.pm
 lib/Monitoring/Livestatus/INET.pm
 lib/Monitoring/Livestatus/UNIX.pm
 lib/Plack/Handler/Thrukembedded.pm
@@ -81,6 +81,7 @@ lib/Thruk/Action/AddDefaults.pm
 lib/Thruk/Action/AddSafeDefaults.pm
 lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Peer.pm
+lib/Thruk/Backend/Pool.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/ConfigOnly.pm
 lib/Thruk/Backend/Provider/HTTP.pm

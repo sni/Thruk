@@ -7,7 +7,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Page ();
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
-use Encode ();
+use Encode qw/encode_utf8/;
 use Thruk::Utils ();
 use Thruk::Pool::Simple ();
 use Thruk::Config ();
@@ -1183,7 +1183,7 @@ sub _get_result_serial {
 
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            my @res = Thruk::Backend::Pool::_do_on_peer($key, $function, $arg);
+            my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
             chomp($last_error) if $last_error;

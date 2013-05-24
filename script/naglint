@@ -28,7 +28,7 @@ use warnings;
 
 our $VERSION = '1.70';
 my $branch   = '';
-$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
+$branch      = Thruk::Config::get_git_name() unless $branch ne '';
 
 my $naglint = Thruk::naglint->new();
 exit $naglint->run();
@@ -179,7 +179,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use Thruk::Utils;
+use Thruk::Config;
 use Thruk::Utils::Scripts;
 use Monitoring::Config;
 use Monitoring::Config::File;
