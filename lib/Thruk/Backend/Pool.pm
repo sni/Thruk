@@ -43,7 +43,7 @@ sub init_backend_thread_pool {
     my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
     $peer_configs    = [] unless defined $peer_configs;
-    my $pool_size    = $config->{'connection_pool_size'} || 0;
+    my $pool_size    = defined $config->{'connection_pool_size'} ? $config->{'connection_pool_size'} : 100;
     my $num_peers    = scalar @{$peer_configs};
     my $use_curl     = $config->{'use_curl'};
     $config->{'deprecations_shown'} = {};
@@ -169,7 +169,7 @@ sub do_on_peer {
 
   get_config()
 
-return thruks config
+return small thruks config without defaults. Needed for the backends only.
 
 =cut
 

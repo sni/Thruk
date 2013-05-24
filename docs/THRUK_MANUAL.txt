@@ -1551,7 +1551,7 @@ ex.:
 ==== connection_pool_size
 Use connection pool when accessing multiple sites.
 Increases the performance because backends will be queried
-parallel but uses around 50mb of memory per pool member.
+parallel but uses around 10mb of memory per pool member.
 Disabled when set to 0, number of concurrent connections otherwise.
 
 ex.:

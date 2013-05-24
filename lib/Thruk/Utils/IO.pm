@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use Carp;
 use Fcntl ':mode';
+use Thruk::Backend::Pool;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -115,7 +116,7 @@ sub ensure_permissions {
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    $Thruk::Utils::IO::config = Thruk::Config::get_config() unless defined $Thruk::Utils::IO::config;
+    $Thruk::Utils::IO::config = Thruk::Backend::Pool::get_config() unless $Thruk::Utils::IO::config;
     my $config = $Thruk::Utils::IO::config;
     # set modes
     if($mode eq 'file') {

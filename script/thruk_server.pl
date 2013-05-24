@@ -3,6 +3,17 @@
 use strict;
 use warnings;
 
+###################################################
+# create connection pool
+# has to be done really early to save memory
+use Thruk::Backend::Pool;
+BEGIN {
+    # won't work with automatical restarts
+    unless(grep {/^\-r$/} @ARGV) {
+        Thruk::Backend::Pool::init_backend_thread_pool()
+    }
+}
+
 use Catalyst::ScriptRunner;
 $ENV{'THRUK_SRC'} = 'DebugServer';
 Catalyst::ScriptRunner->run('Thruk', 'Server');
