@@ -13,21 +13,15 @@ Catalyst based monitoring web interface for Nagios, Icinga and Shinken
 use 5.008000;
 use strict;
 use warnings;
-use threads;
-
 use utf8;
-use Thruk::Pool::Simple;
-use Thruk::Config;
-use Thruk::Backend::Manager;
-use Thruk::Backend::Peer;
-use Thruk::Utils::IO;
 
 ###################################################
 # create connection pool
 # has to be done before the binmode
 # or even earlier to save memory
+use Thruk::Backend::Pool;
 BEGIN {
-    Thruk::Backend::Manager::init_backend_thread_pool();
+    Thruk::Backend::Pool::init_backend_thread_pool();
 };
 
 use Carp;
@@ -40,6 +34,7 @@ use File::Slurp qw(read_file);
 use Data::Dumper;
 use MRO::Compat;
 use Thruk::Utils;
+use Thruk::Config;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
@@ -90,7 +85,6 @@ if($ENV{THRUK_LEAK_CHECK}) {
 # override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
 $Thruk::Utils::IO::config = __PACKAGE__->config;
-
 
 ###################################################
 binmode(STDOUT, ":encoding(UTF-8)");

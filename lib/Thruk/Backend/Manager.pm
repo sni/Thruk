@@ -4,11 +4,16 @@ use strict;
 use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
-use Data::Page;
+use Data::Page ();
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
-use Encode;
-use Thruk::Utils;
+use Encode ();
+use Thruk::Utils ();
+use Thruk::Pool::Simple ();
+use Thruk::Config ();
+use Thruk::Backend::Peer ();
+use Thruk::Backend::Pool ();
+use Thruk::Utils::IO ();
 
 our $AUTOLOAD;
 
@@ -70,8 +75,8 @@ sub init {
 
     # retain order
     $self->{'backends'} = [];
-    for my $key (@{$Thruk::Backend::Manager::peer_order}) {
-        push @{$self->{'backends'}}, $Thruk::Backend::Manager::peers->{$key};
+    for my $key (@{$Thruk::Backend::Pool::peer_order}) {
+        push @{$self->{'backends'}}, $Thruk::Backend::Pool::peers->{$key};
     }
 
     # check if we initialized at least one backend
@@ -1178,7 +1183,7 @@ sub _get_result_serial {
 
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            my @res = _do_on_peer($key, $function, $arg);
+            my @res = Thruk::Backend::Pool::_do_on_peer($key, $function, $arg);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
             chomp($last_error) if $last_error;
@@ -1218,7 +1223,7 @@ sub _get_result_parallel {
         if(!$c->stash->{'failed_backends'}->{$key}) {
             my $id;
             eval {
-                $id = $Thruk::Backend::Manager::pool->add($key, $function, $arg);
+                $id = $Thruk::Backend::Pool::pool->add($key, $function, $arg);
                 $ids{$id} = $key;
             };
             confess($@) if $@;
@@ -1226,7 +1231,7 @@ sub _get_result_parallel {
     }
 
     for my $id (keys %ids) {
-        my @res = $Thruk::Backend::Manager::pool->remove($id);
+        my @res = $Thruk::Backend::Pool::pool->remove($id);
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         my $key = $ids{$id};
@@ -1242,73 +1247,6 @@ sub _get_result_parallel {
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
-}
-
-
-########################################
-
-=head2 _do_on_peer
-
-  _do_on_peer($key, $function, $args)
-
-run a function on a backend peer
-
-=cut
-
-sub _do_on_peer {
-    my($key, $function, $arg) = @_;
-
-    # make it possible to run code in thread context
-    if(ref $arg eq 'ARRAY') {
-        for(my $x = 0; $x <= scalar @{$arg}; $x++) {
-            if($arg->[$x] and $arg->[$x] eq 'eval') {
-                ## no critic
-                eval($arg->[$x+1]);
-                ## use critic
-            }
-        }
-    }
-
-    my $peer = $Thruk::Backend::Manager::peers->{$key};
-    confess("no peer for key: $key, got: ".join(', ', keys %{$Thruk::Backend::Manager::peers})) unless defined $peer;
-    my($type, $size, $data, $last_error);
-    my $errors = 0;
-    while($errors < 3) {
-        eval {
-            ($data,$type,$size) = $peer->{'class'}->$function( @{$arg} );
-            if(defined $data and !defined $size) {
-                if(ref $data eq 'ARRAY') {
-                    $size = scalar @{$data};
-                }
-                elsif(ref $data eq 'HASH') {
-                    $size = scalar keys %{$data};
-                }
-            }
-            $size = 0 unless defined $size;
-        };
-        if($@) {
-            $last_error = $@;
-            $last_error =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
-            $last_error =~ s/thread\s+\d+//gmx;
-            $last_error =~ s/^ERROR:\ //gmx;
-            $last_error = "ERROR: ".$last_error;
-            $errors++;
-            if($last_error =~ m/can't\ get\ db\ response,\ not\ connected\ at/mx) {
-                $peer->{'class'}->reconnect();
-            } else {
-                last;
-            }
-        } else {
-            last;
-        }
-    }
-
-    # don't keep connections open
-    if($peer->{'logcache'}) {
-        $peer->{'logcache'}->_disconnect();
-    }
-
-    return([$type, $size, $data, $last_error]);
 }
 
 ########################################
@@ -1515,62 +1453,6 @@ sub reset_failed_backends {
     my $c    = shift || $Thruk::Backend::Manager::c;
     $c->stash->{'failed_backends'} = {};
     return;
-}
-
-########################################
-
-=head2 init_backend_thread_pool
-
-  init_backend_thread_pool()
-
-init thread connection pool
-
-=cut
-
-sub init_backend_thread_pool {
-    my $config = Thruk::Config::get_config();
-    my $peer_configs = $config->{'Thruk::Backend'}->{'peer'};
-    $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
-    $peer_configs    = [] unless defined $peer_configs;
-    my $num_peers    = scalar @{$peer_configs};
-    my $pool_size    = $config->{'connection_pool_size'};
-    my $use_curl     = $config->{'use_curl'};
-    $config->{'deprecations_shown'} = {};
-    if($num_peers > 0) {
-        my  $peer_keys   = {};
-        our $peer_order  = [];
-        our $peers       = {};
-        for my $peer_config (@{$peer_configs}) {
-            $peer_config->{'use_curl'} = $use_curl;
-            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
-            $peer_keys->{$peer->{'key'}} = 1;
-            $peers->{$peer->{'key'}}     = $peer;
-            push @{$peer_order}, $peer->{'key'};
-            if($peer_config->{'groups'} and !$config->{'deprecations_shown'}->{'backend_groups'}) {
-                print STDERR "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.\n";
-                $config->{'deprecations_shown'}->{'backend_groups'} = 1;
-            }
-        }
-        if($num_peers > 1 and $pool_size > 1) {
-            $Storable::Eval    = 1;
-            $Storable::Deparse = 1;
-            my $minworker = $pool_size;
-            $minworker    = $num_peers if $minworker > $num_peers; # no need for more threads than sites
-            my $maxworker = $minworker; # static pool size
-            $SIG{'USR1'}  = undef;
-            our $pool = Thruk::Pool::Simple->new(
-                min      => $minworker,
-                max      => $maxworker,
-                do       => [\&Thruk::Backend::Manager::_do_thread ],
-            );
-            # wait till we got all worker running
-            my $worker = 0;
-            while($worker < $minworker) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
-        } else {
-            $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
-        }
-    }
-    return();
 }
 
 ##########################################################
@@ -1996,21 +1878,6 @@ sub _set_user_macros {
 
 ########################################
 
-=head2 _do_thread
-
-  _do_thread()
-
-do the work on threads
-
-=cut
-
-sub _do_thread {
-    my($key, $function, $arg) = @_;
-    return(_do_on_peer($key, $function, $arg));
-}
-
-########################################
-
 =head2 _set_result_defaults
 
   _set_result_defaults()
@@ -2074,6 +1941,8 @@ sub _set_result_defaults {
     }
     return $data;
 }
+
+########################################
 
 =head1 AUTHOR
 

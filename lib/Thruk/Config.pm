@@ -3,7 +3,6 @@ package Thruk::Config;
 use strict;
 use warnings;
 use utf8;
-use Thruk::Utils;
 use Config::Any;
 use Catalyst::Utils;
 use Catalyst::Plugin::Thruk::ConfigLoader;
@@ -24,7 +23,7 @@ our $VERSION = '1.70';
 
 my $project_root = Catalyst::Utils::home('Thruk::Config');
 my $branch       = '';
-my $gitbranch    = Thruk::Utils::get_git_name($project_root);
+my $gitbranch    = get_git_name($project_root);
 $branch          = $gitbranch unless $branch ne '';
 
 our %config = ('name'                   => 'Thruk',
@@ -87,7 +86,7 @@ our %config = ('name'                   => 'Thruk',
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
                                           'starttime'      => time(),
-                                          'debug_details'  => Thruk::Utils::get_debug_details(),
+                                          'debug_details'  => get_debug_details(),
                                           'stacktrace'     => '',
                                           'backends'       => [],
                                           'backend_detail' => {},
@@ -459,6 +458,66 @@ sub _load_any {
     my %configs = map { %$_ } @$cfg;
 
     return \%configs;
+}
+
+##############################################
+
+=head2 get_git_name
+
+  get_git_name()
+
+return git branch name
+
+=cut
+
+sub get_git_name {
+    my $project_root = $INC{'Thruk/Config.pm'};
+    $project_root =~ s/\/Config\.pm$//gmx;
+    if(-d $project_root.'/../../.git') {
+        # directly on git tag?
+        my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
+        return '' if $tag;
+
+        my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+        chomp($branch);
+        $branch =~ s/^\*\s+//gmx;
+        my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
+        chomp($hash);
+        if($branch eq 'master') {
+            return $hash;
+        }
+        return $branch.'.'.$hash;
+    }
+    return '';
+}
+
+########################################
+
+=head2 get_debug_details
+
+  get_debug_details()
+
+return details useful for debuging
+
+=cut
+
+sub get_debug_details {
+    chomp(my $uname = `uname -a`);
+    my $release = "";
+    for my $f (qw|/etc/redhat-release /etc/issue|) {
+        if(-e $f) {
+            $release = `cat $f`;
+            last;
+        }
+    }
+    $release =~ s/^\s*//gmx;
+    $release =~ s/\\\w//gmx;
+    $release =~ s/\s*$//gmx;
+    my $details =<<EOT;
+uname:      $uname
+release:    $release
+EOT
+    return $details;
 }
 
 ######################################

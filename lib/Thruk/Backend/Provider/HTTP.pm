@@ -50,7 +50,7 @@ sub new {
     };
     bless $self, $class;
 
-    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
+    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $options->{'peer'} =~ m/^https:/mx) {
         eval {
             # required for new IO::Socket::SSL versions
             require IO::Socket::SSL;
@@ -60,7 +60,6 @@ sub new {
     }
 
     $self->reconnect();
-
     return $self;
 }
 

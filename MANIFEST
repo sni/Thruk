@@ -74,7 +74,6 @@ lib/Monitoring/Availability/Logs.pm
 lib/Monitoring/Livestatus.pm
 lib/Monitoring/Livestatus/Class/Base/Table.pm
 lib/Monitoring/Livestatus/INET.pm
-lib/Monitoring/Livestatus/MULTI.pm
 lib/Monitoring/Livestatus/UNIX.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm

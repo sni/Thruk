@@ -3,7 +3,16 @@
 use strict;
 use warnings;
 
-use Catalyst::ScriptRunner;
+###################################################
+# create connection pool
+# has to be done really early to save memory
+use Thruk::Backend::Pool;
+BEGIN {
+    Thruk::Backend::Pool::init_backend_thread_pool();
+}
+
+require Catalyst::ScriptRunner;
+Catalyst::ScriptRunner->import();
 $ENV{'THRUK_SRC'} = 'FastCGI';
 Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
 

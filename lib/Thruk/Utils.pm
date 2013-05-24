@@ -1538,27 +1538,6 @@ sub get_cron_time_entry {
     return $cron;
 }
 
-##############################################
-
-=head2 get_user
-
-  get_user($from_folder)
-
-return user and groups thruk runs with
-
-=cut
-
-sub get_user {
-    my($from_folder) = @_;
-    confess($from_folder." ".$!) unless -d $from_folder;
-    my $uid = (stat $from_folder)[4];
-    my($name,$gid) = (getpwuid($uid))[0, 3];
-    my @groups = ( $gid );
-    while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-        $users =~ /\b$name\b/mx and push @groups, $gid;
-    }
-    return($uid, \@groups);
-}
 
 ##############################################
 
@@ -1578,24 +1557,6 @@ sub set_user {
     return;
 }
 
-##############################################
-
-=head2 switch_user
-
-  switch_user($uid, $groups)
-
-switch user and groups
-
-=cut
-
-sub switch_user {
-    my($uid, $groups) = @_;
-    $) = join(" ", @{$groups});
-    # using POSIX::setuid here leads to
-    # 'Insecure dependency in eval while running setgid'
-    $> = $uid or confess("setuid failed: ".$!);
-    return;
-}
 
 ##############################################
 
@@ -1762,66 +1723,6 @@ sub decode_any {
         $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
     }
     return $_[0];
-}
-
-##############################################
-
-=head2 get_git_name
-
-  get_git_name()
-
-return git branch name
-
-=cut
-
-sub get_git_name {
-    my $project_root = $INC{'Thruk/Utils.pm'};
-    $project_root =~ s/\/Utils\.pm$//gmx;
-    if(-d $project_root.'/../../.git') {
-        # directly on git tag?
-        my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
-        return '' if $tag;
-
-        my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-        chomp($branch);
-        $branch =~ s/^\*\s+//gmx;
-        my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
-        chomp($hash);
-        if($branch eq 'master') {
-            return $hash;
-        }
-        return $branch.'.'.$hash;
-    }
-    return '';
-}
-
-########################################
-
-=head2 get_debug_details
-
-  get_debug_details()
-
-return details useful for debuging
-
-=cut
-
-sub get_debug_details {
-    chomp(my $uname = `uname -a`);
-    my $release = "";
-    for my $f (qw|/etc/redhat-release /etc/issue|) {
-        if(-e $f) {
-            $release = `cat $f`;
-            last;
-        }
-    }
-    $release =~ s/^\s*//gmx;
-    $release =~ s/\\\w//gmx;
-    $release =~ s/\s*$//gmx;
-    my $details =<<EOT;
-uname:      $uname
-release:    $release
-EOT
-    return $details;
 }
 
 ########################################

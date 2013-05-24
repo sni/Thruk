@@ -8,7 +8,6 @@ use Carp;
 use Digest::MD5 qw(md5_hex);
 use Monitoring::Livestatus::INET;
 use Monitoring::Livestatus::UNIX;
-use Monitoring::Livestatus::MULTI;
 use Encode;
 use JSON::XS;
 
@@ -196,8 +195,7 @@ sub new {
             $self->{'peer'} = $peer->{'peer'};
         }
         else {
-            $options{'peer'} = $peers;
-            return new Monitoring::Livestatus::MULTI(%options);
+            die('what?');
         }
     }
 
@@ -207,10 +205,6 @@ sub new {
     }
     if(defined $self->{'CONNECTOR'}->{'peer'} and !defined $self->{'peer'}) {
         $self->{'peer'} = $self->{'CONNECTOR'}->{'peer'};
-    }
-
-    if($self->{'verbose'} and (!defined $self->{'backend'} or $self->{'backend'} ne 'Monitoring::Livestatus::MULTI')) {
-        $self->{'logger'}->debug('initialized Monitoring::Livestatus ('.$self->peer_name.')');
     }
 
     return $self;

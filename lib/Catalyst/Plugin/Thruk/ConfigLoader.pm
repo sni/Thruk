@@ -1,7 +1,6 @@
 package Catalyst::Plugin::Thruk::ConfigLoader;
 
 use strict;
-use Thruk::Utils;
 use Thruk::Config;
 use base 'Catalyst::Plugin::ConfigLoader';
 
@@ -51,13 +50,13 @@ sub _do_finalize_config {
     my $var_path = $config->{'var_path'} or die("no var path!");
     if($> != 0 and !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
-    my ($uid, $groups) = Thruk::Utils::get_user($var_path);
+    my ($uid, $groups) = get_user($var_path);
     $ENV{'THRUK_USER_ID'}  = $uid;
     $ENV{'THRUK_GROUP_ID'} = $groups->[0];
     $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         if(defined $uid and $> == 0) {
-            Thruk::Utils::switch_user($uid, $groups);
+            switch_user($uid, $groups);
         }
     }
 
@@ -144,6 +143,48 @@ sub _do_finalize_config {
     return;
 }
 
+######################################
+
+=head2 get_user
+
+  get_user($from_folder)
+
+return user and groups thruk runs with
+
+=cut
+
+sub get_user {
+    my($from_folder) = @_;
+    confess($from_folder." ".$!) unless -d $from_folder;
+    my $uid = (stat $from_folder)[4];
+    my($name,$gid) = (getpwuid($uid))[0, 3];
+    my @groups = ( $gid );
+    while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
+        $users =~ /\b$name\b/mx and push @groups, $gid;
+    }
+    return($uid, \@groups);
+}
+
+######################################
+
+=head2 switch_user
+
+  switch_user($uid, $groups)
+
+switch user and groups
+
+=cut
+
+sub switch_user {
+    my($uid, $groups) = @_;
+    $) = join(" ", @{$groups});
+    # using POSIX::setuid here leads to
+    # 'Insecure dependency in eval while running setgid'
+    $> = $uid or confess("setuid failed: ".$!);
+    return;
+}
+
+######################################
 
 1;
 
