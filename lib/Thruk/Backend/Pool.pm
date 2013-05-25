@@ -73,7 +73,7 @@ sub init_backend_thread_pool {
             );
             # wait till we got all worker running
             my $worker = 0;
-            while($worker < $minworker) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
+            while($worker < $pool_size) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
         } else {
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
