@@ -468,8 +468,8 @@
                       <td class='dataVal'>[% n = reduce_number(s.data_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% n = reduce_number(s.index_size, 'B', 1024); sprintf('%.2f %s',n.0, n.1) %]</td>
                       <td class='dataVal'>[% format_number(s.items) %]</td>
-                      <td class='dataVal'>[% IF s.exists('start') %][% date_format(c, s.start,) %][% END %]</td>
-                      <td class='dataVal'>[% IF s.exists('end') %][% date_format(c, s.end,) %][% END %]</td>
+                      <td class='dataVal'>[% IF s.defined('start') %][% date_format(c, s.start,) %][% END %]</td>
+                      <td class='dataVal'>[% IF s.defined('end') %][% date_format(c, s.end,) %][% END %]</td>
                     </tr>
                     [% END %]
                     [% END %]
