@@ -785,20 +785,20 @@ wait till remote job is finished and return that data
 =cut
 sub _wait_for_remote_job {
     my($self, $jobid) = @_;
+    my $res;
     while(1) {
-        my $res = $self->_req('job', $jobid);
+        $res = $self->_req('job', $jobid);
         if($res->[2] =~ m/jobid:([^:]+):0/mx) {
             sleep(1);
             next;
-        } else {
-            my $last_error = "";
-            return([undef,
-                    1,
-                    [$res->[2]->{'rc'}, $res->[2]->{'out'}],
-                    $last_error]
-            );
         }
     }
+    my $last_error = "";
+    return([undef,
+            1,
+           [$res->[2]->{'rc'}, $res->[2]->{'out'}],
+            $last_error]
+    );
 }
 
 ##########################################################
