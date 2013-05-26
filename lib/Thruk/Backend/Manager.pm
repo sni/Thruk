@@ -1275,7 +1275,7 @@ sub _remove_duplicates {
         delete $dat->{'peer_name'};
         my $peer_addr = $dat->{'peer_addr'};
         delete $dat->{'peer_addr'};
-        my $md5 = md5_hex( encode_utf8( join( ';', values %{$dat} ) ) );
+        my $md5 = md5_hex( encode_utf8( join( ';', grep(defined, values %{$dat})) ) );
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
