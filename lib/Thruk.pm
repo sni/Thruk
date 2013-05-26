@@ -192,6 +192,14 @@ elsif(!__PACKAGE__->debug) {
 }
 
 ###################################################
+# SizeMe?
+if($ENV{'SIZEME'}) {
+    require Devel::SizeMe;
+    Devel::SizeMe->import();
+    Devel::SizeMe::perl_size();
+}
+
+###################################################
 
 =head1 METHODS
 
