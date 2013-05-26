@@ -104,7 +104,7 @@ sub _db {
                            );
     }
     my $dbname = $self->{'dbname'};
-    return $self->{'mongo'}->$dbname;
+    return $self->{'mongo'}->get_database($dbname);
 }
 
 ##########################################################
