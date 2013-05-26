@@ -655,7 +655,7 @@ sub logcache_stats {
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my $table = 'logs_'.$key if $type eq 'mongodb';
+            my $table = $type eq 'mongodb' ? 'logs_'.$key : undef;
             my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end('collection' => $table)};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
