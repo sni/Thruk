@@ -792,10 +792,17 @@ sub _process_perf_info_page {
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
     # add logfile cache statistics
-    $c->stash->{'has_logcache'} = 0;
+    $c->stash->{'has_logcache'}   = 0;
+    $c->stash->{'logcache_error'} = '';
     if($c->config->{'logcache'}) {
-        $c->stash->{'logcache_stats'} = $c->{'db'}->logcache_stats($c, 1);
-        $c->stash->{'has_logcache'} = 1;
+        eval {
+            $c->stash->{'logcache_stats'} = $c->{'db'}->logcache_stats($c, 1);
+            $c->stash->{'has_logcache'} = 1;
+        };
+        if($@) {
+            $c->stash->{'logcache_error'} = $@;
+            $c->stash->{'logcache_error'} =~ s/\ at\ .*?\ line\ \d+\.//gmx;
+        }
     }
 
     return 1;

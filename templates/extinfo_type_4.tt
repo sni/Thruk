@@ -440,7 +440,7 @@
         </tr>
 -->
 
-        [% IF has_logcache %]
+        [% IF has_logcache || logcache_error %]
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Logcache Statistics:</div></td>
           <td valign="top" colspan=2>
@@ -456,6 +456,11 @@
                       <th class='data'>Oldest Item</th>
                       <th class='data'>Latest Item</th>
                     </tr>
+                    [% IF logcache_error %]
+                    <tr>
+                      <td class='dataVal' colspan=6><div class="errorMessage">[% logcache_error %]</div></td>
+                    </tr>
+                    [% ELSE %]
                     [% FOREACH peer_key = logcache_stats.keys %]
                     [% s = logcache_stats.$peer_key %]
                     <tr>
@@ -466,6 +471,7 @@
                       <td class='dataVal'>[% IF s.exists('start') %][% date_format(c, s.start,) %][% END %]</td>
                       <td class='dataVal'>[% IF s.exists('end') %][% date_format(c, s.end,) %][% END %]</td>
                     </tr>
+                    [% END %]
                     [% END %]
                   </table>
                 </td>
