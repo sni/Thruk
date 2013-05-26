@@ -602,7 +602,7 @@ sub get_logs {
         $sorted = 1;
     }
     my $collection= $options{'collection'} || 'logs';
-    my $res = $self->_db->$collection
+    my $res = $self->_db->get_collection($collection)
                         ->find($self->_get_filter($options{'filter'}))
                         ->sort($sort);
 
@@ -1626,14 +1626,14 @@ sub _get_logs_start_end {
     my($self, %options) = @_;
     my(@data, $start, $end);
     my $collection= $options{'collection'} || 'logs';
-    @data = $self->_db->$collection
+    @data = $self->_db->get_collection($collection)
                       ->find($self->_get_filter($options{'filter'}))
                       ->fields({ 'time' => 1 })
                       ->sort({'time' => 1})
                       ->limit(1)
                       ->all();
     $start = $data[0]->{'time'} if defined $data[0];
-    @data = $self->_db->$collection
+    @data = $self->_db->get_collection($collection)
                       ->find($self->_get_filter($options{'filter'}))
                       ->fields({ 'time' => 1 })
                       ->sort({'time' => -1})
@@ -1753,7 +1753,7 @@ sub _update_logcache {
         $blocksize = 365 if $mode eq 'clean';
     }
 
-    my $col       = $db->$table;
+    my $col       = $db->get_collection($table);
     my $log_count = 0;
 
     if($mode eq 'import') {
