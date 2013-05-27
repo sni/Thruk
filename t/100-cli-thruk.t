@@ -88,4 +88,12 @@ TestUtils::test_command({
     like => ['/^\d{3} templates precompiled/'],
 });
 
+# logcache
+TestUtils::test_command({
+    cmd     => $BIN.' -a logcacheupdate',
+    like    => ['/(^$|OK - imported \d+ log items from \d+ site successfully)/'],
+    errlike => ['/(^$|FAILED - logcache is not enabled)/'],
+    exit    => undef,
+});
+
 done_testing();
