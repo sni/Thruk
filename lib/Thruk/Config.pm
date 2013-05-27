@@ -411,7 +411,7 @@ sub set_default_config {
     }
     # command disabled should be a hash
     if(ref $config->{'command_disabled'} ne 'HASH') {
-        $config->{'command_disabled'} = Thruk::Utils::array2hash(Thruk::Utils::expand_numeric_list($config->{'command_disabled'}));
+        $config->{'command_disabled'} = array2hash(expand_numeric_list($config->{'command_disabled'}));
     }
 
     $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
@@ -518,6 +518,72 @@ uname:      $uname
 release:    $release
 EOT
     return $details;
+}
+
+########################################
+
+=head2 expand_numeric_list
+
+  expand_numeric_list($txt, $c)
+
+return expanded list.
+ex.: converts '3,7-9,15' -> [3,7,8,9,15]
+
+=cut
+
+sub expand_numeric_list {
+    my $txt  = shift;
+    my $c    = shift;
+    my $list = {};
+    return [] unless defined $txt;
+
+    for my $item (ref $txt eq 'ARRAY' ? @{$txt} : $txt) {
+        for my $block (split/\s*,\s*/mx, $item) {
+            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
+                for my $nr ($1..$2) {
+                    $list->{$nr} = 1;
+                }
+            } elsif($block =~ m/^(\d+)$/gmx) {
+                    $list->{$1} = 1;
+            } else {
+                $c->log->error("'$block' is not a valid number or range") if defined $c;
+            }
+        }
+    }
+
+    my @arr = sort keys %{$list};
+    return \@arr;
+}
+
+########################################
+
+=head2 array2hash
+
+  array2hash($data, [ $key, [ $key2 ]])
+
+create a hash by key
+
+=cut
+sub array2hash {
+    my $data = shift;
+    my $key  = shift;
+    my $key2 = shift;
+
+    return {} unless defined $data;
+    confess("not an array") unless ref $data eq 'ARRAY';
+
+    my %hash;
+    if(defined $key2) {
+        for my $d (@{$data}) {
+            $hash{$d->{$key}}->{$d->{$key2}} = $d;
+        }
+    } elsif(defined $key) {
+        %hash = map { $_->{$key} => $_ } @{$data};
+    } else {
+        %hash = map { $_ => $_ } @{$data};
+    }
+
+    return \%hash;
 }
 
 ######################################

@@ -1281,41 +1281,6 @@ sub list {
 
 ########################################
 
-=head2 expand_numeric_list
-
-  expand_numeric_list($txt, $c)
-
-return expanded list.
-ex.: converts '3,7-9,15' -> [3,7,8,9,15]
-
-=cut
-
-sub expand_numeric_list {
-    my $txt  = shift;
-    my $c    = shift;
-    my $list = {};
-    return [] unless defined $txt;
-
-    for my $item (ref $txt eq 'ARRAY' ? @{$txt} : $txt) {
-        for my $block (split/\s*,\s*/mx, $item) {
-            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
-                for my $nr ($1..$2) {
-                    $list->{$nr} = 1;
-                }
-            } elsif($block =~ m/^(\d+)$/gmx) {
-                    $list->{$1} = 1;
-            } else {
-                $c->log->error("'$block' is not a valid number or range") if defined $c;
-            }
-        }
-    }
-
-    my @arr = sort keys %{$list};
-    return \@arr;
-}
-
-########################################
-
 =head2 translate_host_status
 
   translate_host_status($status)
