@@ -49,6 +49,8 @@ sub init_backend_thread_pool {
         $pool_size   = $config->{'connection_pool_size'};
     } elsif($num_peers >= 3) {
         $pool_size   = $num_peers;
+    } else {
+        $pool_size   = 1;
     }
     my $use_curl     = $config->{'use_curl'};
     $config->{'deprecations_shown'} = {};
