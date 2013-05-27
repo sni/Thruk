@@ -103,7 +103,27 @@ sub get_c {
 
 ##############################################
 
-=head1 OBJECT CONFIGURATION
+=head1 BACKEND CONNECTION POOL
+
+The Backend Connection Pool can be uses for own querys against
+all connected backends in Thruk.
+
+=head2 get_db
+
+    get_db()
+
+Return connection pool as a L<Thruk::Backend::Manager|Thruk::Backend::Manager> object.
+
+=cut
+sub get_db {
+    my($self) = @_;
+    my $c = $self->get_c();
+    return $c->{'db'};
+}
+
+##############################################
+
+=head1 CONFIG TOOL - OBJECT CONFIGURATION
 
 These methods will only be available if you have the config tool plugin enabled
 and if you set core config items to access the core objects config.

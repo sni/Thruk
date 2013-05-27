@@ -35,7 +35,7 @@ my $states = {
 };
 
 my $cli      = Thruk::Utils::CLI->new;
-my $db       = $cli->get_c()->{'db'};
+my $db       = $cli->get_db();
 my $services = $db->get_services();
 
 printf("%-20s   %-30s %-10s\n", "Host", "Service", "Status");
