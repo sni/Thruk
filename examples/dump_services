@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm -a $(cd `dirname $0` && pwd) != '/usr/share/thruk/examples' ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+##############################################
+use strict;
+use warnings;
+use Thruk::Utils::CLI;
+
+my $states = {
+    '0' => 'Ok',
+    '1' => 'Warning',
+    '2' => 'Critical',
+    '3' => 'Unknown',
+};
+
+my $cli      = Thruk::Utils::CLI->new;
+my $db       = $cli->get_c()->{'db'};
+my $services = $db->get_services();
+
+printf("%-20s   %-30s %-10s\n", "Host", "Service", "Status");
+print("===============================================================\n");
+for my $s (@{$services}) {
+    printf("%-20s   %-30s %-10s\n", $s->{'host_name'}, $s->{'description'}, $states->{$s->{'state'}});
+}
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+dump_services - Command Line Utility which dumps services by using Thruks connection pool
+
+=head1 SYNOPSIS
+
+Usage: dump_services
+
+=head1 DESCRIPTION
+
+This script lists all services
+
+=head1 AUTHOR
+
+2013, Sven Nierlein, <sven.nierlein@consol.de>
+
+=cut
