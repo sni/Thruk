@@ -43,8 +43,13 @@ sub init_backend_thread_pool {
     my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
     $peer_configs    = [] unless defined $peer_configs;
-    my $pool_size    = defined $config->{'connection_pool_size'} ? $config->{'connection_pool_size'} : 100;
     my $num_peers    = scalar @{$peer_configs};
+    my $pool_size;
+    if(defined $config->{'connection_pool_size'}) {
+        $pool_size   = $config->{'connection_pool_size'};
+    } elsif($num_peers >= 3) {
+        $pool_size   = $num_peers;
+    }
     my $use_curl     = $config->{'use_curl'};
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
@@ -62,7 +67,7 @@ sub init_backend_thread_pool {
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }
-        if($num_peers > 1) {
+        if($pool_size > 1) {
             $Storable::Eval    = 1;
             $Storable::Deparse = 1;
             $SIG{'USR1'}  = undef;
