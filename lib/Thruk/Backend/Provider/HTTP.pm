@@ -792,6 +792,7 @@ sub _wait_for_remote_job {
             sleep(1);
             next;
         }
+        last;
     }
     my $last_error = "";
     return([undef,
