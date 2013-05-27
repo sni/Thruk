@@ -382,6 +382,7 @@ sub _redirect_or_success {
     }
 
     my $has_spaces = 0;
+    my $seperator  = ';';
     # skip hosts and services containing spaces
     # livestatus supports semicolon since version 1.1.11 i3
     if(   $c->stash->{'lasthost'}    =~ m/\s+/gmx
@@ -399,8 +400,12 @@ sub _redirect_or_success {
         if(!Thruk::Utils::version_compare($v_num, '1.1.3')) {
             $wait = 0;
         }
-        if(!Thruk::Utils::version_compare($v_num, '1.1.12') and $has_spaces) {
-            $wait = 0;
+        if(!Thruk::Utils::version_compare($v_num, '1.1.12')) {
+            $seperator = ' ';
+            # won't work with spaces in that version
+            if($has_spaces) {
+                $wait = 0;
+            }
         }
     }
 
@@ -457,7 +462,7 @@ sub _redirect_or_success {
                                         );
                 }
                 if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
-                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.";".$c->stash->{'lastservice'};
+                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
                     $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                                           { 'host_name'   => $c->stash->{'lasthost'} },
                                                           { 'description' => $c->stash->{'lastservice'} }
