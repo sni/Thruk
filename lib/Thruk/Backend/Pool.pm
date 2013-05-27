@@ -58,6 +58,7 @@ sub init_backend_thread_pool {
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
             $peer_config->{'use_curl'} = $use_curl;
+            $peer_config->{'use_curl'} = 0 if $pool_size >= 2; # curl is not thread safe
             my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;

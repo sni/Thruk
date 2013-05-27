@@ -4,6 +4,8 @@ next:
           - enable connection pool by default (only with 3 backends or more)
           - connection pool uses 90% less memory now
           - allow setting 'state_host' explicitly
+          - Bug Fixes
+            - disable curl when using threads
 
 1.70-4   Tue May 21 11:40:34 CEST 2013
           - Bug Fixes
