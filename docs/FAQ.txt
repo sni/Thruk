@@ -310,3 +310,23 @@ page].
 
 The new 'reports2' module should work fine, even on older Redhat
 boxes.
+
+
+
+=== Premature end of script headers: fcgid_env.sh
+
+A few things to check:
+
+- check the apache error log for more details.
+- check the thruk logfile, usually located in /var/log/thruk/error.log
+- if you are using Redhat/Centos, check if you have SELinux enabled:
++
+  #>getenforce
+  Disabled
++
+'Enforcing' means SELinux is enable. Details can be found in the audit log: /var/log/audit/audit.log.
+SELinux can be disabled in '/etc/selinux/config'
++
+  SELINUX=disabled
++
+Read more about SELinux on http://wiki.centos.org/HowTos/SELinux

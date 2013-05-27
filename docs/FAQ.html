@@ -666,6 +666,7 @@ div.literalblock > div.content {
 <div class='toclevel3'><a href='#_backend_not_available'>Backend not available</a></div>
 <div class='toclevel3'><a href='#_undefined_symbol_perl_istack_sp_ptr'>undefined symbol: Perl_Istack_sp_ptr</a></div>
 <div class='toclevel3'><a href='#_broken_pdf_reports_in_centos_rhel_5'>Broken PDF Reports in Centos/Rhel 5</a></div>
+<div class='toclevel3'><a href='#_premature_end_of_script_headers_fcgid_env_sh'>Premature end of script headers: fcgid_env.sh</a></div>
 </div>
 
 </div>
@@ -953,12 +954,43 @@ prepared packages for cairo 1.8.8 on rhel/centos 5 on the
 page</a>.</p></div>
 <div class="paragraph"><p>The new <em>reports2</em> module should work fine, even on older Redhat
 boxes.</p></div>
+<h3 id="_premature_end_of_script_headers_fcgid_env_sh">Premature end of script headers: fcgid_env.sh</h3><div style="clear:left"></div>
+<div class="paragraph"><p>A few things to check:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+check the apache error log for more details.
+</p>
+</li>
+<li>
+<p>
+check the thruk logfile, usually located in /var/log/thruk/error.log
+</p>
+</li>
+<li>
+<p>
+if you are using Redhat/Centos, check if you have SELinux enabled:
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><tt>#&gt;getenforce
+Disabled</tt></pre>
+</div></div>
+<div class="paragraph"><p><em>Enforcing</em> means SELinux is enable. Details can be found in the audit log: /var/log/audit/audit.log.
+SELinux can be disabled in <em>/etc/selinux/config</em></p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>SELINUX=disabled</tt></pre>
+</div></div>
+<div class="paragraph"><p>Read more about SELinux on <a href="http://wiki.centos.org/HowTos/SELinux">http://wiki.centos.org/HowTos/SELinux</a></p></div>
+</li>
+</ul></div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-04-04 22:09:02 CEST
+Last updated 2013-05-27 14:16:48 CEST
 </div>
 </div>
 </body>
