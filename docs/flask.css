@@ -628,3 +628,8 @@ div.literalblock > div.content {
   border-width: 1px 1px 1px 5px;
   padding: 0.5em;
 }
+
+h4#_peer + div > ul tt {
+  width: 150px;
+  display: inline-block;
+}

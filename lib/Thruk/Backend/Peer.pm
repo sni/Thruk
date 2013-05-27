@@ -131,6 +131,7 @@ sub _initialise_peer {
     $self->{'configtool'}    = $config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
+    $self->{'state_host'}    = $config->{'state_host'};
 
     # shorten backend id
     my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);

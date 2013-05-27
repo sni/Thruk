@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - enable connection pool by default
           - connection pool uses 90% less memory now
+          - allow setting 'state_host' explicitly
 
 1.70-4   Tue May 21 11:40:34 CEST 2013
           - Bug Fixes

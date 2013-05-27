@@ -634,7 +634,13 @@ div.literalblock > div.content {
   border-style: solid;
   border-width: 1px 1px 1px 5px;
   padding: 0.5em;
-}</style>
+}
+
+h4#_peer + div > ul tt {
+  width: 150px;
+  display: inline-block;
+}
+</style>
 
 </head>
 <body style="max-width:800">
@@ -17858,7 +17864,8 @@ behavior.</p></div>
 increase performance when using multiple remote sites. It is enabled
 by default when using more than one site. You have to define
 hostchecks in any local backend (using unix sockets) with a name or
-alias of the address of your remote backends.</p></div>
+alias of the address of your remote backends. To explicitly connect
+a host to a specific backend, set <em>state_host</em> in that peer configuration.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -18199,108 +18206,113 @@ for details.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-name     name for this connection
+<tt>name</tt>          name for this connection
 </p>
 </li>
 <li>
 <p>
-type     type of this connection. Can be <em>livestatus</em>, <em>http</em> or <em>mongodb</em>
+<tt>type</tt>          type of this connection. Can be <em>livestatus</em>, <em>http</em> or <em>mongodb</em>
 </p>
 </li>
 <li>
 <p>
-hidden   should this peer be hidden initially ( can be reenabled
-                 via gui switch ) Only useful with more than one
-                 backend.
+<tt>hidden</tt>        should this peer be hidden initially ( can be reenabled
+                        via gui switch ) Only useful with more than one
+                        backend.
 </p>
 </li>
 <li>
 <p>
-groups   if set, only contacts from these groups have access. You
-                 may add multiple groups separated by comma. Users
-                 without the right contactgroup don&#8217;t even see
-                 that there is a backend. Note that this implies
-                 one extra backend request per page.
-                 (deprecated, please do not use)
+<tt>groups</tt>        if set, only contacts from these groups have access. You
+                        may add multiple groups separated by comma. Users
+                        without the right contactgroup don&#8217;t even see
+                        that there is a backend. Note that this implies
+                        one extra backend request per page.
+                        (deprecated, please do not use)
 </p>
 </li>
 <li>
 <p>
-section  to group backends/sites by different sections, enter a
-                 section.
+<tt>section</tt>       to group backends/sites by different sections, enter a
+                        section.
 </p>
 </li>
 <li>
 <p>
-options
+<tt>state_host</tt>    Set <em>state_host</em> explicitly. See See <a href="#_check_local_states">check_local_states</a> for details.
+</p>
+</li>
+<li>
+<p>
+<tt>options</tt>
 </p>
 <div class="ulist"><ul>
 <li>
 <p>
-peer            address of this connection.
+<tt>peer</tt>            address of this connection.
 </p>
 </li>
 <li>
 <p>
-resource_file   resource_file for this peer (used for macro replacement)
+<tt>resource_file</tt>   resource_file for this peer (used for macro replacement)
 </p>
 </li>
 </ul></div>
 </li>
 <li>
 <p>
-configtool
+<tt>configtool</tt>
 </p>
 <div class="ulist"><ul>
 <li>
 <p>
-core_type       Give the config parser a hint about
-                            your config. Can be <em>nagios</em>, <em>icinga</em>
-                            or <em>shinken</em>.
+<tt>core_type</tt>       Give the config parser a hint about
+                              your config. Can be <em>nagios</em>, <em>icinga</em>
+                              or <em>shinken</em>.
 </p>
 </li>
 <li>
 <p>
-core_conf       Path to your nagios.cfg / icinga.cfg. Read all
-                            object directories and files from this config
-                            file.
+<tt>core_conf</tt>       Path to your nagios.cfg / icinga.cfg. Read all
+                              object directories and files from this config
+                              file.
 </p>
 </li>
 <li>
 <p>
-obj_check_cmd   Commandline to verify the config.
+<tt>obj_check_cmd</tt>   Commandline to verify the config.
 </p>
 </li>
 <li>
 <p>
-obj_reload_cmd  Commandline to reload the config.
+<tt>obj_reload_cmd</tt>  Commandline to reload the config.
 </p>
 </li>
 <li>
 <p>
-obj_readonly    Filename pattern to define readonly objects.
-                            For example for generated config files.
+<tt>obj_readonly</tt>    Filename pattern to define readonly objects.
+                              For example for generated config files.
 </p>
 </li>
 <li>
 <p>
-obj_dir         Path to your objects. Enables the objects editor.
-                            Reads all *.cfg from this folder and all subfolders.
-                            (only needed when not using <em>core_conf</em>)
+<tt>obj_dir</tt>         Path to your objects. Enables the objects editor.
+                              Reads all *.cfg from this folder and all subfolders.
+                              (only needed when not using <em>core_conf</em>)
 </p>
 </li>
 <li>
 <p>
-obj_file        Path to a single objects file. Enables the objects
-                            editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
-                            specified more than once.
-                            (only needed when not using <em>core_conf</em>)
+<tt>obj_file</tt>        Path to a single objects file. Enables the objects
+                              editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
+                              specified more than once.
+                              (only needed when not using <em>core_conf</em>)
 </p>
 </li>
 <li>
 <p>
-obj_exclude     Specify some exception pattern for the obj_dir.
-                            (only needed when not using <em>core_conf</em>)
+<tt>obj_exclude</tt>     Specify some exception pattern for the obj_dir.
+                              (only needed when not using <em>core_conf</em>)
 </p>
 </li>
 </ul></div>
@@ -19781,7 +19793,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-24 23:38:48 CEST
+Last updated 2013-05-27 16:52:20 CEST
 </div>
 </div>
 </body>

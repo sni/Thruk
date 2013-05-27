@@ -1532,7 +1532,8 @@ Get the status for remote backends from local instances. This can
 increase performance when using multiple remote sites. It is enabled
 by default when using more than one site. You have to define
 hostchecks in any local backend (using unix sockets) with a name or
-alias of the address of your remote backends.
+alias of the address of your remote backends. To explicitly connect
+a host to a specific backend, set 'state_host' in that peer configuration.
 
 ex.:
 
@@ -1917,42 +1918,43 @@ for details.
 
 ==== peer
 
-     ** name     name for this connection
-     ** type     type of this connection. Can be 'livestatus', 'http' or 'mongodb'
-     ** hidden   should this peer be hidden initially ( can be reenabled
-                 via gui switch ) Only useful with more than one
-                 backend.
-     ** groups   if set, only contacts from these groups have access. You
-                 may add multiple groups separated by comma. Users
-                 without the right contactgroup don't even see
-                 that there is a backend. Note that this implies
-                 one extra backend request per page.
-                 (deprecated, please do not use)
-     ** section  to group backends/sites by different sections, enter a
-                 section.
-     ** options
-        *** peer            address of this connection.
-        *** resource_file   resource_file for this peer (used for macro replacement)
-     ** configtool
-        *** core_type       Give the config parser a hint about
-                            your config. Can be 'nagios', 'icinga'
-                            or 'shinken'.
-        *** core_conf       Path to your nagios.cfg / icinga.cfg. Read all
-                            object directories and files from this config
-                            file.
-        *** obj_check_cmd   Commandline to verify the config.
-        *** obj_reload_cmd  Commandline to reload the config.
-        *** obj_readonly    Filename pattern to define readonly objects.
-                            For example for generated config files.
-        *** obj_dir         Path to your objects. Enables the objects editor.
-                            Reads all *.cfg from this folder and all subfolders.
-                            (only needed when not using 'core_conf')
-        *** obj_file        Path to a single objects file. Enables the objects
-                            editor. Both 'obj_dir' and 'obj_file' can be
-                            specified more than once.
-                            (only needed when not using 'core_conf')
-        *** obj_exclude     Specify some exception pattern for the obj_dir.
-                            (only needed when not using 'core_conf')
+     ** `name`          name for this connection
+     ** `type`          type of this connection. Can be 'livestatus', 'http' or 'mongodb'
+     ** `hidden`        should this peer be hidden initially ( can be reenabled
+                        via gui switch ) Only useful with more than one
+                        backend.
+     ** `groups`        if set, only contacts from these groups have access. You
+                        may add multiple groups separated by comma. Users
+                        without the right contactgroup don't even see
+                        that there is a backend. Note that this implies
+                        one extra backend request per page.
+                        (deprecated, please do not use)
+     ** `section`       to group backends/sites by different sections, enter a
+                        section.
+     ** `state_host`    Set 'state_host' explicitly. See See <<_check_local_states,check_local_states>> for details.
+     ** `options`
+        *** `peer`            address of this connection.
+        *** `resource_file`   resource_file for this peer (used for macro replacement)
+     ** `configtool`
+        *** `core_type`       Give the config parser a hint about
+                              your config. Can be 'nagios', 'icinga'
+                              or 'shinken'.
+        *** `core_conf`       Path to your nagios.cfg / icinga.cfg. Read all
+                              object directories and files from this config
+                              file.
+        *** `obj_check_cmd`   Commandline to verify the config.
+        *** `obj_reload_cmd`  Commandline to reload the config.
+        *** `obj_readonly`    Filename pattern to define readonly objects.
+                              For example for generated config files.
+        *** `obj_dir`         Path to your objects. Enables the objects editor.
+                              Reads all *.cfg from this folder and all subfolders.
+                              (only needed when not using 'core_conf')
+        *** `obj_file`        Path to a single objects file. Enables the objects
+                              editor. Both 'obj_dir' and 'obj_file' can be
+                              specified more than once.
+                              (only needed when not using 'core_conf')
+        *** `obj_exclude`     Specify some exception pattern for the obj_dir.
+                              (only needed when not using 'core_conf')
 
 ex.:
 
