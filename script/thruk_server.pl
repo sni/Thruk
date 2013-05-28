@@ -10,7 +10,7 @@ use lib 'lib';
 use Thruk::Backend::Pool;
 BEGIN {
     # won't work with automatical restarts
-    unless(grep {/^\-r$/} @ARGV) {
+    unless(grep {/^\-r/} @ARGV) {
         Thruk::Backend::Pool::init_backend_thread_pool()
     }
 }
