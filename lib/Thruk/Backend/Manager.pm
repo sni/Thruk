@@ -1158,8 +1158,7 @@ sub _get_result {
     my($self, $peers, $function, $arg, $force_serial) = @_;
     if($ENV{'THRUK_NO_CONNECTION_POOL'}
        or $force_serial
-       or scalar @{$peers} <= 1
-       or $function eq 'set_stash')
+       or scalar @{$peers} <= 1)
     {
         return $self->_get_result_serial($peers, $function, $arg);
     }

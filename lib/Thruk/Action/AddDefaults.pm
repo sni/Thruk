@@ -193,9 +193,6 @@ sub add_defaults {
     $c->stash->{'has_expire_acks'} = 1 if $c->stash->{'enable_icinga_features'}
                                        or $c->stash->{'enable_shinken_features'};
 
-    # make stash available for our backends
-    $c->{'db'}->set_stash($c->stash);
-
     $c->stash->{'navigation'} = "";
     if( $c->config->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);

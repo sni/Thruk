@@ -34,7 +34,6 @@ sub new {
     my $self = {
         'live'   => Monitoring::Livestatus::Class::Lite->new($peer_config),
         'config' => $config,
-        'stash'  => undef,
     };
     bless $self, $class;
 
@@ -888,21 +887,6 @@ sub set_verbose {
     $self->{'live'}->{'backend_obj'}->{'verbose'} = $val;
     $self->{'live'}->{'backend_obj'}->{'logger'}  = $self->{'log'};
     return($old);
-}
-
-##########################################################
-
-=head2 set_stash
-
-  set_stash
-
-make stash accessible for the backend
-
-=cut
-sub set_stash {
-    my($self, $stash) = @_;
-    $self->{'stash'} = $stash;
-    return;
 }
 
 ##########################################################

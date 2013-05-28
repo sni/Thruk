@@ -98,7 +98,6 @@ sub new {
         'dbsock'      => $dbsock,
         'config'      => $config,
         'peer_config' => $peer_config,
-        'stash'       => undef,
         'verbose'     => 0,
     };
     bless $self, $class;
@@ -570,21 +569,6 @@ sub set_verbose {
     my $old = $self->{'verbose'};
     $self->{'verbose'} = $val;
     return($old);
-}
-
-##########################################################
-
-=head2 set_stash
-
-  set_stash
-
-make stash accessible for the backend
-
-=cut
-sub set_stash {
-    my($self, $stash) = @_;
-    $self->{'stash'} = $stash;
-    return;
 }
 
 ##########################################################

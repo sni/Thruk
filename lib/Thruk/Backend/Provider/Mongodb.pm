@@ -53,7 +53,6 @@ sub new {
         'dbname'      => $dbname,
         'config'      => $config,
         'peer_config' => $peer_config,
-        'stash'       => undef,
         'verbose'     => 0,
     };
     bless $self, $class;
@@ -1321,21 +1320,6 @@ sub set_verbose {
 
 ##########################################################
 
-=head2 set_stash
-
-  set_stash
-
-make stash accessible for the backend
-
-=cut
-sub set_stash {
-    my($self, $stash) = @_;
-    $self->{'stash'} = $stash;
-    return;
-}
-
-##########################################################
-
 =head2 renew_logcache
 
   renew_logcache
@@ -1357,12 +1341,9 @@ returns the size of a query, used to reduce the amount of transfered data
 
 =cut
 sub _get_query_size {
-    my $self    = shift;
-    my $table   = shift;
-    my $options = shift;
-    my $key     = shift;
-    my $sortby1 = shift;
-    my $sortby2 = shift;
+    my($self, $table, $options, $key, $sortby1, $sortby2) = @_;
+
+    # doesn't work anyway currently
     confess("_get_query_size()");
 
     # only if paging is enabled
