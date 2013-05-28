@@ -1187,7 +1187,6 @@ sub _get_result_serial {
     my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
-
     for my $key (@{$peers}) {
         $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);

@@ -122,9 +122,16 @@ sub do_on_peer {
     if(ref $arg eq 'ARRAY') {
         for(my $x = 0; $x <= scalar @{$arg}; $x++) {
             if($arg->[$x] and $arg->[$x] eq 'eval') {
-                ## no critic
-                eval($arg->[$x+1]);
-                ## use critic
+                my $code = $arg->[$x+1];
+                if(ref($code) eq 'HASH') {
+                    $inc  = $code->{'inc'};
+                    $code = $code->{'code'};
+                    @INC = @{$inc} if $inc;
+                }
+                ### no critic
+                eval($code);
+                ### use critic
+                die($@) if $@;
             }
         }
     }

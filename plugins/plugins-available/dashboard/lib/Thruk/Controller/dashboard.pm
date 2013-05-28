@@ -118,6 +118,8 @@ sub _process_dashboard_page {
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
+    my $eval = { code => 'require Thruk::Backend::Provider::DashboardLivestatus', inc => \@INC };
+
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
@@ -174,8 +176,8 @@ sub _process_dashboard_page {
             my $stats;
             delete $filter_host{'-or'}    if scalar @{$filter_host{'-or'}} == 0;
             delete $filter_service{'-or'} if scalar @{$filter_service{'-or'}} == 0;
-            $stats->{'hosts'} = $c->{'db'}->get_host_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), \%filter_host], 'eval' => 'require Thruk::Backend::Provider::DashboardLivestatus');
-            $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service], 'eval' => 'require Thruk::Backend::Provider::DashboardLivestatus');
+            $stats->{'hosts'} = $c->{'db'}->get_host_stats_dashboard(      filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    \%filter_host],    'eval' => $eval);
+            $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service], 'eval' => $eval);
             $stats->{'name'} = $name;
             push (@dashboard, $stats);
         }
@@ -215,8 +217,8 @@ sub _process_dashboard_page {
             my $stats;
             delete $filter_host{'-or'}    if scalar @{$filter_host{'-or'}}    == 0;
             delete $filter_service{'-or'} if scalar @{$filter_service{'-or'}} == 0;
-            $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service], 'eval' => 'require Thruk::Backend::Provider::DashboardLivestatus');
-            $stats->{'hosts'}    = $c->{'db'}->get_host_stats_dashboard(   filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    \%filter_host], 'eval' => 'require Thruk::Backend::Provider::DashboardLivestatus');
+            $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service], 'eval' => $eval);
+            $stats->{'hosts'}    = $c->{'db'}->get_host_stats_dashboard(   filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    \%filter_host],    'eval' => $eval);
             $stats->{'name'}     = $name;
             push (@dashboard, $stats);
 
