@@ -4,6 +4,7 @@ next:
           - enable connection pool by default (only with 3 backends or more)
           - connection pool uses 90% less memory now
           - allow setting 'state_host' explicitly
+          - speed improvments (use json::xs for faster serialization)
           - Bug Fixes
             - disable curl when using threads
 

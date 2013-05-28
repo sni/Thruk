@@ -5,7 +5,7 @@ use threads;
 use threads::shared;
 use warnings;
 use Carp;
-use Storable qw(freeze thaw);
+use JSON::XS qw/decode_json encode_json/;
 use Thread::Queue;
 use Thread::Semaphore;
 
@@ -94,7 +94,7 @@ sub _handle {
             $self->_state(-2) && last unless $id;
             $self->_drop($id) && next unless $self->job_exists($id);
 
-            my $arg = thaw($job);
+            my $arg = decode_json($job);
             my @ret;
             if ($id % 3 == 2) {  # void context
                 if (defined $func) {
@@ -137,7 +137,7 @@ sub _handle {
             else {
                 unshift @ret, 'n';
             }
-            my $ret = freeze(\@ret);
+            my $ret = encode_json(\@ret);
             {
                 lock %{$self->{done}};
                 $self->{done}{$id} = $ret;
@@ -234,7 +234,7 @@ sub add {
     my $self = shift;
     my $context = wantarray;
     $context = 2 unless defined $context; # void context = 2
-    my $arg = freeze(\@_);
+    my $arg = encode_json(\@_);
     my $id;
     while (1) {
         $id = int(rand(time()));
@@ -290,7 +290,7 @@ sub _remove {
     }
     $self->_drop($id) if $exist;
     return $exist unless defined $ret;
-    $ret = thaw($ret);
+    $ret = decode_json($ret);
     my $err = shift @$ret;
     croak $ret->[0] if $err eq 'e';
     return ($exist, @$ret) if $id % 3 == 1;

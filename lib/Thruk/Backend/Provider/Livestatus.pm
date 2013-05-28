@@ -234,7 +234,7 @@ sub get_hosts {
             last_time_down last_time_unreachable last_time_up display_name
             in_check_period in_notification_period
         /];
-        if($self->{'stash'}->{'enable_shinken_features'}) {
+        if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem realm poller_tag
                                              got_business_rule parent_dependencies/;
         }
@@ -383,7 +383,7 @@ sub get_services {
             in_check_period in_notification_period host_parents
         /];
 
-        if($self->{'stash'}->{'enable_shinken_features'}) {
+        if($options{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
                                              got_business_rule parent_dependencies/;
         }

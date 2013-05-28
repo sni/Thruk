@@ -565,10 +565,11 @@ sub set_backend_state_from_local_connections {
     my( $self, $cache, $disabled ) = @_;
 
     my $c = $Thruk::Backend::Manager::c;
-    $c->stats->profile( begin => "set_backend_state_from_local_connections() " );
 
     return $disabled unless scalar keys %{$self->{'local_hosts'}} >= 1;
     return $disabled unless scalar keys %{$self->{'state_hosts'}} >= 1;
+
+    $c->stats->profile( begin => "set_backend_state_from_local_connections() " );
 
     my $options = [
         'backend', [ keys %{$self->{'local_hosts'}} ],
@@ -1086,7 +1087,7 @@ sub _select_backends {
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
-    if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
+    if(     ( $function =~ m/^get_/mxo or $function eq 'send_command')
         and ref $arg eq 'ARRAY'
         and scalar @{$arg} % 2 == 0 )
     {
@@ -1098,7 +1099,7 @@ sub _select_backends {
                     $backends->{$b} = 1;
                 }
             } else {
-                for my $b (split(/,/mx,$arg{'backend'})) {
+                for my $b (split(/,/mxo,$arg{'backend'})) {
                     $backends->{$b} = 1;
                 }
             }
@@ -1118,6 +1119,13 @@ sub _select_backends {
                 $arg{'pager'} = {};
             }
         }
+
+        if(   $function eq 'get_hosts'
+           or $function eq 'get_services'
+           ) {
+            $arg{'enable_shinken_features'} = $c->stash->{'enable_shinken_features'};
+        }
+
         @{$arg} = %arg;
     }
 
@@ -1234,10 +1242,9 @@ sub _get_result_parallel {
     }
 
     for my $id (keys %ids) {
-        my @res = $Thruk::Backend::Pool::pool->remove($id);
-        my $res = shift @res;
-        my($typ, $size, $data, $last_error) = @{$res};
-        my $key = $ids{$id};
+        my @res  = $Thruk::Backend::Pool::pool->remove($id);
+        my($typ, $size, $data, $last_error) = @{$res[0]};
+        my $key  = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
         $c->stash->{'failed_backends'}->{$key} = $last_error;
         $peer->{'last_error'} = $last_error;
