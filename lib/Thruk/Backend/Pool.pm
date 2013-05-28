@@ -128,9 +128,9 @@ sub do_on_peer {
                     $code = $code->{'code'};
                     @INC = @{$inc} if $inc;
                 }
-                ### no critic
+                ## no critic
                 eval($code);
-                ### use critic
+                ## use critic
                 die($@) if $@;
             }
         }
