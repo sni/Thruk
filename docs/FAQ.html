@@ -634,7 +634,13 @@ div.literalblock > div.content {
   border-style: solid;
   border-width: 1px 1px 1px 5px;
   padding: 0.5em;
-}</style>
+}
+
+h4#_peer + div > ul tt {
+  width: 150px;
+  display: inline-block;
+}
+</style>
 
 </head>
 <body style="max-width:800">
@@ -976,8 +982,10 @@ if you are using Redhat/Centos, check if you have SELinux enabled:
 <pre><tt>#&gt;getenforce
 Disabled</tt></pre>
 </div></div>
-<div class="paragraph"><p><em>Enforcing</em> means SELinux is enable. Details can be found in the audit log: /var/log/audit/audit.log.
-SELinux can be disabled in <em>/etc/selinux/config</em></p></div>
+<div class="paragraph"><p><em>Enforcing</em> means SELinux is enable. Details can be found in the audit
+log: /var/log/audit/audit.log.  SELinux can be disabled in
+<em>/etc/selinux/config</em> (you will have to reboot once to make the
+changes active).</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>SELINUX=disabled</tt></pre>
@@ -990,7 +998,7 @@ SELinux can be disabled in <em>/etc/selinux/config</em></p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-27 14:16:48 CEST
+Last updated 2013-05-29 10:32:44 CEST
 </div>
 </div>
 </body>

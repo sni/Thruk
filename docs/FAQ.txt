@@ -324,8 +324,10 @@ A few things to check:
   #>getenforce
   Disabled
 +
-'Enforcing' means SELinux is enable. Details can be found in the audit log: /var/log/audit/audit.log.
-SELinux can be disabled in '/etc/selinux/config'
+'Enforcing' means SELinux is enable. Details can be found in the audit
+log: /var/log/audit/audit.log.  SELinux can be disabled in
+'/etc/selinux/config' (you will have to reboot once to make the
+changes active).
 +
   SELINUX=disabled
 +
