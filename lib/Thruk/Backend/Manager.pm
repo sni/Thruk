@@ -30,10 +30,6 @@ Manager of backend connections
 =cut
 
 ##########################################################
-$Thruk::Backend::Manager::callbacks = {
-                            'empty_callback' => sub { return '' },
-};
-##########################################################
 
 =head2 new
 

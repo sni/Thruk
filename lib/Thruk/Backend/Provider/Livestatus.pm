@@ -19,6 +19,12 @@ connection provider for livestatus connections
 =head1 METHODS
 
 =cut
+
+##########################################################
+$Thruk::Backend::Provider::Livestatus::callbacks = {
+                            'empty_callback' => sub { return '' },
+};
+
 ##########################################################
 
 =head2 new
@@ -1057,7 +1063,7 @@ sub _replace_callbacks {
     return unless defined $callbacks;
     for my $key (keys %{$callbacks}) {
         next if ref $callbacks->{$key} eq 'CODE';
-        my $callback = $Thruk::Backend::Manager::callbacks->{$callbacks->{$key}};
+        my $callback = $Thruk::Backend::Provider::Livestatus::callbacks->{$callbacks->{$key}};
         confess("no callback for ".$key." -> ".$callbacks->{$key}) unless defined $callback;
         $callbacks->{$key} = $callback;
     }
