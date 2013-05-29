@@ -462,19 +462,6 @@ sub set_verbose {
 
 ##########################################################
 
-=head2 set_stash
-
-  set_stash
-
-make stash accessible for the backend
-
-=cut
-sub set_stash {
-    return;
-}
-
-##########################################################
-
 =head2 renew_logcache
 
   renew_logcache
