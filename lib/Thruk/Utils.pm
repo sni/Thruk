@@ -21,6 +21,7 @@ use Encode qw/encode_utf8 decode/;
 use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk::Utils::IO;
 
 ##############################################
 =head1 METHODS
