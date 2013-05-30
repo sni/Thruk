@@ -398,7 +398,7 @@ sub _run_commands {
 
     # request url
     elsif($action =~ /^url=(.*)$/mx) {
-        $data->{'output'} = _cmd_url($c, $1);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_url($c, $1);
     }
 
     # report or report mails
@@ -561,7 +561,7 @@ sub _request_url {
 
     if($result->{'code'} == 302
           and defined $result->{'headers'}->{'Set-Cookie'}
-          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mx
+          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mxo
     ) {
         require URI::Escape;
         my $txt = URI::Escape::uri_unescape($2);
@@ -585,6 +585,13 @@ sub _request_url {
         my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
         _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
         return($result->{'code'}, $result, $txt) if defined wantarray;
+        return $txt;
+    }
+
+    # clean error message if there is one
+    if($result->{'result'} =~ m/<span\sclass="fail_message">(.*?)<\/span>/mxo) {
+        my $txt = 'ERROR - '.$1."\n";
+        return(500, $result, $txt) if wantarray;
         return $txt;
     }
 
@@ -786,10 +793,12 @@ sub _cmd_url {
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/thruk/cgi-bin/'.$url;
     }
-    my $output = _request_url($c, $url);
+    my @res = _request_url($c, $url);
 
     $c->stats->profile(end => "_cmd_url()");
-    return $output;
+
+    return($res[2], 1) if $res[0] != 200;
+    return($res[1]->{'result'}, 0);
 }
 
 ##############################################

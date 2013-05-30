@@ -246,7 +246,7 @@ sub _process_recurring_downtimes_page {
         $c->stash->{rd} = $rd;
         my $failed = 0;
         if($self->_check_downtime_permissions($c, $rd) != 2) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no permission!' });
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no permission for this '.$rd->{'target'}.'!' });
             $failed = 1;
         }
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
