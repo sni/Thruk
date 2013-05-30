@@ -20,6 +20,7 @@ use warnings;
 use Moose;
 use Carp;
 use Data::Dumper;
+use Thruk::Backend::Pool;
 
 extends 'Catalyst::Action';
 
@@ -248,7 +249,7 @@ sub add_defaults {
 
         # reapply config defaults and config conversions
         if(scalar keys %{$c->stash->{'config_adjustments'}} > 0) {
-            Thruk::Config::set_default_config($c->config);
+            Thruk::Backend::Pool::set_default_config($c->config);
         }
     }
 

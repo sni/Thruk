@@ -1,7 +1,7 @@
 package Catalyst::Plugin::Thruk::ConfigLoader;
 
 use strict;
-use Thruk::Config;
+use Thruk::Backend::Pool;
 use base 'Catalyst::Plugin::ConfigLoader';
 
 ########################################
@@ -138,7 +138,7 @@ sub _do_finalize_config {
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
 
     # set default config
-    Thruk::Config::set_default_config($config);
+    Thruk::Backend::Pool::set_default_config($config);
 
     return;
 }
