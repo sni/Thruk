@@ -445,7 +445,7 @@ sub _redirect_or_success {
                 $waittrigger   = 'command';
                 $waitcondition = 'acknowledged = 0';
             }
-            if($waittrigger) {
+            if($waittrigger and $c->stash->{'lasthost'}) {
                 my $options = {
                             'header' => {
                                 'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
