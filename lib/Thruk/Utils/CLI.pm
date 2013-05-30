@@ -796,9 +796,9 @@ sub _cmd_url {
     my @res = _request_url($c, $url);
 
     $c->stats->profile(end => "_cmd_url()");
-
-    return($res[2], 1) if $res[0] != 200;
-    return($res[1]->{'result'}, 0);
+    my $rc = $res[0] >= 400 ? 1 : 0;
+    return($res[2], $rc) if $res[2];
+    return($res[1]->{'result'}, $rc);
 }
 
 ##############################################
