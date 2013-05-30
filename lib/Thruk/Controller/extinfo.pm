@@ -428,7 +428,7 @@ sub _get_downtimes_list {
 
         # backend filter?
         my $backends = Thruk::Utils::list($d->{'backends'});
-        if($noauth != 2 and scalar @{$backends} > 0) {
+        if((!defined $noauth || $noauth != 2) and scalar @{$backends} > 0) {
             my $found = 0;
             $found = 1 if $backends->[0] eq ''; # no backends at all
             for my $b (@{$backends}) {
