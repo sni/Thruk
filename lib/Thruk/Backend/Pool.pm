@@ -163,7 +163,7 @@ sub set_default_config {
 
     # make a nice path
     for my $key (qw/tmp_path var_path/) {
-        $config->{$key} =~ s/\/$//mx;
+        $config->{$key} =~ s/\/$//mx if $config->{$key};
     }
 
     # merge hashes
