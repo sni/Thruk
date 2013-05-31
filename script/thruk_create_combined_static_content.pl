@@ -33,7 +33,10 @@ my $files = [
 for my $file (@{$files}) {
     my $cmd = 'csstidy '.$file.' --silent=true --optimise_shorthands=2 --template=highest > tmp.css && mv tmp.css '.$file;
     print `$cmd`;
-    exit 1 if $? != 0;
+    if($? != 0) {
+        print STDERR "csstidy failed, make sure csstidy is installed\n";
+        last;
+    }
 }
 unlink('tmp.css');
 
@@ -45,7 +48,10 @@ my $files = [
 for my $file (@{$files}) {
     my $cmd = 'yui-compressor -o compressed.js '.$file.' && mv compressed.js '.$file;
     print `$cmd`;
-    exit 1 if $? != 0;
+    if($? != 0) {
+        print STDERR "yui-compressor failed, make sure yui-compressor is installed\n";
+        last;
+    }
 }
 unlink('compressed.js');
 

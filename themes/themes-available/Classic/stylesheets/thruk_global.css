@@ -120,6 +120,9 @@ table.top_nav {
 td.top_nav_pref {
   vertical-align: top;
 }
+td.top_nav_pref input, td.top_nav_pref button {
+  width: 75px;
+}
 
 .top_nav div.backend {
   border: 0px none;
@@ -154,7 +157,7 @@ TABLE.site_panel .notfirst {
   padding-left: 5px;
 }
 
-input.top_nav_pref_button {
+input.top_nav_pref_button, button.top_nav_pref_button {
   color:#444444;
   background-color:#EEEEEE;
   border-style:double;

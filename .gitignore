@@ -41,3 +41,6 @@ panorama_default_view
 notes.txt
 themes/themes-available/*/images/logos/*.png
 .~ko-6.1.3-perllint~
+root/thruk/javascript/all_in_one-*.js
+themes/themes-available/Thruk/stylesheets/all_in_one-*.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-*.css
