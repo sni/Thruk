@@ -29,8 +29,8 @@ parse the object config
 
 =cut
 sub parse {
-    my $self         = shift;
-    my $fields       = shift;
+    my($self, $fields) = @_;
+    $fields = $self->{'default'} unless defined $fields;
     my $parse_errors = [];
 
     delete $self->{'name'};

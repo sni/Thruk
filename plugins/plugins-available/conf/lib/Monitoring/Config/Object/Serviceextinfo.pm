@@ -2,8 +2,7 @@ package Monitoring::Config::Object::Serviceextinfo;
 
 use strict;
 use warnings;
-use Moose;
-extends 'Monitoring::Config::Object::Parent';
+use parent 'Monitoring::Config::Object::Parent';
 
 =head1 NAME
 
@@ -54,19 +53,7 @@ sub BUILD {
     return $self;
 }
 
-
 ##########################################################
-
-=head2 parse
-
-parse the object config
-
-=cut
-sub parse {
-    my $self = shift;
-    return $self->SUPER::parse($self->{'default'});
-}
-
 
 =head1 AUTHOR
 
@@ -78,7 +65,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;
