@@ -192,11 +192,39 @@ elsif(!__PACKAGE__->debug) {
 }
 
 ###################################################
-# SizeMe?
+# SizeMe and other devel internals
 if($ENV{'SIZEME'}) {
-    require Devel::SizeMe;
-    Devel::SizeMe->import();
-    Devel::SizeMe::perl_size();
+    # add signal handler to print memory information
+    # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
+    $SIG{'USR1'} = sub {
+        eval {
+            require Devel::SizeMe;
+            Devel::SizeMe::perl_size();
+        };
+        print STDERR $@ if $@;
+    }
+}
+if($ENV{'MALLINFO'}) {
+    # add signal handler to print memory information
+    # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR2
+    $SIG{'USR2'} = sub {
+        eval {
+            require Devel::Mallinfo;
+            require Data::Dumper;
+            my $info = Devel::Mallinfo::mallinfo();
+            printf STDERR "%s\n", '*******************************************';
+            printf STDERR "%-30s    %5.1f %2s\n", 'arena',                              Thruk::Utils::reduce_number($info->{'arena'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, ordinary blocks',  Thruk::Utils::reduce_number($info->{'uordblks'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, small blocks',     Thruk::Utils::reduce_number($info->{'usmblks'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, ordinary blocks',    Thruk::Utils::reduce_number($info->{'fordblks'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, small blocks',       Thruk::Utils::reduce_number($info->{'fsmblks'}, 'B');
+            printf STDERR "%-30s\n", 'total';
+            printf STDERR "   %-30s %5.1f %2s\n", 'taken from the system',    Thruk::Utils::reduce_number($info->{'arena'} + $info->{'hblkhd'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'in use by program',        Thruk::Utils::reduce_number($info->{'uordblks'} + $info->{'usmblks'} + $info->{'hblkhd'}, 'B');
+            printf STDERR "   %-30s %5.1f %2s\n", 'free within program',      Thruk::Utils::reduce_number($info->{'fordblks'} + $info->{'fsmblks'}, 'B');
+        };
+        print STDERR $@ if $@;
+    }
 }
 
 ###################################################
