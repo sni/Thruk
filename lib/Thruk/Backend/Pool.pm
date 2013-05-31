@@ -75,6 +75,7 @@ sub set_default_config {
         show_modified_attributes        => 1,
         show_config_edit_buttons        => 0,
         show_backends_in_table          => 0,
+        show_logout_button              => 0,
         backends_with_obj_config        => {},
         use_feature_statusmap           => 0,
         use_feature_statuswrl           => 0,

@@ -1367,6 +1367,16 @@ ex.:
 
 
 
+==== show_logout_button
+Show additional logout button next to the top right preferences button.
+(works only together with cookie authentication)
+
+ex.:
+
+  show_logout_button=1
+
+
+
 ==== show_long_plugin_output
 
 When a plugin returns more than one line of output, the
