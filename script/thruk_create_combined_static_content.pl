@@ -23,4 +23,16 @@ for my $cmd (@{$cmds}) {
     exit 1 if $? != 0;
 }
 
+# try to minify css
+my $files = [
+    'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css',
+    'themes/themes-available/Thruk/stylesheets/all_in_one-'.$Thruk::Config::VERSION.'.css',
+];
+for my $file (@{$files}) {
+    my $cmd = 'csstidy '.$file.' --silent=true --optimise_shorthands=2 --template=highest > tmp.css && mv tmp.css '.$file;
+    print `$cmd`;
+    exit 1 if $? != 0;
+}
+unlink('tmp.css');
+
 exit 0;
