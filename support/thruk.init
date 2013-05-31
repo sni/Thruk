@@ -93,14 +93,14 @@ case "$1" in
     stop)
         echo -n "Stopping $NAME..."
         pid=`cat $PIDFILE 2>/dev/null`
-        if [ -z $OMD_SITE ]; then
+        if [ "$OMD_SITE" = "" ]; then
           rm -f /var/lock/subsys/thruk >/dev/null 2>&1
         fi
-        if [ -z $pid ]; then
+        if [ "$pid" = "" ]; then
             echo ". Not running."
         else
             kill $pid
-            if [ -n $OMD_SITE ]; then
+            if [ "$OMD_SITE" != "" ]; then
                 pkill -u $OMD_SITE -f thruk_fastcgi.pl
             fi
             for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
