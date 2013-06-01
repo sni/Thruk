@@ -136,7 +136,7 @@
             [% ELSIF s.state == 3 %]
               [% SET s_status = 'statusUNKNOWN' %]
             [% END %]
-            <a href='extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]' class='[% s_status %]'>[% s.display_name %]</a>
+            <a href='extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]' class='[% s_status %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a>
             [% IF loop.index > 0 && loop.index % 7 == 0 %]<br>[% END %]
             [% END %]
           </td>

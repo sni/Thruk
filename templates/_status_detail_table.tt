@@ -81,7 +81,7 @@
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
-              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% s.display_name %]</a></td>
+              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
               <td align="right" class='[% serviceclass %]'>
               [% PROCESS _status_service_attributes.tt service=s service_comment_count=comment_count %]
               </td>

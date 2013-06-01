@@ -32,7 +32,7 @@
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
-          <div class='dataTitle'>[% service.display_name %]</div>
+          <div class='dataTitle'>[% IF use_service_description %][% service.description %][% ELSE %][% service.display_name%][% END %]</div>
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
           <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>[% service.host_display_name %]</a>)</div><br>
@@ -429,8 +429,10 @@
                 [% UNLESS c.config.command_disabled.exists('56') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'>
-                  <a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a> |
-                  <a href='extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add recurring downtime</a>
+                  <a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a>
+                  [% IF use_feature_recurring_downtime %]
+                    | <a href='extinfo.cgi?type=6&amp;recurring=add&amp;target=service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add recurring downtime</a>
+                  [% END %]
                 </td>
                 [% END %]
                 [% IF downtimes %]
@@ -444,7 +446,7 @@
             [% IF downtimes.size > 0 %]
               [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 %]
             [% END %]
-            [% IF recurring_downtimes.size > 0 %]
+            [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
               <div class='commentTitle'>Recurring Service Downtime</div>
               [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='service' %]
             [% END %]
