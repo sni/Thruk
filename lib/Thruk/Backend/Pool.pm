@@ -82,6 +82,7 @@ sub set_default_config {
         use_feature_histogram           => 0,
         use_feature_configtool          => 0,
         use_feature_recurring_downtime  => 1,
+        use_service_description         => 0,
         use_new_search                  => 1,
         use_new_command_box             => 1,
         all_problems_link               => $config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",

@@ -32,7 +32,7 @@
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
-          <div class='dataTitle'>[% service.display_name %]</div>
+          <div class='dataTitle'>[% IF use_service_description %][% service.description %][% ELSE %][% service.display_name%][% END %]</div>
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
           <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>[% service.host_display_name %]</a>)</div><br>
