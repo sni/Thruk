@@ -63,3 +63,4 @@ themes/themes-available/.*/images/logos/.*server.png
 nytprof/
 nytprof.out
 .~ko-6.1.3-perllint~
+sizeme.db
