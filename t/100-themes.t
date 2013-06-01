@@ -2,7 +2,9 @@ use strict;
 use warnings;
 use Test::More;
 
-plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+plan skip_all => 'internal test only'      if defined $ENV{'CATALYST_SERVER'};
+plan skip_all => 'yui-compressor required' unless -x '/usr/bin/yui-compressor';
+plan skip_all => 'csstidy required'        unless -x '/usr/bin/csstidy';
 
 BEGIN {
     use lib('t');
