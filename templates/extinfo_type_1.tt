@@ -427,8 +427,10 @@
                 [% UNLESS c.config.command_disabled.exists('55') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'>
-                  <a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a> |
-                  <a href='extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add recurring downtime</a>
+                  <a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a>
+                  [% IF use_feature_recurring_downtime %]
+                    | <a href='extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add recurring downtime</a>
+                  [% END %]
                 </td>
                 [% END %]
                 [% IF downtimes %]
@@ -442,7 +444,7 @@
             [% IF downtimes.size > 0 %]
               [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
             [% END %]
-            [% IF recurring_downtimes.size > 0 %]
+            [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
               <div class='commentTitle'>Recurring Host Downtime</div>
               [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' %]
             [% END %]
