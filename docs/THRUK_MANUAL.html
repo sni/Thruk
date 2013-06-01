@@ -17046,6 +17046,14 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_command_reschedule_alias'>command_reschedule_alias</a></div>
 
+<div class='toclevel4'><a href='#_use_feature_recurring_downtime'>use_feature_recurring_downtime</a></div>
+
+<div class='toclevel4'><a href='#_use_feature_histogram'>use_feature_histogram</a></div>
+
+<div class='toclevel4'><a href='#_use_service_description'>use_service_description</a></div>
+
+<div class='toclevel4'><a href='#_use_feature_trends'>use_feature_trends</a></div>
+
 <div class='toclevel4'><a href='#_use_wait_feature'>use_wait_feature</a></div>
 
 <div class='toclevel4'><a href='#_wait_timeout'>wait_timeout</a></div>
@@ -18092,6 +18100,34 @@ page.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK</tt></pre>
+</div></div>
+<h4 id="_use_feature_recurring_downtime">use_feature_recurring_downtime</h4>
+<div class="paragraph"><p>Use recurring downtime, shows recurring downtime links.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_feature_recurring_downtime = 1</tt></pre>
+</div></div>
+<h4 id="_use_feature_histogram">use_feature_histogram</h4>
+<div class="paragraph"><p>Use histograms, shows histogram links.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_feature_histogram = 1</tt></pre>
+</div></div>
+<h4 id="_use_service_description">use_service_description</h4>
+<div class="paragraph"><p>Use service&#8217;s description instead of display name.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_service_description = 1</tt></pre>
+</div></div>
+<h4 id="_use_feature_trends">use_feature_trends</h4>
+<div class="paragraph"><p>Use trends, shows trend links.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_feature_trends = 1</tt></pre>
 </div></div>
 <h4 id="_use_wait_feature">use_wait_feature</h4>
 <div class="paragraph"><p>Waiting is a livestatus feature. When enabled, Thruk will wait
@@ -19803,7 +19839,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-31 13:45:31 CEST
+Last updated 2013-06-01 23:57:00 CEST
 </div>
 </div>
 </body>

@@ -1772,6 +1772,38 @@ ex.:
   command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK
 
 
+==== use_feature_recurring_downtime
+Use recurring downtime, shows recurring downtime links.
+
+ex.:
+
+  use_feature_recurring_downtime = 1
+
+
+==== use_feature_histogram
+Use histograms, shows histogram links.
+
+ex.:
+
+  use_feature_histogram = 1
+
+
+==== use_service_description
+Use service's description instead of display name.
+
+ex.:
+
+  use_service_description = 1
+
+
+==== use_feature_trends
+Use trends, shows trend links.
+
+ex.:
+
+  use_feature_trends = 1
+
+
 ==== use_wait_feature
 Waiting is a livestatus feature. When enabled, Thruk will wait
 after rescheduling hosts/services checks until the
