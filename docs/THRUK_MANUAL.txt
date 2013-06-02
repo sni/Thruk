@@ -817,7 +817,7 @@ ex.:
 ==== documentation_link
 
 This link is used in the side navigation menu as link to the documentation.
-Replace it with whatever your documentation is located. Set it to a blank value
+Replace with your documentation location. Set it to a blank value
 if you don't want a documentation link in the menu at all.
 
 ex.:
