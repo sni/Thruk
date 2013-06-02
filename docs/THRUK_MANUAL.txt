@@ -803,6 +803,17 @@ ex.:
   start_page = /thruk/main.html
 
 
+==== home_link
+
+This link is used whenever you click on one of the main logos. By default
+those logos are the Thruk logos and the link will take you to the Thruk homepage. 
+Replace this with where you want your home location to be.
+
+ex.:
+
+  home_link = http://www.thruk.org
+
+
 ==== documentation_link
 
 This link is used in the side navigation menu as link to the documentation.
