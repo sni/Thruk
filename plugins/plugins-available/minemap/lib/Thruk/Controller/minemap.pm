@@ -23,7 +23,7 @@ Catalyst Controller.
 ######################################
 # add new menu item
 Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
-                                    'href'  => '/thruk/cgi-bin/minemap.cgi',
+                                    'href'  => Thruk->config->{'Thruk::Plugin::Minemap'}->{'default_link'} || Thruk->config->{'minemap_default_link'} || '/thruk/cgi-bin/minemap.cgi',
                                     'name'  => 'Mine Map',
                          });
 

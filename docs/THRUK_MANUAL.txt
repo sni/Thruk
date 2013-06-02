@@ -2195,6 +2195,21 @@ And the statusmap default group by which has to be one of:
 'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
 
 
+=== Component Thruk::Plugin::Minemap
+
+The Minemap plugin gives an overview of your hosts and services.
+
+ex.:
+
+  <Component Thruk::Plugin::Minemap>
+    minemap_default_link = /thruk/cgi-bin/minemap.cgi
+  </Component>
+
+
+==== minemap_default_link
+You may change the default minemap link here.
+
+
 
 === User & Group Specific Overrides
 Both, the 'Users' and the 'Groups' directive override default settings for

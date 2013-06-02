@@ -683,6 +683,7 @@ h4#_peer + div > ul tt {
 <div class='toclevel3'><a href='#_component_thruk_plugin_panorama'>Component Thruk::Plugin::Panorama</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_statusmap'>Component Thruk::Plugin::Statusmap</a></div>
+<div class='toclevel3'><a href='#_component_thruk_plugin_minemap'>Component Thruk::Plugin::Minemap</a></div>
 <div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 <div class='toclevel3'><a href='#_cgi_cfg_3'>cgi.cfg</a></div>
 <div class='toclevel2'><a href='#_logfiles'>Logfiles</a></div>
@@ -17128,6 +17129,10 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_statusmap_default_groupby'>statusmap_default_groupby</a></div>
 
+<div class='toclevel3'><a href='#_component_thruk_plugin_minemap'>Component Thruk::Plugin::Minemap</a></div>
+
+<div class='toclevel4'><a href='#_minemap_minemap_default_link'>minemap_default_link</a></div>
+
 <div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 
 <div class='toclevel4'><a href='#_groups'>Groups</a></div>
@@ -18524,6 +18529,17 @@ types are: <em>table</em> and <em>circle</em></p></div>
 <h4 id="_statusmap_default_groupby">statusmap_default_groupby</h4>
 <div class="paragraph"><p>And the statusmap default group by which has to be one of:
 <em>parent</em>, <em>address</em>, <em>domain</em>, <em>hostgroup</em>, <em>servicegroup</em></p></div>
+<h3 id="_component_thruk_plugin_minemap">Component Thruk::Plugin::Minemap</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The Minemap plugin gives an overview of your hosts and services.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::Minemap&gt;
+  minemap_default_link = /thruk/cgi-bin/minemap.cgi
+&lt;/Component&gt;</tt></pre>
+</div></div>
+<h4 id="_minemap_default_link">minemap_default_link</h4>
+<div class="paragraph"><p>You may change the default minemap link here.</p></div>
 <h3 id="_user_amp_group_specific_overrides">User &amp; Group Specific Overrides</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Both, the <em>Users</em> and the <em>Groups</em> directive override default settings for
 single users or groups. In theory it&#8217;s possible to override each and every
@@ -19856,7 +19872,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-01 23:57:00 CEST
+Last updated 2013-06-02 21:40:00 CEST
 </div>
 </div>
 </body>
