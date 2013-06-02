@@ -1516,6 +1516,14 @@ don't report some known harmless javascript errors
 ex.:
   skip_js_errors  = cluetip is not a function
 
+
+==== bug_email_rcpt
+what email address bug reports will be sent to
+
+ex.:
+  bug_email_rcpt  = bugs@thruk.org
+
+
 ==== strict_passive_mode
 
 Normally passive checks would be marked as disabled. With this
