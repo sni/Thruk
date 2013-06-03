@@ -50,7 +50,7 @@
   [% FOREACH svc = services.keys.sort %]
   [% SET class = 'statusEven' IF loop.even %]
   [% SET class = 'statusOdd'  IF loop.odd %]
-  <td class='[% class %] minemap_head' title="[% svc %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
+  <td class='[% class %] minemap_head' title="[% svc %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi").replace("style=minemap", "style=detail").replace("service=", "dfl_s0_value=") %]&dfl_s0_op=%3D&dfl_s0_type=service'>[% svc %]</a></div></td>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]
@@ -69,7 +69,7 @@
   <td class='[% hostclass %]' style="height: 18px;">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr>
-        <th align="left" class='[% hostclass %]' style="height: 18px;"><a href='[% uri_with(c, host => hst.host_name).replace("minemap.cgi", "status.cgi") %]' title='[% hst.host_address %]'>[% hst.host_name %]</a></th>
+        <th align="left" class='[% hostclass %]' style="height: 18px;"><a href='[% uri_with(c, host => hst.host_name).replace("minemap.cgi", "status.cgi").replace("style=minemap", "style=detail").replace("host=", "dfl_s0_value=") %]&dfl_s0_op=%3D&dfl_s0_type=host' title='[% hst.host_address %]'>[% hst.host_name %]</a></th>
         <td align="right" class='[% hostclass %]' style="height: 18px;">
           [% PROCESS _status_host_attributes.tt hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
         </td>
