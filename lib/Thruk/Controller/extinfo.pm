@@ -596,6 +596,14 @@ sub _process_host_page {
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
+    
+    # Hook to replace special character in hosts for Graphite 
+    if ($c->stash->{'graph_url'} =~ /graphite|render/){
+        my $new_hostname = $hostname;
+        $new_hostname =~ s/[^\w-]/_/g;
+        $c->stash->{'graph_url'} =~ s/$hostname/$new_hostname/g;
+    }
+
 
     # recurring downtimes
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
@@ -720,6 +728,17 @@ sub _process_service_page {
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $service);
+    
+    # Hook to replace special character in hosts and services for Graphite
+    if ($c->stash->{'graph_url'} =~ /graphite|render/){
+        my $new_servicename = $servicename;
+        $new_servicename =~ s/[^\w-]/_/g;
+        my $new_hostname = $hostname;
+        $new_hostname =~ s/[^\w-]/_/g;
+        $c->stash->{'graph_url'} =~ s/$hostname\.$servicename/$new_hostname\.$new_servicename/g;
+
+    }
+
 
     # recurring downtimes
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);
