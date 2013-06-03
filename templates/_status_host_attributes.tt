@@ -13,7 +13,13 @@
   host_is_flapping              = hostprefix _ 'is_flapping'
   host_scheduled_downtime_depth = hostprefix _ 'scheduled_downtime_depth'
   peer_key                      = host.peer_key
+  passive_icon   				= 'passiveonly.gif'
 %]
+
+[% IF hide_passive_icon %]
+  [% passive_icon ='empty.gif' %]
+[% END %]
+
 <table border="0" cellpadding="0" cellspacing="0">
 <tr>
 [% IF host.$host_is_executing > 0             %]<td align="center" valign="middle" id="[% paneprefix %]r[% loop.index %]_h_exec"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% ELSE%]<td align="center" id="[% paneprefix %]r[% loop.index %]_h_exec"></td>[% END %]
@@ -21,7 +27,7 @@
 [% IF strict_passive_mode %]
   [% IF host.$host_check_type == 0 && host.$host_active_checks_enabled == 0 %]<td align="center" valign="middle"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% END %]
   [% IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 0 %]<td align="center" valign="middle"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% END %]
-  [% IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 1 %]<td align="center" valign="middle"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif" alt="Active checks of the host have been disabled - only passive checks are being accepted" title="This host is checked passive" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% END %]
+  [% IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 1 %]<td align="center" valign="middle"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/[% passive_icon %]" alt="Active checks of the host have been disabled - only passive checks are being accepted" title="This host is checked passive" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% END %]
 [% ELSE %]
   [% IF host.$host_active_checks_enabled == 0   %]<td align="center" valign="middle"><img class="notclickable" src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="[% imgsize %]" width="[% imgsize %]"></td>[% END %]
 [% END %]

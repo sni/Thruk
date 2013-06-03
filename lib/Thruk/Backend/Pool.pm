@@ -71,6 +71,7 @@ sub set_default_config {
         documentation_link              => $config->{'url_prefix'}.'thruk/docs/index.html',
         show_notification_number        => 1,
         strict_passive_mode             => 1,
+        hide_passive_icon               => 0,
         show_full_commandline           => 1,
         show_modified_attributes        => 1,
         show_config_edit_buttons        => 0,
