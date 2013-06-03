@@ -118,7 +118,8 @@ function hideElement(id, icon) {
 }
 
 /* show a element by id */
-function showElement(id, icon) {
+var close_elements = [];
+function showElement(id, icon, bodyclose) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
@@ -137,10 +138,53 @@ function showElement(id, icon) {
   if(img && img.src) {
     img.src = img.src.replace(/icon_maximize\.gif/g, "icon_minimize.gif");
   }
+
+  if(bodyclose) {
+    addEvent(document, 'click', close_and_remove_event);
+    window.setTimeout(function() { close_elements.push([id, icon]) }, 50);
+  }
+}
+
+/* close and remove eventhandler */
+function close_and_remove_event(evt) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+    if(close_elements.length == 0) {
+        return;
+    }
+    var x,y;
+    if(evt) {
+        x = evt.pageX;
+        y = evt.pageY;
+    }
+    var new_elems = [];
+    jQuery.each(close_elements, function(key, value) {
+        var obj    = document.getElementById(value[0]);
+        var inside = false;
+        if(x && y && obj) {
+            var width  = jQuery(obj).width();
+            var height = jQuery(obj).height();
+            var coords = ajax_search.get_coordinates(obj);
+            // check if we clicked inside or outside the object we have to close
+            if(   x >= coords[0] && x <= coords[0]+width
+               && y >= coords[1] && y <= coords[1]+height
+               ) {
+                inside = true;
+            }
+        }
+        if(evt && inside) {
+            new_elems.push(value);
+        } else {
+            hideElement(value[0], value[1]);
+        }
+    });
+    close_elements = new_elems;
+    if(new_elems.length == 0) {
+        removeEvent(document, 'click', close_and_remove_event);
+    }
 }
 
 /* toggle a element by id */
-function toggleElement(id, icon) {
+function toggleElement(id, icon, bodyclose) {
   var pane = document.getElementById(id);
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
@@ -148,28 +192,16 @@ function toggleElement(id, icon) {
   }
   resetRefresh();
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
-    showElement(id, icon);
+    showElement(id, icon, bodyclose);
     return true;
   }
   else {
     hideElement(id, icon);
+    try {
+      close_and_remove_event();
+    } catch(e) { debug(e) }
     return false;
   }
-}
-
-/* toggle an element and center it over the related object */
-function toggleElementCentered(id, obj) {
-  var pane = document.getElementById(id);
-  if(!pane) {
-    if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElementCentered(): " + id); }
-    return false;
-  }
-
-  var dim    = pane.getDimensions();
-  var coords = ajax_search.get_coordinates(obj);
-  pane.style.top  = (coords[1] - dim.height - 10) + "px";
-  pane.style.left = (coords[0] - dim.width/2) + "px";
-  return toggleElement(id);
 }
 
 /* save settings in a cookie */
@@ -381,7 +413,7 @@ function button_out(button)
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    toggleElement('site_panel');
+    toggleElement('site_panel', undefined, true);
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
     panel.style.top = (divs[0].offsetHeight + 11) + 'px';
@@ -2338,16 +2370,14 @@ function toggleFilterPane(prefix) {
   var pane = document.getElementById(prefix+'all_filter_table');
   var img  = document.getElementById(prefix+'filter_button');
   if(pane.style.display == 'none') {
-    pane.style.display    = '';
-    pane.style.visibility = 'visible';
+    showElement(prefix+'all_filter_table');
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
     additionalParams['hidesearch'] = 2;
     document.getElementById('hidesearch').value = 2;
   }
   else {
-    pane.style.display    = 'none';
-    pane.style.visibility = 'hidden';
+    hideElement(prefix+'all_filter_table');
     img.style.display     = '';
     img.style.visibility  = 'visible';
     additionalParams['hidesearch'] = 1;
@@ -2393,7 +2423,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
     if(thruk_debug_js) { alert("ERROR: unknown id in toggleFilterPaneSelector(): " + search_prefix + id); }
     return;
   }
-  if(!toggleElement(search_prefix+panel)) {
+  if(!toggleElement(search_prefix+panel, undefined, true)) {
     accept_filter_types(search_prefix, checkbox_name, input_name, checkbox_prefix);
   } {
     set_filter_types(search_prefix, input_name, checkbox_prefix);

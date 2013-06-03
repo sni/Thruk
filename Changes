@@ -5,6 +5,7 @@ next:
           - connection pool uses 90% less memory now
           - allow setting 'state_host' explicitly
           - speed improvments (use json::xs for faster serialization)
+          - close (most) popups by clicking outside popup
           - Bug Fixes
             - disable curl when using threads
             - fixed playing sounds on problems
