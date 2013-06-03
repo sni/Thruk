@@ -284,10 +284,10 @@ sub _dummy_c {
     # temporary close stderr because ubuntu 12.04 (and maybe others) print
     # Error opening file for reading: Permission denied
     # due to permission errors on /proc/self/auxv after setuid
-    open(my $saveerr, ">&STDERR");
-    close(STDERR);
+    open(my $saveerr, ">&STDERR") if $Thruk::Utils::CLI::verbose <= 1;
+    close(STDERR)                 if $Thruk::Utils::CLI::verbose <= 1;
     Catalyst::Test->import('Thruk');
-    open(STDERR, ">&", $saveerr);
+    open(STDERR, ">&", $saveerr)  if $Thruk::Utils::CLI::verbose <= 1;
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
     my $failed = ( $res->code == 200 ? 0 : 1 );
     return($c, $failed);

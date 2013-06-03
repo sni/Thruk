@@ -86,14 +86,17 @@ sub init {
                 $addr =~ s/^http(|s):\/\///mx;
                 $addr =~ s/\/.*$//mx;
             }
+            if($peer->{'type'} eq 'livestatus') {
+                $addr =~ s/:.*$//mx;
+            }
 
             if($peer->{'state_host'}) {
                 $self->{'state_hosts'}->{$peer->{'key'}} = { source => $peer->{'state_host'} };
             }
-            elsif($addr =~ m/^(.*):/mx and $1 ne 'localhost' and $1 !~ /^127\.0\.0\./mx) {
-                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
-            } else {
+            elsif($addr =~ m/^\//mx or $addr eq 'localhost' or $addr =~ /^127\.0\.0\./mx) {
                 $self->{'local_hosts'}->{$peer->{'key'}} = 1;
+            } else {
+                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
             }
         }
         $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
@@ -558,7 +561,7 @@ enables/disables remote backends based on a state from local instances
 =cut
 
 sub set_backend_state_from_local_connections {
-    my( $self, $cache, $disabled ) = @_;
+    my( $self, $cache, $disabled, $safe ) = @_;
 
     my $c = $Thruk::Backend::Manager::c;
 
@@ -580,6 +583,7 @@ sub set_backend_state_from_local_connections {
                       ]};
     }
     push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
+
     for(1..3) {
         eval {
             my $data = $self->_do_on_peers( "get_hosts", $options );
@@ -615,13 +619,18 @@ sub set_backend_state_from_local_connections {
             }
         };
         if($@) {
-            $c->log->error("failed setting states by local check: ".$@);
             # reset failed states, otherwise retry would be useless
             $self->reset_failed_backends();
             sleep(1);
         } else {
             last;
         }
+    }
+    # log errors only once
+    if($@) {
+        return if $safe;
+        $c->log->error("failed setting states by local check");
+        $c->log->debug($@);
     }
 
     $c->stats->profile( end => "set_backend_state_from_local_connections() " );
@@ -972,6 +981,7 @@ sub _do_on_peers {
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
+        # failed to open socket /tmp/live.sock: No such file or directory
         elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
             die($1);
         }

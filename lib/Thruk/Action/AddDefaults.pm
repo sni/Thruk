@@ -107,7 +107,7 @@ sub add_defaults {
     }
 
     ###############################
-    my($disabled_backends,$has_groups) = _set_enabled_backends($c);
+    my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe);
 
     ###############################
     # add program status
@@ -439,7 +439,7 @@ sub _set_processinfo {
 
 ########################################
 sub _set_enabled_backends {
-    my($c, $backends) = @_;
+    my($c, $backends, $safe) = @_;
 
     # first all backends are enabled
     if(defined $c->{'db'}) {
@@ -529,7 +529,7 @@ sub _set_enabled_backends {
 
     # renew state of connections
     if($num_backends > 1 and $c->config->{'check_local_states'}) {
-        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($c->cache, $disabled_backends);
+        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($c->cache, $disabled_backends, $safe);
     }
 
     # when set by args, update
