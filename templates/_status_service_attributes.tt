@@ -1,6 +1,6 @@
 ﻿[%
-  peer_key = service.peer_key
-  passive_icon ='passiveonly.gif'
+  peer_key     = service.peer_key
+  passive_icon = 'passiveonly.gif'
 %]
 
 [% IF hide_passive_icon %]

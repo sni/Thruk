@@ -16955,6 +16955,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_use_new_command_box'>use_new_command_box</a></div>
 
+<div class='toclevel4'><a href='#_bug_email_rcpt'>bug_email_rcpt</a></div>
+
 <div class='toclevel4'><a href='#_datetime_format'>datetime_format</a></div>
 
 <div class='toclevel4'><a href='#_datetime_format_long'>datetime_format_long</a></div>
@@ -17003,9 +17005,9 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_skip_js_errors'>skip_js_errors</a></div>
 
-<div class='toclevel4'><a href='#_bug_email_rcpt'>bug_email_rcpt</a></div>
-
 <div class='toclevel4'><a href='#_strict_passive_mode'>strict_passive_mode</a></div>
+
+<div class='toclevel4'><a href='#_hide_passive_icon'>hide_passive_icon</a></div>
 
 <div class='toclevel4'><a href='#_sitepanel'>sitepanel</a></div>
 
@@ -17131,7 +17133,7 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel3'><a href='#_component_thruk_plugin_minemap'>Component Thruk::Plugin::Minemap</a></div>
 
-<div class='toclevel4'><a href='#_minemap_minemap_default_link'>minemap_default_link</a></div>
+<div class='toclevel4'><a href='#_minemap_default_link'>minemap_default_link</a></div>
 
 <div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 
@@ -17255,7 +17257,7 @@ with displays version information and general links.</p></div>
 </div></div>
 <h4 id="_home_link">home_link</h4>
 <div class="paragraph"><p>This link is used whenever you click on one of the main logos. By default
-those logos are the Thruk logos and the link will take you to the Thruk homepage. 
+those logos are the Thruk logos and the link will take you to the Thruk homepage.
 Replace this with where you want your home location to be.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -17627,6 +17629,10 @@ See allowed_frame_links option for how to integrate addons.</p></div>
 <div class="content">
 <pre><tt>use_new_command_box = 1</tt></pre>
 </div></div>
+<h4 id="_bug_email_rcpt">bug_email_rcpt</h4>
+<div class="paragraph"><p>what email address bug reports will be sent to</p></div>
+<div class="paragraph"><p>ex.:
+  bug_email_rcpt  = <a href="mailto:bugs@thruk.org">bugs@thruk.org</a></p></div>
 <h4 id="_datetime_format">datetime_format</h4>
 <div class="paragraph"><p>Default timeformat. Use POSIX format.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -17870,10 +17876,6 @@ Set to <em>server</em> to log js error server side.</p></div>
 <div class="paragraph"><p>don&#8217;t report some known harmless javascript errors</p></div>
 <div class="paragraph"><p>ex.:
   skip_js_errors  = cluetip is not a function</p></div>
-<h4 id="_bug_email_rcpt">bug_email_rcpt</h4>
-<div class="paragraph"><p>what email address bug reports will be sent to</p></div>
-<div class="paragraph"><p>ex.:
-  bug_email_rcpt  = bugs@thruk.org</p></div>
 <h4 id="_strict_passive_mode">strict_passive_mode</h4>
 <div class="paragraph"><p>Normally passive checks would be marked as disabled. With this
 option set, disabled checks will only be displayed as disabled if their
@@ -17886,6 +17888,12 @@ displayed.</p></div>
 <div class="content">
 <pre><tt>strict_passive_mode = 1</tt></pre>
 </div></div>
+<h4 id="_hide_passive_icon">hide_passive_icon</h4>
+<div class="paragraph"><p>Normally passive checks whould be displayed with a passive icon
+if their last result is passive.
+With this option, passive icon will be hidden in status details.</p></div>
+<div class="paragraph"><p>ex.:
+  hide_passive_icon = 0</p></div>
 <h4 id="_sitepanel">sitepanel</h4>
 <div class="paragraph"><p>The sitepanel is used to display multiple backends/sites at a glance.
 With than 10 or more sites, the list of backends will be combined
@@ -19872,7 +19880,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-02 21:40:00 CEST
+Last updated 2013-06-03 12:35:56 CEST
 </div>
 </div>
 </body>

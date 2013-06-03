@@ -806,7 +806,7 @@ ex.:
 ==== home_link
 
 This link is used whenever you click on one of the main logos. By default
-those logos are the Thruk logos and the link will take you to the Thruk homepage. 
+those logos are the Thruk logos and the link will take you to the Thruk homepage.
 Replace this with where you want your home location to be.
 
 ex.:
@@ -1255,6 +1255,13 @@ ex.:
   use_new_command_box = 1
 
 
+==== bug_email_rcpt
+what email address bug reports will be sent to
+
+ex.:
+  bug_email_rcpt  = bugs@thruk.org
+
+
 ==== datetime_format
 Default timeformat. Use POSIX format.
 
@@ -1517,13 +1524,6 @@ ex.:
   skip_js_errors  = cluetip is not a function
 
 
-==== bug_email_rcpt
-what email address bug reports will be sent to
-
-ex.:
-  bug_email_rcpt  = bugs@thruk.org
-
-
 ==== strict_passive_mode
 
 Normally passive checks would be marked as disabled. With this
@@ -1536,6 +1536,15 @@ displayed.
 ex.:
 
   strict_passive_mode = 1
+
+
+==== hide_passive_icon
+Normally passive checks whould be displayed with a passive icon
+if their last result is passive.
+With this option, passive icon will be hidden in status details.
+
+ex.:
+  hide_passive_icon = 0
 
 
 ==== sitepanel

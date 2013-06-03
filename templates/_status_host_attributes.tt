@@ -13,7 +13,7 @@
   host_is_flapping              = hostprefix _ 'is_flapping'
   host_scheduled_downtime_depth = hostprefix _ 'scheduled_downtime_depth'
   peer_key                      = host.peer_key
-  passive_icon   				= 'passiveonly.gif'
+  passive_icon                  = 'passiveonly.gif'
 %]
 
 [% IF hide_passive_icon %]
