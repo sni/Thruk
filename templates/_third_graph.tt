@@ -22,7 +22,7 @@ document.write('<tr class="comment" style="cursor:pointer">');
   document.write('<tr>');
     document.write('<td colspan=7 align="center">');
       document.write('<div id="pnp_graph_pane" style="position: relative;">');
-        document.write('<a href="[% escape_quotes(graph_url) FILTER remove('render\/') %]">');
+        document.write('<a href="[% escape_quotes(graph_url) FILTER repalce('\/render\/', '\/') %]">');
           document.write('<img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">');
           document.write('<img id="graphiteimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="graphite graph">');
         document.write('<\/a>');
