@@ -19,7 +19,7 @@ chdir('tmppatches') or die("chdir failed: $!");
 
 my @patches = glob('support/*.patch');
 for my $p (@patches) {
-    my $cmd = 'patch -p1 < '.$p.' 2>&1';
+    my $cmd = 'patch -p1 --fuzz=0 -s < '.$p.' 2>&1';
     ok(1, $cmd);
     my $out = `$cmd`;
     is($?, 0, 'patch succeeded') or diag("%> ".$cmd."\n\n".$out);
