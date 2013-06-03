@@ -585,6 +585,9 @@ sub set_backend_state_from_local_connections {
     push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
 
     for(1..3) {
+        # reset failed states, otherwise retry would be useless
+        $self->reset_failed_backends();
+
         eval {
             my $data = $self->_do_on_peers( "get_hosts", $options );
             for my $host (@{$data}) {
@@ -619,8 +622,6 @@ sub set_backend_state_from_local_connections {
             }
         };
         if($@) {
-            # reset failed states, otherwise retry would be useless
-            $self->reset_failed_backends();
             sleep(1);
         } else {
             last;
@@ -994,6 +995,9 @@ sub _do_on_peers {
         elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {
             die($1);
         } else {
+            # die with a small error for know, usually an empty result means that
+            # none of our backends were reachable
+            die('undefined result') unless $err;
             local $Data::Dumper::Deepcopy = 1;
             my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             for my $b (@{$get_results_for}) {
@@ -1249,6 +1253,7 @@ sub _get_result_parallel {
     for my $id (keys %ids) {
         my @res  = $Thruk::Backend::Pool::pool->remove($id);
         my($typ, $size, $data, $last_error) = @{$res[0]};
+        chomp($last_error) if $last_error;
         my $key  = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
         $c->stash->{'failed_backends'}->{$key} = $last_error;

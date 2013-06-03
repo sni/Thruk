@@ -120,21 +120,22 @@ sub add_defaults {
     $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
 
     for my $x (1..$retrys) {
+        # reset failed states, otherwise retry would be useless
+        $c->{'db'}->reset_failed_backends();
+
         eval {
             $last_program_restart = _set_processinfo($c, $cache, $cached_data);
         };
         last unless $@;
         $c->log->debug("retry $x, data source error: $@");
         last if $x == $retrys;
-        # reset failed states, otherwise retry would be useless
-        $c->{'db'}->reset_failed_backends();
         sleep 1;
     }
     if($@) {
         # side.html and some other pages should not be redirect to the error page on backend errors
         _set_possible_backends($c, $disabled_backends);
         return if $safe;
-        $c->log->error("data source error: $@");
+        $c->log->debug("data source error: $@");
         return $c->detach('/error/index/9');
     }
     $c->stash->{'last_program_restart'} = $last_program_restart;

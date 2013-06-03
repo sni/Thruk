@@ -187,7 +187,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     }
 
     if($c->config->{'thruk_debug'}) {
-        $c->stash->{errorDetails} = join('<br>', @{$c->error});
+        $c->stash->{errorDetails} .= join('<br>', @{$c->error});
     }
 
     Thruk->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
