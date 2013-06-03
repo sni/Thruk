@@ -210,8 +210,17 @@ sub commit {
     my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
+        my $is_new_file = $file->{'is_new_file'};
         unless($file->save()) {
             $rc = 0;
+        } else {
+            # do some logging
+            $c->log->info(sprintf("[config][%s][%s] %s file '%s'",
+                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                        $c->stash->{'remote_user'},
+                                        $is_new_file ? 'created' : 'saved',
+                                        $file->{'path'},
+            )) if $c;
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }
@@ -222,6 +231,13 @@ sub commit {
         if(!$f->{'deleted'} or -f $f->{'path'}) {
             push @new_files, $f;
         } else {
+            if($c && $f->{'deleted'}) {
+                $c->log->info(sprintf("[config][%s][%s] deleted file '%s'",
+                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->stash->{'remote_user'},
+                                            $f->{'path'},
+                )) if $c;
+            }
             push @{$files->{'deleted'}}, $f->{'display'};
         }
     }

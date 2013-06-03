@@ -1551,6 +1551,14 @@ sub _object_disable {
     $c->{'obj_db'}->{'needs_commit'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
 
+    # create log message
+    $c->log->info(sprintf("[config][%s][%s] disabled %s '%s'",
+                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->stash->{'remote_user'},
+                                $obj->get_type(),
+                                $obj->get_name(),
+    ));
+
     return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
 
@@ -1563,6 +1571,14 @@ sub _object_enable {
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
+
+    # create log message
+    $c->log->info(sprintf("[config][%s][%s] enabled %s '%s'",
+                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->stash->{'remote_user'},
+                                $obj->get_type(),
+                                $obj->get_name(),
+    ));
 
     return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
@@ -1581,6 +1597,15 @@ sub _object_delete {
         }
     }
     $c->{'obj_db'}->delete_object($obj);
+
+    # create log message
+    $c->log->info(sprintf("[config][%s][%s] removed %s '%s'",
+                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->stash->{'remote_user'},
+                                $obj->get_type(),
+                                $obj->get_name(),
+    ));
+
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
     return $c->response->redirect('conf.cgi?sub=objects&type='.$obj->get_type());
 }
@@ -1607,6 +1632,14 @@ sub _object_save {
         $c->stash->{action} = '';
         return;
     }
+
+    $c->log->info(sprintf("[config][%s][%s] %s %s '%s'",
+                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->stash->{'remote_user'},
+                                $new ? 'created' : 'changed',
+                                $obj->get_type(),
+                                $c->stash->{'data_name'},
+    ));
 
     # only save or continue to raw edit?
     if(defined $c->{'request'}->{'parameters'}->{'send'} and $c->{'request'}->{'parameters'}->{'send'} eq 'raw edit') {
@@ -1649,6 +1682,16 @@ sub _object_move {
         if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
         }
+
+        # create log message
+        $c->log->info(sprintf("[config][%s][%s] moved %s '%s' to '%s'",
+                                    $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                    $c->stash->{'remote_user'},
+                                    $obj->get_type(),
+                                    $obj->get_name(),
+                                    $file->{'path'},
+        ));
+
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
     elsif($c->stash->{action} eq 'move') {

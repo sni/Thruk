@@ -925,9 +925,11 @@ sub _cmd_configtool {
             my($path,$content, $mtime) = @{$f};
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
+            my $saved;
             if($file and !$file->readonly()) {
                 # update file
                 Thruk::Utils::IO::write($path, $content, $mtime);
+                $saved = 'updated';
             } elsif(!$file) {
                 # new file
                 my $filesroot = $c->{'obj_db'}->get_files_root();
@@ -935,9 +937,17 @@ sub _cmd_configtool {
                     $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
                     if(defined $file and !$file->readonly()) {
                         Thruk::Utils::IO::write($path, $content, $mtime);
+                        $saved = 'created';
                     }
                 }
             }
+            # create log message
+            $c->log->info(sprintf("[config][%s][%s][ext] %s file '%s'",
+                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                        $c->stash->{'remote_user'},
+                                        $saved,
+                                        $path,
+            )) if $saved;
         }
         # deleted files
         my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
@@ -945,6 +955,13 @@ sub _cmd_configtool {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
             if($file and !$file->readonly()) {
                 unlink($f);
+
+                # create log message
+                $c->log->info(sprintf("[config][%s][%s][ext] deleted file '%s'",
+                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->stash->{'remote_user'},
+                                            $f,
+                ));
             }
         }
         $res = "saved";
