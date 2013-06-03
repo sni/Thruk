@@ -432,11 +432,14 @@ sub fill_totals_box {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $service_stats = {
-            'pending'         => 0,
-            'ok'              => 0,
-            'warning'         => 0,
-            'unknown'         => 0,
-            'critical'        => 0,
+            'pending'                => 0,
+            'ok'                     => 0,
+            'warning'                => 0,
+            'unknown'                => 0,
+            'critical'               => 0,
+            'warning_and_unhandled'  => 0,
+            'critical_and_unhandled' => 0,
+            'unknown_and_unhandled'  => 0,
         };
         $host_stats = {
             'pending'                   => 0,
@@ -453,6 +456,10 @@ sub fill_totals_box {
                 $service_stats->{'warning'}++   if $service->{'state'} == 1;
                 $service_stats->{'critical'}++  if $service->{'state'} == 2;
                 $service_stats->{'unknown'}++   if $service->{'state'} == 3;
+
+                $service_stats->{'warning_and_unhandled'}++  if($service->{'state'} == 1 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                $service_stats->{'critical_and_unhandled'}++ if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                $service_stats->{'unknown_and_unhandled'}++  if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
             }
             if($service->{'has_been_checked'} == 0) {
                 $service_stats->{'pending'}++;
@@ -467,8 +474,8 @@ sub fill_totals_box {
                 $host_stats->{'down'}++        if $service->{'host_state'} == 1;
                 $host_stats->{'unreachable'}++ if $service->{'host_state'} == 2;
 
-                $host_stats->{'down_and_unhandled'}++        if($service->{'host_state'} == 1 and $service->{'host_scheduled_downtime_depth'} >= 1 and $service->{'host_acknowledged'} == 1);
-                $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_state'} == 2 and $service->{'host_scheduled_downtime_depth'} >= 1 and $service->{'host_acknowledged'} == 1);
+                $host_stats->{'down_and_unhandled'}++        if($service->{'host_state'} == 1 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_state'} == 2 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
             }
         }
     } else {
