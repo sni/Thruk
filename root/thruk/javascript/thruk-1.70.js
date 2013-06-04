@@ -119,7 +119,7 @@ function hideElement(id, icon) {
 
 /* show a element by id */
 var close_elements = [];
-function showElement(id, icon, bodyclose) {
+function showElement(id, icon, bodyclose, bodycloseelement) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
@@ -141,7 +141,7 @@ function showElement(id, icon, bodyclose) {
 
   if(bodyclose) {
     addEvent(document, 'click', close_and_remove_event);
-    window.setTimeout(function() { close_elements.push([id, icon]) }, 50);
+    window.setTimeout(function() { close_elements.push([id, icon, bodycloseelement]) }, 50);
   }
 }
 
@@ -153,20 +153,24 @@ function close_and_remove_event(evt) {
     }
     var x,y;
     if(evt) {
+        evt = jQuery.event.fix(evt); // make pageX/Y available in IE
         x = evt.pageX;
         y = evt.pageY;
     }
     var new_elems = [];
     jQuery.each(close_elements, function(key, value) {
         var obj    = document.getElementById(value[0]);
+        if(value[2]) {
+            obj = jQuery(value[2])[0];
+        }
         var inside = false;
         if(x && y && obj) {
-            var width  = jQuery(obj).width();
-            var height = jQuery(obj).height();
-            var coords = ajax_search.get_coordinates(obj);
+            var width  = jQuery(obj).outerWidth();
+            var height = jQuery(obj).outerHeight();
+            var offset = jQuery(obj).offset();
             // check if we clicked inside or outside the object we have to close
-            if(   x >= coords[0] && x <= coords[0]+width
-               && y >= coords[1] && y <= coords[1]+height
+            if(   x >= offset['left'] - 5 && x <= offset['left'] + width  + 5
+               && y >= offset['top']  - 5 && y <= offset['top']  + height + 5
                ) {
                 inside = true;
             }
@@ -184,7 +188,7 @@ function close_and_remove_event(evt) {
 }
 
 /* toggle a element by id */
-function toggleElement(id, icon, bodyclose) {
+function toggleElement(id, icon, bodyclose, bodycloseelement) {
   var pane = document.getElementById(id);
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
@@ -192,7 +196,7 @@ function toggleElement(id, icon, bodyclose) {
   }
   resetRefresh();
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
-    showElement(id, icon, bodyclose);
+    showElement(id, icon, bodyclose, bodycloseelement);
     return true;
   }
   else {
@@ -413,7 +417,7 @@ function button_out(button)
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    toggleElement('site_panel', undefined, true);
+    toggleElement('site_panel', undefined, true, 'TABLE.site_panel');
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
     panel.style.top = (divs[0].offsetHeight + 11) + 'px';
