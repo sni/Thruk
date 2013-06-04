@@ -2074,6 +2074,51 @@ sub remote_file_save {
 
 ##########################################################
 
+=head2 remote_get_plugins
+
+    remote_get_plugins()
+
+return plugins from remote site
+
+=cut
+sub remote_get_plugins {
+    my($self, $c) = @_;
+    return unless $self->is_remote();
+    return $self->_remote_do($c, 'configplugins');
+}
+
+##########################################################
+
+=head2 remote_get_pluginhelp
+
+    remote_get_pluginhelp()
+
+return plugin help from remote site
+
+=cut
+sub remote_get_pluginhelp {
+    my($self, $c, $name) = @_;
+    return unless $self->is_remote();
+    return $self->_remote_do($c, 'configpluginhelp', $name);
+}
+
+##########################################################
+
+=head2 remote_get_pluginpreview
+
+    remote_get_pluginpreview()
+
+return plugin preview from remote site
+
+=cut
+sub remote_get_pluginpreview {
+    my($self, $c,$command,$args,$host,$service) = @_;
+    return unless $self->is_remote();
+    return $self->_remote_do($c, 'configpluginpreview', [$command,$args,$host,$service]);
+}
+
+##########################################################
+
 =head2 read_rc_file
 
     read_rc_file()
@@ -2170,6 +2215,149 @@ sub _sort_by_object_keys {
     }
 }
 
+##########################################################
+
+=head2 get_plugins
+
+return list of plugins
+
+=cut
+sub get_plugins {
+    my($self, $c) = @_;
+
+    if($self->is_remote()) {
+        return $self->remote_get_plugins($c);
+    }
+
+    my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
+    my $objects         = {};
+    for my $macro (keys %{$user_macros}) {
+        my $dir = $user_macros->{$macro};
+        $dir = $dir.'/.';
+        next unless -d $dir;
+        if($dir =~ m|/plugins/|mx or $dir =~ m|/libexec/|mx) {
+            $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
+        }
+    }
+    return $objects;
+}
+
+##########################################################
+sub _set_plugins_for_directory {
+    my($self, $c, $dir, $macro, $objects) = @_;
+    my $files = $self->_get_files_for_folder($dir);
+    for my $file (@{$files}) {
+        next if $file =~ m/\/utils\.pm/mx;
+        next if $file =~ m/\/utils\.sh/mx;
+        next if $file =~ m/\/p1\.pl/mx;
+        if(-x $file) {
+            my $shortfile = $file;
+            $shortfile =~ s/$dir/$macro/gmx;
+            $objects->{$shortfile} = $file;
+        }
+    }
+    return $objects;
+}
+
+##########################################################
+
+=head2 get_plugin_help
+
+return plugin help
+
+=cut
+sub get_plugin_help {
+    my($self, $c, $name) = @_;
+    my $help = 'help is only available for plugins!';
+    return $help unless defined $name;
+
+    if($self->is_remote()) {
+        return $self->remote_get_pluginhelp($c, $name);
+    }
+
+    my $cmd;
+    my $plugins         = $self->get_plugins($c);
+    my $objects         = $self->get_objects_by_name('command', $name);
+    if(defined $objects->[0]) {
+        my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+        my $user_macros = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'});
+        ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
+            $cmd = $file;
+        }
+    }
+    if(defined $plugins->{$name}) {
+        $cmd = $plugins->{$name};
+    }
+    if(defined $cmd) {
+        eval {
+            local $SIG{ALRM} = sub { die('alarm'); };
+            alarm(5);
+            $cmd = $cmd." -h 2>/dev/null";
+            $help = `$cmd`;
+            alarm(0);
+        }
+    }
+    return $help;
+}
+
+##########################################################
+
+=head2 get_plugin_preview
+
+return plugin preview
+
+=cut
+sub get_plugin_preview {
+    my($self,$c,$command,$args,$host,$service) = @_;
+
+    if($self->is_remote()) {
+        return $self->remote_get_pluginpreview($c,$command,$args,$host,$service);
+    }
+
+    my $output = 'plugin preview is only available for plugins!';
+    return $output unless defined $args;
+
+    my $cfg = $Monitoring::Config::save_options;
+    $Monitoring::Config::key_sort = _sort_by_object_keys($cfg->{object_attribute_key_order}, $cfg->{object_cust_var_order});
+
+    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
+    $macros    = Thruk::Utils::read_resource_file($self->{'config'}->{'obj_resource_file'}, $macros);
+
+    if(defined $host and $host ne '') {
+        my $objects = $self->get_objects_by_name('host', $host);
+        if(defined $objects->[0]) {
+            $macros = $objects->[0]->get_macros($c->{'obj_db'}, $macros);
+        }
+    }
+
+    if(defined $service and $service ne '' and $service ne 'undefined') {
+        my $objects = $self->get_objects_by_name('service', $service, 0, 'ho:'.$host);
+        if(defined $objects->[0]) {
+            $macros = $objects->[0]->get_macros($self, $macros);
+        }
+    }
+
+    my $cmd;
+    my $objects         = $self->get_objects_by_name('command', $command);
+    if(defined $objects->[0]) {
+        my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+        ($file)    = $c->{'db'}->_get_replaced_string($file, $macros);
+        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
+            ($cmd) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+        }
+    }
+    if(defined $cmd) {
+        eval {
+            local $SIG{ALRM} = sub { die('alarm'); };
+            alarm(45);
+            $cmd = $cmd." 2>/dev/null";
+            $output = `$cmd`;
+            alarm(0);
+        }
+    }
+    return $output;
+}
 ##########################################################
 
 =head1 AUTHOR

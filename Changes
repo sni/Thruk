@@ -9,6 +9,7 @@ next:
           - Bug Fixes
             - disable curl when using threads
             - fixed playing sounds on problems
+            - conf: plugin list/preview over http
 
 1.70-4   Tue May 21 11:40:34 CEST 2013
           - Bug Fixes

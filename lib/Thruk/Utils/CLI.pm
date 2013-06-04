@@ -907,6 +907,19 @@ sub _cmd_configtool {
             'files_root' => $c->{'obj_db'}->get_files_root(),
         };
     }
+    # plugins
+    elsif($opt->{'args'}->{'sub'} eq 'configplugins') {
+        $res = $c->{'obj_db'}->get_plugins($c);
+    }
+    # plugin help
+    elsif($opt->{'args'}->{'sub'} eq 'configpluginhelp') {
+        $res = $c->{'obj_db'}->get_plugin_help($c, $opt->{'args'}->{'args'});
+    }
+    # plugin preview
+    elsif($opt->{'args'}->{'sub'} eq 'configpluginpreview') {
+        use Data::Dumper; print STDERR Dumper($opt->{'args'}->{'args'});
+        $res = $c->{'obj_db'}->get_plugin_preview($c, @{$opt->{'args'}->{'args'}});
+    }
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
