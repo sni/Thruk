@@ -917,7 +917,6 @@ sub _cmd_configtool {
     }
     # plugin preview
     elsif($opt->{'args'}->{'sub'} eq 'configpluginpreview') {
-        use Data::Dumper; print STDERR Dumper($opt->{'args'}->{'args'});
         $res = $c->{'obj_db'}->get_plugin_preview($c, @{$opt->{'args'}->{'args'}});
     }
     # run config check
