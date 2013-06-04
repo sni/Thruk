@@ -31,10 +31,10 @@ my $files = [
     'themes/themes-available/Thruk/stylesheets/all_in_one-'.$Thruk::Config::VERSION.'.css',
 ];
 for my $file (@{$files}) {
-    my $cmd = 'csstidy '.$file.' --silent=true --optimise_shorthands=2 --template=highest > tmp.css && mv tmp.css '.$file;
+    my $cmd = 'yui-compressor -o compressed.css '.$file.' && mv compressed.css '.$file;
     print `$cmd`;
     if($? != 0) {
-        print STDERR "csstidy failed, make sure csstidy is installed\n";
+        print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
         last;
     }
 }
@@ -49,7 +49,7 @@ for my $file (@{$files}) {
     my $cmd = 'yui-compressor -o compressed.js '.$file.' && mv compressed.js '.$file;
     print `$cmd`;
     if($? != 0) {
-        print STDERR "yui-compressor failed, make sure yui-compressor is installed\n";
+        print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
         last;
     }
 }
