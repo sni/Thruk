@@ -3397,7 +3397,7 @@ var ajax_search = {
                 success: function(data) {
                     ajax_search.updating=false;
                     ajax_search.base = data;
-                    if(ajax_search.autoopen == true) {
+                    if(ajax_search.autoopen == true || panel.style.visibility == 'visible') {
                         ajax_search.suggest();
                     }
                     ajax_search.autoopen = true;
