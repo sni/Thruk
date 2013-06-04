@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.72     Tue Jun  4 18:42:50 CEST 2013
           - enable connection pool by default (only with 3 backends or more)
           - connection pool uses 90% less memory now
           - allow setting 'state_host' explicitly
