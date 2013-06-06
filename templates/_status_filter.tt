@@ -370,8 +370,8 @@
               <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>
               <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
               <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
-              <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
+              <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
               <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
               <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
