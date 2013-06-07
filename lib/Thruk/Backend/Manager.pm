@@ -96,7 +96,7 @@ sub init {
             elsif($addr =~ m/^\//mx or $addr eq 'localhost' or $addr =~ /^127\.0\.0\./mx) {
                 $self->{'local_hosts'}->{$peer->{'key'}} = 1;
             } else {
-                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
+                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $addr };
             }
         }
         $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
@@ -595,6 +595,7 @@ sub set_backend_state_from_local_connections {
                 my $key;
                 for my $state_key (keys %{$self->{'state_hosts'}}) {
                     my $name = $self->{'state_hosts'}->{$state_key}->{'source'};
+                    next unless $name;
                     $key = $state_key if $host->{'name'}    eq $name;
                     $key = $state_key if $host->{'address'} eq $name;
                     $key = $state_key if $host->{'alias'}   eq $name;

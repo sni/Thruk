@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - Bug Fixes
             - missing filter in list of recurring downtime
+            - fixed state_hosts for http backend
 
 1.72     Tue Jun  4 18:42:50 CEST 2013
           - enable connection pool by default (only with 3 backends or more)
