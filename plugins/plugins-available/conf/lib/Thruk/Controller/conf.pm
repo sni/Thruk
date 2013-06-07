@@ -92,6 +92,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{'last_changed'}        = 0;
     $c->stash->{'needs_commit'}        = 0;
     $c->stash->{'show_save_reload'}    = 0;
+    $c->stash->{'has_jquery_ui'}       = 1;
 
     Thruk::Utils::ssi_include($c);
 

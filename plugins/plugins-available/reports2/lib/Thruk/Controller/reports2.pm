@@ -57,6 +57,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{template}              = 'reports.tt';
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
+    $c->stash->{has_jquery_ui}         = 1;
 
     $Thruk::Utils::CLI::c              = $c;
 

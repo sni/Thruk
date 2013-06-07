@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+test:
+          - performance improvements, only load jquery-ui if necessary
+
 next:
           - added sanity check when saving recurring downtimes
           - Bug Fixes

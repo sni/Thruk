@@ -314,6 +314,8 @@ sub _process_recurring_downtimes_page {
 ##########################################################
 sub _process_recurring_downtimes_page_edit {
     my($self, $c, $src, $default_rd, $rd) = @_;
+    $c->stash->{'has_jquery_ui'} = 1;
+
     my $file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
     $c->stash->{rd}->{'file'} = '';
     $c->stash->{can_edit}     = 1;
