@@ -344,21 +344,31 @@ sub _update_cron_file {
 
 ##########################################################
 # return list of downtimes
+#
+# noauth)
+#   0)  use authentication
+#   1)  no authentication used, list all downtimes
+#   2)  list downtimes for all backends, not just the selected ones
+#
 sub _get_downtimes_list {
     my($self, $c, $noauth, $host, $service) = @_;
 
+    return [] unless $c->config->{'use_feature_recurring_downtime'};
+
     my @hostfilter    = (Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ));
     my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
+
+    # skip further auth tests if this user has admins permission anyway
     if(!$noauth) {
         $noauth = 1 if(!$hostfilter[0] and !$servicefilter[0]);
     }
-    unless($noauth) {
-        if($service) {
-            push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
-        }
-        elsif($host) {
-            push @hostfilter, { name => $host };
-        }
+
+    # host or service filter?
+    if($service) {
+        push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
+    }
+    elsif($host) {
+        push @hostfilter, { name => $host };
     }
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
