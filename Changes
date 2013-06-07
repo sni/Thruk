@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.72-2   Fri Jun  7 15:51:47 CEST 2013
           - added sanity check when saving recurring downtimes
           - log host/service name when deleting downtimes/comments
           - Bug Fixes
