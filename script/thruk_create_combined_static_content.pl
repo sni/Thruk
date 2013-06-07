@@ -10,7 +10,12 @@ use Thruk::Config;
 my $dos2unix = "/usr/bin/dos2unix";
 $dos2unix    = "/usr/bin/fromdos"        if -x "/usr/bin/fromdos";
 $dos2unix    = "/opt/local/bin/dos2unix" if -x "/opt/local/bin/dos2unix";
-my $config   = Thruk::Config::get_config();
+
+#################################################
+# directly use config, otherwise user would be switched when called as root from the Makefile.PL
+my $config   = \%Thruk::Config::config;
+die('no config') unless $config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'};
+die('no config') unless $Thruk::Config::VERSION;
 
 #################################################
 my $cmds = [
