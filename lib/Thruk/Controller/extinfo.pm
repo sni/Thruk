@@ -238,19 +238,36 @@ sub _process_recurring_downtimes_page {
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
             'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || 5,
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || 'automatic downtime',
-            'backends'      => $c->{'request'}->{'parameters'}->{'backends'}        || '',
+            'backends'      => $c->{'request'}->{'parameters'}->{'d_backends'}      || '',
             'childoptions'  => $c->{'request'}->{'parameters'}->{'childoptions'}    || 0,
             'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
             'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,
         };
         $c->stash->{rd} = $rd;
         my $failed = 0;
+
+        # check permissions
         if($self->_check_downtime_permissions($c, $rd) != 2) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no permission for this '.$rd->{'target'}.'!' });
             $failed = 1;
         }
+
+        # does this downtime makes sense?
+        if(    $target eq 'service'      and !$host) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'host cannot be empty!' });
+            $failed = 1;
+        }
+        if(   ($target eq 'host'         and !$host)
+           or ($target eq 'service'      and !$service)
+           or ($target eq 'servicegroup' and !$servicegroup)
+           or ($target eq 'hostgroup'    and !$hostgroup)
+        ) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $target.' cannot be empty!' });
+            $failed = 1;
+        }
+
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
-        if($src) {
+        if($src and !$failed) {
             my $old_file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
             my $old_rd   = Thruk::Utils::read_data_file($old_file);
             if($self->_check_downtime_permissions($c, $old_rd) == 2) {
@@ -259,7 +276,7 @@ sub _process_recurring_downtimes_page {
                 $failed = 1;
             }
         }
-        return _process_recurring_downtimes_page_edit($self, $c, $src, $default_rd) if $failed;
+        return _process_recurring_downtimes_page_edit($self, $c, $src, $default_rd, $rd) if $failed;
         my $file = $self->_get_data_file_name($c, $target, $host, $service, $hostgroup, $servicegroup, $nr);
         Thruk::Utils::write_data_file($file, $rd);
         $self->_update_cron_file($c);
@@ -296,7 +313,7 @@ sub _process_recurring_downtimes_page {
 
 ##########################################################
 sub _process_recurring_downtimes_page_edit {
-    my($self, $c, $src, $default_rd) = @_;
+    my($self, $c, $src, $default_rd, $rd) = @_;
     my $file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
     $c->stash->{rd}->{'file'} = '';
     $c->stash->{can_edit}     = 1;
@@ -317,6 +334,12 @@ sub _process_recurring_downtimes_page_edit {
     $c->stash->{rd}               = $default_rd unless defined $c->stash->{rd};
     for my $key (keys %{$default_rd}) {
         $c->stash->{rd}->{$key} = $default_rd->{$key}  unless defined $c->stash->{rd}->{$key};
+    }
+    # change existing, not yet saved downtime
+    if($rd) {
+        for my $key (keys %{$rd}) {
+            $c->stash->{rd}->{$key} = $rd->{$key};
+        }
     }
     $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
     return 1;

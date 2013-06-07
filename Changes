@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - added sanity check when saving recurring downtimes
           - Bug Fixes
             - missing filter in list of recurring downtime
             - fixed state_hosts for http backend
