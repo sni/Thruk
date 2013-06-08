@@ -126,6 +126,7 @@ our %config = ('name'                   => 'Thruk',
                                           'cookie_auth'      => 0,
                                           'space'          => ' ',
                                           'debug_info'     => '',
+                                          'has_jquery_ui'  => 0,
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,

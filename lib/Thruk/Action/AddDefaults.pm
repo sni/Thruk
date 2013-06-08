@@ -107,6 +107,13 @@ sub add_defaults {
     }
 
     ###############################
+    # no db access before here, so check if all pool worker are up already
+    if($Thruk::Backend::Pool::pool) {
+        my $worker = do { lock ${$Thruk::Backend::Pool::pool->{worker}}; ${$Thruk::Backend::Pool::pool->{worker}} };
+        while($worker < $Thruk::Backend::Pool::pool_size) { sleep(0.1); $worker = do { lock ${$Thruk::Backend::Pool::pool->{worker}}; ${$Thruk::Backend::Pool::pool->{worker}} }; }
+    }
+
+    ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe);
 
     ###############################

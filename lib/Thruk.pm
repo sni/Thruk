@@ -48,7 +48,6 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 
-use parent qw/Catalyst/;
 use Catalyst qw/
                 Thruk::ConfigLoader
                 Unicode::Encoding

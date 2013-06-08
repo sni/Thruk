@@ -219,7 +219,7 @@ init thread connection pool
 =cut
 
 sub init_backend_thread_pool {
-    our($peer_order, $peers, $pool);
+    our($peer_order, $peers, $pool, $pool_size);
     if(defined $peers) {
         return;
     }
@@ -232,7 +232,6 @@ sub init_backend_thread_pool {
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
     $peer_configs    = [] unless defined $peer_configs;
     my $num_peers    = scalar @{$peer_configs};
-    my $pool_size;
     if(defined $config->{'connection_pool_size'}) {
         $pool_size   = $config->{'connection_pool_size'};
     } elsif($num_peers >= 3) {
@@ -267,9 +266,6 @@ sub init_backend_thread_pool {
                 max      => $pool_size,
                 do       => [\&Thruk::Backend::Pool::_do_thread ],
             );
-            # wait till we got all worker running
-            my $worker = 0;
-            while($worker < $pool_size) { sleep(0.3); $worker = do { lock ${$pool->{worker}}; ${$pool->{worker}} }; }
         } else {
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }

@@ -219,6 +219,9 @@ sub _run {
     }
 
     unless(defined $result) {
+        # initialize backend pool here to safe some memory
+        Thruk::Backend::Pool::init_backend_thread_pool();
+
         $c = $self->get_c();
         if(!defined $c) {
             print STDERR "command failed";
