@@ -124,8 +124,10 @@ TestUtils::test_command({
 });
 
 # restore default
-`cd plugins/plugins-enabled && rm -f reports`;
-`cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
-unlink('root/thruk/plugins/reports');
+END {
+    `cd plugins/plugins-enabled && rm -f reports`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
+    unlink('root/thruk/plugins/reports');
+};
 
 done_testing();
