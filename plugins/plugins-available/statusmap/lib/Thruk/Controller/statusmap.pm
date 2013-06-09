@@ -23,6 +23,12 @@ Catalyst Controller.
 # enable statusmap if this plugin is loaded
 Thruk->config->{'use_feature_statusmap'} = 1;
 
+Thruk::Utils::Status::add_view({'group' => 'Status Map',
+                                'name'  => 'Status Map',
+                                'value' => 'statusmap',
+                                'url'   => 'statusmap.cgi'
+                            });
+
 ######################################
 
 =head2 statusmap_cgi
@@ -45,6 +51,15 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    # set some defaults
+    Thruk::Utils::Status::set_default_stash($c);
+
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'statusmap';
+    if($style ne 'statusmap') {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
+    }
+    $c->stash->{substyle} = 'host';
+
     $c->stash->{type}    = $c->request->parameters->{'type'}    || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_type'}    || $c->config->{'statusmap_default_type'}    || 'table';
     $c->stash->{groupby} = $c->request->parameters->{'groupby'} || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_groupby'} || $c->config->{'statusmap_default_groupby'} || 'address';
     $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
@@ -52,6 +67,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($c->stash->{host} eq 'all') {
         $c->stash->{host} = 'rootid';
     }
+
+    # do the filter
+    delete $c->request->parameters->{'host'};
+    $c->stash->{hidesearch} = 1;
+    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
 
     # table layout does not support zoom
     # yits table breaks if one element is in multiple groups
@@ -61,12 +81,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $self->{'all_nodes'} = {};
 
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
 
     # do we need servicegroups?
     if($c->stash->{groupby} eq 'servicegroup') {
         my $new_hosts;
-        my $servicegroups = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), groups => { '!=' => undef }], columns => [qw/host_name groups/]);
+        my $servicegroups = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, groups => { '!=' => undef }], columns => [qw/host_name groups/]);
         my $servicegroupsbyhost = {};
         if(defined $servicegroups) {
             for my $data (@{$servicegroups}) {
@@ -123,6 +143,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{title}         = 'Network Map';
     $c->stash->{page}          = 'statusmap';
+    $c->stash->{style}         = 'statusmap';
     $c->stash->{show_top_pane} = 1;
     $c->stash->{template}      = 'statusmap.tt';
     $c->stash->{infoBoxTitle}  = 'Network Map For All Hosts';

@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 test:
+          - added filter to statusmap
           - performance improvements, only load jquery-ui if necessary
 
 next:

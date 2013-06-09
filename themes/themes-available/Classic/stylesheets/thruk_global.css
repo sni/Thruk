@@ -508,7 +508,7 @@ td.filter_table {
 }
 
 div.filter_pane {
-  z-index:100;
+  z-index:1000;
   position:absolute;
 }
 
@@ -952,4 +952,9 @@ TABLE.logcache_stats TABLE {
 }
 TABLE.logcache_stats TD.dataVal {
   text-align: center;
+}
+
+BODY.statusmap TABLE#dfl_all_filter_table {
+  z-index:1000;
+  position: absolute;
 }
