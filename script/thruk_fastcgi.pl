@@ -12,6 +12,13 @@ BEGIN {
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
 require Catalyst::ScriptRunner;
 Catalyst::ScriptRunner->import();
 $ENV{'THRUK_SRC'} = 'FastCGI';

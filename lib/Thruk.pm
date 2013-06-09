@@ -24,6 +24,13 @@ BEGIN {
     Thruk::Backend::Pool::init_backend_thread_pool();
 };
 
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
 use Carp;
 use Moose;
 use GD;

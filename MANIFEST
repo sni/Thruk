@@ -118,6 +118,7 @@ lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
+lib/Thruk/Utils/INC.pm
 lib/Thruk/Utils/IO.pm
 lib/Thruk/Utils/Menu.pm
 lib/Thruk/Utils/Scripts.pm

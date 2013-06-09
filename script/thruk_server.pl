@@ -15,6 +15,13 @@ BEGIN {
     }
 }
 
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
 use Catalyst::ScriptRunner;
 $ENV{'THRUK_SRC'} = 'DebugServer';
 Catalyst::ScriptRunner->run('Thruk', 'Server');

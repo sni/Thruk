@@ -22,6 +22,13 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 # vim: expandtab:ts=4:sw=4:syntax=perl
 #line 24
 
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
 use strict;
 use warnings;
 use Getopt::Long qw//;
