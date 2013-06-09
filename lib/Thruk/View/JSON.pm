@@ -1,8 +1,8 @@
 package Thruk::View::JSON;
+use parent 'Catalyst::View::JSON';
 
 use strict;
 use JSON::XS ();
-use base 'Catalyst::View::JSON';
 
 =head1 NAME
 

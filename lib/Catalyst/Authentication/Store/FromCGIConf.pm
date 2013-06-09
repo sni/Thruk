@@ -1,4 +1,5 @@
 package Catalyst::Authentication::Store::FromCGIConf;
+use parent 'Class::Accessor::Fast';
 
 use strict;
 use warnings;
@@ -6,7 +7,6 @@ use warnings;
 use Carp;
 use Catalyst::Authentication::User::Hash;
 use Scalar::Util qw( blessed );
-use base qw/Class::Accessor::Fast/;
 
 sub new {
     my ( $class, $config, $app, $realm) = @_;

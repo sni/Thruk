@@ -1,9 +1,8 @@
 package Thruk::View::Excel;
+use parent 'Catalyst::View::Excel::Template::Plus';
 
 use strict;
 use warnings;
-
-use base qw/Catalyst::View::Excel::Template::Plus/;
 
 =head1 NAME
 

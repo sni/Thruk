@@ -43,7 +43,7 @@ This is a L<Catalyst> model for the L<Thruk::Class>
     use strict;
     use warnings;
 
-    use base qw/ Catalyst::Model::Thruk::Class /;
+    use parent qw/ Catalyst::Model::Thruk::Class /;
 
 =head1 INTERNAL METHODS
 

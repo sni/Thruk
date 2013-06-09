@@ -1,11 +1,11 @@
 package Monitoring::Livestatus::UNIX;
+use parent 'Monitoring::Livestatus';
 
 use 5.000000;
 use strict;
 use warnings;
 use IO::Socket::UNIX;
 use Carp;
-use base "Monitoring::Livestatus";
 
 =head1 NAME
 

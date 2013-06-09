@@ -1,8 +1,7 @@
 package Thruk::View::GD;
+use parent 'Catalyst::View::GD';
 
 use strict;
-use base 'Catalyst::View::GD';
-
 
 =head1 NAME
 

@@ -1,8 +1,8 @@
 package Catalyst::Plugin::Thruk::ConfigLoader;
+use parent 'Catalyst::Plugin::ConfigLoader';
 
 use strict;
 use Thruk::Backend::Pool;
-use base 'Catalyst::Plugin::ConfigLoader';
 
 ########################################
 
@@ -228,3 +228,7 @@ This library is free software . You can redistribute it and/or modify
 it under the same terms as perl itself.
 
 =cut
+
+__PACKAGE__->meta->make_immutable;
+
+1;

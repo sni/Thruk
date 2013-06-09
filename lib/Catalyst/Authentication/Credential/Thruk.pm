@@ -1,4 +1,5 @@
 package Catalyst::Authentication::Credential::Thruk;
+use parent 'Class::Accessor::Fast';
 
 =head1 NAME
 
@@ -54,8 +55,6 @@ on underlaying webserver.
 use strict;
 use warnings;
 use Data::Dumper;
-
-use base 'Class::Accessor::Fast';
 
 BEGIN {
     __PACKAGE__->mk_accessors(

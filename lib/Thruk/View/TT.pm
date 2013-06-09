@@ -1,7 +1,7 @@
 package Thruk::View::TT;
+use parent 'Catalyst::View::TT';
 
 use strict;
-use base 'Catalyst::View::TT';
 
 =head1 NAME
 

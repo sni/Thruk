@@ -54,7 +54,7 @@ package [% class %];
 use strict;
 use warnings;
 
-use base qw/ Catalyst::Model::Thruk::Class /;
+use parent/ Catalyst::Model::Thruk::Class /;
 
 =head1 NAME
 

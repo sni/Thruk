@@ -1,4 +1,5 @@
 package Monitoring::Livestatus::INET;
+use parent 'Monitoring::Livestatus';
 
 use 5.000000;
 use strict;
@@ -6,7 +7,6 @@ use warnings;
 use IO::Socket::INET;
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
 use Carp;
-use base "Monitoring::Livestatus";
 
 =head1 NAME
 

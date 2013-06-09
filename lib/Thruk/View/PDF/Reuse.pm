@@ -1,10 +1,10 @@
 package Thruk::View::PDF::Reuse;
+use parent 'Catalyst::View::PDF::Reuse';
 
 use strict;
 use File::Spec::Functions qw/catfile rel2abs/;
 use File::Temp qw/tmpnam/;
 use PDF::Reuse;
-use base 'Catalyst::View::PDF::Reuse';
 
 =head1 NAME
 

@@ -1,7 +1,8 @@
 package Plack::Handler::Thrukembedded;
+use parent 'Plack::Handler::CGI';
+
 use strict;
 use warnings;
-use base 'Plack::Handler::CGI';
 
 sub _handle_response {
     my ($self, $res) = @_;

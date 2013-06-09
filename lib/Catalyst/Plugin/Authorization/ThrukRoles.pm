@@ -1,4 +1,5 @@
 package Catalyst::Plugin::Authorization::ThrukRoles;
+use parent 'Catalyst::Plugin::Authorization::Roles';
 
 =head1 NAME
 
@@ -18,8 +19,6 @@ This authorization module provides authorization for monitoring objects like hos
 
 use strict;
 use warnings;
-
-use base qw/Catalyst::Plugin::Authorization::Roles/;
 
 =head1 METHODS
 

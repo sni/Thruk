@@ -1,9 +1,8 @@
 package Thruk::Model::Thruk;
+use parent 'Catalyst::Model::Thruk::Class';
 
 use strict;
 use warnings;
-
-use base qw/ Catalyst::Model::Thruk::Class /;
 
 =head1 NAME
 

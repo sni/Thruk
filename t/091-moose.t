@@ -7,11 +7,10 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $cmds = [
   "grep -rc 'use Moose' lib/. plugins/plugins-available/*/lib/. | grep -v :0",
-  "grep -Erc 'use base.*Catalyst::' lib/. plugins/plugins-available/*/lib/. | grep -v :0 | grep -v 'Thruk/View' | grep -v 'Catalyst/View' | grep -v 'Catalyst/Plugin'",
-  "grep -Erc 'use parent.*Catalyst::' lib/. plugins/plugins-available/*/lib/. | grep -v :0",
+  "grep -Erc 'use parent.*Catalyst::' lib/. plugins/plugins-available/*/lib/. | grep -v :0 | grep -v 'Thruk/View' | grep -v 'Catalyst/View' | grep -v 'Catalyst/Plugin'",
 ];
 
-# find all TODOs
+# find all moose files which don't set immutable
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
   while(<$ph>) {

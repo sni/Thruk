@@ -1,7 +1,7 @@
 package FCGI::ProcManager::MaxRequestsThruk;
-use strict;
+use parent 'FCGI::ProcManager::MaxRequests';
 
-use base 'FCGI::ProcManager::MaxRequests';
+use strict;
 
 our $VERSION = '0.01';
 

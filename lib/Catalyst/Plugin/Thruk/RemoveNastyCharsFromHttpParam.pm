@@ -1,7 +1,7 @@
 package Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam;
+use parent 'Class::Data::Inheritable';
 
 use strict;
-use base 'Class::Data::Inheritable';
 
 use Carp;
 

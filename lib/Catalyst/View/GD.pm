@@ -1,4 +1,5 @@
 package Catalyst::View::GD;
+use parent 'Catalyst::View';
 
 use strict;
 use warnings;
@@ -10,8 +11,6 @@ use Catalyst::Exception;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
-
-use base 'Catalyst::View';
 
 __PACKAGE__->mk_accessors(qw[
     gd_image_type
@@ -92,7 +91,7 @@ Catalyst::View::GD - A Catalyst View for GD images
 
   # lib/MyApp/View/GD.pm
   package MyApp::View::GD;
-  use base 'Catalyst::View::GD';
+  use parent 'Catalyst::View::GD';
   1;
 
   # configure in lib/MyApp.pm
@@ -178,3 +177,7 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+__PACKAGE__->meta->make_immutable;
+
+1;
