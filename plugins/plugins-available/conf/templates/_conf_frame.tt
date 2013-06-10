@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt overlib=1 css=["thruk/plugins/conf/conf.css","thruk/plugins/conf/linedtextarea/jquery-linedtextarea.css"] js=["thruk/plugins/conf/conf.js", "thruk/plugins/conf/jstree/jstree.min.js"] %]
+﻿[% PROCESS _header.tt overlib=1 css=["thruk/plugins/conf/conf.css","thruk/plugins/conf/linedtextarea/jquery-linedtextarea.css"] js=["thruk/plugins/conf/conf.js", "thruk/javascript/jstree/jstree.min.js"] %]
 [% PROCESS _message.tt %]
 [% PROCESS _overdiv.tt %]
 
