@@ -6,6 +6,7 @@ test:
 
 next:
           - added sanity check when saving recurring downtimes
+          - log host/service name when deleting downtimes/comments
           - Bug Fixes
             - missing filter in list of recurring downtime
             - fixed state_hosts for http backend

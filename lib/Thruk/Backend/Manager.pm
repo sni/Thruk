@@ -47,6 +47,8 @@ sub new {
         'backend_debug'       => 0,
         'sections'            => {},
         'failed_backends'     => {},
+        'by_key'              => {},
+        'by_name'             => {},
     };
     bless $self, $class;
     return $self;
@@ -79,6 +81,9 @@ sub init {
     return if scalar @{ $self->{'backends'} } == 0;
 
     for my $peer (@{$self->get_peers(1)}) {
+        $self->{'by_key'}->{$peer->{'key'}}   = $peer;
+        $self->{'by_name'}->{$peer->{'name'}} = $peer;
+
         $peer->{'local'} = 1;
         my $addr = $peer->{'addr'};
         if($addr) {
@@ -167,11 +172,11 @@ returns peer by key
 =cut
 
 sub get_peer_by_key {
-    my $self = shift;
-    my $key  = shift;
-    for my $peer (@{$self->{'backends'}}) {
-        return $peer if($peer->{'key'} eq $key or $peer->{'name'} eq $key);
-    }
+    my($self, $key) = @_;
+    my $peer = $self->{'by_key'}->{$key};
+    return $peer if $peer;
+    $peer = $self->{'by_name'}->{$key};
+    return $peer if $peer;
     return;
 }
 
@@ -186,11 +191,8 @@ returns peer by name
 =cut
 
 sub get_peer_by_name {
-    my $self = shift;
-    my $name  = shift;
-    for my $peer ( @{ $self->get_peers() } ) {
-        return $peer if $peer->{'name'} eq $name;
-    }
+    my($self, $name) = @_;
+    return $self->{'by_name'}->{$name};
     return;
 }
 
@@ -205,7 +207,7 @@ returns all peer keys
 =cut
 
 sub peer_key {
-    my $self = shift;
+    my($self) = @_;
     my @keys;
     for my $peer ( @{ $self->get_peers() } ) {
         push @keys, $peer->{'key'};
@@ -224,7 +226,7 @@ returns all sections
 =cut
 
 sub sections {
-    my $self = shift;
+    my($self) = @_;
     return $self->{'sections'};
 }
 
@@ -239,8 +241,7 @@ disable backend by key
 =cut
 
 sub disable_backend {
-    my $self = shift;
-    my $key  = shift;
+    my($self, $key) = @_;
 
     my $peer = $self->get_peer_by_key($key);
     if( defined $peer ) {
@@ -260,8 +261,7 @@ ensable backend by key
 =cut
 
 sub enable_backend {
-    my $self = shift;
-    my $key  = shift;
+    my($self, $key) = @_;
 
     my $peer = $self->get_peer_by_key($key);
     if( defined $peer ) {
@@ -281,8 +281,7 @@ disabled backend by key hash
 =cut
 
 sub disable_backends {
-    my $self = shift;
-    my $keys = shift;
+    my($self, $keys) = @_;
 
     if( defined $keys ) {
         for my $key ( keys %{$keys} ) {
@@ -310,8 +309,7 @@ enables all backends
 =cut
 
 sub enable_backends {
-    my $self = shift;
-    my $keys = shift;
+    my($self, $keys) = @_;
 
     if( defined $keys ) {
         if(ref $keys eq 'ARRAY') {
@@ -416,7 +414,7 @@ respect permissions
 =cut
 
 sub get_hostgroup_names_from_hosts {
-    my $self  = shift;
+    my $self = shift; # keep this
     if(scalar @_ == 0) { return $self->get_hostgroup_names(); }
     my $hosts = $self->get_hosts( @_, 'columns', ['groups'] );
     my $groups = {};
@@ -441,7 +439,7 @@ respect permissions
 =cut
 
 sub get_servicegroup_names_from_services {
-    my $self     = shift;
+    my $self = shift; # keep this
     if(scalar @_ == 0) { return $self->get_servicegroup_names(); }
     my $services = $self->get_services( @_, 'columns', ['groups'] );
     my $groups = {};
@@ -465,7 +463,7 @@ runs reconnect on all peers
 =cut
 
 sub reconnect {
-    my( $self ) = @_;
+    my $self = shift; # keep this
     my $c = $Thruk::Backend::Manager::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@_);

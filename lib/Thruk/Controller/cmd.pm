@@ -28,13 +28,14 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $errors = 0;
 
-    $c->stash->{'now'}           = time();
-    $c->stash->{title}           = "External Command Interface";
-    $c->stash->{infoBoxTitle}    = "External Command Interface";
-    $c->stash->{no_auto_reload}  = 1;
-    $c->stash->{page}            = 'cmd';
-    $c->stash->{'form_errors'}   = [];
-    $c->stash->{'commands2send'} = {};
+    $c->stash->{'now'}               = time();
+    $c->stash->{title}               = "External Command Interface";
+    $c->stash->{infoBoxTitle}        = "External Command Interface";
+    $c->stash->{no_auto_reload}      = 1;
+    $c->stash->{page}                = 'cmd';
+    $c->stash->{'form_errors'}       = [];
+    $c->stash->{'commands2send'}     = {};
+    $c->stash->{'extra_log_comment'} = {};
 
     # fill in some defaults
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
@@ -646,6 +647,14 @@ sub _do_send_command {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
         my $joined_backends = join(',', @{$backends_list});
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
+
+        # add log comment if removing downtimes and comments by id
+        if($cmd_typ == 4 or $cmd_typ == 79) {
+            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->{'request'}->{'parameters'}->{'host'}.';'.$c->{'request'}->{'parameters'}->{'service'}.')';
+        }
+        if($cmd_typ == 2 or $cmd_typ == 78) {
+            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->{'request'}->{'parameters'}->{'host'}.')';
+        }
     }
 
     $c->stash->{'start_time_unix'} = $start_time_unix;
@@ -658,9 +667,7 @@ sub _do_send_command {
 ######################################
 # send all collected commands at once
 sub _bulk_send {
-    my $self         = shift;
-    my $c            = shift;
-    my @errors;
+    my($self, $c) = @_;
 
     for my $backends (keys %{$c->stash->{'commands2send'}}) {
         my $options = {};
@@ -670,13 +677,26 @@ sub _bulk_send {
         $options->{'backend'} = [ split(/,/mx, $backends) ];
         return 1 if $options->{'command'} eq '';
 
-        my $backends_string = ref $backends eq 'ARRAY' ? join(',', @{$backends}) : $backends;
-        $backends_string    = 'all' unless $backends_string;
-        if(defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'}) {
-            map { $c->log->info( 'TESTMODE: [' . $c->user->username . ']['.$backends_string.'] cmd: ' . $_ ) } @{$commands2send} unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
-        } else {
-            $c->{'db'}->send_command( %{$options} );
-            map { $c->log->info( '[' . $c->user->username . ']['.$backends_string.'] cmd: ' . $_ ) } @{$commands2send};
+        my @names;
+        for my $b (ref $backends eq 'ARRAY' ? @{$backends} : ($backends)) {
+            my $peer = $c->{'db'}->get_peer_by_key($b);
+            push @names, (defined $peer ? $peer->peer_name() : $b);
+        }
+        my $backends_string = join(',', @names);
+
+        my $testmode = 0;
+        $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'});
+
+        for my $cmd (@{$commands2send}) {
+            my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
+                                    ($testmode ? 'TESTMODE: ' : ''),
+                                    $c->user->username,
+                                    $backends_string,
+                                    $cmd,
+                                    ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
+                                );
+            $c->log->info($logstr) unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
+            $c->{'db'}->send_command( %{$options} ) unless $testmode;
         }
     }
 
