@@ -230,10 +230,10 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     }
     if(d.notifications_enabled == 0)   { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20">'; }
     [% IF hide_passive_icon %]
-		[% passive_icon ='empty.gif' %]
-	[% ELSE %]
-		[% passive_icon ='passiveonly.gif' %]
-	[% END %]
+        [% passive_icon ='empty.gif' %]
+    [% ELSE %]
+        [% passive_icon ='passiveonly.gif' %]
+    [% END %]
     [%+ IF strict_passive_mode +%]
         if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20">'; }
         if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20">'; }
@@ -259,10 +259,10 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
     var d     = item.data;
     if(d.notifications_enabled == 0)   { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif" alt="Notifications for this service have been disabled" title="Notifications for this service have been disabled" border="0" height="20" width="20">'; }
     [% IF hide_passive_icon %]
-    	[% passive_icon ='empty.gif' %]
-	[% ELSE %]
-		[% passive_icon ='passiveonly.gif' %]
-	[% END %]
+        [% passive_icon ='empty.gif' %]
+    [% ELSE %]
+        [% passive_icon ='passiveonly.gif' %]
+    [% END %]
     [%+ IF strict_passive_mode +%]
         if(d.check_type == 0 && d.active_checks_enabled == 0) { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this service have been disabled" title="Checks of this service have been disabled" border="0" height="20" width="20">'; }
         if(d.check_type == 1 && d.accept_passive_checks == 0) { icons += '<img src="[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this service have been disabled" title="Checks of this service have been disabled" border="0" height="20" width="20">'; }
