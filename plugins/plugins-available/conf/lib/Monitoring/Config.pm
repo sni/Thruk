@@ -1135,6 +1135,7 @@ return root folder for config files
 sub get_files_root {
     my ( $self ) = @_;
 
+    return $self->{'cache'}->{'files_root'}  if $self->{'cache'}->{'files_root'};
     return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
     my $files = [];
     for my $file (@{$self->{'files'}}) {
@@ -1154,6 +1155,7 @@ sub get_files_root {
             $root = $dirs->[0];
         }
     }
+    $self->{'cache'}->{'files_root'} = $root;
     return $root;
 }
 

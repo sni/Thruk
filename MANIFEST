@@ -252,6 +252,8 @@ plugins/plugins-available/conf/templates/conf_objects.tt
 plugins/plugins-available/conf/templates/conf_objects_apply.tt
 plugins/plugins-available/conf/templates/conf_objects_filebrowser.tt
 plugins/plugins-available/conf/templates/conf_objects_fileeditor.tt
+plugins/plugins-available/conf/templates/conf_objects_filehistory.tt
+plugins/plugins-available/conf/templates/conf_objects_filehistory_commit.tt
 plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt
 plugins/plugins-available/conf/templates/conf_objects_listref.tt
 plugins/plugins-available/conf/templates/conf_objects_move.tt
@@ -1362,6 +1364,7 @@ themes/themes-available/Classic/images/criticity_2.png
 themes/themes-available/Classic/images/criticity_3.png
 themes/themes-available/Classic/images/criticity_4.png
 themes/themes-available/Classic/images/criticity_5.png
+themes/themes-available/Classic/images/date_magnify.png
 themes/themes-available/Classic/images/delay.gif
 themes/themes-available/Classic/images/delete.gif
 themes/themes-available/Classic/images/delete.png
@@ -1514,6 +1517,7 @@ themes/themes-available/Exfoliation/images/criticity_2.png
 themes/themes-available/Exfoliation/images/criticity_3.png
 themes/themes-available/Exfoliation/images/criticity_4.png
 themes/themes-available/Exfoliation/images/criticity_5.png
+themes/themes-available/Exfoliation/images/date_magnify.png
 themes/themes-available/Exfoliation/images/delay.gif
 themes/themes-available/Exfoliation/images/delete.gif
 themes/themes-available/Exfoliation/images/delete.png
@@ -1723,6 +1727,7 @@ themes/themes-available/Nuvola/images/criticity_2.png
 themes/themes-available/Nuvola/images/criticity_3.png
 themes/themes-available/Nuvola/images/criticity_4.png
 themes/themes-available/Nuvola/images/criticity_5.png
+themes/themes-available/Nuvola/images/date_magnify.png
 themes/themes-available/Nuvola/images/delay.gif
 themes/themes-available/Nuvola/images/delete.gif
 themes/themes-available/Nuvola/images/delete.png
@@ -1925,6 +1930,7 @@ themes/themes-available/Thruk/images/criticity_2.png
 themes/themes-available/Thruk/images/criticity_3.png
 themes/themes-available/Thruk/images/criticity_4.png
 themes/themes-available/Thruk/images/criticity_5.png
+themes/themes-available/Thruk/images/date_magnify.png
 themes/themes-available/Thruk/images/delay.gif
 themes/themes-available/Thruk/images/delete.gif
 themes/themes-available/Thruk/images/delete.png
@@ -2067,6 +2073,7 @@ themes/themes-available/Vautour/images/criticity_2.png
 themes/themes-available/Vautour/images/criticity_3.png
 themes/themes-available/Vautour/images/criticity_4.png
 themes/themes-available/Vautour/images/criticity_5.png
+themes/themes-available/Vautour/images/date_magnify.png
 themes/themes-available/Vautour/images/delay.gif
 themes/themes-available/Vautour/images/delete.gif
 themes/themes-available/Vautour/images/delete.png
@@ -2266,6 +2273,7 @@ themes/themes-available/Wakizashi/images/criticity_2.png
 themes/themes-available/Wakizashi/images/criticity_3.png
 themes/themes-available/Wakizashi/images/criticity_4.png
 themes/themes-available/Wakizashi/images/criticity_5.png
+themes/themes-available/Wakizashi/images/date_magnify.png
 themes/themes-available/Wakizashi/images/delay.gif
 themes/themes-available/Wakizashi/images/delete.gif
 themes/themes-available/Wakizashi/images/delete.png
