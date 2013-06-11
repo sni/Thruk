@@ -1872,7 +1872,7 @@ sub _file_history {
         return if $self->_file_history_commit($c, $commit, $dir);
     }
 
-    my $cmd = "cd '".$dir."' && git log --format='".join("\x1f", '%H', '%an', '%ae', '%at', '%s')."\x1e' -- .";
+    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s')."\x1e' -- .";
     my $out = `$cmd`;
     my $logs = [];
     for my $line (split("\x1e", $out)) {
@@ -1904,7 +1904,7 @@ sub _file_history_commit {
         return;
     }
 
-    my $cmd = "cd '".$dir."' && git show --format='".join("\x1f", '%H', '%an', '%ae', '%at', '%s', '%N')."\x1f' ".$commit;
+    my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s', '%b')."\x1f' ".$commit;
     $c->stash->{'template'}   = 'conf_objects_filehistory_commit.tt';
     my $output = `$cmd`;
 
