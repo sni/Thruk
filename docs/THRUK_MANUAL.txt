@@ -2080,6 +2080,9 @@ ex.:
     thruk                     = .../thruk_local.conf
     cgi.cfg                   = .../cgi.cfg
     htpasswd                  = .../htpasswd
+
+    pre_obj_save_cmd          =
+    post_obj_save_cmd         =
   </Component>
 
 
@@ -2096,6 +2099,17 @@ Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.
 
 ==== htpasswd
 Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.
+
+==== pre_obj_save_cmd
+Run a command before saving object config files. Save will be canceled
+if the command returns non-zero exit code. Command will be run with
+'pre' as first argument and the root config folder as second argument.
+REMOTE_USER will be set in the environment.
+
+==== post_obj_save_cmd
+Run a command after saving object config files. Command will be run with
+'post' as first argument and the root config folder as second
+argument. REMOTE_USER will be set in the environment.
 
 
 

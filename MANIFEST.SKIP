@@ -64,3 +64,4 @@ nytprof/
 nytprof.out
 .~ko-6.1.3-perllint~
 sizeme.db
+test_hook.sh

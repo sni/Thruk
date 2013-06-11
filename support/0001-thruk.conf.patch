@@ -1,5 +1,5 @@
---- a/thruk.conf	2013-06-03 12:32:41.000000000 +0200
-+++ b/thruk.conf	2013-06-03 13:31:05.000000000 +0200
+--- a/thruk.conf	2013-06-11 12:40:11.000000000 +0200
++++ b/thruk.conf	2013-06-11 12:40:30.000000000 +0200
 @@ -63,11 +63,11 @@
  
  ######################################
@@ -120,10 +120,10 @@
 +    thruk    = /etc/thruk/thruk_local.conf
 +    cgi.cfg  = /etc/thruk/cgi.cfg
 +    htpasswd = /etc/thruk/htpasswd
- </Component>
  
- ######################################
-@@ -606,7 +620,7 @@
+     #pre_obj_save_cmd   =
+     #post_obj_save_cmd  =
+@@ -609,7 +623,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
      # wkhtmltopdf is used to convert html pages into pdf

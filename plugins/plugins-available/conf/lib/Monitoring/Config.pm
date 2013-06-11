@@ -207,6 +207,19 @@ $c is only needed when syncing with remote sites.
 sub commit {
     my($self, $c) = @_;
     my $rc    = 1;
+
+    my $filesroot = $self->get_files_root();
+
+    # run pre hook
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}, 'pre', $filesroot);
+        if($? != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Saved canceled by pre save hook!' );
+            return;
+        }
+    }
+
     my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
@@ -252,6 +265,12 @@ sub commit {
     if($self->is_remote()) {
         confess("no c") unless $c;
         $self->remote_file_save($c, $files);
+    }
+
+    # run post hook
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
     }
 
     return $rc;

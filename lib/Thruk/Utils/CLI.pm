@@ -931,6 +931,15 @@ sub _cmd_configtool {
     }
     # save incoming config changes
     elsif($opt->{'args'}->{'sub'} eq 'configsave') {
+        my $filesroot = $c->{'obj_db'}->get_files_root();
+
+        if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
+            local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+            system($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}, 'pre', $filesroot);
+            return("Saved canceled by pre save hook!", 1) if $? != 0;
+        }
+
+
         my $changed = $opt->{'args'}->{'args'}->{'changed'};
         # changed and new files
         for my $f (@{$changed}) {
@@ -944,7 +953,6 @@ sub _cmd_configtool {
                 $saved = 'updated';
             } elsif(!$file) {
                 # new file
-                my $filesroot = $c->{'obj_db'}->get_files_root();
                 if($path =~ m/^\Q$filesroot\E/mx) {
                     $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
                     if(defined $file and !$file->readonly()) {
@@ -977,6 +985,12 @@ sub _cmd_configtool {
             }
         }
         $res = "saved";
+
+        # run post hook
+        if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
+            local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+            system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
+        }
     } else {
         return("unknown configtool command", 1);
     }
