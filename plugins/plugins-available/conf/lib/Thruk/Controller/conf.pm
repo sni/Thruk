@@ -920,6 +920,10 @@ sub _process_objects_page {
 
     # check if we have a history for our configs
     my $files_root = $c->{'obj_db'}->get_files_root();
+    my $dir        = $files_root;
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'}) {
+        $dir = $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'};
+    }
     system("cd '".$files_root."' && git log -1 >/dev/null 2>&1");
     $c->stash->{'has_history'}      = 1 if $? == 0;
 
@@ -1856,6 +1860,9 @@ sub _file_history {
     $dir =~ s/\/[^\/]*?$//gmx; # strip file part
     if(CORE::index($dir, $files_root) != 0 or $dir =~ m/\.\./mx) {
         $dir = $files_root;
+    }
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'}) {
+        $dir = $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'};
     }
 
 

@@ -2081,8 +2081,9 @@ ex.:
     cgi.cfg                   = .../cgi.cfg
     htpasswd                  = .../htpasswd
 
-    pre_obj_save_cmd          =
-    post_obj_save_cmd         =
+    pre_obj_save_cmd          = .../hook.sh
+    post_obj_save_cmd         = .../hook.sh
+    git_base_dir              = /etc/nagios/conf.d/custom/
   </Component>
 
 
@@ -2111,6 +2112,11 @@ Run a command after saving object config files. Command will be run with
 'post' as first argument and the root config folder as second
 argument. REMOTE_USER will be set in the environment.
 
+==== git_base_dir
+If not all config folders are managed by git, then you can specify a
+directory which is used to display the history. Should point to a
+directory which is part of a git repository. This config setting is
+only used for the history support in the configuration tool.
 
 
 
