@@ -924,7 +924,7 @@ sub _process_objects_page {
     if($c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'}) {
         $dir = $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'};
     }
-    system("cd '".$files_root."' && git log -1 >/dev/null 2>&1");
+    system("cd '".$dir."' && git log -1 >/dev/null 2>&1");
     $c->stash->{'has_history'}      = 1 if $? == 0;
 
 
