@@ -1897,23 +1897,37 @@ sub _file_history_commit {
         return;
     }
 
-    my $cmd = "cd '".$dir."' && git show ".$commit;
+    my $cmd = "cd '".$dir."' && git show --format='".join("\x1f", '%H', '%an', '%ae', '%at', '%s', '%N')."\x1f' ".$commit;
     $c->stash->{'template'}   = 'conf_objects_filehistory_commit.tt';
     my $output = `$cmd`;
 
-    # make new files visible
-    $output =~ s/\-\-\-\s+\/dev\/null\n\+\+\+\s+b\/(.*?)$/--- a\/$1/gmxs;
+    my @d = split(/\x1f/mx, $output);
+    my $data = {
+            'id'           => $d[0],
+            'author_name'  => $d[1],
+            'author_email' => $d[2],
+            'date'         => $d[3],
+            'message'      => $d[4],
+            'body'         => $d[5],
+            'diff'         => $d[6],
+    };
+    if(scalar @d < 4) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Not a valid commit!' );
+        return;
+    }
 
-    $output    = Thruk::Utils::Filter::escape_html($output);
+    # make new files visible
+    $data->{'diff'} =~ s/\-\-\-\s+\/dev\/null\n\+\+\+\s+b\/(.*?)$/--- a\/$1/gmxs;
+    $data->{'diff'} = Thruk::Utils::Filter::escape_html($data->{'diff'});
 
     # changed files
     our $diff_link_nr    = 0;
     our $diff_link_files = [];
-    $output =~ s/^(\-\-\-\s+a\/.*)$/&_diff_link($1)/gemx;
+    $data->{'diff'} =~ s/^(\-\-\-\s+a\/.*)$/&_diff_link($1)/gemx;
+    $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
+    $data->{'diff'} =~ s/^\s+//gmx;
 
-    $output = Thruk::Utils::beautify_diff($output);
-    $c->{'stash'}->{'output'} = $output;
-
+    $c->{'stash'}->{'data'}   = $data;
     $c->{'stash'}->{'links'}  = $diff_link_files;
 
     return 1;

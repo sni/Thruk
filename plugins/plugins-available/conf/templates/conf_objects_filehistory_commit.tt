@@ -4,26 +4,37 @@
 
 <table border="0" class='data conftoolobj' width="700">
   <tr>
-    <th class='data' width="5%" align="left"><a href='#' onclick="history.back(-1); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
-    <th class='data' width="90%"><b>Commit Details</b></th>
-    <th class='data' width="5%" align="right"></th>
+    <th class='data' width="15%" align="left"><a href='#' onclick="history.back(-1); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' width="70%"><b>Commit: [% data.message %]</b></th>
+    <th class='data' width="15%" align="right"></th>
   </tr>
   <tr>
-    <td colspan=3 align="left">
-        <b>Changed Files:</b>
-        <ul>
-        [% FOREACH f = links %]
-            <li><a href="#file[% loop.index %]">[% f %]</a></li>
-        [% END %]
-        </ul>
-        <hr>
+    <th align="left">Author:</th>
+    <td align="left" colspan=2>[% data.author_name %] &lt;[% data.author_email %]&gt;</td>
+  </tr>
+  <tr>
+    <th align="left">Date:</th>
+    <td align="left" colspan=2>[% date_format(c, data.date) %]</td>
+  </tr>
+  <tr>
+    <th align="left">Subject:</th>
+    <td align="left" colspan=2>[% data.message %]<br>[% data.body %]</td>
+  </tr>
+  <tr>
+    <th align="left" style="white-space: nowrap; padding-right: 10px; vertical-align: top;">Changed Files:</th>
+    <td align="left" colspan=2>
+      <ul style="padding-left: 12px; margin-top: 0px;">
+      [% FOREACH f = links %]
+        <li><a href="#file[% loop.index %]">[% f %]</a></li>
+      [% END %]
+      </ul>
     </td>
   </tr>
   <tr>
     <td colspan=3>
-        <div style="overflow-x: scroll; width:695px;">
+        <div style="overflow-x: auto; width:695px;">
         <pre style="text-align: left;">
-        [% output %]
+        [% data.diff %]
         </pre>
         </div>
     </td>
