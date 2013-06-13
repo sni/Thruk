@@ -1711,6 +1711,7 @@ sub _get_create_statements {
           plugin_output mediumint(8) NOT NULL,
           message mediumint(8) NOT NULL,
           KEY time (time)
+          KEY host_id (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
 
     # plugin_output
