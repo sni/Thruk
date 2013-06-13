@@ -78,6 +78,17 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $end   = $tmp;
     }
 
+    # service filter
+    if(defined $service and $host ne 'all') {
+        push @{$filter}, { host_name => $host };
+        push @{$filter}, { service_description => $service };
+    }
+    # host filter
+    elsif($host ne 'all') {
+        push @{$filter}, { host_name => $host };
+    }
+
+    # time filter
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
 
@@ -119,16 +130,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # join type filter together
     push @{$filter}, { -or => \@prop_filter };
-
-    # service filter
-    if(defined $service and $host ne 'all') {
-        push @{$filter}, { host_name => $host };
-        push @{$filter}, { service_description => $service };
-    }
-    # host filter
-    elsif($host ne 'all') {
-        push @{$filter}, { host_name => $host };
-    }
 
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
 
