@@ -316,3 +316,9 @@ TD.less_padding DIV.x-grid-cell-inner {
   padding-left: 2px;
   padding-right: 2px;
 }
+
+/* make windows border little bit smaller */
+.x-window-default {
+  border-radius: 4px 4px 4px 4px;
+  padding: 3px;
+}
