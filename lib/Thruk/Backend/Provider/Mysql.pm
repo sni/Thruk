@@ -1729,6 +1729,7 @@ sub _get_create_statements {
           host_id mediumint(8) unsigned NOT NULL,
           service_description varchar(150) NOT NULL,
           PRIMARY KEY (service_id)
+          KEY host_id (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # status
