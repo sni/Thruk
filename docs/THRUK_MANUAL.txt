@@ -2026,6 +2026,8 @@ for details.
         *** `obj_exclude`     Specify some exception pattern for the obj_dir.
                               (only needed when not using 'core_conf')
 
+        *** `git_base_dir`    Override global 'git_base_dir' value.
+
 ex.:
 
   <Component Thruk::Backend>
@@ -2116,7 +2118,8 @@ argument. REMOTE_USER will be set in the environment.
 If not all config folders are managed by git, then you can specify a
 directory which is used to display the history. Should point to a
 directory which is part of a git repository. This config setting is
-only used for the history support in the configuration tool.
+only used for the history support in the configuration tool. The
+'git_base_dir' may be overriden by an per backend value.
 
 
 

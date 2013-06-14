@@ -920,10 +920,7 @@ sub _process_objects_page {
 
     # check if we have a history for our configs
     my $files_root = $c->{'obj_db'}->get_files_root();
-    my $dir        = $files_root;
-    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'}) {
-        $dir = $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'};
-    }
+    my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
     system("cd '".$dir."' && git log -1 >/dev/null 2>&1");
     $c->stash->{'has_history'}      = 1 if $? == 0;
 
@@ -1854,17 +1851,14 @@ sub _file_history {
     return 1 unless $c->stash->{'has_history'};
 
     my $commit     = $c->{'request'}->{'parameters'}->{'id'};
-    my $dir        = $c->{'request'}->{'parameters'}->{'dir'} || '';
+    #my $dir        = $c->{'request'}->{'parameters'}->{'dir'} || '';
     my $files_root = $c->{'obj_db'}->get_files_root();
     # verify given path is below filesroot
-    $dir =~ s/\/[^\/]*?$//gmx; # strip file part
-    if(CORE::index($dir, $files_root) != 0 or $dir =~ m/\.\./mx) {
-        $dir = $files_root;
-    }
-    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'}) {
-        $dir = $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'};
-    }
-
+    #$dir =~ s/\/[^\/]*?$//gmx; # strip file part
+    #if(CORE::index($dir, $files_root) != 0 or $dir =~ m/\.\./mx) {
+    #    $dir = $files_root;
+    #}
+    my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
 
     $c->stash->{'template'} = 'conf_objects_filehistory.tt';
 
