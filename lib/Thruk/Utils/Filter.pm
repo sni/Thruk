@@ -134,9 +134,7 @@ formats a time definition into date format
 
 =cut
 sub date_format {
-    my $c         = shift;
-    my $timestamp = shift;
-    my $format    = shift;
+    my($c, $timestamp, $format) = @_;
     return "" unless defined $timestamp;
 
     # get today

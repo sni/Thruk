@@ -9,7 +9,7 @@ TP.settingsWindow = function() {
         bodyPadding: 5,
         border:      0,
         defaults: {
-            labelWidth:  100,
+            labelWidth:  120,
             anchor: '99%'
         },
         items: [{
@@ -28,7 +28,10 @@ TP.settingsWindow = function() {
             fieldLabel: 'Backends / Sites',
             xtype:      'checkboxgroup',
             vertical:   true,
-            columns:    1,
+            columns:    6,
+            defaults:    {
+                style:      'white-space: nowrap; margin-right: 6px;'
+            },
             items:      []
         }), {
             /* rotating tabs */
@@ -172,7 +175,7 @@ TP.settingsWindow = function() {
     var win_settings = new Ext.window.Window({
         autoShow:    true,
         modal:       true,
-        width:       400,
+        width:       700,
         title:       'Global Settings',
         html:        '',
         buttonAlign: 'center',

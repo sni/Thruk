@@ -73,6 +73,7 @@ $Monitoring::Config::key_sort = undef;
         obj_resource_file   => path to resource.cfg file
         obj_readonly        => readonly pattern
         obj_exclude         => exclude pattern
+        git_base_dir        => git history base folder
         localdir            => local path used for remote configs
         relative            => allow relative paths
     })
@@ -132,6 +133,11 @@ sub init {
         $self->{'remotepeer'} = $remotepeer;
     }
     $self->{'stats'}      = $stats if defined $stats;
+
+    # some keys might have been changed in the thruk_local.conf, so update them
+    for my $key (qw/git_base_dir/) {
+        $self->{'config'}->{$key} = $config->{$key};
+    }
 
     # update readonly config
     my $readonly_changed = 0;
@@ -207,6 +213,24 @@ $c is only needed when syncing with remote sites.
 sub commit {
     my($self, $c) = @_;
     my $rc    = 1;
+
+    my $filesroot = $self->get_files_root();
+
+    # run pre hook
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
+        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}, 'pre', $filesroot);
+        if($? == -1) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$?.': '.$! );
+            return;
+        }
+        if($? != 0) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Saved canceled by pre save hook!' );
+            return;
+        }
+    }
+
     my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
@@ -252,6 +276,17 @@ sub commit {
     if($self->is_remote()) {
         confess("no c") unless $c;
         $self->remote_file_save($c, $files);
+    }
+
+    # run post hook
+    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
+        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
+        if($? == -1) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+            return;
+        }
     }
 
     return $rc;
@@ -1116,6 +1151,7 @@ return root folder for config files
 sub get_files_root {
     my ( $self ) = @_;
 
+    return $self->{'cache'}->{'files_root'}  if $self->{'cache'}->{'files_root'};
     return $self->{'config'}->{'files_root'} if $self->{'config'}->{'files_root'};
     my $files = [];
     for my $file (@{$self->{'files'}}) {
@@ -1135,6 +1171,7 @@ sub get_files_root {
             $root = $dirs->[0];
         }
     }
+    $self->{'cache'}->{'files_root'} = $root;
     return $root;
 }
 

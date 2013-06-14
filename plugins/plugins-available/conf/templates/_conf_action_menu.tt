@@ -75,8 +75,14 @@
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_brick.png' border="0" alt='Objects Tree' title='Objects Tree' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;action=tree[% IF file_link %]#[% file_link %][% END %]'>Objects Tree</a></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=tree'>Objects Tree</a></td>
               </tr>
+              [% IF has_history %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/date_magnify.png' border="0" alt='History' title='History' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=history'>History</a></td>
+              </tr>
+              [% END %]
             </table>
           </td>
         </tr>

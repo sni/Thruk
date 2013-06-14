@@ -1,0 +1,39 @@
+﻿[% USE date %]
+[% WRAPPER _conf_objects_frame.tt %]
+
+
+[% SET  today = date_format(c, date.now, '%Y-%m-%d') %]
+[% SET last_day = '' %]
+[% FOREACH l = data %]
+[% this_day = date_format(c, l.date, '%Y-%m-%d') %]
+[% IF this_day != last_day %]
+    [% SET last_day = this_day %]
+[% UNLESS loop.first %]</table><br>[% END %]
+<table border="0" class='data conftoolobj hoverable' width="700">
+  <tr>
+    <th class='data' colspan=2>[% IF today == this_day %]Today[% ELSE %][% this_day %][% END %]</th>
+  </tr>
+[% ELSE %]
+  <tr>
+    <td colspan=2><hr></td>
+  </tr>
+[% END %]
+
+  <tr onclick="location='conf.cgi?sub=objects&amp;action=history&id=[% l.id %]&dir=[% dir %]'">
+    <td align="right" width=100 valign="top" style="padding-right: 6px; cursor: pointer;" nowrap>[% date_format(c, l.date) %]</td>
+    <td align="left" valign="top" style="cursor: pointer;">
+      <a href="conf.cgi?sub=objects&amp;action=history&id=[% l.id %]&dir=[% dir %]">
+      <b>[% l.message %]</b>
+      <img width="16" height="16" border="0" style="vertical-align: middle; float: right; margin-right: 5px;" title="details" alt="details" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_right.png">
+      </a>
+      <br>
+      [% l.author_name %] &lt;[% l.author_email %]&gt;
+    </td>
+  </tr>
+[% END %]
+</table>
+
+<br>
+<div align="center">[% PROCESS _pager.tt %]</div>
+
+[% END %]

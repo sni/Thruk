@@ -2026,6 +2026,8 @@ for details.
         *** `obj_exclude`     Specify some exception pattern for the obj_dir.
                               (only needed when not using 'core_conf')
 
+        *** `git_base_dir`    Override global 'git_base_dir' value.
+
 ex.:
 
   <Component Thruk::Backend>
@@ -2080,6 +2082,10 @@ ex.:
     thruk                     = .../thruk_local.conf
     cgi.cfg                   = .../cgi.cfg
     htpasswd                  = .../htpasswd
+
+    pre_obj_save_cmd          = .../hook.sh
+    post_obj_save_cmd         = .../hook.sh
+    git_base_dir              = /etc/nagios/conf.d/custom/
   </Component>
 
 
@@ -2097,6 +2103,23 @@ Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.
 ==== htpasswd
 Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.
 
+==== pre_obj_save_cmd
+Run a command before saving object config files. Save will be canceled
+if the command returns non-zero exit code. Command will be run with
+'pre' as first argument and the root config folder as second argument.
+REMOTE_USER will be set in the environment.
+
+==== post_obj_save_cmd
+Run a command after saving object config files. Command will be run with
+'post' as first argument and the root config folder as second
+argument. REMOTE_USER will be set in the environment.
+
+==== git_base_dir
+If not all config folders are managed by git, then you can specify a
+directory which is used to display the history. Should point to a
+directory which is part of a git repository. This config setting is
+only used for the history support in the configuration tool. The
+'git_base_dir' may be overriden by an per backend value.
 
 
 

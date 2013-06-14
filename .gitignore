@@ -44,3 +44,4 @@ themes/themes-available/*/images/logos/*.png
 root/thruk/javascript/all_in_one-*.js
 themes/themes-available/Thruk/stylesheets/all_in_one-*.css
 themes/themes-available/Thruk/stylesheets/all_in_one_noframes-*.css
+test_hook.sh

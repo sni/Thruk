@@ -915,8 +915,16 @@ sub _process_objects_page {
     $c->stash->{'file_link'}        = "";
     $c->stash->{'coretype'}         = $c->{'obj_db'}->{'coretype'};
     $c->stash->{'bare'}             = $c->{'request'}->{'parameters'}->{'bare'} || 0;
+    $c->stash->{'has_history'}      = 0;
 
     $c->{'obj_db'}->read_rc_file();
+
+    # check if we have a history for our configs
+    my $files_root = $c->{'obj_db'}->get_files_root();
+    my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
+    system("cd '".$dir."' && git log -1 >/dev/null 2>&1");
+    $c->stash->{'has_history'}      = 1 if $? == 0;
+
 
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {
@@ -1006,6 +1014,11 @@ sub _process_objects_page {
     # file editor
     elsif($c->stash->{action} eq 'editor') {
         return if $self->_file_editor($c);
+    }
+
+    # history
+    elsif($c->stash->{action} eq 'history') {
+        return if $self->_file_history($c);
     }
 
     # save changed files from editor
@@ -1124,11 +1137,7 @@ sub _apply_config_changes {
 
     # make nicer output
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
-        $c->{'stash'}->{'output'} =~ s/^\-\-\-(.*)$/<font color="#0776E8"><b>---$1<\/b><\/font>/gmx;
-        $c->{'stash'}->{'output'} =~ s/^\+\+\+(.*)$//gmx;
-        $c->{'stash'}->{'output'} =~ s/^\@\@(.*)$/<font color="#0776E8"><b>\@\@$1<\/b><\/font>/gmx;
-        $c->{'stash'}->{'output'} =~ s/^\-(.*)$/<font color="red">-$1<\/font>/gmx;
-        $c->{'stash'}->{'output'} =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
+        $c->{'stash'}->{'output'} = Thruk::Utils::beautify_diff($c->{'stash'}->{'output'});
     }
 
     # discard changes
@@ -1260,17 +1269,15 @@ sub _cmd {
 
 ##########################################################
 sub _find_files {
-    my $c     = shift;
-    my $dir   = shift;
-    my $types = shift;
+    my($c, $dir, $types) = @_;
     my $files = $c->{'obj_db'}->_get_files_for_folder($dir, $types);
     return $files;
 }
 
 ##########################################################
 sub _get_context_object {
-    my $self  = shift;
-    my $c     = shift;
+    my($self, $c) = @_;
+
     my $obj;
 
     $c->stash->{'type'}          = $c->{'request'}->{'parameters'}->{'type'}       || '';
@@ -1422,8 +1429,7 @@ sub _get_context_file {
 
 ##########################################################
 sub _translate_type {
-    my $self = shift;
-    my $type = shift;
+    my($self, $type) = @_;
     my $tt   = {
         'host_name'      => 'host',
         'hostgroup_name' => 'hostgroup',
@@ -1434,9 +1440,8 @@ sub _translate_type {
 
 ##########################################################
 sub _files_to_path {
-    my $self   = shift;
-    my $c      = shift;
-    my $files  = shift;
+    my($self, $c, $files) = @_;
+
     my $folder = { 'dirs' => {}, 'files' => {}, 'path' => '', 'date' => '' };
 
     my $ro_pattern = $c->{'obj_db'}->{'config'}->{'obj_readonly'};
@@ -1518,9 +1523,7 @@ sub _set_files_stash {
 
 ##########################################################
 sub _object_revert {
-    my $self = shift;
-    my $c    = shift;
-    my $obj  = shift;
+    my($self, $c, $obj) = @_;
 
     my $id = $obj->get_id();
     if(-e $obj->{'file'}->{'path'}) {
@@ -1586,9 +1589,7 @@ sub _object_enable {
 
 ##########################################################
 sub _object_delete {
-    my $self = shift;
-    my $c    = shift;
-    my $obj  = shift;
+    my($self, $c, $obj) = @_;
 
     if(!$c->{'request'}->{'parameters'}->{'force'}) {
         my $refs = $c->{'obj_db'}->get_references($obj);
@@ -1613,9 +1614,7 @@ sub _object_delete {
 
 ##########################################################
 sub _object_save {
-    my $self = shift;
-    my $c    = shift;
-    my $obj  = shift;
+    my($self, $c, $obj) = @_;
 
     my $data        = $obj->get_data_from_param($c->{'request'}->{'parameters'});
     my $old_comment = join("\n", @{$obj->{'comments'}});
@@ -1672,9 +1671,7 @@ sub _object_save {
 
 ##########################################################
 sub _object_move {
-    my $self = shift;
-    my $c    = shift;
-    my $obj  = shift;
+    my($self, $c, $obj) = @_;
 
     my $files_root = $self->_set_files_stash($c, 1);
     if($c->stash->{action} eq 'movefile') {
@@ -1703,9 +1700,7 @@ sub _object_move {
 
 ##########################################################
 sub _object_clone {
-    my $self = shift;
-    my $c    = shift;
-    my $obj  = shift;
+    my($self, $c, $obj) = @_;
 
     my $files_root          = $self->_set_files_stash($c, 1);
     $c->stash->{'new_file'} = $obj->{'file'}->{'display'};
@@ -1721,8 +1716,7 @@ sub _object_clone {
 
 ##########################################################
 sub _object_new {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
 
     $self->_set_files_stash($c, 1);
     $c->stash->{'new_file'} = '';
@@ -1747,8 +1741,8 @@ sub _object_new {
 
 ##########################################################
 sub _file_delete {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
+
     my $path = $c->{'request'}->{'parameters'}->{'path'} || '';
     $path    =~ s/^\#//gmx;
 
@@ -1767,8 +1761,8 @@ sub _file_delete {
 
 ##########################################################
 sub _file_undelete {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
+
     my $path = $c->{'request'}->{'parameters'}->{'path'} || '';
     $path    =~ s/^\#//gmx;
 
@@ -1787,8 +1781,7 @@ sub _file_undelete {
 
 ##########################################################
 sub _file_save {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
 
     my $filename = $c->{'request'}->{'parameters'}->{'file'}    || '';
     my $content  = $c->{'request'}->{'parameters'}->{'content'} || '';
@@ -1823,8 +1816,7 @@ sub _file_save {
 
 ##########################################################
 sub _file_editor {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
 
     my $files_root  = $self->_set_files_stash($c);
     my $filename    = $c->{'request'}->{'parameters'}->{'file'} || '';
@@ -1846,12 +1838,107 @@ sub _file_editor {
 
 ##########################################################
 sub _file_browser {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c) = @_;
 
     $self->_set_files_stash($c);
     $c->stash->{'template'} = 'conf_objects_filebrowser.tt';
     return;
+}
+
+##########################################################
+sub _file_history {
+    my($self, $c) = @_;
+
+    return 1 unless $c->stash->{'has_history'};
+
+    my $commit     = $c->{'request'}->{'parameters'}->{'id'};
+    my $files_root = $c->{'obj_db'}->get_files_root();
+    my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
+
+    $c->stash->{'template'} = 'conf_objects_filehistory.tt';
+
+    if($commit) {
+        return if $self->_file_history_commit($c, $commit, $dir);
+    }
+
+    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s')."\x1e' -- .";
+    my $out = `$cmd`;
+    my $logs = [];
+    for my $line (split("\x1e", $out)) {
+        my @d = split("\x1f", $line);
+        next if scalar @d < 5;
+        $d[0] =~ s/^\n//mx;
+        push @{$logs}, {
+            'id'           => $d[0],
+            'author_name'  => $d[1],
+            'author_email' => $d[2],
+            'date'         => $d[3],
+            'message'      => $d[4],
+        };
+    }
+
+    Thruk::Backend::Manager::_page_data(undef, $c, $logs);
+    $c->stash->{'logs'} = $logs;
+    $c->stash->{'dir'}  = $dir;
+    return;
+}
+
+##########################################################
+sub _file_history_commit {
+    my($self, $c, $commit, $dir) = @_;
+
+    # verify our commit id
+    if($commit !~ m/^[a-zA-Z0-9]+$/mx) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Not a valid commit id!' );
+        return;
+    }
+
+    my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s', '%b')."\x1f' ".$commit;
+    $c->stash->{'template'}   = 'conf_objects_filehistory_commit.tt';
+    my $output = `$cmd`;
+
+    my @d = split(/\x1f/mx, $output);
+    my $data = {
+            'id'           => $d[0],
+            'author_name'  => $d[1],
+            'author_email' => $d[2],
+            'date'         => $d[3],
+            'message'      => $d[4],
+            'body'         => $d[5],
+            'diff'         => $d[6],
+    };
+    if(scalar @d < 4) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Not a valid commit!' );
+        return;
+    }
+
+    # make new files visible
+    $data->{'diff'} =~ s/\-\-\-\s+\/dev\/null\n\+\+\+\s+b\/(.*?)$/--- a\/$1/gmxs;
+    $data->{'diff'} = Thruk::Utils::Filter::escape_html($data->{'diff'});
+
+    # changed files
+    our $diff_link_nr    = 0;
+    our $diff_link_files = [];
+    $data->{'diff'} =~ s/^(\-\-\-\s+a\/.*)$/&_diff_link($1)/gemx;
+    $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
+    $data->{'diff'} =~ s/^\s+//gmx;
+
+    $c->{'stash'}->{'data'}   = $data;
+    $c->{'stash'}->{'links'}  = $diff_link_files;
+
+    return 1;
+}
+
+##########################################################
+sub _diff_link {
+    my($text) = @_;
+    our $diff_link_nr;
+    our $diff_link_files;
+    $diff_link_files->[$diff_link_nr] = $text;
+    $diff_link_files->[$diff_link_nr] =~ s/^\-\-\-\s+a\///gmx;
+    $text = "<hr><a name='file".$diff_link_nr."'></a>\n".$text;
+    $diff_link_nr++;
+    return $text;
 }
 
 ##########################################################

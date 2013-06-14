@@ -5,6 +5,11 @@ test:
           - performance improvements, only load jquery-ui if necessary
 
 next:
+          - config tool:
+            - added pre/post save hooks
+            - added history support (if config folder uses git)
+
+1.72-2   Fri Jun  7 15:51:47 CEST 2013
           - added sanity check when saving recurring downtimes
           - log host/service name when deleting downtimes/comments
           - Bug Fixes
