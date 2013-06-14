@@ -12,9 +12,9 @@
 
 [%# definition of the command send to your backend #%]
 [% BLOCK action%]
-    [% IF c.request.parameters.send_notification %][% send_notification = 1 %][% ELSE %][% send_notification = 0 %][% END %]
-    [% IF c.request.parameters.sticky_ack %][% sticky_ack = 2 %][% ELSE %][% sticky_ack = 0 %][% END %]
-    [% IF c.request.parameters.persistent %][% persistent_comment = 1 %][% ELSE %][% persistent_comment = 0 %][% END %]
+    [% IF c.request.parameters.send_notification || force_send_notification %][% send_notification = 1 %][% ELSE %][% send_notification = 0 %][% END %]
+    [% IF c.request.parameters.sticky_ack || force_sticky_ack %][% sticky_ack = 2 %][% ELSE %][% sticky_ack = 0 %][% END %]
+    [% IF c.request.parameters.persistent || force_persistent_ack %][% persistent_comment = 1 %][% ELSE %][% persistent_comment = 0 %][% END %]
     [% comment_data         = c.request.parameters.com_data %]
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
@@ -32,9 +32,9 @@
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
-<tr><td class='optBoxItem'>Sticky Acknowledgement:</td><td><b><input type='checkbox' name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked[% END %]></b></td></tr>
-<tr><td class='optBoxItem'>Send Notification:</td><td><b><input type='checkbox' name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></b></td></tr>
-<tr><td class='optBoxItem'>Persistent Comment:</td><td><b><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack %] checked[% END %]></b></td></tr>
+<tr><td class='optBoxItem'>Sticky Acknowledgement:</td><td><b><input type='checkbox' name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></b></td></tr>
+<tr><td class='optBoxItem'>Send Notification:</td><td><b><input type='checkbox' name='send_notification'[% IF c.config.cmd_defaults.send_notification || force_send_notification %] checked[% END %][% IF force_send_notification %] disabled[% END %]></b></td></tr>
+<tr><td class='optBoxItem'>Persistent Comment:</td><td><b><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %][%IF force_persistent_ack %] disabled[% END %]></b></td></tr>
 [% IF has_expire_acks %]
 <tr><td class='optBoxItem'>Use Expire Time:</td><td><b><input type='checkbox' name='use_expire' onchange="if(this.checked == true) {showElement('expire_row')} else { hideElement('expire_row')};"[% IF c.config.cmd_defaults.use_expire %] checked[% END %]></b></td></tr>
 <tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]><td class='optBoxItem'>Expire Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
