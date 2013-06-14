@@ -1851,13 +1851,7 @@ sub _file_history {
     return 1 unless $c->stash->{'has_history'};
 
     my $commit     = $c->{'request'}->{'parameters'}->{'id'};
-    #my $dir        = $c->{'request'}->{'parameters'}->{'dir'} || '';
     my $files_root = $c->{'obj_db'}->get_files_root();
-    # verify given path is below filesroot
-    #$dir =~ s/\/[^\/]*?$//gmx; # strip file part
-    #if(CORE::index($dir, $files_root) != 0 or $dir =~ m/\.\./mx) {
-    #    $dir = $files_root;
-    #}
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
 
     $c->stash->{'template'} = 'conf_objects_filehistory.tt';

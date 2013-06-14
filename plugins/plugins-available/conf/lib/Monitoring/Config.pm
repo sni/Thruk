@@ -73,6 +73,7 @@ $Monitoring::Config::key_sort = undef;
         obj_resource_file   => path to resource.cfg file
         obj_readonly        => readonly pattern
         obj_exclude         => exclude pattern
+        git_base_dir        => git history base folder
         localdir            => local path used for remote configs
         relative            => allow relative paths
     })
@@ -132,6 +133,11 @@ sub init {
         $self->{'remotepeer'} = $remotepeer;
     }
     $self->{'stats'}      = $stats if defined $stats;
+
+    # some keys might have been changed in the thruk_local.conf, so update them
+    for my $key (qw/git_base_dir/) {
+        $self->{'config'}->{$key} = $config->{$key};
+    }
 
     # update readonly config
     my $readonly_changed = 0;

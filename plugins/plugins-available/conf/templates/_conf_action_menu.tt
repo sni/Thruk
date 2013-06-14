@@ -80,7 +80,7 @@
               [% IF has_history %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/date_magnify.png' border="0" alt='History' title='History' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=objects&amp;action=history[% IF file_link %]&dir=[% file_link %][% END %]'>History</a></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=history'>History</a></td>
               </tr>
               [% END %]
             </table>
