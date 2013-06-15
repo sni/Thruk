@@ -281,7 +281,7 @@ sub _get_hosts_by_split_attribute {
                 }
             }
             else {
-                if(!exists $subtree->{$key}) { $subtree->{$key} = {}; }
+                if(!exists $subtree->{$key} or ref $subtree->{$key} ne 'HASH') { $subtree->{$key} = {}; }
                 $subtree = \%{$subtree->{$key}};
             }
         }
