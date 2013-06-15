@@ -6,6 +6,7 @@ use Thruk 1.0.8;
 use Carp;
 use JSON::XS;
 use Data::Dumper;
+use Encode qw/decode_utf8/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -139,7 +140,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger and not valid js code)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
-    $c->stash->{json}         = $coder->encode($json);
+    $c->stash->{json}         = decode_utf8($coder->encode($json));
 
     $c->stash->{title}         = 'Network Map';
     $c->stash->{page}          = 'statusmap';
