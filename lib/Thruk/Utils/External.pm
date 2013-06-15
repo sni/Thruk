@@ -372,6 +372,7 @@ sub job_page {
         $c->stash->{job_message}           = $message || "";
         $c->stash->{infoBoxTitle}          = 'please stand by';
         $c->stash->{hide_backends_chooser} = 1;
+        $c->stash->{'has_jquery_ui'}       = 1;
         $c->stash->{template}              = 'waiting_for_job.tt';
     } else {
         # job finished, display result
