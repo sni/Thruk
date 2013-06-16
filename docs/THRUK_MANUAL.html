@@ -17045,6 +17045,14 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_cmd_defaults'>cmd_defaults</a></div>
 
+<div class='toclevel4'><a href='#_force_sticky_ack'>force_sticky_ack</a></div>
+
+<div class='toclevel4'><a href='#_force_send_notification'>force_send_notification</a></div>
+
+<div class='toclevel4'><a href='#_force_persistent_ack'>force_persistent_ack</a></div>
+
+<div class='toclevel4'><a href='#_force_persistent_comments'>force_persistent_comments</a></div>
+
 <div class='toclevel4'><a href='#_downtime_duration'>downtime_duration</a></div>
 
 <div class='toclevel4'><a href='#_expire_ack_duration'>expire_ack_duration</a></div>
@@ -18057,6 +18065,34 @@ in user. Useful to do magic stuff on each login.</p></div>
   ptc                    = 0  # For Child Hosts Too
   use_expire             = 0  # Use expire time ( for cores which support it)
 &lt;/cmd_defaults&gt;</tt></pre>
+</div></div>
+<h4 id="_force_sticky_ack">force_sticky_ack</h4>
+<div class="paragraph"><p>Forces acknowledgments to be sticky.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>force_sticky_ack = 1</tt></pre>
+</div></div>
+<h4 id="_force_send_notification">force_send_notification</h4>
+<div class="paragraph"><p>Forces sending a notification for acknowledgments.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>force_send_notification = 1</tt></pre>
+</div></div>
+<h4 id="_force_persistent_ack">force_persistent_ack</h4>
+<div class="paragraph"><p>Forces comments on acknowledgments to be persistent.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>force_persistent_ack = 1</tt></pre>
+</div></div>
+<h4 id="_force_persistent_comments">force_persistent_comments</h4>
+<div class="paragraph"><p>Forces normal comments to be persistent.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>force_persistent_comments = 1</tt></pre>
 </div></div>
 <h4 id="_downtime_duration">downtime_duration</h4>
 <div class="paragraph"><p>Default duration of new downtimes in seconds. Default is 2 hours.</p></div>

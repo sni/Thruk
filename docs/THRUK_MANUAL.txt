@@ -1735,6 +1735,38 @@ ex.:
   </cmd_defaults>
 
 
+==== force_sticky_ack
+Forces acknowledgments to be sticky.
+
+ex.:
+
+  force_sticky_ack = 1
+
+
+==== force_send_notification
+Forces sending a notification for acknowledgments.
+
+ex.:
+
+  force_send_notification = 1
+
+
+==== force_persistent_ack
+Forces comments on acknowledgments to be persistent.
+
+ex.:
+
+  force_persistent_ack = 1
+
+
+==== force_persistent_comments
+Forces normal comments to be persistent.
+
+ex.:
+
+  force_persistent_comments = 1
+
+
 ==== downtime_duration
 Default duration of new downtimes in seconds. Default is 2 hours.
 
