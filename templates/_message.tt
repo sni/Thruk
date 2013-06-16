@@ -1,5 +1,8 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
+[% IF !has_jquery_ui %][%# need ui to hide message #%]
+  <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-ui/js/[% jquery_ui %]"></script>
+[% END +%]
 <div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">
   <div class="shadow"><div class="shadowcontent">
   <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">

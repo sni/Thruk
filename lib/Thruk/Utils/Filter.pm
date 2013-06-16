@@ -494,7 +494,7 @@ get a message from an cookie, display and delete it
 
 =cut
 sub get_message {
-    my $c       = shift;
+    my($c) = @_;
 
     my $has_details = 0;
 
