@@ -922,8 +922,14 @@ sub _process_objects_page {
     # check if we have a history for our configs
     my $files_root = $c->{'obj_db'}->get_files_root();
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
-    system("cd '".$dir."' && git log -1 >/dev/null 2>&1");
-    $c->stash->{'has_history'}      = 1 if $? == 0;
+    {
+        local $SIG{CHLD} = 'DEFAULT';
+        my $cmd          = "cd '".$dir."' && git log --pretty='format:%H' -1 2>&1";
+        my $out          = `$cmd`;
+        $c->stash->{'has_history'} = 1 if $? == 0;
+        $c->log->verbose($cmd);
+        $c->log->verbose($out);
+    };
 
 
     # apply changes?
