@@ -927,8 +927,8 @@ sub _process_objects_page {
         my $cmd          = "cd '".$dir."' && git log --pretty='format:%H' -1 2>&1";
         my $out          = `$cmd`;
         $c->stash->{'has_history'} = 1 if $? == 0;
-        $c->log->verbose($cmd);
-        $c->log->verbose($out);
+        $c->log->debug($cmd);
+        $c->log->debug($out);
     };
 
 
