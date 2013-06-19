@@ -1581,6 +1581,7 @@ sub _insert_logs {
         }
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
+    $dbh->commit or die $dbh->errstr if scalar @values > 0;
     print $log_count . " entries added" if $verbose;
     return $log_count;
 }
