@@ -1574,12 +1574,14 @@ sub _insert_logs {
         push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
         # commit every 1000th to avoid to large blocks
-        if($log_count%1000) {
+        if($log_count%1000 == 0) {
             $self->_safe_insert($dbh, $stm, \@values, $verbose);
+            $dbh->commit or die $dbh->errstr;
             @values = ();
         }
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
+    print $log_count . " entries added" if $verbose;
     return $log_count;
 }
 
