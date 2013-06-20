@@ -1222,7 +1222,11 @@ sub _set_config {
         $self->{'config'}->{'obj_resource_file'} = undef;
 
         my $core_conf = $self->{'config'}->{'core_conf'};
-        if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+        if(defined $ENV{'OMD_ROOT'}
+           and -s $ENV{'OMD_ROOT'}."/version"
+           and !$core_conf
+           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
+           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/icinga.cfg',

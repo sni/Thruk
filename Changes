@@ -8,6 +8,7 @@ next:
           - config tool:
             - added pre/post save hooks
             - added history support (if config folder uses git)
+            - fixed displaying wrong site in OMD environment
 
 1.72-2   Fri Jun  7 15:51:47 CEST 2013
           - added sanity check when saving recurring downtimes
