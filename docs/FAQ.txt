@@ -220,6 +220,24 @@ set -x
 Then regenerate a report and investigate that new logfile.
 
 
+=== How can i create a readonly Panorama dashboard for my boss
+In combination with the user specific settings, this can easily be achieved in
+your thruk_local.conf:
+
+-------
+  <User boss>
+    <Component Thruk::Plugin::Panorama>
+      default_view    = /var/lib/thruk/panorama_view.boss
+      readonly        = 1
+  </Component>
+  </User>
+-------
+
+The default view can be exported from the 'Settings' menu inside the panorama
+dashboard.
+
+
+
 == Installation
 
 === Is it possible to operate Thruk in a cluster?

@@ -663,6 +663,7 @@ h4#_peer + div > ul tt {
 <div class='toclevel3'><a href='#_how_can_i_disable_themes'>How can i disable themes?</a></div>
 <div class='toclevel3'><a href='#_how_can_i_customize_reports'>How can i customize reports?</a></div>
 <div class='toclevel3'><a href='#_why_are_the_pnp_graphs_missing_in_my_reports'>Why are the PNP graphs missing in my reports?</a></div>
+<div class='toclevel3'><a href='#_how_can_i_create_a_readonly_panorama_dashboard_for_my_boss'>How can i create a readonly Panorama dashboard for my boss</a></div>
 <div class='toclevel2'><a href='#_installation'>Installation</a></div>
 <div class='toclevel3'><a href='#_is_it_possible_to_operate_thruk_in_a_cluster'>Is it possible to operate Thruk in a cluster?</a></div>
 <div class='toclevel2'><a href='#_hacking_thruk'>Hacking Thruk</a></div>
@@ -853,6 +854,20 @@ the pnp export (experienced users only).</p></div>
 set -x</tt></pre>
 </div></div>
 <div class="paragraph"><p>Then regenerate a report and investigate that new logfile.</p></div>
+<h3 id="_how_can_i_create_a_readonly_panorama_dashboard_for_my_boss">How can i create a readonly Panorama dashboard for my boss</h3><div style="clear:left"></div>
+<div class="paragraph"><p>In combination with the user specific settings, this can easily be achieved in
+your thruk_local.conf:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  &lt;User boss&gt;
+    &lt;Component Thruk::Plugin::Panorama&gt;
+      default_view    = /var/lib/thruk/panorama_view.boss
+      readonly        = 1
+  &lt;/Component&gt;
+  &lt;/User&gt;</tt></pre>
+</div></div>
+<div class="paragraph"><p>The default view can be exported from the <em>Settings</em> menu inside the panorama
+dashboard.</p></div>
 </div>
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
@@ -998,7 +1013,7 @@ changes active).</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-05-29 10:32:44 CEST
+Last updated 2013-06-20 13:55:25 CEST
 </div>
 </div>
 </body>
