@@ -5,6 +5,8 @@ next:
           - performance improvements, only load jquery-ui if necessary
           - added several new force cmd options (awiddersheim)
           - added new cli command 'command' to print command line for hosts/service
+          - panorama:
+            - added readonly config parameter
           - config tool:
             - added pre/post save hooks
             - added history support (if config folder uses git)

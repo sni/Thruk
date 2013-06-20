@@ -37,6 +37,7 @@ Ext.state.HttpProvider = function(config){
 
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     set: function(name, value) {
+        [% IF readonly %]return;[% END %]
         if(typeof value == "undefined" || value === null) {
             this.clear(name);
             return;
@@ -46,6 +47,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     clear: function(name) {
+        [% IF readonly %]return;[% END %]
         this.clearValue(name);
         Ext.state.HttpProvider.superclass.clear.call(this, name);
     },
@@ -61,6 +63,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     setValue: function(name, value) {
+        [% IF readonly %]return;[% END %]
         encoded = this.encodeValue(value)
         if(ExtState[name] != undefined && ExtState[name] == encoded) {
             return;
@@ -95,6 +98,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         this.interval = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
     },
     saveChanges: function(async) {
+        [% IF readonly %]return;[% END %]
         if(async == undefined) { async = true; }
         var sum = Ext.JSON.encode(ExtState);
         if(sum == this.lastdata) {

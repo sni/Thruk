@@ -2166,6 +2166,7 @@ ex.:
   <Component Thruk::Plugin::Panorama>
     state_provider  = server
     default_view    = /var/lib/thruk/default_panorama_view
+    readonly        = 0
   </Component>
 
 
@@ -2176,6 +2177,11 @@ where lot people share the same account.
 
 ==== default_view
 Can be either the string of an exported view or path to a file with exported view.
+
+==== readonly
+Make panorama dashboard readonly. The user cannot add, remove or
+change panels and tabs. Commands may still be send according to the
+user permissions.
 
 
 

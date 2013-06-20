@@ -17127,6 +17127,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_default_view'>default_view</a></div>
 
+<div class='toclevel4'><a href='#_readonly'>readonly</a></div>
+
 <div class='toclevel3'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
 
 <div class='toclevel4'><a href='#_report_nice_level'>report_nice_level</a></div>
@@ -18532,6 +18534,7 @@ you to build your own panorama views.</p></div>
 <pre><tt>&lt;Component Thruk::Plugin::Panorama&gt;
   state_provider  = server
   default_view    = /var/lib/thruk/default_panorama_view
+  readonly        = 0
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h4 id="_state_provider">state_provider</h4>
@@ -18540,6 +18543,10 @@ Valid options are <em>cookie</em> or <em>server</em>. Cookie store is useful for
 where lot people share the same account.</p></div>
 <h4 id="_default_view">default_view</h4>
 <div class="paragraph"><p>Can be either the string of an exported view or path to a file with exported view.</p></div>
+<h4 id="_readonly">readonly</h4>
+<div class="paragraph"><p>Make panorama dashboard readonly. The user cannot add, remove or
+change panels and tabs. Commands may still be send according to the
+user permissions.</p></div>
 <h3 id="_component_thruk_plugin_reports2">Component Thruk::Plugin::Reports2</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The <em>Reports2</em> plugin creates sla reports in html or pdf format. You
 probably have to download the wkhtmltopdf binary in a recent version.</p></div>
@@ -19948,7 +19955,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-14 15:02:09 CEST
+Last updated 2013-06-20 13:44:58 CEST
 </div>
 </div>
 </body>

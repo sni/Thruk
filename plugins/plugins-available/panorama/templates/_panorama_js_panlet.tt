@@ -10,10 +10,15 @@
     hideMode:  'visibility',
     autoShow:  true,
     stateful:  true,
+    [% IF readonly %]
+    resizable: false,
+    closable: false,
+    [% ELSE %]
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
         heightIncrement: TP.snap_y
     }),
+    [% END %]
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -26,6 +31,7 @@
         this.xdata.backends = [];
 
         this.gearHandler = function() {
+            [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
                 this.items.getAt(0).hide();
                 if(this.gearInitCallback) {
@@ -38,6 +44,9 @@
                 this.gearitem.hide();
             }
         };
+        [% IF readonly %]
+        this.tools = [];
+        [% ELSE %]
         this.tools = [{
             type: 'pin',
             cls: 'pintool',
@@ -67,18 +76,21 @@
                 handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}); }
             });
         }
+        [% END %]
         this.tools.push(new Ext.panel.Tool({
             type:    'refresh',
             scope:    this,
             tooltip: 'reload content of this panlet',
             handler:  function() { this.manualRefresh() }
         }));
+        [% UNLESS readonly %]
         this.tools.push({
             type: 'gear',
             scope: this,
             tooltip: 'settings',
             handler: function() { this.gearHandler() }
         });
+        [% END %]
         this.shadow_id = this.id + '_shadow';
         this.win_shadow = new Ext.create('Ext.Layer', {
             shadow: 'drop',
@@ -229,6 +241,7 @@
         },
         render: function(This, eOpts) {
             /* make title editable */
+            [% UNLESS readonly %]
             var head = Ext.get(This.id + '_header_hd');
             head.on("dblclick", function() {
                 Ext.Msg.prompt('Change Title', '', function(btn, text) {
@@ -239,6 +252,7 @@
                     }
                 }, undefined, undefined, This.title);
             });
+            [%+ END +%]
             /* make header show on mouseover only */
             var div    = This.getEl();
             var global = Ext.getCmp('tabpan');
@@ -271,6 +285,7 @@
         this.check_pintool();
     },
     check_pintool: function() {
+        [% IF readonly %]return;[% END %]
         /* check pin icon and position */
         if(this.xdata.pinned) {
             this.pintool.setType('unpin');

@@ -41,6 +41,7 @@ var default_view = '[% default_view %]';
 [%+ PROCESS _panorama_js_panlet_service.tt +%]
 
 /* main viewport */
+var x;
 Ext.onReady(function() {
   Ext.QuickTips.init();
 
@@ -61,4 +62,9 @@ Ext.onReady(function() {
   });
   Ext.getCmp('bug_report').hide();
   Ext.getCmp('test_tab').hide();
+
+  [% IF readonly %]
+    var icon = Ext.query('SPAN.new-tab')[0];
+    icon.parentNode.parentNode.parentNode.style.display = 'none';
+  [% END %]
 });

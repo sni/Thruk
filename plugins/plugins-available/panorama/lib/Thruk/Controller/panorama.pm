@@ -60,6 +60,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{'no_totals'}   = 1;
 
+    $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
+
     if(defined $c->request->query_keywords) {
         if($c->request->query_keywords eq 'state') {
             return($self->_stateprovider($c));
@@ -192,7 +194,12 @@ sub _stateprovider {
     my $value = $c->request->parameters->{'value'};
     my $name  = $c->request->parameters->{'name'};
 
-    if(defined $task and ($task eq 'set' or $task eq 'update')) {
+    if($c->stash->{'readonly'}) {
+        $c->stash->{'json'} = {
+            'status' => 'failed'
+        };
+    }
+    elsif(defined $task and ($task eq 'set' or $task eq 'update')) {
         my $data = Thruk::Utils::get_user_data($c);
         if($task eq 'update') {
             $c->log->debug("panorama: update users data");

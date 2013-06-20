@@ -54,11 +54,14 @@ Ext.define('TP.TabBar', {
                         text: 'About',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
-                    }, {
+                    },
+                    [%+ UNLESS readonly +%]
+                    {
                         text: 'Settings',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
                         handler: function() { TP.settingsWindow() }
                     },
+                    [%+ END +%]
                     /* Exit */
                     '-',
                     [% IF cookie_auth %]
@@ -79,7 +82,9 @@ Ext.define('TP.TabBar', {
                     }
                 ]
             }
-        }, {
+        }
+        [% UNLESS readonly %]
+        , {
             title: '',
             closable: false,
             minWidth: 28,
@@ -166,7 +171,9 @@ Ext.define('TP.TabBar', {
                     }
                 ]
             }
-        }]
+        }
+        [% END %]
+        ]
     },
     initComponent: function() {
         this.callParent();
@@ -228,8 +235,8 @@ Ext.define('TP.TabBar', {
                 window.location = 'panorama.cgi?clean=1';
             }
         }
-    },
-    items: [{
+    }
+    ,items: [{
         title: '',
         closable: false,
         iconCls: 'new-tab',

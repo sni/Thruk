@@ -2,8 +2,12 @@
     extend: 'Ext.panel.Panel',
 
     title:       'Dashboard',
+    [% UNLESS readonly %]
     tooltip:     'double click to rename',
     closable:    true,
+    [% ELSE %]
+    closable:    false,
+    [% END %]
     stateful:    true,
     window_ids:  false,
     stateEvents: ['add', 'titlechange'],
