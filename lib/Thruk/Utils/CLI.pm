@@ -429,6 +429,11 @@ sub _run_commands {
         $data->{'output'} = _cmd_precompile($c);
     }
 
+    # get commands
+    elsif($action eq 'command') {
+        $data->{'output'} = _cmd_command($c, $opt);
+    }
+
     # import mongodb/mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
@@ -672,6 +677,58 @@ sub _cmd_precompile {
     $c->stats->profile(begin => "_cmd_precompile()");
     my $msg = Thruk::Utils::precompile_templates($c);
     $c->stats->profile(end => "_cmd_precompile()");
+    return $msg;
+}
+
+##############################################
+sub _cmd_command {
+    my($c, $opt) = @_;
+    $c->stats->profile(begin => "_cmd_command()");
+    my $hostname    = $opt->{'url'}->[0];
+    my $description = $opt->{'url'}->[1];
+
+    my $backend = $opt->{'backends'}->[0] || '';
+    my($host, $service);
+
+    my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $hostname } ] );
+    $host = $hosts->[0];
+    # we have more and backend param is used
+    if( scalar @{$hosts} == 1 and defined $backend ) {
+        for my $h ( @{$hosts} ) {
+            if( $h->{'peer_key'} eq $backend ) {
+                $host = $h;
+                last;
+            }
+        }
+    }
+    if(!$host) {
+        return "no such host '".$hostname."'\n";
+    }
+
+    if($description) {
+        my $services = $c->{'db'}->get_services( filter => [{ 'host_name' => $hostname }, { 'description' => $description }, ] );
+        $service = $services->[0];
+        # we have more and backend param is used
+        if( scalar @{$services} == 1 and defined $services ) {
+            for my $s ( @{$services} ) {
+                if( $s->{'peer_key'} eq $backend ) {
+                    $service = $s;
+                    last;
+                }
+            }
+        }
+        if(!$service) {
+            return "no such service '".$description."' on host '".$hostname."'\n";
+        }
+    }
+
+    my $command = $c->{'db'}->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
+    my $msg;
+    $msg .= 'Note:            '.$command->{'note'}."\n" if $command->{'note'};
+    $msg .= 'Check Command:   '.$command->{'line'}."\n";
+    $msg .= 'Expaned Command: '.$command->{'line_expanded'}."\n";
+
+    $c->stats->profile(end => "_cmd_command()");
     return $msg;
 }
 

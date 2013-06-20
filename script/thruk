@@ -171,6 +171,7 @@ script has the following arguments
       - listbackends                list all backends
       - listhosts                   list hostnames
       - listhostgroups              list hostgroupnames
+      - command <host> <service>    print used command line for this host/service
 
 
 =item B<-A> I<authname>, B<--auth>=I<authname>

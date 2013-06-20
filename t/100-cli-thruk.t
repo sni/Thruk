@@ -96,4 +96,10 @@ TestUtils::test_command({
     exit    => undef,
 });
 
+# test command
+TestUtils::test_command({
+    cmd     => $BIN.' -a command '.$host,
+    like    => ['/Expaned Command:/'],
+});
+
 done_testing();
