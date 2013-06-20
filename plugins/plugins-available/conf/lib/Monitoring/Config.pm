@@ -244,7 +244,7 @@ sub commit {
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
                                         $file->{'path'},
-            )) if $c;
+            )) if($c and !$ENV{'THRUK_TEST_CONF_NO_LOG'});
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }

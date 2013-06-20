@@ -14,6 +14,7 @@ BEGIN {
 }
 
 BEGIN {
+    $ENV{'THRUK_TEST_CONF_NO_LOG'} = 1;
     use lib('t');
     require TestUtils;
     import TestUtils;

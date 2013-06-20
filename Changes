@@ -1,12 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-test:
+next:
           - added filter to statusmap
           - performance improvements, only load jquery-ui if necessary
           - added several new force cmd options (awiddersheim)
           - added new cli command 'command' to print command line for hosts/service
-
-next:
           - config tool:
             - added pre/post save hooks
             - added history support (if config folder uses git)

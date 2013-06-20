@@ -1694,7 +1694,7 @@ sub _object_move {
                                     $obj->get_type(),
                                     $obj->get_name(),
                                     $file->{'path'},
-        ));
+        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
 
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
