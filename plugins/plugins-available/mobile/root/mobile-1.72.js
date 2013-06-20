@@ -673,8 +673,8 @@ function show_common_extinfo(typ, data, comments) {
                 description = obj.description;
             }
             jQuery('.'+typ+'_pnp_url').show();
-            jQuery('#'+typ+'_pnp_img').attr('src', data.pnp_url + '/image?host='+hostname+'&srv='+description+'&view=1&source=0');
-            jQuery('#'+typ+'_pnp_lnk').attr('href', data.pnp_url + '/mobile/graph/'+hostname+'/'+description);
+            jQuery('#'+typ+'_pnp_img').attr('src', data.pnp_url + '/image?host='+encoder(hostname)+'&srv='+encoder(description)+'&view=1&source=0');
+            jQuery('#'+typ+'_pnp_lnk').attr('href', data.pnp_url + '/mobile/graph/'+encoder(hostname)+'/'+encoder(description));
         }
 
         return obj;
