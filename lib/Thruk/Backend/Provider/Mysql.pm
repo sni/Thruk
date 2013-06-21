@@ -962,6 +962,7 @@ sub _update_logcache {
         my $start = time() - ($blocksize * 86400);
         print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose;
         $log_count += $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
+        $dbh->commit or die $dbh->errstr;
         return $log_count;
     }
 
@@ -1011,6 +1012,7 @@ sub _update_logcache {
 
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$.") ON DUPLICATE KEY UPDATE value=".$$);
+    $dbh->commit or die $dbh->errstr;
 
     my $stm            = "INSERT INTO `".$prefix."_log` (time,class,type,state,state_type,contact_id,host_id,service_id,plugin_output,message) VALUES";
     my $host_lookup    = _get_host_lookup(   $dbh,$peer,$prefix,               $mode eq 'import' ? 0 : 1);
@@ -1031,6 +1033,7 @@ sub _update_logcache {
 
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+    $dbh->commit or die $dbh->errstr;
 
     return $log_count;
 }
@@ -1080,6 +1083,8 @@ sub _update_logcache_auth {
 
     print "\n" if $verbose;
 
+    $dbh->commit or die $dbh->errstr;
+
     return(scalar @{$hosts} + scalar @{$services});
 }
 
@@ -1108,6 +1113,7 @@ sub _update_logcache_optimize {
         print "OK\n" if $verbose;
     }
 
+    $dbh->commit or die $dbh->errstr;
     return(-1);
 }
 
@@ -1278,7 +1284,7 @@ sub _get_log_service_auth {
                  AND c1.contact_id = csr.contact_id
                  AND s.service_id = csr.service_id
                  AND c1.name = ".$dbh->quote($contact)
-		;
+                ;
     my $services1        = $dbh->selectall_arrayref($sql1);
     my $services2        = $dbh->selectall_arrayref($sql2);
     # Make them unique
@@ -1576,12 +1582,10 @@ sub _insert_logs {
         # commit every 1000th to avoid to large blocks
         if($log_count%1000 == 0) {
             $self->_safe_insert($dbh, $stm, \@values, $verbose);
-            $dbh->commit or die $dbh->errstr;
             @values = ();
         }
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
-    $dbh->commit or die $dbh->errstr if scalar @values > 0;
     print $log_count . " entries added" if $verbose;
     return $log_count;
 }
@@ -1592,6 +1596,7 @@ sub _create_tables {
     for my $stm (@{_get_create_statements($prefix)}) {
         $dbh->do($stm);
     }
+    $dbh->commit or die $dbh->errstr;
     return;
 }
 
@@ -1601,6 +1606,7 @@ sub _drop_tables {
     for my $table (qw/contact contact_host_rel contact_service_rel host log plugin_output service status/) {
         $dbh->do("DROP TABLE IF EXISTS `".$prefix."_".$table.'`');
     }
+    $dbh->commit or die $dbh->errstr;
     return;
 }
 
@@ -1622,6 +1628,7 @@ sub _safe_insert {
             print "ERROR: insert failed for: ".$v."\n" if $verbose;
         }
     }
+    $dbh->commit or die $dbh->errstr;
     return;
 }
 
