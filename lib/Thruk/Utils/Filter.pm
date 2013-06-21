@@ -510,6 +510,12 @@ sub get_message {
         # and show it if it contains data
         if(defined $cookie and defined $cookie->value) {
             my($style,$message) = split/~~/mx, $cookie->value;
+            my @msg = split(/\n/mx, $message);
+            if(scalar @msg > 1) {
+                $has_details = 2;
+                $message     = shift @msg;
+                return($style, $message, $has_details, \@msg);
+            }
             return($style, $message, $has_details);
         }
     }
