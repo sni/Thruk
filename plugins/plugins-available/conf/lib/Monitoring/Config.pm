@@ -223,17 +223,11 @@ sub commit {
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         $c->log->debug('pre save hook: '.$cmd);
         my $out = `$cmd`;
-        my $rc  = $?;
-        if($rc == -1) {
-            $c->log->info('pre save hook: '.$rc.' - '.$!);
-            $c->log->info('pre save hook: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$rc.': '.$!, $out );
-            return;
-        }
+        my $rc  = $?>>8;
         if($rc != 0) {
             $c->log->info('pre save hook: '.$rc);
             $c->log->info('pre save hook: '.$out);
-            Thruk::Utils::set_message( $c, 'fail_message', 'Save canceled by pre save hook!', $out );
+            Thruk::Utils::set_message( $c, 'fail_message', "Save canceled by pre save hook!\n".$out );
             return;
         }
         $c->log->debug('pre save hook: '.$out);

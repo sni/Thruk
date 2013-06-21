@@ -995,10 +995,18 @@ sub _cmd_configtool {
 
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
             local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-            system($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}, 'pre', $filesroot);
-            return("Saved canceled by pre save hook!", 1) if $? != 0;
+            local $SIG{CHLD}        = 'DEFAULT';
+            my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
+            $c->log->debug('pre save hook: '.$cmd);
+            my $out = `$cmd`;
+            my $rc  = $?>>8;
+            if($rc != 0) {
+                $c->log->info('pre save hook: '.$rc);
+                $c->log->info('pre save hook: '.$out);
+                return("Save canceled by pre save hook!\n".$out, 1);
+            }
+            $c->log->debug('pre save hook: '.$out);
         }
-
 
         my $changed = $opt->{'args'}->{'args'}->{'changed'};
         # changed and new files
@@ -1049,6 +1057,7 @@ sub _cmd_configtool {
         # run post hook
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
             local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+            local $SIG{CHLD}        = 'DEFAULT';
             system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
         }
     } else {
