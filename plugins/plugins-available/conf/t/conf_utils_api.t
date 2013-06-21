@@ -81,6 +81,8 @@ alarm(30);
 # start fake live socket
 my $socketpid = fork();
 if(!$socketpid) {
+    $SIG{'INT'}  = sub { exit }; # clean exit
+    $SIG{'TERM'} = sub { exit };
     while(1) {
         my $listner = IO::Socket::UNIX->new(
             Type   => SOCK_STREAM,

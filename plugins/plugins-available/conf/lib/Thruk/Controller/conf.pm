@@ -1645,7 +1645,7 @@ sub _object_save {
                                 $new ? 'created' : 'changed',
                                 $obj->get_type(),
                                 $c->stash->{'data_name'},
-    ));
+    )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
 
     # only save or continue to raw edit?
     if(defined $c->{'request'}->{'parameters'}->{'send'} and $c->{'request'}->{'parameters'}->{'send'} eq 'raw edit') {
