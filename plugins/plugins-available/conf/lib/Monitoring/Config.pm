@@ -220,15 +220,23 @@ sub commit {
     if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         local $SIG{CHLD}        = 'DEFAULT';
-        system($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}, 'pre', $filesroot);
-        if($? == -1) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$?.': '.$! );
+        my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
+        $c->log->debug('pre save hook: '.$cmd);
+        my $out = `$cmd`;
+        my $rc  = $?;
+        if($rc == -1) {
+            $c->log->info('pre save hook: '.$rc.' - '.$!);
+            $c->log->info('pre save hook: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$rc.': '.$!, $out );
             return;
         }
-        if($? != 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'Saved canceled by pre save hook!' );
+        if($rc != 0) {
+            $c->log->info('pre save hook: '.$rc);
+            $c->log->info('pre save hook: '.$out);
+            Thruk::Utils::set_message( $c, 'fail_message', 'Save canceled by pre save hook!', $out );
             return;
         }
+        $c->log->debug('pre save hook: '.$out);
     }
 
     my $files = { changed => [], deleted => []};
