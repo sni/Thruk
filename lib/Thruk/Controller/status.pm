@@ -77,6 +77,31 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'num_hosts'}   = 0;
     $c->stash->{'custom_vars'} = [];
 
+    if($c->stash->{'hostgroup'}) {
+        if($c->stash->{'hostgroup'} eq 'all') {
+            $c->stash->{title} = 'All Hostgroups';
+        }
+        else {
+            $c->stash->{title} = $c->stash->{'hostgroup'};
+        }
+    } 
+    elsif($c->stash->{'servicegroup'}) {
+        if($c->stash->{'servicegroup'} eq 'all') {
+            $c->stash->{title} = 'All Servicegroups';
+        }
+        else {
+            $c->stash->{title} = $c->stash->{'servicegroup'};
+        }
+    } 
+    elsif($c->stash->{'host'}) {
+        if($c->stash->{'host'} eq 'all') {
+            $c->stash->{title} = 'All Hosts';
+        }
+        else {
+            $c->stash->{title} = $c->stash->{'host'};
+        }
+    } 
+
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {
         $c->stash->{substyle} = 'host';
