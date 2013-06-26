@@ -71,10 +71,13 @@
       [% IF user_data.exists('bookmarks') %]
         [% FOREACH section = user_data.bookmarks.keys.sort %]
             [% FOREACH link = user_data.bookmarks.$section %]
-            <div id="bm[% nr %]" onClick="removeBookmark([% nr %]); return false;" class="clickable">
-              <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
-              <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarks">
-              [% section %]: [% link.0 %] - [% link.1 %]<br>
+            <div id="bm[% nr %]">
+              <div onClick="removeBookmark([% nr %]); return false;" class="clickable">
+                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
+                <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarks">
+                [% section %]: [% link.0 %]<br>
+              </div>
+              <pre style="width:550px;overflow-x:auto">[% link.1 %]</pre>
             </div>
             [% nr = nr + 1 %]
             [% END %]
@@ -90,10 +93,13 @@
         [% IF global_user_data.exists('bookmarks') %]
           [% FOREACH section = global_user_data.bookmarks.keys.sort %]
             [% FOREACH link = global_user_data.bookmarks.$section %]
-            <div id="bmp[% nr %]" onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
-              <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
-              <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarksp">
-              [% section %]: [% link.0 %] - [% link.1 %]<br>
+            <div id="bmp[% nr %]">
+              <div onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
+                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
+                <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarksp">
+                [% section %]: [% link.0 %]<br>
+              </div>
+              <pre style="width:550px;overflow-x:auto">[% link.1 %]</pre>
             </div>
             [% nr = nr + 1 %]
             [% END %]
