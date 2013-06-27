@@ -704,8 +704,8 @@ sub _bulk_send {
                                     ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
                                 );
             $c->log->info($logstr) unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
-            $c->{'db'}->send_command( %{$options} ) unless $testmode;
         }
+        $c->{'db'}->send_command( %{$options} ) unless $testmode;
     }
 
     return 1;
