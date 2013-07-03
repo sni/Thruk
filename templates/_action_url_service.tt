@@ -1,9 +1,19 @@
 <script type="text/javascript">
-var target = "" == "[% target %]" ? "" : "target=\"[% target %]\"";
-var img_cls = "" == "[% img_cls %]" ? "" : "class=\"[% img_cls %]\"";
+/*
+Template to handle properly the case where the action_url needs to be modify for graphite integration
+Better to init variable in js here so that we can see easily if something went wrong 
+by looking at the source code in the browser
+*/
+// sometimes the target is missing, so we put empty
+var target = "[% target %]" == "" ? "" : "target=\"[% target %]\"";
+// same for img class
+var img_cls = "[% img_cls %]" == "" ? "" : "class=\"[% img_cls %]\"";
 var src_img = "[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]";
+// gif size
 var size = "[% size %]";
+// alt and title for the image
 var alt = "[% alt %]";
+// sometimes we need to replace the special char &.
 var replace_amp = "[% replace_amp %]";
 var graph_url = "[% escape_quotes(graph_url) %]";
 
@@ -12,10 +22,13 @@ if (replace_amp == "1"){
 }   
 
 if(/render/.test(graph_url)) {
-    var new_h = "[% host %]".replace(/[^\w-]/g,"_");
-    var new_s = "[% service.description %]".replace(/[^\w-]/g,"_");
-    graph_url = graph_url.replace("[% host %]", new_h);
-    graph_url = graph_url.replace("[% service.description %]", new_s);
+    var host = "[% host %]";
+    var service = "[% service.description %]";
+    var new_h = host.replace(/[^\w-]/g,"_");
+    var new_s = service.description.replace(/[^\w-]/g,"_");
+    graph_url = graph_url.replace(host, new_h);
+    graph_url = graph_url.replace(service.description, new_s);
+    // In graphite, the url without render links to the graphite page, not only a png file.
     graph_url = graph_url.replace("render/", "");
 }
 
