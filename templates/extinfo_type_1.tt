@@ -82,10 +82,13 @@
           </tr>
           [% END %]
 
-          [% IF host.action_url_expanded %]
+
+          [% graph_url = get_graph_url(c, host, 1) %]
+          [% IF graph_url %]
             <tr>
               <td align='right'>
-                <a href='[% host.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(host, host_action_icon) %]' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
+                [% PROCESS _action_url_host.tt target=c.config.cgi_cfg.action_url_target host=host alt="Perform Additional Actions On This Host" size=40 %]
+                <br clear="all">
                 <font size="-1"><i>Extra Actions</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -385,7 +388,7 @@
         [% IF graph_url %]
         <tr>
           <td colspan="2" align="center">
-          [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
+          [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
         [% END %]

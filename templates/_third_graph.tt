@@ -2,8 +2,14 @@
 <script type="text/javascript">
   var graph_url = "[% escape_quotes(graph_url) %]";
 
-if(/render/.test("[% escape_quotes(graph_url) %]")) {
-
+if(/render/.test(graph_url)) {
+    
+    var new_h = "[% hst %]".replace(/[^\w-]/g,"_");
+    graph_url = graph_url.replace("[% hst %]", new_h);
+    if("[% svc %]" != "_HOST_"){
+        var new_s = "[% svc %]".replace(/[^\w-]/g,"_");
+        graph_url = graph_url.replace("[% svc %]", new_s);
+    }
 document.write('<div class="commentTitle">Performance Graph<\/div>');
 document.write('<table border="0" class="comment blockHeadBorder">');
 document.write('<tr class="comment" style="cursor:pointer">');
@@ -22,7 +28,7 @@ document.write('<tr class="comment" style="cursor:pointer">');
   document.write('<tr>');
     document.write('<td colspan=7 align="center">');
       document.write('<div id="pnp_graph_pane" style="position: relative;">');
-        document.write('<a href="[% escape_quotes(graph_url) %]">');
+        document.write('<a href="'+graph_url+'">');
           document.write('<img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">');
           document.write('<img id="graphiteimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="graphite graph">');
         document.write('<\/a>');
@@ -52,7 +58,7 @@ document.write('<\/table>');
   document.write('<div id="third_graph_pane" style="position: relative; border-color:#C4C2C2; border-style:ridge; border-width:2px; border-collapse: separate; border-spacing:2px; width:825px; margin-right:275px;">');
   document.write('<div class="commentTitle">Performance Graph<\/div>');
   document.write('<\/br><\/br>');
-  document.write('<iframe name="graph" id="graph" src="[% escape_quotes(graph_url) %]" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"><\/iframe>');
+  document.write('<iframe name="graph" id="graph" src="'+graph_url+'" width="800" height="500" frameborder="0" style="overflow-x: hidden; overflow-y: scroll;"><\/iframe>');
   document.write('<\/div>');
 }
 </script>
