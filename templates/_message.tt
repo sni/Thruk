@@ -1,8 +1,5 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
-[% IF !has_jquery_ui %][%# need ui to hide message #%]
-  <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-ui/js/[% jquery_ui %]"></script>
-[% END +%]
 <div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">
   <div class="shadow"><div class="shadowcontent">
   <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">
@@ -19,7 +16,7 @@
         [% END %]
       </td>
       <td valign="top" align="right" width="50">
-        <a href="#" onclick="jQuery('#thruk_message').hide('fade', {}, 500);return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
+        <a href="#" onclick="fade('thruk_message', 500);return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
       </td>
     </tr>
     [% IF message.2 == 2 %]
@@ -44,7 +41,7 @@
   [% IF message.0 == 'success_message' %]
   <script type="text/javascript">
   <!--
-  window.setTimeout("jQuery('#thruk_message').hide('fade', {}, 500)", 5000);
+  window.setTimeout("fade('thruk_message', 500)", 5000);
   -->
   </script>
   [% END %]

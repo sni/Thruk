@@ -140,8 +140,10 @@ function showElement(id, icon, bodyclose, bodycloseelement) {
   }
 
   if(bodyclose) {
-    addEvent(document, 'click', close_and_remove_event);
-    window.setTimeout(function() { close_elements.push([id, icon, bodycloseelement]) }, 50);
+    window.setTimeout(function() {
+        addEvent(document, 'click', close_and_remove_event);
+        close_elements.push([id, icon, bodycloseelement])
+    }, 50);
   }
 }
 
@@ -156,6 +158,9 @@ function close_and_remove_event(evt) {
         evt = jQuery.event.fix(evt); // make pageX/Y available in IE
         x = evt.pageX;
         y = evt.pageY;
+
+        // hilight click itself
+        //hilight_area(x-5, y-5, x + 5, y + 5, 1000, 'blue');
     }
     var new_elems = [];
     jQuery.each(close_elements, function(key, value) {
@@ -168,12 +173,31 @@ function close_and_remove_event(evt) {
             var width  = jQuery(obj).outerWidth();
             var height = jQuery(obj).outerHeight();
             var offset = jQuery(obj).offset();
+
+            var x1 = offset['left'] - 15;
+            var x2 = offset['left'] + width  + 15;
+            var y1 = offset['top']  - 15;
+            var y2 = offset['top']  + height + 15;
+
             // check if we clicked inside or outside the object we have to close
-            if(   x >= offset['left'] - 5 && x <= offset['left'] + width  + 5
-               && y >= offset['top']  - 5 && y <= offset['top']  + height + 5
-               ) {
+            if( x >= x1 && x <= x2 && y >= y1 && y <= y2 ) {
                 inside = true;
             }
+
+            // verify if our event target is a subelement of the panel to close
+            if(!inside && evt) {
+                var el = evt.target;
+                while(el.parentNode != undefined) {
+                    el = el.parentNode;
+                    if(el == obj) {
+                        inside = true;
+                    }
+                }
+            }
+
+            // hilight checked area
+            //var color = inside ? 'green' : 'red';
+            //hilight_area(x1, y1, x2, y2, 1000, color);
         }
         if(evt && inside) {
             new_elems.push(value);
@@ -1101,6 +1125,38 @@ function set_sub(nr) {
 
 
     return false;
+}
+
+/* hilight area of screen */
+function hilight_area(x1, y1, x2, y2, duration, color) {
+    if(!color)    { color    = 'red'; };
+    if(!duration) { duration = 2000; };
+    var rnd = Math.floor(Math.random()*10000000);
+
+    jQuery(document.body).append('<div id="hilight_area'+rnd+'" style="width:'+(x2-x1)+'px; height:'+(y2-y1)+'px; position: absolute; background-color: '+color+'; opacity:0.2; top: '+y1+'px; left: '+x1+'px; z-index:10000;">&nbsp;<\/div>');
+
+    window.setTimeout(function() {
+       fade('hilight_area'+rnd, 1000);
+    }, duration);
+}
+
+/* fade out using jquery ui, ensure jquery ui loaded */
+function fade(id, duration) {
+    var success = function(script, textStatus, jqXHR) {
+        has_jquery_ui = true;
+        jQuery('#'+id).hide('fade', {}, duration);
+    };
+
+    if(has_jquery_ui) {
+        success();
+    } else {
+        jQuery.ajax({
+            url:       jquery_ui_url,
+            dataType: 'script',
+            success:   success,
+            cache:     true
+        });
+    }
 }
 
 /*******************************************************************************
@@ -3449,7 +3505,7 @@ var ajax_search = {
         }
         else if(ajax_search.cur_select == -1) {
             window.clearTimeout(ajax_search.hideTimer);
-            ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)}", 100);
+            ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){fade('"+ajax_search.result_pan+"', 300)}", 100);
         }
     },
 
