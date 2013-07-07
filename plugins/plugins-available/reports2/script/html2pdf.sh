@@ -30,8 +30,8 @@ xpid=$!
 
 # wait for xauth
 for x in seq 10; do
-    [ -e $XAUTHORITY ] && break;
     sleep 1;
+    [ -e $XAUTHORITY ] && break;
 done
 
 rm -f $OUTPUT

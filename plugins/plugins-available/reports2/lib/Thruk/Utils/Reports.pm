@@ -902,12 +902,20 @@ sub _convert_to_pdf {
     my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
     my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$wkhtmltopdf.'"';
     `$cmd`;
+
+    # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
-        die('report failed: '.read_file($logfile));
-    } else {
-        move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
-        Thruk::Utils::IO::ensure_permissions('file', $attachment);
+        my $error = read_file($logfile);
+        if($error =~ m/QPainter::begin/mx) {
+            `$cmd`;
+        }
+        if(!-e $attachment.'.pdf') {
+            die('report failed: '.$error);
+        }
     }
+
+    move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
+    Thruk::Utils::IO::ensure_permissions('file', $attachment);
     return;
 }
 
