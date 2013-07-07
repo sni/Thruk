@@ -99,7 +99,7 @@
                 <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarksp">
                 [% section %]: [% link.0 %]<br>
               </div>
-              <pre style="width:550px;overflow-x:auto">[% link.1 %]</pre>
+              <pre style="width:530px;overflow-x:auto">[% link.1 %]</pre>
             </div>
             [% nr = nr + 1 %]
             [% END %]
