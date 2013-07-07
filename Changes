@@ -13,6 +13,7 @@ next:
             - fixed displaying wrong site in OMD environment
           - Bug Fixes
             - fixed sending duplicate commands
+            - fixed closing preferences by document click
 
 1.72-2   Fri Jun  7 15:51:47 CEST 2013
           - added sanity check when saving recurring downtimes
