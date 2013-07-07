@@ -82,13 +82,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $longest_service = $len if $len > $longest_service;
     }
 
-    $c->stash->{head_height}  = 7*$longest_service;
-    $c->stash->{style}        = 'minemap';
-    $c->stash->{substyle}     = 'service';
-    $c->stash->{title}        = 'Mine Map';
-    $c->stash->{page}         = 'status';
-    $c->stash->{template}     = 'minemap.tt';
-    $c->stash->{infoBoxTitle} = 'Mine Map';
+    $c->stash->{head_height}   = 7*$longest_service;
+    $c->stash->{style}         = 'minemap';
+    $c->stash->{substyle}      = 'service';
+    $c->stash->{title}         = 'Mine Map';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{page}          = 'status';
+    $c->stash->{template}      = 'minemap.tt';
+    $c->stash->{infoBoxTitle}  = 'Mine Map';
 
     Thruk::Utils::ssi_include($c);
 

@@ -114,8 +114,6 @@ sub get_search_from_param {
         'serviceprops'       => $c->stash->{'serviceprops'}       || $c->{'request'}->{'parameters'}->{ $prefix . '_serviceprops' },
     };
 
-    return $search unless defined $c->{'request'}->{'parameters'}->{ $prefix . '_type' };
-
     # store global searches, these will be added to our search
     my $globals = {
         'host'         => $c->stash->{'host'},
@@ -124,33 +122,35 @@ sub get_search_from_param {
         'service'      => $c->stash->{'service'},
     };
 
-    if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {
-        for ( my $x = 0; $x < scalar @{ $c->{'request'}->{'parameters'}->{ $prefix . '_type' } }; $x++ ) {
+    if( defined $c->{'request'}->{'parameters'}->{ $prefix . '_type' } ) {
+        if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {
+            for ( my $x = 0; $x < scalar @{ $c->{'request'}->{'parameters'}->{ $prefix . '_type' } }; $x++ ) {
+                my $text_filter = {
+                    val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' }->[$x] || '',
+                    type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' }->[$x],
+                    value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
+                    op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
+                };
+                if($text_filter->{'type'} eq 'business impact' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
+                    $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
+                }
+                push @{ $search->{'text_filter'} }, $text_filter;
+                if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
+            }
+        }
+        else {
             my $text_filter = {
-                val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' }->[$x] || '',
-                type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' }->[$x],
-                value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
-                op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
+                val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' } || '',
+                type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' },
+                value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
+                op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
             };
-            if($text_filter->{'type'} eq 'business impact' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
-                $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
+            if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
+                $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
             }
             push @{ $search->{'text_filter'} }, $text_filter;
             if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
         }
-    }
-    else {
-        my $text_filter = {
-            val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' } || '',
-            type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' },
-            value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
-            op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
-        };
-        if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
-            $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
-        }
-        push @{ $search->{'text_filter'} }, $text_filter;
-        if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
     }
 
     for my $key (keys %{$globals}) {
@@ -192,7 +192,8 @@ sub do_filter {
     unless ( exists $c->{'request'}->{'parameters'}->{$prefix.'s0_hoststatustypes'}
           or exists $c->{'request'}->{'parameters'}->{$prefix.'s0_type'}
           or exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
-          or exists $c->{'request'}->{'parameters'}->{'s0_type'} )
+          or exists $c->{'request'}->{'parameters'}->{'s0_type'}
+          or exists $c->{'request'}->{'parameters'}->{'complex'} )
     {
 
         # classic search
