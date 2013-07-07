@@ -33,7 +33,7 @@ use strict;
 use warnings;
 use Getopt::Long qw//;
 
-our $VERSION = '1.72';
+our $VERSION = '1.74';
 my $branch   = '';
 
 my $options = {
