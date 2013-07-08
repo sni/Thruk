@@ -126,7 +126,7 @@
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></td></tr>
           <tr><td onclick="toggleCheckBox('opt3')">Send Notification:</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification || force_send_notification %] checked[% END %][% IF force_send_notification %] disabled[% END %]></td></tr>
-          <tr><td onclick="toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %]>[% IF force_persistent_ack %] disabled[% END %]</td></tr>
+          <tr><td onclick="toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td></tr>
           <tr id="opt_expire"><td onclick="toggleCheckBox('opt5')">Use Expire Time:</td><td><input type='checkbox' id="opt5" name='use_expire'[% IF c.config.cmd_defaults.use_expire %] checked[% END %] onchange="if(this.checked == true) {showElement('row_expire')} else { hideElement('row_expire')};"></td></tr>
         </table>
       </td>
