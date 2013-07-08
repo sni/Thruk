@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed display of hoverable downtimes comments
+
 1.74     Sun Jul  7 17:39:32 CEST 2013
           - added filter to statusmap
           - performance improvements, only load jquery-ui if necessary

@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime hoverable' style="min-width: 900px;" id="[% type %]_downtimes_table">
+  <table border="0" class='downtime[% IF names %] hoverable[% END %]' style="min-width: 900px;" id="[% type %]_downtimes_table">
     <tr class='downtime'>
       [% IF names %]
       <th class='downtime'>Host Name&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1 ) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
@@ -21,7 +21,7 @@
     [%  FOREACH d = downtimes %]
     [% SET class = 'downtimeOdd' IF loop.even %]
     [% SET class = 'downtimeEven'  IF loop.odd %]
-    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]_[% d.peer_key %]">
+    <tr class='[% class %][% IF names %] clickable[% END %]' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]_[% d.peer_key %]">
       [% IF names %]
       <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
       [% IF type == 'service' %]
