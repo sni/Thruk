@@ -35,46 +35,46 @@
         <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)">
           [% need_spacer = 0 %]
           [% IF c.config.cmd_quick_status.reschedule %]
-            <option value="1" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delay.gif); }"[% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END%]>reschedule next check</option>
+            <option value="1" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delay.gif); }"[% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END%]>Reschedule Next Check</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.downtime %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="2" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif); }"[% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END%]>add downtime</option>
-            <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }"[% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END%]>remove downtimes</option>
+            <option value="2" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif); }"[% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END%]>Add Downtime</option>
+            <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }"[% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END%]>Remove Downtimes</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.comment %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="3" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/comment.gif); }"[% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END%]>add comment</option>
-            <option value="6" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }"[% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END%]>remove comments</option>
+            <option value="3" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/comment.gif); }"[% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END%]>Add Comment</option>
+            <option value="6" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }"[% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END%]>Remove Comments</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.acknowledgement %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="4" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/ack.gif); }"[% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END%]>add acknowledgement</option>
-            <option value="7" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/noack.gif); }"[% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END%]>remove acknowledgement</option>
+            <option value="4" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/ack.gif); }"[% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END%]>Add Acknowledgement</option>
+            <option value="7" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/noack.gif); }"[% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END%]>Remove Acknowledgement</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.active_checks %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="8" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }"[% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END%]>enable active checks</option>
-            <option value="9" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END%]>disable active checks</option>
+            <option value="8" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }"[% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END%]>Enable Active Checks</option>
+            <option value="9" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END%]>Disable Active Checks</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.notifications %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="10" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }"[% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END%]>enable notifications</option>
-            <option value="11" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>disable notifications</option>
+            <option value="10" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }"[% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END%]>Enable Notifications</option>
+            <option value="11" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>Disable Notifications</option>
             [% need_spacer = 1 %]
           [% END %]
           [% IF c.config.cmd_quick_status.submit_result %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="12" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif); }"[% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>submit passive check result</option>
+            <option value="12" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif); }"[% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>Submit Passive Check Result</option>
           [% END %]
           [% IF c.config.cmd_quick_status.reset_attributes %]
             [% IF need_spacer %]<option value="" disabled class="disable">-------------------------</option>[% need_spacer = 0  %][% END %]
-            <option value="14" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>reset modified attributes</option>
+            <option value="14" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }"[% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>Reset Modified Attributes</option>
           [% END %]
         </select>
       </td>
@@ -110,7 +110,7 @@
           <tr><td onclick="toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
           <tr><td>Spread Checks:</td><td>
             <select name="spread">
-              <option value="0">no</option>
+              <option value="0">No</option>
               <option value="10">10 Seconds</option>
               <option value="30">30 Seconds</option>
               <option value="60"> 1 Minute</option>
@@ -158,10 +158,10 @@
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td>Check Result:</td><td>
             <select name="plugin_state">
-              <option value="0">Ok</option>
-              <option value="1">Warning</option>
-              <option value="2">Critical</option>
-              <option value="3">Unknown</option>
+              <option value="0">OK</option>
+              <option value="1">WARNING</option>
+              <option value="2">CRITICAL</option>
+              <option value="3">UNKNOWN</option>
             </select>
           </td></tr>
           <tr>
