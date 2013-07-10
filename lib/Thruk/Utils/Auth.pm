@@ -98,6 +98,12 @@ sub get_auth_filter {
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
+
+        if(    $c->check_user_roles('authorized_for_all_services')
+           and $c->check_user_roles('authorized_for_all_hosts')) {
+            return;
+        }
+
         if($c->check_user_roles('authorized_for_all_services')) {
             push @filter, { 'service_description' => { '!=' => undef } };
         } else {
