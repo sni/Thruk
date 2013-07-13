@@ -63,16 +63,18 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{type}    = $c->request->parameters->{'type'}    || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_type'}    || $c->config->{'statusmap_default_type'}    || 'table';
     $c->stash->{groupby} = $c->request->parameters->{'groupby'} || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_groupby'} || $c->config->{'statusmap_default_groupby'} || 'address';
-    $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
     $c->stash->{detail}  = $c->request->parameters->{'detail'}  || '0';
-    if($c->stash->{host} eq 'all') {
-        $c->stash->{host} = 'rootid';
+    my $host             = $c->request->parameters->{'host'}    || 'rootid';
+    if($host eq 'all') {
+        $host = 'rootid';
     }
 
     # do the filter
     delete $c->request->parameters->{'host'};
     $c->stash->{hidesearch} = 1;
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+
+    $c->stash->{host} = $host;
 
     # table layout does not support zoom
     # yits table breaks if one element is in multiple groups
