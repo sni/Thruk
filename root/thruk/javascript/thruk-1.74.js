@@ -4071,12 +4071,19 @@ function set_png_img(start, end, id) {
     //debug(newUrl);
 
     jQuery('#pnpwaitimg').css('display', 'block');
-    jQuery('#pnpimg').attr('src', newUrl);
-
-    jQuery('#pnpimg').load(function() {
-      jQuery('#pnpimg').css('display' , 'block');
+    jQuery('<img id="pnpimg" src="' + newUrl + '" alt="pnp graph">')
+    .error(function () {
+      jQuery('#pnperror').css('display', 'block');
+      jQuery('#pnpwaitimgspace').css('display', 'none');
       jQuery('#pnpwaitimg').css('display', 'none');
-    });
+    })
+    .load(function() {
+        //jQuery('#pnpimg').css('display', 'block');
+        jQuery('#pnpimg_div').html(this);
+        jQuery('#pnpwaitimgspace').css('display', 'none');
+        jQuery('#pnpwaitimg').css('display', 'none');
+    })
+    .attr('src', newUrl);
 
     // set style of buttons
     if(id) {

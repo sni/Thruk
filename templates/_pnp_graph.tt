@@ -22,9 +22,10 @@
       <div id="pnp_graph_pane" style="position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&theme=smoothness">
           <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">
-          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
+          <div id="pnpimg_div"></div>
         </a>
-      </div>
+      <div id="pnperror" style="display:none">Could not retrieve graph data</div>
+      <div id="pnpwaitimgspace"><br><br></div>
     </td>
   </tr>
 </table>
