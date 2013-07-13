@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - Bug Fixes
             - fixed display of hoverable downtimes comments
+            - fixed pnp graph waiting icon
 
 1.74     Sun Jul  7 17:39:32 CEST 2013
           - added filter to statusmap

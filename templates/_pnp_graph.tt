@@ -3,7 +3,7 @@
   var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
 </script>
 <div class='commentTitle'>Performance Graph</div>
-<table border="0" class='comment blockHeadBorder'>
+<table border="0" class='comment blockHeadBorder' width='500'>
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
@@ -21,8 +21,9 @@
     <td colspan=7 align="center">
       <div id="pnp_graph_pane" style="position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&theme=smoothness">
-          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">
+          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
           <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
+          <div id="pnperr" style="display:none">Could not retrieve graph data</div>
         </a>
       </div>
     </td>

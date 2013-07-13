@@ -4071,12 +4071,20 @@ function set_png_img(start, end, id) {
     //debug(newUrl);
 
     jQuery('#pnpwaitimg').css('display', 'block');
-    jQuery('#pnpimg').attr('src', newUrl);
 
     jQuery('#pnpimg').load(function() {
       jQuery('#pnpimg').css('display' , 'block');
-      jQuery('#pnpwaitimg').css('display', 'none');
+      jQuery('#pnperr').css('display' , 'none');
+      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
+    })
+    .error(function(e) {
+      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
+      jQuery('#pnpimg').css('display' , 'none');
+      jQuery('#pnperr').css('display' , 'block');
     });
+
+    jQuery('#pnperr').css('display' , 'none');
+    jQuery('#pnpimg').attr('src', newUrl);
 
     // set style of buttons
     if(id) {
