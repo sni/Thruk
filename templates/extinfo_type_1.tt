@@ -391,6 +391,11 @@
         [% END %]
 
         <tr>
+          <td colspan="2">
+            <br>
+          </td>
+        </tr>
+        <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
           [% IF c.check_cmd_permissions('host', host.name) %]
             <a name="comments" id="comments"></a>
