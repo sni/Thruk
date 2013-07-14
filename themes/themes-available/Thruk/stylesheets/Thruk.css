@@ -158,7 +158,7 @@ DIV.infoMessage {
   background-color:#FF9E00;
 }
 
-td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, td.newfilter:hover {
+td.filterValue:hover,DIV#search-results ul li a.ajax_search_selected,DIV#search-results ul li a:hover, td.newfilter:hover {
   background-color:#FFEB66;
 }
 

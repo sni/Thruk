@@ -3747,7 +3747,16 @@ var ajax_search = {
 
         /* move dom node to make sure it scrolls with the input field */
         if(input.className == 'NavBarSearchItem') {
-            jQuery('#'+ajax_search.result_pan).insertAfter(input);
+            var tmpElem = input;
+            var x = 0;
+            // put result div below the form, otherwise clicking a type header would result in a redirect to undefined (#197)
+            while(tmpElem && tmpElem.parentNode && x < 7) {
+                if(tmpElem.tagName != 'UL') {
+                    tmpElem = tmpElem.parentNode;
+                }
+                x++;
+            }
+            jQuery('#'+ajax_search.result_pan).insertAfter(tmpElem);
         } else {
             jQuery('#'+ajax_search.result_pan).appendTo('BODY');
         }

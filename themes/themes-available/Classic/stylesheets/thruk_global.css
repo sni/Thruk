@@ -602,7 +602,7 @@ td.stateInfoTable1 .dataVal {
 }
 
 /* Search result suggestions */
-#search-results {
+DIV#search-results {
   position: absolute;
   left: 0;
   top: 0;
@@ -618,7 +618,7 @@ td.stateInfoTable1 .dataVal {
   font-weight: normal;
 }
 
-#search-results ul{
+DIV#search-results ul {
   list-style: none;
   margin: 0px;
   padding: 0px;
@@ -626,14 +626,22 @@ td.stateInfoTable1 .dataVal {
   display: block;
 }
 
-#search-results a{
+DIV#search-results ul li {
+  padding: 1px;
+  line-height: 16px;
+  height: 16px;
+}
+
+DIV#search-results ul li a, DIV#search-results ul li a:hover {
   text-decoration: none;
   color:black;
   width: 150px;
   display: block;
+  background: none;
+  padding: 0;
 }
 
-#search-results a.ajax_search_selected, #search-results a:hover {
+DIV#search-results ul li a.ajax_search_selected, DIV#search-results ul li a:hover {
   background-color:#88BBD8;
   cursor: pointer;
 }
