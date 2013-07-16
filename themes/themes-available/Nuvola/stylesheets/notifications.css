@@ -4,7 +4,7 @@ font-family: Tahoma, Arial, Sans-Serif;
 background-color: #C3C7D3;
 color: #3F3D3D;
 font-size: 8pt;
-
+white-space: nowrap;
 }
 
 TABLE.notifications
@@ -14,6 +14,7 @@ text-align: center;
 background-color: #F0F1F5;
 border: 1px #E2DECD outset;
 width: 100%;
+border-spacing: 2px;
 }
 
 TH.notifications
@@ -30,18 +31,24 @@ background-color: #F0F1F5;
 background-image: url(../images/border_small.gif);
 background-repeat: repeat-x;
 background-position: bottom;
+white-space: nowrap;
 }
 
 TD.notificationsEven
 {
-padding: 0px;
+background-color: #DEDBD2;
+padding-left: 4px;
+padding-right: 4px;
+white-space: nowrap;
 }
 
 TD.notificationsOdd
 {
-padding: 1px;
 background-color: #E7E5DD;
 height: 22px;
+padding-left: 4px;
+padding-right: 4px;
+white-space: nowrap;
 }
 
 TD.notificationsOK,TD.notificationsHOSTUP

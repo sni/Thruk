@@ -146,6 +146,7 @@ text-align: center;
 background-color: #F0F1F5;
 border: 1px #E2DECD outset;
 width: 100%;
+border-spacing: 2px;
 }
 
 TH.comment,TH.downtime
@@ -162,6 +163,8 @@ background-color: #F0F1F5;
 background-image: url(../images/border_small.gif);
 background-repeat: repeat-x;
 background-position: bottom;
+vertical-align: top;
+white-space: nowrap;
 }
 
 TD.comment,TD.downtime
@@ -171,17 +174,21 @@ padding: 0px;
 
 TD.commentOdd,TD.downtimeOdd
 {
-padding: 1px;
 background-color: #E7E5DD;
 height: 22px;
+padding-left: 4px;
+padding-right: 4px;
+white-space: nowrap;
 }
 
 
 TD.commentEven,TD.downtimeEven
 {
-padding: 1px;
 background-color: #DEDBD2;
 height: 22px;
+padding-left: 4px;
+padding-right: 4px;
+white-space: nowrap;
 }
 
 TABLE.queue

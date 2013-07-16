@@ -133,7 +133,7 @@
         [% SET class = 'notificationsOdd'  IF loop.even %]
         [% SET class = 'notificationsEven' IF loop.odd %]
         [% PROCESS _notifications_log_line.tt %]
-        <tr class='[% class %]'>
+        <tr align='left' class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% n.host_name | uri %]&amp;backend=[% n.peer_key %]'>[% n.host_name %]</a></td>
           <td class='[% class %]'>
             [% IF n.service_description %]
@@ -142,11 +142,11 @@
             N/A
             [% END %]
           </td>
-          <td class='[% statusclass %]'>[% level %]</td>
-          <td class='[% class %]'>[% format_date(n.time, datetime_format) %]</td>
+          <td align='center' class='[% statusclass %]'>[% level %]</td>
+          <td align='center' class='[% class %]'>[% format_date(n.time, datetime_format) %]</td>
           <td class='[% class %]'><a href='config.cgi?type=contacts#[% n.contact_name %]'>[% n.contact_name %]</a></td>
-          <td class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>
-          <td class='[% class %] left'>[% IF escape_html_tags %][% escape_html(n.plugin_output) %][% ELSE %][% n.plugin_output %][% END %]</td>
+          <td align='center' class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>
+          <td class='[% class %] left' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(n.plugin_output) %][% ELSE %][% n.plugin_output %][% END %]</td>
         </tr>
         [% END %]
 

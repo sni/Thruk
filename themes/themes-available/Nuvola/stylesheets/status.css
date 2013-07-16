@@ -140,11 +140,13 @@ padding: 0px;
 TD.statusOdd {
 background-color: #E7E5DD;
 /*height: 22px;*/
+white-space: nowrap;
 }
 
 TD.statusEven {
 background-color: #DEDBD2;
 /*height: 22px;*/
+white-space: nowrap;
 }
 
 TABLE#statusTable tbody > tr > TD {
