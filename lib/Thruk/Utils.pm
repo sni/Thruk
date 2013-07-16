@@ -17,7 +17,7 @@ use Carp;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use File::Slurp qw/read_file/;
-use Encode qw/encode_utf8 decode/;
+use Encode qw/encode encode_utf8 decode/;
 use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -1025,17 +1025,7 @@ sub get_user_data {
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     return {} unless -f $file;
-
-    my $dump = read_file($file) or carp("cannot open file $file");
-    my $VAR1 = {};
-
-    ## no critic
-    eval($dump);
-    ## use critic
-
-    carp("error in file $file: $@") if $@;
-
-    return($VAR1);
+    return read_data_file($file);
 }
 
 
@@ -1098,17 +1088,7 @@ sub get_global_user_data {
 
     my $file = $c->config->{'var_path'}."/global_user_data";
     return {} unless -f $file;
-
-    my $dump = read_file($file) or carp("cannot open file $file");
-    my $VAR1 = {};
-
-    ## no critic
-    eval($dump);
-    ## use critic
-
-    carp("error in file $file: $@") if $@;
-
-    return($VAR1);
+    return read_data_file($file);
 }
 
 
@@ -1138,14 +1118,15 @@ sub store_global_user_data {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
         return;
     };
-    print $fh Dumper($data);
-    Thruk::Utils::IO::close($fh, $file.'.new');
-    Thruk::Utils::IO::ensure_permissions('file', $file);
+    CORE::close($fh);
+    write_data_file($file.'.new', $data);
+    Thruk::Utils::IO::ensure_permissions('file', $file.'.new');
 
     move($file.'.new', $file) or do {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
         return;
     };
+    Thruk::Utils::IO::ensure_permissions('file', $file);
 
     return 1;
 }
@@ -1642,10 +1623,17 @@ sub read_data_file {
     # ensure right encoding
     $cont = decode_any($cont);
 
+    $cont =~ s/^\$VAR1\ =\ //mx;
+
+    # replace broken escape sequences
+    $cont =~ s/\\x\{[\w]{5,}\}/\x{fffd}/gmxi;
+
     my $data;
     ## no critic
     eval('$data = '.$cont.';');
     ## use critic
+
+    warn($@) if $@;
 
     return $data;
 }

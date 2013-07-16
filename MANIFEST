@@ -1037,6 +1037,7 @@ t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
 t/101-cli-thruk.t
+t/102-thruk_utils.t
 t/200-view_Excel.t
 t/200-view_GD.t
 t/200-view_JSON.t
@@ -1097,6 +1098,9 @@ t/data/naglint/timeperiods/out.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
 t/data/test_c_style.conf
+t/data/userfiles/encoding_broken
+t/data/userfiles/encoding_iso
+t/data/userfiles/encoding_ok
 t/perlcriticrc
 t/TestUtils.pm
 t/timed_test.sh

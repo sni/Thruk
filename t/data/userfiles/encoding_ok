@@ -1,0 +1,10 @@
+$VAR1 = {
+          'bookmarks' => {
+                           'Bookmarks' => [
+                                          [
+                                            "öäüß",
+                                            '/thruk/cgi-bin/status.cgi?host=all'
+                                          ]
+                                        ]
+                         }
+        };
