@@ -6,6 +6,7 @@ next:
             - fixed pnp graph waiting icon
             - fixed rootid in statusmap when using filter
             - fixed clicking search result header
+            - fixed reduced result set on json exports
 
 1.74     Sun Jul  7 17:39:32 CEST 2013
           - added filter to statusmap

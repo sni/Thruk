@@ -1129,6 +1129,13 @@ sub _select_backends {
             }
         }
 
+        # no paging except on html pages
+        my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+        if($view_mode ne 'html') {
+            delete $arg{'pager'};
+            delete $c->stash->{'use_pager'};
+        }
+
         if(   $function eq 'get_hosts'
            or $function eq 'get_services'
            ) {
