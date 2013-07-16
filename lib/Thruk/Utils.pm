@@ -1246,6 +1246,39 @@ sub get_graph_url {
 
 ########################################
 
+=head2 get_action_url
+
+  get_action_url($action_url, $host, $svc)
+
+return action_url modified for object (host/service) if we use graphite
+
+=cut
+
+sub get_action_url {
+    my $action_url = shift;
+    my $host = shift;
+    my $svc = shift;
+    
+    return $action_url unless $action_url =~ m|/render/|;
+
+    my $new_action_url = $action_url;
+    my $new_host = $host;
+    $new_host =~ s/[^\w-]/_/g;
+    $new_action_url =~ s/$host/$new_host/g;
+
+    if ($svc){
+        my $new_svc = $svc;
+        $new_svc =~ s/[^\w-]/_/g; 
+        $new_action_url =~ s/$svc/$new_svc/g;
+    }
+        
+    
+    return $new_action_url;
+}
+
+
+########################################
+
 =head2 list
 
   list($ref)

@@ -77,11 +77,11 @@
             </td>
           </tr>
           [% END %]
-
           [% IF service.action_url_expanded %]
+          [% action_url = escape_quotes(get_action_url(service.action_url_expanded, service.host_name, service.description)) %]
           <tr>
             <td align='right'>
-              <a href='[% service.action_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
+              <a href='[% action_url %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
               <font size="-1"><i>Extra Actions</i></font><br clear="all">
               <br clear="all">
             </td>
