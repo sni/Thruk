@@ -1231,16 +1231,30 @@ sub get_graph_url {
     my $obj   = shift;
     my $force = shift;
     my $graph_word = $c->config->{'graph_word'};
-    return '' unless $graph_word;
-    return '' unless $c->config->{'shown_inline_pnp'} || $force;
-
-    for my $type (qw/action_url_expanded notes_url_expanded/) {
-        next unless defined $obj->{$type};
-        for my $regex (@{list($graph_word)}) {
-            return($obj->{$type}) if $obj->{$type} =~ m|$regex|mx;
+    my $action_url = '';
+    
+    if ($graph_word && ($c->config->{'shown_inline_pnp'} || $force)){
+        for my $type (qw/action_url_expanded notes_url_expanded/) {
+            next unless defined $obj->{$type};
+            for my $regex (@{list($graph_word)}) {
+                if ($obj->{$type} =~ m|$regex|mx){
+                    $action_url = $obj->{$type};
+                    last;
+                }
+            }
         }
     }
-    return '';
+
+    if (defined $obj->{'name'}){
+        #host obj
+        return get_action_url(1, 0, $action_url, $obj->{'name'});
+    }elsif(defined $obj->{'host_name'} && defined $obj->{'description'}){
+        #service obj
+        return get_action_url(1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
+    }else{
+        #unknown host
+        return '';
+    }
 }
 
 
@@ -1248,13 +1262,17 @@ sub get_graph_url {
 
 =head2 get_action_url
 
-  get_action_url($action_url, $host, $svc)
+  get_action_url($escape_fun, $remove_render, $action_url, $host, $svc)
 
 return action_url modified for object (host/service) if we use graphite
+escape_fun is use to escape special char (html or quotes)
+remove_render remove /render in action url
 
 =cut
 
 sub get_action_url {
+    my $escape_fun = shift;
+    my $remove_render = shift;
     my $action_url = shift;
     my $host = shift;
     my $svc = shift;
@@ -1271,9 +1289,19 @@ sub get_action_url {
         $new_svc =~ s/[^\w-]/_/g; 
         $new_action_url =~ s/$svc/$new_svc/g;
     }
-        
-    
+   
+    if ($escape_fun == 2){     
+        $new_action_url = Thruk::Utils::Filter::escape_html($new_action_url);
+    }elsif($escape_fun == 1){
+        $new_action_url = Thruk::Utils::Filter::escape_quotes($new_action_url);
+    }
+
+    if ($remove_render != 0){
+        $new_action_url =~ s|/render||g;
+    }
+
     return $new_action_url;
+    
 }
 
 
