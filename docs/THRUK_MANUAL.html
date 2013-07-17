@@ -16853,6 +16853,10 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_title_prefix'>title_prefix</a></div>
 
+<div class='toclevel4'><a href='#_use_bookmark_titles'>use_bookmark_titles</a></div>
+
+<div class='toclevel4'><a href='#_use_intelligent_titles'>use_intelligent_titles</a></div>
+
 <div class='toclevel4'><a href='#_url_prefix'>url_prefix</a></div>
 
 <div class='toclevel4'><a href='#_use_timezone'>use_timezone</a></div>
@@ -17209,6 +17213,23 @@ all page titles.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>title_prefix = Prod</tt></pre>
+</div></div>
+<h4 id="_use_bookmark_titles">use_bookmark_titles</h4>
+<div class="paragraph"><p>Sets the page title to the name of a bookmark
+if the url matches. Private bookmarks are processed
+first and the name of the first match is used.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_bookmark_titles = 1</tt></pre>
+</div></div>
+<h4 id="_use_intelligent_titles">use_intelligent_titles</h4>
+<div class="paragraph"><p>Thruk will used more intelligent and descriptive 
+page titles.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_intelligent_titles = 1</tt></pre>
 </div></div>
 <h4 id="_url_prefix">url_prefix</h4>
 <div class="paragraph"><p>Changes the usual url path for Thruk. Don&#8217;t change it unless you plan

@@ -731,6 +731,27 @@ ex.:
   title_prefix = Prod
 
 
+==== use_bookmark_titles
+
+Sets the page title to the name of a bookmark
+if the url matches. Private bookmarks are processed 
+first and the name of the first match is used.
+
+ex.:
+
+  use_bookmark_titles = 1
+
+
+==== use_intelligent_titles
+
+Thruk will used more intelligent and descriptive
+page titles. 
+
+ex.:
+
+  use_intelligent_titles = 1
+
+
 ==== url_prefix
 
 Changes the usual url path for Thruk. Don't change it unless you plan

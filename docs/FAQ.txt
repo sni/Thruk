@@ -238,6 +238,21 @@ dashboard.
 
 
 
+=== How can i set custom page titles
+There are few ways to do this. The first way is you can turn on the 
+use_bookmark_titles in your thruk_local.conf:
+
+-------
+    use_bookmark_titles = 1
+-------
+
+Now anytime you go to one of your Thruk bookmarks the name of 
+that bookmark will be used as the page title.
+The second option is on most pages adding 'title=your title here' to 
+the url will set a custom title
+
+
+
 == Installation
 
 === Is it possible to operate Thruk in a cluster?

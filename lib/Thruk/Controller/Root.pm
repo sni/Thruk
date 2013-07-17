@@ -53,7 +53,7 @@ sub begin : Private {
                   bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
                   status_color_background show_logout_button use_feature_recurring_downtime
                   use_service_description force_sticky_ack force_send_notification force_persistent_ack
-                  force_persistent_comments
+                  force_persistent_comments use_bookmark_titles use_intelligent_titles
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }
@@ -795,6 +795,102 @@ sub end : ActionClass('RenderView') {
                 }
             }
         };
+    }
+
+    # set our bookmark name as our page title
+    # only if use_bookmark_titles is true
+    # and a custom title was not set
+    # since some processing time is required 
+    # it might not be for everyone
+    my $bookmark = 0;
+    if($c->stash->{'use_bookmark_titles'} && !$c->{'request'}->{'parameters'}->{'title'}) {
+        # process public bookmarks
+        OUTER:
+        foreach my $section (sort(keys(%{$c->stash->{'user_data'}->{'bookmarks'}}))) {
+            foreach my $link (@{$c->stash->{'user_data'}->{'bookmarks'}->{$section}}) {
+                if($$link[1] eq $c->{'request'}->{'env'}->{'REQUEST_URI'}) {
+                    $c->stash->{'title'} = $$link[0];
+                    $bookmark = 1;
+                    last OUTER;
+                }
+            }
+        }
+
+        # process private bookmarks only 
+        # if we did not find any matches in the
+        # user bookmarks
+        if(!$bookmark) {
+            OUTER:
+            foreach my $section (sort(keys(%{$c->stash->{'global_user_data'}->{'bookmarks'}}))) {
+                foreach my $link (@{$c->stash->{'global_user_data'}->{'bookmarks'}->{$section}}) {
+                    if($$link[1] eq $c->{'request'}->{'env'}->{'REQUEST_URI'}) {
+                        $c->stash->{'title'} = $$link[0];
+                        $bookmark = 1;
+                        last OUTER;
+                    }
+                }
+            }
+        }
+    }
+
+    # figure out intelligent titles
+    # only if use_intelligent_titles is true
+    # we haven't found a bookmark title
+    # and a custom title wasn't set 
+    if($c->stash->{'use_intelligent_titles'} && !$bookmark && !$c->{'request'}->{'parameters'}->{'title'}) {
+        $c->log->info($c->{'request'}->{'action'});
+
+        # titles for status.cgi
+        if($c->{'request'}->{'action'} eq 'thruk/cgi-bin/status.cgi') {
+            if($c->stash->{'hostgroup'}) {
+                if($c->stash->{'hostgroup'} eq 'all') {
+                    $c->stash->{'title'} = 'All Hostgroups';
+                }
+                else {
+                    $c->stash->{'title'} = $c->stash->{'hostgroup'};
+                }
+            }
+            elsif($c->stash->{'servicegroup'}) {
+                if($c->stash->{'servicegroup'} eq 'all') {
+                    $c->stash->{'title'} = 'All Servicegroups';
+                }
+                else {
+                    $c->stash->{'title'} = $c->stash->{'servicegroup'};
+                }
+            }
+            elsif($c->stash->{'host'}) {
+                if($c->stash->{'host'} eq 'all') {
+                    $c->stash->{'title'} = 'All Hosts';
+                }
+                else {
+                    $c->stash->{'title'} = $c->stash->{'host'};
+                }
+            }
+        }
+        # titles for extinfo
+        elsif($c->{'request'}->{'action'} eq 'thruk/cgi-bin/extinfo.cgi') {
+            my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
+    
+            # host details
+            if($type == 1) {
+                $c->stash->{'title'} = $c->{'request'}->{'parameters'}->{'host'};
+            }
+            # service details
+            elsif($type == 2) {
+                $c->stash->{'title'} = $c->{'request'}->{'parameters'}->{'service'} . " @ " . $c->{'request'}->{'parameters'}->{'host'};
+            }
+            # hostgroup information
+            elsif($type == 5) {
+                $c->stash->{'title'} = $c->{'request'}->{'parameters'}->{'hostgroup'} . " " . $c->stash->{'infoBoxTitle'};
+            }
+            # servicegroup information
+            elsif($type == 8) {
+               $c->stash->{'title'} = $c->{'request'}->{'parameters'}->{'servicegroup'} . " " . $c->stash->{'infoBoxTitle'};
+            }
+            else {
+               $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
+            }
+        }
     }
 
     return 1;

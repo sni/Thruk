@@ -32,7 +32,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{template}     = 'extinfo_type_' . $type . '.tt';
 
     my $infoBoxTitle;
-    my $title = undef;
     if( $type == 0 ) {
         $infoBoxTitle = 'Process Information';
         return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
@@ -40,12 +39,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     if( $type == 1 ) {
         $infoBoxTitle = 'Host Information';
-        $title = $c->{'request'}->{'parameters'}->{'host'};
         return unless $self->_process_host_page($c);
     }
     if( $type == 2 ) {
         $infoBoxTitle = 'Service Information';
-        $title = $c->{'request'}->{'parameters'}->{'service'} . " @ " . $c->{'request'}->{'parameters'}->{'host'};
         return unless $self->_process_service_page($c);
     }
     if( $type == 3 ) {
@@ -58,7 +55,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     if( $type == 5 ) {
         $infoBoxTitle = 'Hostgroup Information';
-        $title = $c->{'request'}->{'parameters'}->{'hostgroup'} . " " . $infoBoxTitle;
         $self->_process_hostgroup_cmd_page($c);
     }
     if( $type == 6 ) {
@@ -76,19 +72,13 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     if( $type == 8 ) {
         $infoBoxTitle = 'Servicegroup Information';
-        $title = $c->{'request'}->{'parameters'}->{'servicegroup'} . " " . $infoBoxTitle;
         $self->_process_servicegroup_cmd_page($c);
-    }
-
-    if(defined($title)) {
-        $c->stash->{title} = $title;
-    }
-    elsif(defined($infoBoxTitle)) {
-        $c->stash->{title} = $infoBoxTitle;
     }
 
     $c->stash->{infoBoxTitle} = $infoBoxTitle;
     Thruk::Utils::ssi_include($c);
+
+    Thruk::Utils::Status::set_custom_title($c);
 
     return 1;
 }
