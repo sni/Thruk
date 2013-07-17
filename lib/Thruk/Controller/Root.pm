@@ -838,8 +838,6 @@ sub end : ActionClass('RenderView') {
     # we haven't found a bookmark title
     # and a custom title wasn't set 
     if($c->stash->{'use_intelligent_titles'} && !$bookmark && !$c->{'request'}->{'parameters'}->{'title'}) {
-        $c->log->info($c->{'request'}->{'action'});
-
         # titles for status.cgi
         if($c->{'request'}->{'action'} eq 'thruk/cgi-bin/status.cgi') {
             if($c->stash->{'hostgroup'}) {
