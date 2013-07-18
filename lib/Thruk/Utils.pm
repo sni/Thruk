@@ -1277,17 +1277,19 @@ sub get_action_url {
     my $host = shift;
     my $svc = shift;
     
-    return $action_url unless $action_url =~ m|/render/|;
-
     my $new_action_url = $action_url;
-    my $new_host = $host;
-    $new_host =~ s/[^\w-]/_/g;
-    $new_action_url =~ s/$host/$new_host/g;
 
-    if ($svc){
-        my $new_svc = $svc;
-        $new_svc =~ s/[^\w-]/_/g; 
-        $new_action_url =~ s/$svc/$new_svc/g;
+    if ($action_url =~ m|/render/|){
+          
+        my $new_host = $host;
+        $new_host =~ s/[^\w-]/_/g;
+        $new_action_url =~ s/$host/$new_host/g;
+
+        if ($svc){
+            my $new_svc = $svc;
+            $new_svc =~ s/[^\w-]/_/g; 
+            $new_action_url =~ s/$svc/$new_svc/g;
+        }
     }
    
     if ($escape_fun == 2){     
