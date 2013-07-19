@@ -26,9 +26,9 @@
         </td><td class='[% class %]'>
         <a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a>
         [% ELSIF d.target == 'hostgroup' %]
-        <a href='extinfo.cgi?type=5&amp;hostgroup=[% d.hostgroup | uri %]'>[% d.hostgroup %]</a>
+        <a href='status.cgi?hostgroup=[% d.hostgroup | uri %]&amp;style=overview'>[% d.hostgroup %]</a>
         [% ELSIF d.target == 'servicegroup' %]
-        <a href='extinfo.cgi?type=8&amp;servicegroup=[% d.servicegroup | uri %]'>[% d.servicegroup %]</a>
+        <a href='status.cgi?servicegroup=[% d.servicegroup | uri %]&amp;style=overview'>[% d.servicegroup %]</a>
         [% END %]
       </td>
       <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
