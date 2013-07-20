@@ -70,7 +70,7 @@ for my $downtime (@{$test_downtime}) {
     while($now > time() - 150) {
         my $test = { cmd  => $BIN.' "extinfo.cgi?type=1&host='.$host.'"'};
         TestUtils::test_command($test);
-        if($test->{'stdout'} =~ m/\(cron\)<\/td>\s+<td\s+class='\w+'>$comment/gs) {
+        if($test->{'stdout'} =~ m/\(cron\)<\/td>\s+<td[^>]*>$comment/gs) {
             ok(1, "downtime occured after ".(time()-$now)." seconds");
             $found = 1;
             last;
