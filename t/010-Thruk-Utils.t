@@ -6,7 +6,7 @@ use Data::Dumper;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 37;
+    plan tests => 38;
 
     use lib('t');
     require TestUtils;
@@ -88,6 +88,16 @@ is_deeply($sorted_by_ba_reverse, \@sorted_by_ba_exp_reverse, 'sort by colum b,a 
 
 my $sorted_by_abc = $b->_sort($befor, { 'ASC' => ['a','b','c'] });
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
+
+#########################
+# check sorting with case
+my $befor_case = [
+  {a => 'aAaZ', b => 1},
+  {a => 'aaAY', b => 1},
+  {a => 'aaaX', b => 1},
+];
+my $sorted_case = $b->_sort($befor_case, { 'ASC' => ['a','b'] });
+is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 
 #########################
 SKIP: {

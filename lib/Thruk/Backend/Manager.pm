@@ -1770,10 +1770,8 @@ sort a array of hashes by hash keys
 =cut
 
 sub _sort {
-    my $self   = shift;
-    my $data   = shift;
-    my $sortby = shift;
-    my $c      = $Thruk::Backend::Manager::c;
+    my($self, $data, $sortby) = @_;
+    my $c = $Thruk::Backend::Manager::c;
     my( @sorted, $key, $order );
 
     $key = $sortby;
@@ -1817,7 +1815,7 @@ sub _sort {
 
         # sort alphanumeric
         else {
-            push @compares, 'lc($a->{' . $key . '}) cmp lc($b->{' . $key . '})';
+            push @compares, '$a->{' . $key . '} cmp $b->{' . $key . '}';
         }
     }
     my $sortstring = join( ' || ', @compares );
@@ -1849,9 +1847,7 @@ returns data limited by limit
 =cut
 
 sub _limit {
-    my $self  = shift;
-    my $data  = shift;
-    my $limit = shift;
+    my($self, $data, $limit) = @_;
 
     return $data unless defined $limit and $limit > 0;
 

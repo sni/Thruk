@@ -217,7 +217,7 @@ sub get_hosts {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
-            $options{'options'}->{'limit'} = $limit + 1;
+            $options{'options'}->{'limit'} = $limit;
         }
     }
 
@@ -361,7 +361,7 @@ sub get_services {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
-            $options{'options'}->{'limit'} = $limit + 1;
+            $options{'options'}->{'limit'} = $limit;
         }
     }
 
