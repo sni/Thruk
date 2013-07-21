@@ -628,8 +628,8 @@ DIV#search-results ul {
 
 DIV#search-results ul li {
   padding: 1px;
-  line-height: 16px;
-  height: 16px;
+  line-height: 14px;
+  height: 14px;
 }
 
 DIV#search-results ul li a, DIV#search-results ul li a:hover {

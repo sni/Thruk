@@ -3715,8 +3715,8 @@ var ajax_search = {
             x++;
         }
         ajax_search.result_size = x;
-        resultHTML += '<\/ul>';
         if(results.length == 0) {
+            resultHTML += '<li>';
             if(ajax_search.error) {
                 resultHTML += '<a href="#"><span style="color:red;">error: '+ajax_search.error+'</span></a>';
             }
@@ -3725,11 +3725,13 @@ var ajax_search = {
             } else {
                 resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
             }
+            resultHTML += '</li>';
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
                 return;
             }
         }
+        resultHTML += '<\/ul>';
 
         panel.innerHTML = resultHTML;
 

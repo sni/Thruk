@@ -99,3 +99,8 @@ ul {
   background: none;
   color: #000;
 }
+
+DIV#search-results ul li {
+  height: 13px;
+  line-height: 13px;
+}
