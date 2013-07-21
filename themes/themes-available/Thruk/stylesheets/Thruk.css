@@ -128,11 +128,15 @@ DIV.infoMessage {
 .outageImportantProblem,.hostImportantProblem,.serviceImportantProblem {
   background-color:#FF5B33;
   white-space:nowrap;
+  padding-right: 3px;
+  padding-left: 3px;
 }
 
 .outageUnimportantProblem,.hostUnimportantProblem,.serviceUnimportantProblem {
   background-color:#FFC0C0;
   white-space:nowrap;
+  padding-right: 3px;
+  padding-left: 3px;
 }
 
 .overDivContent {
@@ -549,14 +553,17 @@ TD.hostTotals,TD.serviceTotals,TD.hostTotalsUP,TD.serviceTotalsOK,TD.hostTotalsD
 
 TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL {
   background-image:url(../images/red.gif);
+  background-position: center top;
 }
 
 TD.hostTotalsPENDING,TD.serviceTotalsPENDING {
   background-image:url(../images/blue.gif);
+  background-position: center top;
 }
 
 TD.hostTotalsUP,TD.serviceTotalsOK {
   background-image:url(../images/green.gif);
+  background-position: center top;
 }
 
 TD.hostUNREACHABLE {
@@ -686,10 +693,12 @@ TD.notificationsWARNING {
 
 TD.serviceTotalsUNKNOWN,TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS {
   background-image:url(../images/orange.gif);
+  background-position: center top;
 }
 
 TD.serviceTotalsWARNING {
   background-image:url(../images/yellow.gif);
+  background-position: center top;
 }
 
 TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
