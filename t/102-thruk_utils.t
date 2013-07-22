@@ -2,7 +2,12 @@ use strict;
 use warnings;
 use utf8;
 use Encode 2.12;
-use Test::More tests => 7;
+use Test::More;
+
+# from: http://perldoc.perl.org/perl5101delta.html
+# Within UTF8-encoded Perl source files (i.e. where use utf8 is in effect), double-quoted literal strings could be corrupted where a \xNN , \0NNN or \N{} is followed by a literal character with ordinal value greater than 255 [RT #59908].
+plan skip_all => 'breaks with perl older than 5.10.1, got '.$] if $] < 5.010001;
+plan tests => 7;
 
 use_ok('Thruk::Utils');
 
