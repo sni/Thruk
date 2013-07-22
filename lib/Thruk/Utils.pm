@@ -1024,7 +1024,7 @@ sub get_user_data {
     }
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    return {} unless -f $file;
+    return {} unless -s $file;
     return read_data_file($file);
 }
 
@@ -1087,7 +1087,7 @@ sub get_global_user_data {
     my($c) = @_;
 
     my $file = $c->config->{'var_path'}."/global_user_data";
-    return {} unless -f $file;
+    return {} unless -s $file;
     return read_data_file($file);
 }
 
@@ -1618,7 +1618,7 @@ sub read_data_file {
     my($filename) = @_;
 
     my $cont = read_file($filename);
-    if ($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
+    if($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
 
     # ensure right encoding
     $cont = decode_any($cont);
