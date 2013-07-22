@@ -1966,22 +1966,21 @@ sub _initialassumedservicestate_to_state {
 
 ##############################################
 sub _parse_date {
-    my $c      = shift;
-    my $string = shift;
+    my($c, $string) = @_;
     my $timestamp;
 
     # just a timestamp?
-    if($string =~ m/^(\d{9,12})$/mx) {
+    if($string =~ m/^(\d+)$/mx) {
         $timestamp = $1;
     }
 
     # real date?
-    elsif($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{12})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
 
     # real date without seconds?
-    elsif($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2})/mx) {
+    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,0);
     }
 

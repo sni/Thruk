@@ -804,10 +804,15 @@ function verify_time_do(id) {
         url: url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value,
         type: 'POST',
         success: function(data) {
+            var next = jQuery(obj).next();
+            if(next[0] && next[0].className == 'smallalert') {
+                jQuery(next).remove();
+            }
             if(data.verified == "false") {
-                debug(data.error)
+                debug(data.error);
                 verification_errors[id] = 1;
                 obj.style.background = "#f8c4c4";
+                jQuery("<span class='smallalert'>"+data.error+"</span>").insertAfter(obj);
             } else {
                 obj.style.background = "";
                 delete verification_errors[id];

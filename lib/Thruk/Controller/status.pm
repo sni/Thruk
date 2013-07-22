@@ -1055,7 +1055,7 @@ sub _process_verify_time {
     my( $self, $c ) = @_;
 
     my $verified = 'false';
-    my $error    = 'false';
+    my $error    = 'not a valid date';
     my $time = $c->{'request'}->{'parameters'}->{'time'};
     if(defined $time) {
         eval {
@@ -1065,6 +1065,9 @@ sub _process_verify_time {
         };
         if($@) {
             $error = $@;
+            chomp($error);
+            $error =~ s/\ at .*?\.pm\ line\ \d+//gmx;
+            $error =~ s/^Date::Calc::Mktime\(\):\ //gmx;
         }
     }
 

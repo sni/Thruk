@@ -29,7 +29,7 @@
       </th>
     </tr>
     <tr>
-      <td class="statusOdd">Command:</td>
+      <td class="statusOdd" width=90>Command:</td>
       <td class="statusOdd">
         <input type='hidden' id="opt_persistent" name='persistent' value="comments">
         <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)">
@@ -80,19 +80,19 @@
       </td>
     </tr>
     <tr id="row_comment">
-      <td class="statusOdd">Comment:</td>
+      <td class="statusOdd" width=90>Comment:</td>
       <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="37"></td>
     </tr>
     <tr id="row_start">
-      <td class="statusOdd">Start:</td>
+      <td class="statusOdd" width=90>Start:</td>
       <td class="statusOdd"><a href="#" onclick="show_cal('start_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_end">
-      <td class="statusOdd">End:</td>
+      <td class="statusOdd" width=90>End:</td>
       <td class="statusOdd"><a href="#" onclick="show_cal('end_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_downtime_options">
-      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd" valign="top" width=90>Options:</td>
       <td class="statusOdd">
         Child Hosts: <select name="childoptions">
           <option value="0">Do nothing with child hosts</option>
@@ -104,7 +104,7 @@
      </td>
     </tr>
     <tr id="row_reschedule_options">
-      <td class="statusOdd">Options:</td>
+      <td class="statusOdd" width=90>Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
@@ -121,7 +121,7 @@
       </td>
     </tr>
     <tr id="row_ack_options">
-      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd" valign="top" width=90>Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></td></tr>
@@ -132,11 +132,11 @@
       </td>
     </tr>
     <tr id="row_expire">
-      <td class="statusOdd">Expire:</td>
+      <td class="statusOdd" width=90>Expire:</td>
       <td class="statusOdd"><a href="#" onclick="show_cal('expire_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+expire_ack_duration, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_comment_options">
-      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd" valign="top" width=90>Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt6')">Persistent :</td><td><input type='checkbox' id="opt6" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments || force_persistent_comments %] checked[% END %][% IF force_persistent_comments %] disabled[% END %]></td></tr>
@@ -144,7 +144,7 @@
       </td>
     </tr>
     <tr id="row_down_options">
-      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd" valign="top" width=90>Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt7')">Active Downtimes:</td><td><input type='checkbox' id="opt7" name='active_downtimes' checked></td></tr>
@@ -153,7 +153,7 @@
       </td>
     </tr>
     <tr id="row_submit_options">
-      <td class="statusOdd">Options:</td>
+      <td class="statusOdd" width=90>Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td>Check Result:</td><td>

@@ -417,7 +417,7 @@ div.thruk_message table {
   color: #FF0000;
 }
 
-.alert {
+.alert, .smallalert {
   padding: 8px 35px 8px 14px;
   margin-bottom: 18px;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -429,6 +429,12 @@ div.thruk_message table {
   color: #b94a48;
   background-color: #f2dede;
   border-color: #eed3d7;
+}
+
+.smallalert {
+  padding: 1px 1px 1px 1px;
+  margin-bottom: 0px;
+  margin-left: 3px;
 }
 
 /* show log filter */
