@@ -247,11 +247,37 @@ sub init_backend_thread_pool {
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
 
+    # do some checks
+    $use_curl = 0 if $pool_size >= 2; # curl is not thread safe
+
+    # if we have multiple https backends, make sure we use the thread safe IO::Socket::SSL
+    my $https_count = 0;
+    for my $peer_config (@{$peer_configs}) {
+        if($peer_config->{'options'} && $peer_config->{'options'}->{'peer'} && $peer_config->{'options'}->{'peer'} =~ m/^https/mxio) {
+            $https_count++;
+        }
+    }
+
+    if($https_count > 2 and $pool_size > 1) {
+        eval {
+            require IO::Socket::SSL;
+            IO::Socket::SSL->import();
+        };
+        if($@) {
+            die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
+        }
+        if(!$Net::SSLeay::VERSION or $Net::SSLeay::VERSION < 1.43) {
+            die('Net::SSLeay (>=1.43) is required for multiple parallel https connections, you have '.($Net::SSLeay::VERSION ? $Net::SSLeay::VERSION : 'unknown'));
+        }
+        if($INC{'Crypt/SSLeay.pm'}) {
+            die('Crypt::SSLeay must not be loaded for multiple parallel https connections!');
+        }
+    }
+
     if($num_peers > 0) {
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
             $peer_config->{'use_curl'} = $use_curl;
-            $peer_config->{'use_curl'} = 0 if $pool_size >= 2; # curl is not thread safe
             my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;

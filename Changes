@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - show response from date/time check in quick commands
+          - make sure IO::Socket::SSL is used for multiple parallel https connections
           - Bug Fixes
             - fixed display of hoverable downtimes comments
             - fixed pnp graph waiting icon
