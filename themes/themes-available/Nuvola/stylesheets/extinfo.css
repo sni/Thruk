@@ -251,3 +251,9 @@ TD.extdetails DIV, TD.checkstatus DIV {
 TABLE.extCommandPanel {
     width: 270px;
 }
+
+.tableRowSelected {
+	padding-left: 4px;
+	padding-right: 4px;
+	white-space: nowrap;
+}
