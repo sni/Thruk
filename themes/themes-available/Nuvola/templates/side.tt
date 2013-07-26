@@ -23,6 +23,7 @@
   </head>
   <body class='navbar' onload="preloadImages();">
 [% END %]
+[% PROCESS _side_js.tt %]
 <div class="tree">
 <script type="text/javascript" language="JavaScript1.2">
 <!--
@@ -110,7 +111,11 @@
         [% FOREACH sublink = link.links +%]
           [% PROCESS set_icons l=sublink %]
           [% index = index + 1 %]
-          [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]');
+          [% tmp = "" %]
+          [% FOREACH addlink = sublink.links %]
+            [% tmp = tmp _ '(<a href="' _ addlink.href _ '" target="' _ addlink.target _ '">' _ addlink.name _ '</a>)' %]
+          [% END %]
+          [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]', undefined, undefined, undefined, '[% tmp %]');
         [% END %]
       [% ELSIF link.search +%]
         [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]thruk/cgi-bin/status.cgi' target='[% link.target %]'>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='text' name='s0_value' id='s0_value' class='NavBarSearchItem' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' id='NavBarSearchItem' size=10 style='font-size:10'>[% END %]<\/form><\/nobr>",'','','','[% url_prefix %]thruk/themes/Nuvola/side/icons/search.gif');
@@ -123,7 +128,6 @@ document.write([% menu_name %]);
 </script>
 </div>
 [% PROCESS _ajax_search.tt %]
-[% PROCESS _side_js.tt %]
 [% IF use_frames %]
   </body>
 </html>

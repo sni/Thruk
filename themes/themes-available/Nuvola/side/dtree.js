@@ -45,7 +45,7 @@ function changeMenuState(menuID)
 
 
 // Node object
-function Node(id, pid, name, url, title, target, icon, iconOpen, open, css) {
+function Node(id, pid, name, url, title, target, icon, iconOpen, open, css, more_links) {
 	this.id = id;
 	this.pid = pid;
 	this.name = name;
@@ -61,6 +61,7 @@ function Node(id, pid, name, url, title, target, icon, iconOpen, open, css) {
 	this._ai = 0;
 	this._p;
 	if (css) this.css = css; else this.css = "dTreeNode";
+	this._more_links = more_links;
 };
 
 // Tree object
@@ -171,8 +172,8 @@ dTree.prototype.header = function(title,icon,height,bgImage,bgColor,open) {
 
 
 // Adds a new node to the node array
-dTree.prototype.add = function(id, pid, name, url, title, target, icon, iconOpen, open, css) {
-	this.aNodes[this.aNodes.length] = new Node(id, pid, name, url, title, target, icon, iconOpen, open, css);
+dTree.prototype.add = function(id, pid, name, url, title, target, icon, iconOpen, open, css, more_links) {
+	this.aNodes[this.aNodes.length] = new Node(id, pid, name, url, title, target, icon, iconOpen, open, css, more_links);
 };
 
 // Open/close all nodes
@@ -253,6 +254,11 @@ dTree.prototype.node = function(node, nodeId) {
 		str += '<a href="javascript: ' + this.obj + '.o(' + nodeId + ');" class="node">';
 	str += node.name;
 	if (node.url || ((!this.config.folderLinks || !node.url) && node._hc)) str += '</a>';
+	}
+	if(node._more_links) {
+		str += '<span class="subnode">';
+		str += node._more_links;
+		str += '</span>';
 	}
 	str += '</div>';
 	if (node._hc) {

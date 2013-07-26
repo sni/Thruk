@@ -11,6 +11,7 @@ next:
             - fixed reduced result set on json exports
             - fixed reading wrong encoded global user data file
             - fixed case-sensitive sorting on host/servicenames
+            - fixed missing links in Nuvola theme side navigation
 
 1.74     Sun Jul  7 17:39:32 CEST 2013
           - added filter to statusmap
