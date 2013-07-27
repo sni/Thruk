@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.74-2   Sat Jul 27 18:15:20 CEST 2013
           - show response from date/time check in quick commands
           - make sure IO::Socket::SSL is used for multiple parallel https connections
           - Bug Fixes
