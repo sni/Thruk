@@ -2721,6 +2721,15 @@ Description: Sets the number of columns
 Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
 
 
+==== debug
+
+Pages: availability reports
+
+Description: Creates a file with debug information regarding this report
+
+Example: /thruk/cgi-bin/avail.cgi?host=HOSTNAME&debug=1
+
+
 ==== hidetop
 
 Pages: status pages

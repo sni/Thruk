@@ -748,10 +748,11 @@ sub end : ActionClass('RenderView') {
         print $fh 'Uri: '.Thruk::Utils::Filter::full_uri($c)."\n";
         print $fh "*************************************\n";
         print $fh "version: ".Thruk::Utils::Filter::fullversion($c)."\n";
+        print $fh "user:    ".$c->stash->{'remote_user'}."\n";
         print $fh "parameters:\n";
         print $fh Dumper($c->{'request'}->{'parameters'});
         print $fh "debug info:\n";
-        print $fh Thruk::Utils::get_debug_details();
+        print $fh Thruk::Config::get_debug_details();
         if($c->stash->{'original_url'}) {
             print $fh "*************************************\n";
             print $fh "job:\n";

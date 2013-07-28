@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 327;
+    plan tests => 343;
 }
 
 BEGIN {
@@ -84,3 +84,14 @@ for my $url (@{$csv_pages}) {
         'like'    => 'HOST_NAME, ',
     );
 }
+
+# debug information in reports
+my $debug_report = '/thruk/cgi-bin/avail.cgi?host='.$host.'&timeperiod=last7days&smon=1&sday=13&syear=2010&shour=0&smin=0&ssec=0&emon=1&eday=14&eyear=2010&ehour=24&emin=0&esec=0&rpttimeperiod=&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedservicestate=0&backtrack=4&debug=1';
+my $res = TestUtils::test_page(
+    'url'     => $debug_report,
+    'like'    => [ 'Availability Report', 'Availability report completed in', '>Debug Information written to:\s(.*?)<' ],
+);
+$res->{'content'} =~ m/>Debug Information written to:\s(.*?)</;
+my $file = $1;
+ok(-f $file, $file.' exists');
+ok(unlink($file), $file.' removed');
