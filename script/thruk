@@ -152,7 +152,7 @@ script has the following arguments
       - report=<nr>                 generate report
       - reportmail=<nr>             send report by mail
 
-    Mongodb Logcache:
+    Logcache: ( MySQL / MongoDB )
       - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day.
       - logcacheupdate              update logcache
       - logcacheauthupdate          update logcache authorization information
