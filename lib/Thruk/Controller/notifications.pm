@@ -70,9 +70,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $end   = $tmp;
     }
 
-    push @{$filter}, { time => { '>=' => $start }};
-    push @{$filter}, { time => { '<=' => $end }};
-
     if($host eq '' and $service eq '' and $contact eq '') {
         $host = 'all';
     }
@@ -90,6 +87,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
         push @{$filter}, { message => { '~' => ';'.$contact.';' }} if $contact ne 'all';
     }
+
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
 
     push @{$filter}, { class => 3 };
 
