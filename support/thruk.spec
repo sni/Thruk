@@ -190,7 +190,7 @@ if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
   cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
 fi
-ls -la /etc/thruk/plugins/plugins-enabled/
+echo "plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
 if [ -d /tmp/thruk_update/ssi/. ]; then
   rm -f /etc/thruk/ssi/*
   cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
