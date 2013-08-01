@@ -60,6 +60,14 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         }
     }
 
+    # internal error but all backends failed redirects to "no backend available"
+    if($arg1 == 13
+       and (ref $c->stash->{'failed_backends'} eq 'HASH')
+       and (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
+       and (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
+        $arg1 = 9;
+    }
+
     my $errors = {
         '99'  => {
             'mess' => '',

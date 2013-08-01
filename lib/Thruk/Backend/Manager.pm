@@ -974,15 +974,20 @@ sub _do_on_peers {
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
+    $c->stash->{'num_selected_backends'} = $selected_backends;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     if(!defined $result and $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
-        my $err = $@;
+        my $err = $@; # only set if there is exact one backend
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
         }
         # failed to open socket /tmp/live.sock: No such file or directory
         elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
+            die($1);
+        }
+        # failed to connect at .../Class/Lite.pm line 245.
+        elsif($err =~ m|(failed\s+to\s+connect)\s+at\s+|mx) {
             die($1);
         }
         elsif($err =~ m|(hit\s\+.*?timeout\s+on.*?)\s+at\s+|mx) {
@@ -993,13 +998,14 @@ sub _do_on_peers {
         }
         elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|mx) {
             die($1);
+        }
+        elsif($err) {
+            die($err);
         } else {
+            # multiple backends and all fail
             # die with a small error for know, usually an empty result means that
             # none of our backends were reachable
-            unless($err) {
-                $c->detach('/error/index/9');
-                die('undefined result');
-            }
+            die('undefined result');
             #local $Data::Dumper::Deepcopy = 1;
             #my $msg = "Error in _do_on_peers: '".($err ? $err : 'undefined result')."'\n";
             #for my $b (@{$get_results_for}) {
