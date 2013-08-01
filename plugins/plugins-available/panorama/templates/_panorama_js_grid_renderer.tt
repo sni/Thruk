@@ -357,7 +357,7 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
 TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
     v = v.replace(/\\n/g, "");
     v = v.replace(/(\r\n|\n|\r)/gm,"");
-    v = v.replace(/</gm,"&lt;");
+    v = v.replace(/<\s*/gm,"&lt;");
     v = v.replace(/>/gm,"&gt;");
     return v;
 }
