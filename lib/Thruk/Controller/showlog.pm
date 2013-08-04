@@ -63,23 +63,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $end   = $tmp;
     }
 
-    push @{$filter}, { time => { '>=' => $start }};
-    push @{$filter}, { time => { '<=' => $end }};
-
-
-    # additional filters set?
-    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
-    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
-    my $errors = 0;
-    if(defined $pattern and $pattern !~ m/^\s*$/mx) {
-        $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
-        push @{$filter}, { message => { '~~' => $pattern }};
-    }
-    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-        $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
-        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
-    }
-
     my $host    = $c->{'request'}->{'parameters'}->{'host'}    || '';
     my $service = $c->{'request'}->{'parameters'}->{'service'} || '';
     if($service) {
@@ -109,6 +92,23 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     $c->stash->{'host'}    = $host;
     $c->stash->{'service'} = $service;
+
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
+
+
+    # additional filters set?
+    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
+    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    my $errors = 0;
+    if(defined $pattern and $pattern !~ m/^\s*$/mx) {
+        $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
+        push @{$filter}, { message => { '~~' => $pattern }};
+    }
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
+        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+    }
 
     my $order = "DESC";
     if($oldestfirst) {
