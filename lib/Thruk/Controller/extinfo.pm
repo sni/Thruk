@@ -400,13 +400,9 @@ sub _get_downtimes_list {
         $noauth = 1 if(!$hostfilter[0] and !$servicefilter[0]);
     }
 
-    # host or service filter?
-    if($service) {
-        push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
-    }
-    elsif($host) {
-        push @hostfilter, { name => $host };
-    }
+    # host and service filter
+    push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
+    push @hostfilter, { name => $host };
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
     my $host_data    = $c->{'db'}->get_hosts(    filter => \@hostfilter,    columns => [qw/name groups/]);
