@@ -86,7 +86,10 @@
                 }
             };
             // make sure all refresh timers are running now
-            window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive + 2000);
+            if(TP.startAllPanelRefreshTimeout) {
+                window.clearTimeout(TP.startAllPanelRefreshTimeout);
+            }
+            TP.startAllPanelRefreshTimeout = window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive + 2000);
             this.window_ids = state.window_ids;
             this.setTitle(state.title);
             Ext.apply(this, state);

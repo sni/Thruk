@@ -228,7 +228,7 @@ var TP = {
         var panels = TP.getAllPanel();
         for(var nr in panels) {
             var p = panels[nr];
-            if(p.reloadOnSiteChanges != undefined && p.reloadOnSiteChanges == true) {
+            if(p.reloadOnSiteChanges != undefined && p.reloadOnSiteChanges == true && p.isVisible()) {
                 p.refreshHandler();
             }
         }
@@ -349,16 +349,25 @@ var TP = {
     startAllPanelRefresh: function() {
         TP.stopAllPanelRefresh();
         var panels = TP.getAllPanel();
-        for(var nr in panels) {
-            var p = panels[nr];
-            p.startInterval();
+        // spread panel reload
+        if(panels.length > 30) {
+            var delay    = 0;
+            var interval = 60 / panels.length;
+            for(var nr in panels) {
+                window.setTimeout(Ext.bind(panels[nr].startInterval, panels[nr], []), delay);
+                delay = delay + Math.round(interval*1000);
+            }
+        } else {
+            // no delay required
+            for(var nr in panels) {
+                panels[nr].startInterval();
+            }
         }
     },
     stopAllPanelRefresh: function() {
         var panels = TP.getAllPanel();
         for(var nr in panels) {
-            var p = panels[nr];
-            p.stopInterval();
+            panels[nr].stopInterval();
         }
     },
     /* convert time frame into seconds */
