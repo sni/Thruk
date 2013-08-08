@@ -269,10 +269,6 @@ Ext.define('TP.PanletHost', {
         this.xdata.url         = 'panorama.cgi?task=host_detail';
         if(this.xdata.host    == undefined) { this.xdata.host    = '' }
 
-        this.refreshHandler = function() {
-            TP.defaultSiteRefreshHandler(this);
-        };
-
         /* load host data */
         this.loader = TP.ExtinfoPanelLoader(this),
         this.add(TP.ExtinfoPanel('host'));

@@ -51,16 +51,19 @@
             type: 'pin',
             cls: 'pintool',
             handler: function() {
+                var tabpan = Ext.getCmp('tabpan');
                 if(this.xdata.pinned) {
                     this.xdata.pinned = false;
-                    /* make sure panelet is now connected to the active tab */
+                    /* make sure panlet is now connected to the active tab */
                     this.removeWindowFromPanels();
-                    var tabpan = Ext.getCmp('tabpan');
-                    tabpan.getActiveTab().window_ids.push(this.id);
-                    tabpan.saveState();
+                    var activeTab = tabpan.getActiveTab();
+                    activeTab.window_ids.push(this.id);
+                    activeTab.saveState();
                 } else {
                     this.xdata.pinned = true;
                 }
+                this.saveState();
+                tabpan.saveState();
                 this.check_pintool();
             },
             listeners: { afterrender: function() { this.up('panel').pintool = this; }},
@@ -172,7 +175,7 @@
     html:       '',
     onEsc:      function() { return false; },
     startInterval: function() {
-        window.clearInterval(this.interval);
+        this.stopInterval();
         var refresh = this.xdata.refresh;
         if(this.xdata.refresh == -1) {
             var tab = Ext.getCmp('tabpan');
@@ -181,6 +184,9 @@
         if(refresh > 0) {
             this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), refresh * 1000);
         }
+    },
+    stopInterval: function() {
+        window.clearInterval(this.interval);
     },
     dd_overriden: false,
     getState: function() {
@@ -220,7 +226,7 @@
         },
         show: function(This, eOpts) {
             // make move show snap shadow
-            if(This.dd_overriden == false) {
+            if(This.dd_overriden == false && This.dd != undefined) {
                 This.dd.onDrag = function(e){
                     // original onDrag function
                     var me = this,
@@ -282,7 +288,6 @@
         if(this.formUpdatedCallback) {
             this.formUpdatedCallback(this);
         }
-        this.check_pintool();
     },
     check_pintool: function() {
         [% IF readonly %]return;[% END %]
@@ -312,6 +317,9 @@
         if(this.loader != undefined) { this.loader.loadMask=true; }
         this.refreshHandler();
         if(this.loader != undefined) { this.loader.loadMask=false; }
+    },
+    refreshHandler: function() {
+        TP.defaultSiteRefreshHandler(this);
     },
     getTool: function(name) {
         for(var nr in this.tools) {

@@ -28,7 +28,9 @@ var window = {
         removeChild:function(){}
     }
   }
-}", 'set window object') or BAIL_OUT("failed to create window object");
+}
+thruk_debug_js = 1;
+", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('root/thruk/javascript/jquery-*.js');
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load jQuery");

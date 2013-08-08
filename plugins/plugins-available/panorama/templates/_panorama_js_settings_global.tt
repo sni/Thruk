@@ -91,7 +91,7 @@ TP.settingsWindow = function() {
                             if(btn == 'ok') {
                                 TP.importAllTabs(text);
                                 win_settings.close();
-                                Ext.MessageBox.alert('Success', 'Import Successful!');
+                                Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
                             }
                         }
                     });

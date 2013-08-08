@@ -48,6 +48,7 @@ var navigator = window.navigator;
 var document  = window.document;
 setTimeout    = function() {};
 setInterval   = function() {};
+thruk_debug_js = 1;
 ", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');
 ok($jsfiles[0], $jsfiles[0]);
@@ -62,7 +63,6 @@ my $tst = TestUtils::test_page(
 my($fh, $filename) = tempfile();
 print $fh $tst->{'content'};
 close($fh);
-js_eval_ok($filename);
-unlink($filename);
+js_eval_ok($filename) && unlink($filename);
 
 done_testing();

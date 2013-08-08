@@ -216,14 +216,16 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         try {
+            TP.initial_create_delay = 2000; // initial delay of placing panlets
             if(state) {
-                    this.xdata = state.xdata;
-                    for(nr in state.item_ids) {
-                        TP.add_pantab(state.item_ids[nr]);
-                    };
+                this.xdata = state.xdata;
+                for(nr in state.item_ids) {
+                    TP.add_pantab(state.item_ids[nr]);
+                };
                 this.setActiveTab(state.activeTab);
                 Ext.apply(this, state);
             }
+
             TP.startRotatingTabs();
             TP.startServerTime();
         } catch(e) {

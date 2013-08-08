@@ -27,14 +27,17 @@
         },
         activate: function(This, eOpts) {
             for(nr in This.window_ids) {
-                Ext.getCmp(This.window_ids[nr]).show();
+                var panlet = Ext.getCmp(This.window_ids[nr]);
+                if(panlet) { // may not yet exists due to delayed rendering
+                    panlet.show();
+                }
             }
         },
         hide: function(This, eOpts) {
             for(nr in This.window_ids) {
-                var pantab = Ext.getCmp(This.window_ids[nr]);
-                if(pantab && !pantab.xdata.pinned) {
-                    pantab.hide();
+                var panlet = Ext.getCmp(This.window_ids[nr]);
+                if(panlet && !panlet.xdata.pinned) {
+                    panlet.hide();
                 }
             }
         },
@@ -61,7 +64,8 @@
         if(state) {
             for(nr in state.window_ids) {
                 if(state.window_ids[nr]) {
-                    TP.add_panlet({id:state.window_ids[nr], skip_state:true}, false);
+                    window.setTimeout(TP.add_panlet, TP.initial_create_delay, {id:state.window_ids[nr], skip_state:true}, false);
+                    TP.initial_create_delay = TP.initial_create_delay + 200; // delay panlet creation by 200ms each
                 }
             };
             this.window_ids = state.window_ids;

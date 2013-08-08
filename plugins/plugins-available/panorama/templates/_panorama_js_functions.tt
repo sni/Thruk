@@ -1,8 +1,8 @@
 ﻿/* send debug output to firebug console */
-function debug(str) {
-    if (window.console != undefined) {
-        console.debug(str);
-    }
+var debug = function(str) {}
+if(thruk_debug_js != undefined && thruk_debug_js && window.console != undefined) {
+    /* overwrite debug function, so caller information is not replaced */
+    debug = console.debug;
 }
 
 /* uppercase first char */
@@ -28,7 +28,7 @@ var TP = {
     add_pantab: function(id) {
         var tabpan = Ext.getCmp('tabpan');
         var size   = tabpan.items.length;
-        var nextid = this.getNextId("tabpan-tab", id);
+        var nextid = TP.getNextId("tabpan-tab", id);
 
         /* add new tab panel */
         tabpan.add(new TP.Pantab({id: nextid})).show();
@@ -60,8 +60,8 @@ var TP = {
         if(config.conf == undefined) {
             config.conf = {};
         }
-        config.conf.id = this.getNextId("panlet", config.id);
-        var state = cp.readValues();
+        config.conf.id = TP.getNextId("panlet", config.id);
+        var state = cp.state;
         if(state[config.conf.id] != undefined
            && state[config.conf.id].xdata != undefined
            && state[config.conf.id].xdata.cls != undefined) {
@@ -225,6 +225,12 @@ var TP = {
             }
         }
     },
+    refreshAllPanel: function() {
+        var panels = TP.getAllPanel();
+        for(var nr in panels) {
+            panels[nr].refreshHandler();
+        }
+    },
     /* return all panlets */
     getAllPanel: function() {
         var panels = [];
@@ -330,6 +336,22 @@ var TP = {
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },
+    startAllPanelRefresh: function() {
+        var panels = TP.getAllPanel();
+        for(var nr in panels) {
+            var p = panels[nr];
+            p.startInterval();
+        }
+    },
+    stopAllPanelRefresh: function() {
+        var panels = TP.getAllPanel();
+        for(var nr in panels) {
+            var p = panels[nr];
+            if(p) {
+                p.stopInterval();
+            }
+        }
+    },
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         var res  = timedef.match(/^(\d+)(\w{1})/);
@@ -355,9 +377,13 @@ var TP = {
         }
         if(data == undefined || data == '') { data = {} }
 
+        // stop everything
+        this.stopRotatingTabs();
+        this.stopAllPanelRefresh();
+
         cp.clearAll();
         cp.loadData(data);
-        Ext.getCmp('viewport').add(new TP.TabBar());
+        //Ext.getCmp('viewport').add(new TP.TabBar()); // seems unnecessary
         window.setTimeout("window.location.reload()", 1000);
     },
     /* eval response data */
@@ -397,7 +423,11 @@ var TP = {
             }
             return data;
         }
-        debug("ERROR: " + response.status);
+        if(response.status == 0) {
+            // ok too
+            return false;
+        }
+        debug("ERROR: " + response.status + ' (' + response.request.options.url + ')');
         debug(response);
         if(refresh.setType) { refresh.setType('broken') }
         return false;
@@ -415,7 +445,7 @@ var TP = {
     /* start tab rotation interval */
     startRotatingTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval_rotatetabs);
+        this.stopRotatingTabs();
         if(tabpan.xdata.rotate_tabs > 0) {
             debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
             tabpan.interval_rotatetabs = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
@@ -444,7 +474,7 @@ var TP = {
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval);
+        window.clearInterval(tabpan.interval_rotatetabs);
     },
     /* rotate tabs once */
     rotateTabs: function() {

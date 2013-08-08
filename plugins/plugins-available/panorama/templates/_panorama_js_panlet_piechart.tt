@@ -49,6 +49,7 @@
                     });
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
+                    this.chart.redraw();
                 }
             }
         };
@@ -76,7 +77,7 @@
                         storeItem.store.each(function(rec) {
                             total += rec.get('data');
                         });
-                        this.setTitle(storeItem.get('name') + ' :' + storeItem.get('data') + ' (' + Math.round(storeItem.get('data') / total * 100) + '%)');
+                        this.setTitle(storeItem.get('name') + ': ' + storeItem.get('data') + ' (' + Math.round(storeItem.get('data') / total * 100) + '%)');
                     }
                 },
                 highlight: {
@@ -94,10 +95,7 @@
         });
         this.add(this.chart);
 
-        this.refreshHandler = function() {
-            TP.defaultSiteRefreshHandler(this);
-        };
-        this.addListener('afterrender', function() {
+        this.addListener('beforerender', function() {
             this.refreshHandler();
         });
     }
