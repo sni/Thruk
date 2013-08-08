@@ -330,6 +330,7 @@ plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
+plugins/plugins-available/panorama/root/cleanextjs.sh
 plugins/plugins-available/panorama/root/extjs-4.1.1/ext-all-debug.js
 plugins/plugins-available/panorama/root/extjs-4.1.1/ext-all.js
 plugins/plugins-available/panorama/root/extjs-4.1.1/license.txt
