@@ -42,10 +42,10 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 *******************************************************************************/
 
 /* send debug output to firebug console */
-function debug(str) {
-    if (thruk_debug_js && window.console != undefined) {
-        console.debug(str);
-    }
+var debug = function(str) {}
+if(thruk_debug_js != undefined && thruk_debug_js && window.console != undefined) {
+    /* overwrite debug function, so caller information is not replaced */
+    debug = console.debug;
 }
 
 /* do initial things */
