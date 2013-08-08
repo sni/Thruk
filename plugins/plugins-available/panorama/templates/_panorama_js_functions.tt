@@ -71,9 +71,17 @@ var TP = {
             throw("add_panlet(): no type!");
         }
         var pan = Ext.getCmp('tabpan');
-        var tb  = pan.getActiveTab();
-        if(!tb) {
-            tb = pan.setActiveTab(0);
+        var tb;
+
+        if(config.tb) {
+            tb                   = config.tb;
+            config.conf.autoShow = config.autoshow;
+        } else {
+            config.conf.autoShow = true;
+            tb  = pan.getActiveTab();
+            if(!tb) {
+                tb = pan.setActiveTab(0);
+            }
         }
         if(!tb) {
             throw("add_panlet(): no active tab!");
@@ -240,7 +248,9 @@ var TP = {
                 for(var nr in panel.window_ids) {
                     var id = panel.window_ids[nr];
                     var p  = Ext.getCmp(id);
-                    panels.push(p);
+                    if(p) { // can be undefined unless already rendered
+                        panels.push(p);
+                    }
                 }
             }
         });
@@ -337,6 +347,7 @@ var TP = {
         }
     },
     startAllPanelRefresh: function() {
+        TP.stopAllPanelRefresh();
         var panels = TP.getAllPanel();
         for(var nr in panels) {
             var p = panels[nr];
@@ -347,9 +358,7 @@ var TP = {
         var panels = TP.getAllPanel();
         for(var nr in panels) {
             var p = panels[nr];
-            if(p) {
-                p.stopInterval();
-            }
+            p.stopInterval();
         }
     },
     /* convert time frame into seconds */

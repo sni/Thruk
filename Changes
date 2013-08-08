@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - panorama
             - performance improvements
+            - delayed inactive panel rendering
           - Bug Fixes
             - fixed quoting downtime tasks
             - show error instead of empty result for a single failed instance

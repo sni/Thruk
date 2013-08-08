@@ -49,7 +49,9 @@
                     });
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
-                    this.chart.redraw();
+                    if(this.chart.isVisible()) {
+                        this.chart.redraw();
+                    }
                 }
             }
         };

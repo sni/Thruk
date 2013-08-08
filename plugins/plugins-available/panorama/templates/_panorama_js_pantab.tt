@@ -29,15 +29,20 @@
             for(nr in This.window_ids) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
-                    panlet.show();
+                    panlet.show(false);
                 }
+            }
+            // save current active tab unless we are in tab rotation mode
+            var tabpan = Ext.getCmp('tabpan');
+            if(tabpan.xdata.rotate_tabs <= 0) {
+                tabpan.saveState();
             }
         },
         hide: function(This, eOpts) {
             for(nr in This.window_ids) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet && !panlet.xdata.pinned) {
-                    panlet.hide();
+                    panlet.hide(false);
                 }
             }
         },
@@ -47,9 +52,9 @@
         },
         beforerender: function(This, eOpts) {
             for(nr in This.window_ids) {
-                var pantab = Ext.getCmp(This.window_ids[nr]);
-                if(pantab && !pantab.xdata.pinned) {
-                    pantab.hide();
+                var panlet = Ext.getCmp(This.window_ids[nr]);
+                if(panlet && !panlet.xdata.pinned) {
+                    panlet.hide();
                 }
             }
         }
@@ -64,10 +69,24 @@
         if(state) {
             for(nr in state.window_ids) {
                 if(state.window_ids[nr]) {
-                    window.setTimeout(TP.add_panlet, TP.initial_create_delay, {id:state.window_ids[nr], skip_state:true}, false);
-                    TP.initial_create_delay = TP.initial_create_delay + 200; // delay panlet creation by 200ms each
+                    // delayed panlet creation
+                    var autoshow = false;
+                    var delay    = TP.initial_create_delay_inactive;
+                    if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
+                        autoshow = true;
+                        delay    = TP.initial_create_delay_active;
+                    }
+                    window.setTimeout(TP.add_panlet, delay, {id:state.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false);
+
+                    if(autoshow) {
+                       TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
+                    } else {
+                       TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 50;
+                    }
                 }
             };
+            // make sure all refresh timers are running now
+            window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive + 2000);
             this.window_ids = state.window_ids;
             this.setTitle(state.title);
             Ext.apply(this, state);

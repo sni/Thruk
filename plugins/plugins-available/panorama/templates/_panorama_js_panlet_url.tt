@@ -70,8 +70,10 @@
         this.refreshHandler = function() {
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
                 /* set external url as src */
-                iframe     = this.items.getAt(1).getEl().dom;
-                iframe.src = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
+                var iframeObj = this.items.getAt(1).getEl();
+                if(iframeObj && iframeObj.dom) {
+                    iframeObj.dom.src = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
+                }
             } else {
                 TP.defaultSiteRefreshHandler(this);
             }
