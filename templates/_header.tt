@@ -30,7 +30,6 @@
       [% IF enable_shinken_features +%]
       var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
       [% END +%]
-      var thruk_debug_js          = [% IF thruk_debug %]1[% ELSE %]0[% END %];
 
       [% IF original_url %]
       var original_url = '[% original_url %]';

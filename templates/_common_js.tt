@@ -11,6 +11,7 @@
   var internetExplorer       = false;
   var has_jquery_ui          = [% has_jquery_ui %];
   var jquery_ui_url          = '[% url_prefix %]thruk/javascript/jquery-ui/js/[% jquery_ui %]';
+  var thruk_debug_js         = [% IF thruk_debug %]1[% ELSE %]0[% END %];
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
