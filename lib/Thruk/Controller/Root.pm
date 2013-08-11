@@ -798,78 +798,27 @@ sub end : ActionClass('RenderView') {
         };
     }
 
-    # set our bookmark name as our page title
-    # only if use_bookmark_titles is true
-    # and a custom title was not set
-    # since some processing time is required 
-    # it might not be for everyone
-    my $bookmark = 0;
-    if($c->stash->{'use_bookmark_titles'} && !$c->{'request'}->{'parameters'}->{'title'}) {
-        # process public bookmarks
-        OUTER:
-        foreach my $section (sort(keys(%{$c->stash->{'user_data'}->{'bookmarks'}}))) {
-            foreach my $link (@{$c->stash->{'user_data'}->{'bookmarks'}->{$section}}) {
-                if($$link[1] eq $c->{'request'}->{'env'}->{'REQUEST_URI'}) {
-                    $c->stash->{'title'} = $$link[0];
-                    $bookmark = 1;
-                    last OUTER;
-                }
-            }
-        }
-
-        # process private bookmarks only 
-        # if we did not find any matches in the
-        # user bookmarks
-        if(!$bookmark) {
-            OUTER:
-            foreach my $section (sort(keys(%{$c->stash->{'global_user_data'}->{'bookmarks'}}))) {
-                foreach my $link (@{$c->stash->{'global_user_data'}->{'bookmarks'}->{$section}}) {
-                    if($$link[1] eq $c->{'request'}->{'env'}->{'REQUEST_URI'}) {
-                        $c->stash->{'title'} = $$link[0];
-                        $bookmark = 1;
-                        last OUTER;
-                    }
-                }
-            }
-        }
-    }
-
     # figure out intelligent titles
     # only if use_intelligent_titles is true
     # we haven't found a bookmark title
-    # and a custom title wasn't set 
-    if($c->stash->{'use_intelligent_titles'} && !$bookmark && !$c->{'request'}->{'parameters'}->{'title'}) {
+    # and a custom title wasn't set
+    elsif(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_intelligent_titles'} && $c->stash->{page}) {
         # titles for status.cgi
-        if($c->{'request'}->{'action'} eq 'thruk/cgi-bin/status.cgi') {
+        if($c->stash->{page} eq 'status') {
             if($c->stash->{'hostgroup'}) {
-                if($c->stash->{'hostgroup'} eq 'all') {
-                    $c->stash->{'title'} = 'All Hostgroups';
-                }
-                else {
-                    $c->stash->{'title'} = $c->stash->{'hostgroup'};
-                }
+                $c->stash->{'title'} = $c->stash->{'hostgroup'} eq 'all' ? 'All Hostgroups' : $c->stash->{'hostgroup'};
             }
             elsif($c->stash->{'servicegroup'}) {
-                if($c->stash->{'servicegroup'} eq 'all') {
-                    $c->stash->{'title'} = 'All Servicegroups';
-                }
-                else {
-                    $c->stash->{'title'} = $c->stash->{'servicegroup'};
-                }
+                $c->stash->{'title'} = $c->stash->{'servicegroup'} eq 'all' ? 'All Servicegroups' : $c->stash->{'servicegroup'};
             }
             elsif($c->stash->{'host'}) {
-                if($c->stash->{'host'} eq 'all') {
-                    $c->stash->{'title'} = 'All Hosts';
-                }
-                else {
-                    $c->stash->{'title'} = $c->stash->{'host'};
-                }
+                $c->stash->{'title'} = $c->stash->{'host'} eq 'all' ? 'All Hosts' : $c->stash->{'host'};
             }
         }
         # titles for extinfo
-        elsif($c->{'request'}->{'action'} eq 'thruk/cgi-bin/extinfo.cgi') {
+        elsif($c->stash->{page} eq 'extinfo') {
             my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
-    
+
             # host details
             if($type == 1) {
                 $c->stash->{'title'} = $c->{'request'}->{'parameters'}->{'host'};

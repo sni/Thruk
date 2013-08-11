@@ -16,6 +16,7 @@ use Carp;
 use Data::Dumper;
 use File::Slurp;
 use Storable qw/dclone/;
+use Thruk::Utils::Filter;
 
 ##############################################
 =head1 METHODS
@@ -281,8 +282,8 @@ sub _renew_navigation {
         for my $section (keys %{$userdata->{'bookmarks'}}) {
             for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
                 my $item = {
-                        name => $item->[0],
-                        href => $item->[1]
+                    name => $item->[0],
+                    href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
                 push @{$user_items}, [ $section, $item ];
             }
@@ -295,8 +296,8 @@ sub _renew_navigation {
         for my $section (keys %{$globaldata->{'bookmarks'}}) {
             for my $item (@{$globaldata->{'bookmarks'}->{$section}}) {
                 my $item = {
-                        name => $item->[0],
-                        href => $item->[1]
+                    name => $item->[0],
+                    href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
                 push @{$user_items}, [ $section, $item ];
             }
@@ -473,6 +474,26 @@ sub _get_sublink_by_name {
         }
     }
     return;
+}
+
+##############################################
+
+=head2 _uri_with
+
+  _uri_with($baseurl, $additions)
+
+returns link expanded with additional parameters
+
+=cut
+
+sub _uri_with {
+    my($base, $add) = @_;
+    my $uri = $base;
+    for my $key (keys %{$add}) {
+        my $concat = $base =~ m/\?/mx ? '&' : '?';
+        $uri .= $concat.$key.'='.Thruk::Utils::Filter::as_url_arg($add->{$key});
+    }
+    return $uri;
 }
 
 1;

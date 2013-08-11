@@ -1434,9 +1434,11 @@ sub set_custom_title {
     $c->stash->{custom_title} = '';
     if( exists $c->{'request'}->{'parameters'}->{'title'} ) {
         my $custom_title          = $c->{'request'}->{'parameters'}->{'title'};
+        if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
         $custom_title             =~ s/\+/\ /gmx;
         $c->stash->{custom_title} = $custom_title;
         $c->stash->{title}        = $custom_title;
+        return 1;
     }
     return;
 }

@@ -126,8 +126,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
-    Thruk::Utils::Status::set_custom_title($c);
-
     return 1;
 }
 

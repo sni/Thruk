@@ -734,7 +734,7 @@ ex.:
 ==== use_bookmark_titles
 
 Sets the page title to the name of a bookmark
-if the url matches. Private bookmarks are processed 
+if the url matches. Private bookmarks are processed
 first and the name of the first match is used.
 
 ex.:
@@ -745,7 +745,7 @@ ex.:
 ==== use_intelligent_titles
 
 Thruk will used more intelligent and descriptive
-page titles. 
+page titles.
 
 ex.:
 
