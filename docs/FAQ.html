@@ -664,6 +664,7 @@ h4#_peer + div > ul tt {
 <div class='toclevel3'><a href='#_how_can_i_customize_reports'>How can i customize reports?</a></div>
 <div class='toclevel3'><a href='#_why_are_the_pnp_graphs_missing_in_my_reports'>Why are the PNP graphs missing in my reports?</a></div>
 <div class='toclevel3'><a href='#_how_can_i_create_a_readonly_panorama_dashboard_for_my_boss'>How can i create a readonly Panorama dashboard for my boss</a></div>
+<div class='toclevel3'><a href='#_how_can_i_set_custom_page_titles'>How can i set custom page titles</a></div>
 <div class='toclevel2'><a href='#_installation'>Installation</a></div>
 <div class='toclevel3'><a href='#_is_it_possible_to_operate_thruk_in_a_cluster'>Is it possible to operate Thruk in a cluster?</a></div>
 <div class='toclevel2'><a href='#_hacking_thruk'>Hacking Thruk</a></div>
@@ -868,6 +869,21 @@ your thruk_local.conf:</p></div>
 </div></div>
 <div class="paragraph"><p>The default view can be exported from the <em>Settings</em> menu inside the panorama
 dashboard.</p></div>
+</div>
+<h3 id="_how_can_i_set_custom_page_titles">How can i set custom page titles</h3><div style="clear:left"></div>
+<div class="paragraph"><p>There are few ways to do this. The first way is you 
+can turn on the use_bookmark_titles in your thruk_local.conf:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>
+    use_bookmark_titles = 1
+<pre></tt>
+</div></div>
+<div class="paragraph"><p>Now anytime you go to one of your Thruk 
+bookmarks the name of that bookmark will be used as the page title.</p></div>
+<div class="paragraph"><p>The second option is on most pages adding 
+<em>title=your title here</em> to the url will set a custom title.</p></div>
+</p></div>
 </div>
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">

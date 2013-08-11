@@ -153,6 +153,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{template}      = 'statusmap.tt';
     $c->stash->{infoBoxTitle}  = 'Network Map For All Hosts';
 
+    Thruk::Utils::Status::set_custom_title($c);
+
     return 1;
 }
 
