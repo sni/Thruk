@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - new options to set page titles: 'use_bookmark_titles' and 'use_intelligent_titles'
+          - new options to set page titles: 'use_bookmark_titles' and 'use_intelligent_titles' (awiddersheim)
           - panorama
             - performance improvements
             - delayed inactive panel rendering
