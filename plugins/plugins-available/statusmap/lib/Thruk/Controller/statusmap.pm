@@ -52,9 +52,6 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    # set some defaults
-    Thruk::Utils::Status::set_default_stash($c);
-
     my $style = $c->{'request'}->{'parameters'}->{'style'} || 'statusmap';
     if($style ne 'statusmap') {
         return if Thruk::Utils::Status::redirect_view($c, $style);
@@ -69,8 +66,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $host = 'rootid';
     }
 
-    # do the filter
+    # delete host param, otherwise we get false host=rootid filter
     delete $c->request->parameters->{'host'};
+
+    # set some defaults
+    Thruk::Utils::Status::set_default_stash($c);
+
+    # do the filter
     $c->stash->{hidesearch} = 1;
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
 

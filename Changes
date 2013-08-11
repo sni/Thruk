@@ -7,6 +7,7 @@ next:
           - Bug Fixes
             - fixed quoting downtime tasks
             - show error instead of empty result for a single failed instance
+            - fixed rootid in statusmap when using filter
 
 1.74-2   Sat Jul 27 18:15:20 CEST 2013
           - show response from date/time check in quick commands
