@@ -61,7 +61,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     }
 
     # internal error but all backends failed redirects to "no backend available"
-    if($arg1 == 13
+    if("$arg1" eq "13" # can be alphanumeric sometimes
        and (ref $c->stash->{'failed_backends'} eq 'HASH')
        and (scalar keys %{$c->stash->{'failed_backends'}} >= $c->stash->{'num_selected_backends'})
        and (scalar keys %{$c->stash->{'failed_backends'}} > 0)) {
