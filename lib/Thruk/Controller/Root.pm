@@ -802,7 +802,7 @@ sub end : ActionClass('RenderView') {
     # only if use_intelligent_titles is true
     # we haven't found a bookmark title
     # and a custom title wasn't set
-    elsif(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_intelligent_titles'} && $c->stash->{page}) {
+    if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_intelligent_titles'} && $c->stash->{page}) {
         # titles for status.cgi
         if($c->stash->{page} eq 'status') {
             if($c->stash->{'hostgroup'}) {
