@@ -14,7 +14,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # if we are not on a exact tag, use the last tag and add the date
-version=`git tag -l | sed -e 's/^v//g' | sort -n | tail -n 1`
+version=`git tag -l | sort -V | sed -e 's/^v//g' | tail -n 1`
 if [ $? -eq 0 ]; then
   version=`echo "$version" | awk -F "-" '{ print $1 }'`
   date=`date +%Y-%m-%d`
