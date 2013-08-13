@@ -6,9 +6,16 @@ use Data::Dumper;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $replace = {
-    'Log::Log4perl::Catalyst'        => 'Log::Log4perl',
-    'LWP::ConnCache'                 => 'LWP::UserAgent',
-    'Monitoring::Availability::Logs' => 'Monitoring::Availability',
+    'Log::Log4perl::Catalyst'                     => 'Log::Log4perl',
+    'LWP::ConnCache'                              => 'LWP::UserAgent',
+    'Monitoring::Availability::Logs'              => 'Monitoring::Availability',
+    'Chart::Clicker::Data::DataSet'               => 'Chart::Clicker',
+    'Chart::Clicker::Data::Series'                => 'Chart::Clicker',
+    'Chart::Clicker::Data::Marker'                => 'Chart::Clicker',
+    'Chart::Clicker::Data::Range'                 => 'Chart::Clicker',
+    'Chart::Clicker::Decoration::Legend::Tabular' => 'Chart::Clicker',
+    'Chart::Clicker::Renderer::Pie'               => 'Chart::Clicker',
+    'Chart::Clicker::Renderer::StackedBar'        => 'Chart::Clicker',
 };
 
 # first get all we have already

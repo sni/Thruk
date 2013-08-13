@@ -62,12 +62,7 @@ requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
-
-# conf tool plugin
-feature     ('plugin_conf',
-  -default                                        => 1,
-  'Storable'                                      => 0,
-);
+requires 'Storable'                               => 0;     # required by Thruk::Utils::External
 
 # shinken features plugin
 feature     ('plugin_shinken',
@@ -91,13 +86,6 @@ feature     ('plugin_reports',
   'MIME::Lite'                                    => 0,
   'Class::Inspector'                              => 0,
   'Chart::Clicker'                                => 0,
-  'Chart::Clicker::Data::DataSet'                 => 0,
-  'Chart::Clicker::Data::Series'                  => 0,
-  'Chart::Clicker::Data::Marker'                  => 0,
-  'Chart::Clicker::Data::Range'                   => 0,
-  'Chart::Clicker::Decoration::Legend::Tabular'   => 0,
-  'Chart::Clicker::Renderer::Pie'                 => 0,
-  'Chart::Clicker::Renderer::StackedBar'          => 0,
   'Graphics::Color::RGB'                          => 0,
 );
 
@@ -107,10 +95,17 @@ feature     ('plugin_reports2',
   'MIME::Lite'                                    => 0,
   'Class::Inspector'                              => 0,
 );
+
 # curl support
 feature     ('curl_support',
   -default                                        => 0,
   'LWP::Protocol::Net::Curl'                      => 0,     # required by Thruk::Backend::Provider::HTTP
+);
+
+# https backends support
+feature     ('https_backends_support',
+  -default                                        => 0,
+  'LWP::Protocol::https'                          => 0,     # required by Thruk::Backend::Provider::HTTP
 );
 
 # mysql logcache support
@@ -128,6 +123,7 @@ feature     ('author_test',
   'CatalystX::LeakChecker'                                                  => 0,
   'HTML::Lint'                                                              => 0,
   'File::BOM'                                                               => 0,
+  'Test::Simple'                                                            => 0,
   'Test::Cmd'                                                               => 0,
   'Test::Pod'                                                               => 1.40,
   'Test::Perl::Critic'                                                      => 0,
@@ -137,7 +133,6 @@ feature     ('author_test',
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
-  'Stream::Buffered'                                                        => 0,
 );
 
 ##################################
