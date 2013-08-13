@@ -2,8 +2,8 @@ package Catalyst::Helper::Model::Thruk::Class;
 
 use strict;
 use warnings;
-
 use Carp qw/ croak /;
+
 =head1 NAME
 
 Catalyst::Helper::Model::Thruk::Class - Helper Class for Catalyst::Model::Thruk::Class
@@ -39,43 +39,6 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
-=cut
-
-__PACKAGE__->meta->make_immutable;
-
-1;
-__DATA__
-=begin pod_to_ignore
-
-__thruk_class__
-package [% class %];
-
-use strict;
-use warnings;
-
-use parent/ Catalyst::Model::Thruk::Class /;
-
-=head1 NAME
-
-[% class %]
-
-=head1 SYNOPSIS
-
-See L<[% app %]>.
-
-=head1 DESCRIPTION
-
-Thruk::Class Model Class.
-
-=head1 AUTHOR
-
-[% author %]
-
-=head1 LICENSE
-
-This module is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself. See L<perlartistic>.
 
 =cut
 

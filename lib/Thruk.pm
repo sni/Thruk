@@ -54,19 +54,25 @@ use Catalyst::Runtime '5.70';
 #
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
-
-use Catalyst qw/
-                Thruk::ConfigLoader
-                Unicode::Encoding
-                Compress
-                Authentication
-                Authorization::ThrukRoles
-                CustomErrorMessage
-                Static::Simple
-                Redirect
-                Cache
-                Thruk::RemoveNastyCharsFromHttpParam
-                /;
+BEGIN {
+    my @catalyst_plugins = qw/Thruk::ConfigLoader/;
+    if($Catalyst::Runtime::VERSION < 5.90042) {
+        # since 5.90042 catalyst encodes by core
+        push @catalyst_plugins, 'Unicode::Encoding';
+    }
+    push @catalyst_plugins, qw/
+          Compress
+          Authentication
+          Authorization::ThrukRoles
+          CustomErrorMessage
+          Static::Simple
+          Redirect
+          Cache
+          Thruk::RemoveNastyCharsFromHttpParam
+    /;
+    require Catalyst;
+    Catalyst->import(@catalyst_plugins);
+};
 
 ###################################################
 our $VERSION = '1.74';
