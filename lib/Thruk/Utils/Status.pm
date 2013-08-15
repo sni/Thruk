@@ -1716,15 +1716,15 @@ sub set_audio_file {
             $state = $state - 3 if $state == 4;
             $worst_service = $state if $worst_host < $state;
         }
-        if($worst_host == 3 and defined $c->config->{'cgi_cfg'}->{'service_critical_sound'}) {
-            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_critical_sound'};
-            return;
-        }
-        if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
+        if($worst_service == 1 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
             return;
         }
-        if($worst_host == 1 and defined $c->config->{'cgi_cfg'}->{'service_unknown_sound'}) {
+        if($worst_service == 2 and defined $c->config->{'cgi_cfg'}->{'service_critical_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_critical_sound'};
+            return;
+        }
+        if($worst_service == 3 and defined $c->config->{'cgi_cfg'}->{'service_unknown_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_unknown_sound'};
             return;
         }
