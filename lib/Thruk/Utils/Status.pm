@@ -1714,7 +1714,7 @@ sub set_audio_file {
             next if $s->{'notifications_enabled'} == 0;
             my $state = $s->{'state'} + 1;
             $state = $state - 3 if $state == 4;
-            $worst_service = $state if $worst_host < $state;
+            $worst_service = $state if $worst_service < $state;
         }
         if($worst_service == 1 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
