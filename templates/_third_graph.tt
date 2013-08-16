@@ -2,7 +2,8 @@
 <script type="text/javascript">
   var graph_url = "[% escape_quotes(graph_url) %]";
 
-if(/render/.test("[% escape_quotes(graph_url) %]")) {
+if(/render/.test(graph_url)) {
+img_url = graph_url.replace('/render','');
 
 document.write('<div class="commentTitle">Performance Graph<\/div>');
 document.write('<table border="0" class="comment blockHeadBorder">');
@@ -22,7 +23,7 @@ document.write('<tr class="comment" style="cursor:pointer">');
   document.write('<tr>');
     document.write('<td colspan=7 align="center">');
       document.write('<div id="pnp_graph_pane" style="position: relative;">');
-        document.write('<a href="[% escape_quotes(graph_url) %]">');
+        document.write('<a href="'+img_url+'">');
           document.write('<img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">');
           document.write('<img id="graphiteimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="graphite graph">');
         document.write('<\/a>');
