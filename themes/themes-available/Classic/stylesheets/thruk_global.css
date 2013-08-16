@@ -65,7 +65,7 @@ body.navbar {
 div.pref_pane {
   width:470px;
   min-height:100px;
-  position:absolute;
+  position:fixed;
   top: 0px;
   right: 0px;
   z-index: 99;
