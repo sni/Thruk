@@ -48,7 +48,7 @@ if(thruk_debug_js != undefined && thruk_debug_js) {
         /* overwrite debug function, so caller information is not replaced */
         try {
             debug = console.debug;
-            debug("");
+            debug('console debug log enabled');
         } catch(e) {
             debug = function(str) {}
         }
