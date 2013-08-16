@@ -448,10 +448,22 @@ function button_out(button)
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    toggleElement('site_panel', undefined, true, 'TABLE.site_panel');
+    var enabled = toggleElement('site_panel', undefined, true, 'TABLE.site_panel');
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
     panel.style.top = (divs[0].offsetHeight + 11) + 'px';
+
+    /* make sure site panel does not overlap screen */
+    var div = jQuery('DIV.site_panel_sections')[0];
+    if(enabled == true) {
+        var table = jQuery('TABLE.top_nav')[0];
+        var newWidth = table.offsetWidth - 10;
+        if(newWidth < div.offsetWidth) {
+            div.style.width = newWidth + 'px';
+        }
+    } else {
+        div.style.width = '';
+    }
 }
 
 /* toggle querys for this backend */

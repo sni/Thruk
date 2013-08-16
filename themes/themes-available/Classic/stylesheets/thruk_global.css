@@ -139,10 +139,14 @@ DIV#site_panel {
  left: 17px;
  font-size:11px;
 }
+
 TABLE.site_panel {
   background: #F0F1EE;
-  border: 1px solid black;
+  border: none;
   padding: 5px;
+}
+DIV#site_panel DIV.shadowcontent {
+  border: 1px solid black;
 }
 TABLE.site_panel TH.site_panel {
   padding-right: 3px;

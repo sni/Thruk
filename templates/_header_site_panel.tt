@@ -72,6 +72,9 @@
               </table>
             </th>
         </tr>
+      </table>
+      <div class="site_panel_sections" style="overflow: auto;">
+      <table class="site_panel" cellspacing=0 cellpadding=0 width="100%">
         <tr>
             [% FOREACH section IN sections.keys.sort %]
             <th class="site_panel [% UNLESS loop.first %]notfirst[% END %]">
@@ -96,6 +99,7 @@
             [% END %]
         </tr>
       </table>
+      </div>
       </div></div>
       </div>
       [% END %]
