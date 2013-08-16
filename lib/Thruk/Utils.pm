@@ -1227,13 +1227,12 @@ return graph url for object (host/service)
 =cut
 
 sub get_graph_url {
-    my $c = shift;
-    my $obj   = shift;
-    my $force = shift;
+    my($c, $obj, $force) = @_;
+
     my $graph_word = $c->config->{'graph_word'};
     my $action_url = '';
-    
-    if ($graph_word && ($c->config->{'shown_inline_pnp'} || $force)){
+
+    if ($graph_word && ($c->config->{'shown_inline_pnp'} || $force)) {
         for my $type (qw/action_url_expanded notes_url_expanded/) {
             next unless defined $obj->{$type};
             for my $regex (@{list($graph_word)}) {
@@ -1245,13 +1244,15 @@ sub get_graph_url {
         }
     }
 
-    if (defined $obj->{'name'}){
+    if(defined $obj->{'name'}) {
         #host obj
         return get_action_url(1, 0, $action_url, $obj->{'name'});
-    }elsif(defined $obj->{'host_name'} && defined $obj->{'description'}){
+    }
+    elsif(defined $obj->{'host_name'} && defined $obj->{'description'}) {
         #service obj
         return get_action_url(1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
-    }else{
+    }
+    else {
         #unknown host
         return '';
     }
@@ -1271,39 +1272,34 @@ remove_render remove /render in action url
 =cut
 
 sub get_action_url {
-    my $escape_fun = shift;
-    my $remove_render = shift;
-    my $action_url = shift;
-    my $host = shift;
-    my $svc = shift;
-    
+    my($escape_fun, $remove_render, $action_url, $host, $svc) = @_;
+
     my $new_action_url = $action_url;
 
-    if ($action_url =~ m|/render/|){
-          
+    if ($action_url =~ m|/render/|mx) {
         my $new_host = $host;
-        $new_host =~ s/[^\w-]/_/g;
-        $new_action_url =~ s/$host/$new_host/g;
+        $new_host =~ s/[^\w\-]/_/gmx;
+        $new_action_url =~ s/$host/$new_host/gmx;
 
-        if ($svc){
+        if ($svc) {
             my $new_svc = $svc;
-            $new_svc =~ s/[^\w-]/_/g; 
-            $new_action_url =~ s/$svc/$new_svc/g;
+            $new_svc =~ s/[^\w\-]/_/gmx;
+            $new_action_url =~ s/$svc/$new_svc/gmx;
         }
     }
-   
-    if ($escape_fun == 2){     
+
+    if ($escape_fun == 2) {
         $new_action_url = Thruk::Utils::Filter::escape_html($new_action_url);
-    }elsif($escape_fun == 1){
+    }
+    elsif($escape_fun == 1) {
         $new_action_url = Thruk::Utils::Filter::escape_quotes($new_action_url);
     }
 
-    if ($remove_render != 0){
-        $new_action_url =~ s|/render||g;
+    if ($remove_render != 0) {
+        $new_action_url =~ s|/render||gmx;
     }
 
     return $new_action_url;
-    
 }
 
 

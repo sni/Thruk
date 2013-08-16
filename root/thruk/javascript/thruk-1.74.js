@@ -4010,7 +4010,7 @@ function graphite_format_date(date) {
 }
 
 function graphite_unformat_date(str) {
-    console.log("STR : "+str);
+    debug("STR : "+str);
     //23:59_20130125
     var year,month,hour,day,minute;
     hour=str.substring(0,2);
@@ -4018,28 +4018,36 @@ function graphite_unformat_date(str) {
     year=str.substring(6,10);
     month=str.substring(10,12)-1;
     day=str.substring(12,14);
-    console.log(year, month, day, hour, minute);
+    debug(year, month, day, hour, minute);
     var date=new Date(year, month, day, hour, minute);
 
-    console.log("date"+date);
+    debug("date"+date);
     return date.getTime()/1000;
 }
 
 function set_graphite_img(start, end, id) {
     //23:59_20130125
     var date_start = new Date(start * 1000);
-    var date_end = new Date(end * 1000);
+    var date_end   = new Date(end * 1000);
 
     var newUrl = graph_url + "&from=" + graphite_format_date(start) + "&until=" + graphite_format_date(end);
-    console.log(newUrl);
+    debug(newUrl);
 
-    jQuery('#pnpwaitimg').css('display', 'block');
-    jQuery('#graphiteimg').attr('src', newUrl);
+    jQuery('#graphitewaitimg').css('display', 'block');
 
     jQuery('#graphiteimg').load(function() {
-        jQuery('#graphiteimg').css('display' , 'block');
-        jQuery('#pnpwaitimg').css('display', 'none');
+      jQuery('#graphiteimg').css('display' , 'block');
+      jQuery('#graphiteerr').css('display' , 'none');
+      jQuery('#graphitewaitimg').css({'display': 'none', 'position': 'absolute'});
+    })
+    .error(function(e) {
+      jQuery('#graphitewaitimg').css({'display': 'none', 'position': 'inherit'});
+      jQuery('#graphiteimg').css('display' , 'none');
+      jQuery('#graphiteerr').css('display' , 'block');
     });
+
+    jQuery('#graphiteerr').css('display' , 'none');
+    jQuery('#graphiteimg').attr('src', newUrl);
 
     // set style of buttons
     if(id) {
@@ -4165,8 +4173,6 @@ function move_png_img(factor) {
 
     start = parseInt(diff * factor) + parseInt(start);
     end   = parseInt(diff * factor) + parseInt(end);
-    debug(start);
-    debug(end);
 
     return set_png_img(start, end);
 }
