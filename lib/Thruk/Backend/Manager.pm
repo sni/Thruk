@@ -1875,7 +1875,8 @@ sub _limit {
 
   _set_user_macros($peer_key)
 
-sets the USER1-256 macros from a resource file
+sets the USER1-256 macros from a resource file. Shinken supports all kind of
+macros in resource file, so just replace everything from the resource file.
 
 =cut
 
@@ -1898,8 +1899,8 @@ sub _set_user_macros {
     }
 
     if(defined $res) {
-        for my $x (1..256) {
-            $macros->{'$USER'.$x.'$'} = $res->{'$USER'.$x.'$'} if defined $res->{'$USER'.$x.'$'};
+        for my $key (keys %{$res}) {
+            $macros->{$key} = $res->{$key};
         }
     }
 

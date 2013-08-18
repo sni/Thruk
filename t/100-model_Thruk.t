@@ -9,7 +9,7 @@ $Data::Dumper::Sortkeys = 1;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 26;
+    plan tests => 30;
 }
 
 BEGIN {
@@ -81,6 +81,16 @@ unlike($cmd->{'line_expanded'}, qr/SERVICEDESC/, 'expanded command line must not
 ################################################################################
 # now set a ressource file
 ################################################################################
+# read resource file
+my $expected_resource = {
+    '$USER1$'     => '/tmp',
+    '$USER2$'     => 'test3',
+    '$PLUGINDIR$' => '/usr/local/plugins',
+};
+my $res = Thruk::Utils::read_resource_file('t/data/resource.cfg');
+is_deeply($res, $expected_resource, 'reading resource file');
+
+################################################################################
 # set resource file
 $b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
 for my $backend ( @{$b->{'backends'}} ) {
@@ -99,6 +109,17 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}, 'expand
 is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
 is($cmd->{'note'}, '', 'note should be empty');
 
+################################################################################
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}, 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 $cmd = $b->expand_command(

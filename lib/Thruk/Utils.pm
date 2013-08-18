@@ -724,7 +724,7 @@ sub read_resource_file {
     $macros   = {} unless defined $macros;
     open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
     while(my $line = <$fh>) {
-        if($line =~ m/^\s*(\$USER\d+\$)\s*=\s*(.*)$/mx) {
+        if($line =~ m/^\s*(\$[A-Z0-9]+\$)\s*=\s*(.*)$/mx) {
             $macros->{$1}   = $2;
             $comments->{$1} = $lastcomment;
             $lastcomment    = "";
