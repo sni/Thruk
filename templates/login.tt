@@ -7,7 +7,7 @@
     [%+ PROCESS _common_css.tt use_frames=1 +%]
     [%+ PROCESS _common_js.tt +%]
   </head>
-  <body class='[% page %] loginpage' id='[% page %]'>
+  <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
   [% ssi_header %]
   <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
   <br><br>
@@ -24,7 +24,7 @@
               <table>
                 <tr>
                   <th>Username</th>
-                  <td><input type="text" name="login" class="logininput"></td>
+                  <td><input type="text" name="login" class="logininput" id='loginuser'></td>
                 </tr>
                 <tr>
                   <th>Password</th>
