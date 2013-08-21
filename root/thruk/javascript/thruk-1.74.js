@@ -448,7 +448,7 @@ function button_out(button)
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    var enabled = toggleElement('site_panel', undefined, true, 'TABLE.site_panel');
+    var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent');
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
     panel.style.top = (divs[0].offsetHeight + 11) + 'px';
