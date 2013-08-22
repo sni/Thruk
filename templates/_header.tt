@@ -104,7 +104,7 @@
                 <script type="text/javascript">
                 <!--
                     try {
-                        if(window.parent.frames) {
+                        if(window.parent.frames && top.frames['side']) {
                             top.frames['side'].is_reloading = undefined;
                             top.frames['side'].load_errors  = 0;
                         }
