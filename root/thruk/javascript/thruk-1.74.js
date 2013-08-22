@@ -126,7 +126,7 @@ function hideElement(id, icon) {
 
 /* show a element by id */
 var close_elements = [];
-function showElement(id, icon, bodyclose, bodycloseelement) {
+function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
@@ -149,7 +149,15 @@ function showElement(id, icon, bodyclose, bodycloseelement) {
   if(bodyclose) {
     window.setTimeout(function() {
         addEvent(document, 'click', close_and_remove_event);
-        close_elements.push([id, icon, bodycloseelement])
+        var found = false;
+        jQuery.each(close_elements, function(key, value) {
+            if(value[0] == id) {
+                found = true;
+            }
+        });
+        if(!found) {
+            close_elements.push([id, icon, bodycloseelement, bodyclosecallback])
+        }
     }, 50);
   }
 }
@@ -209,6 +217,9 @@ function close_and_remove_event(evt) {
         if(evt && inside) {
             new_elems.push(value);
         } else {
+            if(value[3]) {
+                value[3]();
+            }
             hideElement(value[0], value[1]);
         }
     });
@@ -219,7 +230,7 @@ function close_and_remove_event(evt) {
 }
 
 /* toggle a element by id */
-function toggleElement(id, icon, bodyclose, bodycloseelement) {
+function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   var pane = document.getElementById(id);
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
@@ -227,7 +238,7 @@ function toggleElement(id, icon, bodyclose, bodycloseelement) {
   }
   resetRefresh();
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
-    showElement(id, icon, bodyclose, bodycloseelement);
+    showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback);
     return true;
   }
   else {
@@ -448,7 +459,7 @@ function button_out(button)
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
-    var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent');
+    var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent', toggleSitePanel);
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
     panel.style.top = (divs[0].offsetHeight + 11) + 'px';
@@ -462,7 +473,13 @@ function toggleSitePanel() {
             div.style.width = newWidth + 'px';
         }
     } else {
+        // reset styles till next open
         div.style.width = '';
+        // immediately reload if there were changes
+        if(additionalParams['reload_nav']) {
+            window.clearTimeout(backendSelTimer);
+            backendSelTimer  = window.setTimeout('reloadPage()', 50);
+        }
     }
 }
 
@@ -509,13 +526,13 @@ function toggleBackend(backend, state) {
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
   window.clearTimeout(backendSelTimer);
-  backendSelTimer  = window.setTimeout('reloadPage()', 2500);
+  backendSelTimer  = window.setTimeout('reloadPage()', 3000);
   return;
 }
 
 /* toggle all backends for this section */
 function toggleSection(section) {
-    section = section.replace(' ', '_');
+    section = section.replace(/[^\w]+/g, '_');
     var first_state = undefined;
     jQuery('INPUT[type=button].section_'+section).each(function(i, b) {
         var id = b.id.replace(/^button_/, '');
