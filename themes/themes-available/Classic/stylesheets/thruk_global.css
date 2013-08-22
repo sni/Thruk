@@ -63,7 +63,7 @@ body.navbar {
 
 /* preferences pane */
 div.pref_pane {
-  width:470px;
+  width:490px;
   min-height:100px;
   position:fixed;
   top: 0px;
