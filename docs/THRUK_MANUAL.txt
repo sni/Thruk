@@ -3,11 +3,11 @@ Thruk Users Guide
 
 == Introduction
 
-Thruk is a multibackend monitoring web interface which currently
+Thruk is a multibackend monitoring webinterface which currently
 supports Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a 'drop in' replacement and covers almost
-all of the original features plus adds additional enhancements for
-large installations.
+API. It is designed to be a 'dropin' replacement and covers almost
+100% of the original features plus adds additional enhancements for
+large installations and increased usability.
 
 Main Features / Advantages
 
@@ -15,21 +15,21 @@ Main Features / Advantages
   * faster, no need to parse status.dat for every request
   * less cpu usage
   * display live data, no delay between core and gui
-  * independent from monitoring core, can be installed on remote host
+  * independant from monitoring core, can be installed on remote host
   * clusterable, can be clustered over hosts
   * change status.cgi filter inline
   * extended logfile search
   * better logging, uses log4perl (who submitted which command?)
   * valid HTML code
-  * no frames ( can be re-enabled for better addon integration)
+  * no frames ( can be reenabled for better addon integration)
   * easy to extend with plugins
   * 100% Perl (using Catalyst Framework)
-  * paging ( can be disabled and customized )
+  * pagination
   * multiple themes included
   * Excel export for status and logfiles
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
-  * Save searches like bookmarks
+  * Save searches in personal bookmarks
   * Config Tool included
   * Mobile interface included
   * SLA Reports in PDF format
