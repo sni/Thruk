@@ -42,6 +42,13 @@ case "$1" in
         a2enmod auth_basic
         a2enmod rewrite
 
+        # enable thruk itself
+        if [ -x '/usr/sbin/a2enconf' ]; then
+            /usr/sbin/a2enconf thruk
+        else
+            [ -f /etc/apache2/conf.d/thruk.conf ] || ln -s /etc/apache2/conf-available/thruk.conf /etc/apache2/conf.d/thruk.conf
+        fi
+
         # set permissions
         mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports
         chown -R www-data: /var/lib/thruk \

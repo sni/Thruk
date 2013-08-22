@@ -44,6 +44,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/thruk/var/cache/thruk/
 	mkdir -p $(CURDIR)/debian/thruk/var/log/thruk/
 	mkdir -p $(CURDIR)/debian/thruk/etc/apache2/conf.d/
+	mkdir -p $(CURDIR)/debian/thruk/etc/apache2/conf-available/
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk
 	mkdir -p $(CURDIR)/debian/thruk/etc/init.d
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-available
@@ -96,7 +97,7 @@ install: build
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk_local.conf.example $(CURDIR)/debian/thruk/etc/thruk/thruk_local.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/naglint.conf.example $(CURDIR)/debian/thruk/etc/thruk/naglint.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/fcgid_env.sh $(CURDIR)/debian/thruk/usr/share/thruk/fcgid_env.sh
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/apache_fcgid.conf $(CURDIR)/debian/thruk/etc/apache2/conf.d/thruk.conf
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/apache_fcgid.conf $(CURDIR)/debian/thruk/etc/apache2/conf-available/thruk.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/menu_local.conf $(CURDIR)/debian/thruk/etc/thruk/menu_local.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/htpasswd $(CURDIR)/debian/thruk/etc/thruk/htpasswd
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk.init $(CURDIR)/debian/thruk/etc/init.d/thruk
