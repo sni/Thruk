@@ -1278,6 +1278,10 @@ sub get_action_url {
 
     # don't escape pnp links, they often contain quotes on purpose
     if($action_url =~ m/\/pnp(|4nagios)\//mx) {
+        # add theme
+        if($action_url !~ m/theme=/mx) {
+            $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
+        }
         return($action_url);
     }
 
