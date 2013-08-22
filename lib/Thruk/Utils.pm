@@ -1276,6 +1276,11 @@ sub get_action_url {
 
     my $new_action_url = $action_url;
 
+    # don't escape pnp links, they often contain quotes on purpose
+    if($action_url =~ m/\/pnp(|4nagios)\//mx) {
+        return($action_url);
+    }
+
     if ($action_url =~ m|/render/|mx) {
         my $new_host = $host;
         $new_host =~ s/[^\w\-]/_/gmx;
