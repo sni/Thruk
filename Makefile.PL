@@ -96,12 +96,6 @@ feature     ('plugin_reports2',
   'Class::Inspector'                              => 0,
 );
 
-# curl support
-feature     ('curl_support',
-  -default                                        => 0,
-  'LWP::Protocol::Net::Curl'                      => 0,     # required by Thruk::Backend::Provider::HTTP
-);
-
 # https backends support
 feature     ('https_backends_support',
   -default                                        => 0,

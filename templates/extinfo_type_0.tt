@@ -254,14 +254,6 @@
                       </td>
                       [% END %]
                     </tr>
-                    <tr>
-                      <td class='dataVar' nowrap>&nbsp;</td>
-                      [% FOREACH pd IN tmpbackends %]
-                      <td class='dataVal dataValMisc'>
-                        [% IF backend_detail.$pd.has_curl %](curl enabled)[% END %]
-                      </td>
-                      [% END %]
-                    </tr>
                   </table>
                 </td>
               </tr>

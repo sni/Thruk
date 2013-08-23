@@ -17059,8 +17059,6 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_ssl_verify_hostnames'>ssl_verify_hostnames</a></div>
 
-<div class='toclevel4'><a href='#_use_curl'>use_curl</a></div>
-
 <div class='toclevel3'><a href='#_cookie_authentication_settings'>Cookie Authentication Settings</a></div>
 
 <div class='toclevel4'><a href='#_cookie_auth_login_url'>cookie_auth_login_url</a></div>
@@ -18134,10 +18132,11 @@ With this option, passive icon will be hidden in status details.</p></div>
 <h4 id="_sitepanel">sitepanel</h4>
 <div class="paragraph"><p>The sitepanel is used to display multiple backends/sites at a glance.
 With than 10 or more sites, the list of backends will be combined
-into the combined site panel which just displays the totals of
-available / down / disabled sites.
-Set sitepanel to list/compact/auto/off to change the default
-behavior.</p></div>
+into the <em>compact</em> site panel which just displays the totals of
+available / down / disabled sites. The <em>compact</em> panel will also
+automatically be used if you use sections.
+With more than 50 backends, the <em>collapsed</em> will be selected in <em>auto</em> mode.
+Set sitepanel to list/compact/collapsed/auto/off to change the default behaviour.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -18225,16 +18224,6 @@ example for the cookie login or the http backend.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ssl_verify_hostnames = 1</tt></pre>
-</div></div>
-</div>
-<div class="sect3">
-<h4 id="_use_curl">use_curl</h4>
-<div class="paragraph"><p>Enable curl library to speed up http connections, for example used by
-the HTTP backend provider. Disabled by default.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>use_curl = 1</tt></pre>
 </div></div>
 </div>
 </div>
@@ -20430,7 +20419,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-08-22 15:13:17 CEST
+Last updated 2013-08-23 14:50:10 CEST
 </div>
 </div>
 </body>

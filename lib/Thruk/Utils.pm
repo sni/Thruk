@@ -1836,52 +1836,6 @@ sub format_response_error {
     }
 }
 
-########################################
-
-=head2 load_lwp_curl
-
-  load_lwp_curl()
-
-load curls lwp replacement
-
-=cut
-
-sub load_lwp_curl {
-    my($proxy) = @_;
-    return if(defined $ENV{'USE_CURL'} and $ENV{'USE_CURL'} == 0);
-    my $options = {};
-    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0) {
-        $options = {
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_SSL_VERIFYHOST => 0,
-        };
-    }
-    eval {
-        require LWP::Protocol::Net::Curl;
-        LWP::Protocol::Net::Curl->import(%{$options});
-
-        if($proxy) {
-            # curl uses env proxy
-            $ENV{'HTTP_PROXY'}  = $proxy;
-            $ENV{'http_proxy'}  = $proxy;
-            $ENV{'HTTPS_PROXY'} = $proxy;
-            $ENV{'https_proxy'} = $proxy;
-        } else {
-            # remove proxy from env if load succeded
-            delete $ENV{'HTTP_PROXY'};
-            delete $ENV{'http_proxy'};
-            delete $ENV{'HTTPS_PROXY'};
-            delete $ENV{'https_proxy'};
-        }
-    };
-    if($@) {
-        $ENV{'THRUK_CURL_ERROR'} = $@;
-        return;
-    }
-
-    return 1;
-}
-
 ##############################################
 
 =head2 precompile_templates

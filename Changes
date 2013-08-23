@@ -5,6 +5,7 @@ next:
           - make sure huge site panels do not overlap screen
           - support $PLUGINDIR$ and other user macros from resource file
           - added support for apache 2.4 on debian based systems
+          - removed curl support, LWP::Protocol::Net::Curl wasn't thread safe
           - panorama
             - performance improvements
             - delayed inactive panel rendering

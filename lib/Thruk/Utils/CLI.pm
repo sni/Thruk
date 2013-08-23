@@ -25,7 +25,6 @@ use Thruk::Utils::IO qw//;
 
 $Thruk::Utils::CLI::verbose  = 0;
 $Thruk::Utils::CLI::c        = undef;
-$Thruk::Utils::CLI::use_curl = 0;
 
 ##############################################
 
@@ -182,9 +181,6 @@ sub _read_secret {
             next if substr($line, 0, 1) eq '#';
             if($line =~ m/^\s*var_path\s*=\s*(.*?)\s*$/mxo) {
                 $var_path = $1;
-            }
-            if($line =~ m/^\s*use_curl\s*=\s*(.*?)\s*$/mxo) {
-                $Thruk::Utils::CLI::use_curl = $1;
             }
         }
         Thruk::Utils::IO::close($fh, $file, 1);
@@ -1151,10 +1147,6 @@ sub _cmd_ext_job {
 }
 ##############################################
 sub _get_user_agent {
-    if($Thruk::Utils::CLI::use_curl) {
-        _debug("enabled curl support") if $Thruk::Utils::CLI::verbose >= 2;
-        Thruk::Utils::load_lwp_curl();
-    }
     my $ua = LWP::UserAgent->new;
     $ua->agent("thruk_cli");
     return $ua;

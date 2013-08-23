@@ -160,7 +160,6 @@ sub set_default_config {
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
-        'use_curl'                          => 0,
         'precompile_templates'              => 1,
         'report_use_temp_files'             => 14,
         'perf_bar_pnp_popup'                => 1,
@@ -245,12 +244,8 @@ sub init_backend_thread_pool {
     } else {
         $pool_size   = 1;
     }
-    my $use_curl     = $config->{'use_curl'};
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
-
-    # do some checks
-    $use_curl = 0 if $pool_size >= 2; # curl is not thread safe
 
     # if we have multiple https backends, make sure we use the thread safe IO::Socket::SSL
     my $https_count = 0;
@@ -279,7 +274,6 @@ sub init_backend_thread_pool {
     if($num_peers > 0) {
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
-            $peer_config->{'use_curl'} = $use_curl;
             my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
