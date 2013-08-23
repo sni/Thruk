@@ -10,8 +10,6 @@ use File::Temp qw/tempdir/;
 use File::Copy qw/copy/;
 use Storable qw/dclone/;
 
-my $testport = 50080;
-
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'local test only' if defined $ENV{'CATALYST_SERVER'};
@@ -20,9 +18,24 @@ BEGIN {
     alarm(60);
 }
 
+###########################################################
+my $testport;
+BEGIN {
+    my $start = 50000;
+    for my $x (0..99) {
+        $testport = $start + $x;
+        my $socket = IO::Socket::INET->new(Listen    => 5,
+                                           LocalAddr => 'localhost',
+                                           LocalPort => $testport,
+                                           Proto     => 'tcp');
+        last if($socket);
+    }
+    BAIL_OUT('got no testport') unless $testport;
+}
+
+###########################################################
 my($http_dir, $local_dir, $input_dir,$test_name);
 BEGIN {
-    ###########################################################
     if($ENV{THRUK_LEAK_CHECK}) {
         $input_dir = 'core.d';
         $test_name = 'testname';
@@ -50,6 +63,9 @@ BEGIN {
     print $fh "tmp_path  = ".$http_dir."/tmp\n";
     close($fh);
     my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/$input_dir|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
+    `$cmd`;
+
+    $cmd = "cat $http_dir/thruk_local.conf | sed -e 's|%TESTPORT%|$testport|g' > $http_dir/thruk_local.conf2 && mv $http_dir/thruk_local.conf2 $http_dir/thruk_local.conf";
     `$cmd`;
 
     $ENV{'CATALYST_CONFIG'} = $http_dir;
@@ -228,3 +244,4 @@ sub bail_out_with_kill {
     `rm -rf $http_dir $local_dir`;
     BAIL_OUT($msg);
 }
+
