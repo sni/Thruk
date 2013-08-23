@@ -64,6 +64,9 @@ var TP = {
 
     /* add given panlet */
     add_panlet: function(config, smartPlacement) {
+        if(config == undefined) {
+            throw("add_panlet(): no config!");
+        }
         if(config.conf == undefined) {
             config.conf = {};
         }
