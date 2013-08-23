@@ -40,6 +40,15 @@
       [% END %]
 
       init_page();
+
+      [%+ IF use_frames && use_dynamic_titles %]
+      if(window.parent.frames) {
+        try {
+          window.parent.document.title = '[% title_prefix %][% title %]';
+        } catch(e) { debug(e) }
+      }
+      [% END +%]
+
     -->
     </script>
 

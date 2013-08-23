@@ -742,14 +742,16 @@ ex.:
   use_bookmark_titles = 1
 
 
-==== use_intelligent_titles
+==== use_dynamic_titles
 
-Thruk will used more intelligent and descriptive
-page titles.
+Uses more descriptive page titles.
+Bookmark titles take precedence and
+can be overriden by adding the title
+parameter on most pages
 
 ex.:
 
-  use_intelligent_titles = 1
+  use_dynamic_titles = 1
 
 
 ==== url_prefix

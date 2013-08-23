@@ -53,7 +53,7 @@ sub begin : Private {
                   bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
                   status_color_background show_logout_button use_feature_recurring_downtime
                   use_service_description force_sticky_ack force_send_notification force_persistent_ack
-                  force_persistent_comments use_bookmark_titles use_intelligent_titles
+                  force_persistent_comments use_bookmark_titles use_dynamic_titles
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }
@@ -799,10 +799,10 @@ sub end : ActionClass('RenderView') {
     }
 
     # figure out intelligent titles
-    # only if use_intelligent_titles is true
+    # only if use_dynamic_titles is true
     # we haven't found a bookmark title
     # and a custom title wasn't set
-    if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_intelligent_titles'} && $c->stash->{page}) {
+    if(!Thruk::Utils::Status::set_custom_title($c) && $c->stash->{'use_dynamic_titles'} && $c->stash->{page}) {
         # titles for status.cgi
         if($c->stash->{page} eq 'status') {
             if($c->stash->{'hostgroup'}) {

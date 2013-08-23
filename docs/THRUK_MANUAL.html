@@ -16885,7 +16885,7 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_use_bookmark_titles'>use_bookmark_titles</a></div>
 
-<div class='toclevel4'><a href='#_use_intelligent_titles'>use_intelligent_titles</a></div>
+<div class='toclevel4'><a href='#_use_dynamic_titles'>use_dynamic_titles</a></div>
 
 <div class='toclevel4'><a href='#_url_prefix'>url_prefix</a></div>
 
@@ -17263,13 +17263,15 @@ first and the name of the first match is used.</p></div>
 </div></div>
 </div>
 <div class="sect3">
-<h4 id="_use_intelligent_titles">use_intelligent_titles</h4>
-<div class="paragraph"><p>Thruk will used more intelligent and descriptive
-page titles.</p></div>
+<h4 id="_use_dynamic_titles">use_dynamic_titles</h4>
+<div class="paragraph"><p>Uses more descriptive page titles.
+Bookmark titles take precedence and
+can be overriden by adding the title
+parameter on most pages</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>use_intelligent_titles = 1</tt></pre>
+<pre><tt>use_dynamic_titles = 1</tt></pre>
 </div></div>
 </div>
 <div class="sect3">
@@ -18132,11 +18134,10 @@ With this option, passive icon will be hidden in status details.</p></div>
 <h4 id="_sitepanel">sitepanel</h4>
 <div class="paragraph"><p>The sitepanel is used to display multiple backends/sites at a glance.
 With than 10 or more sites, the list of backends will be combined
-into the <em>compact</em> site panel which just displays the totals of
-available / down / disabled sites. The <em>compact</em> panel will also
-automatically be used if you use sections.
-With more than 50 backends, the <em>collapsed</em> will be selected in <em>auto</em> mode.
-Set sitepanel to list/compact/collapsed/auto/off to change the default behaviour.</p></div>
+into the combined site panel which just displays the totals of
+available / down / disabled sites.
+Set sitepanel to list/compact/auto/off to change the default
+behavior.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -20419,7 +20420,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-08-23 14:50:10 CEST
+Last updated 2013-08-23 16:03:09 CEST
 </div>
 </div>
 </body>
