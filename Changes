@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.76     Fri Aug 23 12:17:25 CEST 2013
           - new options to set page titles: 'use_bookmark_titles' and 'use_dynamic_titles' (awiddersheim)
           - make sure huge site panels do not overlap screen
           - support $PLUGINDIR$ and other user macros from resource file

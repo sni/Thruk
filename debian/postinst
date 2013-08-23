@@ -44,7 +44,7 @@ case "$1" in
 
         # enable thruk itself
         if [ -x '/usr/sbin/a2enconf' ]; then
-            /usr/sbin/a2enconf thruk
+            [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
         else
             [ -f /etc/apache2/conf.d/thruk.conf ] || ln -s /etc/apache2/conf-available/thruk.conf /etc/apache2/conf.d/thruk.conf
         fi
