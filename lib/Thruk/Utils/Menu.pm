@@ -490,7 +490,7 @@ sub _uri_with {
     my($base, $add) = @_;
     my $uri = $base;
     for my $key (keys %{$add}) {
-        my $concat = $base =~ m/\?/mx ? '&' : '?';
+        my $concat = $base =~ m/\?/mx ? '&amp;' : '?';
         $uri .= $concat.$key.'='.Thruk::Utils::Filter::as_url_arg($add->{$key});
     }
     return $uri;
