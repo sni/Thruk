@@ -60,9 +60,10 @@ if [ -n "$newversion" -a "$newversion" != "$VERSION" ]; then
                 -i script/nagimp
     sed -r "s/_"$VERSION"_/_$newversion\_/" -i docs/THRUK_MANUAL.txt
     sed -r "s/\-$VERSION\./-$newversion\./" \
-                -i MANIFEST              \
-                -i docs/THRUK_MANUAL.txt \
-                -i root/thruk/startup.html
+                -i MANIFEST                 \
+                -i docs/THRUK_MANUAL.txt    \
+                -i root/thruk/startup.html  \
+                -i .gitignore
     sed -r "s/\-$VERSION\-/-$newversion\-/" -i docs/THRUK_MANUAL.txt
     sed -r "s/$VERSION\s*not yet released/$newversion     $fulldate/"    -i Changes
     sed -r "s/^next:/$newversion     $fulldate/"                         -i Changes
