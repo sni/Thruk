@@ -45,13 +45,13 @@
     <div class="site_panel_sections" style="overflow: auto;">
     <table class="site_panel" cellspacing=0 cellpadding=0 width="100%">
       [% FOREACH subsection IN subsections.keys.sort %]
-      [%# IF subsections.size > 1 #%]
+      [% IF subsections.size > 1 %]
       <tr>
         <th align="left">
           <a href="#" onclick="toggleAllSubSection('[% subsection %]'); return false;" title="[% subsection %]" class="sites_subsection">[% subsection %]</a>
         </th>
       </tr>
-      [%# END #%]
+      [% END %]
       <tr>
         <td>
           [% FOREACH section IN subsections.$subsection.keys.sort %]
