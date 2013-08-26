@@ -65,6 +65,7 @@ var TP = {
     /* add given panlet */
     add_panlet: function(config, smartPlacement) {
         if(config == undefined) {
+# TODO: Error: Exception thrown and not caught
             throw("add_panlet(): no config!");
         }
         if(config.conf == undefined) {

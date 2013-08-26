@@ -220,6 +220,51 @@ input.button_peerHID {
   -moz-opacity: 0.60;       /* Mozilla */
   opacity: 0.60;            /* Opera */
 }
+input.button_peerWARN {
+  color:#444444;
+  background-color:#DEDC10;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+  overflow: hidden;
+  width: 80px;
+  cursor: pointer;
+}
+input.button_peerUPDIS {
+  color:#444444;
+  background-color:#EEEEEE;
+  background-image: url(../images/peer_btn_up_disabled.png);
+  border-style:double;
+  border-color:#ACACAC;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+  overflow: hidden;
+  width: 80px;
+  cursor: pointer;
+}
+input.button_peerDOWNDIS {
+  color:#444444;
+  background-color:#EEEEEE;
+  background-image: url(../images/peer_btn_down_disabled.png);
+  border-style:double;
+  border-color:#ACACAC;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+  overflow: hidden;
+  width: 80px;
+  cursor: pointer;
+}
+
+input.section_active {
+  font-weight: bold;
+  border-color: #555555;
+  border-width: 3px;
+  border-style: solid;
+}
 
 /* class to preload images */
 .hidepics {
@@ -975,4 +1020,14 @@ TABLE.logcache_stats TD.dataVal {
 BODY.statusmap TABLE#dfl_all_filter_table {
   z-index:1000;
   position: absolute;
+}
+
+hr.sites_collapsed {
+ border: 0px;
+ border-bottom: 1px dotted #333;
+}
+
+hr.sites_collapsed.last {
+ border: 0px;
+ border-bottom: 2px solid #333;
 }

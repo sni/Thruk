@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - new site 'collapsed' panel for large setups
           - Bug Fixes
             - dashboard: removed unnecessary dependency
 

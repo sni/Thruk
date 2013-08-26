@@ -1122,7 +1122,9 @@ templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
 templates/_header_initial_states.tt
-templates/_header_site_panel.tt
+templates/_header_sites.tt
+templates/_header_sites_collapsed.tt
+templates/_header_sites_panel.tt
 templates/_help.tt
 templates/_host_command_box.tt
 templates/_host_command_box_full.tt
@@ -1434,6 +1436,8 @@ themes/themes-available/Classic/images/page_white_swoosh.png
 themes/themes-available/Classic/images/page_white_text.png
 themes/themes-available/Classic/images/page_world.png
 themes/themes-available/Classic/images/passiveonly.gif
+themes/themes-available/Classic/images/peer_btn_down_disabled.png
+themes/themes-available/Classic/images/peer_btn_up_disabled.png
 themes/themes-available/Classic/images/plus.gif
 themes/themes-available/Classic/images/problem.png
 themes/themes-available/Classic/images/recovery.png
@@ -1588,6 +1592,8 @@ themes/themes-available/Exfoliation/images/page_white_swoosh.png
 themes/themes-available/Exfoliation/images/page_white_text.png
 themes/themes-available/Exfoliation/images/page_world.png
 themes/themes-available/Exfoliation/images/passiveonly.gif
+themes/themes-available/Exfoliation/images/peer_btn_down_disabled.png
+themes/themes-available/Exfoliation/images/peer_btn_up_disabled.png
 themes/themes-available/Exfoliation/images/plus.gif
 themes/themes-available/Exfoliation/images/problem.png
 themes/themes-available/Exfoliation/images/recovery.png
@@ -1800,6 +1806,8 @@ themes/themes-available/Nuvola/images/page_white_swoosh.png
 themes/themes-available/Nuvola/images/page_white_text.png
 themes/themes-available/Nuvola/images/page_world.png
 themes/themes-available/Nuvola/images/passiveonly.gif
+themes/themes-available/Nuvola/images/peer_btn_down_disabled.png
+themes/themes-available/Nuvola/images/peer_btn_up_disabled.png
 themes/themes-available/Nuvola/images/plus.gif
 themes/themes-available/Nuvola/images/problem.png
 themes/themes-available/Nuvola/images/recovery.png
@@ -2006,6 +2014,8 @@ themes/themes-available/Thruk/images/page_white_swoosh.png
 themes/themes-available/Thruk/images/page_white_text.png
 themes/themes-available/Thruk/images/page_world.png
 themes/themes-available/Thruk/images/passiveonly.gif
+themes/themes-available/Thruk/images/peer_btn_down_disabled.png
+themes/themes-available/Thruk/images/peer_btn_up_disabled.png
 themes/themes-available/Thruk/images/plus.gif
 themes/themes-available/Thruk/images/problem.png
 themes/themes-available/Thruk/images/recovery.png
@@ -2151,6 +2161,8 @@ themes/themes-available/Vautour/images/page_white_swoosh.png
 themes/themes-available/Vautour/images/page_white_text.png
 themes/themes-available/Vautour/images/page_world.png
 themes/themes-available/Vautour/images/passiveonly.gif
+themes/themes-available/Vautour/images/peer_btn_down_disabled.png
+themes/themes-available/Vautour/images/peer_btn_up_disabled.png
 themes/themes-available/Vautour/images/plus.gif
 themes/themes-available/Vautour/images/problem.png
 themes/themes-available/Vautour/images/recovery.png
@@ -2399,6 +2411,8 @@ themes/themes-available/Wakizashi/images/page_white_swoosh.png
 themes/themes-available/Wakizashi/images/page_white_text.png
 themes/themes-available/Wakizashi/images/page_world.png
 themes/themes-available/Wakizashi/images/passiveonly.gif
+themes/themes-available/Wakizashi/images/peer_btn_down_disabled.png
+themes/themes-available/Wakizashi/images/peer_btn_up_disabled.png
 themes/themes-available/Wakizashi/images/plus.gif
 themes/themes-available/Wakizashi/images/problem.png
 themes/themes-available/Wakizashi/images/recovery.png

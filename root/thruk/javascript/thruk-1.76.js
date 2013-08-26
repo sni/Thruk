@@ -199,15 +199,9 @@ function close_and_remove_event(evt) {
                 inside = true;
             }
 
-            // verify if our event target is a subelement of the panel to close
+            // make sure our event target is not a subelement of the panel to close
             if(!inside && evt) {
-                var el = evt.target;
-                while(el.parentNode != undefined) {
-                    el = el.parentNode;
-                    if(el == obj) {
-                        inside = true;
-                    }
-                }
+                inside = is_el_subelement(evt.target, obj);
             }
 
             // hilight checked area
@@ -243,11 +237,40 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
   }
   else {
     hideElement(id, icon);
-    try {
-      close_and_remove_event();
-    } catch(e) { debug(e) }
+    // if we hide something, check if we have to close others too
+    // but only if the element to close is not a subset of an existing to_close_element
+    var inside = false;
+    jQuery.each(close_elements, function(key, value) {
+        var obj    = document.getElementById(value[0]);
+        if(value[2]) {
+            obj = jQuery(value[2])[0];
+        }
+        inside = is_el_subelement(pane, obj);
+        if(inside) {
+            return false; // break jQuery.each
+        }
+    });
+    if(!inside) {
+        try {
+          close_and_remove_event();
+        } catch(e) { debug(e) }
+    }
     return false;
   }
+}
+
+/* return true if obj A is a subelement from obj B */
+function is_el_subelement(obj_a, obj_b) {
+    if(obj_a == obj_b) {
+        return true;
+    }
+    while(obj_a.parentNode != undefined) {
+        obj_a = obj_a.parentNode;
+        if(obj_a == obj_b) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /* save settings in a cookie */
@@ -453,7 +476,7 @@ function button_over(button)
 }
 function button_out(button)
 {
-   button.style.borderColor = "#999999";
+   button.style.borderColor = "";
 }
 
 /* toggle site panel */
@@ -481,10 +504,12 @@ function toggleSitePanel() {
             backendSelTimer  = window.setTimeout('reloadPage()', 50);
         }
     }
+
+    updateSitePanelCheckBox();
 }
 
 /* toggle querys for this backend */
-function toggleBackend(backend, state) {
+function toggleBackend(backend, state, skip_update) {
   resetRefresh();
   var button        = document.getElementById('button_' + backend);
   if(state == undefined) { state = -1; }
@@ -526,8 +551,35 @@ function toggleBackend(backend, state) {
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
   window.clearTimeout(backendSelTimer);
-  backendSelTimer  = window.setTimeout('reloadPage()', 3000);
+  var delay = 2500;
+  if(show_sitepanel == 'panel')     { delay =  3500; }
+  if(show_sitepanel == 'collapsed') { delay = 10000; }
+  backendSelTimer  = window.setTimeout('reloadPage()', delay);
+
+  if(skip_update == undefined || !skip_update) {
+    updateSitePanelCheckBox();
+  }
   return;
+}
+
+/* toggle subsection */
+var last_subsection;
+function toggleSubSection(subsection) {
+    var enabled = toggleElement(subsection);
+    if(enabled) {
+        jQuery('#btn_'+subsection).addClass('section_active');
+    }
+    if(last_subsection == subsection) {
+        jQuery('#btn_'+subsection).removeClass('section_active');
+        last_subsection = undefined;
+    } else {
+        if(last_subsection != undefined) {
+            jQuery('#btn_'+last_subsection).removeClass('section_active');
+            hideElement(last_subsection);
+        }
+        last_subsection = subsection;
+    }
+    updateSitePanelCheckBox();
 }
 
 /* toggle all backends for this section */
@@ -543,8 +595,35 @@ function toggleSection(section) {
                 first_state = 1;
             }
         }
-        toggleBackend(id, first_state);
+        toggleBackend(id, first_state, true);
     });
+    updateSitePanelCheckBox();
+}
+
+/* toggle all backends for one subsection */
+function toggleAllSubSection(subsection) {
+    subsection = subsection.replace(/[^\w]+/g, '_');
+    var first_state = undefined;
+    jQuery('INPUT[type=button].section_'+subsection).each(function(i, b) {
+        var id = b.id.replace(/^button_/, '');
+        if(first_state == undefined) {
+            if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
+                first_state = 0;
+            } else {
+                first_state = 1;
+            }
+        }
+        toggleBackend(id, first_state, true);
+    });
+    jQuery('INPUT.btn_sites_'+subsection).each(function(i, b) {
+        jQuery(b).removeClass("button_peerDIS button_peerDOWN button_peerUP button_peerWARN button_peerUPDIS button_peerDOWNDIS");
+        if(first_state == 0) {
+            jQuery(b).addClass("button_peerDIS");
+        } else {
+            jQuery(b).addClass("button_peerUP");
+        }
+    });
+    updateSitePanelCheckBox();
 }
 
 /* toggle all backends for all sections */
@@ -558,14 +637,103 @@ function toggleAllSections(reverse) {
     }
     jQuery('TABLE.site_panel DIV.backend INPUT').each(function(i, b) {
         var id = b.id.replace(/^button_/, '');
-        toggleBackend(id, state);
+        toggleBackend(id, state, true);
     });
-    if(state == 1) {
-        jQuery('#all_backends').attr('checked', true);
-    } else {
+    jQuery('INPUT.btn_sites').each(function(i, b) {
+        jQuery(b).removeClass("button_peerDIS button_peerDOWN button_peerUP button_peerWARN button_peerUPDIS button_peerDOWNDIS");
+        if(state == 1) {
+            jQuery(b).addClass("button_peerUP");
+        } else {
+            jQuery(b).addClass("button_peerDIS");
+        }
+    });
+    updateSitePanelCheckBox();
+}
+
+/* update all site panel checkboxes */
+function updateSitePanelCheckBox() {
+    var subsections = [];
+    jQuery('A.sites_subsection').each(function(i, b) {
+        subsections.push(b.title);
+    });
+    if(subsections.length == 0) {
+        subsections = ['Default'];
+    }
+
+    /* count totals */
+    var total = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
+    jQuery(subsections).each(function(i, subsection) {
+        total['subsections'][subsection] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
+        jQuery('INPUT.btn_sites_'+subsection).each(function(i, b) {
+            var section = b.value;
+            total['subsections'][subsection]['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
+            jQuery('INPUT.section_'+subsection+'_'+section).each(function(i, b) {
+                if(jQuery(b).hasClass('button_peerDIS') || jQuery(b).hasClass('button_peerHID')) {
+                    total['subsections'][subsection]['sections'][section]['disabled']++;
+                    total['subsections'][subsection]['disabled']++;
+                    total['disabled']++;
+                }
+                else if(jQuery(b).hasClass('button_peerUP')) {
+                    total['subsections'][subsection]['sections'][section]['up']++;
+                    total['subsections'][subsection]['up']++;
+                    total['up']++;
+                }
+                else if(jQuery(b).hasClass('button_peerDOWN')) {
+                    total['subsections'][subsection]['sections'][section]['down']++;
+                    total['subsections'][subsection]['down']++;
+                    total['down']++;
+                } else {
+                    if(thruk_debug_js) { alert("ERROR: no known class found in subsection: " + subsection + ', section: ' + section + ', site: ' + b.title ); }
+                }
+                total['subsections'][subsection]['sections'][section]['total']++;
+                total['subsections'][subsection]['total']++;
+                total['total']++;
+            });
+
+            /* set section button */
+            jQuery('#btn_sites_' + subsection + '_' + section)
+                    .removeClass("button_peerDIS")
+                    .removeClass("button_peerDOWN")
+                    .removeClass("button_peerUP")
+                    .removeClass("button_peerWARN")
+                    .removeClass("button_peerUPDIS")
+                    .removeClass("button_peerDOWNDIS");
+            if(total['subsections'][subsection]['sections'][section]['disabled'] == total['subsections'][subsection]['sections'][section]['total']) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDIS');
+            }
+            else if(total['subsections'][subsection]['sections'][section]['up'] == total['subsections'][subsection]['sections'][section]['total']) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerUP');
+            }
+            else if(total['subsections'][subsection]['sections'][section]['down'] == total['subsections'][subsection]['sections'][section]['total']) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDOWN');
+            }
+            else if(total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] > 0) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerWARN');
+            }
+            else if(total['subsections'][subsection]['sections'][section]['up'] > 0 && total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] == 0) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerUPDIS');
+            }
+            else if(total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] == 0) {
+                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDOWNDIS');
+            }
+
+            /* set section checkbox */
+            if(total['subsections'][subsection]['sections'][section]['disabled'] > 0) {
+                jQuery('#all_section_' + subsection + '_' + section).attr('checked', false);
+            } else {
+                jQuery('#all_section_' + subsection + '_' + section).attr('checked', true);
+            }
+        });
+    });
+
+    /* check all button */
+    if(total['disabled'] > 0) {
         jQuery('#all_backends').attr('checked', false);
+    } else {
+        jQuery('#all_backends').attr('checked', true);
     }
 }
+
 
 /* toogle checkbox by id */
 function toggleCheckBox(id) {

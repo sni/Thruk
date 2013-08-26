@@ -104,8 +104,15 @@ sub init {
                 $self->{'state_hosts'}->{$peer->{'key'}} = { source => $addr };
             }
         }
-        $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
-        push @{$self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}}}, $peer;
+        my($subsection,$section) = split(/\//mx, $peer->{'section'}, 2);
+        if(!$section) {
+            $section    = $subsection;
+            $subsection = 'Default';
+        }
+        if(!defined $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}) {
+            $self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}} = [];
+        }
+        push @{$self->{'sections'}->{$subsection}->{$section}->{$peer->{'name'}}}, $peer;
     }
 
     $self->{'initialized'} = 1;
