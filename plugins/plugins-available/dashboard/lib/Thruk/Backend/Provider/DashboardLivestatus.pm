@@ -3,7 +3,6 @@ package Thruk::Backend::Provider::Livestatus;
 use strict;
 use warnings;
 use Carp;
-use Monitoring::Livestatus::Class;
 use Thruk::Utils;
 use Thruk::Backend::Provider::Livestatus;
 
