@@ -512,6 +512,23 @@ sub test_command {
 }
 
 #########################
+
+=head2 overrideConfig
+
+    overrideConfig('key', 'value')
+
+  override config setting
+
+=cut
+sub overrideConfig {
+    my($key, $value) = @_;
+    my $c = get_c();
+    $c->config->{$key} = $value;
+    ok(1, "config: set '$key' to '$value'");
+    return;
+}
+
+#########################
 sub make_test_hash {
     my $data = shift;
     my $test = shift || {};
