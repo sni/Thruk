@@ -93,6 +93,8 @@
             this.window_ids = state.window_ids;
             this.setTitle(state.title);
             Ext.apply(this, state);
+        } else {
+            TP.initialized = true;
         }
     }
 });
