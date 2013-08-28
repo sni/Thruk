@@ -65,8 +65,7 @@ var TP = {
     /* add given panlet */
     add_panlet: function(config, smartPlacement) {
         if(config == undefined) {
-// TODO: Error: Exception thrown and not caught
-            throw new ThrukError("add_panlet(): no config!");
+            throw new Error("TP.add_panlet(): no config! (caller: " + TP.add_panlet.caller.toString() + ")");
         }
         if(config.conf == undefined) {
             config.conf = {};
@@ -79,7 +78,7 @@ var TP = {
             config.type = state[config.conf.id].xdata.cls;
         }
         if(config.type == undefined) {
-            throw new ThrukError("add_panlet(): no type!");
+            throw new Error("TP.add_panlet(): no type! (caller: " + TP.add_panlet.caller.toString() + ")");
         }
         var pan = Ext.getCmp('tabpan');
         var tb;
@@ -95,7 +94,7 @@ var TP = {
             }
         }
         if(!tb) {
-            throw new ThrukError("add_panlet(): no active tab!");
+            throw new Error("TP.add_panlet(): no active tab! (caller: " + TP.add_panlet.caller.toString() + ")");
         }
         var win = Ext.create(config.type, config.conf);
         win.panel_id = tb.id;
