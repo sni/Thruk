@@ -129,7 +129,7 @@ SKIP: {
         sleep(1);
     }
 
-    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished") or BAIL_OUT("job did not finish");
+    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished") or BAIL_OUT("$0: job did not finish");
     my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
     is($out,  "test\n", "got result");

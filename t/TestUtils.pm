@@ -103,7 +103,7 @@ sub get_test_host_cli {
     my $test = { cmd  => $binary.' -a listhosts' };
     test_command($test);
     my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-    isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
+    isnt($host, undef, 'got test hosts') or BAIL_OUT($0.": need test host:\n".Dumper($test));
     return $host;
 }
 
@@ -119,7 +119,7 @@ sub get_test_hostgroup_cli {
         next unless $members;
         $hostgroup = $name;
     }
-    isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT("need test hostgroup");
+    isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT($0.": need test hostgroup");
     return $hostgroup;
 }
 
@@ -592,11 +592,11 @@ sub bail_out_req {
         $error = $1;
         diag(Dumper($msg));
         diag(Dumper($error));
-        BAIL_OUT($msg);
+        BAIL_OUT($0.': '.$msg);
     }
     diag(Dumper($msg));
     diag(Dumper($req));
-    BAIL_OUT($msg);
+    BAIL_OUT($0.': '.$msg);
     return;
 }
 

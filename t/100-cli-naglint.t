@@ -19,7 +19,7 @@ if(defined $ENV{'THRUK_BIN'}) {
     $BIN =~ s/thruk$/naglint/mx;
 }
 
-ok(-f $BIN, "naglint exists: $BIN") or BAIL_OUT("no binary found");
+ok(-f $BIN, "naglint exists: $BIN") or BAIL_OUT("$0: no binary found");
 
 # create test file
 my($fh, $filename) = tempfile(TEMPLATE => 'tempXXXXX', SUFFIX => '.cfg');

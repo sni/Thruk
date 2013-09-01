@@ -37,7 +37,7 @@ $b->init(
   'config'  => Thruk->config,
 );
 
-is($b->{'initialized'}, 1, 'Backend Manager Initialized') or BAIL_OUT('no need to run further tests without valid connection');
+is($b->{'initialized'}, 1, 'Backend Manager Initialized') or BAIL_OUT("$0: no need to run further tests without valid connection");
 
 my $disabled_backends = $b->disable_hidden_backends();
 $b->disable_backends($disabled_backends);

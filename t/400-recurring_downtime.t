@@ -22,7 +22,7 @@ $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CA
 my $test = { cmd  => $BIN.' -a listhosts' };
 TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
+isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host:\n".Dumper($test));
 
 my $rand    = int(rand(1000000));
 my $comment = 'test downtime '.$rand;
@@ -58,7 +58,7 @@ for my $downtime (@{$test_downtime}) {
     my $host = $downtime->{'host'};
     my $user = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
     my $cronentry = `crontab -l $user | grep downtimetask | grep '$host'`;
-    like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("got no cron entry");
+    like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");
 
     my($logfile) = ($cronentry =~ m/>>(.*?cron\.log)/mx);
     like($logfile, '/cron\.log$/', "got cron log: ".$logfile);

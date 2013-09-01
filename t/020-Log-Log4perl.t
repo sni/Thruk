@@ -21,7 +21,7 @@ BEGIN {
 plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
 
 # copy our test log4perl config
-ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("copy failed: $!");
+ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("$0: copy failed: $!");
 
 if(defined $ENV{'CATALYST_SERVER'}) {
     move('/etc/thruk/log4perl.conf', '/etc/thruk/log4perl.conf.orig');

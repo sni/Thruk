@@ -44,6 +44,6 @@ for my $file (sort glob("templates/cmd/*")) {
         );
     }
     else {
-        BAIL_OUT("found file which does not match cmd template: ".$file);
+        BAIL_OUT("$0: found file which does not match cmd template: ".$file);
     }
 }

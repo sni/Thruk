@@ -33,16 +33,16 @@ my $cmd="./script/thruk_server.pl --pidfile=$pidfile --port=$testport > $server_
 ok($cmd, $cmd);
 my $out = `$cmd`;
 my $rc = $?;
-ok($rc == 0, 'test server started: '.$out) or BAIL_OUT('need test server');
+ok($rc == 0, 'test server started: '.$out) or BAIL_OUT("$0: need test server");
 for my $x (1..10) {
     last if -f $pidfile;
     sleep(1);
 }
-ok(-f $pidfile, 'has pidfile') or BAIL_OUT('need test server');
+ok(-f $pidfile, 'has pidfile') or BAIL_OUT("$0: need test server");
 my $pid = `cat $pidfile`;
-ok($pid > 0, 'got a pid from '.$pidfile) or BAIL_OUT('need test server');
+ok($pid > 0, 'got a pid from '.$pidfile) or BAIL_OUT("$0: need test server");
 `ps -p $pid`;
-ok($? == 0, 'test server alive') or BAIL_OUT('need test server');
+ok($? == 0, 'test server alive') or BAIL_OUT("$0: need test server");
 for my $x (1..30) {
     my $out = `grep 'Accepting connections at' $server_log > /dev/null 2>&1`;
     last if ($?>>8) == 0;

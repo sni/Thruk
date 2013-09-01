@@ -26,7 +26,7 @@ $cronuser = ' -u '.$ENV{'THRUK_USER'} if defined $ENV{'THRUK_USER'};
 my $test = { cmd  => $BIN.' -a listhosts' };
 TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host");
+isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host");
 
 # list backends
 TestUtils::test_command({
