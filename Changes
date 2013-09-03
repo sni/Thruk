@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.76-3   Tue Sep  3 23:00:09 CEST 2013
           - new site 'collapsed' panel for large setups
           - Bug Fixes
             - dashboard: removed unnecessary dependency
