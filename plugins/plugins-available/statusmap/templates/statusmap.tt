@@ -11,7 +11,7 @@
       [% PROCESS _infobox.tt %]
     </td>
     <td align="center" valign="top" width="33%">
-      <div align="center" class='dataTitle'>Statusmap For All Hosts</div><br>
+      <div align="center" class='dataTitle'>Statusmap</div><br>
     </td>
     <td align="right" valign="top" width="33%">
       <table border="0" cellspacing=2 cellpadding=2 class='optBox'>
