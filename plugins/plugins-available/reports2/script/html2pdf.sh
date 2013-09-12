@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# usage:
+#
+# html2pdf.sh <html inputfile> <pdf outputfile> [<logfile>] [<wkhtmltopdf binary>]
+#
 
 # read rc files if exist
 [ -e ~/.thruk   ] && . ~/.thruk
