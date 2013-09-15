@@ -40,6 +40,7 @@ sub set_default_config {
         mode_file                       => '0660',
         mode_dir                        => '0770',
         backend_debug                   => 0,
+        backend_single                  => 0,
         connection_pool_size            => undef,
         use_ajax_search                 => 1,
         ajax_search_hosts               => 1,

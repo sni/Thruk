@@ -1611,6 +1611,15 @@ ex.:
   backend_debug = 1
 
 
+==== backend_single
+Use this to enable only one backend at a time. Default
+behavior is to select multiple backends.
+
+ex.:
+
+  backend_single = 1
+
+
 ==== connection_pool_size
 Use connection pool when accessing multiple sites.
 Increases the performance because backends will be queried

@@ -522,6 +522,11 @@ function toggleBackend(backend, state, skip_update) {
     return;
   }
 
+  if(backend_single) {
+    jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
+    jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
+  }
+
   initial_state = initial_backend_states[backend];
   var newClass  = undefined;
   if(jQuery(button).hasClass("button_peerDIS") || state == 1) {
@@ -539,6 +544,12 @@ function toggleBackend(backend, state, skip_update) {
     newClass = "button_peerUP";
     current_backend_states[backend] = 0;
     delete additionalParams['backend'];
+  } else if(backend_single) {
+    newClass = "button_peerUP";
+    for(var b in current_backend_states) {
+        current_backend_states[b] = 2;
+    }
+    current_backend_states[backend] = 0;
   } else {
     newClass = "button_peerDIS";
     current_backend_states[backend] = 2;
@@ -551,7 +562,11 @@ function toggleBackend(backend, state, skip_update) {
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states));
   window.clearTimeout(backendSelTimer);
-  var delay = 2500;
+  if(backend_single) {
+    var delay = 0;
+  } else {
+    var delay = 2500;
+  }
   if(show_sitepanel == 'panel')     { delay =  3500; }
   if(show_sitepanel == 'collapsed') { delay = 10000; }
   backendSelTimer  = window.setTimeout('reloadPage()', delay);
