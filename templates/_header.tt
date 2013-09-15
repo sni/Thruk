@@ -20,6 +20,7 @@
     <!--
       var ajax_search_enabled     = '[% use_ajax_search %]';
       var backend_chooser         = '[% backend_chooser %]';
+      var backend_single          = [% backend_single %];
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
       [% END +%]

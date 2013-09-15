@@ -17021,6 +17021,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_backend_debug'>backend_debug</a></div>
 
+<div class='toclevel4'><a href='#_backend_single'>backend_single</a></div>
+
 <div class='toclevel4'><a href='#_connection_pool_size'>connection_pool_size</a></div>
 
 <div class='toclevel4'><a href='#_logcache'>logcache</a></div>
@@ -17972,6 +17974,14 @@ makes sense when debug logging is activated.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>backend_debug = 1</tt></pre>
+</div></div>
+<h4 id="_backend_single">backend_single</h4>
+<div class="paragraph"><p>Use this to enable only one backend at a time. Default
+behavior is to select multiple backends.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>backend_single = 1</tt></pre>
 </div></div>
 <h4 id="_connection_pool_size">connection_pool_size</h4>
 <div class="paragraph"><p>Use connection pool when accessing multiple sites.
