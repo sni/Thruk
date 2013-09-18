@@ -76,7 +76,7 @@
                         autoshow = true;
                         delay    = TP.initial_create_delay_active;
                     }
-                    window.setTimeout(TP.add_panlet, delay, {id:state.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false);
+                    window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:state.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
 
                     if(autoshow) {
                        TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
