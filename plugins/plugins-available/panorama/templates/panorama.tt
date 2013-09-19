@@ -40,9 +40,7 @@
 <!--[IF IE]>
 [% IF thruk_debug %]
 <script type="text/javascript">
-<!--
 alert("Thruks Panorama View does not support Internet Explorer. Please use almost any other browser instead.");
--->
 </script>
 [% ELSE %]
 Thruks Panorama View does not support Internet Explorer. Please use almost any other browser instead.
