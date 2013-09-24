@@ -921,7 +921,6 @@ sub _apache_status {
     my $cookie = $c->request->cookie('thruk_auth');
     $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value) if $cookie;
     $ua->default_header('Authorization' => $c->{'request'}->{'headers'}->{'authorization'}) if $c->{'request'}->{'headers'}->{'authorization'};
-$ua->default_header('Cookie' => 'thruk_auth=dd0d3276c5b8855dc639996794c6dcfc');
     my $res = $ua->get($url);
     if($res->code == 200) {
         my $content = $res->content;
