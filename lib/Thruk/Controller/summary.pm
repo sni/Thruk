@@ -449,16 +449,31 @@ sub _get_filter {
     my $host         = $c->{'request'}->{'parameters'}->{'host'};
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
     if(defined $hostgroup and $hostgroup ne 'all') {
-        push @hostfilter,    { current_host_groups => { '>=' => $hostgroup }};
-        push @servicefilter, { current_host_groups => { '>=' => $hostgroup }};
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { groups => { '>=' => $hostgroup }} ]);
+        $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        my @hosts_from_groups = ();
+        for my $hostname (keys %{$host_data}) {
+            push @hosts_from_groups, { host_name => $hostname };
+        }
+        my $loghostfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);
+
+        push @hostfilter,    $loghostfilter;
+        push @servicefilter, $loghostfilter;
     }
     if(defined $host and $host ne 'all') {
         push @hostfilter,    { host_name => $host };
         push @servicefilter, { host_name => $host };
     }
     if(defined $servicegroup and $servicegroup ne 'all') {
-        push @hostfilter,    { current_service_groups => { '>=' => $servicegroup }};
-        push @servicefilter, { current_service_groups => { '>=' => $servicegroup }};
+        my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { groups => { '>=' => $servicegroup }} ]);
+        my @tmpfilter = ();
+        for my $service (@{$service_data}) {
+            push @tmpfilter, { host_name => $service->{'host_name'}, service_description => $service->{'description'} };
+        }
+        my $loghostfilter = Thruk::Utils::combine_filter('-or', \@tmpfilter);
+
+        push @hostfilter,    $loghostfilter;
+        push @servicefilter, $loghostfilter;
     }
 
     return(\@hostfilter, \@servicefilter);
