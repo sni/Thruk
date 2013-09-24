@@ -164,6 +164,7 @@ sub set_default_config {
         'report_use_temp_files'             => 14,
         'perf_bar_pnp_popup'                => 1,
         'status_color_background'           => 0,
+        'apache_status'                     => {},
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
@@ -199,6 +200,11 @@ sub set_default_config {
         $omdlink    =~ s/.*?\///gmx;
         $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
         $config->{'omd_version'} = $omdlink;
+    }
+
+    # set apache status url
+    if($ENV{'CONFIG_APACHE_TCP_PORT'}) {
+        $config->{'apache_status'}->{'Site'} = 'http://127.0.0.1:'.$ENV{'CONFIG_APACHE_TCP_PORT'}.'/server-status';
     }
 
     # additional user template paths?

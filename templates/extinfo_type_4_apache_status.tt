@@ -1,0 +1,25 @@
+﻿[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+            [% PROCESS _infobox.tt %]
+            <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+              <tr>
+                <td class='linkBox'>
+                  <a href='extinfo.cgi?type=4'>back to Performance Info</a><br>
+                </td>
+              <tr>
+            </table>
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="top" width="33%">
+          [% PROCESS _help.tt topic = "extinfo_4" %]
+        </td>
+      </tr>
+    </table><br>
+    <div align="left" class="extinfo4 apachestatus">
+      [% content %]
+    </div>
+
+[% PROCESS _footer.tt %]

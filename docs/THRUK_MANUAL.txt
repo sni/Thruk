@@ -1583,6 +1583,22 @@ ex.:
 
   sitepanel = auto
 
+==== apache_status
+
+You can integrate the output of apache status into Thruk.
+The following list of apache status pages will be accessible
+from the performance info page. Make sure the page is
+accessible from Thruk, credentials will be passed through. So
+both, basic authentication or ip based authentication would be possible.
+Read more about Apaches mod_status here: http://httpd.apache.org/docs/current/mod/mod_status.html
+
+ex.:
+
+  <apache_status>
+    Site        http://127.0.0.1:5000/server-status
+    System      http://127.0.0.1/server-status
+    Other       http://127.0.0.1/server-status
+  </apache_status>
 
 
 

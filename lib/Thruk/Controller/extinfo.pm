@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use parent 'Catalyst::Controller';
 use Data::Page;
+use LWP::UserAgent;
 
 =head1 NAME
 
@@ -821,6 +822,23 @@ sub _process_process_info_page {
 sub _process_perf_info_page {
     my( $self, $c ) = @_;
 
+    # apache statistics
+    $c->stash->{'apache_status'} = [];
+    if(    $c->check_user_roles("authorized_for_configuration_information")
+       and $c->check_user_roles("authorized_for_system_information")) {
+        my $apache = $c->{'request'}->{'parameters'}->{'apache'};
+
+        for my $name (keys %{$c->config->{'apache_status'}}) {
+            push @{$c->stash->{'apache_status'}}, $name;
+        }
+
+        if($apache and $c->config->{'apache_status'}->{$apache}) {
+            _apache_status($c, $apache, $c->config->{'apache_status'}->{$apache});
+            $c->stash->{template} = 'extinfo_type_4_apache_status.tt';
+            return 1;
+        }
+    }
+
     $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
@@ -891,6 +909,35 @@ sub _check_downtime_permissions {
 }
 
 ##########################################################
+# get apache status
+sub _apache_status {
+    my($c, $name, $url) = @_;
+    my $ua = LWP::UserAgent->new;
+    $ua->timeout(10);
+    $ua->agent("thruk");
+    $ua->ssl_opts('verify_hostname' => 0 );
+    $ua->max_redirect(0);
+    # pass through authentication
+    my $cookie = $c->request->cookie('thruk_auth');
+    $ua->default_header('Cookie' => 'thruk_auth='.$cookie->value) if $cookie;
+    $ua->default_header('Authorization' => $c->{'request'}->{'headers'}->{'authorization'}) if $c->{'request'}->{'headers'}->{'authorization'};
+$ua->default_header('Cookie' => 'thruk_auth=dd0d3276c5b8855dc639996794c6dcfc');
+    my $res = $ua->get($url);
+    if($res->code == 200) {
+        my $content = $res->content;
+        $content =~ s|<html>||gmx;
+        $content =~ s|<head>.*?<\/head>||gmxs;
+        $content =~ s|<body>||gmx;
+        $content =~ s|<\/body>||gmx;
+        $content =~ s|<\/html>||gmx;
+        $content =~ s|<h1>Apache\s+Server\s+Status\s+for\s+.*?</h1>|<h1>$name Apache Server Status</h1>|gmx;
+        $c->stash->{content} = $content;
+    } else {
+        $c->stash->{content}  = 'not available: '.$res->code;
+    }
+    return 1;
+}
+
 
 =head1 AUTHOR
 

@@ -1305,6 +1305,7 @@ templates/extinfo_type_1.tt
 templates/extinfo_type_2.tt
 templates/extinfo_type_3.tt
 templates/extinfo_type_4.tt
+templates/extinfo_type_4_apache_status.tt
 templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_6_recurring.tt
