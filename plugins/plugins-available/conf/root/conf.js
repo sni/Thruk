@@ -277,10 +277,17 @@ function update_command_line(id) {
         success: function(data) {
             hideElement(id + 'wait');
             var cmd_line = data[0].cmd_line;
+            var extra_class = "";
+            // if there is only one arg, we can make the input field larger
+            var regex = new RegExp('\\$ARG[0-9]+\\$', 'g');
+            var matches = cmd_line.match(regex);
+            if(matches.length == 1) {
+                extra_class = "single_arg";
+            }
 
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1', hideempty:true})\" onkeyup='update_other_inputs(this)'>");
+                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+extra_class+" cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'>");
             }
 
             cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");

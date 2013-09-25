@@ -34,6 +34,9 @@ INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT
 INPUT.obj_servicegroup_servicegroup_members {
   width: 400px !important;
 }
+INPUT.cmd_line_inp_wzd.single_arg {
+  width: 350px;
+}
 
 .conf_attr_used {
   text-decoration: line-through;
