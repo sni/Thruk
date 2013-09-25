@@ -87,6 +87,9 @@
             </td>
           [% ELSE %]
             <td align="left" class='[% class %]'
+            [% h.plugin_output      = remove_html_comments(h.plugin_output) %]
+            [% h.long_plugin_output = remove_html_comments(h.long_plugin_output) %]
+
             [% IF h.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]

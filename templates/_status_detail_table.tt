@@ -115,6 +115,8 @@
               [% END %]
             [% END %]
             >
+            [% s.plugin_output      = remove_html_comments(s.plugin_output) %]
+            [% s.long_plugin_output = remove_html_comments(s.long_plugin_output) %]
             [% pnp_url = get_pnp_url(c, s, 1) %]
             [% graph_url = get_graph_url(c, s, 1) %]
             [% PROCESS _perfdata_table.tt write="true" state=s.state plugin_output=s.plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description %]

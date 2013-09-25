@@ -337,9 +337,7 @@ returns an escaped string
 
 =cut
 sub escape_html {
-    my $text = shift;
-
-    return HTML::Entities::encode($text);
+    return HTML::Entities::encode($_[0]);
 }
 
 
@@ -353,11 +351,26 @@ returns a string with only the single- or double-quotes escaped
 
 =cut
 sub escape_quotes {
-    my $string = shift;
-    $string =~ s/\\'/'/gmx;
-    $string =~ s/'/\\'/gmx;
-    $string =~ s/"/\\'/gmx;
-    return $string;
+    $_[0] =~ s/\\'/'/gmx;
+    $_[0] =~ s/'/\\'/gmx;
+    $_[0] =~ s/"/\\'/gmx;
+    return $_[0];
+}
+
+
+########################################
+
+=head2 remove_html_comments
+
+  remove_html_comments($text)
+
+returns string with html comments removed
+
+=cut
+sub remove_html_comments {
+    # remove comments
+    $_[0] =~ s/<\!\-\-.*?(--!>|-->|$)//msxi;
+    return $_[0];
 }
 
 ########################################
