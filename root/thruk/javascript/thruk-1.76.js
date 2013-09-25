@@ -3689,7 +3689,7 @@ var ajax_search = {
     },
 
     /* hide the search results */
-    hide_results: function(event, immediately) {
+    hide_results: function(event, immediately, setfocus) {
         if(ajax_search.dont_hide) { return; }
         if(event && event.target) {
         }
@@ -3711,6 +3711,12 @@ var ajax_search = {
          */
         if(immediately != undefined) {
             hideElement(ajax_search.result_pan);
+            if(setfocus) {
+                ajax_search.stop_events = true;
+                window.setTimeout("ajax_search.stop_events=false;", 200);
+                var input = document.getElementById(ajax_search.input_field);
+                input.focus();
+            }
         }
         else if(ajax_search.cur_select == -1) {
             window.clearTimeout(ajax_search.hideTimer);
@@ -4033,7 +4039,7 @@ var ajax_search = {
 
         input.value = value;
         ajax_search.cur_select = -1;
-        ajax_search.hide_results();
+        ajax_search.hide_results(null, 1, 1);
         input.focus();
         if(cursorpos) {
             setCaretToPos(input, cursorpos);
@@ -4042,7 +4048,7 @@ var ajax_search = {
         // close suggestions after select
         window.clearTimeout(ajax_search.timer);
         ajax_search.dont_hide==false;
-        window.setTimeout('ajax_search.hide_results(null, 1);', 100);
+        window.setTimeout('ajax_search.hide_results(null, 1, 1);', 100);
 
         if(ajax_search.onselect != undefined) {
             return ajax_search.onselect();

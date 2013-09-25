@@ -281,7 +281,7 @@ function update_command_line(id) {
             // if there is only one arg, we can make the input field larger
             var regex = new RegExp('\\$ARG[0-9]+\\$', 'g');
             var matches = cmd_line.match(regex);
-            if(matches.length == 1) {
+            if(matches && matches.length == 1) {
                 extra_class = "single_arg";
             }
 
