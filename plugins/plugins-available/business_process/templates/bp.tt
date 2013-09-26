@@ -1,0 +1,38 @@
+﻿[% WRAPPER _bp_frame.tt subtitle="Business Process Overview" %]
+[% USE date %]
+
+<div style="margin-left: 10px; display: table;">
+  <div style="text-align: left; float: left; line-height: 29px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
+  <div style="text-align: right; margin-bottom: 3px;"><a href="bp.cgi?action=edit&amp;bp=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
+<div id="bp_table">
+<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
+  <tr>
+    <th class="status" nowrap width="200">Name</th>
+    <th class="status" nowrap width="100">Status</th>
+    <th class="status" nowrap width="100">Last Check</th>
+    <th class="status" nowrap width="100">Duration</th>
+    <th class="status" nowrap width="400">Status Information</th>
+  </tr>
+  [% FOREACH bp IN bps %]
+  [% SET rowclass = 'statusOdd'  IF loop.even %]
+  [% SET rowclass = 'statusEven' IF loop.odd %]
+  [% statusClass = 'statusUNKNOWN' %]
+  [% statusText  = 'UNKNOWN' %]
+  [% IF    bp.status == 0 %][% statusClass = 'statusOK' %][% statusText  = 'OK' %]
+  [% ELSIF bp.status == 1 %][% statusClass = 'statusWARNING' %][% statusText  = 'WARNING' %]
+  [% ELSIF bp.status == 2 %][% statusClass = 'statusCRITICAL' %][% statusText  = 'CRITICAL' %]
+  [% ELSIF bp.status == 3 %][% statusClass = 'statusUNKNOWN' %][% statusText  = 'UNKNOWN' %]
+  [% ELSIF bp.status == 4 %][% statusClass = 'statusPENDING' %][% statusText  = 'PENDING' %]
+  [% END %]
+  <tr class="[%+ IF loop.first +%] firstrow[% END %]">
+    <td class="status [% rowclass %]" align="left"><a href="bp.cgi?action=details&bp=[% bp.id %]"><b>[% bp.name %]</b></a></td>
+    <td class="status [% statusClass %]" align="center">[% statusText %]</td>
+    <td class="status [% rowclass %]" align="center">[% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]</td>
+    <td class="status [% rowclass %]" align="left">[% bp.status_text %]</td>
+  </tr>
+  [% END %]
+</table>
+</div>
+
+[% END %]

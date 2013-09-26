@@ -19,6 +19,7 @@ for my $key (qw/cgi_cfg_stat
                 use_feature_statusmap
                 use_feature_configtool
                 use_feature_reports
+                use_feature_bp
                 root
                 deprecations_shown
                 ssi_includes

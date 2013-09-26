@@ -1,0 +1,4 @@
+The 'Business Process' plugin enables advanced modeling of Business
+processes.
+
+Url: bp.cgi

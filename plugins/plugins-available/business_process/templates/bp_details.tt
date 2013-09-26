@@ -1,0 +1,7 @@
+﻿[% WRAPPER _bp_frame.tt subtitle=bp.name %]
+
+
+
+[% PROCESS _bp_graph.tt %]
+
+[% END %]

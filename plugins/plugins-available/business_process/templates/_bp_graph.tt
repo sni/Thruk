@@ -1,0 +1,36 @@
+﻿<div id='container[% bp.id %]' class="bp_container">
+    [% FOREACH n IN bp.nodes %]
+    [% statusClass = 'statusUNKNOWN' %]
+    [% statusText  = "" %]
+    [% IF    n.status == 0 %][% statusClass = 'statusOK' %]
+    [% ELSIF n.status == 1 %][% statusClass = 'statusWARNING' %]
+    [% ELSIF n.status == 2 %][% statusClass = 'statusCRITICAL' %]
+    [% ELSIF n.status == 3 %][% statusClass = 'statusUNKNOWN' %]
+    [% ELSIF n.status == 4 %][% statusClass = 'statusPENDING' %][% statusText = "status not yet calculated" %]
+    [% END %]
+    [% IF n.defined('status_text') %][% statusText = n.status_text %][% END %]
+    <div id='[% n.id %]' class='bp_node clickable [% statusClass %]'>
+        <div class="bp_label">[% n.label %]</div>
+        <div class="bp_sublabel" title="[% escape_html(statusText) %]">[% statusText %]</div>
+    </div>
+    [%+ END %]
+</div>
+<script type="text/javascript">
+    <!--
+    var nodes = [
+        [% FOREACH n IN bp.nodes %]
+        { id:"[% n.id %]", label:"[% n.label %]", status:"[% n.status %]", width: 120, height: 40 }[% UNLESS loop.last %],[% END +%]
+        [%+ END %]
+    ];
+
+    var edges = [
+        [% FOREACH n IN bp.nodes %]
+          [% FOREACH d IN n.depends %]
+              { sourceId: "[% n.id %]", targetId: "[% d.id %]" },
+          [%+ END %]
+        [% END %]
+    ];
+
+    bp_render('container[% bp.id %]', nodes, edges);
+-->
+</script>

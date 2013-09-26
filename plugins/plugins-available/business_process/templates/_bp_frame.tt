@@ -1,0 +1,27 @@
+﻿[% PROCESS _header.tt css="thruk/plugins/business_process/bp.css" js=["thruk/plugins/business_process/bp.js", "thruk/plugins/business_process/dagre-0.2.0/dagre.min.js" ] %]
+[% PROCESS _message.tt %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">
+      <br><br>
+      <div align="center" class='dataTitle'>
+        [% subtitle %]
+      </div>
+    </td>
+    <td align="right" valign="bottom" width="33%">
+      [% PROCESS _help.tt topic = "business_process" %]
+    </td>
+  </tr>
+</table>
+
+[% content %]
+
+<script type="text/javascript">
+<!--
+init_bp_buttons();
+-->
+</script>

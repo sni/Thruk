@@ -1,0 +1,56 @@
+A.bp_button {
+  height: 25px;
+}
+BUTTON.bp_button {
+  height: 27px;
+  min-width: 27px;
+}
+
+.bp_container {
+    position: relative;
+}
+
+.bp_node {
+    border: 1px solid black;
+    position: absolute;
+    text-align: center;
+    height: 40px;
+    width: 120px;
+    display: block;
+
+    -webkit-box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
+    box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
+}
+
+.bp_label {
+    font-weight: bold;
+    line-height: 20px;
+    font-size: 11px;
+    width: 120px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.bp_sublabel {
+    font-size: 9px;
+    width: 120px;
+    height: 18px;
+    overflow: hidden;
+}
+
+.bp_node:hover {
+    box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -moz-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    border:1px solid rgba(0, 150, 255, 0.8);
+}
+
+.bp_vedge {
+    border-left: 2px solid grey;
+    position: absolute;
+}
+
+.bp_hedge {
+    border-top: 2px solid grey;
+    position: absolute;
+}
