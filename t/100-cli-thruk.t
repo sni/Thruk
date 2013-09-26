@@ -98,7 +98,7 @@ TestUtils::test_command({
 
 # test command
 TestUtils::test_command({
-    cmd     => $BIN.' -a command '.$host,
+    cmd     => $BIN.' -a command "'.$host.'"',
     like    => ['/Expaned Command:/'],
 });
 
