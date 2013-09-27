@@ -32,7 +32,10 @@ sub load_bp_data {
     my($c, $num) = @_;
     my $bps   = [];
     my $pattern = '*.tbp';
-    if($num) { $pattern = $num.'.tbp';  }
+    if($num) {
+        return($bps) unless $num =~ m/^\d+$/mx;
+        $pattern = $num.'.tbp';
+    }
     my @files = glob($c->config->{'var_path'}.'/bp/'.$pattern);
     my $bpnum = 0;
     for my $file (@files) {

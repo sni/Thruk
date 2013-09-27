@@ -1,7 +1,121 @@
 ﻿[% WRAPPER _bp_frame.tt subtitle=bp.name %]
 
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 5px;">
+<tr>
+<td align="center" valign="top" width="100%">
+  <ul id="bp_menu" style="display: none; position: absolute;">
+    <li><a href="#"><span class="ui-icon ui-icon-info"></span>Show Information</a></li>
+    <li><a href="#"><span class="ui-icon ui-icon-refresh"></span>Refresh Node</a></li>
+    <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+    <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)"><span class="ui-icon ui-icon-zoomin"></span>Zoom In</a></li>
+    <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)"><span class="ui-icon ui-icon-zoomout"></span>Zoom Out</a></li>
+    <li><a href="#" onclick="bp_zoom_reset('inner_container[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-arrow-4-diag"></span>Reset Zoom</a></li>
+    <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+    <li><a href="#"><span class="ui-icon ui-icon-plus"></span>Add New Node</a></li>
+    <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+    <li><a href="#"><span class="ui-icon ui-icon-tag"></span>Rename Node</a></li>
+    <li><a href="#"><span class="ui-icon ui-icon-trash"></span>Remove Node</a></li>
+    <li><a href="#"><span class="ui-icon ui-icon-wrench"></span>Edit Node</a></li>
+    </ul>
+
+    [% PROCESS _bp_graph.tt %]
+</td>
+
+<td align="center" valign="top" class="action_menu">
+<table border='0' cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center" valign="top" class='commandPanel'>
+      <div class='dataTitle'>Information</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+              <tr class='data'>
+                <th>Label</th>
+                <td id="bp_status_label"></td>
+              </tr>
+              <tr class='data'>
+                <th>Status</th>
+                <td id="bp_status_status"></td>
+              </tr>
+              <tr class='data'>
+                <th>Plugin Output</th>
+                <td><div id="bp_status_plugin_output"></div></td>
+              </tr>
+              <tr class='data'>
+                <th>Last Check</th>
+                <td id="bp_status_last_check"></td>
+              </tr>
+              <tr class='data'>
+                <th>Duration</th>
+                <td id="bp_status_duration"></td>
+              </tr>
+              <tr class='data'>
+                <th>Function</th>
+                <td id="bp_status_function"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td><br></td>
+  </tr>
+
+  <tr>
+    <td align="center" valign="top" class='commandPanel'>
+      <div class='dataTitle'>Settings</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_settings">
+              <tr class='data'>
+                <th>Label</th>
+                <td><input type="text"></td>
+              </tr>
+              <tr class='data'>
+                <th>Type</th>
+                <td>
+                  <select>
+                    <optgroup label="Status">
+                      <option>Host</option>
+                      <option>Service</option>
+                    </optgroup>
+                    <optgroup label="Function">
+                      <option>Best</option>
+                      <option>Worst</option>
+                      <option>Equals</option>
+                      <option>Fixed</option>
+                      <option>At Least</option>
+                      <option>Not More</option>
+                    </optgroup>
+                  </select>
+                </td>
+              </tr>
+              <tr class='data'>
+                <th>Depends</th>
+                <td>
+                  <select multiple=1 size=5>
+                  </select>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
 
 
-[% PROCESS _bp_graph.tt %]
+</td>
+</tr>
+</table>
+
+
 
 [% END %]

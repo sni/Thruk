@@ -40,7 +40,9 @@ sub new {
     my $self = {
         'id'                => $id,
         'label'             => $data->{'label'},
-        'function'          => undef,
+        'function'          => '',
+        'function_ref'      => undef,
+        'function_args'     => [],
         'depends'           => Thruk::Utils::list($data->{'depends'} || []),
         'parents'           => $data->{'parents'} || [],
 
@@ -99,8 +101,8 @@ sub update_status {
     my($self, $c, $bp) = @_;
     delete $bp->{'need_update'}->{$self->{'id'}};
 
-    return unless $self->{'function'};
-    my $function = $self->{'function'};
+    return unless $self->{'function_ref'};
+    my $function = $self->{'function_ref'};
     eval {
         my($status, $status_text) = &$function($c, $bp, $self, @{$self->{'function_args'}});
         $self->_set_status($status, $status_text, $bp);
@@ -169,7 +171,8 @@ sub _set_function {
             $self->_set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
-            $self->{'function'}      = $function;
+            $self->{'function_ref'}  = $function;
+            $self->{'function'}      = $fname;
         }
     }
     return;

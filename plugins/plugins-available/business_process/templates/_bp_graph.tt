@@ -1,4 +1,9 @@
-﻿<div id='container[% bp.id %]' class="bp_container">
+﻿[% USE date %]
+<div style="position: relative;">
+<a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)" class="bp_container_zoom plus">+</a>
+<a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)" class="bp_container_zoom minus">-</a>
+<div id='container[% bp.id %]' class="bp_container">
+  <div id='inner_container[% bp.id %]' class="bp_inner_container">
     [% FOREACH n IN bp.nodes %]
     [% statusClass = 'statusUNKNOWN' %]
     [% statusText  = "" %]
@@ -9,25 +14,28 @@
     [% ELSIF n.status == 4 %][% statusClass = 'statusPENDING' %][% statusText = "status not yet calculated" %]
     [% END %]
     [% IF n.defined('status_text') %][% statusText = n.status_text %][% END %]
-    <div id='[% n.id %]' class='bp_node clickable [% statusClass %]'>
+    <div id='[% n.id %]' class='bp_node clickable [% statusClass %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_update_status(event, this)">
         <div class="bp_label">[% n.label %]</div>
         <div class="bp_sublabel" title="[% escape_html(statusText) %]">[% statusText %]</div>
     </div>
     [%+ END %]
+  </div>
+</div>
 </div>
 <script type="text/javascript">
-    <!--
+<!--
     var nodes = [
         [% FOREACH n IN bp.nodes %]
-        { id:"[% n.id %]", label:"[% n.label %]", status:"[% n.status %]", width: 120, height: 40 }[% UNLESS loop.last %],[% END +%]
+        { id:"[% n.id %]", label:"[% n.label %]", status:"[% n.status %]", status_text: '[% escape_quotes(n.status_text) %]', last_check: '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]', duration: '[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]', func:"[% n.function %]", func_args:[% json_encode(n.function_args) %], width: 120, height: 40 }[% UNLESS loop.last %],[% END +%]
         [%+ END %]
     ];
 
     var edges = [
         [% FOREACH n IN bp.nodes %]
           [% FOREACH d IN n.depends %]
-              { sourceId: "[% n.id %]", targetId: "[% d.id %]" },
+              { sourceId: "[% n.id %]", targetId: "[% d.id %]" }[% UNLESS loop.last %],[% END +%]
           [%+ END %]
+          [% UNLESS loop.last %],[% END +%]
         [% END %]
     ];
 

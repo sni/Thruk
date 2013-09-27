@@ -212,6 +212,18 @@ sub _resolve_nodes {
 
 ##########################################################
 
+=head2 save
+
+save business process data to file
+
+=cut
+sub save {
+    my ( $self, $file ) = @_;
+    return;
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2013, <sven.nierlein@consol.de>

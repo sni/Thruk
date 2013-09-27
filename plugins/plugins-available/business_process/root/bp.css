@@ -1,13 +1,84 @@
 A.bp_button {
-  height: 25px;
+    height: 25px;
 }
 BUTTON.bp_button {
-  height: 27px;
-  min-width: 27px;
+    height: 27px;
+    min-width: 27px;
+}
+
+.ui-menu {
+    width: 150px;
+    z-index: 100;
+}
+
+TD.action_menu {
+    padding-left: 10px;
+    padding-right: 5px;
+}
+
+LI.bp_menu_seperator.ui-state-disabled {
+    height: 3px;
+}
+LI.bp_menu_seperator.ui-state-disabled A {
+    line-height: 0px;
+}
+
+.bp_settings TH, .bp_info TH {
+    padding-top: 5px;
+    vertical-align: top;
+    text-align: left;
+    padding-left: 2px;
+    padding-right: 4px;
+}
+.bp_info TD {
+    overflow: hidden;
+    text-align: left;
+    padding-top: 5px;
+}
+#bp_status_plugin_output {
+    overflow: hidden;
+    width: 220px;
+    height: 35px;
+}
+#bp_status_status DIV.statusField {
+    float: left;
+    min-width: 80px;
+    text-align: center;
+    line-height: 20px;
+    height: 18px;
+}
+
+.bp_settings INPUT, .bp_settings SELECT {
+    width: 240px;
+    margin-top: 3px;
+}
+
+.bp_container_zoom {
+    position: absolute;
+    right: 5px;
+    background: white;
+    border: 1px solid grey;
+    width: 11px;
+    height: 11px;
+    display: block;
+    line-height: 13px;
+    font-weight: bold;
+    z-index: 50;
+}
+.bp_container_zoom:hover {
+    background: #DDDDDD;
+}
+.bp_container_zoom.plus {
+    top:  3px;
+}
+.bp_container_zoom.minus {
+    top: 17px;
 }
 
 .bp_container {
     position: relative;
+    border: 1px solid grey;
+    overflow: auto;
 }
 
 .bp_node {
@@ -38,7 +109,7 @@ BUTTON.bp_button {
     overflow: hidden;
 }
 
-.bp_node:hover {
+.bp_node_active, .bp_node:hover {
     box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -moz-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
