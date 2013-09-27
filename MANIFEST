@@ -925,7 +925,7 @@ root/thruk/javascript/cal/jscal2.js
 root/thruk/javascript/excanvas.js
 root/thruk/javascript/jquery-1.7.2.min.js
 root/thruk/javascript/jquery-fieldselection.js
-root/thruk/javascript/jquery-ui/css/smoothness/images/pbar-ani.gif
+root/thruk/javascript/jquery-ui/css/smoothness/images/animated-overlay.gif
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_75_ffffff_40x100.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_55_fbf9ee_1x400.png
@@ -939,8 +939,8 @@ root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_2e83ff_256x240.pn
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_454545_256x240.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_888888_256x240.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_cd0a0a_256x240.png
-root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css
-root/thruk/javascript/jquery-ui/js/jquery-ui-1.8.16.custom.min.js
+root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.10.3.custom.min.css
+root/thruk/javascript/jquery-ui/js/jquery-ui-1.10.3.custom.min.js
 root/thruk/javascript/jstree/jquery.jstree.js
 root/thruk/javascript/jstree/jstree.min.js
 root/thruk/javascript/jstree/themes/apple/bg.jpg

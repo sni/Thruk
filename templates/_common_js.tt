@@ -10,7 +10,7 @@
   var perf_bar_pnp_popup     = '[% perf_bar_pnp_popup %]';
   var internetExplorer       = false;
   var has_jquery_ui          = [% has_jquery_ui %];
-  var jquery_ui_url          = '[% url_prefix %]thruk/javascript/jquery-ui/js/[% jquery_ui %]';
+  var jquery_ui_url          = '[% url_prefix %]thruk/javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
   var thruk_debug_js         = [% IF thruk_debug %]1[% ELSE %]0[% END %];
 -->
 </script>
@@ -23,7 +23,7 @@
   [% END %]
 [% END +%]
 [% IF has_jquery_ui %]
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-ui/js/[% jquery_ui %]"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js"></script>
 [% END +%]
 <script type="text/javascript">
 <!--
