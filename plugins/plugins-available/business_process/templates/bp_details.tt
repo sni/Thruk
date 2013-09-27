@@ -4,8 +4,7 @@
 <tr>
 <td align="center" valign="top" width="100%">
   <ul id="bp_menu" style="display: none; position: absolute;">
-    <li><a href="#"><span class="ui-icon ui-icon-info"></span>Show Information</a></li>
-    <li><a href="#"><span class="ui-icon ui-icon-refresh"></span>Refresh Node</a></li>
+    <li><a href="#" onclick="bp_refresh('[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-refresh"></span>Refresh Node</a></li>
     <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
     <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)"><span class="ui-icon ui-icon-zoomin"></span>Zoom In</a></li>
     <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)"><span class="ui-icon ui-icon-zoomout"></span>Zoom Out</a></li>
@@ -44,7 +43,10 @@
               </tr>
               <tr class='data'>
                 <th>Last Check</th>
-                <td id="bp_status_last_check"></td>
+                <td height=26 valign="top">
+                  <div id="bp_status_last_check" style="float: left;"></div>
+                  <img id="bp_status_waiting" style="display: none; position: relative; top: -3px; left: 3px;" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This business process is currently updating" title="This business process is currently updating" border="0" height="20" width="20">
+                </td>
               </tr>
               <tr class='data'>
                 <th>Duration</th>

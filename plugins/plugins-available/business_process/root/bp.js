@@ -19,6 +19,21 @@ function init_bp_buttons() {
     return;
 }
 
+/* refresh given business process */
+var current_node;
+function bp_refresh(bp_id) {
+    bp_active_node = current_node;
+    showElement('bp_status_waiting');
+    /* adding timestamp makes IE happy */
+    var ts = new Date().getTime();
+    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&bp='+bp_id, [], function() {
+        hideElement('bp_status_waiting');
+        var node = document.getElementById(current_node);
+        bp_update_status(null, node);
+        jQuery(node).addClass('bp_node_active');
+    });
+}
+
 /* unset active node */
 function bp_unset_active_node() {
     jQuery('.bp_node_active').removeClass('bp_node_active');
@@ -45,6 +60,8 @@ function bp_context_menu_open(evt, node) {
         jQuery(node).addClass('bp_node_active');
         jQuery("#bp_menu").menu().css('top', evt.pageY+'px').css('left', evt.pageX+'px');
         showElement('bp_menu', undefined, true, undefined, bp_context_menu_close_cb);
+        bp_active_node = node.id;
+        bp_update_status(evt, node);
     } else if(node) {
         bp_unset_active_node();
         jQuery(node).addClass('bp_node_active');

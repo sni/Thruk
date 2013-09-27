@@ -37,13 +37,12 @@ sub load_bp_data {
         $pattern = $num.'.tbp';
     }
     my @files = glob($c->config->{'var_path'}.'/bp/'.$pattern);
-    my $bpnum = 0;
     for my $file (@files) {
-        my $bp = Thruk::BP::Components::BP->new($bpnum++, $file);
+        my $bp = Thruk::BP::Components::BP->new($file);
         push @{$bps}, $bp if $bp;
     }
 
-    update_bp_status($c, $bps);
+    #update_bp_status($c, $bps);
     return($bps);
 }
 

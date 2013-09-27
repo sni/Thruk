@@ -59,25 +59,34 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{subtitle}              = 'Business Process';
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
+    my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
+    if($id !~ m/^\d+$/mx) { $id = ''; }
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
-    if($action eq 'details') {
-        $c->stash->{'no_auto_reload'} = 1;
-        my $id  = $c->{'request'}->{'parameters'}->{'bp'};
+    if($id) {
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
         if(scalar @{$bps} != 1) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
-        $c->stash->{'bp'} = $bps->[0];
-        $c->stash->{template} = 'bp_details.tt';
-    }
-    elsif($action eq 'show') {
-        # load business processes
-        my $bps = Thruk::BP::Utils::load_bp_data($c);
-        $c->stash->{'bps'} = $bps;
+        my $bp = $bps->[0];
+        $c->stash->{'bp'} = $bp;
+
+        if($action eq 'details') {
+            $c->stash->{'no_auto_reload'} = 1;
+            $c->stash->{template} = 'bp_details.tt';
+            return 1;
+        }
+        elsif($action eq 'refresh' and $id) {
+            $bp->update_status($c);
+            $c->stash->{template} = '_bp_graph.tt';
+            return 1;
+        }
     }
 
+    # load business processes
+    my $bps = Thruk::BP::Utils::load_bp_data($c);
+    $c->stash->{'bps'} = $bps;
 
     Thruk::Utils::ssi_include($c);
 
