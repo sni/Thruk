@@ -133,14 +133,7 @@ sub update_status {
     }
 
     # store runtime data
-    my $data = {};
-    for my $key (@stateful_keys) {
-        $data->{$key} = $self->{$key};
-    }
-    for my $n (@{$self->{'nodes'}}) {
-        $data->{'nodes'}->{$n->{'id'}} = $n->get_stateful_data();
-    }
-    lock_nstore($data, $self->{'datafile'});
+    $self->save_runtime();
 
     return;
 }
@@ -189,6 +182,45 @@ sub add_node {
     }
     $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;
+    return;
+}
+
+##########################################################
+
+=head2 remove_node
+
+remove node from business process
+
+=cut
+sub remove_node {
+    my ( $self, $node_id ) = @_;
+    my $node = $self->{'nodes_by_id'}->{$node_id};
+    delete $self->{'nodes_by_id'}->{$node_id};
+    delete $self->{'nodes_by_name'}->{$node->{'label'}};
+
+    # remove connections
+    for my $p (@{$node->{'parents'}}) {
+        my @depends;
+        for my $d (@{$p->{'depends'}}) {
+            push @depends, $d unless $d->{'id'} eq $node_id;
+        }
+        $p->{'depends'} = \@depends;
+    }
+
+    for my $d (@{$node->{'depends'}}) {
+        my @parents;
+        for my $p (@{$d->{'parents'}}) {
+            push @parents, $p unless $p->{'id'} eq $node_id;
+        }
+        $d->{'parents'} = \@parents;
+    }
+
+    my @nodes;
+    for my $n (@{$self->{'nodes'}}) {
+        push @nodes, $n unless $n->{'id'} eq $node_id;
+    }
+    $self->{'nodes'} = \@nodes;
+
     return;
 }
 
@@ -251,6 +283,26 @@ sub save {
     print $fh $string;
     close($fh);
     $self->{'need_save'} = 0;
+    return;
+}
+
+##########################################################
+
+=head2 save_runtime
+
+save run time data
+
+=cut
+sub save_runtime {
+    my ( $self ) = @_;
+    my $data = {};
+    for my $key (@stateful_keys) {
+        $data->{$key} = $self->{$key};
+    }
+    for my $n (@{$self->{'nodes'}}) {
+        $data->{'nodes'}->{$n->{'id'}} = $n->get_stateful_data();
+    }
+    lock_nstore($data, $self->{'datafile'});
     return;
 }
 

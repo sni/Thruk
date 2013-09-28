@@ -84,9 +84,17 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
         }
-        elsif($action eq 'rename' and $id && $nodeid) {
+        elsif($action eq 'rename_node' and $id && $nodeid) {
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
             $bp->save();
+            $c->stash->{'text'} = 'OK';
+            $c->stash->{template} = 'passthrough.tt';
+            return 1;
+        }
+        elsif($action eq 'remove_node' and $id && $nodeid) {
+            $bp->remove_node($nodeid);
+            $bp->save();
+            $bp->save_runtime();
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;

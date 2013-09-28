@@ -64,7 +64,7 @@ function bp_context_menu_open(evt, node) {
         bp_active_node = node.id;
         bp_update_status(evt, node);
         jQuery("#bp_menu").menu().css('top', evt.pageY+'px').css('left', evt.pageX+'px');
-        bp_restore_menu();
+        bp_menu_restore();
     } else if(node) {
         bp_unset_active_node();
         jQuery(node).addClass('bp_node_active');
@@ -93,7 +93,7 @@ function bp_context_menu_open(evt, node) {
 }
 
 /* restores menu if possible */
-function bp_restore_menu() {
+function bp_menu_restore() {
     if(original_menu) { // restore original menu
         jQuery('#bp_menu').html(original_menu);
     }
@@ -105,7 +105,7 @@ function bp_restore_menu() {
 function bp_show_rename(evt) {
     evt = (evt) ? evt : ((window.event) ? event : null);
     bp_menu_save();
-    bp_restore_menu();
+    bp_menu_restore();
     var node = bp_get_node(current_node);
     jQuery('#bp_menu_rename_node').html(
          '<input type="text" value="'+node.label+'" id="bp_rename_text" style="width:100px;" onkeyup="bp_submit_on_enter(event, \'bp_rename_btn\')">'
@@ -119,7 +119,7 @@ function bp_show_rename(evt) {
 /* send rename request */
 function bp_confirmed_rename(node) {
     var text = jQuery('#bp_rename_text').val();
-    jQuery.post('bp.cgi?action=rename&bp='+bp_id+'&node='+node.id+'&label='+text, [], function() {
+    jQuery.post('bp.cgi?action=rename_node&bp='+bp_id+'&node='+node.id+'&label='+text, [], function() {
         bp_refresh(bp_id, node.id);
     });
     hideElement('bp_menu');
@@ -128,13 +128,21 @@ function bp_confirmed_rename(node) {
 /* remove node after confirm */
 function bp_show_remove() {
     bp_menu_save();
-    bp_restore_menu();
+    bp_menu_restore();
     var node = bp_get_node(current_node);
     jQuery('#bp_menu_remove_node').html(
-         'Confirm: <input type="button" value="No" style="width: 50px;">'
-        +'<input type="button" value="Yes" style="width: 40px;" onclick="bp_confirmed_remove()">'
+         'Confirm: <input type="button" value="No" style="width: 50px;" onclick="bp_menu_restore()">'
+        +'<input type="button" value="Yes" style="width: 40px;" onclick="bp_confirmed_remove('+node.id+')">'
     );
     return false;
+}
+
+/* send remoev request */
+function bp_confirmed_remove(node) {
+    jQuery.post('bp.cgi?action=remove_node&bp='+bp_id+'&node='+node.id, [], function() {
+        bp_refresh(bp_id);
+    });
+    hideElement('bp_menu');
 }
 
 /* run command on enter */
@@ -157,6 +165,9 @@ function bp_menu_save() {
 /* set status data */
 function bp_update_status(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+    if(node == null) {
+        return false;
+    }
     if(bp_active_node != undefined && bp_active_node != node.id) {
         return false;
     }
