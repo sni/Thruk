@@ -168,18 +168,18 @@ function bp_show_add_node() {
 
 /* show node type select: fixed */
 function bp_select_fixed() {
-    bp_show_dialog('bp_select_fixed', 430, 200);
+    bp_show_dialog('bp_select_fixed', 430, 220);
     jQuery('.bp_fixed_radio').buttonset();
 }
 
 /* show node type select: best */
 function bp_select_best() {
-    bp_show_dialog('bp_select_best', 430, 130);
+    bp_show_dialog('bp_select_best', 430, 150);
 }
 
 /* show node type select: worst */
 function bp_select_worst() {
-    bp_show_dialog('bp_select_worst', 430, 130);
+    bp_show_dialog('bp_select_worst', 430, 150);
 }
 
 /* show add node dialog */

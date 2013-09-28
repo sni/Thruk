@@ -41,6 +41,9 @@
     <input type="hidden" name="function" value="Fixed">
     <table width="100%">
       <tr>
+        <td align="center" colspan=2 class="bp_type_desc">Shows the same fixed state all the time.</td>
+      </tr>
+      <tr>
         <th align="right">Label</th>
         <td align="left"><input type="text" value="" name="bp_label"></td>
       </tr>
@@ -68,6 +71,9 @@
     <input type="hidden" name="function" value="Best">
     <table width="100%">
       <tr>
+        <td align="center" colspan=2 class="bp_type_desc">Shows the best state of all nodes.</td>
+      </tr>
+      <tr>
         <th align="right">Label</th>
         <td align="left"><input type="text" value="" name="bp_label"></td>
       </tr>
@@ -79,6 +85,9 @@
     <form id="bp_select_worst_form" action="bp.cgi">
     <input type="hidden" name="function" value="Worst">
     <table width="100%">
+      <tr>
+        <td align="center" colspan=2 class="bp_type_desc">Shows the worst state of all nodes.</td>
+      </tr>
       <tr>
         <th align="right">Label</th>
         <td align="left"><input type="text" value="" name="bp_label"></td>
