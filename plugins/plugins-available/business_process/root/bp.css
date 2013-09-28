@@ -11,6 +11,10 @@ BUTTON.bp_button {
     z-index: 100;
 }
 
+#bp_menu BUTTON, #bp_menu INPUT {
+    z-index: 150;
+}
+
 TD.action_menu {
     padding-left: 10px;
     padding-right: 5px;
@@ -23,8 +27,7 @@ LI.bp_menu_seperator.ui-state-disabled A {
     line-height: 0px;
 }
 
-.bp_settings TH, .bp_info TH {
-    padding-top: 5px;
+.bp_info TH {
     vertical-align: top;
     text-align: left;
     padding-left: 2px;
@@ -33,7 +36,6 @@ LI.bp_menu_seperator.ui-state-disabled A {
 .bp_info TD {
     overflow: hidden;
     text-align: left;
-    padding-top: 5px;
 }
 #bp_status_plugin_output {
     overflow: hidden;

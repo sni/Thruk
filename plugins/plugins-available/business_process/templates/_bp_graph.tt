@@ -27,7 +27,17 @@
 <!--
     var nodes = [
         [% FOREACH n IN bp.nodes %]
-        { id:"[% n.id %]", label:"[% n.label %]", status:"[% n.status %]", status_text: '[% escape_quotes(n.status_text) %]', last_check: '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]', duration: '[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]', func:"[% n.function %]", func_args:[% json_encode(n.function_args) %], width: 120, height: 40 }[% UNLESS loop.last %],[% END +%]
+        { id:           "[% n.id %]",
+          label:        "[% n.label %]",
+          status:       "[% n.status %]",
+          status_text:  '[% escape_quotes(n.status_text) %]',
+          last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
+          duration:     '[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]',
+          func:         "[% n.function %]",
+          func_args:    [% json_encode(n.function_args) %],
+          width:        120,
+          height:        40
+        }[% UNLESS loop.last %],[% END +%]
         [%+ END %]
     ];
 
@@ -40,7 +50,10 @@
         [% END %]
     ];
 
-    bp_render('container[% bp.id %]', nodes, edges);
+    var bp_id = [% bp.id %];
+    jQuery(document).ready(function() {
+        bp_render('container[% bp.id %]', nodes, edges);
+    });
 -->
 </script>
 </div>

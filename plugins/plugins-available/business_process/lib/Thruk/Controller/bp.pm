@@ -61,6 +61,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'has_jquery_ui'}       = 1;
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
     if($id !~ m/^\d+$/mx) { $id = ''; }
+    my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
+    if($nodeid !~ m/^node\d+$/mx) { $nodeid = ''; }
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {
@@ -80,6 +82,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'refresh' and $id) {
             $bp->update_status($c);
             $c->stash->{template} = '_bp_graph.tt';
+            return 1;
+        }
+        elsif($action eq 'rename' and $id && $nodeid) {
+            $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
+            $bp->save();
+            $c->stash->{'text'} = 'OK';
+            $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
     }

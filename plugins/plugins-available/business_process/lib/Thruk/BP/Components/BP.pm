@@ -35,7 +35,7 @@ sub new {
 
     my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
     my %config = $conf->getall;
-    next unless $config{'bp'};
+    return unless $config{'bp'};
     my $bplist = Thruk::Utils::list($config{'bp'});
     return unless scalar @{$bplist} > 0;
     my $bpdata = $bplist->[0];
@@ -47,7 +47,11 @@ sub new {
         'id'                => $id,
         'name'              => $bpdata->{'name'},
         'nodes'             => [],
+        'nodes_by_id'       => {},
+        'nodes_by_name'     => {},
         'need_update'       => {},
+        'need_save'         => 0,
+        'file'              => $file,
         'datafile'          => $file.'.runtime',
 
         'status'            => 4,
@@ -58,15 +62,16 @@ sub new {
     bless $self, $class;
 
     # read in nodes
-    my $num = 0;
     for my $n (@{Thruk::Utils::list($bpdata->{'node'} || [])}) {
-        my $node = Thruk::BP::Components::Node->new('node'.$num++, $n);
-        $self->add_node($node);
+        my $node = Thruk::BP::Components::Node->new($n);
+        $self->add_node($node, 1);
     }
 
     $self->_resolve_nodes();
 
     $self->load_runtime_data();
+
+    $self->save() if $self->{'need_save'};
 
     return $self;
 }
@@ -173,9 +178,16 @@ add new node to business process
 
 =cut
 sub add_node {
-    my ( $self, $node ) = @_;
+    my ( $self, $node, $init ) = @_;
     push @{$self->{'nodes'}}, $node;
-    $self->{'nodes_by_id'}->{$node->{'id'}}      = $node;
+    if(!$init) {
+        # verify uniq id
+        my $id = $node->{'id'} || $self->make_new_node_id();
+        if($self->{'nodes_by_id'}->{$id}) {
+            $node->set_id($self->make_new_node_id());
+        }
+    }
+    $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;
     return;
 }
@@ -186,6 +198,11 @@ sub _resolve_nodes {
     my($self) = @_;
 
     for my $node (@{$self->{'nodes'}}) {
+        # make sure we have an id noew
+        if(!$node->{'id'}) {
+            $node->set_id($self->make_new_node_id());
+            $self->{'nodes_by_id'}->{$node->{'id'}} = $node;
+        }
         my $new_depends = [];
         for my $d (@{$node->{'depends'}}) {
             # not a reference yet?
@@ -193,8 +210,8 @@ sub _resolve_nodes {
                 my $dn = $self->{'nodes_by_id'}->{$d} || $self->{'nodes_by_name'}->{$d};
                 if(!$dn) {
                     # fake node required
-                    my $id = scalar @{$self->{'nodes'}}; # next free id
-                    $dn = Thruk::BP::Components::Node->new('node'.$id, {
+                    $dn = Thruk::BP::Components::Node->new({
+                                        'id'       => $self->make_new_node_id(),
                                         'label'    => $d,
                                         'function' => 'Fixed("Unknown")',
                     });
@@ -222,10 +239,41 @@ save business process data to file
 =cut
 sub save {
     my ( $self, $file ) = @_;
+    my $string = "<bp>\n";
+    for my $key (qw/name/) {
+        $string .= sprintf("  %-10s = %s\n", $key, $self->{$key});
+    }
+    for my $n (@{$self->{'nodes'}}) {
+        $string .= $n->save_to_string();
+    }
+    $string .= "</bp>\n";
+    open(my $fh, '>', $self->{'file'}) or die('cannot open '.$self->{'file'}.': '.$!);
+    print $fh $string;
+    close($fh);
+    $self->{'need_save'} = 0;
     return;
 }
 
 ##########################################################
+
+=head2 make_new_node_id
+
+generate new uniq id
+
+=cut
+sub make_new_node_id {
+    my ( $self ) = @_;
+    my $num = 1;
+    my $id  = 'node'.$num;
+    while($self->{'nodes_by_id'}->{$id}) {
+        $id = 'node'.++$num;
+    }
+    $self->{'need_save'} = 1;
+    return $id;
+}
+
+##########################################################
+
 
 =head1 AUTHOR
 

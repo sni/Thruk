@@ -36,9 +36,9 @@ return new node
 =cut
 
 sub new {
-    my ( $class, $id, $data ) = @_;
+    my ( $class, $data ) = @_;
     my $self = {
-        'id'                => $id,
+        'id'                => $data->{'id'},
         'label'             => $data->{'label'},
         'function'          => '',
         'function_ref'      => undef,
@@ -67,10 +67,26 @@ update runtime data
 =cut
 sub load_runtime_data {
     my($self, $data) = @_;
-    return if $self->{'last_state_change'} >= $data->{'last_state_change'};
+    # return if there is a a newer result already
+    if($self->{'last_state_change'} && $data->{'last_state_change'} && $self->{'last_state_change'} >= $data->{'last_state_change'}) {
+        return;
+    }
     for my $key (@stateful_keys) {
         $self->{$key} = $data->{$key} if defined $data->{$key};
     }
+    return;
+}
+
+##########################################################
+
+=head2 set_id
+
+set new id for this node
+
+=cut
+sub set_id {
+    my($self, $id) = @_;
+    $self->{'id'} = $id;
     return;
 }
 
@@ -88,6 +104,43 @@ sub get_stateful_data {
         $data->{$key} = $self->{$key};
     }
     return $data;
+}
+
+##########################################################
+
+=head2 save_to_string
+
+get textual representation of this node
+
+=cut
+sub save_to_string {
+    my ( $self ) = @_;
+    my $string = "  <node>\n";
+
+    # normal keys
+    for my $key (qw/id label/) {
+        $string .= sprintf("    %-10s = %s\n", $key, $self->{$key});
+    }
+
+    # function
+    if($self->{'function'}) {
+        my @arg;
+        for my $a (@{$self->{'function_args'}}) {
+            if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
+                push @arg, $a;
+            } else {
+                push @arg, "'".$a."'";
+            }
+        }
+        $string .= sprintf("    %-10s = %s(%s)\n", "function", $self->{'function'}, join(', ', @arg));
+    }
+
+    # depends
+    for my $d (@{$self->{'depends'}}) {
+        $string .= sprintf("    %-10s = %s\n", 'depends', $d->{'label'});
+    }
+    $string .= "  </node>\n";
+    return $string;
 }
 
 ##########################################################
