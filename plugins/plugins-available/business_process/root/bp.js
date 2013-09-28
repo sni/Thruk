@@ -154,6 +154,66 @@ function bp_submit_on_enter(evt, id) {
     }
 }
 
+/* show node type select */
+function bp_show_add_node() {
+    hideElement('bp_menu');
+    jQuery("#bp_edit_node").dialog({
+        modal: true,
+        closeOnEscape: true,
+        width: 365
+    });
+    jQuery('.bp_type_btn').button();
+    showElement('bp_edit_node');
+}
+
+/* show node type select: fixed */
+function bp_select_fixed() {
+    bp_show_dialog('bp_select_fixed', 430, 200);
+    jQuery('.bp_fixed_radio').buttonset();
+}
+
+/* show node type select: best */
+function bp_select_best() {
+    bp_show_dialog('bp_select_best', 430, 130);
+}
+
+/* show node type select: worst */
+function bp_select_worst() {
+    bp_show_dialog('bp_select_worst', 430, 130);
+}
+
+/* show add node dialog */
+function bp_show_dialog(id, w, h) {
+    jQuery("#bp_edit_node").dialog("close");
+    jQuery("#"+id).dialog({
+        modal: true,
+        closeOnEscape: true,
+        width: w,
+        height: h,
+        buttons: [
+            { text: 'Back',
+              click: function() { jQuery(this).dialog("close"); bp_show_add_node(); },
+              icons: { primary: "ui-icon-arrowthick-1-w" },
+              'class': 'bp_dialog_back_btn'
+            },
+            { text: 'Create',
+              click: function() { bp_add_node(id+'_form'); jQuery(this).dialog("close"); },
+              'class': 'bp_dialog_create_btn'
+            }
+        ]
+    });
+}
+
+/* save menu for later restore */
+function bp_add_node(formId) {
+    var data = jQuery('#'+formId).serializeArray();
+    var node = document.getElementById(current_node);
+    jQuery.post('bp.cgi?action=add_node&bp='+bp_id+'&node='+node.id, data, function() {
+        bp_refresh(bp_id);
+    });
+    return false;
+}
+
 /* save menu for later restore */
 var original_menu;
 function bp_menu_save() {

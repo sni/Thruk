@@ -99,6 +99,25 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
+        elsif($action eq 'add_node' and $id && $nodeid) {
+            my $parent = $bp->get_node($nodeid);
+            my @arg;
+            for my $x (1..10) {
+                push @arg, $c->{'request'}->{'parameters'}->{'bp_arg'.$x} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x};
+            }
+            my $function = sprintf("%s(%s)", $c->{'request'}->{'parameters'}->{'function'}, Thruk::BP::Utils::join_args(\@arg));
+            my $node = Thruk::BP::Components::Node->new({
+                                'label'    => $c->{'request'}->{'parameters'}->{'bp_label'},
+                                'function' => $function,
+                                'depends'  => [],
+            });
+            $bp->add_node($node);
+            $parent->append_child($node);
+            $bp->save();
+            $c->stash->{'text'} = 'OK';
+            $c->stash->{template} = 'passthrough.tt';
+            return 1;
+        }
     }
 
     # load business processes

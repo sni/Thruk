@@ -11,7 +11,7 @@
           <td class='linkBox'>
             <a href='bp.cgi'>List All Business Processes</a><br>
           </td>
-        <tr>
+        </tr>
       </table>
       [% END %]
     </td>

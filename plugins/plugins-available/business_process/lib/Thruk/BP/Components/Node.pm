@@ -94,6 +94,19 @@ sub set_id {
 
 ##########################################################
 
+=head2 append_child
+
+append new child noew
+
+=cut
+sub append_child {
+    my($self, $append) = @_;
+    push @{$self->{'depends'}}, $append;
+    return;
+}
+
+##########################################################
+
 =head2 get_stateful_data
 
 return data which needs to be statefully stored
@@ -126,20 +139,12 @@ sub save_to_string {
 
     # function
     if($self->{'function'}) {
-        my @arg;
-        for my $a (@{$self->{'function_args'}}) {
-            if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
-                push @arg, $a;
-            } else {
-                push @arg, "'".$a."'";
-            }
-        }
-        $string .= sprintf("    %-10s = %s(%s)\n", "function", $self->{'function'}, join(', ', @arg));
+        $string .= sprintf("    %-10s = %s(%s)\n", "function", $self->{'function'}, Thruk::BP::Utils::join_args($self->{'function_args'}));
     }
 
     # depends
     for my $d (@{$self->{'depends'}}) {
-        $string .= sprintf("    %-10s = %s\n", 'depends', $d->{'label'});
+        $string .= sprintf("    %-10s = %s\n", 'depends', $d->{'id'});
     }
     $string .= "  </node>\n";
     return $string;

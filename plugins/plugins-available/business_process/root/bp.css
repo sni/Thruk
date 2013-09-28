@@ -27,6 +27,26 @@ LI.bp_menu_seperator.ui-state-disabled A {
     line-height: 0px;
 }
 
+.bp_type_btn {
+    height: 80px;
+    width: 80px;
+    white-space: normal;
+}
+
+.bp_dialog_back_btn {
+    float: left;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+    float: inherit;
+}
+.bp_dialog_create_btn {
+    float: right;
+}
+
+DIV.ui-dialog INPUT[type=text] {
+    width: 265px;
+}
+
 .bp_info TH {
     vertical-align: top;
     text-align: left;

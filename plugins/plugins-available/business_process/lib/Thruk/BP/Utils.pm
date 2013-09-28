@@ -117,6 +117,29 @@ sub join_labels {
 
 ##########################################################
 
+=head2 join_args
+
+    join_args($args)
+
+return string with joined args
+
+=cut
+sub join_args {
+    my($args) = @_;
+    my @arg;
+    for my $a (@{$args}) {
+        if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
+            push @arg, $a;
+        } else {
+            push @arg, "'".$a."'";
+        }
+    }
+    return(join(', ', @arg));
+}
+
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2013, <sven.nierlein@consol.de>

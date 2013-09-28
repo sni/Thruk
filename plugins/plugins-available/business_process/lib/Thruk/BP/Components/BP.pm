@@ -165,6 +165,18 @@ sub set_status {
 
 ##########################################################
 
+=head2 get_node
+
+return node by id
+
+=cut
+sub get_node {
+    my ( $self, $node_id ) = @_;
+    return $self->{'nodes_by_id'}->{$node_id};
+}
+
+##########################################################
+
 =head2 add_node
 
 add new node to business process
@@ -179,6 +191,7 @@ sub add_node {
         if($self->{'nodes_by_id'}->{$id}) {
             $node->set_id($self->make_new_node_id());
         }
+        $node->set_id($id);
     }
     $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;

@@ -55,6 +55,8 @@
     jQuery(document).ready(function() {
         bp_render('container[% bp.id %]', nodes, edges);
     });
+
+    //bp_show_add_node();
 -->
 </script>
 </div>
