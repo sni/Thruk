@@ -159,8 +159,8 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $short_desc, $status_text) = &$function($c, $bp, $self, @{$self->{'function_args'}});
-        $self->_set_status($status, $status_text || $short_desc, $bp);
+        my($status, $short_desc, $status_text, $extra) = &$function($c, $bp, $self, @{$self->{'function_args'}});
+        $self->_set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
     };
     if($@) {
@@ -172,7 +172,7 @@ sub update_status {
 
 ##########################################################
 sub _set_status {
-    my($self, $state, $text, $bp) = @_;
+    my($self, $state, $text, $bp, $extra) = @_;
 
     my $last_state = $self->{'status'};
 
@@ -191,6 +191,11 @@ sub _set_status {
                 $bp->{'need_update'}->{$p->{'id'}} = $p;
             }
         }
+    }
+
+    # update some extra attributes
+    for my $key (qw/last_check last_state_change/) {
+        $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }
 
     # if this node has no parents, use this state for the complete bp

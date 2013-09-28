@@ -102,6 +102,9 @@ sub join_labels {
         push @labels, $n->{'label'};
     }
     my $num = scalar @labels;
+    if($num == 0) {
+        return('');
+    }
     if($num == 1) {
         return($labels[0]);
     }

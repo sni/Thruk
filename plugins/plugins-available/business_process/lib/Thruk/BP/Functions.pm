@@ -36,17 +36,24 @@ returns status based on real service or host
 =cut
 sub status {
     my($c, $bp, $n, $hostname, $description) = @_;
+    my $data;
     if($description) {
         my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $description } ] );
         if(scalar @{$services} > 0) {
-            return($services->[0]->{'state'}, $services->[0]->{'plugin_output'});
+            $data = $services->[0];
         }
-        return(3, 'no such service');
+    } else {
+        my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
+        if(scalar @{$hosts} > 0) {
+            $data = $hosts->[0];
+        }
     }
 
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
-    if(scalar @{$hosts} > 0) {
-        return($hosts->[0]->{'state'}, $hosts->[0]->{'plugin_output'});
+    if($data) {
+        return($data->{'state'}, $data->{'plugin_output'}, undef, $data);
+    }
+    if($description) {
+        return(3, 'no such service');
     }
     return(3, 'no such host');
 }
