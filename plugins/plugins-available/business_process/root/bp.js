@@ -155,15 +155,26 @@ function bp_submit_on_enter(evt, id) {
 }
 
 /* show node type select */
-function bp_show_add_node() {
+function bp_show_add_node(id) {
     hideElement('bp_menu');
+    var title = 'Change Node';
+    if(id == 'new') {
+        title = 'Create New Node';
+    }
     jQuery("#bp_edit_node").dialog({
         modal: true,
         closeOnEscape: true,
-        width: 365
+        width: 365,
+        title: title
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_edit_node');
+    jQuery('#bp_node_id').val(id);
+}
+
+/* show node type select for existing nodes */
+function bp_show_edit_node() {
+    bp_show_add_node(current_node);
 }
 
 /* show node type select: fixed */
@@ -180,6 +191,21 @@ function bp_select_best() {
 /* show node type select: worst */
 function bp_select_worst() {
     bp_show_dialog('bp_select_worst', 430, 150);
+}
+
+/* show node type select: equals */
+function bp_select_exactly() {
+    bp_show_dialog('bp_select_exactly', 430, 180);
+}
+
+/* show node type select: not_more */
+function bp_select_not_more() {
+    bp_show_dialog('bp_select_not_more', 430, 210);
+}
+
+/* show node type select: at_least */
+function bp_select_at_least() {
+    bp_show_dialog('bp_select_at_least', 430, 210);
 }
 
 /* show add node dialog */
