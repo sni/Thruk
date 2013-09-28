@@ -17,6 +17,14 @@ functions used to calculate business processes
 
 =cut
 
+my $tr_states = {
+    '0' => 'OK',
+    '1' => 'WARNING',
+    '2' => 'CRITICAL',
+    '3' => 'UNKNOWN',
+    '4' => 'PENDING',
+};
+
 ##########################################################
 
 =head2 status
@@ -56,15 +64,15 @@ sub fixed {
     my($c, $bp, $n, $status, $text) = @_;
     $status = lc $status;
     if($status eq '2' or $status eq 'critical' or $status eq 'down') {
-        return(2, $text || 'CRITICAL');
+        return(2, 'fixed', $text || 'CRITICAL');
     }
     if($status eq '1' or $status eq 'warning') {
-        return(1, $text || 'WARNING');
+        return(1, 'fixed', $text || 'WARNING');
     }
     if($status eq '0' or $status eq 'ok') {
-        return(0, $text || 'OK');
+        return(0, 'fixed', $text || 'OK');
     }
-    return(3, $text || 'UNKNOWN');
+    return(3, 'fixed', $text || 'UNKNOWN');
 }
 
 ##########################################################
@@ -80,12 +88,12 @@ sub worst {
     my($c, $bp, $n) = @_;
     my $states = _get_nodes_grouped_by_state($n, $bp);
     if(scalar keys %{$states} == 0) {
-        return(4, 'no dependent nodes');
+        return(3, 'no dependent nodes');
     }
     my @sorted = reverse sort keys %{$states};
     my $state = $sorted[0];
     $state = 4 if $state == -1;
-    return($state, 'worst of');
+    return($state, 'worst of', $tr_states->{$state}.' - Worst state is '.$tr_states->{$state}.': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
 ##########################################################
@@ -101,12 +109,12 @@ sub best {
     my($c, $bp, $n) = @_;
     my $states = _get_nodes_grouped_by_state($n, $bp);
     if(scalar keys %{$states} == 0) {
-        return(4, 'no dependent nodes');
+        return(3, 'no dependent nodes');
     }
     my @sorted = sort keys %{$states};
     my $state = $sorted[0];
     $state = 4 if $state == -1;
-    return($state, 'best of');
+    return($state, 'best of', $tr_states->{$state}.' - Best state is '.$tr_states->{$state}.': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
 ##########################################################
@@ -123,9 +131,6 @@ sub at_least {
     my($c, $bp, $n, $warning, $critical) = @_;
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->{'depends'});
-    if($good == 0 and $bad == 0) {
-        return(4, 'no dependent nodes');
-    }
     my $state = 0;
     if($good <= $critical) {
         $state = 2;
@@ -133,10 +138,11 @@ sub at_least {
     elsif($good <= $warning) {
         $state = 1;
     }
+    my $desc = '>= '.$warning.','.$critical;
     if($warning == $critical) {
-        return($state, '>= '.$critical);
+        $desc = '>= '.$critical;
     }
-    return($state, '>= '.$warning.','.$critical);
+    return($state, $desc, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -153,9 +159,6 @@ sub not_more {
     my($c, $bp, $n, $warning, $critical) = @_;
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->{'depends'});
-    if($good == 0 and $bad == 0) {
-        return(4, 'no dependent nodes');
-    }
     my $state = 0;
     if($good > $critical) {
         $state = 2;
@@ -163,10 +166,12 @@ sub not_more {
     elsif($good > $warning) {
         $state = 1;
     }
+
+    my $desc = '<= '.$warning.','.$critical;
     if($warning == $critical) {
-        return($state, '>= '.$critical);
+        $desc = '<= '.$critical;
     }
-    return($state, '<= '.$warning.','.$critical);
+    return($state, $desc, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -188,7 +193,7 @@ sub equals {
     if($good == $number) {
         $state = 0;
     }
-    return($state, '= '.$number);
+    return($state, '= '.$number, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################

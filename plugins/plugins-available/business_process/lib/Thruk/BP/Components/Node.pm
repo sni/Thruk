@@ -18,7 +18,7 @@ Business Process Node
 
 =cut
 
-my @stateful_keys = qw/status status_text last_check last_state_change/;
+my @stateful_keys = qw/status status_text last_check last_state_change short_desc/;
 
 my $tr_states = {
     '0' => 'OK',
@@ -49,6 +49,7 @@ sub new {
 
         'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
         'status_text'       => $data->{'status_text'} || '',
+        'short_desc'        => $data->{'short_desc'}  || '',
         'last_check'        => 0,
         'last_state_change' => 0,
     };
@@ -158,8 +159,9 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $status_text) = &$function($c, $bp, $self, @{$self->{'function_args'}});
-        $self->_set_status($status, $status_text, $bp);
+        my($status, $short_desc, $status_text) = &$function($c, $bp, $self, @{$self->{'function_args'}});
+        $self->_set_status($status, $status_text || $short_desc, $bp);
+        $self->{'short_desc'} = $short_desc;
     };
     if($@) {
         $self->_set_status(3, 'Internal Error: '.$@, $bp);
@@ -197,13 +199,13 @@ sub _set_status {
         if(scalar @{$self->{'depends'}} > 0) {
             my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
             if($sum->{'3'}) {
-                $text = _join_labels($sum->{'3'}).' unknown';
+                $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';
             }
             elsif($sum->{'2'}) {
-                $text = _join_labels($sum->{'2'}).' failed';
+                $text = Thruk::BP::Utils::join_labels($sum->{'2'}).' failed';
             }
             elsif($sum->{'1'}) {
-                $text = _join_labels($sum->{'1'}).' warning';
+                $text = Thruk::BP::Utils::join_labels($sum->{'1'}).' warning';
             }
             else {
                 $text = 'everyhing is fine';
@@ -230,24 +232,6 @@ sub _set_function {
         }
     }
     return;
-}
-
-##########################################################
-sub _join_labels {
-    my($nodes) = @_;
-    my @labels;
-    for my $n (@{$nodes}) {
-        push @labels, $n->{'label'};
-    }
-    my $num = scalar @labels;
-    if($num == 1) {
-        return($labels[0]);
-    }
-    if($num == 2) {
-        return($labels[0].' and '.$labels[1]);
-    }
-    my $last = pop @labels;
-    return(join(', ', @labels).' and '.$last);
 }
 
 ##########################################################

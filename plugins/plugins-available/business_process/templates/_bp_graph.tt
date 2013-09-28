@@ -7,17 +7,17 @@
   <div id='inner_container[% bp.id %]' class="bp_inner_container">
     [% FOREACH n IN bp.nodes %]
     [% statusClass = 'statusUNKNOWN' %]
-    [% statusText  = "" %]
+    [% short_desc  = "" %]
     [% IF    n.status == 0 %][% statusClass = 'statusOK' %]
     [% ELSIF n.status == 1 %][% statusClass = 'statusWARNING' %]
     [% ELSIF n.status == 2 %][% statusClass = 'statusCRITICAL' %]
     [% ELSIF n.status == 3 %][% statusClass = 'statusUNKNOWN' %]
-    [% ELSIF n.status == 4 %][% statusClass = 'statusPENDING' %][% statusText = "status not yet calculated" %]
+    [% ELSIF n.status == 4 %][% statusClass = 'statusPENDING' %][% short_desc = "status not yet calculated" %]
     [% END %]
-    [% IF n.defined('status_text') %][% statusText = n.status_text %][% END %]
+    [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     <div id='[% n.id %]' class='bp_node clickable [% statusClass %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="current_node = this.id; bp_update_status(event, this);">
         <div class="bp_label">[% n.label %]</div>
-        <div class="bp_sublabel" title="[% escape_html(statusText) %]">[% statusText %]</div>
+        <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
     </div>
     [%+ END %]
   </div>
@@ -31,6 +31,7 @@
           label:        "[% n.label %]",
           status:       "[% n.status %]",
           status_text:  '[% escape_quotes(n.status_text) %]',
+          short_desc:   '[% escape_quotes(n.short_desc) %]',
           last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
           duration:     '[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]',
           func:         "[% n.function %]",

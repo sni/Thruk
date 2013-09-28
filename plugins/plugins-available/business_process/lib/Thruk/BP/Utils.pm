@@ -72,7 +72,6 @@ sub update_bp_status {
 return clean args from a string
 
 =cut
-
 sub clean_function_args {
     my($args) = @_;
     return([]) unless defined $args;
@@ -85,6 +84,32 @@ sub clean_function_args {
         }
     }
     return(\@newargs);
+}
+
+##########################################################
+
+=head2 join_labels
+
+    join_labels($nodes)
+
+return string with joined labels
+
+=cut
+sub join_labels {
+    my($nodes) = @_;
+    my @labels;
+    for my $n (@{$nodes}) {
+        push @labels, $n->{'label'};
+    }
+    my $num = scalar @labels;
+    if($num == 1) {
+        return($labels[0]);
+    }
+    if($num == 2) {
+        return($labels[0].' and '.$labels[1]);
+    }
+    my $last = pop @labels;
+    return(join(', ', @labels).' and '.$last);
 }
 
 ##########################################################
