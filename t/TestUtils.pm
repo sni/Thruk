@@ -141,6 +141,7 @@ sub get_test_hostgroup_cli {
     unlike          => (list of) regular expressions which must not match page content
     content_type    => match this content type
     skip_html_lint  => skip html lint check
+    skip_doctype    => skip doctype check, even if its an html page
     sleep           => sleep this amount of seconds after the request
     waitfor         => wait till regex occurs (max 60sec)
   }
@@ -279,9 +280,11 @@ sub test_page {
     }
 
     # html valitidy
-    if($content_type =~ 'text\/html' and !$request->is_redirect) {
-        like($return->{'content'}, '/<html[^>]*>/i', 'html page has html section');
-        like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
+    if(!defined $opts->{'skip_doctype'} or $opts->{'skip_doctype'} == 0) {
+        if($content_type =~ 'text\/html' and !$request->is_redirect) {
+            like($return->{'content'}, '/<html[^>]*>/i', 'html page has html section');
+            like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
+        }
     }
 
     SKIP: {
