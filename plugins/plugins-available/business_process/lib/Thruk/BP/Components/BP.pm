@@ -294,7 +294,7 @@ sub save {
     $string .= "</bp>\n";
     open(my $fh, '>', $self->{'file'}) or die('cannot open '.$self->{'file'}.': '.$!);
     print $fh $string;
-    close($fh);
+    Thruk::Utils::IO::close($fh, $file);
     $self->{'need_save'} = 0;
     return;
 }

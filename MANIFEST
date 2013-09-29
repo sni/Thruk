@@ -150,6 +150,7 @@ plugins/plugins-available/business_process/root/images/unknown.png
 plugins/plugins-available/business_process/root/images/warning.png
 plugins/plugins-available/business_process/t/controller_bp.t
 plugins/plugins-available/business_process/t/utils_bp.t
+plugins/plugins-available/business_process/templates/_bp_context_menu.tt
 plugins/plugins-available/business_process/templates/_bp_frame.tt
 plugins/plugins-available/business_process/templates/_bp_graph.tt
 plugins/plugins-available/business_process/templates/bp.tt

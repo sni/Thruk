@@ -20,14 +20,6 @@ Business Process Node
 
 my @stateful_keys = qw/status status_text last_check last_state_change short_desc/;
 
-my $tr_states = {
-    '0' => 'OK',
-    '1' => 'WARNING',
-    '2' => 'CRITICAL',
-    '3' => 'UNKNOWN',
-    '4' => 'PENDING',
-};
-
 ##########################################################
 
 =head2 new
@@ -220,7 +212,7 @@ sub _set_status {
             else {
                 $text = 'everyhing is fine';
             }
-            $text = $tr_states->{$self->{'status'}}.' - '.$text;
+            $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
         }
         $bp->set_status($self->{'status'}, $text);
     }

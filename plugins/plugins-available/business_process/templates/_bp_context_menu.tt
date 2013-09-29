@@ -1,0 +1,171 @@
+﻿<img src="[% url_prefix %]thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
+
+<!-- context menu -->
+<ul id="bp_menu" style="display: none; position: absolute;">
+  <li><a href="#" onclick="bp_refresh('[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-refresh">&nbsp;</span>Refresh Status</a></li>
+  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+  <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)"><span class="ui-icon ui-icon-zoomin">&nbsp;</span>Zoom In</a></li>
+  <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)"><span class="ui-icon ui-icon-zoomout">&nbsp;</span>Zoom Out</a></li>
+  <li><a href="#" onclick="bp_zoom_reset('inner_container[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-arrow-4-diag">&nbsp;</span>Reset Zoom</a></li>
+  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+  <li><a href="#" onclick="bp_show_add_node('new')"><span class="ui-icon ui-icon-plus">&nbsp;</span>Add New Node</a></li>
+  <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
+  <li id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><span class="ui-icon ui-icon-trash">&nbsp;</span>Remove Node</a></li>
+  <li id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><span class="ui-icon ui-icon-tag">&nbsp;</span>Rename Node</a></li>
+  <li><a href="#" onclick="bp_show_edit_node()"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Edit Node</a></li>
+</ul>
+
+<!-- edit node dialog -->
+<div id="bp_edit_node" style="display: none;">
+  <table width="100%">
+    <tr>
+      <td><input type="button" class="bp_type_btn" value="Existing Node"></td>
+      <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_best()"></td>
+      <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_at_least()"></td>
+      <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_exactly()"></td>
+    </tr>
+    <tr>
+      <td><input type="button" class="bp_type_btn" value="Host / Service"></td>
+      <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_worst()"></td>
+      <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_not_more()"></td>
+      <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_fixed()"></td>
+    </tr>
+  </table>
+</div>
+
+<!-- dummy/fixed type select -->
+<div id="bp_select_fixed" title="Fixed Status" style="display: none;">
+  <form id="bp_select_fixed_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Fixed">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Shows the same fixed state all the time.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+    <tr>
+      <th align="right">Status</th>
+      <td align="left">
+        <div class="bp_fixed_radio">
+          <input type="radio" value="OK" id="bp_fixed_ok" name="bp_arg1" checked="checked" /><label for="bp_fixed_ok">Ok</label>
+          <input type="radio" value="WARNING" id="bp_fixed_warning" name="bp_arg1" /><label for="bp_fixed_warning">Warning</label>
+          <input type="radio" value="CRITICAL" id="bp_fixed_critical" name="bp_arg1" /><label for="bp_fixed_critical">Critical</label>
+          <input type="radio" value="UNKNOWN" id="bp_fixed_unknown" name="bp_arg1" /><label for="bp_fixed_unknown">Unknown</label>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th align="right">Plugin Output</th>
+      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!-- best type select -->
+<div id="bp_select_best" title="Best Of" style="display: none;">
+  <form id="bp_select_best_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Best">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Shows the best state of all nodes.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!-- worst type select -->
+<div id="bp_select_worst" title="Worst Of" style="display: none;">
+  <form id="bp_select_worst_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Worst">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Shows the worst state of all nodes.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!-- exactly/equal type select -->
+<div id="bp_select_exactly" title="Exactly" style="display: none;">
+  <form id="bp_select_exactly_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Equals">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes equals this number.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+    <tr>
+      <th align="right">Number</th>
+      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!-- not_more type select -->
+<div id="bp_select_not_more" title="Not More Than" style="display: none;">
+  <form id="bp_select_not_more_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Not_More">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes is not higher than the threshold.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+    <tr>
+      <th align="right">Warning</th>
+      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+    </tr>
+    <tr>
+      <th align="right">Critical</th>
+      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!-- at_least type select -->
+<div id="bp_select_at_least" title="At Least" style="display: none;">
+  <form id="bp_select_at_least_form" action="bp.cgi">
+  <input type="hidden" name="function" value="At_Least">
+  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes is higher than the threshold.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label"></td>
+    </tr>
+    <tr>
+      <th align="right">Warning</th>
+      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+    </tr>
+    <tr>
+      <th align="right">Critical</th>
+      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+    </tr>
+  </table>
+  </form>
+</div>

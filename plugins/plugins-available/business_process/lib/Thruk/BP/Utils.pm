@@ -137,6 +137,24 @@ sub join_args {
     return(join(', ', @arg));
 }
 
+##########################################################
+
+=head2 state2text
+
+    status2text($state)
+
+return string of given state
+
+=cut
+sub state2text {
+    my($nr) = @_;
+    if($nr == 0) { return 'OK'; }
+    if($nr == 1) { return 'WARNING'; }
+    if($nr == 2) { return 'CRITICAL'; }
+    if($nr == 3) { return 'UNKOWN'; }
+    if($nr == 4) { return 'PENDING'; }
+    return;
+}
 
 ##########################################################
 

@@ -17,14 +17,6 @@ functions used to calculate business processes
 
 =cut
 
-my $tr_states = {
-    '0' => 'OK',
-    '1' => 'WARNING',
-    '2' => 'CRITICAL',
-    '3' => 'UNKNOWN',
-    '4' => 'PENDING',
-};
-
 ##########################################################
 
 =head2 status
@@ -100,7 +92,7 @@ sub worst {
     my @sorted = reverse sort keys %{$states};
     my $state = $sorted[0];
     $state = 4 if $state == -1;
-    return($state, 'worst of', $tr_states->{$state}.' - Worst state is '.$tr_states->{$state}.': '.Thruk::BP::Utils::join_labels($states->{$state}));
+    return($state, 'worst of', Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
 ##########################################################
@@ -121,7 +113,7 @@ sub best {
     my @sorted = sort keys %{$states};
     my $state = $sorted[0];
     $state = 4 if $state == -1;
-    return($state, 'best of', $tr_states->{$state}.' - Best state is '.$tr_states->{$state}.': '.Thruk::BP::Utils::join_labels($states->{$state}));
+    return($state, 'best of', Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
 ##########################################################
@@ -149,7 +141,7 @@ sub at_least {
     if($warning == $critical) {
         $desc = '>= '.$critical;
     }
-    return($state, $desc, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, $desc, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -178,7 +170,7 @@ sub not_more {
     if($warning == $critical) {
         $desc = '<= '.$critical;
     }
-    return($state, $desc, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, $desc, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
@@ -200,7 +192,7 @@ sub equals {
     if($good == $number) {
         $state = 0;
     }
-    return($state, '= '.$number, $tr_states->{$state}.' - '.$good.'/'.($good+$bad).' nodes are available');
+    return($state, '= '.$number, Thruk::BP::Utils::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
 }
 
 ##########################################################
