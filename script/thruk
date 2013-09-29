@@ -166,6 +166,7 @@ script has the following arguments
       - uninstallcron               remove all thruk cronjobs
                                     (only needed during package deinstallation)
       - compile                     compile templates for faster access
+      - bpd                         start business process daemon
 
     Testing Commands
       - listbackends                list all backends

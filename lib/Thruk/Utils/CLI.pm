@@ -430,6 +430,16 @@ sub _run_commands {
         $data->{'output'} = _cmd_command($c, $opt);
     }
 
+    # business process daemon
+    elsif($action eq 'bpd') {
+        if(!$c->config->{'use_feature_bp'}) {
+            $data->{'output'} = "ERROR - business process addon is disabled\n";
+            $data->{'rc'}     = 1;
+        } else {
+            ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
+        }
+    }
+
     # import mongodb/mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
@@ -653,6 +663,9 @@ sub _cmd_installcron {
     if($c->config->{'use_feature_reports'}) {
         Thruk::Utils::Reports::update_cron_file($c);
     }
+    if($c->config->{'use_feature_bp'}) {
+        Thruk::BP::Utils::update_cron_file($c);
+    }
     $c->stats->profile(end => "_cmd_installcron()");
     return "updated cron entries\n";
 }
@@ -758,6 +771,35 @@ sub _cmd_report {
     }
 
     $c->stats->profile(end => "_cmd_report()");
+    return($output, 0)
+}
+
+##############################################
+sub _cmd_bpd {
+    my($c, $src, $opt) = @_;
+    $c->stats->profile(begin => "_cmd_bpd()");
+
+    my($output, $rc);
+    eval {
+        require Thruk::BP::Utils;
+    };
+    if($@) {
+        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
+        return("business process plugin is disabled.\n", 1);
+    }
+
+    my $t0 = [gettimeofday];
+    my $bps = Thruk::BP::Utils::load_bp_data($c);
+    for my $bp (@{$bps}) {
+        _debug("updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
+        $bp->update_status($c);
+        _debug("OK") if $Thruk::Utils::CLI::verbose >= 1;
+    }
+    my $nr = scalar @{$bps};
+    my $elapsed = tv_interval($t0);
+    $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
+
+    $c->stats->profile(end => "_cmd_bpd()");
     return($output, 0)
 }
 

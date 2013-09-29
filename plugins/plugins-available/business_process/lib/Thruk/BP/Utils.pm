@@ -88,6 +88,37 @@ sub clean_function_args {
 
 ##########################################################
 
+=head2 update_cron_file
+
+  update_cron_file($c)
+
+update reporting cronjobs
+
+=cut
+sub update_cron_file {
+    my($c) = @_;
+
+    # gather reporting send types from all reports
+    my $cron_entries = [];
+    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp');
+    if(scalar @files > 0) {
+        open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
+        Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
+        my $cmd = sprintf("cd %s && %s '%s -a bpd' >/dev/null 2>>%s/cron.log",
+                                $c->config->{'project_root'},
+                                $c->config->{'thruk_shell'},
+                                $c->config->{'thruk_bin'},
+                                $c->config->{'var_path'},
+                        );
+        push @{$cron_entries}, ['* * * * *', $cmd];
+    }
+
+    Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
+    return 1;
+}
+
+##########################################################
+
 =head2 join_labels
 
     join_labels($nodes)
