@@ -8,6 +8,7 @@
 <table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
+    <th class="status" nowrap width="0" nowrap>&nbsp;</th>
     <th class="status" nowrap width="100">Status</th>
     <th class="status" nowrap width="100">Last Check</th>
     <th class="status" nowrap width="100">Duration</th>
@@ -26,6 +27,9 @@
   [% END %]
   <tr class="[%+ IF loop.first +%] firstrow[% END %]">
     <td class="status [% rowclass %]" align="left"><a href="bp.cgi?action=details&bp=[% bp.id %]"><b>[% bp.name %]</b></a></td>
+    <td class="status [% rowclass %]" align="right" nowrap>
+      <a href="bp.cgi?action=details&bp=[% bp.id %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Graph' title='Show Graph' width="20" height="20"></a>
+    </td>
     <td class="status [% statusClass %]" align="center">[% statusText %]</td>
     <td class="status [% rowclass %]" align="center">[% IF bp.last_check %][% date_format(c, bp.last_check) %][% ELSE %]never[% END %]</td>
     <td class="status [% rowclass %]" align="left">[% IF bp.last_state_change %][% duration(date.now - bp.last_state_change) %][% END %]</td>

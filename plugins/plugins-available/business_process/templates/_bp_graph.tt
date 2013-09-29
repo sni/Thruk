@@ -15,9 +15,10 @@
     [% ELSIF n.status == 4 %][% statusClass = 'statusPENDING' %][% short_desc = "status not yet calculated" %]
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
-    <div id='[% n.id %]' class='bp_node clickable [% statusClass %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="current_node = this.id; bp_update_status(event, this);">
+    <div id='[% n.id %]' class='bp_node clickable [% statusClass %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);">
         <div class="bp_label">[% n.label %]</div>
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
+        <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
     </div>
     [%+ END %]
   </div>
@@ -29,6 +30,8 @@
         [% FOREACH n IN bp.nodes %]
         { id:           "[% n.id %]",
           label:        "[% n.label %]",
+          host:         "[% n.host %]",
+          service:      "[% n.service %]",
           status:       "[% n.status %]",
           status_text:  '[% escape_quotes(n.status_text) %]',
           short_desc:   '[% escape_quotes(n.short_desc) %]',
@@ -55,8 +58,6 @@
     jQuery(document).ready(function() {
         bp_render('container[% bp.id %]', nodes, edges);
     });
-
-    //bp_show_add_node();
 -->
 </script>
 </div>

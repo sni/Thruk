@@ -38,6 +38,8 @@ sub new {
         'function_args'     => [],
         'depends'           => Thruk::Utils::list($data->{'depends'} || []),
         'parents'           => $data->{'parents'} || [],
+        'host'              => '',
+        'service'           => '',
 
         'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
         'status_text'       => $data->{'status_text'} || '',
@@ -125,7 +127,7 @@ sub save_to_string {
     my $string = "  <node>\n";
 
     # normal keys
-    for my $key (qw/id label/) {
+    for my $key (qw/id label host service/) {
         $string .= sprintf("    %-10s = %s\n", $key, $self->{$key});
     }
 

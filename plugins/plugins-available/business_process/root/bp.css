@@ -135,6 +135,16 @@ DIV.ui-dialog INPUT[type=text] {
     overflow: hidden;
 }
 
+.bp_node_edit_icon {
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    display: none;
+}
+.bp_node:hover .bp_node_edit_icon {
+    display: inherit;
+}
+
 .bp_node_active, .bp_node:hover {
     box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);

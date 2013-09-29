@@ -37,7 +37,7 @@
 <div id="bp_select_fixed" title="Fixed Status" style="display: none;">
   <form id="bp_select_fixed_form" action="bp.cgi">
   <input type="hidden" name="function" value="Fixed">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Shows the same fixed state all the time.</td>
@@ -69,7 +69,7 @@
 <div id="bp_select_best" title="Best Of" style="display: none;">
   <form id="bp_select_best_form" action="bp.cgi">
   <input type="hidden" name="function" value="Best">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Shows the best state of all nodes.</td>
@@ -86,7 +86,7 @@
 <div id="bp_select_worst" title="Worst Of" style="display: none;">
   <form id="bp_select_worst_form" action="bp.cgi">
   <input type="hidden" name="function" value="Worst">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Shows the worst state of all nodes.</td>
@@ -103,7 +103,7 @@
 <div id="bp_select_exactly" title="Exactly" style="display: none;">
   <form id="bp_select_exactly_form" action="bp.cgi">
   <input type="hidden" name="function" value="Equals">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes equals this number.</td>
@@ -124,7 +124,7 @@
 <div id="bp_select_not_more" title="Not More Than" style="display: none;">
   <form id="bp_select_not_more_form" action="bp.cgi">
   <input type="hidden" name="function" value="Not_More">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes is not higher than the threshold.</td>
@@ -149,7 +149,7 @@
 <div id="bp_select_at_least" title="At Least" style="display: none;">
   <form id="bp_select_at_least_form" action="bp.cgi">
   <input type="hidden" name="function" value="At_Least">
-  <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Ok if the number of good nodes is higher than the threshold.</td>

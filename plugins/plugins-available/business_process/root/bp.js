@@ -57,6 +57,8 @@ function bp_context_menu_open(evt, node) {
     var rightclick;
     if (evt.which) rightclick = (evt.which == 3);
     else if (evt.button) rightclick = (evt.button == 2);
+    // clicking the wrench icon counts as right click too
+    if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
     if(rightclick && node) {
         bp_context_menu = true;
         bp_unset_active_node();
@@ -174,7 +176,7 @@ function bp_show_add_node(id) {
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_edit_node');
-    jQuery('#bp_node_id').val(id);
+    jQuery('INPUT.bp_node_id').val(id);
 }
 
 /* show node type select for existing nodes */
@@ -263,6 +265,9 @@ function bp_update_status(evt, node) {
         return false;
     }
     var n = bp_get_node(node.id);
+    if(n == null) {
+        if(thruk_debug_js) { alert("ERROR: got no node in bp_update_status(): " + node.id); }
+    }
 
     var status = n.status;
     if(status == 0) { statusName = 'OK'; }
@@ -276,8 +281,35 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_last_check').html(n.last_check);
     jQuery('#bp_status_duration').html(n.duration);
     jQuery('#bp_status_function').html(n.func + '('+n.func_args.join(', ')+')');
+
+    jQuery('.bp_info_host').css('display', 'none');
+    jQuery('.bp_info_service').css('display', 'none');
+
+    // service specific things...
+    if(node.service != '') {
+        jQuery('.bp_info_service').css('display', 'inherit');
+    }
+
+    // host specific things...
+    else if(node.host != '') {
+        jQuery('.bp_info_host').css('display', 'inherit');
+    }
+
     return false;
 }
+
+/* fired if mouse if over a node */
+function bp_mouse_over_node(evt, node) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+    current_node = node.id;
+    bp_update_status(evt, node);
+}
+
+/* fired if mouse leaves a node */
+function bp_mouse_out_node(evt, node) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+}
+
 
 /* return node object by id */
 function bp_get_node(id) {
@@ -360,7 +392,7 @@ function bp_zoom_reset(containerId) {
 /* set zoom level */
 function bp_zoom(containerId, zoom) {
     // round to 0.05
-    zoom = Math.round(zoom * 20) / 20;
+    zoom = Math.floor(zoom * 20) / 20;
     last_zoom = zoom;
     jQuery('#'+containerId).css('zoom', zoom)
                                  .css('-moz-transform', 'scale('+zoom+')')
