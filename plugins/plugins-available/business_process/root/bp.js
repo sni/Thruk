@@ -522,6 +522,12 @@ function bp_render(containerId, nodes, edges) {
         current_node = main_node.id;
     }
 
+    // center align inner container
+    var inner = document.getElementById('inner_'+containerId);
+    var offset = (w - maxX) / 2;
+    if(offset < 0) {offset = 0;}
+    inner.style.left = offset+'px';
+
     return;
 }
 

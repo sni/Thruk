@@ -112,6 +112,12 @@ DIV.ui-dialog INPUT[type=text] {
     overflow: auto;
 }
 
+.bp_container_inner {
+    position: relative;
+    width: 10px;
+    margin-right: auto;
+}
+
 .bp_node {
     border: 1px solid black;
     position: absolute;

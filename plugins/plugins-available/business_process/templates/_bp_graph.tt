@@ -4,7 +4,7 @@
 <a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)" class="bp_container_zoom plus">+</a>
 <a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)" class="bp_container_zoom minus">-</a>
 <div id='container[% bp.id %]' class="bp_container">
-  <div id='inner_container[% bp.id %]' class="bp_inner_container">
+  <div id='inner_container[% bp.id %]' class="bp_container_inner">
     [% FOREACH n IN bp.nodes %]
     [% statusClass = 'statusUNKNOWN' %]
     [% short_desc  = "" %]
