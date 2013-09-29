@@ -32,6 +32,11 @@ LI.bp_menu_seperator.ui-state-disabled A {
     width: 80px;
     white-space: normal;
 }
+.bp_type_btn_small {
+    height: inherit;
+    width: inherit;
+    white-space: inherit;
+}
 
 .bp_dialog_back_btn {
     float: left;

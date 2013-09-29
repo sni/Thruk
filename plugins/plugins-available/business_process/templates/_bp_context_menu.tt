@@ -19,7 +19,7 @@
 <div id="bp_edit_node" style="display: none;">
   <table width="100%">
     <tr>
-      <td><input type="button" class="bp_type_btn" value="Existing Node"></td>
+      <td><input type="button" class="bp_type_btn" value="Change Connections" onclick="bp_change_connections()" id="bp_conn_edit_btn"></td>
       <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_best()"></td>
       <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_at_least()"></td>
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_exactly()"></td>
@@ -31,6 +31,50 @@
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_fixed()"></td>
     </tr>
   </table>
+</div>
+
+<!-- connections editor -->
+<div id="bp_select_connections" title="Edit Connections" style="display: none;">
+  <form id="bp_select_connections_form" action="bp.cgi">
+  <input type="hidden" name="action" value="edit_connections">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Change relationships for this node.</td>
+    </tr>
+    <tr>
+      <td colspan=2>
+        <table><tr><td class="filter">
+          <table style="width:100%;">
+            <tr>
+              <td class="attrName"><b>Available</b></td>
+              <td>&nbsp;</td>
+              <td class="attrName"><b>Selected</b></td>
+            </tr>
+            <tr>
+              <td class="attrName">
+                <input type="text" class="filter_available" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% bp.id %]_available_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="[% bp.id %]_available_nodes" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% bp.id %]_available_nodes', '[% bp.id %]_selected_nodes')">
+                    <option disabled>loading...</option>
+                </select>
+              </td>
+              <td align="center" valign="middle">
+                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('[% bp.id %]_available_nodes', '[% bp.id %]_selected_nodes'); return false;">&gt;&gt;</button><br>
+                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('[% bp.id %]_selected_nodes', '[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
+              </td>
+              <td class="attrName">
+                <input type="text" class="filter_selected" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% bp.id %]_selected_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_selected_nodes" name="[% bp.id %]_selected_nodes" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% bp.id %]_selected_nodes', '[% bp.id %]_available_nodes')">
+                    <option disabled>loading...</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+        </td></tr></table>
+      </td>
+    </tr>
+  </table>
+  </form>
 </div>
 
 <!-- host/service status type select -->

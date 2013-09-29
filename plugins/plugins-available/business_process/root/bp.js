@@ -52,6 +52,7 @@ function bp_refresh(bp_id, node_id, callback) {
         }
         if(callback) { callback(textStatus == 'success' ? true : false); }
     });
+    return true;
 }
 
 /* refresh business process in background */
@@ -214,6 +215,7 @@ function bp_show_add_node(id) {
         title: title
     });
     jQuery('.bp_type_btn').button();
+    jQuery('#bp_conn_edit_btn').button({ disabled: current_edit_node == 'new' ? true : false });
     showElement('bp_edit_node');
     jQuery('INPUT.bp_node_id').val(id);
 }
@@ -223,6 +225,7 @@ function bp_show_edit_node() {
     bp_show_add_node(current_node);
 }
 
+/* fill in form with current values */
 function bp_fill_select_form(data) {
     if(data.radio) {
         for(var key in data.radio) {
@@ -241,6 +244,57 @@ function bp_fill_select_form(data) {
     if(data.label != undefined) {
         jQuery('#'+data.form).find('INPUT[name=bp_label]').val(data.label);
     }
+}
+
+/* show node connection editor */
+bp_list_wizard_initialized = {};
+function bp_change_connections() {
+    bp_show_dialog('bp_select_connections', 600, 480);
+
+    var node = bp_get_node(current_edit_node);
+
+    // initialize selected nodes
+    selected_nodes   = new Array();
+    selected_nodes_h = new Object();
+    var options = [];
+    node.depends.forEach(function(d) {
+        var val = d;
+        selected_nodes.push(val);
+        selected_nodes_h[val] = 1;
+        options.push(new Option(val, val));
+    });
+    set_select_options('bp_'+bp_id+"_selected_nodes", options, true);
+    sortlist('bp_'+bp_id+"_selected_nodes");
+    reset_original_options('bp_'+bp_id+"_selected_nodes");
+
+    // initialize available nodes
+    available_nodes   = new Array();
+    available_nodes_h = new Object();
+    var options = [];
+    nodes.forEach(function(n) {
+        var val = n.label;
+        if(selected_nodes_h[val]) { return true; }
+        available_nodes.push(val);
+        available_nodes_h[val] = 1;
+        options.push(new Option(val, val));
+        return true;
+    });
+    set_select_options('bp_'+bp_id+"_available_nodes", options, true);
+    sortlist('bp_'+bp_id+"_available_nodes");
+    reset_original_options('bp_'+bp_id+"_available_nodes");
+
+    // button has to be initialized only once
+    if(bp_list_wizard_initialized[bp_id] != undefined) {
+        // reset filter
+        jQuery('INPUT.filter_available').val('');
+        jQuery('INPUT.filter_selected').val('');
+        data_filter_select('bp_'+bp_id+'_available_nodes', '');
+        data_filter_select('bp_'+bp_id+'_selected_nodes', '');
+        return;
+    }
+    bp_list_wizard_initialized[bp_id] = true;
+
+    return;
 }
 
 /* show node type select: status */
@@ -291,7 +345,7 @@ function bp_select_best() {
     bp_show_dialog('bp_select_best', 430, 150);
     // insert current values
     var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
+    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
         bp_fill_select_form({
             form:  'bp_select_best_form',
             label: node.label
@@ -309,7 +363,7 @@ function bp_select_worst() {
     bp_show_dialog('bp_select_worst', 430, 150);
     // insert current values
     var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
+    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
         bp_fill_select_form({
             form:  'bp_select_worst_form',
             label: node.label
@@ -347,7 +401,7 @@ function bp_select_not_more() {
     bp_show_dialog('bp_select_not_more', 430, 210);
     // insert current values
     var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
         bp_fill_select_form({
             form:  'bp_select_not_more_form',
             label: node.label,
@@ -367,7 +421,7 @@ function bp_select_at_least() {
     bp_show_dialog('bp_select_at_least', 430, 210);
     // insert current values
     var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
         bp_fill_select_form({
             form:  'bp_select_at_least_form',
             label: node.label,
@@ -437,7 +491,7 @@ function bp_update_status(evt, node) {
     var n = bp_get_node(node.id);
     if(n == null) {
         if(thruk_debug_js) { alert("ERROR: got no node in bp_update_status(): " + node.id); }
-        return;
+        return false;
     }
 
     var status = n.status;
@@ -501,6 +555,7 @@ function bp_get_node(id) {
             node = n;
             return false;
         }
+        return true;
     });
     return node;
 }
@@ -661,5 +716,5 @@ function bp_redraw(evt) {
     if(offset < 0) {offset = 0;}
     inner.style.left = offset+'px';
 
-    return;
+    return true;
 }
