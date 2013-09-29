@@ -2311,6 +2311,41 @@ You may change the default minemap link here.
 
 
 
+=== Component Thruk::Plugin::BP
+
+The Business Process plugin gives the possibility to create and model your business
+processes.
+
+ex.:
+
+  <Component Thruk::Plugin::BP>
+    #spool_dir = /var/nagios/spool
+    objects_save_file = /etc/nagios/conf.d/bp_generated.cfg
+    #pre_obj_save_cmd   =
+    #post_obj_save_cmd  =
+    refresh_interval = 30
+  </Component>
+
+
+==== spool_dir
+Results may either be send back through livestatus or by a spool folder.
+Set a spool folder if you don't want to use livestatus.
+
+==== objects_save_file
+Save objects to this file. Content will be overwritten.
+
+==== pre_obj_save_cmd
+Run this hook command before saving a business process.
+
+==== post_obj_save_cmd
+Run this hook command after saving a business process.
+
+==== refresh_interval
+Refresh interval defines how often business processes
+will be recalculated and refreshed.
+
+
+
 === User & Group Specific Overrides
 Both, the 'Users' and the 'Groups' directive override default settings for
 single users or groups. In theory it's possible to override each and every
