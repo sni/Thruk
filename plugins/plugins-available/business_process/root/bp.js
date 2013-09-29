@@ -591,7 +591,10 @@ function bp_no_more_events(evt) {
 
 /* redraw nodes and stuff */
 function bp_redraw(evt) {
-    containerId = 'container'+bp_id;
+    var containerId;
+    try {
+        containerId = 'container'+bp_id;
+    } catch(e) { return false; }
 
     var maxX = 0, maxY = 0, minY = -1, main_node;
     nodes.forEach(function(u) {

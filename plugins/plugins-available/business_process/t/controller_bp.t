@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 212;
+use Test::More tests => 224;
 use File::Copy qw/copy/;
 
 BEGIN {
@@ -19,6 +19,7 @@ my $pages = [
     '/thruk/cgi-bin/bp.cgi',
     '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid,
     '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid.'&minimal=1',
+    '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid.'&edit=1',
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Test App', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=Test App Renamed', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },

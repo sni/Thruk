@@ -75,7 +75,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
-        $c->stash->{'bp'} = $bp;
+        $c->stash->{'bp'}     = $bp;
+        $c->stash->{editmode} = $c->{'request'}->{'parameters'}->{'edit'} || 0;
 
         if($action eq 'details') {
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';

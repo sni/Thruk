@@ -58,6 +58,7 @@
     </td>
   </tr>
 
+  [% IF editmode %]
   <tr>
     <td style="height: 20px;"></td>
   </tr>
@@ -83,6 +84,7 @@
       </table>
     </td>
   </tr>
+  [% END %]
 </table>
 
 
