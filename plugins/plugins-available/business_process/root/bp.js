@@ -182,13 +182,18 @@ function bp_submit_on_enter(evt, id) {
 
 /* show node type select */
 var current_edit_node;
+var current_edit_node_clicked;
 function bp_show_add_node(id) {
     hideElement('bp_menu');
     if(id) {
+        current_edit_node_clicked = id;
+        if(id == 'new') {
+            current_edit_node_clicked = current_node;
+        }
         current_edit_node = id;
     }
     var title = 'Change Node';
-    if(id == 'new') {
+    if(current_edit_node == 'new') {
         title = 'Create New Node';
     }
     jQuery("#bp_edit_node").dialog({
@@ -207,43 +212,102 @@ function bp_show_edit_node() {
     bp_show_add_node(current_node);
 }
 
+function bp_fill_select_form(data) {
+    if(data.radio) {
+        for(var key in data.radio) {
+            var d = data.radio[key];
+            jQuery('#'+data.form).find('INPUT[name='+key+']').removeAttr("checked");
+            jQuery('#'+data.form).find('INPUT[name='+key+'][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery(d[1]).buttonset();
+        }
+    }
+    if(data.text) {
+        for(var key in data.text) {
+            var d = data.text[key];
+            jQuery('#'+data.form).find('INPUT[name='+key+']').val(d);
+        }
+    }
+    if(data.label != undefined) {
+        jQuery('#'+data.form).find('INPUT[name=bp_label]').val(data.label);
+    }
+}
+
 /* show node type select: fixed */
 function bp_select_fixed() {
     bp_show_dialog('bp_select_fixed', 430, 220);
     jQuery('.bp_fixed_radio').buttonset();
     // insert current values
-    if(current_edit_node != 'new') {
-        var node = bp_get_node(current_edit_node);
-        if(node.func.toLowerCase() == 'fixed') {
-            // update radio buttons
-            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg1]').removeAttr("checked");
-            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg1][value="'+node.func_args[0].toUpperCase()+'"]').attr("checked","checked");
-            jQuery('.bp_fixed_radio').buttonset();
-
-            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
-        }
+    var node = bp_get_node(current_edit_node);
+    if(node && node.func.toLowerCase() == 'fixed') {
+        bp_fill_select_form({
+            form:  'bp_select_fixed_form',
+            label: node.label,
+            radio: { 'bp_arg1': [ node.func_args[0].toUpperCase(), '.bp_fixed_radio'] },
+            text:  { 'bp_arg2': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_fixed_form',
+            label: '',
+            radio: { 'bp_arg1': [ 'OK', '.bp_fixed_radio'] },
+            text:  { 'bp_arg2': '' }
+        });
     }
 }
 
 /* show node type select: best */
 function bp_select_best() {
     bp_show_dialog('bp_select_best', 430, 150);
+    // insert current values
+    var node = bp_get_node(current_edit_node);
+    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
+        bp_fill_select_form({
+            form:  'bp_select_best_form',
+            label: node.label
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_best_form',
+            label: ''
+        });
+    }
 }
 
 /* show node type select: worst */
 function bp_select_worst() {
     bp_show_dialog('bp_select_worst', 430, 150);
+    // insert current values
+    var node = bp_get_node(current_edit_node);
+    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
+        bp_fill_select_form({
+            form:  'bp_select_worst_form',
+            label: node.label
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_worst_form',
+            label: ''
+        });
+    }
 }
 
 /* show node type select: equals */
 function bp_select_exactly() {
     bp_show_dialog('bp_select_exactly', 430, 180);
     // insert current values
-    if(current_edit_node != 'new') {
-        var node = bp_get_node(current_edit_node);
-        if(node.func.toLowerCase() == 'equals') {
-            jQuery('#bp_select_exactly_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
-        }
+    var node = bp_get_node(current_edit_node);
+    if(node && node.func.toLowerCase() == 'equals') {
+        bp_fill_select_form({
+            form:  'bp_select_exactly_form',
+            label: node.label,
+            text:  { 'bp_arg1': node.func_args[0] }
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_exactly_form',
+            label: '',
+            text:  { 'bp_arg1': '' }
+        });
     }
 }
 
@@ -251,12 +315,19 @@ function bp_select_exactly() {
 function bp_select_not_more() {
     bp_show_dialog('bp_select_not_more', 430, 210);
     // insert current values
-    if(current_edit_node != 'new') {
-        var node = bp_get_node(current_edit_node);
-        if(node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least') {
-            jQuery('#bp_select_not_more_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
-            jQuery('#bp_select_not_more_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
-        }
+    var node = bp_get_node(current_edit_node);
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+        bp_fill_select_form({
+            form:  'bp_select_not_more_form',
+            label: node.label,
+            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_not_more_form',
+            label: '',
+            text:  { 'bp_arg1': '', 'bp_arg2': '' }
+        });
     }
 }
 
@@ -264,12 +335,19 @@ function bp_select_not_more() {
 function bp_select_at_least() {
     bp_show_dialog('bp_select_at_least', 430, 210);
     // insert current values
-    if(current_edit_node != 'new') {
-        var node = bp_get_node(current_edit_node);
-        if(node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least') {
-            jQuery('#bp_select_at_least_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
-            jQuery('#bp_select_at_least_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
-        }
+    var node = bp_get_node(current_edit_node);
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+        bp_fill_select_form({
+            form:  'bp_select_at_least_form',
+            label: node.label,
+            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_at_least_form',
+            label: '',
+            text:  { 'bp_arg1': '', 'bp_arg2': '' }
+        });
     }
 }
 
@@ -288,22 +366,18 @@ function bp_show_dialog(id, w, h) {
               'class': 'bp_dialog_back_btn'
             },
             { text: 'Create',
-              click: function() { bp_add_node(id+'_form'); jQuery(this).dialog("close"); },
+              click: function() { bp_edit_node_submit(id+'_form'); jQuery(this).dialog("close"); },
               'class': 'bp_dialog_create_btn'
             }
         ]
     });
-    // insert current label
-    if(current_edit_node != 'new') {
-        var node = bp_get_node(current_edit_node);
-        jQuery('#'+id+'_form').find('INPUT[name=bp_label]').val(node.label);
-    }
 }
 
-/* save menu for later restore */
-function bp_add_node(formId) {
+/* save node */
+function bp_edit_node_submit(formId) {
     var data = jQuery('#'+formId).serializeArray();
-    jQuery.post('bp.cgi?action=add_node&bp='+bp_id+'&node='+bp_active_node, data, function() {
+    var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
+    jQuery.post('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, function() {
         bp_refresh(bp_id);
     });
     return false;

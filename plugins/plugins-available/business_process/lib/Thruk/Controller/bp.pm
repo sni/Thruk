@@ -62,7 +62,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
     if($id !~ m/^\d+$/mx) { $id = ''; }
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
-    if($nodeid !~ m/^node\d+$/mx) { $nodeid = ''; }
+    if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
     my $refresh_rate = $c->{'request'}->{'parameters'}->{'refresh'} || $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'};
     $c->{'request'}->{'parameters'}->{'refresh'} = $refresh_rate if $refresh_rate;
@@ -93,6 +93,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         elsif($action eq 'rename_node' and $id && $nodeid) {
+            if(!$bp->{'nodes_by_id'}->{$nodeid}) {
+                $c->stash->{'text'} = 'ERROR: no such node';
+                $c->stash->{template} = 'passthrough.tt';
+                return 1;
+            }
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
             $bp->save();
             $c->stash->{'text'} = 'OK';
@@ -100,6 +105,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return 1;
         }
         elsif($action eq 'remove_node' and $id && $nodeid) {
+            if(!$bp->{'nodes_by_id'}->{$nodeid}) {
+                $c->stash->{'text'} = 'ERROR: no such node';
+                $c->stash->{template} = 'passthrough.tt';
+                return 1;
+            }
             $bp->remove_node($nodeid);
             $bp->save();
             $bp->save_runtime();
@@ -107,20 +117,27 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
-        elsif($action eq 'add_node' and $id && $nodeid) {
+        elsif($action eq 'edit_node' and $id && $nodeid) {
             my $parent = $bp->get_node($nodeid);
             my @arg;
             for my $x (1..10) {
                 push @arg, $c->{'request'}->{'parameters'}->{'bp_arg'.$x} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x};
             }
             my $function = sprintf("%s(%s)", $c->{'request'}->{'parameters'}->{'function'}, Thruk::BP::Utils::join_args(\@arg));
-            my $node = Thruk::BP::Components::Node->new({
-                                'label'    => $c->{'request'}->{'parameters'}->{'bp_label'},
-                                'function' => $function,
-                                'depends'  => [],
-            });
-            $bp->add_node($node);
-            $parent->append_child($node);
+            my $node;
+            if($c->{'request'}->{'parameters'}->{'bp_node_id'} eq 'new') {
+                $node = Thruk::BP::Components::Node->new({
+                                    'label'    => $c->{'request'}->{'parameters'}->{'bp_label'},
+                                    'function' => $function,
+                                    'depends'  => [],
+                });
+                $bp->add_node($node);
+                $parent->append_child($node);
+            } else {
+                $node = $parent;
+                $node->{'label'} = $c->{'request'}->{'parameters'}->{'bp_label'};
+                $node->_set_function({'function' => $function});
+            }
             $bp->save();
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';

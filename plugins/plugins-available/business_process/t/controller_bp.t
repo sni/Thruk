@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 89;
+use Test::More tests => 109;
 use File::Copy qw/copy/;
 
 BEGIN {
@@ -21,8 +21,10 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Test App', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=renamed', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
-    { url => '/thruk/cgi-bin/bp.cgi?action=add_node&bp='.$bpid.'&node=node1&bp_arg1=Critical&function=Fixed&bp_label=addednode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1=Critical&function=Fixed&bp_label=addednode', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&node=node2&bp_arg1=Warning&bp_arg2=newnodetest&function=Fixed&bp_label=newnode&bp_node_id=new', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'newnodetest', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
 ];
 

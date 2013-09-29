@@ -44,7 +44,7 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
     <tr>
       <th align="right">Status</th>
@@ -59,7 +59,7 @@
     </tr>
     <tr>
       <th align="right">Plugin Output</th>
-      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+      <td align="left"><input type="text" value="" name="bp_arg2" placeholder="dummy plugin output"></td>
     </tr>
   </table>
   </form>
@@ -76,7 +76,7 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
   </table>
   </form>
@@ -93,7 +93,7 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
   </table>
   </form>
@@ -110,11 +110,11 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
     <tr>
       <th align="right">Number</th>
-      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+      <td align="left"><input type="text" value="" name="bp_arg1" placeholder="threshold, ex.: 2"></td>
     </tr>
   </table>
   </form>
@@ -131,15 +131,15 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
     <tr>
       <th align="right">Warning</th>
-      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+      <td align="left"><input type="text" value="" name="bp_arg1" placeholder="threshold, ex.: 2"></td>
     </tr>
     <tr>
       <th align="right">Critical</th>
-      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+      <td align="left"><input type="text" value="" name="bp_arg2" placeholder="threshold, ex.: 3"></td>
     </tr>
   </table>
   </form>
@@ -156,15 +156,15 @@
     </tr>
     <tr>
       <th align="right">Label</th>
-      <td align="left"><input type="text" value="" name="bp_label"></td>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
     </tr>
     <tr>
       <th align="right">Warning</th>
-      <td align="left"><input type="text" value="" name="bp_arg1"></td>
+      <td align="left"><input type="text" value="" name="bp_arg1" placeholder="threshold, ex.: 2"></td>
     </tr>
     <tr>
       <th align="right">Critical</th>
-      <td align="left"><input type="text" value="" name="bp_arg2"></td>
+      <td align="left"><input type="text" value="" name="bp_arg2" placeholder="threshold, ex.: 3"></td>
     </tr>
   </table>
   </form>
