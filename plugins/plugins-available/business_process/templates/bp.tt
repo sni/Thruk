@@ -3,7 +3,7 @@
 
 <div style="margin-left: 10px; display: table;">
   <div style="text-align: left; float: left; line-height: 29px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
-  <div style="text-align: right; margin-bottom: 3px;"><a href="bp.cgi?action=edit&amp;bp=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
+  <div style="text-align: right; margin-bottom: 3px;"><a href="bp.cgi?action=new" class="bp_button bp_edit_button" style="width: 230px;">create new business process</a></div>
 <div id="bp_table">
 <table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
   <tr>

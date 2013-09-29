@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 161;
+use Test::More tests => 200;
 use File::Copy qw/copy/;
 
 BEGIN {
@@ -28,6 +28,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1 },
     { url => '/thruk/cgi-bin/bp.cgi', follow => 1, like => 'Clone of Test App' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
 ];
 
 for my $url (@{$pages}) {
@@ -44,4 +45,13 @@ if($test->{'content'} =~ m/action=details&bp=(\d+)"><b>Clone\ of\ Test\ App/mx) 
     ok(!-f 'var/bp/'.$1.'.tbp', 'clone business process removed');
 } else {
     fail('did not find clone, cannot remove');
+}
+
+# remove new business process
+$test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', 'like' => 'Business Process');
+if($test->{'content'} =~ m/action=details&bp=(\d+)"><b>New\ Test\ Business\ Process/mx) {
+    TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$1, 'like' => 'Business Process', follow => 1);
+    ok(!-f 'var/bp/'.$1.'.tbp', 'new business process removed');
+} else {
+    fail('did not find new file, cannot remove');
 }

@@ -31,14 +31,16 @@ return new business process
 =cut
 
 sub new {
-    my ( $class, $file ) = @_;
+    my ( $class, $file, $bpdata ) = @_;
 
-    my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
-    my %config = $conf->getall;
-    return unless $config{'bp'};
-    my $bplist = Thruk::Utils::list($config{'bp'});
-    return unless scalar @{$bplist} > 0;
-    my $bpdata = $bplist->[0];
+    if(-e $file) {
+        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
+        my %config = $conf->getall;
+        return unless $config{'bp'};
+        my $bplist = Thruk::Utils::list($config{'bp'});
+        return unless scalar @{$bplist} > 0;
+        $bpdata = $bplist->[0];
+    }
 
     $file =~ m/(\d+).tbp/mx;
     my $id = $1;

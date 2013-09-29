@@ -60,13 +60,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
-    if($id !~ m/^\d+$/mx) { $id = ''; }
+    if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
     my $refresh_rate = $c->{'request'}->{'parameters'}->{'refresh'} || $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'};
     $c->{'request'}->{'parameters'}->{'refresh'} = $refresh_rate if $refresh_rate;
-
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {
@@ -152,6 +151,25 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
+    }
+
+    # new business process
+    if($action eq 'new') {
+        my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+        my $label = $c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process';
+        my $bp = Thruk::BP::Components::BP->new($file, {
+            'name'  => $label,
+            'node'  => [{
+                'label'    => $label,
+                'function' => 'Worst()',
+                'depends'  => ['Example Node'],
+            }, {
+                'label'    => 'Example Node',
+                'function' => 'Fixed("OK")',
+            }]
+        });
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
     }
 
     # load business processes

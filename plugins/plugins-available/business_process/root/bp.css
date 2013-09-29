@@ -125,18 +125,25 @@ DIV.ui-dialog INPUT[type=text] {
     height: 40px;
     width: 120px;
     display: block;
+    overflow: hidden;
 
     -webkit-box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
     box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
 }
 
-.bp_label {
+DIV.bp_label {
     font-weight: bold;
-    line-height: 20px;
+    line-height: 11px;
     font-size: 11px;
     width: 120px;
     height: 20px;
-    overflow: hidden;
+    display: table;
+    position: relative;
+    top: 2px;
+}
+SPAN.bp_label {
+    display: table-cell;
+    vertical-align: middle;
 }
 
 .bp_sublabel {

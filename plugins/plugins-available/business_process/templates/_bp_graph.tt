@@ -16,7 +16,7 @@
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     <div id='[% n.id %]' class='bp_node clickable [% statusClass %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);">
-        <div class="bp_label">[% n.label %]</div>
+        <div class="bp_label"><span class="bp_label">[% n.label %]</span></div>
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
         <div class="bp_node_icons">
