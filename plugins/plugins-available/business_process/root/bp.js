@@ -243,6 +243,26 @@ function bp_fill_select_form(data) {
     }
 }
 
+/* show node type select: status */
+function bp_select_status() {
+    bp_show_dialog('bp_select_status', 430, 225);
+    // insert current values
+    var node = bp_get_node(current_edit_node);
+    if(node && node.func.toLowerCase() == 'status') {
+        bp_fill_select_form({
+            form:  'bp_select_status_form',
+            label: node.label,
+            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            form:  'bp_select_status_form',
+            label: '',
+            text:  { 'bp_arg1': '', 'bp_arg2': '' }
+        });
+    }
+}
+
 /* show node type select: fixed */
 function bp_select_fixed() {
     bp_show_dialog('bp_select_fixed', 430, 220);

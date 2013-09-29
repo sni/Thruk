@@ -25,12 +25,37 @@
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_exactly()"></td>
     </tr>
     <tr>
-      <td><input type="button" class="bp_type_btn" value="Host / Service"></td>
+      <td><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_status()"></td>
       <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_worst()"></td>
       <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_not_more()"></td>
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_fixed()"></td>
     </tr>
   </table>
+</div>
+
+<!-- host/service status type select -->
+<div id="bp_select_status" title="Host / Servicestatus" style="display: none;">
+  <form id="bp_select_status_form" action="bp.cgi">
+  <input type="hidden" name="function" value="Status">
+  <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
+  <table width="100%">
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">Uses status from the selected host or service.<br>The hoststatus will be used if the service is left empty.</td>
+    </tr>
+    <tr>
+      <th align="right">Label</th>
+      <td align="left"><input type="text" value="" name="bp_label" placeholder="node name"></td>
+    </tr>
+    <tr>
+      <th align="right">Host</th>
+      <td align="left"><input type="text" value="" id="bp_arg1" name="bp_arg1" placeholder="hostname"[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"[% END %]></td>
+    </tr>
+    <tr>
+      <th align="right">Service</th>
+      <td align="left"><input type="text" value="" id="bp_arg2" name="bp_arg2" placeholder="optional service description"[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'bp_arg1' })"[% END %]></td>
+    </tr>
+  </table>
+  </form>
 </div>
 
 <!-- dummy/fixed type select -->
