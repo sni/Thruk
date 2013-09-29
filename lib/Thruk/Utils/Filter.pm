@@ -383,7 +383,10 @@ returns json encoded string
 
 =cut
 sub json_encode {
-    return JSON::XS::encode_json([@_]);
+    if(scalar @_ > 1) {
+        return JSON::XS::encode_json([@_]);
+    }
+    return JSON::XS::encode_json($_[0]);
 }
 
 ########################################

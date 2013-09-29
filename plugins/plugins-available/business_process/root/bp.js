@@ -181,8 +181,12 @@ function bp_submit_on_enter(evt, id) {
 }
 
 /* show node type select */
+var current_edit_node;
 function bp_show_add_node(id) {
     hideElement('bp_menu');
+    if(id) {
+        current_edit_node = id;
+    }
     var title = 'Change Node';
     if(id == 'new') {
         title = 'Create New Node';
@@ -207,6 +211,18 @@ function bp_show_edit_node() {
 function bp_select_fixed() {
     bp_show_dialog('bp_select_fixed', 430, 220);
     jQuery('.bp_fixed_radio').buttonset();
+    // insert current values
+    if(current_edit_node != 'new') {
+        var node = bp_get_node(current_edit_node);
+        if(node.func.toLowerCase() == 'fixed') {
+            // update radio buttons
+            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg1]').removeAttr("checked");
+            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg1][value="'+node.func_args[0].toUpperCase()+'"]').attr("checked","checked");
+            jQuery('.bp_fixed_radio').buttonset();
+
+            jQuery('#bp_select_fixed_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
+        }
+    }
 }
 
 /* show node type select: best */
@@ -222,16 +238,39 @@ function bp_select_worst() {
 /* show node type select: equals */
 function bp_select_exactly() {
     bp_show_dialog('bp_select_exactly', 430, 180);
+    // insert current values
+    if(current_edit_node != 'new') {
+        var node = bp_get_node(current_edit_node);
+        if(node.func.toLowerCase() == 'equals') {
+            jQuery('#bp_select_exactly_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
+        }
+    }
 }
 
 /* show node type select: not_more */
 function bp_select_not_more() {
     bp_show_dialog('bp_select_not_more', 430, 210);
+    // insert current values
+    if(current_edit_node != 'new') {
+        var node = bp_get_node(current_edit_node);
+        if(node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least') {
+            jQuery('#bp_select_not_more_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
+            jQuery('#bp_select_not_more_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
+        }
+    }
 }
 
 /* show node type select: at_least */
 function bp_select_at_least() {
     bp_show_dialog('bp_select_at_least', 430, 210);
+    // insert current values
+    if(current_edit_node != 'new') {
+        var node = bp_get_node(current_edit_node);
+        if(node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least') {
+            jQuery('#bp_select_at_least_form').find('INPUT[name=bp_arg1]').val(node.func_args[0]);
+            jQuery('#bp_select_at_least_form').find('INPUT[name=bp_arg2]').val(node.func_args[1]);
+        }
+    }
 }
 
 /* show add node dialog */
@@ -254,6 +293,11 @@ function bp_show_dialog(id, w, h) {
             }
         ]
     });
+    // insert current label
+    if(current_edit_node != 'new') {
+        var node = bp_get_node(current_edit_node);
+        jQuery('#'+id+'_form').find('INPUT[name=bp_label]').val(node.label);
+    }
 }
 
 /* save menu for later restore */
