@@ -8,7 +8,7 @@
   <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.7.2.min.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
-  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/strftime-min.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/strftime-min.js"></script>
   <!--[if IE]><script language='javascript' type='text/javascript' src='[% url_prefix %]thruk/javascript/excanvas.js'></script><![endif]-->
   [% PROCESS 'reports/style/custom.tt' %]
 </head>

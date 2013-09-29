@@ -23,6 +23,10 @@
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
       [% END +%]
+      [% IF auto_reload_fn +%]
+      var auto_reload_fn          = function(cb) { return([% auto_reload_fn %](cb)) };
+      var datetime_format_long    = '[% datetime_format_long %]';
+      [% END +%]
       [% PROCESS _header_initial_states.tt %]
       /* create clone */
       var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);

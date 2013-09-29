@@ -316,7 +316,26 @@ function setRefreshRate(rate) {
   else {
     obj.innerHTML = "Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'>";
     if(rate == 0) {
-      reloadPage();
+      var has_auto_reload_fn = false;
+      try {
+        if(auto_reload_fn && typeof(auto_reload_fn) == 'function') {
+            has_auto_reload_fn = true;
+        }
+      } catch(e) {}
+      if(has_auto_reload_fn) {
+        auto_reload_fn(function(state) {
+            if(state) {
+                var d = new Date();
+                var new_date = d.strftime(datetime_format_long);
+                jQuery('#infoboxdate').html(new_date);
+            } else {
+                jQuery('#infoboxdate').html('<span class="fail_message">refresh failed<\/span>');
+            }
+        });
+        resetRefresh();
+      } else {
+        reloadPage();
+      }
     }
     if(rate > 0) {
       newRate = rate - 1;
