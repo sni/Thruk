@@ -18,7 +18,8 @@ Business Process Node
 
 =cut
 
-my @stateful_keys = qw/status status_text last_check last_state_change short_desc/;
+my @stateful_keys = qw/status status_text last_check last_state_change short_desc
+                       scheduled_downtime_depth acknowledged/;
 
 ##########################################################
 
@@ -40,6 +41,8 @@ sub new {
         'parents'           => $data->{'parents'} || [],
         'host'              => '',
         'service'           => '',
+        'scheduled_downtime_depth' => 0,
+        'acknowledged'      => 0,
 
         'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
         'status_text'       => $data->{'status_text'} || '',
@@ -193,7 +196,7 @@ sub _set_status {
     }
 
     # update some extra attributes
-    for my $key (qw/last_check last_state_change/) {
+    for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }
 

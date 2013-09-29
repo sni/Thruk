@@ -282,6 +282,17 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_duration').html(n.duration);
     jQuery('#bp_status_function').html(n.func + '('+n.func_args.join(', ')+')');
 
+    if(n.scheduled_downtime_depth > 0) {
+        jQuery('#bp_status_icon_downtime').css('display', 'inherit');
+    } else {
+        jQuery('#bp_status_icon_downtime').css('display', 'none');
+    }
+    if(n.acknowledged > 0) {
+        jQuery('#bp_status_icon_ack').css('display', 'inherit');
+    } else {
+        jQuery('#bp_status_icon_ack').css('display', 'none');
+    }
+
     jQuery('.bp_info_host').css('display', 'none');
     jQuery('.bp_info_service').css('display', 'none');
 

@@ -84,6 +84,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
         }
+        elsif($action eq 'remove' and $id) {
+            $bp->remove($c);
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+        }
         elsif($action eq 'rename_node' and $id && $nodeid) {
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
             $bp->save();

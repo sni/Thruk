@@ -277,13 +277,27 @@ sub _resolve_nodes {
 
 ##########################################################
 
+=head2 remove
+
+remove business process data to file
+
+=cut
+sub remove {
+    my ( $self ) = @_;
+    unlink($self->{'file'})     or die('cannot remove '.$self->{'file'}.': '.$!);
+    unlink($self->{'datafile'}) or die('cannot remove '.$self->{'datafile'}.': '.$!);
+    return;
+}
+
+##########################################################
+
 =head2 save
 
 save business process data to file
 
 =cut
 sub save {
-    my ( $self, $file ) = @_;
+    my ( $self ) = @_;
     my $string = "<bp>\n";
     for my $key (qw/name/) {
         $string .= sprintf("  %-10s = %s\n", $key, $self->{$key});
@@ -294,7 +308,7 @@ sub save {
     $string .= "</bp>\n";
     open(my $fh, '>', $self->{'file'}) or die('cannot open '.$self->{'file'}.': '.$!);
     print $fh $string;
-    Thruk::Utils::IO::close($fh, $file);
+    Thruk::Utils::IO::close($fh, $self->{'file'});
     $self->{'need_save'} = 0;
     return;
 }

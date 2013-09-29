@@ -8,7 +8,7 @@
 <table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
-    <th class="status" nowrap width="0" nowrap>&nbsp;</th>
+    <th class="status" nowrap width="0">&nbsp;</th>
     <th class="status" nowrap width="100">Status</th>
     <th class="status" nowrap width="100">Last Check</th>
     <th class="status" nowrap width="100">Duration</th>

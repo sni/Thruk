@@ -74,6 +74,11 @@ DIV.ui-dialog INPUT[type=text] {
     height: 18px;
 }
 
+.bp_status_status_icons IMG {
+    margin-left: 3px;
+    float: left;
+}
+
 .bp_settings INPUT, .bp_settings SELECT {
     width: 240px;
     margin-top: 3px;
@@ -143,6 +148,12 @@ DIV.ui-dialog INPUT[type=text] {
 }
 .bp_node:hover .bp_node_edit_icon {
     display: inherit;
+}
+
+.bp_node_icons {
+    position: absolute;
+    top: 2px;
+    left: 1px;
 }
 
 .bp_node_active, .bp_node:hover {

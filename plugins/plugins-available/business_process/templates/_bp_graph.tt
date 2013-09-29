@@ -19,6 +19,14 @@
         <div class="bp_label">[% n.label %]</div>
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
+        <div class="bp_node_icons">
+          [% IF n.scheduled_downtime_depth > 0%]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" height="12" width="12">
+          [% END %]
+          [% IF n.acknowledged > 0%]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" border="0" height="12" width="12">
+          [% END %]
+        </div>
     </div>
     [%+ END %]
   </div>
@@ -28,16 +36,18 @@
 <!--
     var nodes = [
         [% FOREACH n IN bp.nodes %]
-        { id:           "[% n.id %]",
-          label:        "[% n.label %]",
-          host:         "[% n.host %]",
-          service:      "[% n.service %]",
-          status:       "[% n.status %]",
+        { id:           '[% n.id %]',
+          label:        '[% n.label %]',
+          host:         '[% n.host %]',
+          service:      '[% n.service %]',
+          status:       '[% n.status %]',
           status_text:  '[% escape_quotes(n.status_text) %]',
           short_desc:   '[% escape_quotes(n.short_desc) %]',
           last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
           duration:     '[% IF n.last_state_change %][% duration(date.now - n.last_state_change) %][% END %]',
-          func:         "[% n.function %]",
+          acknowledged: '[% n.acknowledged %]',
+          scheduled_downtime_depth: '[% n.scheduled_downtime_depth %]',
+          func:         '[% n.function %]',
           func_args:    [% json_encode(n.function_args) %],
           width:        120,
           height:        40

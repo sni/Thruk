@@ -1,0 +1,20 @@
+<bp>
+  name       = Test App
+  <node>
+    id         = node1
+    label      = Test App
+    function   = Worst()
+    depends    = node2
+    depends    = node3
+  </node>
+  <node>
+    id         = node2
+    label      = Node 1
+    function   = Fixed('Ok')
+  </node>
+  <node>
+    id         = node3
+    label      = Node 2
+    function   = Fixed('Ok')
+  </node>
+</bp>
