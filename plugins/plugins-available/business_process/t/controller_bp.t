@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 200;
+use Test::More tests => 212;
 use File::Copy qw/copy/;
 
 BEGIN {
@@ -18,8 +18,9 @@ ok(-f 'var/bp/'.$bpid.'.tbp', 'business process exists');
 my $pages = [
     '/thruk/cgi-bin/bp.cgi',
     '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid,
+    '/thruk/cgi-bin/bp.cgi?action=details&bp='.$bpid.'&minimal=1',
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Test App', skip_doctype => 1 },
-    { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=renamed', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=Test App Renamed', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1=Critical&function=Fixed&bp_label=addednode', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },

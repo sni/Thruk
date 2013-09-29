@@ -107,6 +107,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 return 1;
             }
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
+            # first node renames business process itself too
+            if($nodeid eq 'node1') {
+                $bp->{'name'} = $c->{'request'}->{'parameters'}->{'label'};
+            }
             $bp->save();
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';

@@ -16,6 +16,7 @@ function init_bp_buttons() {
     }
     document.onmousedown   = bp_context_menu_open;
     document.oncontextmenu = bp_context_menu_open;
+    window.onresize        = bp_redraw;
     return;
 }
 
@@ -25,7 +26,9 @@ var is_refreshing = false;
 function bp_refresh(bp_id, node_id, callback) {
     if(is_refreshing) { return false; }
     if(node_id && node_id != 'changed_only') {
-        showElement('bp_status_waiting');
+        if(!minimal) {
+            showElement('bp_status_waiting');
+        }
     }
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
@@ -33,7 +36,9 @@ function bp_refresh(bp_id, node_id, callback) {
     is_refreshing = true;
     jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&bp='+bp_id, [], function(responseText, textStatus, XMLHttpRequest) {
         is_refreshing = false;
-        hideElement('bp_status_waiting');
+        if(!minimal) {
+            hideElement('bp_status_waiting');
+        }
         var node = document.getElementById(current_node);
         bp_update_status(null, node);
         if(bp_active_node) {
@@ -88,6 +93,12 @@ function bp_context_menu_open(evt, node) {
         var h = jQuery(window).height() - jQuery("#bp_menu").height() - 10;
         if(h < evt.pageY) {
             jQuery("#bp_menu").css('top', h+'px');
+        }
+        // first node cannot be removed
+        if(node.id == 'node1') {
+            jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
+        } else {
+            jQuery('#bp_menu_remove_node').removeClass('ui-state-disabled');
         }
     } else if(node) {
         bp_unset_active_node();
@@ -394,6 +405,9 @@ function bp_menu_save() {
 /* set status data */
 function bp_update_status(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+    if(minimal) {
+        return false;
+    }
     if(node == null) {
         return false;
     }
@@ -403,6 +417,7 @@ function bp_update_status(evt, node) {
     var n = bp_get_node(node.id);
     if(n == null) {
         if(thruk_debug_js) { alert("ERROR: got no node in bp_update_status(): " + node.id); }
+        return;
     }
 
     var status = n.status;
@@ -472,6 +487,8 @@ function bp_get_node(id) {
 
 /* do the layout */
 function bp_render(containerId, nodes, edges) {
+    // first reset zoom
+    bp_zoom('inner_'+containerId, 1);
     dagre.layout()
         //.debugLevel(4)
         .nodes(nodes)
@@ -480,55 +497,16 @@ function bp_render(containerId, nodes, edges) {
         .rankDir("TB")
         .run();
 
-    var maxX = 0, maxY = 0, minY = -1, main_node;
     nodes.forEach(function(u) {
         // move node
         jQuery('#'+u.dagre.id).css('left', (u.dagre.x-55)+'px').css('top', (u.dagre.y-15)+'px');
-        if(maxX < u.dagre.x) { maxX = u.dagre.x }
-        if(maxY < u.dagre.y) { maxY = u.dagre.y }
-        if(minY == -1 || u.dagre.y < minY) { minY = u.dagre.y; main_node = u; }
     });
-    maxX = maxX + 80;
-    maxY = maxY + 30;
 
     edges.forEach(function(e) {
         bp_plump('inner_'+containerId, e.sourceId, e.targetId);
     });
 
-    // adjust size of container
-    var container = document.getElementById(containerId);
-    var w = jQuery(window).width() - container.parentNode.offsetLeft - 320;
-    var h = jQuery(window).height() - container.parentNode.offsetTop -  10;
-    container.style.width  = w+'px';
-    container.style.height = h+'px';
-
-    // do we need to zoom in?
-    var zoomX = 1, zoomY = 1;
-    if(w < maxX) {
-        zoomX = w / maxX;
-    }
-    if(h < maxY) {
-        zoomY = h / maxY;
-    }
-    var zoom = zoomY;
-    if(zoomX < zoomY) { zoom = zoomX; }
-    if(zoom < 1) {
-        bp_zoom('inner_'+containerId, zoom);
-    }
-    original_zoom = zoom;
-
-    if(!current_node) {
-        bp_update_status(null, main_node);
-        current_node = main_node.id;
-    }
-
-    // center align inner container
-    var inner = document.getElementById('inner_'+containerId);
-    var offset = (w - maxX) / 2;
-    if(offset < 0) {offset = 0;}
-    inner.style.left = offset+'px';
-
-    return;
+    bp_redraw();
 }
 
 /* zoom out */
@@ -609,4 +587,56 @@ function bp_no_more_events(evt) {
     }
     evt.cancelBubble = true;
     return false;
+}
+
+/* redraw nodes and stuff */
+function bp_redraw(evt) {
+    containerId = 'container'+bp_id;
+
+    var maxX = 0, maxY = 0, minY = -1, main_node;
+    nodes.forEach(function(u) {
+        if(maxX < u.dagre.x) { maxX = u.dagre.x }
+        if(maxY < u.dagre.y) { maxY = u.dagre.y }
+        if(minY == -1 || u.dagre.y < minY) { minY = u.dagre.y; main_node = u; }
+    });
+    maxX = maxX + 80;
+    maxY = maxY + 30;
+
+    // adjust size of container
+    var container = document.getElementById(containerId);
+    var w = jQuery(window).width() - container.parentNode.offsetLeft - 5;
+    var h = jQuery(window).height() - container.parentNode.offsetTop -10;
+    if(!minimal) {
+        w = w - 315;
+    }
+    container.style.width  = w+'px';
+    container.style.height = h+'px';
+
+    // do we need to zoom in?
+    var zoomX = 1, zoomY = 1;
+    if(w < maxX) {
+        zoomX = w / maxX;
+    }
+    if(h < maxY) {
+        zoomY = h / maxY;
+    }
+    var zoom = zoomY;
+    if(zoomX < zoomY) { zoom = zoomX; }
+    if(zoom < 1) {
+        bp_zoom('inner_'+containerId, zoom);
+    }
+    original_zoom = zoom;
+
+    if(!current_node) {
+        bp_update_status(null, main_node);
+        current_node = main_node.id;
+    }
+
+    // center align inner container
+    var inner = document.getElementById('inner_'+containerId);
+    var offset = (w - maxX) / 2;
+    if(offset < 0) {offset = 0;}
+    inner.style.left = offset+'px';
+
+    return;
 }
