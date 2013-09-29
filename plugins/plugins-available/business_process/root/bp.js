@@ -370,14 +370,14 @@ function bp_show_dialog(id, w, h) {
         closeOnEscape: true,
         width: w,
         height: h,
-        buttons: [
-            { text: 'Back',
-              click: function() { jQuery(this).dialog("close"); bp_show_add_node(); },
-              icons: { primary: "ui-icon-arrowthick-1-w" },
+        buttons: [{
+              'text':  'Back',
+              'click':  function() { jQuery(this).dialog("close"); bp_show_add_node(); },
+              'icons':  { primary: "ui-icon-arrowthick-1-w" },
               'class': 'bp_dialog_back_btn'
-            },
-            { text: 'Create',
-              click: function() { bp_edit_node_submit(id+'_form'); jQuery(this).dialog("close"); },
+            }, {
+              'text':   current_edit_node == 'new' ? 'Create' : 'Save',
+              'click':  function() { bp_edit_node_submit(id+'_form'); jQuery(this).dialog("close"); },
               'class': 'bp_dialog_create_btn'
             }
         ]
