@@ -87,7 +87,7 @@ function bp_context_menu_open(evt, node) {
         jQuery(node).addClass('bp_node_active');
         bp_active_node = node.id;
         bp_update_status(evt, node);
-        jQuery("#bp_menu").menu().css('top', evt.pageY+'px').css('left', evt.pageX+'px');
+        jQuery("#bp_menu").menu().css('top', evt.pageY+'px').css('left', evt.pageX+'px').unbind('keydown');
         bp_menu_restore();
         // make sure menu does not overlap window
         var h = jQuery(window).height() - jQuery("#bp_menu").height() - 10;
