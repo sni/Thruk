@@ -64,6 +64,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx) { $nodeid = ''; }
 
+    my $refresh_rate = $c->{'request'}->{'parameters'}->{'refresh'} || $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'};
+    $c->{'request'}->{'parameters'}->{'refresh'} = $refresh_rate if $refresh_rate;
+
+
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
@@ -75,7 +79,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'bp'} = $bp;
 
         if($action eq 'details') {
-            $c->stash->{'no_auto_reload'} = 1;
+            $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{template} = 'bp_details.tt';
             return 1;
         }

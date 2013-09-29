@@ -21,20 +21,37 @@ function init_bp_buttons() {
 
 /* refresh given business process */
 var current_node;
-function bp_refresh(bp_id, node_id) {
-    bp_active_node = current_node;
-    showElement('bp_status_waiting');
+var is_refreshing = false;
+function bp_refresh(bp_id, node_id, callback) {
+    if(is_refreshing) { return false; }
+    if(node_id && node_id != 'changed_only') {
+        showElement('bp_status_waiting');
+    }
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
-    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&bp='+bp_id, [], function() {
+    var old_nodes = nodes;
+    is_refreshing = true;
+    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&bp='+bp_id, [], function(responseText, textStatus, XMLHttpRequest) {
+        is_refreshing = false;
         hideElement('bp_status_waiting');
         var node = document.getElementById(current_node);
         bp_update_status(null, node);
-        jQuery(node).addClass('bp_node_active');
-        if(node_id) {
+        if(bp_active_node) {
+            jQuery(node).addClass('bp_node_active');
+        }
+        if(node_id == 'changed_only') {
+            // maybe hilight changed nodes in future...
+        }
+        else if(node_id) {
             jQuery('#'+node_id).effect('highlight', {}, 1500);
         }
+        if(callback) { callback(textStatus == 'success' ? true : false); }
     });
+}
+
+/* refresh business process in background */
+function bp_refresh_bg(cb) {
+    bp_refresh(bp_id, 'changed_only', cb);
 }
 
 /* unset active node */
@@ -96,6 +113,8 @@ function bp_context_menu_open(evt, node) {
         evt.cancelBubble = true;
         return false;
     }
+    // don't interrupt user interactions by automatic reload
+    resetRefresh();
     return true;
 }
 
@@ -240,8 +259,7 @@ function bp_show_dialog(id, w, h) {
 /* save menu for later restore */
 function bp_add_node(formId) {
     var data = jQuery('#'+formId).serializeArray();
-    var node = document.getElementById(current_node);
-    jQuery.post('bp.cgi?action=add_node&bp='+bp_id+'&node='+node.id, data, function() {
+    jQuery.post('bp.cgi?action=add_node&bp='+bp_id+'&node='+bp_active_node, data, function() {
         bp_refresh(bp_id);
     });
     return false;
@@ -383,6 +401,7 @@ function bp_render(containerId, nodes, edges) {
 
     if(!current_node) {
         bp_update_status(null, main_node);
+        current_node = main_node.id;
     }
 
     return;
