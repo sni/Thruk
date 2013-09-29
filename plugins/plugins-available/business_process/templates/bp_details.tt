@@ -74,7 +74,7 @@
               </tr>
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete this Business Process' title='Delete this Business Process' width="20" height="20"></td>
-                <td class='command'><a href='bp.cgi?action=delete&amp;bp=[% bp.id %]'>Delete this Business Process</a></td>
+                <td class='command'><a href='bp.cgi?action=remove&amp;bp=[% bp.id %]' onclick="return confirm('Removed Business Process cannot be restored. Really remove?')">Delete this Business Process</a></td>
               </tr>
             </table>
           </td>

@@ -90,7 +90,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'remove' and $id) {
             $bp->remove($c);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+        }
+        elsif($action eq 'clone' and $id) {
+            my $newid;
+            ($bp->{'file'}, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+            $bp->{'name'} = 'Clone of '.$bp->{'name'};
+            $bp->save($c);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
         }
         elsif($action eq 'rename_node' and $id && $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {

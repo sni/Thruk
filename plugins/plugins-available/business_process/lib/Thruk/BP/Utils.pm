@@ -42,8 +42,28 @@ sub load_bp_data {
         push @{$bps}, $bp if $bp;
     }
 
-    #update_bp_status($c, $bps);
+    # sort by name
+    @{$bps} = sort { $a->{'name'} cmp $b->{'name'} } @{$bps};
+
     return($bps);
+}
+
+##########################################################
+
+=head2 next_free_bp_file
+
+    next_free_bp_file($c)
+
+return next free bp file
+
+=cut
+sub next_free_bp_file {
+    my($c) = @_;
+    my $num = 1;
+    while(-e $c->config->{'var_path'}.'/bp/'.$num.'.tbp') {
+        $num++;
+    }
+    return($c->config->{'var_path'}.'/bp/'.$num.'.tbp', $num);
 }
 
 ##########################################################

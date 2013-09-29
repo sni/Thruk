@@ -285,7 +285,7 @@ remove business process data to file
 sub remove {
     my ( $self ) = @_;
     unlink($self->{'file'})     or die('cannot remove '.$self->{'file'}.': '.$!);
-    unlink($self->{'datafile'}) or die('cannot remove '.$self->{'datafile'}.': '.$!);
+    unlink($self->{'datafile'}); # can fail if not updated before removal
     return;
 }
 

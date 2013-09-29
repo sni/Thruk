@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 109;
+use Test::More tests => 161;
 use File::Copy qw/copy/;
 
 BEGIN {
@@ -25,6 +25,8 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&node=node2&bp_arg1=Warning&bp_arg2=newnodetest&function=Fixed&bp_label=newnode&bp_node_id=new', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&bp='.$bpid, like => 'newnodetest', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi', follow => 1, like => 'Clone of Test App' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
 ];
 
@@ -34,3 +36,12 @@ for my $url (@{$pages}) {
 }
 
 ok(!-f 'var/bp/'.$bpid.'.tbp', 'business process removed');
+
+# remove clone
+my $test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', 'like' => 'Business Process');
+if($test->{'content'} =~ m/action=details&bp=(\d+)"><b>Clone\ of\ Test\ App/mx) {
+    TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$1, 'like' => 'Business Process', follow => 1);
+    ok(!-f 'var/bp/'.$1.'.tbp', 'clone business process removed');
+} else {
+    fail('did not find clone, cannot remove');
+}
