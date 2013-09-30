@@ -16,8 +16,8 @@
         </select>
       </td>
       <td align="center" valign="middle">
-        <button id="[% id %]_add" onclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">&gt;&gt;</button><br>
-        <button id="[% id %]_remove" onclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">&lt;&lt;</button>
+        <button id="[% id %]_add" onclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members'); return false;">&gt;&gt;</button><br>
+        <button id="[% id %]_remove" onclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members'); return false;">&lt;&lt;</button>
       </td>
       <td class="attrName">
         <input type="text" class="filter_selected" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% id %]_selected_members', this.value)"><br>
