@@ -84,11 +84,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
-        $c->stash->{'bp'}     = $bp;
+        $c->stash->{'bp'} = $bp;
 
         if($action eq 'details') {
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
-            $c->stash->{template} = 'bp_details.tt';
+            $c->stash->{template}         = 'bp_details.tt';
             return 1;
         }
         elsif($action eq 'refresh' and $id) {
@@ -220,7 +220,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         });
         Thruk::BP::Utils::update_cron_file($c); # check cronjob
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
     }
 
     # load business processes

@@ -22,7 +22,7 @@
 <div id="bp_edit_node" style="display: none;">
   <table width="100%">
     <tr>
-      <td><input type="button" class="bp_type_btn" value="Change Connections" onclick="bp_change_connections()" id="bp_conn_edit_btn"></td>
+      <td><input type="button" class="bp_type_btn" value="Change Child Connections" onclick="bp_change_connections()" id="bp_conn_edit_btn"></td>
       <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_best()"></td>
       <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_at_least()"></td>
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_exactly()"></td>

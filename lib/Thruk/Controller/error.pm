@@ -239,6 +239,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
+    delete $c->stash->{'auto_reload_fn'};
 
     $c->stash->{'title'}        = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}         = "status" unless defined $c->stash->{'page'};

@@ -2314,7 +2314,11 @@ You may change the default minemap link here.
 === Component Thruk::Plugin::BP
 
 The Business Process plugin gives the possibility to create and model your business
-processes.
+processes. In order to edit and create new business processes you will
+need the roles:
+
+ - authorized_for_configuration_information
+ - authorized_for_system_commands
 
 ex.:
 

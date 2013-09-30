@@ -684,6 +684,7 @@ h4#_peer + div > ul tt {
 <div class='toclevel3'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_statusmap'>Component Thruk::Plugin::Statusmap</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_minemap'>Component Thruk::Plugin::Minemap</a></div>
+<div class='toclevel3'><a href='#_component_thruk_plugin_bp'>Component Thruk::Plugin::BP</a></div>
 <div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 <div class='toclevel3'><a href='#_cgi_cfg_3'>cgi.cfg</a></div>
 <div class='toclevel2'><a href='#_logfiles'>Logfiles</a></div>
@@ -17185,6 +17186,18 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_minemap_default_link'>minemap_default_link</a></div>
 
+<div class='toclevel3'><a href='#_component_thruk_plugin_bp'>Component Thruk::Plugin::BP</a></div>
+
+<div class='toclevel4'><a href='#_spool_dir'>spool_dir</a></div>
+
+<div class='toclevel4'><a href='#_objects_save_file'>objects_save_file</a></div>
+
+<div class='toclevel4'><a href='#_pre_obj_save_cmd_2'>pre_obj_save_cmd</a></div>
+
+<div class='toclevel4'><a href='#_post_obj_save_cmd_2'>post_obj_save_cmd</a></div>
+
+<div class='toclevel4'><a href='#_refresh_interval'>refresh_interval</a></div>
+
 <div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 
 <div class='toclevel4'><a href='#_groups'>Groups</a></div>
@@ -18998,6 +19011,57 @@ types are: <em>table</em> and <em>circle</em></p></div>
 </div>
 </div>
 <div class="sect2">
+<h3 id="_component_thruk_plugin_bp">Component Thruk::Plugin::BP</h3>
+<div class="paragraph"><p>The Business Process plugin gives the possibility to create and model your business
+processes. In order to edit and create new business processes you will
+need the roles:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+authorized_for_configuration_information
+</p>
+</li>
+<li>
+<p>
+authorized_for_system_commands
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::BP&gt;
+  #spool_dir          = /var/nagios/spool
+  objects_save_file   = /etc/nagios/conf.d/bp_generated.cfg
+  #pre_obj_save_cmd   =
+  #post_obj_save_cmd  =
+  refresh_interval    = 1
+&lt;/Component&gt;</tt></pre>
+</div></div>
+<div class="sect3">
+<h4 id="_spool_dir">spool_dir</h4>
+<div class="paragraph"><p>Results may either be send back through livestatus or by a spool folder.
+Set a spool folder if you don&#8217;t want to use livestatus.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_objects_save_file">objects_save_file</h4>
+<div class="paragraph"><p>Save objects to this file. Content will be overwritten.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_pre_obj_save_cmd_2">pre_obj_save_cmd</h4>
+<div class="paragraph"><p>Run this hook command before saving a business process.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_post_obj_save_cmd_2">post_obj_save_cmd</h4>
+<div class="paragraph"><p>Run this hook command after saving a business process.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_refresh_interval">refresh_interval</h4>
+<div class="paragraph"><p>Refresh interval defines how often business processes
+will be recalculated and refreshed. (in minutes)</p></div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_user_amp_group_specific_overrides">User &amp; Group Specific Overrides</h3>
 <div class="paragraph"><p>Both, the <em>Users</em> and the <em>Groups</em> directive override default settings for
 single users or groups. In theory it&#8217;s possible to override each and every
@@ -20441,7 +20505,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-24 11:25:22 CEST
+Last updated 2013-09-30 17:26:39 CEST
 </div>
 </div>
 </body>

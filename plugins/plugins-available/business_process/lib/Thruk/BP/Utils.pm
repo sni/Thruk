@@ -60,7 +60,7 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
-    while(-e $c->config->{'var_path'}.'/bp/'.$num.'.tbp') {
+    while(-e $c->config->{'var_path'}.'/bp/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
         $num++;
     }
     return($c->config->{'var_path'}.'/bp/'.$num.'.tbp', $num);

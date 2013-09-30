@@ -55,8 +55,8 @@ sub new {
     bless $self, $class;
     $self->set_file($file);
 
+    if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {
-        if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
         my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
         my %config = $conf->getall;
         return unless $config{'bp'};

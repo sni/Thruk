@@ -120,7 +120,7 @@ sub resolve_depends {
         for my $d (@{$self->{'depends'}}) {
             my @new_parents;
             for my $p (@{$d->{'parents'}}) {
-                push @new_parents, $p unless $p->{'id'} = $self->{'id'};
+                push @new_parents, $p unless $p->{'id'} eq $self->{'id'};
             }
             $d->{'parents'} = \@new_parents;
         }
@@ -272,7 +272,7 @@ sub _set_status {
                 $text = Thruk::BP::Utils::join_labels($sum->{'1'}).' warning';
             }
             else {
-                $text = 'everyhing is fine';
+                $text = 'everything is fine';
             }
             $text = Thruk::BP::Utils::state2text($self->{'status'}).' - '.$text;
         }
