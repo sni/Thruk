@@ -317,7 +317,7 @@ function bp_select_status() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_status_form',
-            label: '',
+            label: node ? node.label : '',
             text:  { 'bp_arg1': '', 'bp_arg2': '' }
         });
     }
@@ -339,7 +339,7 @@ function bp_select_fixed() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_fixed_form',
-            label: '',
+            label: node ? node.label : '',
             radio: { 'bp_arg1': [ 'OK', '.bp_fixed_radio'] },
             text:  { 'bp_arg2': '' }
         });
@@ -359,7 +359,7 @@ function bp_select_best() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_best_form',
-            label: ''
+            label: node ? node.label : ''
         });
     }
 }
@@ -377,7 +377,7 @@ function bp_select_worst() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_worst_form',
-            label: ''
+            label: node ? node.label : ''
         });
     }
 }
@@ -396,7 +396,7 @@ function bp_select_exactly() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_exactly_form',
-            label: '',
+            label: node ? node.label : '',
             text:  { 'bp_arg1': '' }
         });
     }
@@ -416,7 +416,7 @@ function bp_select_not_more() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_not_more_form',
-            label: '',
+            label: node ? node.label : '',
             text:  { 'bp_arg1': '', 'bp_arg2': '' }
         });
     }
@@ -436,7 +436,7 @@ function bp_select_at_least() {
     } else {
         bp_fill_select_form({
             form:  'bp_select_at_least_form',
-            label: '',
+            label: node ? node.label : '',
             text:  { 'bp_arg1': '', 'bp_arg2': '' }
         });
     }
@@ -510,7 +510,8 @@ function bp_update_status(evt, node) {
     if(status == 4) { statusName = 'PENDING'; }
     jQuery('#bp_status_status').html('<div class="statusField status'+statusName+'">  '+statusName+'  </div>');
     jQuery('#bp_status_label').html(n.label);
-    jQuery('#bp_status_plugin_output').html(n.status_text);
+    jQuery('#bp_status_plugin_output').html("<span id='bp_status_plugin_output_title'>"+n.status_text+"<\/span>");
+    jQuery('#bp_status_plugin_output_title').attr('title', n.status_text);
     jQuery('#bp_status_last_check').html(n.last_check);
     jQuery('#bp_status_duration').html(n.duration);
     jQuery('#bp_status_function').html(n.func + '('+n.func_args.join(', ')+')');

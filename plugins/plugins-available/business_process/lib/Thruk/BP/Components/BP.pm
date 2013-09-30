@@ -32,7 +32,7 @@ return new business process
 =cut
 
 sub new {
-    my ( $class, $file, $bpdata, $editmode ) = @_;
+    my ( $class, $file, $bpdata, $editmode, $c ) = @_;
 
     my $self = {
         'id'                => undef,
@@ -75,7 +75,8 @@ sub new {
     $self->_resolve_nodes();
 
     if($self->{'editmode'}) {
-        $self->update_status();
+        die("no context") unless $c;
+        $self->update_status($c);
     } else {
         $self->load_runtime_data();
     }
@@ -118,6 +119,8 @@ update status of business process
 =cut
 sub update_status {
     my ( $self, $c ) = @_;
+
+    die("no context") unless $c;
 
     my $last_state = $self->{'status'};
 

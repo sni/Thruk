@@ -38,7 +38,7 @@ sub load_bp_data {
     }
     my @files = glob($c->config->{'var_path'}.'/bp/'.$pattern);
     for my $file (@files) {
-        my $bp = Thruk::BP::Components::BP->new($file, undef, $editmode);
+        my $bp = Thruk::BP::Components::BP->new($file, undef, $editmode, $c);
         push @{$bps}, $bp if $bp;
     }
 

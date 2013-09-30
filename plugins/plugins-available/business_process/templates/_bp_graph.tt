@@ -41,7 +41,7 @@
           host:         '[% n.host %]',
           service:      '[% n.service %]',
           status:       '[% n.status %]',
-          status_text:  '[% escape_quotes(n.status_text) %]',
+          status_text:  [% json_encode([n.status_text]) %][0],
           short_desc:   '[% escape_quotes(n.short_desc) %]',
           last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
           duration:     '[% IF n.last_state_change %][% duration(date.now - n.last_state_change) %][% END %]',
