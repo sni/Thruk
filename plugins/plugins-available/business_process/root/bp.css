@@ -68,7 +68,7 @@ DIV.ui-dialog INPUT[type=text] {
 }
 #bp_status_plugin_output {
     overflow: hidden;
-    width: 220px;
+    width: 205px;
     height: 35px;
 }
 #bp_status_status DIV.statusField {
@@ -83,7 +83,9 @@ DIV.ui-dialog INPUT[type=text] {
     float: left;
 }
 .bp_status_extinfo_link_host, .bp_status_extinfo_link_service {
-    float: right;
+    position: absolute;
+    top: 2px;
+    right: 2px;
 }
 
 

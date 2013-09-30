@@ -21,9 +21,11 @@
               <tr class='data'>
                 <th>Label</th>
                 <td>
-                  <span id="bp_status_label"></span>
-                  <div class="bp_status_extinfo_link_host"></div>
-                  <div class="bp_status_extinfo_link_service"></div>
+                  <div style="position: relative;">
+                    <span id="bp_status_label"></span>
+                    <div class="bp_status_extinfo_link_host"></div>
+                    <div class="bp_status_extinfo_link_service"></div>
+                  </div>
                 </td>
               </tr>
               <tr class='data'>

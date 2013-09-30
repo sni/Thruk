@@ -532,12 +532,12 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(n.service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("( <a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'>"+n.host+" - "+n.service+"<\/a> )");
+        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/info.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(n.host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("( <a href='extinfo.cgi?type=1&amp;host="+n.host+"'>"+n.host+"<\/a> )");
+        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("( <a href='extinfo.cgi?type=1&amp;host="+n.host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/info.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a> )");
     }
 
     return false;
@@ -682,6 +682,9 @@ function bp_redraw(evt) {
 
     var maxX = 0, maxY = 0, minY = -1, main_node;
     nodes.forEach(function(u) {
+        if(!u.dagre) {
+            return false;
+        }
         if(maxX < u.dagre.x) { maxX = u.dagre.x }
         if(maxY < u.dagre.y) { maxY = u.dagre.y }
         if(minY == -1 || u.dagre.y < minY) { minY = u.dagre.y; main_node = u; }
