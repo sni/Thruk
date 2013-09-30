@@ -65,7 +65,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
-    my $allowed_for_edit = 1;
+    # check roles
+    my $allowed_for_edit = 0;
+    if( $c->check_user_roles( "authorized_for_configuration_information")
+        and $c->check_user_roles( "authorized_for_system_commands")) {
+        $allowed_for_edit = 1;
+    }
+    $c->stash->{allowed_for_edit} = $allowed_for_edit;
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {

@@ -14,7 +14,7 @@
   <li[% UNLESS editmode %] class="ui-state-disabled"[% END %] id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><span class="ui-icon ui-icon-tag">&nbsp;</span>Rename Node</a></li>
   <li[% UNLESS editmode %] class="ui-state-disabled"[% END %]><a href="#" onclick="bp_show_edit_node()"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Edit Node</a></li>
   [% UNLESS editmode %]
-  <li><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Enable Edit Mode</a></li>
+  <li[% UNLESS allowed_for_edit %] class="ui-state-disabled"[% END %]><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Enable Edit Mode</a></li>
   [% END %]
 </ul>
 
