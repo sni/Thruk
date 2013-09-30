@@ -64,9 +64,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
-    my $refresh_rate = $c->{'request'}->{'parameters'}->{'refresh'} || $c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'};
-    $c->{'request'}->{'parameters'}->{'refresh'} = $refresh_rate if $refresh_rate;
-
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id);

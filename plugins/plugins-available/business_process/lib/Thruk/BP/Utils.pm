@@ -118,6 +118,10 @@ update reporting cronjobs
 sub update_cron_file {
     my($c) = @_;
 
+    my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'});
+    if($rate <  1) { $rate =  1; }
+    if($rate > 60) { $rate = 60; }
+
     # gather reporting send types from all reports
     my $cron_entries = [];
     my @files = glob($c->config->{'var_path'}.'/bp/*.tbp');
@@ -130,7 +134,8 @@ sub update_cron_file {
                                 $c->config->{'thruk_bin'},
                                 $c->config->{'var_path'},
                         );
-        push @{$cron_entries}, ['* * * * *', $cmd];
+        push @{$cron_entries}, ['* * * * *', $cmd] if $rate == 1;
+        push @{$cron_entries}, ['*/'.$rate.' * * * *', $cmd] if $rate != 1;
     }
 
     Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);

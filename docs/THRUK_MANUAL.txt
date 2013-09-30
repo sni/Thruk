@@ -2319,11 +2319,11 @@ processes.
 ex.:
 
   <Component Thruk::Plugin::BP>
-    #spool_dir = /var/nagios/spool
-    objects_save_file = /etc/nagios/conf.d/bp_generated.cfg
+    #spool_dir          = /var/nagios/spool
+    objects_save_file   = /etc/nagios/conf.d/bp_generated.cfg
     #pre_obj_save_cmd   =
     #post_obj_save_cmd  =
-    refresh_interval = 30
+    refresh_interval    = 1
   </Component>
 
 
@@ -2342,7 +2342,7 @@ Run this hook command after saving a business process.
 
 ==== refresh_interval
 Refresh interval defines how often business processes
-will be recalculated and refreshed.
+will be recalculated and refreshed. (in minutes)
 
 
 
