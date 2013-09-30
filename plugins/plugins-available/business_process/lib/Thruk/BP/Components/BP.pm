@@ -6,6 +6,7 @@ use Data::Dumper;
 use Config::General;
 use Storable qw/lock_nstore lock_retrieve/;
 use File::Copy qw/move/;
+use Encode qw/encode_utf8/;
 use Thruk::Utils;
 use Thruk::BP::Components::Node;
 
@@ -57,7 +58,7 @@ sub new {
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {
-        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
+        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1, -UTF8 => 1);
         my %config = $conf->getall;
         return unless $config{'bp'};
         my $bplist = Thruk::Utils::list($config{'bp'});
@@ -354,7 +355,7 @@ sub save {
     }
     $string .= "</bp>\n";
     open(my $fh, '>', $self->{'editfile'}) or die('cannot open '.$self->{'editfile'}.': '.$!);
-    print $fh $string;
+    print $fh encode_utf8($string);
     Thruk::Utils::IO::close($fh, $self->{'file'});
     $self->{'need_save'} = 0;
 
