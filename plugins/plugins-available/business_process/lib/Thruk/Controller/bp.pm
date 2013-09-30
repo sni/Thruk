@@ -90,6 +90,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'remove' and $id) {
             $bp->remove($c);
+            Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
@@ -98,6 +99,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             ($bp->{'file'}, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
             $bp->{'name'} = 'Clone of '.$bp->{'name'};
             $bp->save($c);
+            Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
         }
@@ -173,6 +175,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 'function' => 'Fixed("OK")',
             }]
         });
+        Thruk::BP::Utils::update_cron_file($c); # check cronjob
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
     }
