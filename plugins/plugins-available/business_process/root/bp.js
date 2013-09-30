@@ -212,6 +212,11 @@ function bp_show_add_node(id) {
     var title = 'Change Node';
     if(current_edit_node == 'new') {
         title = 'Create New Node';
+    } else {
+        var n = bp_get_node(current_edit_node);
+        if(n && n.label) {
+            title = title + ': '+n.label;
+        }
     }
     jQuery("#bp_edit_node").dialog({
         modal: true,
