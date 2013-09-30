@@ -59,6 +59,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{subtitle}              = 'Business Process';
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
+    $c->stash->{editmode}              = 0;
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';

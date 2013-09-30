@@ -19,7 +19,8 @@
     <td align="center" valign="top" width="33%">
       <br><br>
       <div align="center" class='dataTitle'>
-        [% subtitle %]
+        <span id="subtitle">[% subtitle %]</span>
+        [% IF editmode %]<br><span style="color: #EB6900">(Edit-Mode)</span>[% END %]
       </div>
     </td>
     <td align="right" valign="bottom" width="33%">

@@ -50,6 +50,11 @@ function bp_refresh(bp_id, node_id, callback) {
         else if(node_id) {
             jQuery('#'+node_id).effect('highlight', {}, 1500);
         }
+        if(node_id == 'node1') {
+            // first nodes name is linked to the bp name itself
+            var n = bp_get_node(node.id)
+            jQuery('#subtitle').html(n.label);
+        }
         if(callback) { callback(textStatus == 'success' ? true : false); }
     });
     return true;
