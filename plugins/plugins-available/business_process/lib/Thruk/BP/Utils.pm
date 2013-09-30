@@ -118,7 +118,7 @@ update reporting cronjobs
 sub update_cron_file {
     my($c) = @_;
 
-    my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'});
+    my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
     if($rate <  1) { $rate =  1; }
     if($rate > 60) { $rate = 60; }
 
