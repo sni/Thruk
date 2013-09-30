@@ -879,6 +879,10 @@ function data_filter_select(id, filter) {
     var select  = document.getElementById(id);
     var pattern = get_trimmed_pattern(filter);
 
+    if(!select) {
+        if(thruk_debug_js) { alert("ERROR: no select in data_filter_select() for: " + id ); }
+    }
+
     var options = select.options;
     /* create backup of original list */
     if(originalOptions[id] == undefined) {

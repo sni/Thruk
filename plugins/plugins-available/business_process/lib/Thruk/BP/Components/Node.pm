@@ -104,6 +104,49 @@ sub append_child {
 
 ##########################################################
 
+=head2 resolve_depends
+
+resolve dependend nodes into objects
+
+=cut
+sub resolve_depends {
+    my($self, $bp, $depends) = @_;
+
+    # set or update?
+    if(!$depends) {
+        $depends = $self->{'depends'};
+    } else {
+        # TODO: remove this node from parents
+    }
+
+    my $new_depends = [];
+    for my $d (@{$depends}) {
+        # not a reference yet?
+        if(ref $d eq '') {
+            my $dn = $bp->{'nodes_by_id'}->{$d} || $bp->{'nodes_by_name'}->{$d};
+            if(!$dn) {
+                # fake node required
+                $dn = Thruk::BP::Components::Node->new({
+                                    'id'       => $bp->make_new_node_id(),
+                                    'label'    => $d,
+                                    'function' => 'Fixed("Unknown")',
+                });
+                $bp->add_node($dn);
+            }
+            $d = $dn;
+        }
+        push @{$new_depends}, $d;
+
+        # add parent connection
+        push @{$d->{'parents'}}, $self;
+    }
+    $self->{'depends'} = $new_depends;
+    return;
+}
+
+
+##########################################################
+
 =head2 get_stateful_data
 
 return data which needs to be statefully stored
@@ -130,8 +173,15 @@ sub save_to_string {
     my $string = "  <node>\n";
 
     # normal keys
-    for my $key (qw/id label host service/) {
+    for my $key (qw/id label/) {
         $string .= sprintf("    %-10s = %s\n", $key, $self->{$key});
+    }
+
+    # host / service
+    if(lc $self->{'function'} ne 'status') {
+        for my $key (qw/host service/) {
+            $string .= sprintf("    %-10s = %s\n", $key, $self->{$key}) if $self->{$key};
+        }
     }
 
     # function

@@ -249,7 +249,7 @@ function bp_fill_select_form(data) {
 /* show node connection editor */
 bp_list_wizard_initialized = {};
 function bp_change_connections() {
-    bp_show_dialog('bp_select_connections', 600, 480);
+    bp_show_dialog('bp_select_connections', 600, 330);
 
     var node = bp_get_node(current_edit_node);
 
@@ -274,6 +274,7 @@ function bp_change_connections() {
     nodes.forEach(function(n) {
         var val = n.label;
         if(selected_nodes_h[val]) { return true; }
+        if(val == node.label) { return true; }
         available_nodes.push(val);
         available_nodes_h[val] = 1;
         options.push(new Option(val, val));
@@ -460,6 +461,8 @@ function bp_show_dialog(id, w, h) {
 
 /* save node */
 function bp_edit_node_submit(formId) {
+    // add selected nodes
+    jQuery('#'+formId).find('#bp_'+bp_id+'_selected_nodes OPTION').attr('selected',true);
     var data = jQuery('#'+formId).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     jQuery.post('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, function() {

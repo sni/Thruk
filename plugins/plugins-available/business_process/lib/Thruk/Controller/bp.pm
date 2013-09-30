@@ -130,6 +130,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return 1;
         }
         elsif($action eq 'edit_node' and $id && $nodeid) {
+            my $edit = $c->{'request'}->{'parameters'}->{'edit'} || '';
+            if($edit eq 'connections') {
+                my $node = $bp->get_node($nodeid);
+                my $depends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'bp_'.$id.'_selected_nodes'} || []);
+                $node->resolve_depends($bp, $depends);
+                $bp->save();
+                $c->stash->{'text'} = 'OK';
+                $c->stash->{template} = 'passthrough.tt';
+                return 1;
+            }
             my $parent = $bp->get_node($nodeid);
             my @arg;
             for my $x (1..10) {

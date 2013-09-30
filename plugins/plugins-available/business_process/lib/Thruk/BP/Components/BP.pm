@@ -250,28 +250,7 @@ sub _resolve_nodes {
             $node->set_id($self->make_new_node_id());
             $self->{'nodes_by_id'}->{$node->{'id'}} = $node;
         }
-        my $new_depends = [];
-        for my $d (@{$node->{'depends'}}) {
-            # not a reference yet?
-            if(ref $d eq '') {
-                my $dn = $self->{'nodes_by_id'}->{$d} || $self->{'nodes_by_name'}->{$d};
-                if(!$dn) {
-                    # fake node required
-                    $dn = Thruk::BP::Components::Node->new({
-                                        'id'       => $self->make_new_node_id(),
-                                        'label'    => $d,
-                                        'function' => 'Fixed("Unknown")',
-                    });
-                    $self->add_node($dn);
-                }
-                $d = $dn;
-            }
-            push @{$new_depends}, $d;
-
-            # add parent connection
-            push @{$d->{'parents'}}, $node;
-        }
-        $node->{'depends'} = $new_depends;
+        $node->resolve_depends($self);
     }
 
     return;
