@@ -78,11 +78,14 @@ DIV.ui-dialog INPUT[type=text] {
     line-height: 20px;
     height: 18px;
 }
-
 .bp_status_status_icons IMG {
     margin-left: 3px;
     float: left;
 }
+.bp_status_extinfo_link_host, .bp_status_extinfo_link_service {
+    float: right;
+}
+
 
 .bp_settings INPUT, .bp_settings SELECT {
     width: 240px;

@@ -518,17 +518,18 @@ function bp_update_status(evt, node) {
         jQuery('#bp_status_icon_ack').css('display', 'none');
     }
 
-    jQuery('.bp_info_host').css('display', 'none');
-    jQuery('.bp_info_service').css('display', 'none');
+    jQuery('.bp_status_extinfo_link_host').css('display', 'none');
+    jQuery('.bp_status_extinfo_link_service').css('display', 'none');
+
 
     // service specific things...
-    if(node.service != '') {
-        jQuery('.bp_info_service').css('display', 'inherit');
+    if(n.service) {
+        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("( <a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'>"+n.host+" - "+n.service+"<\/a> )");
     }
 
     // host specific things...
-    else if(node.host != '') {
-        jQuery('.bp_info_host').css('display', 'inherit');
+    else if(n.host) {
+        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("( <a href='extinfo.cgi?type=1&amp;host="+n.host+"'>"+n.host+"<\/a> )");
     }
 
     return false;

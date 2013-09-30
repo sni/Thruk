@@ -238,6 +238,10 @@ sub _set_function {
             $self->{'function'}      = $fname;
         }
     }
+    if(lc $self->{'function'} eq 'status') {
+        $self->{'host'}    = $self->{'function_args'}->[0] || '';
+        $self->{'service'} = $self->{'function_args'}->[1] || '';
+    }
     return;
 }
 

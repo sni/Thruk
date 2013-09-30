@@ -20,7 +20,11 @@
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
               <tr class='data'>
                 <th>Label</th>
-                <td id="bp_status_label"></td>
+                <td>
+                  <span id="bp_status_label"></span>
+                  <div class="bp_status_extinfo_link_host"></div>
+                  <div class="bp_status_extinfo_link_service"></div>
+                </td>
               </tr>
               <tr class='data'>
                 <th>Status</th>
