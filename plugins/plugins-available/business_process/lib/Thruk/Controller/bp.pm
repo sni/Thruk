@@ -65,16 +65,20 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
     if($nodeid !~ m/^node\d+$/mx and $nodeid ne 'new') { $nodeid = ''; }
 
+    my $allowed_for_edit = 1;
+
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     if($id) {
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
+        $c->stash->{editmode} = $c->{'request'}->{'parameters'}->{'edit'} || 0;
+        $c->stash->{editmode} = 0 unless $allowed_for_edit;
+
+        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
         $c->stash->{'bp'}     = $bp;
-        $c->stash->{editmode} = $c->{'request'}->{'parameters'}->{'edit'} || 0;
 
         if($action eq 'details') {
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
@@ -86,22 +90,48 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
         }
-        elsif($action eq 'remove' and $id) {
+    }
+
+    if($id and $allowed_for_edit) {
+        $c->stash->{editmode} = 1;
+        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
+        if(scalar @{$bps} != 1) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+        }
+        my $bp = $bps->[0];
+        $c->stash->{'bp'}     = $bp;
+
+        if($action eq 'commit') {
+            $bp->commit($c);
+            Thruk::BP::Utils::update_cron_file($c); # check cronjob
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+        }
+        elsif($action eq 'revert') {
+            unlink($bp->{'editfile'});
+            Thruk::BP::Utils::update_cron_file($c); # check cronjob
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+        }
+        elsif($action eq 'remove') {
             $bp->remove($c);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
-        elsif($action eq 'clone' and $id) {
-            my $newid;
-            ($bp->{'file'}, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+        elsif($action eq 'clone') {
+            my($new_file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+            $bp->set_file($new_file);
             $bp->{'name'} = 'Clone of '.$bp->{'name'};
+            $bp->get_node('node1')->{'label'} = $bp->{'name'};
             $bp->save($c);
+            $bp->commit($c);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$newid);
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
         }
-        elsif($action eq 'rename_node' and $id && $nodeid) {
+        elsif($action eq 'rename_node' and $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
                 $c->stash->{'text'} = 'ERROR: no such node';
                 $c->stash->{template} = 'passthrough.tt';
@@ -112,31 +142,30 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             if($nodeid eq 'node1') {
                 $bp->{'name'} = $c->{'request'}->{'parameters'}->{'label'};
             }
-            $bp->save();
+            $bp->save($c);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
-        elsif($action eq 'remove_node' and $id && $nodeid) {
+        elsif($action eq 'remove_node' and $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
                 $c->stash->{'text'} = 'ERROR: no such node';
                 $c->stash->{template} = 'passthrough.tt';
                 return 1;
             }
             $bp->remove_node($nodeid);
-            $bp->save();
-            $bp->save_runtime();
+            $bp->save($c);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;
         }
-        elsif($action eq 'edit_node' and $id && $nodeid) {
-            my $edit = $c->{'request'}->{'parameters'}->{'edit'} || '';
-            if($edit eq 'connections') {
+        elsif($action eq 'edit_node' and $nodeid) {
+            my $sub = $c->{'request'}->{'parameters'}->{'sub'} || '';
+            if($sub eq 'connections') {
                 my $node = $bp->get_node($nodeid);
                 my $depends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'bp_'.$id.'_selected_nodes'} || []);
                 $node->resolve_depends($bp, $depends);
-                $bp->save();
+                $bp->save($c);
                 $c->stash->{'text'} = 'OK';
                 $c->stash->{template} = 'passthrough.tt';
                 return 1;
@@ -161,7 +190,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $node->{'label'} = $c->{'request'}->{'parameters'}->{'bp_label'};
                 $node->_set_function({'function' => $function});
             }
-            $bp->save();
+            $bp->save($c);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;

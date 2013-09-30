@@ -65,7 +65,8 @@
         [% END %]
     ];
 
-    var bp_id = [% bp.id %];
+    var bp_id    = [% bp.id %];
+    var editmode = [% editmode %];
     jQuery(document).ready(function() {
         bp_render('container[% bp.id %]', nodes, edges);
     });

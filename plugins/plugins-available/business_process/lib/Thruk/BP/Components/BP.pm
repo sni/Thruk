@@ -5,6 +5,7 @@ use warnings;
 use Data::Dumper;
 use Config::General;
 use Storable qw/lock_nstore lock_retrieve/;
+use File::Copy qw/move/;
 use Thruk::Utils;
 use Thruk::BP::Components::Node;
 
@@ -31,30 +32,20 @@ return new business process
 =cut
 
 sub new {
-    my ( $class, $file, $bpdata ) = @_;
-
-    if(-e $file) {
-        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
-        my %config = $conf->getall;
-        return unless $config{'bp'};
-        my $bplist = Thruk::Utils::list($config{'bp'});
-        return unless scalar @{$bplist} > 0;
-        $bpdata = $bplist->[0];
-    }
-
-    $file =~ m/(\d+).tbp/mx;
-    my $id = $1;
+    my ( $class, $file, $bpdata, $editmode ) = @_;
 
     my $self = {
-        'id'                => $id,
-        'name'              => $bpdata->{'name'},
+        'id'                => undef,
+        'editmode'          => $editmode,
+        'name'              => undef,
         'nodes'             => [],
         'nodes_by_id'       => {},
         'nodes_by_name'     => {},
         'need_update'       => {},
         'need_save'         => 0,
-        'file'              => $file,
-        'datafile'          => $file.'.runtime',
+        'file'              => undef,
+        'datafile'          => undef,
+        'editfile'          => undef,
 
         'status'            => 4,
         'status_text'       => 'not yet checked',
@@ -62,6 +53,18 @@ sub new {
         'last_state_change' => 0,
     };
     bless $self, $class;
+    $self->set_file($file);
+
+    if(-e $file) {
+        if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
+        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1);
+        my %config = $conf->getall;
+        return unless $config{'bp'};
+        my $bplist = Thruk::Utils::list($config{'bp'});
+        return unless scalar @{$bplist} > 0;
+        $bpdata = $bplist->[0];
+    }
+    $self->{'name'} = $bpdata->{'name'};
 
     # read in nodes
     for my $n (@{Thruk::Utils::list($bpdata->{'node'} || [])}) {
@@ -71,7 +74,11 @@ sub new {
 
     $self->_resolve_nodes();
 
-    $self->load_runtime_data();
+    if($self->{'editmode'}) {
+        $self->update_status();
+    } else {
+        $self->load_runtime_data();
+    }
 
     $self->save() if $self->{'need_save'};
 
@@ -162,6 +169,23 @@ sub set_status {
     if($last_state != $state) {
         $self->{'last_state_change'} = $now;
     }
+    return;
+}
+
+##########################################################
+
+=head2 set_file
+
+set file for this business process
+
+=cut
+sub set_file {
+    my($self, $file) = @_;
+    $self->{'file'}     = $file;
+    $self->{'datafile'} = $file.'.runtime';
+    $self->{'editfile'} = $file.'.edit';
+    $file =~ m/(\d+).tbp/mx;
+    $self->{'id'}       = $1;
     return;
 }
 
@@ -272,13 +296,52 @@ sub remove {
 
 ##########################################################
 
+=head2 commit
+
+commit business process data to file
+
+=cut
+sub commit {
+    my ( $self, $c ) = @_;
+
+    # run pre hook
+    if($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
+        system($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}, 'pre', $self->{'file'});
+        if($? == -1) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'pre save hook failed: '.$?.': '.$! );
+            return;
+        }
+    }
+
+    move($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
+    unlink($self->{'editfile'});
+
+    # run post hook
+    if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
+        system($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}, 'post', $self->{'file'});
+        if($? == -1) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );
+            return;
+        }
+    }
+
+    return 1;
+}
+
+##########################################################
+
 =head2 save
 
-save business process data to file
+save business process data to edit file
 
 =cut
 sub save {
-    my ( $self ) = @_;
+    my ( $self, $c ) = @_;
+
     my $string = "<bp>\n";
     for my $key (qw/name/) {
         $string .= sprintf("  %-10s = %s\n", $key, $self->{$key});
@@ -287,11 +350,12 @@ sub save {
         $string .= $n->save_to_string();
     }
     $string .= "</bp>\n";
-    open(my $fh, '>', $self->{'file'}) or die('cannot open '.$self->{'file'}.': '.$!);
+    open(my $fh, '>', $self->{'editfile'}) or die('cannot open '.$self->{'editfile'}.': '.$!);
     print $fh $string;
     Thruk::Utils::IO::close($fh, $self->{'file'});
     $self->{'need_save'} = 0;
-    return;
+
+    return 1;
 }
 
 ##########################################################
@@ -303,6 +367,7 @@ save run time data
 =cut
 sub save_runtime {
     my ( $self ) = @_;
+    return if $self->{'editmode'};
     my $data = {};
     for my $key (@stateful_keys) {
         $data->{$key} = $self->{$key};

@@ -13,6 +13,9 @@
   <li[% UNLESS editmode %] class="ui-state-disabled"[% END %] id='bp_menu_remove_node'><a href="#" onclick="bp_show_remove()"><span class="ui-icon ui-icon-trash">&nbsp;</span>Remove Node</a></li>
   <li[% UNLESS editmode %] class="ui-state-disabled"[% END %] id='bp_menu_rename_node'><a href="#" onclick="bp_show_rename(event)"><span class="ui-icon ui-icon-tag">&nbsp;</span>Rename Node</a></li>
   <li[% UNLESS editmode %] class="ui-state-disabled"[% END %]><a href="#" onclick="bp_show_edit_node()"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Edit Node</a></li>
+  [% UNLESS editmode %]
+  <li><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Enable Edit Mode</a></li>
+  [% END %]
 </ul>
 
 <!-- edit node dialog -->
@@ -36,7 +39,7 @@
 <!-- connections editor -->
 <div id="bp_select_connections" title="Edit Connections" style="display: none;">
   <form id="bp_select_connections_form" action="bp.cgi">
-  <input type="hidden" name="edit" value="connections">
+  <input type="hidden" name="sub" value="connections">
   <input type="hidden" name="bp_node_id" class="bp_node_id" value="">
   <table width="100%">
     <tr>

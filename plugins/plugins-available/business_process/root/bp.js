@@ -34,7 +34,7 @@ function bp_refresh(bp_id, node_id, callback) {
     var ts = new Date().getTime();
     var old_nodes = nodes;
     is_refreshing = true;
-    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&bp='+bp_id, [], function(responseText, textStatus, XMLHttpRequest) {
+    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&edit='+editmode+'&bp='+bp_id, [], function(responseText, textStatus, XMLHttpRequest) {
         is_refreshing = false;
         if(!minimal) {
             hideElement('bp_status_waiting');
@@ -101,7 +101,7 @@ function bp_context_menu_open(evt, node) {
             jQuery("#bp_menu").css('top', h+'px');
         }
         // first node cannot be removed
-        if(node.id == 'node1') {
+        if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
         } else {
             jQuery('#bp_menu_remove_node').removeClass('ui-state-disabled');

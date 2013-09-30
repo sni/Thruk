@@ -116,7 +116,14 @@ sub resolve_depends {
     if(!$depends) {
         $depends = $self->{'depends'};
     } else {
-        # TODO: remove this node from parents
+        # remove node from the parent list of its children first
+        for my $d (@{$self->{'depends'}}) {
+            my @new_parents;
+            for my $p (@{$d->{'parents'}}) {
+                push @new_parents, $p unless $p->{'id'} = $self->{'id'};
+            }
+            $d->{'parents'} = \@new_parents;
+        }
     }
 
     my $new_depends = [];

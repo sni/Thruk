@@ -23,13 +23,13 @@ Helper for the business process addon
 
 =head2 load_bp_data
 
-    load_bp_data($c, [$num])
+    load_bp_data($c, [$num], [$editmode])
 
 load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num) = @_;
+    my($c, $num, $editmode) = @_;
     my $bps   = [];
     my $pattern = '*.tbp';
     if($num) {
@@ -38,7 +38,7 @@ sub load_bp_data {
     }
     my @files = glob($c->config->{'var_path'}.'/bp/'.$pattern);
     for my $file (@files) {
-        my $bp = Thruk::BP::Components::BP->new($file);
+        my $bp = Thruk::BP::Components::BP->new($file, undef, $editmode);
         push @{$bps}, $bp if $bp;
     }
 

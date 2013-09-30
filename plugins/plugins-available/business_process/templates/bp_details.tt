@@ -2,6 +2,16 @@
 
 [% PROCESS _bp_context_menu.tt %]
 
+[% IF editmode %]
+  <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">
+    <tr>
+      <td>
+        [% button('bp.cgi?action=commit&amp;bp=' _ bp.id, 'save', 'bp_save_button') %]
+      </td>
+    </tr>
+  </table>
+[% END %]
+
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 5px;">
 <tr>
 <td align="center" valign="top" width="100%">
@@ -83,6 +93,10 @@
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete this Business Process' title='Delete this Business Process' width="20" height="20"></td>
                 <td class='command'><a href='bp.cgi?action=remove&amp;bp=[% bp.id %]' onclick="return confirm('Removed Business Process cannot be restored. Really remove?')">Delete this Business Process</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_swoosh.png' border="0" alt='Discard Changes' title='Discard Changes' width="16" height="16"></td>
+                <td class='command'><a href='bp.cgi?action=revert&amp;bp=[% bp.id %]'>Discard Changes</a></td>
               </tr>
             </table>
           </td>
