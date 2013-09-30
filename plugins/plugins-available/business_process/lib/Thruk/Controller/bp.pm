@@ -128,11 +128,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'clone') {
             my($new_file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
-            $bp->set_file($new_file);
+            $bp->set_file($c, $new_file);
             $bp->{'name'} = 'Clone of '.$bp->{'name'};
             $bp->get_node('node1')->{'label'} = $bp->{'name'};
             $bp->save($c);
-            $bp->commit($c);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
@@ -205,9 +204,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # new business process
     if($action eq 'new') {
+        Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
         my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
         my $label = $c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process';
-        my $bp = Thruk::BP::Components::BP->new($file, {
+        my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
             'node'  => [{
                 'label'    => $label,

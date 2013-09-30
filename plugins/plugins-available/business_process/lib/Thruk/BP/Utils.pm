@@ -36,9 +36,9 @@ sub load_bp_data {
         return($bps) unless $num =~ m/^\d+$/mx;
         $pattern = $num.'.tbp';
     }
-    my @files = glob($c->config->{'var_path'}.'/bp/'.$pattern);
+    my @files = glob($c->config->{'home'}.'/bp/'.$pattern);
     for my $file (@files) {
-        my $bp = Thruk::BP::Components::BP->new($file, undef, $editmode, $c);
+        my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
         push @{$bps}, $bp if $bp;
     }
 
@@ -60,10 +60,10 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
-    while(-e $c->config->{'var_path'}.'/bp/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
+    while(-e $c->config->{'home'}.'/bp/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
         $num++;
     }
-    return($c->config->{'var_path'}.'/bp/'.$num.'.tbp', $num);
+    return($c->config->{'home'}.'/bp/'.$num.'.tbp', $num);
 }
 
 ##########################################################
@@ -108,6 +108,32 @@ sub clean_function_args {
 
 ##########################################################
 
+=head2 clean_orphaned_edit_files
+
+  clean_orphaned_edit_files($c, [$threshold])
+
+remove old edit files
+
+=cut
+sub clean_orphaned_edit_files {
+    my($c, $threshold) = @_;
+    $threshold = 86400 unless defined $threshold;
+    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
+    for my $file (@files) {
+        my $bpfile = $file;
+        $bpfile =~ s/\.edit$//mx;
+        $bpfile =~ s/^.*\///mx;
+        if(!-e $c->config->{'home'}.'/'.$bpfile) {
+            my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+            next if $mtime > (time() - $threshold);
+            unlink($file);
+        }
+    }
+    return;
+}
+
+##########################################################
+
 =head2 update_cron_file
 
   update_cron_file($c)
@@ -124,7 +150,7 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp');
+    my @files = glob($c->config->{'home'}.'/bp/*.tbp');
     if(scalar @files > 0) {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');

@@ -33,7 +33,7 @@ return new business process
 =cut
 
 sub new {
-    my ( $class, $file, $bpdata, $editmode, $c ) = @_;
+    my ( $class, $c, $file, $bpdata, $editmode ) = @_;
 
     my $self = {
         'id'                => undef,
@@ -54,7 +54,7 @@ sub new {
         'last_state_change' => 0,
     };
     bless $self, $class;
-    $self->set_file($file);
+    $self->set_file($c, $file);
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {
@@ -184,11 +184,13 @@ set file for this business process
 
 =cut
 sub set_file {
-    my($self, $file) = @_;
-    $self->{'file'}     = $file;
-    $self->{'datafile'} = $file.'.runtime';
-    $self->{'editfile'} = $file.'.edit';
-    $file =~ m/(\d+).tbp/mx;
+    my($self, $c, $file) = @_;
+    my $basename = $file;
+    $basename    =~ s/^.*\///mx;
+    $self->{'file'}     = $c->config->{'home'}.'/bp/'.$basename;
+    $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
+    $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
+    $basename =~ m/(\d+).tbp/mx;
     $self->{'id'}       = $1;
     return;
 }
@@ -293,8 +295,9 @@ remove business process data to file
 =cut
 sub remove {
     my ( $self ) = @_;
-    unlink($self->{'file'})     or die('cannot remove '.$self->{'file'}.': '.$!);
+    unlink($self->{'file'});     # may not exist, if removed before first commit
     unlink($self->{'datafile'}); # can fail if not updated before removal
+    unlink($self->{'editfile'}); # may also not exist
     return;
 }
 
