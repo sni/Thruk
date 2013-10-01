@@ -475,7 +475,7 @@ function bp_edit_node_submit(formId) {
     var data = jQuery('#'+formId).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     jQuery.post('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, function() {
-        bp_refresh(bp_id);
+        bp_refresh(bp_id, current_edit_node);
     });
     return false;
 }
