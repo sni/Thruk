@@ -60,6 +60,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{editmode}              = 0;
+    $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
@@ -87,14 +88,32 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'bp'} = $bp;
 
         if($action eq 'details') {
-            $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
-            $c->stash->{template}         = 'bp_details.tt';
+            $c->stash->{'auto_reload_fn'}         = 'bp_refresh_bg';
+            $c->stash->{'template'}               = 'bp_details.tt';
             return 1;
         }
         elsif($action eq 'refresh' and $id) {
             $bp->update_status($c);
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
+        }
+    }
+
+    if($allowed_for_edit) {
+        if($action eq 'templates') {
+            my $data = [];
+            # simple / fast template grep
+            if($c->stash->{'objects_templates_file'} and -e $c->stash->{'objects_templates_file'}) {
+                open(my $fh, '<', $c->stash->{'objects_templates_file'}) or die("failed to open ".$c->stash->{'objects_templates_file'}.": ".$!);
+                while(my $line = <$fh>) {
+                    if($line =~ m/^\s*name\s+(.*?)\s*(;|#|$)$/) {
+                        push @{$data}, $1;
+                    }
+                }
+            }
+            my $json = [ { 'name' => "templates", 'data' => $data } ];
+            $c->stash->{'json'} = $json;
+            return $c->forward('Thruk::View::JSON');
         }
     }
 
@@ -110,13 +129,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
         if($action eq 'commit') {
             $bp->commit($c);
+            my $bps = Thruk::BP::Utils::load_bp_data($c);
+            Thruk::BP::Utils::save_bp_objects($c, $bps);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
             unlink($bp->{'editfile'});
-            Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
         }
@@ -132,7 +152,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $bp->{'name'} = 'Clone of '.$bp->{'name'};
             $bp->get_node('node1')->{'label'} = $bp->{'name'};
             $bp->save($c);
-            Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
         }

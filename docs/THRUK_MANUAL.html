@@ -17192,6 +17192,10 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_objects_save_file'>objects_save_file</a></div>
 
+<div class='toclevel4'><a href='#_objects_templates_file'>objects_templates_file</a></div>
+
+<div class='toclevel4'><a href='#_objects_reload_cmd'>objects_reload_cmd</a></div>
+
 <div class='toclevel4'><a href='#_pre_obj_save_cmd_2'>pre_obj_save_cmd</a></div>
 
 <div class='toclevel4'><a href='#_post_obj_save_cmd_2'>post_obj_save_cmd</a></div>
@@ -19031,11 +19035,13 @@ authorized_for_system_commands
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::BP&gt;
-  #spool_dir          = /var/nagios/spool
-  objects_save_file   = /etc/nagios/conf.d/bp_generated.cfg
-  #pre_obj_save_cmd   =
-  #post_obj_save_cmd  =
-  refresh_interval    = 1
+  #spool_dir             = /var/nagios/spool
+  objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
+  objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
+  objects_reload_cmd     = /etc/init.d/nagios reload
+  #pre_obj_save_cmd      =
+  #post_obj_save_cmd     =
+  refresh_interval       = 1
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <div class="sect3">
@@ -19046,6 +19052,14 @@ Set a spool folder if you don&#8217;t want to use livestatus.</p></div>
 <div class="sect3">
 <h4 id="_objects_save_file">objects_save_file</h4>
 <div class="paragraph"><p>Save objects to this file. Content will be overwritten.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_objects_templates_file">objects_templates_file</h4>
+<div class="paragraph"><p>User maintained file containing templates used for business process services.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_objects_reload_cmd">objects_reload_cmd</h4>
+<div class="paragraph"><p>Command to apply changes to the objects_save_file.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_pre_obj_save_cmd_2">pre_obj_save_cmd</h4>
@@ -20505,7 +20519,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-30 17:26:39 CEST
+Last updated 2013-10-02 00:34:50 CEST
 </div>
 </div>
 </body>

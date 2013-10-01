@@ -208,6 +208,29 @@ sub save_to_string {
 
 ##########################################################
 
+=head2 get_objects_string
+
+return object config as string
+
+=cut
+sub get_objects_string {
+    my ( $self, $bp ) = @_;
+    return "" unless $self->{'create_obj'};
+    return "" unless $self->{'host'};
+    return "" if lc($self->{'function'}) eq 'status';
+    my $type = $self->{'service'} ? 'service' : 'host';
+    my $string = "define ".$type." {\n";
+    $string    .= "  host           ".$self->{'host'}."\n";
+    $string    .= "  description    ".$self->{'service'}."\n" if $type eq 'service';
+    $string    .= "  use            ".$self->{'template'}."\n";
+    $string    .= "  _THRUK_BP_ID   ".$bp->{'id'}."\n";
+    $string    .= "  _THRUK_NODE_ID ".$self->{'id'}."\n";
+    $string    .= "}\n\n";
+    return $string;
+}
+
+##########################################################
+
 =head2 update_status
 
 update status of node

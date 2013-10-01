@@ -244,10 +244,10 @@
       <td align="left"><input type="text" value="" name="bp_service" placeholder="service description" class="bp_create"></td>
     </tr>
     <tr>
-      <th align="right">Template</th>
+      <th align="right" valign="top">Template</th>
       <td align="left">
-        <input type="text" value="" name="bp_template" placeholder="template" class="bp_create">
-        [% IF use_feature_configtool %]<br><a href="conf.cgi#TODO...">Edit Templates</a>[% END %]
+        <input type="text" value="" id="bp_template" name="bp_template" placeholder="template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        [% IF use_feature_configtool && objects_templates_file %]<br><br><a href="conf.cgi?sub=objects&action=editor&file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
       </td>
     </tr>
     </table>

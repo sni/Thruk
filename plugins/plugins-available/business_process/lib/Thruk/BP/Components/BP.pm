@@ -322,8 +322,10 @@ sub commit {
         }
     }
 
-    move($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
-    unlink($self->{'editfile'});
+    if(-e $self->{'editfile'}) {
+        move($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
+        unlink($self->{'editfile'});
+    }
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
@@ -363,6 +365,26 @@ sub save {
     $self->{'need_save'} = 0;
 
     return 1;
+}
+
+##########################################################
+
+=head2 get_objects_string
+
+return object config as string
+
+=cut
+sub get_objects_string {
+    my ( $self ) = @_;
+    my $string = "";
+    for my $n (@{$self->{'nodes'}}) {
+        $string .= $n->get_objects_string($self);
+    }
+    if($string ne '') {
+        $string = "# ".$self->{'file'}."\n".
+                  $string;
+    }
+    return $string;
 }
 
 ##########################################################

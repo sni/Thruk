@@ -2,6 +2,9 @@ package Thruk::BP::Utils;
 
 use strict;
 use warnings;
+use Digest::MD5 qw(md5_hex);
+use File::Temp qw/tempfile/;
+use File::Copy qw/move/;
 use Thruk::BP::Components::BP;
 
 use Carp;
@@ -80,6 +83,46 @@ sub update_bp_status {
     for my $bp (@{$bps}) {
         $bp->update_status($c);
     }
+    return;
+}
+
+##########################################################
+
+=head2 save_bp_objects
+
+    save_bp_objects($c, $bps)
+
+save business processes objects to object file
+
+=cut
+sub save_bp_objects {
+    my($c, $bps) = @_;
+
+    my $file = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
+    return unless $file;
+
+    my($fh, $filename) = tempfile();
+    for my $bp (@{$bps}) {
+        print $fh $bp->get_objects_string();
+    }
+    Thruk::Utils::IO::close($fh, $filename);
+
+    my $new_hex = md5_hex($filename);
+    my $old_hex = md5_hex($file);
+
+    # check if something changed
+    if($new_hex ne $old_hex) {
+        move($filename, $file) or die('move failed: '.$!);
+        # and reload
+        my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
+        if($cmd) {
+            `$cmd >/dev/null 2>&1 &`;
+        }
+    } else {
+        # discard file
+        unlink($filename);
+    }
+
     return;
 }
 

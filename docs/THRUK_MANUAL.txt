@@ -2326,6 +2326,7 @@ ex.:
     #spool_dir             = /var/nagios/spool
     objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
     objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
+    objects_reload_cmd     = /etc/init.d/nagios reload
     #pre_obj_save_cmd      =
     #post_obj_save_cmd     =
     refresh_interval       = 1
@@ -2341,6 +2342,9 @@ Save objects to this file. Content will be overwritten.
 
 ==== objects_templates_file
 User maintained file containing templates used for business process services.
+
+==== objects_reload_cmd
+Command to apply changes to the objects_save_file.
 
 ==== pre_obj_save_cmd
 Run this hook command before saving a business process.
