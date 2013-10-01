@@ -355,6 +355,7 @@ function bp_show_edit_node(id, refreshType) {
     }
     jQuery('#bp_node_id').val(current_edit_node);
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
+    var $edit_dialog;
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
         width: 430, height: 320,
@@ -369,12 +370,13 @@ function bp_show_edit_node(id, refreshType) {
         create: function() { // turn tabs into dialogs
             // define the elements we're dealing with
             $tabs = jQuery(this).find('.ui-tabs-nav'); $dlg = jQuery(this).parent();
+            $edit_dialog = $dlg;
             // clone close button from dialog title and put it in the tabs area
             $dlg.find('.ui-dialog-titlebar-close').appendTo($tabs);
             // make the tabs draggable, give it a class that gracefully adds the move cursor and remove the dialog's original titlebar completely
             $dlg.draggable({handle: ".ui-tabs-nav"})
-            .addClass('ui-draggable')
-            .find('.ui-dialog-titlebar').remove();
+                .addClass('ui-draggable')
+                .find('.ui-dialog-titlebar').remove();
             // give dialog styles to the tabs (would like to do this without adding CSS, but couldn't)
             $dlg.find('.ui-tabs').css('padding', '0px');
             // turn off the highlighting of tabs in chrome, add titlebar style to tabs to give close button correct styling
@@ -411,6 +413,11 @@ function bp_show_edit_node(id, refreshType) {
 
     // initialize childrens tab
     bp_initialize_children_tab(node);
+
+    // make dragable again
+    if($edit_dialog) {
+        $edit_dialog.draggable({handle: ".ui-tabs-nav"}).addClass('ui-draggable');
+    }
 }
 
 /* initialize childrens tab */

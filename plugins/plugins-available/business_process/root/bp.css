@@ -186,6 +186,13 @@ SPAN.bp_label {
     left: 1px;
 }
 
+.bp_node_link_icons {
+    position: absolute;
+    top: 25px;
+    left: 1px;
+}
+
+
 .bp_node_active, .bp_node:hover {
     box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
@@ -201,4 +208,9 @@ SPAN.bp_label {
 .bp_hedge {
     border-top: 2px solid grey;
     position: absolute;
+}
+
+/* decrease padding of tabs panel */
+.ui-tabs .ui-tabs-panel {
+    padding: 5px;
 }

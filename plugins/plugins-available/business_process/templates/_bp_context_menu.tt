@@ -202,8 +202,8 @@
             </tr>
             <tr>
               <td class="attrName">
-                <input type="text" class="filter_available" style="width:150px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:150px; height:120px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
+                <input type="text" class="filter_available" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:174px; height:135px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
               </td>
@@ -212,8 +212,8 @@
                 <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
               </td>
               <td class="attrName">
-                <input type="text" class="filter_selected" style="width:150px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:150px; height:120px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
+                <input type="text" class="filter_selected" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:174px; height:135px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
                     <option disabled>loading...</option>
                 </select>
               </td>
@@ -245,7 +245,10 @@
     </tr>
     <tr>
       <th align="right">Template</th>
-      <td align="left"><input type="text" value="" name="bp_template" placeholder="template" class="bp_create">[% IF use_feature_configtool %]<br><a href="conf.cgi#TODO...">Edit Templates</a>[% END %]</td>
+      <td align="left">
+        <input type="text" value="" name="bp_template" placeholder="template" class="bp_create">
+        [% IF use_feature_configtool %]<br><a href="conf.cgi#TODO...">Edit Templates</a>[% END %]
+      </td>
     </tr>
     </table>
   </div>
