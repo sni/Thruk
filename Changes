@@ -5,6 +5,7 @@ next:
           - show apache status in performance page
           - Bug Fixes
             - summary: fixed reports using host/servicegroups in combination with the mysql logcache
+            - mysql logcache: fixed service cannot be NULL error on import
 
 1.76-3   Tue Sep  3 23:00:09 CEST 2013
           - new site 'collapsed' panel for large setups

@@ -1159,7 +1159,7 @@ sub _get_service_lookup {
     for my $s (@{$services}) {
         next if defined $services_lookup->{$s->{'host_name'}}->{$s->{'description'}};
         my $host_id = &_host_lookup($hosts_lookup, $s->{'host_name'}, $dbh, $prefix);
-        push @values, '('.$host_id.','.$dbh->quote($s->{'service_description'}).')';
+        push @values, '('.$host_id.','.$dbh->quote($s->{'description'}).')';
     }
     if(scalar @values > 0) {
         $dbh->do($stm.join(',', @values));
@@ -1586,7 +1586,7 @@ sub _insert_logs {
         }
     }
     $self->_safe_insert($dbh, $stm, \@values, $verbose) if scalar @values > 0;
-    print $log_count . " entries added" if $verbose;
+    print '. '.$log_count . " entries added" if $verbose;
     return $log_count;
 }
 
