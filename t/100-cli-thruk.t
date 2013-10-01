@@ -28,6 +28,15 @@ TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
 isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host");
 
+# show help
+TestUtils::test_command({
+    cmd     => $BIN.' -h',
+    errlike => ['/EXAMPLES/',
+                '/Usage: thruk/'
+               ],
+    exit    => 3,
+});
+
 # list backends
 TestUtils::test_command({
     cmd  => $BIN.' -l',
