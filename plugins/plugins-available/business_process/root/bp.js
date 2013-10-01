@@ -68,8 +68,10 @@ function bp_refresh_bg(cb) {
 
 /* unset active node */
 function bp_unset_active_node() {
-    jQuery('.bp_node_active').removeClass('bp_node_active');
-    bp_active_node = undefined;
+    if(!bp_context_menu) {
+        jQuery('.bp_node_active').removeClass('bp_node_active');
+        bp_active_node = undefined;
+    }
 }
 
 /* close menu */
@@ -83,6 +85,10 @@ var bp_context_menu = false;
 var bp_active_node;
 function bp_context_menu_open(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+
+    // don't interrupt user interactions by automatic reload
+    resetRefresh();
+
     var rightclick;
     if (evt.which) rightclick = (evt.which == 3);
     else if (evt.button) rightclick = (evt.button == 2);
@@ -131,8 +137,6 @@ function bp_context_menu_open(evt, node) {
         evt.cancelBubble = true;
         return false;
     }
-    // don't interrupt user interactions by automatic reload
-    resetRefresh();
     return true;
 }
 

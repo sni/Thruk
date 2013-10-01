@@ -193,11 +193,18 @@ SPAN.bp_label {
 }
 
 
-.bp_node_active, .bp_node:hover {
+.bp_node:hover {
     box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     -moz-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
     border:1px solid rgba(0, 150, 255, 0.8);
+}
+
+.bp_node_active {
+    box-shadow: 0 0 10px rgba(96, 50, 200, 1) !important;
+    -webkit-box-shadow: 0 0 10px rgba(96, 50, 200, 1) !important;
+    -moz-box-shadow: 0 0 10px rgba(96, 50, 200, 1) !important;
+    border:1px solid rgba(96, 50, 200, 0.8) !important;
 }
 
 .bp_vedge {
