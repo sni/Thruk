@@ -1,0 +1,10 @@
+﻿<table width="100%" id="[% div_id %]" style="display: none;">
+  <tr>
+    <td align="center" colspan=2 class="bp_type_desc">[% div_help %]</td>
+  </tr>
+  <tr>
+    <th align="right">Label</th>
+    <td align="left"><input type="text" value="" name="bp_label_[% function %]" placeholder="node name"></td>
+  </tr>
+  [% content %]
+</table>

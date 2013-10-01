@@ -154,6 +154,7 @@ plugins/plugins-available/business_process/t/controller_bp_local.t
 plugins/plugins-available/business_process/t/data/9999.tbp
 plugins/plugins-available/business_process/t/utils_bp.t
 plugins/plugins-available/business_process/templates/_bp_context_menu.tt
+plugins/plugins-available/business_process/templates/_bp_context_menu_frame.tt
 plugins/plugins-available/business_process/templates/_bp_frame.tt
 plugins/plugins-available/business_process/templates/_bp_graph.tt
 plugins/plugins-available/business_process/templates/bp.tt

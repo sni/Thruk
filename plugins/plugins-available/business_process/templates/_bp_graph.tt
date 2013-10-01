@@ -40,6 +40,8 @@
           label:        '[% n.label %]',
           host:         '[% n.host %]',
           service:      '[% n.service %]',
+          template:     '[% n.template %]',
+          create_obj:   [% IF n.create_obj %]true[% ELSE %]false[% END %],
           status:       '[% n.status %]',
           status_text:  [% json_encode([n.status_text]) %][0],
           short_desc:   '[% escape_quotes(n.short_desc) %]',

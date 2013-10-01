@@ -27,10 +27,17 @@ LI.bp_menu_seperator.ui-state-disabled A {
     line-height: 0px;
 }
 
-.bp_type_btn {
+.bp_type_btn, .bp_type_box, .bp_type_box_label {
     height: 80px;
     width: 80px;
     white-space: normal;
+}
+.bp_type_box_label SPAN {
+    height: 65px;
+    width: 50px;
+    text-align: center;
+    display: table-cell !important;
+    vertical-align: middle;
 }
 .bp_type_btn_small {
     height: inherit;

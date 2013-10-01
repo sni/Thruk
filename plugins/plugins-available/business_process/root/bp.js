@@ -200,82 +200,237 @@ function bp_submit_on_enter(evt, id) {
 /* show node type select */
 var current_edit_node;
 var current_edit_node_clicked;
-function bp_show_add_node(id) {
+function bp_add_new_node() {
     hideElement('bp_menu');
-    if(id) {
-        current_edit_node_clicked = id;
-        if(id == 'new') {
-            current_edit_node_clicked = current_node;
-        }
-        current_edit_node = id;
-    }
-    var title = 'Change Node';
-    if(current_edit_node == 'new') {
-        title = 'Create New Node';
-    } else {
-        var n = bp_get_node(current_edit_node);
-        if(n && n.label) {
-            title = title + ': '+n.label;
-        }
-    }
-    jQuery("#bp_edit_node").dialog({
+    current_edit_node         = 'new';
+    current_edit_node_clicked = current_node;
+    jQuery("#bp_add_new_node").dialog({
         modal: true,
         closeOnEscape: true,
-        width: 365,
-        title: title
+        width: 365
     });
     jQuery('.bp_type_btn').button();
-    jQuery('#bp_conn_edit_btn').button({ disabled: current_edit_node == 'new' ? true : false });
-    showElement('bp_edit_node');
-    jQuery('INPUT.bp_node_id').val(id);
-}
-
-/* show node type select for existing nodes */
-function bp_show_edit_node() {
-    bp_show_add_node(current_node);
+    showElement('bp_add_new_node');
 }
 
 /* fill in form with current values */
 function bp_fill_select_form(data) {
+    var form = 'bp_edit_node_form';
     if(data.radio) {
         for(var key in data.radio) {
             var d = data.radio[key];
-            jQuery('#'+data.form).find('INPUT[name='+key+']').removeAttr("checked");
-            jQuery('#'+data.form).find('INPUT[name='+key+'][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+']][value="'+d[0]+'"]').attr("checked","checked");
             jQuery(d[1]).buttonset();
         }
     }
     if(data.text) {
         for(var key in data.text) {
             var d = data.text[key];
-            jQuery('#'+data.form).find('INPUT[name='+key+']').val(d);
+            jQuery('#'+form).find('INPUT[name='+key+']').val(d);
         }
-    }
-    if(data.label != undefined) {
-        jQuery('#'+data.form).find('INPUT[name=bp_label]').val(data.label);
     }
 }
 
-/* show node connection editor */
-bp_list_wizard_initialized = {};
-function bp_change_connections() {
-    bp_show_dialog('bp_select_connections', 600, 330);
+/* generic node type selection */
+function bp_select_type(type) {
+    bp_show_edit_node(undefined, false);
+    jQuery('.bp_type_box').attr('checked', false).button("refresh");
+    jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
+    jQuery.each(['status', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
+        hideElement('bp_select_'+s);
+    });
+    // change details tab
+    showElement('bp_select_'+type);
+    // switch to details tab
+    jQuery("#edit_dialog_"+bp_id).tabs({ active: 1 });
 
+    // insert current values
     var node = bp_get_node(current_edit_node);
+    if(node) {
+        jQuery('#bp_edit_node_form').find('INPUT[name=bp_label_'+type+']').val(node.label);
+    } else {
+        jQuery('#bp_edit_node_form').find('INPUT[name=bp_label_'+type+']').val('');
+    }
+    if     (type == 'status')   { bp_select_status(node)    }
+    else if(type == 'fixed')    { bp_select_fixed(node)     }
+    else if(type == 'at_least') { bp_select_at_least(node)  }
+    else if(type == 'not_more') { bp_select_not_more(node)  }
+    else if(type == 'best')     { bp_select_best(node)      }
+    else if(type == 'worst')    { bp_select_worst(node)     }
+    else if(type == 'equals')   { bp_select_equals(node)    }
+    jQuery('#bp_function').val(type);
+}
 
-    // initialize selected nodes
+/* show node type select: status */
+function bp_select_status(node) {
+    if(node && node.func.toLowerCase() == 'status') {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_status': node.func_args[0], 'bp_arg2_status': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_status': '', 'bp_arg2_status': '' }
+        });
+    }
+}
+
+/* show node type select: fixed */
+function bp_select_fixed(node) {
+    if(node && node.func.toLowerCase() == 'fixed') {
+        bp_fill_select_form({
+            radio: { 'bp_arg1_fixed': [ node.func_args[0].toUpperCase(), '.bp_fixed_radio'] },
+            text:  { 'bp_arg2_fixed': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            radio: { 'bp_arg1_fixed': [ 'OK', '.bp_fixed_radio'] },
+            text:  { 'bp_arg2_fixed': '' }
+        });
+    }
+}
+
+/* show node type select: best */
+function bp_select_best(node) {
+}
+
+/* show node type select: worst */
+function bp_select_worst(node) {
+}
+
+/* show node type select: equals */
+function bp_select_equals(node) {
+    if(node && node.func.toLowerCase() == 'equals') {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_equals': node.func_args[0] }
+        });
+    } else {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_equals': '' }
+        });
+    }
+}
+
+/* show node type select: not_more */
+function bp_select_not_more(node) {
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_not_more': node.func_args[0], 'bp_arg2_not_more': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_not_more': '', 'bp_arg2_not_more': '' }
+        });
+    }
+}
+
+/* show node type select: at_least */
+function bp_select_at_least(node) {
+    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_at_least': node.func_args[0], 'bp_arg2_at_least': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            text:  { 'bp_arg1_at_least': '', 'bp_arg2_at_least': '' }
+        });
+    }
+}
+
+/* show add node dialog */
+function bp_show_edit_node(id, refreshType) {
+    if(refreshType == undefined) { refreshType = true; }
+    hideElement('bp_menu');
+    jQuery("#bp_add_new_node").dialog().dialog("close");
+    if(id) {
+        if(id == 'new') {
+            current_edit_node         = 'new';
+            current_edit_node_clicked = current_node;
+        }
+        if(id == 'current') {
+            current_edit_node         = current_node;
+            current_edit_node_clicked = current_node;
+        }
+    }
+    jQuery('#bp_node_id').val(current_edit_node);
+    // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
+    jQuery("#edit_dialog_"+bp_id).tabs().dialog({
+        autoOpen: false, modal: true,
+        width: 430, height: 320,
+        draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
+        modal: true,
+        closeOnEscape: true,
+        buttons: [{
+              'text':   current_edit_node == 'new' ? 'Create' : 'Save',
+              'click':  function() { bp_edit_node_submit('bp_edit_node_form'); jQuery(this).dialog("close"); },
+              'class': 'bp_dialog_create_btn'
+        }],
+        create: function() { // turn tabs into dialogs
+            // define the elements we're dealing with
+            $tabs = jQuery(this).find('.ui-tabs-nav'); $dlg = jQuery(this).parent();
+            // clone close button from dialog title and put it in the tabs area
+            $dlg.find('.ui-dialog-titlebar-close').appendTo($tabs);
+            // make the tabs draggable, give it a class that gracefully adds the move cursor and remove the dialog's original titlebar completely
+            $dlg.draggable({handle: ".ui-tabs-nav"})
+            .addClass('ui-draggable')
+            .find('.ui-dialog-titlebar').remove();
+            // give dialog styles to the tabs (would like to do this without adding CSS, but couldn't)
+            $dlg.find('.ui-tabs').css('padding', '0px');
+            // turn off the highlighting of tabs in chrome, add titlebar style to tabs to give close button correct styling
+            $tabs.addClass('ui-dialog-titlebar')
+                .find('li, a').css('outline', 'none').mousedown(function(e){ e.stopPropagation(); });
+        }
+    })
+    jQuery('.bp_type_box').button();
+    jQuery("#edit_dialog_"+bp_id).dialog("open");
+
+    // show correct type
+    var node = bp_get_node(current_edit_node);
+    if(node && refreshType) {
+        bp_select_type(node.func.toLowerCase());
+    }
+    if(id && id == 'current') {
+        jQuery("#edit_dialog_"+bp_id).tabs({ active: 0 });
+    }
+
+    // update object creation status
+    if(node && node.func.toLowerCase() != 'status') {
+        jQuery("INPUT[name=bp_host]").val(node.host);
+        jQuery("INPUT[name=bp_service]").val(node.service);
+        jQuery("INPUT[name=bp_template]").val(node.template);
+    } else {
+        jQuery("INPUT[name=bp_host]").val('');
+        jQuery("INPUT[name=bp_service]").val('');
+        jQuery("INPUT[name=bp_template]").val('');
+    }
+    var checkbox = document.getElementById('bp_create_link');
+    if(node && node.create_obj) { checkbox.checked = node.create_obj }
+    else { checkbox.checked = false; }
+    bp_update_obj_create();
+
+    // initialize childrens tab
+    bp_initialize_children_tab(node);
+}
+
+/* initialize childrens tab */
+bp_list_wizard_initialized = {};
+function bp_initialize_children_tab(node) {
     selected_nodes   = new Array();
     selected_nodes_h = new Object();
     var options = [];
-    node.depends.forEach(function(d) {
-        var val = d;
-        selected_nodes.push(val);
-        selected_nodes_h[val] = 1;
-        options.push(new Option(val, val));
-    });
+    if(node) {
+        node.depends.forEach(function(d) {
+            var val = d;
+            selected_nodes.push(val);
+            selected_nodes_h[val] = 1;
+            options.push(new Option(val, val));
+        });
+    }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, true);
     sortlist('bp_'+bp_id+"_selected_nodes");
     reset_original_options('bp_'+bp_id+"_selected_nodes");
+
+    var first_node = bp_get_node('node1');
 
     // initialize available nodes
     available_nodes   = new Array();
@@ -283,8 +438,9 @@ function bp_change_connections() {
     var options = [];
     nodes.forEach(function(n) {
         var val = n.label;
-        if(selected_nodes_h[val]) { return true; }
-        if(val == node.label) { return true; }
+        if(selected_nodes_h[val])                 { return true; } // skip already selected nodes
+        if(node && val == node.label)             { return true; } // skip own node
+        if(first_node && val == first_node.label) { return true; } // skip first/master node
         available_nodes.push(val);
         available_nodes_h[val] = 1;
         options.push(new Option(val, val));
@@ -301,172 +457,8 @@ function bp_change_connections() {
         jQuery('INPUT.filter_selected').val('');
         data_filter_select('bp_'+bp_id+'_available_nodes', '');
         data_filter_select('bp_'+bp_id+'_selected_nodes', '');
-        return;
     }
     bp_list_wizard_initialized[bp_id] = true;
-
-    return;
-}
-
-/* show node type select: status */
-function bp_select_status() {
-    bp_show_dialog('bp_select_status', 430, 225);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && node.func.toLowerCase() == 'status') {
-        bp_fill_select_form({
-            form:  'bp_select_status_form',
-            label: node.label,
-            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_status_form',
-            label: node ? node.label : '',
-            text:  { 'bp_arg1': '', 'bp_arg2': '' }
-        });
-    }
-}
-
-/* show node type select: fixed */
-function bp_select_fixed() {
-    bp_show_dialog('bp_select_fixed', 430, 220);
-    jQuery('.bp_fixed_radio').buttonset();
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && node.func.toLowerCase() == 'fixed') {
-        bp_fill_select_form({
-            form:  'bp_select_fixed_form',
-            label: node.label,
-            radio: { 'bp_arg1': [ node.func_args[0].toUpperCase(), '.bp_fixed_radio'] },
-            text:  { 'bp_arg2': node.func_args[1] }
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_fixed_form',
-            label: node ? node.label : '',
-            radio: { 'bp_arg1': [ 'OK', '.bp_fixed_radio'] },
-            text:  { 'bp_arg2': '' }
-        });
-    }
-}
-
-/* show node type select: best */
-function bp_select_best() {
-    bp_show_dialog('bp_select_best', 430, 150);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
-        bp_fill_select_form({
-            form:  'bp_select_best_form',
-            label: node.label
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_best_form',
-            label: node ? node.label : ''
-        });
-    }
-}
-
-/* show node type select: worst */
-function bp_select_worst() {
-    bp_show_dialog('bp_select_worst', 430, 150);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'worst' || node.func.toLowerCase() == 'best')) {
-        bp_fill_select_form({
-            form:  'bp_select_worst_form',
-            label: node.label
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_worst_form',
-            label: node ? node.label : ''
-        });
-    }
-}
-
-/* show node type select: equals */
-function bp_select_exactly() {
-    bp_show_dialog('bp_select_exactly', 430, 180);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && node.func.toLowerCase() == 'equals') {
-        bp_fill_select_form({
-            form:  'bp_select_exactly_form',
-            label: node.label,
-            text:  { 'bp_arg1': node.func_args[0] }
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_exactly_form',
-            label: node ? node.label : '',
-            text:  { 'bp_arg1': '' }
-        });
-    }
-}
-
-/* show node type select: not_more */
-function bp_select_not_more() {
-    bp_show_dialog('bp_select_not_more', 430, 210);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
-        bp_fill_select_form({
-            form:  'bp_select_not_more_form',
-            label: node.label,
-            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_not_more_form',
-            label: node ? node.label : '',
-            text:  { 'bp_arg1': '', 'bp_arg2': '' }
-        });
-    }
-}
-
-/* show node type select: at_least */
-function bp_select_at_least() {
-    bp_show_dialog('bp_select_at_least', 430, 210);
-    // insert current values
-    var node = bp_get_node(current_edit_node);
-    if(node && (node.func.toLowerCase() == 'not_more' || node.func.toLowerCase() == 'at_least')) {
-        bp_fill_select_form({
-            form:  'bp_select_at_least_form',
-            label: node.label,
-            text:  { 'bp_arg1': node.func_args[0], 'bp_arg2': node.func_args[1] }
-        });
-    } else {
-        bp_fill_select_form({
-            form:  'bp_select_at_least_form',
-            label: node ? node.label : '',
-            text:  { 'bp_arg1': '', 'bp_arg2': '' }
-        });
-    }
-}
-
-/* show add node dialog */
-function bp_show_dialog(id, w, h) {
-    jQuery("#bp_edit_node").dialog("close");
-    jQuery("#"+id).dialog({
-        modal: true,
-        closeOnEscape: true,
-        width: w,
-        height: h,
-        buttons: [{
-              'text':  'Back',
-              'click':  function() { jQuery(this).dialog("close"); bp_show_add_node(); },
-              'icons':  { primary: "ui-icon-arrowthick-1-w" },
-              'class': 'bp_dialog_back_btn'
-            }, {
-              'text':   current_edit_node == 'new' ? 'Create' : 'Save',
-              'click':  function() { bp_edit_node_submit(id+'_form'); jQuery(this).dialog("close"); },
-              'class': 'bp_dialog_create_btn'
-            }
-        ]
-    });
 }
 
 /* save node */
@@ -538,29 +530,36 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(n.service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/info.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(n.host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("( <a href='extinfo.cgi?type=1&amp;host="+n.host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/info.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a> )");
+        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("<a href='extinfo.cgi?type=1&amp;host="+n.host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
     }
 
     return false;
 }
 
+/* toggle object creation */
+function bp_update_obj_create() {
+    var checkbox = document.getElementById('bp_create_link');
+    jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+}
+
 /* fired if mouse if over a node */
 function bp_mouse_over_node(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+    if(bp_context_menu) { return false; }
     current_node = node.id;
     bp_update_status(evt, node);
+    return true;
 }
 
 /* fired if mouse leaves a node */
 function bp_mouse_out_node(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
 }
-
 
 /* return node object by id */
 function bp_get_node(id) {
@@ -688,12 +687,11 @@ function bp_redraw(evt) {
 
     var maxX = 0, maxY = 0, minY = -1, main_node;
     nodes.forEach(function(u) {
-        if(!u.dagre) {
-            return false;
-        }
+        if(!u.dagre) { return false }
         if(maxX < u.dagre.x) { maxX = u.dagre.x }
         if(maxY < u.dagre.y) { maxY = u.dagre.y }
         if(minY == -1 || u.dagre.y < minY) { minY = u.dagre.y; main_node = u; }
+        return true;
     });
     maxX = maxX + 80;
     maxY = maxY + 30;
@@ -723,7 +721,7 @@ function bp_redraw(evt) {
     }
     original_zoom = zoom;
 
-    if(!current_node) {
+    if(!current_node && main_node) {
         bp_update_status(null, main_node);
         current_node = main_node.id;
     }

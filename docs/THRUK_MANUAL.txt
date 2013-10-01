@@ -2323,11 +2323,12 @@ need the roles:
 ex.:
 
   <Component Thruk::Plugin::BP>
-    #spool_dir          = /var/nagios/spool
-    objects_save_file   = /etc/nagios/conf.d/bp_generated.cfg
-    #pre_obj_save_cmd   =
-    #post_obj_save_cmd  =
-    refresh_interval    = 1
+    #spool_dir             = /var/nagios/spool
+    objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
+    objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
+    #pre_obj_save_cmd      =
+    #post_obj_save_cmd     =
+    refresh_interval       = 1
   </Component>
 
 
@@ -2337,6 +2338,9 @@ Set a spool folder if you don't want to use livestatus.
 
 ==== objects_save_file
 Save objects to this file. Content will be overwritten.
+
+==== objects_templates_file
+User maintained file containing templates used for business process services.
 
 ==== pre_obj_save_cmd
 Run this hook command before saving a business process.

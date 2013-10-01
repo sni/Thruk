@@ -41,6 +41,8 @@ sub new {
         'parents'           => $data->{'parents'} || [],
         'host'              => '',
         'service'           => '',
+        'template'          => '',
+        'create_obj'        => '',
         'scheduled_downtime_depth' => 0,
         'acknowledged'      => 0,
 
@@ -186,7 +188,7 @@ sub save_to_string {
 
     # host / service
     if(lc $self->{'function'} ne 'status') {
-        for my $key (qw/host service/) {
+        for my $key (qw/host service template create_obj/) {
             $string .= sprintf("    %-10s = %s\n", $key, $self->{$key}) if $self->{$key};
         }
     }

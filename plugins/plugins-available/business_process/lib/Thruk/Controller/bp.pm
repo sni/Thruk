@@ -165,36 +165,40 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return 1;
         }
         elsif($action eq 'edit_node' and $nodeid) {
-            my $sub = $c->{'request'}->{'parameters'}->{'sub'} || '';
-            if($sub eq 'connections') {
-                my $node = $bp->get_node($nodeid);
-                my $depends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'bp_'.$id.'_selected_nodes'} || []);
-                $node->resolve_depends($bp, $depends);
-                $bp->save($c);
-                $c->stash->{'text'} = 'OK';
-                $c->stash->{template} = 'passthrough.tt';
-                return 1;
-            }
-            my $parent = $bp->get_node($nodeid);
+            my $type = lc($c->{'request'}->{'parameters'}->{'bp_function'} || '');
+            my $node = $bp->get_node($nodeid); # node from the 'node' parameter
+
             my @arg;
             for my $x (1..10) {
-                push @arg, $c->{'request'}->{'parameters'}->{'bp_arg'.$x} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x};
+                push @arg, $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type};
             }
-            my $function = sprintf("%s(%s)", $c->{'request'}->{'parameters'}->{'function'}, Thruk::BP::Utils::join_args(\@arg));
-            my $node;
+            my $function = sprintf("%s(%s)", $type, Thruk::BP::Utils::join_args(\@arg));
+
+            # check create first
             if($c->{'request'}->{'parameters'}->{'bp_node_id'} eq 'new') {
-                $node = Thruk::BP::Components::Node->new({
-                                    'label'    => $c->{'request'}->{'parameters'}->{'bp_label'},
+                my $parent = $node;
+                $node   = Thruk::BP::Components::Node->new({
+                                    'label'    => $c->{'request'}->{'parameters'}->{'bp_label_'.$type},
                                     'function' => $function,
                                     'depends'  => [],
                 });
                 $bp->add_node($node);
                 $parent->append_child($node);
-            } else {
-                $node = $parent;
-                $node->{'label'} = $c->{'request'}->{'parameters'}->{'bp_label'};
-                $node->_set_function({'function' => $function});
             }
+
+            # update children
+            my $depends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'bp_'.$id.'_selected_nodes'} || []);
+            $node->resolve_depends($bp, $depends);
+
+            # save object creating attributes
+            for my $key (qw/host service template/) {
+                $node->{$key} = $c->{'request'}->{'parameters'}->{'bp_'.$key} || '';
+            }
+            $node->{'create_obj'} = $c->{'request'}->{'parameters'}->{'bp_create_link'} || 0;
+
+            $node->{'label'} = $c->{'request'}->{'parameters'}->{'bp_label_'.$type};
+            $node->_set_function({'function' => $function});
+
             $bp->save($c);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
