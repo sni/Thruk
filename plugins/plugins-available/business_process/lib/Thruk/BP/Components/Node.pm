@@ -38,11 +38,11 @@ sub new {
         'function_ref'      => undef,
         'function_args'     => [],
         'depends'           => Thruk::Utils::list($data->{'depends'} || []),
-        'parents'           => $data->{'parents'} || [],
-        'host'              => '',
-        'service'           => '',
-        'template'          => '',
-        'create_obj'        => '',
+        'parents'           => $data->{'parents'}    || [],
+        'host'              => $data->{'host'}       || '',
+        'service'           => $data->{'service'}    || '',
+        'template'          => $data->{'template'}   || '',
+        'create_obj'        => $data->{'create_obj'} || 0,
         'scheduled_downtime_depth' => 0,
         'acknowledged'      => 0,
 
@@ -298,8 +298,10 @@ sub _set_function {
         }
     }
     if(lc $self->{'function'} eq 'status') {
-        $self->{'host'}    = $self->{'function_args'}->[0] || '';
-        $self->{'service'} = $self->{'function_args'}->[1] || '';
+        $self->{'host'}       = $self->{'function_args'}->[0] || '';
+        $self->{'service'}    = $self->{'function_args'}->[1] || '';
+        $self->{'template'}   = '';
+        $self->{'create_obj'} = 0;
     }
     return;
 }

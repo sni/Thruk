@@ -14,6 +14,7 @@ function init_bp_buttons() {
     if (document.layers) {
       document.captureEvents(Event.MOUSEDOWN);
     }
+
     document.onmousedown   = bp_context_menu_open;
     document.oncontextmenu = bp_context_menu_open;
     window.onresize        = bp_redraw;
