@@ -54,6 +54,7 @@
   </ul>
 
 
+  <!-- TAB 1: TYPE -->
   <div id="tabs-1_[% bp.id %]" align="center">
     <input type="hidden" name="bp_function" id="bp_function" value="">
     <table>
@@ -76,6 +77,7 @@
   </div>
 
 
+  <!-- TAB 2: DETAILS -->
   <div id="tabs-2_[% bp.id %]">
 
 
@@ -183,6 +185,7 @@
   </div>
 
 
+  <!-- TAB 3: CHILDREN -->
   <div id="tabs-3_[% bp.id %]">
   <table width="100%">
     <tr>
@@ -200,12 +203,12 @@
             <tr>
               <td class="attrName">
                 <input type="text" class="filter_available" style="width:150px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:150px; height:120px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes')">
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:150px; height:120px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
               </td>
               <td align="center" valign="middle">
-                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes'); return false;">&gt;&gt;</button><br>
+                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true); return false;">&gt;&gt;</button><br>
                 <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
               </td>
               <td class="attrName">
@@ -222,11 +225,15 @@
   </table>
   </div>
 
-
+  <!-- TAB 4: LINKS -->
   <div id="tabs-4_[% bp.id %]">
     <table width="100%">
     <tr>
-      <td align="center" colspan=2 class="bp_type_desc"><input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()"> Create a host or service for this node.</td>
+      <td></td>
+      <td align="center" class="bp_type_desc">
+        <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
+          Create a host or service for this node.
+      </td>
     </tr>
     <tr>
       <th align="right">Host</th>
@@ -238,7 +245,7 @@
     </tr>
     <tr>
       <th align="right">Template</th>
-      <td align="left"><input type="text" value="" name="bp_template" placeholder="template" class="bp_create"></td>
+      <td align="left"><input type="text" value="" name="bp_template" placeholder="template" class="bp_create">[% IF use_feature_configtool %]<br><a href="conf.cgi#TODO...">Edit Templates</a>[% END %]</td>
     </tr>
     </table>
   </div>

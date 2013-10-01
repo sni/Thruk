@@ -427,7 +427,6 @@ function bp_initialize_children_tab(node) {
         });
     }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, true);
-    sortlist('bp_'+bp_id+"_selected_nodes");
     reset_original_options('bp_'+bp_id+"_selected_nodes");
 
     var first_node = bp_get_node('node1');

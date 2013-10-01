@@ -815,7 +815,7 @@ function is_shift_pressed(e) {
 }
 
 /* moves element from one select to another */
-function data_select_move(from, to) {
+function data_select_move(from, to, skip_sort) {
     var from_sel = document.getElementsByName(from);
     if(!from_sel || from_sel.length == 0) {
         if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + from ); }
@@ -870,7 +870,9 @@ function data_select_move(from, to) {
     }
 
     /* sort elements of to field */
-    sortlist(to_sel.id);
+    if(!skip_sort) {
+        sortlist(to_sel.id);
+    }
 }
 
 /* filter select field option */
