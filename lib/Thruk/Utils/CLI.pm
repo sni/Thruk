@@ -788,13 +788,22 @@ sub _cmd_bpd {
         return("business process plugin is disabled.\n", 1);
     }
 
+    my $bp;
+    my $rate = int($c->config->{'Thruk::Plugin::BP'}->{'refresh_interval'} || 1);
+    if($rate <  1) { $rate =  1; }
+    if($rate > 60) { $rate = 60; }
+    my $timeout = ($rate*60) -5;
+    local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($bp ? $bp->{'name'} : 'unknown')) };
+    alarm($timeout);
+
     my $t0 = [gettimeofday];
     my $bps = Thruk::BP::Utils::load_bp_data($c);
-    for my $bp (@{$bps}) {
+    for $bp (@{$bps}) {
         _debug("updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
         $bp->update_status($c);
         _debug("OK") if $Thruk::Utils::CLI::verbose >= 1;
     }
+    alarm(0);
     my $nr = scalar @{$bps};
     my $elapsed = tv_interval($t0);
     $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
