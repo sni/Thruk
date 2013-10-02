@@ -2,7 +2,7 @@
 
 <!-- context menu -->
 <ul id="bp_menu" style="display: none; position: absolute;">
-  <li><a href="#" onclick="bp_refresh('[% bp.id %]'); hideElement('bp_menu')"><span class="ui-icon ui-icon-refresh">&nbsp;</span>Refresh Status</a></li>
+  <li><a href="#" onclick="bp_refresh('[% bp.id %]', current_node); hideElement('bp_menu')"><span class="ui-icon ui-icon-refresh">&nbsp;</span>Refresh Status</a></li>
   <li class="ui-state-disabled bp_menu_seperator"><a href="#">-----------------------</a></li>
   <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)"><span class="ui-icon ui-icon-zoomin">&nbsp;</span>Zoom In</a></li>
   <li><a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)"><span class="ui-icon ui-icon-zoomout">&nbsp;</span>Zoom Out</a></li>
