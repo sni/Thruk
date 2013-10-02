@@ -3,9 +3,12 @@ package Thruk::BP::Components::BP;
 use strict;
 use warnings;
 use Data::Dumper;
+use Carp;
 use Config::General;
 use Storable qw/lock_nstore lock_retrieve/;
+use File::Temp;
 use File::Copy qw/move/;
+use Fcntl qw/:DEFAULT :flock/;
 use Encode qw/encode_utf8/;
 use Thruk::Utils;
 use Thruk::BP::Components::Node;
@@ -125,16 +128,19 @@ sub update_status {
 
     my $last_state = $self->{'status'};
 
+    my $results = [];
     my($hostdata, $servicedata) = $self->_bulk_fetch_live_data($c);
     for my $n (@{$self->{'nodes'}}) {
-        $n->update_status($c, $self, $hostdata, $servicedata);
+        my $r = $n->update_status($c, $self, $hostdata, $servicedata);
+        push @{$results}, $r if $r;
     }
 
     my $iterations = 0;
     while(scalar keys %{$self->{'need_update'}} > 0) {
         $iterations++;
         for my $id (keys %{$self->{'need_update'}}) {
-            $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata);
+            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata);
+            push @{$results}, $r if $r;
         }
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
@@ -152,6 +158,9 @@ sub update_status {
 
     # store runtime data
     $self->save_runtime();
+
+    # submit back to core
+    $self->_submit_results_to_core($c, $results);
 
     return;
 }
@@ -471,6 +480,35 @@ sub _bulk_fetch_live_data {
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
     return($hostdata, $servicedata);
+}
+
+##########################################################
+sub _submit_results_to_core {
+    my($self, $c, $results) = @_;
+    return unless scalar @{$results} > 0;
+
+    my $spool = $c->config->{'Thruk::Plugin::BP'}->{'spool_dir'};
+    if($spool) {
+        die("spool folder does not exist ".$spool.": ".$!) unless -d $spool;
+        my $fh = File::Temp->new(
+            TEMPLATE => "cXXXXXX",
+            DIR      => $spool,
+        );
+        $fh->unlink_on_destroy(0);
+        print $fh "### Active Check Result File ###\n";
+        print $fh sprintf("file_time=%d\n\n",time);
+        for my $r (@{$results}) {
+            print $fh $r,"\n";
+        }
+        CORE::close($fh);
+
+        my $file = $fh->filename.".ok";
+        sysopen my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY
+            or croak("Can't create $file : $!");
+        CORE::close $t or croak("Can't close $file : $!");
+    }
+
+    return;
 }
 
 ##########################################################

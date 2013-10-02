@@ -2323,7 +2323,7 @@ need the roles:
 ex.:
 
   <Component Thruk::Plugin::BP>
-    #spool_dir             = /var/nagios/spool
+    spool_dir              = /var/nagios/rw/check_results
     objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
     objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
     objects_reload_cmd     = /etc/init.d/nagios reload
@@ -2334,8 +2334,8 @@ ex.:
 
 
 ==== spool_dir
-Results may either be send back through livestatus or by a spool folder.
-Set a spool folder if you don't want to use livestatus.
+Results will be send back by using the spool folder.
+This folder should point to the 'check_result_path' of your core.
 
 ==== objects_save_file
 Save objects to this file. Content will be overwritten.

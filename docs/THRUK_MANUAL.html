@@ -19035,7 +19035,7 @@ authorized_for_system_commands
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::BP&gt;
-  #spool_dir             = /var/nagios/spool
+  spool_dir              = /var/nagios/rw/check_results
   objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
   objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
   objects_reload_cmd     = /etc/init.d/nagios reload
@@ -19046,8 +19046,8 @@ authorized_for_system_commands
 </div></div>
 <div class="sect3">
 <h4 id="_spool_dir">spool_dir</h4>
-<div class="paragraph"><p>Results may either be send back through livestatus or by a spool folder.
-Set a spool folder if you don&#8217;t want to use livestatus.</p></div>
+<div class="paragraph"><p>Results will be send back by using the spool folder.
+This folder should point to the <em>check_result_path</em> of your core.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_objects_save_file">objects_save_file</h4>
@@ -20519,7 +20519,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-02 00:34:50 CEST
+Last updated 2013-10-02 23:19:31 CEST
 </div>
 </div>
 </body>

@@ -253,7 +253,13 @@ sub update_status {
         $self->_set_status(3, 'Internal Error: '.$@, $bp);
     }
 
-    return;
+    # create result if we are linked to an object
+    my $result;
+    if($self->{'create_obj'} and $self->{'host'}) {
+        $result = $self->_result_to_string();
+    }
+
+    return $result;
 }
 
 ##########################################################
@@ -329,6 +335,34 @@ sub _set_function {
         $self->{'create_obj'} = 0;
     }
     return;
+}
+
+##########################################################
+sub _result_to_string {
+    my($self) = @_;
+    my $string = "";
+    $string .= "### Nagios Service Check Result ###\n";
+    $string .= sprintf "# Time: %s\n",scalar localtime time();
+    $string .= sprintf "host_name=%s\n", $self->{'host'};
+    if(defined($self->{'service'})) {
+        $string .= sprintf "service_description=%s\n", $self->{'service'};
+    }
+    my $output = $self->{'status_text'} ||$ self->{'short_desc'};
+    # remove trailing newlines and quote the remaining ones
+    $output =~ s/[\r\n]*$//o;
+    $output =~ s/\n/\\n/go;
+
+    $string .= sprintf "check_type=%d\n",       1; # passive
+    $string .= sprintf "check_options=%d\n",    0; # no options
+    $string .= sprintf "scheduled_check=%d\n",  0; # not scheduled
+    $string .= sprintf "latency=%f\n",          0;
+    $string .= sprintf "start_time=%f\n",       $self->{'last_check'};
+    $string .= sprintf "finish_time=%f\n",      $self->{'last_check'};
+    $string .= sprintf "early_timeout=%d\n",    0;
+    $string .= sprintf "exited_ok=%d\n",        0;
+    $string .= sprintf "return_code=%d\n",      $self->{'status'};
+    $string .= sprintf "output=%s\n",           $output;
+    return $string;
 }
 
 ##########################################################
