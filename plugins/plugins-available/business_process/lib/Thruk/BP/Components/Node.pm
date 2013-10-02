@@ -349,8 +349,8 @@ sub _result_to_string {
     }
     my $output = $self->{'status_text'} ||$ self->{'short_desc'};
     # remove trailing newlines and quote the remaining ones
-    $output =~ s/[\r\n]*$//o;
-    $output =~ s/\n/\\n/go;
+    $output =~ s/[\r\n]*$//mxo;
+    $output =~ s/\n/\\n/gmxo;
 
     $string .= sprintf "check_type=%d\n",       1; # passive
     $string .= sprintf "check_options=%d\n",    0; # no options
