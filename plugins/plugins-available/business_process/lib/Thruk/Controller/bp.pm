@@ -106,7 +106,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             if($c->stash->{'objects_templates_file'} and -e $c->stash->{'objects_templates_file'}) {
                 open(my $fh, '<', $c->stash->{'objects_templates_file'}) or die("failed to open ".$c->stash->{'objects_templates_file'}.": ".$!);
                 while(my $line = <$fh>) {
-                    if($line =~ m/^\s*name\s+(.*?)\s*(;|#|$)$/) {
+                    if($line =~ m/^\s*name\s+(.*?)\s*[;$]+$/mx) {
                         push @{$data}, $1;
                     }
                 }
