@@ -125,42 +125,7 @@ sub update_status {
 
     my $last_state = $self->{'status'};
 
-    # bulk fetch live data
-    my $hostfilter    = {};
-    my $servicefilter = {};
-    my $hostdata      = {};
-    my $servicedata   = {};
-    for my $n (@{$self->{'nodes'}}) {
-        if(lc $n->{'function'} eq 'status') {
-            if($n->{'host'} and $n->{'service'}) {
-                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = 1;
-            }
-            elsif($n->{'host'}) {
-                $hostfilter->{$n->{'host'}} = 1;
-            }
-        }
-    }
-    if(scalar keys %{$hostfilter} > 0) {
-        my @filter;
-        for my $hostname (keys %{$hostfilter}) {
-            push @filter, { name => $hostname };
-        }
-        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hosts(filter => [$filter]);
-        $hostdata  = Thruk::Utils::array2hash($data, 'name');
-    }
-    if(scalar keys %{$servicefilter} > 0) {
-        my @filter;
-        for my $hostname (keys %{$servicefilter}) {
-            for my $description (keys %{$servicefilter->{$hostname}}) {
-                push @filter, { host_name => $hostname, description => $description };
-            }
-        }
-        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_services(filter => [$filter]);
-        $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
-    }
-
+    my($hostdata, $servicedata) = $self->_bulk_fetch_live_data($c);
     for my $n (@{$self->{'nodes'}}) {
         $n->update_status($c, $self, $hostdata, $servicedata);
     }
@@ -169,7 +134,7 @@ sub update_status {
     while(scalar keys %{$self->{'need_update'}} > 0) {
         $iterations++;
         for my $id (keys %{$self->{'need_update'}}) {
-            $self->{'nodes_by_id'}->{$id}->update_status($c, $self);
+            $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata);
         }
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
@@ -460,6 +425,48 @@ sub make_new_node_id {
     }
     $self->{'need_save'} = 1;
     return $id;
+}
+
+##########################################################
+sub _bulk_fetch_live_data {
+    my($self, $c) = @_;
+
+    # bulk fetch live data
+    my $hostfilter    = {};
+    my $servicefilter = {};
+    my $hostdata      = {};
+    my $servicedata   = {};
+    for my $n (@{$self->{'nodes'}}) {
+        if(lc $n->{'function'} eq 'status') {
+            if($n->{'host'} and $n->{'service'}) {
+                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = 1;
+            }
+            elsif($n->{'host'}) {
+                $hostfilter->{$n->{'host'}} = 1;
+            }
+        }
+    }
+    if(scalar keys %{$hostfilter} > 0) {
+        my @filter;
+        for my $hostname (keys %{$hostfilter}) {
+            push @filter, { name => $hostname };
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_hosts(filter => [$filter]);
+        $hostdata  = Thruk::Utils::array2hash($data, 'name');
+    }
+    if(scalar keys %{$servicefilter} > 0) {
+        my @filter;
+        for my $hostname (keys %{$servicefilter}) {
+            for my $description (keys %{$servicefilter->{$hostname}}) {
+                push @filter, { host_name => $hostname, description => $description };
+            }
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_services(filter => [$filter]);
+        $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
+    }
+    return($hostdata, $servicedata);
 }
 
 ##########################################################
