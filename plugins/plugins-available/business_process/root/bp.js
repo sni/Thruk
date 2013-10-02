@@ -654,6 +654,10 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     }
     points.push([edge.target.x, edge.target.y]);
 
+    var edge_id = 'edge_'+sourceId+'_'+targetId;
+    jQuery(container).append('<div id="'+edge_id+'"><\/div>');
+    var edge_container = jQuery('#'+edge_id);
+
     // non-direct layout
     if(points.length > 5) {
         // move start point outside
@@ -661,7 +665,7 @@ function bp_plump(containerId, sourceId, targetId, edge) {
             points[0][0] = points[0][0] + 15;
             points[1][0] = points[1][0] + 15;
         }
-        //jQuery(container).append('<div class="bp_vedge" style="left: '+points[0][0]+'px; top: '+points[0][1]+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+points[0][0]+'px; top: '+points[0][1]+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
         for(var x = 0; x < points.length -1; x++) {
             var x1 = points[x][0];
             var y1 = points[x][1];
@@ -678,9 +682,7 @@ function bp_plump(containerId, sourceId, targetId, edge) {
             }
             if(h < 0) { h = -h; y1 = y2; }
             if(w < 0) { w = -w; x1 = x2; }
-            if(h == 0) { h = 1; cls = 'bp_hedge'; }
-            if(w == 0) { w = 1; cls = 'bp_vedge'; }
-            jQuery(container).append('<div class="'+cls+'" style="left: '+x1+'px; top: '+y1+'px; width:'+w+'px; height: '+h+'px;"><\/div>');
+            bp_draw_edge(edge_container, edge_id, x1, y1, w, h);
         }
     }
 
@@ -703,7 +705,7 @@ function bp_plump(containerId, sourceId, targetId, edge) {
         // draw "line" from top middle of lower node
         var x = lpos.left + lower.offsetWidth / 2;
         var y = lpos.top  - 10;
-        jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: 10px;"><\/div>');
+        bp_draw_edge(edge_container, edge_id, x, y, 0, 10);
 
         // draw vertical line
         var w = (upos.left + upper.offsetWidth / 2) - x;
@@ -713,17 +715,34 @@ function bp_plump(containerId, sourceId, targetId, edge) {
         } else {
             x = x + 2;
         }
-        jQuery(container).append('<div class="bp_hedge" style="left: '+x+'px; top: '+y+'px; width:'+w+'px; height: 1px;"><\/div>');
+        bp_draw_edge(edge_container, edge_id, x, y, w, 0);
 
         // draw horizontal line
         x = upos.left + upper.offsetWidth / 2;
         y = lpos.top  - 10;
         var h = y - (upos.top + upper.offsetHeight);
         y = y - h;
-        jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: '+h+'px;"><\/div>');
+        bp_draw_edge(edge_container, edge_id, x, y, 0, h);
     }
 
     return;
+}
+
+function bp_draw_edge(edge_container, edge_id, x, y, w, h) {
+    var style = 'left: '+x+'px; top: '+y+'px;';
+    if(h == 0) { cls = 'bp_hedge'; style += ' width:'+w+'px;'; }
+    if(w == 0) { cls = 'bp_vedge'; style += ' height:'+h+'px;'; }
+    jQuery(edge_container).append('<div class="'+cls+'" style="'+style+'" onmouseover="bp_hover_edge(\''+edge_id+'\')" onmouseout="bp_hover_edge_out(\''+edge_id+'\')"><\/div>');
+}
+
+function bp_hover_edge(id) {
+    jQuery('#'+id+' .bp_vedge').addClass('bp_vedge_hover');
+    jQuery('#'+id+' .bp_hedge').addClass('bp_hedge_hover');
+
+}
+function bp_hover_edge_out(id) {
+    jQuery('.bp_vedge_hover').removeClass('bp_vedge_hover');
+    jQuery('.bp_hedge_hover').removeClass('bp_hedge_hover');
 }
 
 /* stop further events */

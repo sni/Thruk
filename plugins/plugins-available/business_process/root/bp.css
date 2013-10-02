@@ -211,11 +211,27 @@ SPAN.bp_label {
 .bp_vedge {
     border-left: 2px solid grey;
     position: absolute;
+    width: 1px;
+}
+.bp_vedge_hover {
+    border-left: 2px solid #0096FF;
+    z-index: 1;
+    box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -moz-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
 }
 
 .bp_hedge {
     border-top: 2px solid grey;
     position: absolute;
+    height: 1px;
+}
+.bp_hedge_hover {
+    border-top: 2px solid #0096FF;
+    z-index: 1;
+    box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -webkit-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
+    -moz-box-shadow: 0 0 5px rgba(0, 150, 255, 1);
 }
 
 /* decrease padding of tabs panel */
