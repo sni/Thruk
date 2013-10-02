@@ -43,8 +43,8 @@
                 <td>
                   <div id="bp_status_status"></div>
                   <div class="bp_status_status_icons">
-                    <img id="bp_status_icon_downtime" src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="16" width="16">
-                    <img id="bp_status_icon_ack" src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="16" width="16">
+                    <img id="bp_status_icon_downtime" src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="16" width="16" style="display: none;">
+                    <img id="bp_status_icon_ack" src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="16" width="16" style="display: none;">
                   </div>
                 </td>
               </tr>

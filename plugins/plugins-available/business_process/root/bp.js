@@ -123,7 +123,7 @@ function bp_context_menu_open(evt, node) {
     }
 
     // always allow events on input fields
-    if(evt.target.tagName == "INPUT") {
+    if(evt.target && evt.target.tagName == "INPUT") {
         return true;
     }
 
@@ -589,13 +589,18 @@ function bp_get_node(id) {
 function bp_render(containerId, nodes, edges) {
     // first reset zoom
     bp_zoom('inner_'+containerId, 1);
-    dagre.layout()
-        //.debugLevel(4)
-        .nodes(nodes)
-        .edges(edges)
-        .nodeSep(20)
-        .rankDir("TB")
-        .run();
+    try {
+        dagre.layout()
+            //.debugLevel(4)
+            .nodes(nodes)
+            .edges(edges)
+            .nodeSep(20)
+            .rankDir("TB")
+            .run();
+    } catch(e) {
+        jQuery('#inner_'+containerId).html('<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>');
+        return;
+    }
 
     nodes.forEach(function(u) {
         // move node
