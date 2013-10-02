@@ -503,12 +503,12 @@ sub _submit_results_to_core {
         for my $r (@{$results}) {
             print $fh $r,"\n";
         }
-        CORE::close($fh);
+        Thruk::Utils::IO::close($fh, $fh->filename);
 
-        my $file = $fh->filename.".ok";
+        my $file = $fh->filename.'.ok';
         sysopen my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY
             or croak("Can't create $file : $!");
-        CORE::close $t or croak("Can't close $file : $!");
+        Thruk::Utils::IO::close($t, $file);
     }
 
     return;
