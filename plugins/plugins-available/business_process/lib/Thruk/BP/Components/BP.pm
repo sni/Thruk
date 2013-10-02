@@ -146,6 +146,10 @@ sub update_status {
         $self->{'last_state_change'} = $now;
     }
 
+    # make sure our folders exist
+    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp') unless -d $c->config->{'var_path'}.'/bp';
+    Thruk::Utils::IO::mkdir_r($c->config->{'home'}.'/bp')     unless -d $c->config->{'home'}.'/bp';
+
     # store runtime data
     $self->save_runtime();
 
