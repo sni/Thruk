@@ -21,23 +21,33 @@ functions used to calculate business processes
 
 =head2 status
 
-    status($c, $bp, $n, $hostname, [$service_description])
+    status($c, $bp, $n, [$args: $hostname, $description], [$hostdata], [$servicedata])
 
 returns status based on real service or host
 
 =cut
 sub status {
-    my($c, $bp, $n, $hostname, $description) = @_;
+    my($c, $bp, $n, $args, $hostdata, $servicedata) = @_;
+    my($hostname, $description) = @{$args};
     my $data;
-    if($description) {
-        my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $description } ] );
-        if(scalar @{$services} > 0) {
-            $data = $services->[0];
+    if($hostname and $description) {
+        if(defined $servicedata->{$hostname}->{$description}) {
+            $data = $servicedata->{$hostname}->{$description};
+        } else {
+            my $services = $c->{'db'}->get_services( filter => [{ 'description' => $description }]);
+            if(scalar @{$services} > 0) {
+                $data = $services->[0];
+            }
         }
-    } else {
-        my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
-        if(scalar @{$hosts} > 0) {
-            $data = $hosts->[0];
+    }
+    elsif($hostname) {
+        if(defined $hostdata->{$hostname}) {
+            $data = $hostdata->{$hostname};
+        } else {
+            my $hosts = $c->{'db'}->get_hosts( filter => [{ 'name' => $hostname } ] );
+            if(scalar @{$hosts} > 0) {
+                $data = $hosts->[0];
+            }
         }
     }
 
@@ -54,13 +64,14 @@ sub status {
 
 =head2 fixed
 
-    fixed($c, $bp, $n, $status, [$text])
+    fixed($c, $bp, $n, [$args: $status, [$text]])
 
 returns fixed status based input
 
 =cut
 sub fixed {
-    my($c, $bp, $n, $status, $text) = @_;
+    my($c, $bp, $n, $args) = @_;
+    my($status, $text) = @{$args};
     $status = lc $status;
     if($status eq '2' or $status eq 'critical' or $status eq 'down') {
         return(2, 'fixed', $text || 'CRITICAL');
@@ -120,14 +131,15 @@ sub best {
 
 =head2 at_least
 
-    worst($c, $bp, $n, $critical)
-    worst($c, $bp, $n, $warning, $critical)
+    at_least($c, $bp, $n, [$args: $critical])
+    at_least($c, $bp, $n, [$args: $warning, $critical])
 
 returns state if thresholds are reached
 
 =cut
 sub at_least {
-    my($c, $bp, $n, $warning, $critical) = @_;
+    my($c, $bp, $n, $args) = @_;
+    my($warning, $critical) = @{$args};
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->{'depends'});
     my $state = 0;
@@ -148,15 +160,15 @@ sub at_least {
 
 =head2 not_more
 
-    worst($c, $bp, $n, $critical)
-    worst($c, $bp, $n, $warning, $critical)
+    not_more($c, $bp, $n, [$args: $critical])
+    not_more($c, $bp, $n, [$args: $warning, $critical])
 
 returns state if thresholds are reached
 
 =cut
 sub not_more {
-    my($c, $bp, $n, $warning, $critical) = @_;
-    $critical = $warning unless defined $critical;
+    my($c, $bp, $n, $args) = @_;
+    my($warning, $critical) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
     my $state = 0;
     if($good > $critical) {
@@ -177,13 +189,14 @@ sub not_more {
 
 =head2 equals
 
-    equals($c, $bp, $n, $number)
+    equals($c, $bp, $n, [$args: $number])
 
 returns number of good nodes matches the number
 
 =cut
 sub equals {
-    my($c, $bp, $n, $number) = @_;
+    my($c, $bp, $n, $args) = @_;
+    my($number) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
     if($good == 0 and $bad == 0) {
         return(4, 'no dependent nodes');

@@ -233,17 +233,19 @@ sub get_objects_string {
 
 =head2 update_status
 
+    update_status($c, $bp, [$hostdata], [$servicedata])
+
 update status of node
 
 =cut
 sub update_status {
-    my($self, $c, $bp) = @_;
+    my($self, $c, $bp, $hostdata, $servicedata) = @_;
     delete $bp->{'need_update'}->{$self->{'id'}};
 
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $short_desc, $status_text, $extra) = &$function($c, $bp, $self, @{$self->{'function_args'}});
+        my($status, $short_desc, $status_text, $extra) = &$function($c, $bp, $self, $self->{'function_args'}, $hostdata, $servicedata);
         $self->_set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
     };

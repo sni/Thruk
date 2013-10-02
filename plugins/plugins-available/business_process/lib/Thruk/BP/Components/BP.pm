@@ -125,8 +125,44 @@ sub update_status {
 
     my $last_state = $self->{'status'};
 
+    # bulk fetch live data
+    my $hostfilter    = {};
+    my $servicefilter = {};
+    my $hostdata      = {};
+    my $servicedata   = {};
     for my $n (@{$self->{'nodes'}}) {
-        $n->update_status($c, $self);
+        if(lc $n->{'function'} eq 'status') {
+            if($n->{'host'} and $n->{'service'}) {
+                $servicefilter->{$n->{'host'}}->{$n->{'service'}} = 1;
+            }
+            elsif($n->{'host'}) {
+                $hostfilter->{$n->{'host'}} = 1;
+            }
+        }
+    }
+    if(scalar keys %{$hostfilter} > 0) {
+        my @filter;
+        for my $hostname (keys %{$hostfilter}) {
+            push @filter, { name => $hostname };
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_hosts(filter => [$filter]);
+        $hostdata  = Thruk::Utils::array2hash($data, 'name');
+    }
+    if(scalar keys %{$servicefilter} > 0) {
+        my @filter;
+        for my $hostname (keys %{$servicefilter}) {
+            for my $description (keys %{$servicefilter->{$hostname}}) {
+                push @filter, { host_name => $hostname, description => $description };
+            }
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_services(filter => [$filter]);
+        $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
+    }
+
+    for my $n (@{$self->{'nodes'}}) {
+        $n->update_status($c, $self, $hostdata, $servicedata);
     }
 
     my $iterations = 0;
