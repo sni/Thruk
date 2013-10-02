@@ -203,6 +203,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                     'function' => $function,
                                     'depends'  => [],
                 });
+                die('internal error') unless $node;
+                die('internal error') unless $parent;
                 $bp->add_node($node);
                 $parent->append_child($node);
             }
