@@ -478,6 +478,11 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
+    # only save backends if checkbox checked
+    if(!$params->{'report_backends_toggle'}) {
+        $params->{'report_backends'} = [];
+    }
+
     my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
         'name'       => $params->{'name'}            || 'New Report',

@@ -753,7 +753,6 @@ function updateSitePanelCheckBox() {
     }
 }
 
-
 /* toogle checkbox by id */
 function toggleCheckBox(id) {
   var box = document.getElementById(id);
@@ -761,6 +760,16 @@ function toggleCheckBox(id) {
     box.checked = false;
   } else {
     box.checked = true;
+  }
+}
+
+/* toogle disabled status */
+function toggleDisabled(id) {
+  var thing = document.getElementById(id);
+  if(thing.disabled) {
+    thing.disabled = false;
+  } else {
+    thing.disabled = true;
   }
 }
 
@@ -3587,11 +3596,15 @@ var ajax_search = {
             }
         }
         if(backend_select) {
-            var backends = jQuery('#'+backend_select).val();
-            if(backends != undefined) {
-                jQuery.each(backends, function(i, val) {
-                    search_url = search_url + '&backend=' + val;
-                });
+            var sel = document.getElementById(backend_select);
+            // only if enabled
+            if(!sel.disabled) {
+                var backends = jQuery('#'+backend_select).val();
+                if(backends != undefined) {
+                    jQuery.each(backends, function(i, val) {
+                        search_url = search_url + '&backend=' + val;
+                    });
+                }
             }
         }
 
