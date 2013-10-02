@@ -63,6 +63,8 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
+    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
+    Thruk::Utils::IO::mkdir_r($c->config->{'home'}.'/bp');
     while(-e $c->config->{'home'}.'/bp/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
         $num++;
     }
