@@ -359,7 +359,7 @@ sub _result_to_string {
     $string .= sprintf "start_time=%f\n",       $self->{'last_check'};
     $string .= sprintf "finish_time=%f\n",      $self->{'last_check'};
     $string .= sprintf "early_timeout=%d\n",    0;
-    $string .= sprintf "exited_ok=%d\n",        0;
+    $string .= sprintf "exited_ok=%d\n",        1;
     $string .= sprintf "return_code=%d\n",      $self->{'status'};
     $string .= sprintf "output=%s\n",           $output;
     return $string;
