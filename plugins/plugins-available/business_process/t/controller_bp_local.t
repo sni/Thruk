@@ -19,7 +19,12 @@ my $c    = TestUtils::get_c();
 
 ###########################################################
 # copy sample bp
-copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp');
+my $created_dir = 0;
+if(!-d 'bp') {
+    mkdir('bp') or die("cannot create bp: ".$!);
+    $created_dir = 1;
+}
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp') or die("copy failed: ".$!);
 ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
 
 ###########################################################
@@ -52,3 +57,6 @@ ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
 # cleanup
 use_ok('Thruk::BP::Utils');
 Thruk::BP::Utils::clean_orphaned_edit_files($c, 0);
+
+# if it was empty, remove it again
+rmdir('bp') if $created_dir;
