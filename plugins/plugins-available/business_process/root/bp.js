@@ -24,7 +24,7 @@ function init_bp_buttons() {
 /* refresh given business process */
 var current_node;
 var is_refreshing = false;
-function bp_refresh(bp_id, node_id, callback) {
+function bp_refresh(bp_id, node_id, callback, refresh_only) {
     if(is_refreshing) { return false; }
     if(node_id && node_id != 'changed_only') {
         if(!minimal) {
@@ -35,7 +35,7 @@ function bp_refresh(bp_id, node_id, callback) {
     var ts = new Date().getTime();
     var old_nodes = nodes;
     is_refreshing = true;
-    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&edit='+editmode+'&bp='+bp_id, [], function(responseText, textStatus, XMLHttpRequest) {
+    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1), [], function(responseText, textStatus, XMLHttpRequest) {
         is_refreshing = false;
         if(!minimal) {
             hideElement('bp_status_waiting');
@@ -63,7 +63,7 @@ function bp_refresh(bp_id, node_id, callback) {
 
 /* refresh business process in background */
 function bp_refresh_bg(cb) {
-    bp_refresh(bp_id, 'changed_only', cb);
+    bp_refresh(bp_id, 'changed_only', cb, true);
 }
 
 /* unset active node */
@@ -85,9 +85,6 @@ var bp_context_menu = false;
 var bp_active_node;
 function bp_context_menu_open(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
-
-    // don't interrupt user interactions by automatic reload
-    resetRefresh();
 
     var rightclick;
     if (evt.which) rightclick = (evt.which == 3);
@@ -126,6 +123,9 @@ function bp_context_menu_open(evt, node) {
     if(evt.target && evt.target.tagName == "INPUT") {
         return true;
     }
+
+    // don't interrupt user interactions by automatic reload
+    resetRefresh();
 
     if(bp_context_menu) {
         if (evt.stopPropagation) {

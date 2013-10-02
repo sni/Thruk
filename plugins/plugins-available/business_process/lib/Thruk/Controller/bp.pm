@@ -93,7 +93,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return 1;
         }
         elsif($action eq 'refresh' and $id) {
-            $bp->update_status($c);
+            if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
+                $bp->update_status($c);
+            }
             $c->stash->{template} = '_bp_graph.tt';
             return 1;
         }
