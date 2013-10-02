@@ -603,7 +603,7 @@ function bp_render(containerId, nodes, edges) {
     });
 
     edges.forEach(function(e) {
-        bp_plump('inner_'+containerId, e.sourceId, e.targetId);
+        bp_plump('inner_'+containerId, e.sourceId, e.targetId, e);
     });
 
     bp_redraw();
@@ -632,47 +632,96 @@ function bp_zoom(containerId, zoom) {
 }
 
 /* draw connector between two nodes */
-function bp_plump(containerId, sourceId, targetId) {
+function bp_plump(containerId, sourceId, targetId, edge) {
     var upper     = document.getElementById(sourceId);
     var lower     = document.getElementById(targetId);
     var container = document.getElementById(containerId);
 
-    // get position
-    var lpos = jQuery(lower).position();
-    var upos = jQuery(upper).position();
 
-    // switch position
-    if(lpos.top < upos.top) {
-        var tmp = lower;
-        lower = upper;
-        upper = tmp;
+    var x = edge.source.x;
+    var y = edge.source.y;
 
-        var tmp = lpos;
-        lpos = upos;
-        upos = tmp;
+    var points = [[x,y]];
+    edge.dagre.points.forEach(function(p) {
+        if(x != p.x && y != p.y) {
+            points.push([x, p.y]);
+        }
+        points.push([p.x, p.y]);
+        x = p.x; y = p.y;
+    });
+    if(x != edge.target.x && y != edge.target.y) {
+        points.push([x, edge.target.y]);
+    }
+    points.push([edge.target.x, edge.target.y]);
+
+    // non-direct layout
+    if(points.length > 5) {
+        // move start point outside
+        if(points[0][0] < points[2][0]) {
+            points[0][0] = points[0][0] + 15;
+            points[1][0] = points[1][0] + 15;
+        }
+        //jQuery(container).append('<div class="bp_vedge" style="left: '+points[0][0]+'px; top: '+points[0][1]+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+        for(var x = 0; x < points.length -1; x++) {
+            var x1 = points[x][0];
+            var y1 = points[x][1];
+            var x2 = points[x+1][0];
+            var y2 = points[x+1][1];
+            var w = x2 - x1;
+            var h = y2 - y1;
+            if(w < 0) {
+                w = -w;
+                x1 = x2;
+                x1 = x1 + 1;
+            } else {
+                x1 = x1 - 1;
+            }
+            if(h < 0) { h = -h; y1 = y2; }
+            if(w < 0) { w = -w; x1 = x2; }
+            if(h == 0) { h = 1; cls = 'bp_hedge'; }
+            if(w == 0) { w = 1; cls = 'bp_vedge'; }
+            jQuery(container).append('<div class="'+cls+'" style="left: '+x1+'px; top: '+y1+'px; width:'+w+'px; height: '+h+'px;"><\/div>');
+        }
     }
 
-    // draw "line" from top middle of lower node
-    var x = lpos.left + lower.offsetWidth / 2;
-    var y = lpos.top  - 10;
-    jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: 10px;"><\/div>');
+    else {
+        // get position
+        var lpos = jQuery(lower).position();
+        var upos = jQuery(upper).position();
 
-    // draw vertical line
-    var w = (upos.left + upper.offsetWidth / 2) - x;
-    if(w < 0) {
-        w = -w;
-        x = x - w;
-    } else {
-        x = x + 2;
+        // switch position
+        if(lpos.top < upos.top) {
+            var tmp = lower;
+            lower = upper;
+            upper = tmp;
+
+            var tmp = lpos;
+            lpos = upos;
+            upos = tmp;
+        }
+
+        // draw "line" from top middle of lower node
+        var x = lpos.left + lower.offsetWidth / 2;
+        var y = lpos.top  - 10;
+        jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: 10px;"><\/div>');
+
+        // draw vertical line
+        var w = (upos.left + upper.offsetWidth / 2) - x;
+        if(w < 0) {
+            w = -w;
+            x = x - w;
+        } else {
+            x = x + 2;
+        }
+        jQuery(container).append('<div class="bp_hedge" style="left: '+x+'px; top: '+y+'px; width:'+w+'px; height: 1px;"><\/div>');
+
+        // draw horizontal line
+        x = upos.left + upper.offsetWidth / 2;
+        y = lpos.top  - 10;
+        var h = y - (upos.top + upper.offsetHeight);
+        y = y - h;
+        jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: '+h+'px;"><\/div>');
     }
-    jQuery(container).append('<div class="bp_hedge" style="left: '+x+'px; top: '+y+'px; width:'+w+'px; height: 1px;"><\/div>');
-
-    // draw horizontal line
-    x = upos.left + upper.offsetWidth / 2;
-    y = lpos.top  - 10;
-    var h = y - (upos.top + upper.offsetHeight);
-    y = y - h;
-    jQuery(container).append('<div class="bp_vedge" style="left: '+x+'px; top: '+y+'px; width:1px; height: '+h+'px;"><\/div>');
 
     return;
 }
