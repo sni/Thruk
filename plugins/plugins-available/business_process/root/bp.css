@@ -143,6 +143,7 @@ DIV.ui-dialog INPUT[type=text] {
     width: 120px;
     display: block;
     overflow: hidden;
+    z-index: 10;
 
     -webkit-box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
     box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
