@@ -3584,7 +3584,9 @@ var ajax_search = {
                 type = type();
             }
             ajax_search.search_type = type;
-            search_url              = search_url + "&type=" + type;
+            if(!search_url.match(/type=/)) {
+                search_url = search_url + "&type=" + type;
+            }
         } else {
             type                    = 'all';
         }
