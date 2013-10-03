@@ -246,14 +246,21 @@ sub get_objects_conf {
 
 =head2 update_status
 
-    update_status($c, $bp, [$hostdata], [$servicedata])
+    update_status($c, $bp, [$hostdata], [$servicedata], [$type])
+
+type:
+    0 / undef:      update always
+    1:              only recalculate
 
 update status of node
 
 =cut
 sub update_status {
-    my($self, $c, $bp, $hostdata, $servicedata) = @_;
+    my($self, $c, $bp, $hostdata, $servicedata, $type) = @_;
+    $type = 0 unless defined $type;
     delete $bp->{'need_update'}->{$self->{'id'}};
+
+    return if $type == 1 and $self->{'function'} eq 'status';
 
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};

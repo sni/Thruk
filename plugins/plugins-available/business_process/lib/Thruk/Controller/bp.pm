@@ -123,6 +123,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             Thruk::BP::Utils::save_bp_objects($c, $bps);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' });
+            $bp->update_status($c);
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
@@ -169,6 +170,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             $bp->remove_node($nodeid);
             $bp->save($c);
+            $bp->update_status($c, 1);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;
@@ -211,6 +213,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $node->_set_function({'function' => $function});
 
             $bp->save($c);
+            $bp->update_status($c, 1);
             $c->stash->{'text'} = 'OK';
             $c->stash->{template} = 'passthrough.tt';
             return 1;

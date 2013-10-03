@@ -115,28 +115,37 @@ sub load_runtime_data {
 
 =head2 update_status
 
+    update_status($c, [$type])
+
+type:
+    0 / undef:      update everything
+    1:              only recalculate
+
 update status of business process
 
 =cut
 sub update_status {
-    my ( $self, $c ) = @_;
-
+    my ( $self, $c, $type ) = @_;
     die("no context") unless $c;
 
+    $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
 
     my $results = [];
-    my($hostdata, $servicedata) = $self->_bulk_fetch_live_data($c);
-    for my $n (@{$self->{'nodes'}}) {
-        my $r = $n->update_status($c, $self, $hostdata, $servicedata);
-        push @{$results}, $r if $r;
+    my($hostdata, $servicedata);
+    if($type == 0) {
+        ($hostdata, $servicedata) = $self->_bulk_fetch_live_data($c);
+        for my $n (@{$self->{'nodes'}}) {
+            my $r = $n->update_status($c, $self, $hostdata, $servicedata);
+            push @{$results}, $r if $r;
+        }
     }
 
     my $iterations = 0;
     while(scalar keys %{$self->{'need_update'}} > 0) {
         $iterations++;
         for my $id (keys %{$self->{'need_update'}}) {
-            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata);
+            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata, $type);
             push @{$results}, $r if $r;
         }
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
