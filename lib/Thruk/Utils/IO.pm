@@ -13,8 +13,9 @@ IO Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use Fcntl ':mode';
+use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
+use JSON::XS;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -145,6 +146,57 @@ sub ensure_permissions {
     # change group
     chown($uid, $ENV{'THRUK_GROUP_ID'}, $path) if defined $ENV{'THRUK_GROUP_ID'};
     return;
+}
+
+##############################################
+
+=head2 json_lock_store
+
+  json_lock_store($file, $data, [$pretty])
+
+stores data json encoded
+
+=cut
+
+sub json_lock_store {
+    my($file, $data, $pretty) = @_;
+
+    my $json = JSON::XS->new->utf8;
+    $json = $json->pretty if $pretty;
+
+    open(my $fh, '>', $file) or die('cannot write file '.$file.': '.$!);
+    flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
+    print $fh $json->encode($data);
+    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
+    Thruk::Utils::IO::close($fh, $file);
+    return 1;
+}
+
+##############################################
+
+=head2 json_lock_retrieve
+
+  json_lock_retrieve($file)
+
+retrieve json data
+
+=cut
+
+sub json_lock_retrieve {
+    my($file) = @_;
+
+    my $json = JSON::XS->new->utf8;
+    my $data;
+
+    open(my $fh, '<', $file) or die('cannot read file '.$file.': '.$!);
+    flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
+    while(my $line = <$fh>) {
+        $json->incr_parse($line);
+    }
+    $data = $json->incr_parse;
+    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
+    CORE::close($fh);
+    return $data;
 }
 
 ##############################################
