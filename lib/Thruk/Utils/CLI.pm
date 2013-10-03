@@ -431,13 +431,8 @@ sub _run_commands {
     }
 
     # business process daemon
-    elsif($action eq 'bpd') {
-        if(!$c->config->{'use_feature_bp'}) {
-            $data->{'output'} = "ERROR - business process addon is disabled\n";
-            $data->{'rc'}     = 1;
-        } else {
-            ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
-        }
+    elsif($action eq 'bpd' or $action eq 'bp') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
     }
 
     # import mongodb/mysql logs
@@ -779,6 +774,15 @@ sub _cmd_bpd {
     my($c, $src, $opt) = @_;
     $c->stats->profile(begin => "_cmd_bpd()");
 
+    if(!$c->config->{'use_feature_bp'}) {
+        return("ERROR - business process addon is disabled\n", 1);
+    }
+
+    my $id;
+    if($opt->{'url'} and $opt->{'url'}->[0]) {
+        $id = $opt->{'url'}->[0];
+    }
+
     my($output, $rc);
     eval {
         require Thruk::BP::Utils;
@@ -797,7 +801,7 @@ sub _cmd_bpd {
     alarm($timeout);
 
     my $t0 = [gettimeofday];
-    my $bps = Thruk::BP::Utils::load_bp_data($c);
+    my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
     for my $bp (@{$bps}) {
         $last_bp = $bp;
         _debug("updating: ".$bp->{'name'}) if $Thruk::Utils::CLI::verbose >= 1;
@@ -810,7 +814,7 @@ sub _cmd_bpd {
     $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
 
     $c->stats->profile(end => "_cmd_bpd()");
-    return($output, 0)
+    return($output, 0);
 }
 
 ##############################################

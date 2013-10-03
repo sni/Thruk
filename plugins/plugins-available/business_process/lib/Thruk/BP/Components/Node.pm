@@ -55,7 +55,7 @@ sub new {
     bless $self, $class;
 
     # first node is always linked
-    $self->{'create_obj'} = 1 if $self->{'id'} eq 'node1';
+    $self->{'create_obj'} = 1 if($self->{'id'} and $self->{'id'} eq 'node1');
 
     $self->_set_function($data);
 
@@ -362,8 +362,12 @@ sub _set_function {
 sub _result_to_string {
     my($self, $bp) = @_;
     my $string = "";
-    if($self->{'id'} eq 'node1') {
+    my $firstnode = $self->{'id'} eq 'node1' ? 1 : 0;
+    my $status    = $self->{'status'};
+    if($firstnode) {
         $string .= "### Nagios Host Check Result ###\n";
+        # translate into host status
+        $status <= 1 ? $status = 0 : $status = 1;
     } else {
         $string .= "### Nagios Service Check Result ###\n";
     }
@@ -385,7 +389,7 @@ sub _result_to_string {
     $string .= sprintf "finish_time=%f\n",      $self->{'last_check'};
     $string .= sprintf "early_timeout=%d\n",    0;
     $string .= sprintf "exited_ok=%d\n",        1;
-    $string .= sprintf "return_code=%d\n",      $self->{'status'};
+    $string .= sprintf "return_code=%d\n",      $status;
     $string .= sprintf "output=%s\n",           $output;
     return $string;
 }
