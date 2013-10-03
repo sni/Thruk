@@ -416,15 +416,19 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_template]").val('');
     }
     var checkbox = document.getElementById('bp_create_link');
-    if(node && node.create_obj) { checkbox.checked = node.create_obj }
-    else { checkbox.checked = false; }
+    if(checkbox) {
+        if(node && node.create_obj) { checkbox.checked = node.create_obj }
+        else { checkbox.checked = false; }
+    }
     bp_update_obj_create();
 
 
-    if(node && node.id == 'node1') {
-        checkbox.disabled = true;
-    } else {
-        checkbox.disabled = false;
+    if(checkbox) {
+        if(node && node.id == 'node1') {
+            checkbox.disabled = true;
+        } else {
+            checkbox.disabled = false;
+        }
     }
 
     // initialize childrens tab

@@ -238,6 +238,7 @@
         </p>
       </td>
     </tr>
+    [% IF objects_save_file && objects_templates_file %]
     <tr>
       <th align="right" valign="top">Create Link</th>
       <td align="left">
@@ -249,9 +250,25 @@
       <th align="right" valign="top">Template</th>
       <td align="left">
         <input type="text" value="" id="bp_template" name="bp_template" placeholder="template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_template_type, { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
-        [% IF use_feature_configtool && objects_templates_file %]<br><br><a href="conf.cgi?sub=objects&action=editor&file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
+        [% IF use_feature_configtool %]<br><br><a href="conf.cgi?sub=objects&action=editor&file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
       </td>
     </tr>
+    [% ELSE %]
+    <tr>
+      <td width="50"></td>
+      <td align="left" class="bp_type_desc">
+        <p>
+          <span style="color: #FF0000; font-weight: bold;">The export is currently disabled.</span><br>
+          In order to enable linking, you need to set:
+          <ul>
+            <li>objects_templates_file</li>
+            <li>objects_save_file</li>
+          </ul>
+          in your configuration. <a href="http://thruk.org/documentation.html#_component_thruk_plugin_bp" target="_blank">See online documentation</a>.
+        </p>
+      </td>
+    </tr>
+    [% END %]
     </table>
   </div>
 

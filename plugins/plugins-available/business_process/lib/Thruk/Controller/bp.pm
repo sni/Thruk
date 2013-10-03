@@ -61,6 +61,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{editmode}              = 0;
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
+    $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
     if($id !~ m/^\d+$/mx and $id ne 'new') { $id = ''; }
     my $nodeid = $c->{'request'}->{'parameters'}->{'node'} || '';
