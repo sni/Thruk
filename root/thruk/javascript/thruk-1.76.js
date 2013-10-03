@@ -1402,6 +1402,41 @@ function fade(id, duration) {
     }
 }
 
+
+/* write/return table with performance data */
+function thruk_message(rc, message) {
+    jQuery('#thruk_message').remove();
+    cls = 'fail_message';
+    if(rc == 0) { cls = 'success_message'; }
+    var html = ''
+        +'<div id="thruk_message" class="thruk_message" style="position: fixed; z-index: 5000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">'
+        +'  <div class="shadow"><div class="shadowcontent">'
+        +'  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">'
+        +'    <tr>'
+        +'      <td align="center">'
+        +'        <span class="' + cls + '">' + message + '<\/span>';
+    if(rc != 0) {
+        html += ''
+        +'          <img src="' + url_prefix + 'thruk/themes/'+ theme +'/images/error.png" alt="Errors detected" title="Errors detected" width="16" height="16" style="vertical-align: text-bottom">'
+    }
+    html += ''
+        +'      <\/td>'
+        +'      <td valign="top" align="right" width="50">'
+        +'        <a href="#" onclick="fade(\'thruk_message\', 500);return false;"><img src="' + url_prefix + 'thruk/themes/' + theme + '/images/icon_close.gif" border="0" alt="Hide Message" title="Hide Message" width="13" height="12" class="close_button" style="margin-right: 4px;"><\/a>'
+        +'      <\/td>'
+        +'    <\/tr>'
+        +'  <\/table>'
+        +'  <\/div><\/div>';
+
+    jQuery("body").append(html);
+    if(rc == 0) {
+        window.setTimeout("fade('thruk_message', 500)",  5000);
+    } else {
+        window.setTimeout("fade('thruk_message', 500)", 30000);
+    }
+}
+
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b

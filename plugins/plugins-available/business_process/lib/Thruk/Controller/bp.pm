@@ -148,9 +148,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'rename_node' and $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
-                $c->stash->{'text'} = 'ERROR: no such node';
-                $c->stash->{template} = 'passthrough.tt';
-                return 1;
+                $c->stash->{'json'} = { rc => 1, 'message' => 'ERROR: no such node' };
+                return $c->forward('Thruk::View::JSON');
             }
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
             # first node renames business process itself too
@@ -158,22 +157,19 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $bp->{'name'} = $c->{'request'}->{'parameters'}->{'label'};
             }
             $bp->save($c);
-            $c->stash->{'text'} = 'OK';
-            $c->stash->{template} = 'passthrough.tt';
-            return 1;
+            $c->stash->{'json'} = { rc => 0, 'message' => 'OK' };
+            return $c->forward('Thruk::View::JSON');
         }
         elsif($action eq 'remove_node' and $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
-                $c->stash->{'text'} = 'ERROR: no such node';
-                $c->stash->{template} = 'passthrough.tt';
-                return 1;
+                $c->stash->{'json'} = { rc => 1, 'message' => 'ERROR: no such node' };
+                return $c->forward('Thruk::View::JSON');
             }
             $bp->remove_node($nodeid);
             $bp->save($c);
             $bp->update_status($c, 1);
-            $c->stash->{'text'} = 'OK';
-            $c->stash->{template} = 'passthrough.tt';
-            return 1;
+            $c->stash->{'json'} = { rc => 0, 'message' => 'OK' };
+            return $c->forward('Thruk::View::JSON');
         }
         elsif($action eq 'edit_node' and $nodeid) {
             my $type = lc($c->{'request'}->{'parameters'}->{'bp_function'} || '');
@@ -214,9 +210,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             $bp->save($c);
             $bp->update_status($c, 1);
-            $c->stash->{'text'} = 'OK';
-            $c->stash->{template} = 'passthrough.tt';
-            return 1;
+            $c->stash->{'json'} = { rc => 0, 'message' => 'OK' };
+            return $c->forward('Thruk::View::JSON');
         }
     }
 

@@ -172,10 +172,28 @@ function bp_show_rename(evt) {
 /* send rename request */
 function bp_confirmed_rename(node) {
     var text = jQuery('#bp_rename_text').val();
-    jQuery.post('bp.cgi?action=rename_node&bp='+bp_id+'&node='+node.id+'&label='+text, [], function() {
-        bp_refresh(bp_id, node.id);
-    });
+    bp_post_and_refresh('bp.cgi?action=rename_node&bp='+bp_id+'&node='+node.id+'&label='+text, [], node.id);
     hideElement('bp_menu');
+}
+
+/* post url and refresh on success*/
+function bp_post_and_refresh(url, data, node_id) {
+    jQuery.ajax({
+        url:   url,
+        type: 'POST',
+        data:  data,
+        success: function(data) {
+            if(data && data.rc == 0) {
+                bp_refresh(bp_id, node_id);
+            } else if(data.message) {
+                thruk_message(data.rc, data.message);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            thruk_message(1, errorThrown);
+        }
+    });
+    return;
 }
 
 /* remove node after confirm */
@@ -192,9 +210,7 @@ function bp_show_remove() {
 
 /* send remoev request */
 function bp_confirmed_remove(node) {
-    jQuery.post('bp.cgi?action=remove_node&bp='+bp_id+'&node='+node.id, [], function() {
-        bp_refresh(bp_id);
-    });
+    bp_post_and_refresh('bp.cgi?action=remove_node&bp='+bp_id+'&node='+node.id, []);
     hideElement('bp_menu');
 }
 
@@ -494,9 +510,7 @@ function bp_edit_node_submit(formId) {
     jQuery('#'+formId).find('#bp_'+bp_id+'_selected_nodes OPTION').attr('selected',true);
     var data = jQuery('#'+formId).serializeArray();
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
-    jQuery.post('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, function() {
-        bp_refresh(bp_id, current_edit_node);
-    });
+    bp_post_and_refresh('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, current_edit_node);
     jQuery('#edit_dialog_'+bp_id).dialog("close");
     return false;
 }
