@@ -3160,6 +3160,10 @@ In order to make integration as simple as possible, you can only choose from
 different templates which can be edited by the Thruk Config Tool or manually
 in the 'objects_templates_file' file.
 
+The name of the business process will be used as hostname, so make
+sure it does not clash with existing hosts by using a uniq prefix or
+something similar.
+
 
 ==== Creating New Business Processes
 In order to change or create business processes, you need these roles from the cgi.cfg.

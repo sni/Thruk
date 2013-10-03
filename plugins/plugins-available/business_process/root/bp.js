@@ -540,14 +540,32 @@ function bp_update_status(evt, node) {
     jQuery('.bp_status_extinfo_link_service').css('display', 'none');
 
 
-    // service specific things...
+    var service, host;
     if(n.service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+n.host+"&service="+n.service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        service = n.service;
+        host    = n.host;
+    }
+    else if(n.host) {
+        host = n.host;
+    }
+    else if(n.create_obj) {
+        if(n.id == 'node1') {
+            host = n.label;
+        } else {
+            var firstnode = bp_get_node('node1');
+            host    = firstnode.label;
+            service = n.label;
+        }
+    }
+
+    // service specific things...
+    if(service) {
+        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
-    else if(n.host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("<a href='extinfo.cgi?type=1&amp;host="+n.host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+    else if(host) {
+        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("<a href='extinfo.cgi?type=1&amp;host="+host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
     }
 
     return false;

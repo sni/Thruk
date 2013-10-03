@@ -103,10 +103,30 @@ sub save_bp_objects {
     my $file = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
     return unless $file;
 
-    my($fh, $filename) = tempfile();
+    my $obj = {'hosts' => {}, 'services' => {}};
     for my $bp (@{$bps}) {
-        print $fh $bp->get_objects_string();
+        my $data = $bp->get_objects_conf();
+        merge_obj_hash($obj, $data);
     }
+
+    my($fh, $filename) = tempfile();
+    for my $hostname (keys %{$obj->{'hosts'}}) {
+        print $fh 'define host {', "\n";
+        for my $attr (keys %{$obj->{'hosts'}->{$hostname}}) {
+            print $fh ' ', $attr, ' ', $obj->{'hosts'}->{$hostname}->{$attr}, "\n";
+        }
+        print $fh "}\n";
+    }
+    for my $hostname (keys %{$obj->{'services'}}) {
+        for my $description (keys %{$obj->{'services'}->{$hostname}}) {
+            print $fh 'define service {', "\n";
+            for my $attr (keys %{$obj->{'services'}->{$hostname}->{$description}}) {
+                print $fh ' ', $attr, ' ', $obj->{'services'}->{$hostname}->{$description}->{$attr}, "\n"
+            }
+            print $fh "}\n";
+        }
+    }
+
     Thruk::Utils::IO::close($fh, $filename);
 
     my $new_hex = md5_hex($filename);
@@ -281,6 +301,37 @@ sub state2text {
     if($nr == 3) { return 'UNKOWN'; }
     if($nr == 4) { return 'PENDING'; }
     return;
+}
+
+##########################################################
+
+=head2 merge_obj_hash
+
+    merge_obj_hash($hash, $data)
+
+merge objects hash with more objects
+
+=cut
+sub merge_obj_hash {
+    my($hash, $data) = @_;
+
+    if(defined $data->{'hosts'}) {
+        for my $hostname (keys %{$data->{'hosts'}}) {
+            my $host = $data->{'hosts'}->{$hostname};
+            $hash->{'hosts'}->{$hostname} = $host;
+        }
+    }
+
+    if(defined $data->{'services'}) {
+        for my $hostname (keys %{$data->{'services'}}) {
+            for my $description (keys %{$data->{'services'}->{$hostname}}) {
+                my $service = $data->{'services'}->{$hostname}->{$description};
+                # TODO: check uniq names
+                $hash->{'services'}->{$hostname}->{$description} = $service;
+            }
+        }
+    }
+    return($hash);
 }
 
 ##########################################################

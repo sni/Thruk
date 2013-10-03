@@ -382,22 +382,22 @@ sub save {
 
 ##########################################################
 
-=head2 get_objects_string
+=head2 get_objects_conf
 
-return object config as string
+return object config
 
 =cut
-sub get_objects_string {
+sub get_objects_conf {
     my ( $self ) = @_;
-    my $string = "";
+    my $obj = {
+        'hosts'    => {},
+        'services' => {},
+    };
     for my $n (@{$self->{'nodes'}}) {
-        $string .= $n->get_objects_string($self);
+        my $nodedata = $n->get_objects_conf($self);
+        Thruk::BP::Utils::merge_obj_hash($obj, $nodedata) if $nodedata;
     }
-    if($string ne '') {
-        $string = "# ".$self->{'file'}."\n".
-                  $string;
-    }
-    return $string;
+    return $obj;
 }
 
 ##########################################################

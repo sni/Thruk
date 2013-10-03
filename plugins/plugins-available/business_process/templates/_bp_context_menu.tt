@@ -204,7 +204,7 @@
             <tr>
               <td class="attrName">
                 <input type="text" class="filter_available" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:174px; height:135px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
               </td>
@@ -214,7 +214,7 @@
               </td>
               <td class="attrName">
                 <input type="text" class="filter_selected" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:174px; height:135px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
+                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
                     <option disabled>loading...</option>
                 </select>
               </td>

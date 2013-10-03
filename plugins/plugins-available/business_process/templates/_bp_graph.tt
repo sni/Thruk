@@ -27,7 +27,7 @@
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="12" width="12">
           [% END %]
         </div>
-        [% IF editmode && n.host && n.create_obj %]
+        [% IF editmode && n.create_obj %]
         <div class="bp_node_link_icons">
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/link.png" alt="This node is linked to a host or service object" title="This node is linked to a host or service object" border="0" height="14" width="14">
         </div>

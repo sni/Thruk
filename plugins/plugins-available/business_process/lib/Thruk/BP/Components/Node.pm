@@ -54,6 +54,9 @@ sub new {
     };
     bless $self, $class;
 
+    # first node is always linked
+    $self->{'create_obj'} = 1 if $self->{'id'} eq 'node1';
+
     $self->_set_function($data);
 
     return $self;
@@ -186,10 +189,8 @@ sub get_save_obj {
     };
 
     # host / service
-    if(lc $self->{'function'} ne 'status') {
-        for my $key (qw/host service template create_obj/) {
-            $obj->{$key} = $self->{$key} if $self->{$key};
-        }
+    for my $key (qw/template create_obj/) {
+        $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
     # function
@@ -207,25 +208,38 @@ sub get_save_obj {
 
 ##########################################################
 
-=head2 get_objects_string
+=head2 get_objects_conf
 
-return object config as string
+return objects config
 
 =cut
-sub get_objects_string {
+sub get_objects_conf {
     my ( $self, $bp ) = @_;
-    return "" unless $self->{'create_obj'};
-    return "" unless $self->{'host'};
-    return "" if lc($self->{'function'}) eq 'status';
-    my $type = $self->{'service'} ? 'service' : 'host';
-    my $string = "define ".$type." {\n";
-    $string    .= "  host           ".$self->{'host'}."\n";
-    $string    .= "  description    ".$self->{'service'}."\n" if $type eq 'service';
-    $string    .= "  use            ".$self->{'template'}."\n";
-    $string    .= "  _THRUK_BP_ID   ".$bp->{'id'}."\n";
-    $string    .= "  _THRUK_NODE_ID ".$self->{'id'}."\n";
-    $string    .= "}\n\n";
-    return $string;
+
+    # shared data
+    my $data = {
+        '_THRUK_BP_ID'   => $bp->{'id'},
+        '_THRUK_NODE_ID' => $self->{'id'},
+    };
+
+    # first node always creates a host
+    if($self->{'id'} eq 'node1') {
+        $data->{'host_name'} = $self->{'label'};
+        $data->{'alias'}     = 'Business Process: '.$self->{'label'};
+        $data->{'use'}       = $self->{'template'} || 'thruk-bp-template';
+        my $obj = { hosts => { $data->{'host_name'} => $data }};
+        return($obj);
+    }
+
+    return unless $self->{'create_obj'};
+
+    $data->{'host_name'}    = $bp->{'nodes_by_id'}->{'node1'}->{'label'};
+    $data->{'description'}  = $self->{'label'};
+    $data->{'display_name'} = $self->{'label'};
+    $data->{'use'}          = $self->{'template'} || 'thruk-bp-node-template';
+
+    my $obj = { services => { $data->{'host_name'} => { $data->{'description'} => $data }}};
+    return($obj);
 }
 
 ##########################################################
@@ -254,8 +268,8 @@ sub update_status {
 
     # create result if we are linked to an object
     my $result;
-    if($self->{'create_obj'} and $self->{'host'}) {
-        $result = $self->_result_to_string();
+    if($self->{'create_obj'}) {
+        $result = $self->_result_to_string($bp);
     }
 
     return $result;
@@ -318,7 +332,8 @@ sub _set_function {
     my($self, $data) = @_;
     if($data->{'function'}) {
         my($fname, $fargs) = $data->{'function'} =~ m|^(\w+)\((.*)\)|mx;
-        my $function = \&{'Thruk::BP::Functions::'.lc($fname)};
+        $fname = lc $fname;
+        my $function = \&{'Thruk::BP::Functions::'.$fname};
         if(!defined &$function) {
             $self->_set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
@@ -327,26 +342,30 @@ sub _set_function {
             $self->{'function'}      = $fname;
         }
     }
-    if(lc $self->{'function'} eq 'status') {
+    if($self->{'function'} eq 'status') {
         $self->{'host'}       = $self->{'function_args'}->[0] || '';
         $self->{'service'}    = $self->{'function_args'}->[1] || '';
         $self->{'template'}   = '';
-        $self->{'create_obj'} = 0;
+        $self->{'create_obj'} = 0 unless $self->{'id'} eq 'node1';
     }
     return;
 }
 
 ##########################################################
 sub _result_to_string {
-    my($self) = @_;
+    my($self, $bp) = @_;
     my $string = "";
-    $string .= "### Nagios Service Check Result ###\n";
-    $string .= sprintf "# Time: %s\n",scalar localtime time();
-    $string .= sprintf "host_name=%s\n", $self->{'host'};
-    if(defined($self->{'service'})) {
-        $string .= sprintf "service_description=%s\n", $self->{'service'};
+    if($self->{'id'} eq 'node1') {
+        $string .= "### Nagios Host Check Result ###\n";
+    } else {
+        $string .= "### Nagios Service Check Result ###\n";
     }
-    my $output = $self->{'status_text'} ||$ self->{'short_desc'};
+    $string .= sprintf "# Time: %s\n",scalar localtime time();
+    $string .= sprintf "host_name=%s\n", $bp->{'name'};
+    if($self->{'id'} ne 'node1') {
+        $string .= sprintf "service_description=%s\n", $self->{'label'};
+    }
+    my $output = $self->{'status_text'} || $self->{'short_desc'};
     # remove trailing newlines and quote the remaining ones
     $output =~ s/[\r\n]*$//mxo;
     $output =~ s/\n/\\n/gmxo;
