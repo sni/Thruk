@@ -24,6 +24,8 @@ docs/source/arch.png
 docs/source/arch_preview.png
 docs/source/backends.png
 docs/source/Bookmarks_and_excel_export.png
+docs/source/bp.png
+docs/source/bp_arch.png
 docs/source/Config_Tool.png
 docs/source/Filter.png
 docs/source/livestatus.png
@@ -1035,6 +1037,7 @@ support/thruk.logrotate
 support/thruk.spec
 support/thruk_cookie_auth.example
 support/thruk_local.conf.example
+support/thruk_templates.cfg
 t/001-app.t
 t/002-config.t
 t/010-Thruk-Utils.t

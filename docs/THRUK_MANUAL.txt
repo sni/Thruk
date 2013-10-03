@@ -78,6 +78,13 @@ page in Thruk into a regular E-Mail report.
 image:source/sla_reporting.png[SLA Reporting]
 
 
+==== Business Process Integration
+Using the Business Process addon allows modeling your important applications and
+business processes. Online editor and notifications included.
+
+image:source/bp.png[Business Process]
+
+
 ==== Excel Export and Bookmarks
 
 The Bookmarks feature allows you to save your searches and add them as
@@ -2605,7 +2612,7 @@ same server as Thruk itself (or at least in the same network).
 image:source/livestatus_mongodb.png[Logfile Cache Architecture]
 
 
-=== Config
+=== Configuration
 You will need to specify your mysql connection configuration in your
 thruk_local.conf. Make sure the user and database exists. The tables will then
 be created automatically.
@@ -2616,7 +2623,9 @@ thruk_local.conf:
 -------
 
 
-=== Import
+=== Actions
+
+==== Import
 It's a good idea to import the logfiles after enabling the
 logfilecache:
 
@@ -2632,7 +2641,7 @@ do that once.
 
 Depending on the size, this may take a while.
 
-=== Update
+==== Update
 
 Logfile Cache Update
 -------
@@ -2644,7 +2653,7 @@ The logcacheupdate imports the delta since the last update. That's pretty
 fast and done automatically whenever you access logfiles via Thruk.
 
 
-=== Import from Logfile Archive Files
+==== Import from Logfile Archive Files
 The MySQL logcache supports import from files too. Duplicates are not imported
 twice, so you can do that safely as often as you like.
 
@@ -2654,7 +2663,7 @@ twice, so you can do that safely as often as you like.
 -------
 
 
-=== Authentication Update
+==== Authentication Update
 
 The cache needs authentication information which has to be updated whenever
 contacts have changed.
@@ -2666,7 +2675,7 @@ Update logfile caches authentication information:
 -------
 
 
-=== Cleanup
+==== Cleanup
 You may want to remove old logfile entries from time to time. This is possible
 with the logcacheclean command. Optionally you can define the number of days
 which should be kept in the cache.
@@ -2678,7 +2687,7 @@ which should be kept in the cache.
 
 
 
-=== Statistics
+==== Statistics
 
 There is also a command to check the current usage statistics of your
 logfile cache:
@@ -2690,7 +2699,7 @@ logfile cache:
 -------
 
 
-=== Maintainance
+==== Maintainance
 Using the logfile cache needs some extra maintainance to work smoothly, the
 following cronjobs should cover that. When not using OMD, you will have to
 adjust the paths.
@@ -3109,6 +3118,61 @@ available to the stash, so functions from this module can be used in
 the reporting templates.
 
 
+
+
+== Business Process
+
+Thruk comes with a business process engine which allows you to design, operate
+and illustrate your business intelligence models. It is possible to span business
+prosesses across multiple sites, but the calculation will happen all in one
+single local site. Thruk needs to able to access the 'check_results' folder to
+submit results and a config file to create hosts and services for your objects.
+
+=== How it works
+
+.Business Process Workflow
+image:source/bp_arch.png[Business Process Architecture]
+
+ - 'Thruks Business Process Engine' is usually by cron, which is automatically
+   added if you create your first business process.
+ - 'Business Process Config' and 'Runtime Status' are JSON files which are used to
+   store objects and status
+ - Results are submited to Nagios by using the check_results folder.
+ - 'Livestatus' will be used to fetch input data for the calculation itself.
+
+==== Integration in Nagios
+Thruk will create Hosts and Services for selected nodes of your business model.
+That way it is possible to send notifications, even for sub steps of the business
+process. The business process itself will be created as Nagios Host object and
+all selected nodes will be created as Service objects.
+
+To make that work, you will need 2 files:
+
+ - Thruk BP Templates (see an https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[example on github])
+ - Thruk BP Objects
+
+Both file locations can be changed in your 'thruk_local.conf'. The templates file is
+user maintained, while the objects file will be overwritten by Thruk whenever
+you change a business process. Also make sure Thruk is allowed to write the objects
+file.
+
+In order to make integration as simple as possible, you can only choose from
+different templates which can be edited by the Thruk Config Tool or manually
+in the 'objects_templates_file' file.
+
+
+==== Creating New Business Processes
+In order to change or create business processes, you need these roles from the cgi.cfg.
+
+ - authorized_for_configuration_information
+ - authorized_for_system_commands
+
+Then simply model your business process from the web gui.
+
+
+==== Configuration
+Configuration settings are covered by the
+<<_component_thruk_plugin_bp,configuration sections>>.
 
 
 

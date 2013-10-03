@@ -88,8 +88,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'bp'} = $bp;
 
         if($action eq 'details') {
-            $c->stash->{'auto_reload_fn'}         = 'bp_refresh_bg';
-            $c->stash->{'template'}               = 'bp_details.tt';
+            $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
+            $c->stash->{'template'}       = 'bp_details.tt';
             return 1;
         }
         elsif($action eq 'refresh' and $id) {
