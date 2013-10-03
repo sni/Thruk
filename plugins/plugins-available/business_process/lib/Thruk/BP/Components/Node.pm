@@ -367,13 +367,13 @@ sub _result_to_string {
     if($firstnode) {
         $string .= "### Nagios Host Check Result ###\n";
         # translate into host status
-        $status <= 1 ? $status = 0 : $status = 1;
+        $status = $status <= 1 ? 0 : 1;
     } else {
         $string .= "### Nagios Service Check Result ###\n";
     }
     $string .= sprintf "# Time: %s\n",scalar localtime time();
     $string .= sprintf "host_name=%s\n", $bp->{'name'};
-    if($self->{'id'} ne 'node1') {
+    if(!$firstnode) {
         $string .= sprintf "service_description=%s\n", $self->{'label'};
     }
     my $output = $self->{'status_text'} || $self->{'short_desc'};

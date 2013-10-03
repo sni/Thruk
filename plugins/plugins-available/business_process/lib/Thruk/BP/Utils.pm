@@ -326,8 +326,13 @@ sub merge_obj_hash {
         for my $hostname (keys %{$data->{'services'}}) {
             for my $description (keys %{$data->{'services'}->{$hostname}}) {
                 my $service = $data->{'services'}->{$hostname}->{$description};
-                # TODO: check uniq names
-                $hash->{'services'}->{$hostname}->{$description} = $service;
+                my $num = 0;
+                my $uniq = $description;
+                while($hash->{'services'}->{$hostname}->{$uniq}) {
+                    $uniq = $description.' '.$num++;
+                }
+                $service->{'description'} = $uniq;
+                $hash->{'services'}->{$hostname}->{$uniq} = $service;
             }
         }
     }

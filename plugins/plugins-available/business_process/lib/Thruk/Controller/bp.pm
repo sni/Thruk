@@ -119,11 +119,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
         if($action eq 'commit') {
             $bp->commit($c);
-            my $bps = Thruk::BP::Utils::load_bp_data($c);
+            $bps = Thruk::BP::Utils::load_bp_data($c);
             Thruk::BP::Utils::save_bp_objects($c, $bps);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' });
-            $bp->update_status($c);
+            my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
+            $bps->[0]->update_status($c);
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
