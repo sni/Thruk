@@ -1,4 +1,5 @@
-﻿[% IF c.request.parameters.exists('json') %]
+﻿[% auto_reload_fn = '' %]
+[% IF c.request.parameters.exists('json') %]
 [% IF die_on_errors %][% throw(errorMessage) %][% END %]
 {
   [% IF errorMessage %]
