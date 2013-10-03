@@ -63,7 +63,7 @@ sub new {
         return unless $bpdata;
         return unless $bpdata->{'name'};
     }
-    $self->{'name'} = $bpdata->{'name'};
+    $self->set_label($c, $bpdata->{'name'});
 
     return unless $self->{'name'};
 
@@ -171,6 +171,19 @@ sub update_status {
     # submit back to core
     $self->_submit_results_to_core($c, $results);
 
+    return;
+}
+
+##########################################################
+
+=head2 set_label
+
+set label for this business process
+
+=cut
+sub set_label {
+    my($self, $c, $label) = @_;
+    $self->{'name'} = $label;
     return;
 }
 

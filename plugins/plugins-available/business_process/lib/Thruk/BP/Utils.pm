@@ -28,6 +28,10 @@ Helper for the business process addon
 
     load_bp_data($c, [$num], [$editmode])
 
+editmode:
+    - 0/undef:    no edit mode
+    - 1:          only edit mode
+
 load all or specific business process
 
 =cut

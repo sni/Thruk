@@ -152,11 +152,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $c->stash->{'json'} = { rc => 1, 'message' => 'ERROR: no such node' };
                 return $c->forward('Thruk::View::JSON');
             }
-            $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $c->{'request'}->{'parameters'}->{'label'};
+            my $label = $c->{'request'}->{'parameters'}->{'label'} || 'none';
             # first node renames business process itself too
             if($nodeid eq 'node1') {
-                $bp->{'name'} = $c->{'request'}->{'parameters'}->{'label'};
+                $bp->set_label($c, $label);
             }
+            $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $label;
             $bp->save($c);
             $c->stash->{'json'} = { rc => 0, 'message' => 'OK' };
             return $c->forward('Thruk::View::JSON');
@@ -232,6 +233,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 'function' => 'Fixed("OK")',
             }]
         });
+        $bp->set_label($c, $label);
         die("internal error") unless $bp;
         Thruk::BP::Utils::update_cron_file($c); # check cronjob
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
