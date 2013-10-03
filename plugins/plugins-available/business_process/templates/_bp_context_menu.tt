@@ -230,24 +230,25 @@
   <div id="tabs-4_[% bp.id %]">
     <table width="100%">
     <tr>
-      <td></td>
-      <td align="center" class="bp_type_desc">
-        <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
-          Create a host or service for this node.
+      <td align="center" class="bp_type_desc" colspan=2>
+        <p>
+          Create a service for this node. The Business Process itself will be<br>
+          exported as a host object. All selected nodes will be exported as<br>
+          service objects. The nodes label will be used as object name.<br>
+          The first/main node will always be linked automatically.<br>
+        </p>
       </td>
     </tr>
     <tr>
-      <th align="right">Host</th>
-      <td align="left"><input type="text" value="" name="bp_host" placeholder="hostname" class="bp_create"></td>
-    </tr>
-    <tr>
-      <th align="right">Service</th>
-      <td align="left"><input type="text" value="" name="bp_service" placeholder="service description" class="bp_create"></td>
+      <th align="right" valign="top">Create Link</th>
+      <td align="left">
+        <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
+      </td>
     </tr>
     <tr>
       <th align="right" valign="top">Template</th>
       <td align="left">
-        <input type="text" value="" id="bp_template" name="bp_template" placeholder="template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        <input type="text" value="" id="bp_template" name="bp_template" placeholder="template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_template_type, { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
         [% IF use_feature_configtool && objects_templates_file %]<br><br><a href="conf.cgi?sub=objects&action=editor&file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
       </td>
     </tr>

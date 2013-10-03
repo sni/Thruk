@@ -591,6 +591,14 @@ function bp_mouse_out_node(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
 }
 
+/* return template type of current node */
+function bp_get_template_type() {
+    if(current_edit_node_clicked == 'node1') {
+        return "host template";
+    }
+    return "service template";
+}
+
 /* return node object by id */
 function bp_get_node(id) {
     var node;

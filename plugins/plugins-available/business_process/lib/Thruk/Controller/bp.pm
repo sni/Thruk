@@ -79,17 +79,27 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # json actions
     if($allowed_for_edit) {
         if($action eq 'templates') {
-            my $data = [];
+            my $host_templates    = [];
+            my $service_templates = [];
             # simple / fast template grep
             if($c->stash->{'objects_templates_file'} and -e $c->stash->{'objects_templates_file'}) {
+                my $lasttype;
                 open(my $fh, '<', $c->stash->{'objects_templates_file'}) or die("failed to open ".$c->stash->{'objects_templates_file'}.": ".$!);
                 while(my $line = <$fh>) {
+                    if($line =~ m/^\s*define\s+(.*?)(\s|{)/mx) {
+                        $lasttype = $1;
+                    }
                     if($line =~ m/^\s*name\s+(.*?)\s*(;|$)+$/mx) {
-                        push @{$data}, $1;
+                        if($lasttype eq 'host') {
+                            push @{$host_templates}, $1;
+                        }
+                        if($lasttype eq 'service') {
+                            push @{$service_templates}, $1;
+                        }
                     }
                 }
             }
-            my $json = [ { 'name' => "templates", 'data' => $data } ];
+            my $json = [ { 'name' => "host templates", 'data' => $host_templates }, { 'name' => "service templates", 'data' => $service_templates } ];
             $c->stash->{'json'} = $json;
             return $c->forward('Thruk::View::JSON');
         }

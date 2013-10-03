@@ -3574,14 +3574,19 @@ var ajax_search = {
         }
 
         search_url = ajax_search.url;
-        if(type != undefined) {
-            ajax_search.search_type = type;
-            search_url              = ajax_search.url + "&type=" + type;
-        } else {
-            type                    = 'all';
-        }
         if(options.url != undefined) {
             search_url              = options.url;
+        }
+
+        if(type != undefined) {
+            // type can be a callback
+            if(typeof(type) == 'function') {
+                type = type();
+            }
+            ajax_search.search_type = type;
+            search_url              = search_url + "&type=" + type;
+        } else {
+            type                    = 'all';
         }
 
         var appended_value;
