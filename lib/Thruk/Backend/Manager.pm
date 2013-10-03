@@ -1234,7 +1234,7 @@ sub _get_result_serial {
                 $type       = $typ;
                 $result->{ $key } = $data;
             }
-            $c->stash->{'failed_backends'}->{$key} = $last_error;
+            $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
             $peer->{'last_error'} = $last_error;
         }
         $c->stats->profile( end => "_get_result_serial($key)");
