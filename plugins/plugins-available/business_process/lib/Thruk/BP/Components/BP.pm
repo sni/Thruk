@@ -4,13 +4,11 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Carp;
-use Config::General;
-use Storable qw/lock_nstore lock_retrieve/;
 use File::Temp;
 use File::Copy qw/move/;
-use Fcntl qw/:DEFAULT :flock/;
-use Encode qw/encode_utf8/;
+use Fcntl qw/:DEFAULT/;
 use Thruk::Utils;
+use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
 
 =head1 NAME
@@ -61,17 +59,16 @@ sub new {
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {
-        my $conf = Config::General->new(-ConfigFile => $file, -ForceArray => 1, -UTF8 => 1);
-        my %config = $conf->getall;
-        return unless $config{'bp'};
-        my $bplist = Thruk::Utils::list($config{'bp'});
-        return unless scalar @{$bplist} > 0;
-        $bpdata = $bplist->[0];
+        $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
+        return unless $bpdata;
+        return unless $bpdata->{'name'};
     }
     $self->{'name'} = $bpdata->{'name'};
 
+    return unless $self->{'name'};
+
     # read in nodes
-    for my $n (@{Thruk::Utils::list($bpdata->{'node'} || [])}) {
+    for my $n (@{Thruk::Utils::list($bpdata->{'nodes'} || [])}) {
         my $node = Thruk::BP::Components::Node->new($n);
         $self->add_node($node, 1);
     }
@@ -102,7 +99,7 @@ sub load_runtime_data {
 
     return unless -e $self->{'datafile'};
 
-    my $data = lock_retrieve($self->{'datafile'});
+    my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'datafile'});
 
     for my $key (qw/status status_text last_check last_state_change/) {
         $self->{$key} = $data->{$key} if defined $data->{$key};
@@ -362,23 +359,22 @@ sub commit {
 
 =head2 save
 
-save business process data to edit file
+save business process data to temporary edit file
 
 =cut
 sub save {
     my ( $self, $c ) = @_;
 
-    my $string = "<bp>\n";
-    for my $key (qw/name/) {
-        $string .= sprintf("  %-10s = %s\n", $key, $self->{$key});
-    }
+    my $obj = {
+        name  => $self->{'name'},
+        nodes => [],
+    };
+
     for my $n (@{$self->{'nodes'}}) {
-        $string .= $n->save_to_string();
+        push @{$obj->{'nodes'}}, $n->get_save_obj();
     }
-    $string .= "</bp>\n";
-    open(my $fh, '>', $self->{'editfile'}) or die('cannot open '.$self->{'editfile'}.': '.$!);
-    print $fh encode_utf8($string);
-    Thruk::Utils::IO::close($fh, $self->{'file'});
+
+    Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, 1);
     $self->{'need_save'} = 0;
 
     return 1;
@@ -421,7 +417,7 @@ sub save_runtime {
     for my $n (@{$self->{'nodes'}}) {
         $data->{'nodes'}->{$n->{'id'}} = $n->get_stateful_data();
     }
-    lock_nstore($data, $self->{'datafile'});
+    Thruk::Utils::IO::json_lock_store($self->{'datafile'}, $data);
     return;
 }
 

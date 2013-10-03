@@ -75,32 +75,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
-    if($id) {
-        $c->stash->{editmode} = $c->{'request'}->{'parameters'}->{'edit'} || 0;
-        $c->stash->{editmode} = 0 unless $allowed_for_edit;
 
-        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
-        if(scalar @{$bps} != 1) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
-        }
-        my $bp = $bps->[0];
-        $c->stash->{'bp'} = $bp;
-
-        if($action eq 'details') {
-            $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
-            $c->stash->{'template'}       = 'bp_details.tt';
-            return 1;
-        }
-        elsif($action eq 'refresh' and $id) {
-            if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
-                $bp->update_status($c);
-            }
-            $c->stash->{template} = '_bp_graph.tt';
-            return 1;
-        }
-    }
-
+    # json actions
     if($allowed_for_edit) {
         if($action eq 'templates') {
             my $data = [];
@@ -119,6 +95,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
+    # read / write actions
     if($id and $allowed_for_edit) {
         $c->stash->{editmode} = 1;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
@@ -127,7 +104,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
-        $c->stash->{'bp'}     = $bp;
+        $c->stash->{'bp'} = $bp;
 
         if($action eq 'commit') {
             $bp->commit($c);
@@ -236,7 +213,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $label = $c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process';
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
-            'node'  => [{
+            'nodes' => [{
                 'label'    => $label,
                 'function' => 'Worst()',
                 'depends'  => ['Example Node'],
@@ -245,9 +222,36 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 'function' => 'Fixed("OK")',
             }]
         });
+        die("internal error") unless $bp;
         Thruk::BP::Utils::update_cron_file($c); # check cronjob
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
+    }
+
+    # readonly actions
+    if($id) {
+        $c->stash->{editmode} = $c->{'request'}->{'parameters'}->{'edit'} || 0;
+        $c->stash->{editmode} = 0 unless $allowed_for_edit;
+        my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
+        if(scalar @{$bps} != 1) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+        }
+        my $bp = $bps->[0];
+        $c->stash->{'bp'} = $bp;
+
+        if($action eq 'details') {
+            $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
+            $c->stash->{'template'}       = 'bp_details.tt';
+            return 1;
+        }
+        elsif($action eq 'refresh' and $id) {
+            if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
+                $bp->update_status($c);
+            }
+            $c->stash->{template} = '_bp_graph.tt';
+            return 1;
+        }
     }
 
     # load business processes

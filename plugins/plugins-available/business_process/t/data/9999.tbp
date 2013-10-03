@@ -1,20 +1,24 @@
-<bp>
-  name       = Test App
-  <node>
-    id         = node1
-    label      = Test App
-    function   = Worst()
-    depends    = node2
-    depends    = node3
-  </node>
-  <node>
-    id         = node2
-    label      = Node 1
-    function   = Fixed('Ok')
-  </node>
-  <node>
-    id         = node3
-    label      = Node 2
-    function   = Fixed('Ok')
-  </node>
-</bp>
+{
+   "name" : "New Business",
+   "nodes" : [
+      {
+         "function" : "worst()",
+         "label" : "Test App",
+         "id" : "node1",
+         "depends" : [
+            "node2",
+            "node3"
+         ]
+      },
+      {
+         "function" : "fixed('OK', '')",
+         "label" : "Node 1",
+         "id" : "node2"
+      },
+      {
+         "function" : "fixed('OK', '')",
+         "label" : "Node 2",
+         "id" : "node3"
+      }
+   ]
+}

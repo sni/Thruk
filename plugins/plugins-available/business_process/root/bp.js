@@ -368,7 +368,7 @@ function bp_show_edit_node(id, refreshType) {
         closeOnEscape: true,
         buttons: [{
               'text':   current_edit_node == 'new' ? 'Create' : 'Save',
-              'click':  function() { bp_edit_node_submit('bp_edit_node_form'); jQuery(this).dialog("close"); },
+              'click':  function() { bp_edit_node_submit('bp_edit_node_form'); },
               'class': 'bp_dialog_create_btn'
         }],
         create: function() { // turn tabs into dialogs
@@ -481,6 +481,7 @@ function bp_edit_node_submit(formId) {
     jQuery.post('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, function() {
         bp_refresh(bp_id, current_edit_node);
     });
+    jQuery('#edit_dialog_'+bp_id).dialog("close");
     return false;
 }
 

@@ -172,38 +172,37 @@ sub get_stateful_data {
 
 ##########################################################
 
-=head2 save_to_string
+=head2 get_save_obj
 
-get textual representation of this node
+get object data which needs to be saved
 
 =cut
-sub save_to_string {
+sub get_save_obj {
     my ( $self ) = @_;
-    my $string = "  <node>\n";
 
-    # normal keys
-    for my $key (qw/id label/) {
-        $string .= sprintf("    %-10s = %s\n", $key, $self->{$key});
-    }
+    my $obj = {
+        id     => $self->{'id'},
+        label  => $self->{'label'},
+    };
 
     # host / service
     if(lc $self->{'function'} ne 'status') {
         for my $key (qw/host service template create_obj/) {
-            $string .= sprintf("    %-10s = %s\n", $key, $self->{$key}) if $self->{$key};
+            $obj->{$key} = $self->{$key} if $self->{$key};
         }
     }
 
     # function
     if($self->{'function'}) {
-        $string .= sprintf("    %-10s = %s(%s)\n", "function", $self->{'function'}, Thruk::BP::Utils::join_args($self->{'function_args'}));
+        $obj->{'function'} = sprintf("%s(%s)", $self->{'function'}, Thruk::BP::Utils::join_args($self->{'function_args'}));
     }
 
     # depends
+    $obj->{'depends'} = [] if scalar @{$self->{'depends'}} > 0;
     for my $d (@{$self->{'depends'}}) {
-        $string .= sprintf("    %-10s = %s\n", 'depends', $d->{'id'});
+        push @{$obj->{'depends'}}, $d->{'id'};
     }
-    $string .= "  </node>\n";
-    return $string;
+    return $obj;
 }
 
 ##########################################################
