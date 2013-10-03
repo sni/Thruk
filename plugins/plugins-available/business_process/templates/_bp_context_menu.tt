@@ -235,7 +235,6 @@
           Create a service for this node. The Business Process itself will be<br>
           exported as a host object. All selected nodes will be exported as<br>
           service objects. The nodes label will be used as object name.<br>
-          The first/main node will always be linked automatically.<br>
         </p>
       </td>
     </tr>
@@ -243,6 +242,7 @@
       <th align="right" valign="top">Create Link</th>
       <td align="left">
         <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
+        <span class='firstnode bp_type_desc'>The first/main node will always be linked automatically.</span>
       </td>
     </tr>
     <tr>

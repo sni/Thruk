@@ -104,6 +104,11 @@ function bp_context_menu_open(evt, node) {
         if(h < evt.pageY) {
             jQuery("#bp_menu").css('top', h+'px');
         }
+        if(node.id == 'node1') {
+            jQuery('.firstnode').css('display', 'inherit');
+        } else {
+            jQuery('.firstnode').css('display', 'none');
+        }
         // first node cannot be removed
         if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
@@ -414,6 +419,13 @@ function bp_show_edit_node(id, refreshType) {
     if(node && node.create_obj) { checkbox.checked = node.create_obj }
     else { checkbox.checked = false; }
     bp_update_obj_create();
+
+
+    if(node && node.id == 'node1') {
+        checkbox.disabled = true;
+    } else {
+        checkbox.disabled = false;
+    }
 
     // initialize childrens tab
     bp_initialize_children_tab(node);
