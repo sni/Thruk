@@ -1798,17 +1798,31 @@ sub get_service_matrix {
     # add comments and downtimes
     Thruk::Utils::Status::set_comments_and_downtimes($c);
 
-    # get all services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+    # fetch hostnames first
+    my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
 
     # get pages hosts
     my $uniq_hosts    = {};
-    for my $svc (@{$services}) {
+    for my $svc (@{$hostnames}) {
         $uniq_hosts->{$svc->{'host_name'}} = 1;
     }
+    undef $hostnames;
+
     my @keys = sort keys %{$uniq_hosts};
     Thruk::Backend::Manager::_page_data(undef, $c, \@keys);
-    $uniq_hosts = Thruk::Utils::array2hash($c->{'stash'}->{'data'});
+    @keys = (); # empty
+    my $filter = [];
+    for my $host_name (@{$c->{'stash'}->{'data'}}) {
+        push @{$filter}, { 'host_name' => $host_name };
+    }
+    my $hostfilter = Thruk::Utils::combine_filter( '-or', $filter );
+    my $combined_filter = $hostfilter;
+    if($servicefilter) {
+        $combined_filter = Thruk::Utils::combine_filter( '-and', [ $servicefilter, $hostfilter ] );
+    }
+
+    # get real services
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $combined_filter ] );
 
     # build matrix
     my $matrix        = {};

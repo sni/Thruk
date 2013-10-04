@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - added business process addon
           - show apache status in performance page
+          - minemap performance improvements and reduced memory usage
           - Bug Fixes
             - summary: fixed reports using host/servicegroups in combination with the mysql logcache
             - mysql logcache: fixed service cannot be NULL error on import

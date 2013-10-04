@@ -269,14 +269,8 @@ sub test_page {
     # memory usage
     SKIP: {
         skip "skipped memory check, set TEST_AUTHOR_MEMORY to enable", 1 unless defined $ENV{'TEST_AUTHOR_MEMORY'};
-        open(my $ph, '-|', "ps -p $$ -o rss") or die("ps failed: $!");
-        while(my $line = <$ph>) {
-            if($line =~ m/(\d+)/) {
-                my $rsize = sprintf("%.2f", $1/1024);
-                ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
-            }
-        }
-        close($ph);
+        my $rsize = Thruk::Utils::get_memory_usage($$);
+        ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
     }
 
     # html valitidy

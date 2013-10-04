@@ -271,10 +271,12 @@ returns a list of host by a services query
 sub get_hosts_by_servicequery {
     my($self, %options) = @_;
 
-    $options{'columns'} = [qw/
-        host_has_been_checked host_name host_state host_scheduled_downtime_depth host_acknowledged
-        has_been_checked state scheduled_downtime_depth acknowledged
-        /];
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            host_has_been_checked host_name host_state host_scheduled_downtime_depth host_acknowledged
+            has_been_checked state scheduled_downtime_depth acknowledged
+            /];
+    }
 
     my $data = $self->_get_table('services', \%options);
     unless(wantarray) {
