@@ -1,8 +1,11 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 5;
+use Test::More;
 use File::Temp qw/tempfile/;
+
+plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+plan tests => 5;
 
 use_ok('Thruk::Utils::IO');
 
