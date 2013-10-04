@@ -7,7 +7,7 @@ use Carp;
 use File::Temp;
 use File::Copy qw/move/;
 use Fcntl qw/:DEFAULT/;
-use Scalar::Util qw/weaken/;
+use Scalar::Util qw/weaken isweak/;
 use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
@@ -88,8 +88,8 @@ sub new {
 
     # avoid circular refs
     for my $n (@{$self->{'nodes'}}) {
-        weaken($self->{'nodes_by_id'}->{$n->{'id'}});
-        weaken($self->{'nodes_by_name'}->{$n->{'label'}});
+        weaken($self->{'nodes_by_id'}->{$n->{'id'}})      unless isweak($self->{'nodes_by_id'}->{$n->{'id'}});
+        weaken($self->{'nodes_by_name'}->{$n->{'label'}}) unless isweak($self->{'nodes_by_name'}->{$n->{'label'}});
     }
 
     return $self;
