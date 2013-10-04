@@ -35,6 +35,7 @@ else
     fi
     rpmrelease=$release
 fi
+if [ $rpmrelease -gt 1 ]; then branch=$rpmrelease; fi
 
 # replace all versions everywhere
 sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$date',/" -i lib/Thruk/Config.pm
