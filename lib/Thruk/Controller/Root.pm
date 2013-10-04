@@ -9,6 +9,7 @@ use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
 use POSIX qw/strftime/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::Filter;
 
 #
@@ -41,8 +42,9 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
 
-    if($ENV{'THRUK_MEMORY_DEBUG'}) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
         $self->{'memory_begin'} = Thruk::Utils::get_memory_usage();
+        $self->{'time_begin'}   = [gettimeofday];
     }
 
     # make some configs available in stash
@@ -845,11 +847,12 @@ sub end : ActionClass('RenderView') {
         }
     }
 
-    if($ENV{'THRUK_MEMORY_DEBUG'}) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
         $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
         my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
-        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
-        $c->log->info(sprintf("mem:% 7s MB       % 10.2f MB     %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}) , $url));
+        if(length($url) > 50) { $url = substr(($url||''), 0, 50).'...' }
+        my $elapsed = tv_interval($self->{'time_begin'});
+        $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
     }
 
     return 1;

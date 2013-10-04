@@ -126,5 +126,5 @@ Don't log sent test commands from cmd.cgi.
 Contains thruks user id.
 
 
-==== THRUK_MEMORY_DEBUG
-print memory usage to stderr
+==== THRUK_PERFORMANCE_DEBUG
+print memory and cpu usage to stderr
