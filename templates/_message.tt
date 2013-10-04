@@ -41,7 +41,7 @@
   [% IF message.0 == 'success_message' %]
   <script type="text/javascript">
   <!--
-  window.setTimeout("fade('thruk_message', 500)", 5000);
+  thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", 5000);
   -->
   </script>
   [% END %]

@@ -1400,12 +1400,17 @@ function fade(id, duration) {
             cache:     true
         });
     }
+
+    // completly remove from dom after fading out
+    window.setTimeout("jQuery('#"+id+"').remove()", duration + 1000);
 }
 
 
 /* write/return table with performance data */
+var thruk_message_fade_timer;
 function thruk_message(rc, message) {
     jQuery('#thruk_message').remove();
+    window.clearInterval(thruk_message_fade_timer);
     cls = 'fail_message';
     if(rc == 0) { cls = 'success_message'; }
     var html = ''
@@ -1429,11 +1434,11 @@ function thruk_message(rc, message) {
         +'  <\/div><\/div>';
 
     jQuery("body").append(html);
-    if(rc == 0) {
-        window.setTimeout("fade('thruk_message', 500)",  5000);
-    } else {
-        window.setTimeout("fade('thruk_message', 500)", 30000);
+    var fade_away_in = 5000;
+    if(rc != 0) {
+        fade_away_in = 30000;
     }
+    thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", fade_away_in);
 }
 
 

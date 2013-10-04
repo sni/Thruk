@@ -130,7 +130,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'revert') {
             unlink($bp->{'editfile'});
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+            if(-e $bp->{'file'}) {
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+            } else {
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+            }
         }
         elsif($action eq 'remove') {
             $bp->remove($c);

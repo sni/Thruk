@@ -40,23 +40,34 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
         if(!minimal) {
             hideElement('bp_status_waiting');
         }
-        var node = document.getElementById(current_node);
-        bp_update_status(null, node);
-        if(bp_active_node) {
-            jQuery(node).addClass('bp_node_active');
-        }
-        if(node_id == 'changed_only') {
-            // maybe hilight changed nodes in future...
-        }
-        else if(node_id) {
-            jQuery('#'+node_id).effect('highlight', {}, 1500);
-        }
-        if(node_id == 'node1') {
-            // first nodes name is linked to the bp name itself
-            var n = bp_get_node(node.id)
-            jQuery('#subtitle').html(n.label);
+        if(textStatus == "success") {
+            var node = document.getElementById(current_node);
+            bp_update_status(null, node);
+            if(bp_active_node) {
+                jQuery(node).addClass('bp_node_active');
+            }
+            if(node_id == 'changed_only') {
+                // maybe hilight changed nodes in future...
+            }
+            else if(node_id) {
+                jQuery('#'+node_id).effect('highlight', {}, 1500);
+            }
+            if(node_id == 'node1') {
+                // first nodes name is linked to the bp name itself
+                var n = bp_get_node(node.id)
+                jQuery('#subtitle').html(n.label);
+            }
         }
         if(callback) { callback(textStatus == 'success' ? true : false); }
+        if(textStatus != 'success') {
+            // remove current message
+            jQuery('#thruk_message').remove();
+            window.clearInterval(thruk_message_fade_timer);
+
+            // responseText contains error?
+            var msg = jQuery("SPAN.fail_message", responseText).text();
+            thruk_message(1, 'refreshing failed: ' + msg);
+        }
     });
     return true;
 }
