@@ -41,6 +41,10 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
 
+    if($ENV{'THRUK_MEMORY_DEBUG'}) {
+        $self->{'memory_begin'} = Thruk::Utils::get_memory_usage();
+    }
+
     # make some configs available in stash
     for my $key (qw/url_prefix title_prefix use_pager start_page documentation_link
                   use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
@@ -839,6 +843,13 @@ sub end : ActionClass('RenderView') {
                $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
             }
         }
+    }
+
+    if($ENV{'THRUK_MEMORY_DEBUG'}) {
+        $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
+        my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
+        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
+        $c->log->info(sprintf("mem:% 7s MB       % 10.2f MB     %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}) , $url));
     }
 
     return 1;

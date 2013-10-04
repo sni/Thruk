@@ -124,3 +124,7 @@ Don't log sent test commands from cmd.cgi.
 
 ==== THRUK_USER_ID
 Contains thruks user id.
+
+
+==== THRUK_MEMORY_DEBUG
+print memory usage to stderr
