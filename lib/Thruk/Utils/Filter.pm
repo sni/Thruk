@@ -699,6 +699,27 @@ sub logline_icon {
     return $pic;
 }
 
+########################################
+
+=head2 has_business_process
+
+  has_business_process($host)
+
+returns true if host is part of an business process
+
+=cut
+sub has_business_process {
+    my($obj, $prefix) = @_;
+    $prefix = '' unless defined $prefix;
+    my $x = 0;
+    for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
+        return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'THRUK_BP_ID';
+        $x++;
+    }
+    return 0;
+}
+
+
 
 ########################################
 

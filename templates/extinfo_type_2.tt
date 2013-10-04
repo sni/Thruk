@@ -96,6 +96,16 @@
             </td>
           </tr>
           [% END %]
+          [% has_bp = has_business_process(service, 'host_') %]
+          [% IF has_bp %]
+            <tr>
+              <td align='right'>
+                <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
+                <font size="-1"><i>Business<br>Process</i></font>
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
           [% IF custom_vars.size > 0 %]
             <tr>
               <td align='right'>

@@ -14,6 +14,7 @@
   host_scheduled_downtime_depth = hostprefix _ 'scheduled_downtime_depth'
   peer_key                      = host.peer_key
   passive_icon                  = 'passiveonly.gif'
+  has_bp                        = has_business_process(host, hostprefix)
 %]
 
 [% IF hide_passive_icon %]
@@ -40,5 +41,6 @@
 [% IF host.$host_icon_image_expanded          %]<td align="center" valign="middle"><img class="notclickable" src='[% logo_path_prefix %][% host.$host_icon_image_expanded %]' border="0" width="[% imgsize %]" height="[% imgsize %]" alt='[% host.$host_icon_image_alt %]' title='[% host.$host_icon_image_alt %]'></td>[% END %]
 [% IF with_status && show_config_edit_buttons && backends_with_obj_config.$peer_key %]<td><a href='conf.cgi?edit&amp;host=[% host.$host_name | uri %]&amp;backend=[% host.peer_key %]'><img class="clickable" src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt='Configure This Host' title='Configure This Host' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
 [% IF with_status                             %]<td align="center" valign="middle"><a href='status.cgi?host=[% host.$host_name | uri %]'><img class="clickable" src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
+[% IF has_bp                                  %]<td align="center" valign="middle"><a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
 </tr>
 </table>
