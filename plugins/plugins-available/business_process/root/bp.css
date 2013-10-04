@@ -113,6 +113,9 @@ DIV.ui-dialog INPUT[type=text] {
     font-weight: bold;
     z-index: 50;
 }
+TABLE.minimal .bp_container_zoom {
+    display: none;
+}
 .bp_container_zoom:hover {
     background: #DDDDDD;
 }
@@ -127,6 +130,9 @@ DIV.ui-dialog INPUT[type=text] {
     position: relative;
     border: 1px solid grey;
     overflow: auto;
+}
+TABLE.minimal .bp_container {
+    border: 0;
 }
 
 .bp_container_inner {
