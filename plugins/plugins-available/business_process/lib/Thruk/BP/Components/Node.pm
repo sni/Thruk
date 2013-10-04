@@ -44,6 +44,7 @@ sub new {
         'service'           => $data->{'service'}    || '',
         'template'          => $data->{'template'}   || '',
         'create_obj'        => $data->{'create_obj'} || 0,
+        'create_obj_ok'     => 1,
         'scheduled_downtime_depth' => 0,
         'acknowledged'      => 0,
 

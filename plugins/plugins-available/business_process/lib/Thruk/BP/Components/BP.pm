@@ -55,6 +55,8 @@ sub new {
         'status_text'       => 'not yet checked',
         'last_check'        => 0,
         'last_state_change' => 0,
+
+        'exported_nodes'    => {},
     };
     bless $self, $class;
     $self->set_file($c, $file);
@@ -272,6 +274,13 @@ sub add_node {
     $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;
 
+    if($self->{'exported_nodes'}->{$node->{'label'}}) {
+        $node->{'create_obj_ok'} = 0;
+        $node->{'create_obj'}    = 0;
+    } elsif($node->{'create_obj'}) {
+        $self->{'exported_nodes'}->{$node->{'label'}} = 1;
+    }
+
     return;
 }
 
@@ -310,6 +319,10 @@ sub remove_node {
         push @nodes, $n unless $n->{'id'} eq $node_id;
     }
     $self->{'nodes'} = \@nodes;
+
+    if($node->{'create_obj'}) {
+        delete $self->{'exported_nodes'}->{$node->{'label'}};
+    }
 
     return;
 }

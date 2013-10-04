@@ -448,6 +448,13 @@ function bp_show_edit_node(id, refreshType) {
     if(checkbox) {
         if(node && node.create_obj) { checkbox.checked = node.create_obj }
         else { checkbox.checked = false; }
+
+        if(!node || node.create_obj_ok) {
+            jQuery(".create_obj_nok").css('display', 'none');
+        } else {
+            jQuery(".create_obj_nok").css('display', '');
+            checkbox.checked  = false;
+        }
     }
     bp_update_obj_create();
 
@@ -456,7 +463,11 @@ function bp_show_edit_node(id, refreshType) {
         if(node && node.id == 'node1') {
             checkbox.disabled = true;
         } else {
-            checkbox.disabled = false;
+            if(node.create_obj_ok) {
+                checkbox.disabled = false;
+            } else {
+                checkbox.disabled = true;
+            }
         }
     }
 

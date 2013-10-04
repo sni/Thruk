@@ -99,7 +99,7 @@ sub make_uniq_label {
     my $num = 2;
     my $testlabel = $label;
     while(defined $names->{$testlabel}) {
-        $testlabel = $label.' ('.$num++.')';
+        $testlabel = $label.' '.$num++;
     }
 
     return $testlabel;
@@ -360,17 +360,26 @@ sub merge_obj_hash {
         for my $hostname (keys %{$data->{'services'}}) {
             for my $description (keys %{$data->{'services'}->{$hostname}}) {
                 my $service = $data->{'services'}->{$hostname}->{$description};
-                my $num = 0;
-                my $uniq = $description;
-                while($hash->{'services'}->{$hostname}->{$uniq}) {
-                    $uniq = $description.' '.$num++;
-                }
-                $service->{'description'} = $uniq;
-                $hash->{'services'}->{$hostname}->{$uniq} = $service;
+                $hash->{'services'}->{$hostname}->{$description} = $service;
             }
         }
     }
     return($hash);
+}
+
+##########################################################
+
+=head2 clean_nasty
+
+    clean_nasty($string)
+
+clean nasty chars from string
+
+=cut
+sub clean_nasty {
+    my($str) = @_;
+    $str =~ s#[`~!\$%^&*\|'"<>\?,\(\)=]*##gmxo;
+    return($str);
 }
 
 ##########################################################

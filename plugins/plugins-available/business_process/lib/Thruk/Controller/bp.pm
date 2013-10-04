@@ -158,7 +158,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $c->stash->{'json'} = { rc => 1, 'message' => 'ERROR: no such node' };
                 return $c->forward('Thruk::View::JSON');
             }
-            my $label = $c->{'request'}->{'parameters'}->{'label'} || 'none';
+            my $label = Thruk::BP::Utils::clean_nasty($c->{'request'}->{'parameters'}->{'label'} || 'none');
             # first node renames business process itself too
             if($nodeid eq 'node1' and $bp->get_node('node1')->{'label'} ne $label) {
                 $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
@@ -196,7 +196,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $new = 1;
                 my $parent = $node;
                 $node = Thruk::BP::Components::Node->new({
-                                    'label'    => $c->{'request'}->{'parameters'}->{'bp_label_'.$type},
+                                    'label'    => Thruk::BP::Utils::clean_nasty($c->{'request'}->{'parameters'}->{'bp_label_'.$type}),
                                     'function' => $function,
                                     'depends'  => [],
                 });
@@ -217,7 +217,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $node->{'create_obj'} = $c->{'request'}->{'parameters'}->{'bp_create_link'} || 0;
 
 
-            my $label = $c->{'request'}->{'parameters'}->{'bp_label_'.$type} || 'none';
+            my $label = Thruk::BP::Utils::clean_nasty($c->{'request'}->{'parameters'}->{'bp_label_'.$type} || 'none');
             # first node renames business process itself too
             if(!$new and $nodeid eq 'node1') {
                 if($bp->get_node('node1')->{'label'} ne $label) {
@@ -241,7 +241,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($action eq 'new') {
         Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
         my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
-        my $label = $c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process';
+        my $label = Thruk::BP::Utils::clean_nasty($c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process');
         $label = Thruk::BP::Utils::make_uniq_label($c, $label);
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,

@@ -244,6 +244,7 @@
       <td align="left">
         <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
         <span class='firstnode bp_type_desc'>The first/main node will always be linked automatically.</span>
+        <span class='create_obj_nok bp_type_desc' style="color: red;">Cannot create link, link with same label already exists.</span>
       </td>
     </tr>
     <tr class="firstnode">
