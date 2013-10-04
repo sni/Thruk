@@ -137,7 +137,7 @@ ok($socketpid, 'live socket started: '.$socketpid);
 my $started = 0;
 for my $x (1..30) {
     my($res, $c) = ctx_request('/thruk/cgi-bin/extinfo.cgi?type=0');
-    if(exists $c->stash->{'failed_backends'}->{'http'} and !defined $c->stash->{'failed_backends'}->{'http'}) {
+    if($res->is_success and scalar keys %{$c->stash->{'failed_backends'}} == 0) {
         ok(1, 'server started in '.(time() - $now).'s');
         $started = 1;
         last;
