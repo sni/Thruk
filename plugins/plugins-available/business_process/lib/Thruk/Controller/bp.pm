@@ -111,7 +111,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{editmode} = 1;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];
@@ -140,9 +140,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'clone') {
             my($new_file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
+            my $label = Thruk::BP::Utils::make_uniq_label($c, 'Clone of '.$bp->{'name'});
+            $bp->set_label($c, $label);
+            $bp->get_node('node1')->{'label'} = $label;
             $bp->set_file($c, $new_file);
-            $bp->{'name'} = 'Clone of '.$bp->{'name'};
-            $bp->get_node('node1')->{'label'} = $bp->{'name'};
             $bp->save($c);
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
@@ -154,7 +155,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             my $label = $c->{'request'}->{'parameters'}->{'label'} || 'none';
             # first node renames business process itself too
-            if($nodeid eq 'node1') {
+            if($nodeid eq 'node1' and $bp->get_node('node1')->{'label'} ne $label) {
+                $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
                 $bp->set_label($c, $label);
             }
             $bp->{'nodes_by_id'}->{$nodeid}->{'label'} = $label;
@@ -184,9 +186,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             my $function = sprintf("%s(%s)", $type, Thruk::BP::Utils::join_args(\@arg));
 
             # check create first
+            my $new = 0;
             if($c->{'request'}->{'parameters'}->{'bp_node_id'} eq 'new') {
+                $new = 1;
                 my $parent = $node;
-                $node   = Thruk::BP::Components::Node->new({
+                $node = Thruk::BP::Components::Node->new({
                                     'label'    => $c->{'request'}->{'parameters'}->{'bp_label_'.$type},
                                     'function' => $function,
                                     'depends'  => [],
@@ -207,7 +211,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             $node->{'create_obj'} = $c->{'request'}->{'parameters'}->{'bp_create_link'} || 0;
 
-            $node->{'label'} = $c->{'request'}->{'parameters'}->{'bp_label_'.$type};
+
+            my $label = $c->{'request'}->{'parameters'}->{'bp_label_'.$type} || 'none';
+            # first node renames business process itself too
+            if(!$new and $nodeid eq 'node1' and $bp->get_node('node1')->{'label'} ne $label) {
+                $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
+                $bp->set_label($c, $label);
+            }
+            $node->{'label'} = $label;
+
             $node->_set_function({'function' => $function});
 
             $bp->save($c);
@@ -222,6 +234,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
         my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
         my $label = $c->{'request'}->{'parameters'}->{'bp_label'} || 'New Business Process';
+        $label = Thruk::BP::Utils::make_uniq_label($c, $label);
         my $bp = Thruk::BP::Components::BP->new($c, $file, {
             'name'  => $label,
             'nodes' => [{
@@ -246,7 +259,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{editmode} = 0 unless $allowed_for_edit;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process' });
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         my $bp = $bps->[0];

@@ -1,5 +1,5 @@
 {
-   "name" : "New Business",
+   "name" : "Test App",
    "nodes" : [
       {
          "function" : "worst()",

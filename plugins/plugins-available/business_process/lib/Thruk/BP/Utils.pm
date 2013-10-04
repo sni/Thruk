@@ -77,6 +77,36 @@ sub next_free_bp_file {
 
 ##########################################################
 
+=head2 make_uniq_label
+
+    make_uniq_label($c, $label, $bp_id)
+
+returns new uniq label
+
+=cut
+sub make_uniq_label {
+    my($c, $label, $bp_id) = @_;
+
+    # gather names of all BPs and editBPs
+    my $names = {};
+    my @files = glob($c->config->{'home'}.'/bp/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
+    for my $file (@files) {
+        next if $bp_id and $file =~ m#/$bp_id\.tbp(.edit|)$#mx;
+        my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        $names->{$data->{'name'}} = 1;
+    }
+
+    my $num = 2;
+    my $testlabel = $label;
+    while(defined $names->{$testlabel}) {
+        $testlabel = $label.' ('.$num++.')';
+    }
+
+    return $testlabel;
+}
+
+##########################################################
+
 =head2 update_bp_status
 
     update_bp_status($c, $bps)
