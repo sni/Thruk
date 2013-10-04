@@ -2,6 +2,7 @@ package Thruk::BP::Components::Node;
 
 use strict;
 use warnings;
+use Scalar::Util qw/weaken/;
 use Thruk::Utils;
 use Thruk::BP::Functions;
 use Thruk::BP::Utils;
@@ -153,6 +154,15 @@ sub resolve_depends {
         push @{$d->{'parents'}}, $self;
     }
     $self->{'depends'} = $new_depends;
+
+    # avoid circular refs
+    for(my $x = 0; $x < @{$self->{'depends'}}; $x++) {
+        weaken($self->{'depends'}->[$x]);
+    }
+    for(my $x = 0; $x < @{$self->{'parents'}}; $x++) {
+        weaken($self->{'parents'}->[$x]);
+    }
+
     return;
 }
 

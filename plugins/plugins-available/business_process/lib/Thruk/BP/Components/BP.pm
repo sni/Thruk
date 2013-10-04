@@ -7,6 +7,7 @@ use Carp;
 use File::Temp;
 use File::Copy qw/move/;
 use Fcntl qw/:DEFAULT/;
+use Scalar::Util qw/weaken/;
 use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
@@ -83,6 +84,12 @@ sub new {
     }
 
     $self->save() if $self->{'need_save'};
+
+    # avoid circular refs
+    for my $n (@{$self->{'nodes'}}) {
+        weaken($self->{'nodes_by_id'}->{$n->{'id'}});
+        weaken($self->{'nodes_by_name'}->{$n->{'label'}});
+    }
 
     return $self;
 }
@@ -263,6 +270,7 @@ sub add_node {
     }
     $self->{'nodes_by_id'}->{$node->{'id'}}      = $node if $node->{'id'};
     $self->{'nodes_by_name'}->{$node->{'label'}} = $node;
+
     return;
 }
 
@@ -311,7 +319,7 @@ sub _resolve_nodes {
     my($self) = @_;
 
     for my $node (@{$self->{'nodes'}}) {
-        # make sure we have an id noew
+        # make sure we have an id now
         if(!$node->{'id'}) {
             $node->set_id($self->make_new_node_id());
             $self->{'nodes_by_id'}->{$node->{'id'}} = $node;
