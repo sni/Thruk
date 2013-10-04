@@ -54,7 +54,7 @@
           duration:     '[% IF n.last_state_change %][% duration(date.now - n.last_state_change) %][% END %]',
           acknowledged: '[% n.acknowledged %]',
           scheduled_downtime_depth: '[% n.scheduled_downtime_depth %]',
-          depends:      [[% FOREACH d IN n.depends %]'[% d.label %]'[% UNLESS loop.last %],[% END %][% END %]],
+          depends:      [[% FOREACH d IN n.depends %]['[% d.id %]', '[% d.label %]'][% UNLESS loop.last %],[% END %][% END %]],
           func:         '[% n.function %]',
           func_args:    [% json_encode(n.function_args) %],
           width:        120,

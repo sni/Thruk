@@ -212,10 +212,12 @@ function bp_show_remove() {
     bp_menu_save();
     bp_menu_restore();
     var node = bp_get_node(current_node);
-    jQuery('#bp_menu_remove_node').html(
-         'Confirm: <input type="button" value="No" style="width: 50px;" onclick="bp_menu_restore()">'
-        +'<input type="button" value="Yes" style="width: 40px;" onclick="bp_confirmed_remove('+node.id+')">'
-    );
+    if(node) {
+        jQuery('#bp_menu_remove_node').html(
+             'Confirm: <input type="button" value="No" style="width: 50px;" onclick="bp_menu_restore()">'
+            +'<input type="button" value="Yes" style="width: 40px;" onclick="bp_confirmed_remove('+node.id+')">'
+        );
+    }
     return false;
 }
 
@@ -475,13 +477,13 @@ function bp_initialize_children_tab(node) {
     var options = [];
     if(node) {
         node.depends.forEach(function(d) {
-            var val = d;
+            var val = d[0];
             selected_nodes.push(val);
             selected_nodes_h[val] = 1;
-            options.push(new Option(val, val));
+            options.push(new Option(val, d[1]));
         });
     }
-    set_select_options('bp_'+bp_id+"_selected_nodes", options, true);
+    set_select_options('bp_'+bp_id+"_selected_nodes", options, false);
     reset_original_options('bp_'+bp_id+"_selected_nodes");
 
     var first_node = bp_get_node('node1');
@@ -491,16 +493,16 @@ function bp_initialize_children_tab(node) {
     available_nodes_h = new Object();
     var options = [];
     nodes.forEach(function(n) {
-        var val = n.label;
-        if(selected_nodes_h[val])                 { return true; } // skip already selected nodes
-        if(node && val == node.label)             { return true; } // skip own node
-        if(first_node && val == first_node.label) { return true; } // skip first/master node
+        var val = n.id;
+        if(selected_nodes_h[val])        { return true; } // skip already selected nodes
+        if(node && val == node.id)       { return true; } // skip own node
+        if(first_node && val == 'node1') { return true; } // skip first/master node
         available_nodes.push(val);
         available_nodes_h[val] = 1;
-        options.push(new Option(val, val));
+        options.push(new Option(val, n.label));
         return true;
     });
-    set_select_options('bp_'+bp_id+"_available_nodes", options, true);
+    set_select_options('bp_'+bp_id+"_available_nodes", options, false);
     sortlist('bp_'+bp_id+"_available_nodes");
     reset_original_options('bp_'+bp_id+"_available_nodes");
 

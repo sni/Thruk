@@ -864,12 +864,19 @@ function data_select_move(from, to, skip_sort) {
     // reverse elements so the later remove doesn't disorder the select
     elements.reverse();
 
+    var elements_to_add = new Array();
     for(var x = 0; x < elements.length; x++) {
         var elem       = from_sel.options[elements[x]];
         var elOptNew   = document.createElement('option');
         elOptNew.text  = elem.text;
         elOptNew.value = elem.value;
         from_sel.remove(elements[x]);
+        elements_to_add.push(elOptNew);
+    }
+
+    elements_to_add.reverse();
+    for(var x = 0; x < elements_to_add.length; x++) {
+        var elOptNew = elements_to_add[x];
         try {
           to_sel.add(elOptNew, null); // standards compliant; doesn't work in IE
         }
@@ -907,7 +914,7 @@ function data_filter_select(id, filter) {
     jQuery.each(options, function(i, option) {
         var found = 0;
         jQuery.each(pattern, function(i, sub_pattern) {
-            var index = option.value.toLowerCase().indexOf(sub_pattern.toLowerCase());
+            var index = option.text.toLowerCase().indexOf(sub_pattern.toLowerCase());
             if(index != -1) {
                 found++;
             }
@@ -917,7 +924,8 @@ function data_filter_select(id, filter) {
             newOptions.push(option);
         }
     });
-    set_select_options(id, newOptions, true);
+    // don't set uniq flag here, otherwise non-uniq lists will be uniq after init
+    set_select_options(id, newOptions, false);
 }
 
 /* resets originalOptions hash for given id */
@@ -965,24 +973,13 @@ function keys(obj) {
 
 /* sort select by value */
 function sortlist(id) {
-    var lb = document.getElementById(id);
-
-    if(!lb) {
-        if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
-    }
-
-    opts = new Object();
-
-    for(i=0; i<lb.length; i++)  {
-        opts[lb.options[i].text] = lb.options[i].value;
-    }
-
-    var sortedkeys = keys(opts).sort();
-
-    for(i=0; i<lb.length; i++)  {
-      lb.options[i].text  = sortedkeys[i];
-      lb.options[i].value = opts[sortedkeys[i]];
-    }
+    var selectOptions = jQuery("#"+id+" option");
+    selectOptions.sort(function(a, b) {
+        if      (a.text > b.text) { return 1;  }
+        else if (a.text < b.text) { return -1; }
+        else                      { return 0;  }
+    });
+    jQuery("#"+id).empty().append(selectOptions);
 }
 
 /* fetch all select fields and select all options when it is multiple select */
