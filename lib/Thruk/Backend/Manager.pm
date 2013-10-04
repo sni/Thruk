@@ -1278,7 +1278,7 @@ sub _get_result_parallel {
         chomp($last_error) if $last_error;
         my $key  = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
-        $c->stash->{'failed_backends'}->{$key} = $last_error;
+        $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
         $peer->{'last_error'} = $last_error;
         if(!$last_error and defined $size) {
             $totalsize += $size;
