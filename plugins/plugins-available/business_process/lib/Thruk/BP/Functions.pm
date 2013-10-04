@@ -102,7 +102,7 @@ sub worst {
     }
     my @sorted = reverse sort keys %{$states};
     my $state = $sorted[0];
-    $state = 4 if $state == -1;
+    $state = 0 if $state == -1;
     return($state, 'worst of', Thruk::BP::Utils::state2text($state).' - Worst state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
@@ -123,7 +123,7 @@ sub best {
     }
     my @sorted = sort keys %{$states};
     my $state = $sorted[0];
-    $state = 4 if $state == -1;
+    $state = 0 if $state == -1;
     return($state, 'best of', Thruk::BP::Utils::state2text($state).' - Best state is '.Thruk::BP::Utils::state2text($state).': '.Thruk::BP::Utils::join_labels($states->{$state}));
 }
 
@@ -199,7 +199,7 @@ sub equals {
     my($number) = @{$args};
     my($good, $bad) = _count_good_bad($n->{'depends'});
     if($good == 0 and $bad == 0) {
-        return(4, 'no dependent nodes');
+        return(3, 'no dependent nodes');
     }
     my $state = 2;
     if($good == $number) {

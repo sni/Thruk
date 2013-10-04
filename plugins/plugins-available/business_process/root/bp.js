@@ -463,7 +463,7 @@ function bp_show_edit_node(id, refreshType) {
         if(node && node.id == 'node1') {
             checkbox.disabled = true;
         } else {
-            if(node.create_obj_ok) {
+            if(!node || node.create_obj_ok) {
                 checkbox.disabled = false;
             } else {
                 checkbox.disabled = true;
