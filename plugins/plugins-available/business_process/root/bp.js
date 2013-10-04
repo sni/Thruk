@@ -116,7 +116,7 @@ function bp_context_menu_open(evt, node) {
             jQuery("#bp_menu").css('top', h+'px');
         }
         if(node.id == 'node1') {
-            jQuery('.firstnode').css('display', 'inherit');
+            jQuery('.firstnode').css('display', '');
         } else {
             jQuery('.firstnode').css('display', 'none');
         }
@@ -436,11 +436,11 @@ function bp_show_edit_node(id, refreshType) {
     if(node && node.func.toLowerCase() != 'status') {
         jQuery("INPUT[name=bp_host]").val(node.host);
         jQuery("INPUT[name=bp_service]").val(node.service);
-        jQuery("INPUT[name=bp_template]").val(node.template);
+        jQuery("INPUT[name=bp_service_template]").val(node.template);
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
-        jQuery("INPUT[name=bp_template]").val('');
+        jQuery("INPUT[name=bp_service_template]").val('');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
@@ -567,12 +567,12 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_function').html(n.func + '('+n.func_args.join(', ')+')');
 
     if(n.scheduled_downtime_depth > 0) {
-        jQuery('#bp_status_icon_downtime').css('display', 'inherit');
+        jQuery('#bp_status_icon_downtime').css('display', '');
     } else {
         jQuery('#bp_status_icon_downtime').css('display', 'none');
     }
     if(n.acknowledged > 0) {
-        jQuery('#bp_status_icon_ack').css('display', 'inherit');
+        jQuery('#bp_status_icon_ack').css('display', '');
     } else {
         jQuery('#bp_status_icon_ack').css('display', 'none');
     }
@@ -601,12 +601,12 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', 'inherit').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link_service').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', 'inherit').html("<a href='extinfo.cgi?type=1&amp;host="+host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link_host').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
     }
 
     return false;

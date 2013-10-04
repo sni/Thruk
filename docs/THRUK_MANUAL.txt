@@ -3164,6 +3164,17 @@ The name of the business process will be used as hostname, so make
 sure it does not clash with existing hosts by using a uniq prefix or
 something similar.
 
+[TIP]
+.notifications
+=======
+As each business process will result in at least one host and one
+service. It is recommended to setup notifications on the host unless
+you need notifications for the warning state of the business process
+too. Then use the service object of each business process.
+=======
+
+
+
 
 ==== Creating New Business Processes
 In order to change or create business processes, you need these roles from the cgi.cfg.

@@ -246,11 +246,17 @@
         <span class='firstnode bp_type_desc'>The first/main node will always be linked automatically.</span>
       </td>
     </tr>
-    <tr>
-      <th align="right" valign="top">Template</th>
+    <tr class="firstnode">
+      <th align="right" valign="top">Host Template</th>
       <td align="left">
-        <input type="text" value="" id="bp_template" name="bp_template" placeholder="template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_template_type, { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
-        [% IF use_feature_configtool %]<br><br><a href="conf.cgi?sub=objects&action=editor&file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
+        <input type="text" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+      </td>
+    </tr>
+    <tr>
+      <th align="right" valign="top">Service Template</th>
+      <td align="left">
+        <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
+        [% IF use_feature_configtool %]<br><br><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
       </td>
     </tr>
     [% ELSE %]

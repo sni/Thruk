@@ -2,7 +2,7 @@ package Thruk::BP::Components::Node;
 
 use strict;
 use warnings;
-use Scalar::Util qw/weaken/;
+use Scalar::Util qw/weaken isweak/;
 use Thruk::Utils;
 use Thruk::BP::Functions;
 use Thruk::BP::Utils;
@@ -157,10 +157,10 @@ sub resolve_depends {
 
     # avoid circular refs
     for(my $x = 0; $x < @{$self->{'depends'}}; $x++) {
-        weaken($self->{'depends'}->[$x]);
+        weaken($self->{'depends'}->[$x]) unless isweak($self->{'depends'}->[$x]);
     }
     for(my $x = 0; $x < @{$self->{'parents'}}; $x++) {
-        weaken($self->{'parents'}->[$x]);
+        weaken($self->{'parents'}->[$x]) unless isweak($self->{'parents'}->[$x]);
     }
 
     return;
@@ -226,29 +226,29 @@ return objects config
 sub get_objects_conf {
     my ( $self, $bp ) = @_;
 
-    # shared data
-    my $data = {
+    return unless $self->{'create_obj'};
+
+    # first node always creates a host too
+    my $obj = {};
+    if($self->{'id'} eq 'node1') {
+        $obj->{'hosts'}->{$bp->{'name'}} = {
+            'host_name'      => $bp->{'name'},
+            'alias'          => 'Business Process: '.$self->{'label'},
+            'use'            => $self->{'template'} || 'thruk-bp-template',
+            '_THRUK_BP_ID'   => $bp->{'id'},
+            '_THRUK_NODE_ID' => $self->{'id'},
+        };
+    }
+
+    $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
+        'host_name'      => $bp->{'name'},
+        'description'    => $self->{'label'},
+        'display_name'   => $self->{'label'},
+        'use'            => $self->{'template'} || 'thruk-bp-node-template',
         '_THRUK_BP_ID'   => $bp->{'id'},
         '_THRUK_NODE_ID' => $self->{'id'},
     };
 
-    # first node always creates a host
-    if($self->{'id'} eq 'node1') {
-        $data->{'host_name'} = $self->{'label'};
-        $data->{'alias'}     = 'Business Process: '.$self->{'label'};
-        $data->{'use'}       = $self->{'template'} || 'thruk-bp-template';
-        my $obj = { hosts => { $data->{'host_name'} => $data }};
-        return($obj);
-    }
-
-    return unless $self->{'create_obj'};
-
-    $data->{'host_name'}    = $bp->{'nodes_by_id'}->{'node1'}->{'label'};
-    $data->{'description'}  = $self->{'label'};
-    $data->{'display_name'} = $self->{'label'};
-    $data->{'use'}          = $self->{'template'} || 'thruk-bp-node-template';
-
-    my $obj = { services => { $data->{'host_name'} => { $data->{'description'} => $data }}};
     return($obj);
 }
 
@@ -370,9 +370,9 @@ sub _set_function {
 
 ##########################################################
 sub _result_to_string {
-    my($self, $bp) = @_;
+    my($self, $bp, $force_service) = @_;
     my $string = "";
-    my $firstnode = $self->{'id'} eq 'node1' ? 1 : 0;
+    my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
     my $status    = $self->{'status'};
     if($firstnode) {
         $string .= "### Nagios Host Check Result ###\n";
@@ -401,6 +401,11 @@ sub _result_to_string {
     $string .= sprintf "exited_ok=%d\n",        1;
     $string .= sprintf "return_code=%d\n",      $status;
     $string .= sprintf "output=%s\n",           $output;
+
+    if($firstnode) {
+        # submit result for host & service
+        $string .= "\n\n".$self->_result_to_string($bp, 1);
+    }
     return $string;
 }
 

@@ -218,9 +218,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             my $label = $c->{'request'}->{'parameters'}->{'bp_label_'.$type} || 'none';
             # first node renames business process itself too
-            if(!$new and $nodeid eq 'node1' and $bp->get_node('node1')->{'label'} ne $label) {
-                $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
-                $bp->set_label($c, $label);
+            if(!$new and $nodeid eq 'node1') {
+                if($bp->get_node('node1')->{'label'} ne $label) {
+                    $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
+                    $bp->set_label($c, $label);
+                }
+                $bp->{'template'} = $c->{'request'}->{'parameters'}->{'bp_host_template'} || '';
             }
             $node->{'label'} = $label;
 

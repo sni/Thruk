@@ -41,6 +41,7 @@ sub new {
         'id'                => undef,
         'editmode'          => $editmode,
         'name'              => undef,
+        'template'          => $bpdata->{'template'},
         'nodes'             => [],
         'nodes_by_id'       => {},
         'nodes_by_name'     => {},
@@ -396,8 +397,9 @@ sub save {
     my ( $self, $c ) = @_;
 
     my $obj = {
-        name  => $self->{'name'},
-        nodes => [],
+        name      => $self->{'name'},
+        template  => $self->{'template'},
+        nodes     => [],
     };
 
     for my $n (@{$self->{'nodes'}}) {

@@ -1401,8 +1401,10 @@ function fade(id, duration) {
         });
     }
 
-    // completly remove from dom after fading out
-    window.setTimeout("jQuery('#"+id+"').remove()", duration + 1000);
+    // completly remove message from dom after fading out
+    if(id == 'thruk_message') {
+        window.setTimeout("jQuery('#"+id+"').remove()", duration + 1000);
+    }
 }
 
 
@@ -3574,6 +3576,7 @@ var ajax_search = {
         }
 
         var input = document.getElementById(ajax_search.input_field);
+        if(input.disabled) { return false; }
         ajax_search.size = jQuery(input).width();
         if(ajax_search.size < 100) {
             /* minimum is 100px */
