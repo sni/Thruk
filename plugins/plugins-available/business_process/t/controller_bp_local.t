@@ -6,7 +6,7 @@ use File::Copy qw/copy/;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 148;
+    plan tests => 161;
 }
 
 BEGIN {
@@ -45,6 +45,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1, like => 'Clone of Test App' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
+    { url => '/thruk/cgi-bin/bp.cgi?bp=9999', like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
 ];
 
 for my $url (@{$pages}) {

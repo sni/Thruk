@@ -112,7 +112,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+            return $self->_bp_start_page($c);
         }
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
@@ -260,7 +260,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process', code => 404 });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+            return $self->_bp_start_page($c);
         }
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
@@ -279,6 +279,18 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
+    $self->_bp_start_page($c);
+
+    return 1;
+}
+
+##########################################################
+sub _bp_start_page {
+    my($self, $c) = @_;
+
+    $c->stash->{template} = 'bp.tt';
+    $c->stash->{editmode} = 0;
+
     # load business processes
     my $bps = Thruk::BP::Utils::load_bp_data($c);
     $c->stash->{'bps'} = $bps;
@@ -287,6 +299,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     return 1;
 }
+
 
 ##########################################################
 
