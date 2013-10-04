@@ -3,6 +3,7 @@ use parent 'Catalyst::Controller';
 
 use strict;
 use warnings;
+use Data::Dumper;
 use Thruk 1.76;
 use Thruk::BP::Utils;
 
@@ -199,8 +200,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                     'function' => $function,
                                     'depends'  => [],
                 });
-                die('internal error') unless $node;
-                die('internal error') unless $parent;
+                die('could not create node: '.Dumper($c->{'request'}->{'parameters'})) unless $node;
+                die('got no parent'.Dumper($c->{'request'}->{'parameters'})) unless $parent;
                 $bp->add_node($node);
                 $parent->append_child($node);
             }
