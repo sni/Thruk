@@ -848,10 +848,11 @@ sub end : ActionClass('RenderView') {
     }
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
+        my $elapsed = tv_interval($self->{'time_begin'});
         $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
         my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
-        if(length($url) > 50) { $url = substr(($url||''), 0, 50).'...' }
-        my $elapsed = tv_interval($self->{'time_begin'});
+        $url     = $c->request->uri unless $url;
+        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
         $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
     }
 
