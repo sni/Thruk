@@ -104,6 +104,54 @@
       </table>
     </td>
   </tr>
+
+  <tr>
+    <td style="height: 20px;"></td>
+  </tr>
+
+  <tr>
+    <td align="center" valign="top" class='commandPanel'>
+      <div class='dataTitle'>Graph Options</div>
+      <form id="bp_graph_option_form" action="#" onsubmit="return false;">
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+              <tr class='data'>
+                <td>Direction</td>
+                <td>
+                  <select onchange="bp_redraw_changed('bp_rankDir', this.value)" id="bp_rankDir" name="bp_rankDir">
+                    <option value="TB">Top-Bottom</option>
+                    <option value="LR">Left Right</option>
+                  </select>
+                </td>
+              </tr>
+              <tr class='data'>
+                <td>Node Seperation</td>
+                <td>
+                  <input type="text" value="" name="bp_nodeSep" onkeyup="bp_redraw_changed('bp_nodeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_nodeSep">
+                </td>
+              </tr>
+              <tr class='data'>
+                <td>Edge Seperation</td>
+                <td>
+                  <input type="text" value="" name="bp_edgeSep" onkeyup="bp_redraw_changed('bp_edgeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_edgeSep">
+                </td>
+              </tr>
+              <tr class='data'>
+                <td>Rank Seperation</td>
+                <td>
+                  <input type="text" value="" name="bp_rankSep" onkeyup="bp_redraw_changed('bp_rankSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_rankSep">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      </form>
+    </td>
+  </tr>
+
   [% END %]
 </table>
 

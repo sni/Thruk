@@ -80,5 +80,12 @@
     var editmode  = [% editmode %];
     var testmode  = [% testmode %];
     var testmodes = [% json_encode(testmodes) %];
+
+    var bp_graph_options = {
+        'bp_rankDir': 'TB',
+        'bp_nodeSep': 20,
+        'bp_edgeSep': 10,
+        'bp_rankSep': 30
+    };
 </script>
 </div>

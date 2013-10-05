@@ -18,6 +18,21 @@ function init_bp_buttons() {
     document.onmousedown   = bp_context_menu_open;
     document.oncontextmenu = bp_context_menu_open;
     window.onresize        = bp_redraw;
+
+    // initialize graph options in edit mode
+    if(editmode) {
+        bp_fill_select_form({
+            select:  {
+                'bp_rankDir': bp_graph_options.bp_rankDir
+            },
+            text:  {
+                'bp_edgeSep': bp_graph_options.bp_edgeSep,
+                'bp_rankSep': bp_graph_options.bp_rankSep,
+                'bp_nodeSep': bp_graph_options.bp_nodeSep
+            }
+        },'bp_graph_option_form');
+    }
+
     return;
 }
 
@@ -269,8 +284,10 @@ function bp_add_new_node() {
 }
 
 /* fill in form with current values */
-function bp_fill_select_form(data) {
-    var form = 'bp_edit_node_form';
+function bp_fill_select_form(data, form) {
+    if(!form) {
+        form = 'bp_edit_node_form';
+    }
     if(data.radio) {
         for(var key in data.radio) {
             var d = data.radio[key];
@@ -285,6 +302,30 @@ function bp_fill_select_form(data) {
             jQuery('#'+form).find('INPUT[name='+key+']').val(d);
         }
     }
+    if(data.select) {
+        for(var key in data.select) {
+            var d = data.select[key];
+            jQuery("#"+form+" option[text="+d+"]").attr("selected","selected");
+            jQuery("#"+form+" option[value="+d+"]").attr("selected","selected");
+        }
+    }
+}
+
+/* change graph options */
+function bp_redraw_changed(name, value) {
+    bp_graph_options[name] = value;
+    bp_render('container'+bp_id, nodes, edges);
+}
+
+/* change input by arrow keys */
+function bp_input_keys(evt, input) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+    var keyCode      = evt.keyCode;
+    var value = Math.ceil(input.value);
+    if(keyCode == 38)   { value++; }
+    if(keyCode == 40) { value--; }
+    input.value = value;
+    return false;
 }
 
 /* generic node type selection */
@@ -701,8 +742,10 @@ function bp_render(containerId, nodes, edges) {
     try {
         bp_graph_layout = dagre.layout()
             //.debugLevel(4)
-            .nodeSep(20)
-            .rankDir("TB")
+            .nodeSep(bp_graph_options.bp_nodeSep)
+            .edgeSep(bp_graph_options.bp_edgeSep)
+            .rankSep(bp_graph_options.bp_rankSep)
+            .rankDir(bp_graph_options.bp_rankDir)
             .run(g);
     } catch(e) {
         var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
@@ -757,14 +800,15 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     var upos = jQuery(upper).position();
 
     var edge_id = 'edge_'+sourceId+'_'+targetId;
+    jQuery('#'+edge_id).remove();
     jQuery(container).append('<div id="'+edge_id+'"><\/div>');
     var edge_container = jQuery('#'+edge_id);
 
     // draw "line" from top middle of lower node
     var srcX = upos.left + 55;
-    var srcY = upos.top + 20;
+    var srcY = upos.top + 15;
     var tarX = lpos.left + 55;
-    var tarY = lpos.top + 20;
+    var tarY = lpos.top + 15;
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
 
@@ -828,11 +872,11 @@ function bp_redraw(evt) {
     } catch(e) { return false; }
     if(!bp_graph_layout) { return false; }
 
-    var maxX = 0, maxY = 0, minY = -1, main_node;
+    var maxX = 0, maxY = 0, minY = -1;
     bp_graph_layout.eachNode(function(u, value) {
         if(maxX < value.x) { maxX = value.x }
         if(maxY < value.y) { maxY = value.y }
-        if(minY == -1 || value.y < minY) { minY = value.y; main_node = u; }
+        if(minY == -1 || value.y < minY) { minY = value.y; }
         return true;
     });
     maxX = maxX + 80;
@@ -863,9 +907,9 @@ function bp_redraw(evt) {
     }
     original_zoom = zoom;
 
-    if(!current_node && main_node) {
-        bp_update_status(null, main_node);
-        current_node = main_node;
+    if(!current_node) {
+        bp_update_status(null, 'node1');
+        current_node = 'node1';
     }
 
     // center align inner container
