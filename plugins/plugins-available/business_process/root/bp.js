@@ -529,8 +529,8 @@ function bp_initialize_children_tab(node) {
         return true;
     });
     set_select_options('bp_'+bp_id+"_available_nodes", options, false);
-    sortlist('bp_'+bp_id+"_available_nodes");
     reset_original_options('bp_'+bp_id+"_available_nodes");
+    sortlist('bp_'+bp_id+"_available_nodes");
 
     // button has to be initialized only once
     if(bp_list_wizard_initialized[bp_id] != undefined) {
