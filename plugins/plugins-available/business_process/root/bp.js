@@ -756,62 +756,28 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     var lpos = jQuery(lower).position();
     var upos = jQuery(upper).position();
 
-    // switch position
-    if(lpos.top < upos.top) {
-        var tmp = lower;
-        lower = upper;
-        upper = tmp;
-
-        var tmp = lpos;
-        lpos = upos;
-        upos = tmp;
-    }
-
     var edge_id = 'edge_'+sourceId+'_'+targetId;
     jQuery(container).append('<div id="'+edge_id+'"><\/div>');
     var edge_container = jQuery('#'+edge_id);
 
     // draw "line" from top middle of lower node
-    var srcX = lpos.left + lower.offsetWidth / 2;
-    var srcY = lpos.top;
-    var tarX = upos.left + upper.offsetWidth / 2;
-    var tarY = upos.top + 50;
+    var srcX = upos.left + 55;
+    var srcY = upos.top + 20;
+    var tarX = lpos.left + 55;
+    var tarY = lpos.top + 20;
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
 
-    // non-direct layout
-    if(edge.points.length > 1) {
-        // need to reverse points if first point is further away than the last
-        bp_draw_edge(edge_container, edge_id, tarX, tarY, tarX, tarY-10);
-        if(bp_distance(srcX, srcY, edge.points[0].x, edge.points[0].y) > bp_distance(tarX, tarY, edge.points[0].x, edge.points[0].y)) {
-            edge.points.reverse();
-        }
+    // need to reverse points if first point is further away than the last
+    bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY);
 
-        var x1 = srcX, y1 = srcY;
-        jQuery.each(edge.points, function(nr, p) {
-            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
-            bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
-            x1 = p.x; y1 = p.y;
-        });
-        bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
-    }
-
-    else {
-        // draw "line" from top middle of lower node
-        var x = srcX;
-        var y = srcY - 10;
-        bp_draw_edge(edge_container, edge_id, x, y, x, y+10);
-
-        // draw vertical line
-        var w = (upos.left + upper.offsetWidth / 2) - x;
-        bp_draw_edge(edge_container, edge_id, x, y, x+w, y);
-
-        // draw horizontal line
-        x = upos.left + upper.offsetWidth / 2;
-        y = lpos.top  - 10;
-        var h = y - (upos.top + upper.offsetHeight);
-        bp_draw_edge(edge_container, edge_id, x, y, x, y-h);
-    }
+    var x1 = srcX, y1 = srcY;
+    jQuery.each(edge.points, function(nr, p) {
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+        bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
+        x1 = p.x; y1 = p.y;
+    });
+    bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
 
     return;
 }
@@ -830,12 +796,6 @@ function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2) {
     if(h == 0) { cls = 'bp_hedge'; style += ' width:'+w+'px;';  }
     if(w == 0) { cls = 'bp_vedge'; style += ' height:'+h+'px;'; }
     jQuery(edge_container).append('<div class="'+cls+'" style="'+style+'" onmouseover="bp_hover_edge(\''+edge_id+'\')" onmouseout="bp_hover_edge_out(\''+edge_id+'\')"><\/div>');
-}
-
-/* calculate distance between 2 points */
-function bp_distance(x1, y1, x2, y2) {
-    var dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2))
-    return(dist);
 }
 
 function bp_hover_edge(id) {
