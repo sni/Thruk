@@ -1,4 +1,8 @@
-﻿[% PROCESS _header.tt css="thruk/plugins/business_process/bp.css" js=["thruk/plugins/business_process/bp.js", "thruk/plugins/business_process/dagre-0.2.0/dagre.min.js" ] %]
+﻿[% PROCESS _header.tt css="thruk/plugins/business_process/bp.css"
+                      js=["thruk/plugins/business_process/bp.js",
+                          "thruk/plugins/business_process/dagre-0.3.0/dagre.min.js"
+                         ]
+%]
 [% PROCESS _message.tt %]
 
 [% UNLESS minimal %]
@@ -35,6 +39,8 @@
 
 <script type="text/javascript">
 <!--
-init_bp_buttons();
+  jQuery(document).ready(function() {
+    init_bp_buttons();
+  });
 -->
 </script>

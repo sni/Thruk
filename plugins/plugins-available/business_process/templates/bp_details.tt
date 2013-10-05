@@ -115,5 +115,12 @@
 </table>
 
 
+<script type="text/javascript">
+<!--
+  jQuery(document).ready(function() {
+    bp_render('container[% bp.id %]', nodes, edges);
+  });
+-->
+</script>
 
 [% END %]

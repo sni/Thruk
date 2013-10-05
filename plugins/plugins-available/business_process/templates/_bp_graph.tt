@@ -39,7 +39,6 @@
 </div>
 </div>
 <script type="text/javascript">
-<!--
     var nodes = [
         [% FOREACH n IN bp.nodes %]
         { id:           '[% n.id %]',
@@ -65,22 +64,21 @@
         [%+ END %]
     ];
 
+    [% edges = [];
+      FOREACH n IN bp.nodes;
+        FOREACH d IN n.depends;
+          edges.push([n.id, d.id]);
+        END;
+    END %]
     var edges = [
-        [% FOREACH n IN bp.nodes %]
-          [% FOREACH d IN n.depends %]
-              { sourceId: "[% n.id %]", targetId: "[% d.id %]" }[% UNLESS loop.last %],[% END +%]
-          [%+ END %]
-          [% UNLESS loop.last %],[% END +%]
-        [% END %]
+      [% FOREACH e IN edges %]
+      { sourceId: "[% e.0 %]", targetId: "[% e.1 %]" }[% UNLESS loop.last %],[% END +%]
+      [%+ END %]
     ];
 
     var bp_id     = [% bp.id %];
     var editmode  = [% editmode %];
     var testmode  = [% testmode %];
     var testmodes = [% json_encode(testmodes) %];
-    jQuery(document).ready(function() {
-        bp_render('container[% bp.id %]', nodes, edges);
-    });
--->
 </script>
 </div>

@@ -106,11 +106,11 @@
 %]
 <tr>
   <th align="right">Host</th>
-  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname"[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg1_status" name="bp_arg1_status" placeholder="hostname"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { url: 'status.cgi?format=search&amp;type=hosts', autosubmit:false })"[% END %]></td>
 </tr>
 <tr>
   <th align="right">Service</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'bp_arg1_status' })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg2_status" name="bp_arg2_status" placeholder="optional service description"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'bp_arg1_status' })"[% END %]></td>
 </tr>
 [% END %]
 
