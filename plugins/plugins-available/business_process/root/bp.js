@@ -692,7 +692,9 @@ function bp_render(containerId, nodes, edges) {
             .rankDir("TB")
             .run();
     } catch(e) {
-        jQuery('#inner_'+containerId).html('<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>');
+        var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
+        if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
+        jQuery('#inner_'+containerId).html(msg);
         return;
     }
 
