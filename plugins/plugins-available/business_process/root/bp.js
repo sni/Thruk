@@ -35,7 +35,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
     var ts = new Date().getTime();
     var old_nodes = nodes;
     is_refreshing = true;
-    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1), [], function(responseText, textStatus, XMLHttpRequest) {
+    jQuery('#bp'+bp_id).load('bp.cgi?_=' + ts + '&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1)+"&testmode="+testmode, testmodes, function(responseText, textStatus, XMLHttpRequest) {
         is_refreshing = false;
         if(!minimal) {
             hideElement('bp_status_waiting');
@@ -70,6 +70,20 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
         }
     });
     return true;
+}
+
+/* set test mode for this node */
+function bp_test_mode_node(state) {
+    testmode = true;
+    if(state == -1) {
+        delete testmodes[current_node];
+    } else {
+        testmodes[current_node] = state;
+    }
+    hideElement('bp_menu');
+    bp_context_menu = false;
+    bp_refresh(bp_id, 'changed_only', bp_unset_active_node, true);
+    return false;
 }
 
 /* refresh business process in background */
@@ -377,6 +391,7 @@ function bp_select_at_least(node) {
 }
 
 /* show add node dialog */
+var $edit_dialog;
 function bp_show_edit_node(id, refreshType) {
     if(refreshType == undefined) { refreshType = true; }
     hideElement('bp_menu');
@@ -393,7 +408,6 @@ function bp_show_edit_node(id, refreshType) {
     }
     jQuery('#bp_node_id').val(current_edit_node);
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
-    var $edit_dialog;
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
         width: 430, height: 320,
@@ -457,7 +471,6 @@ function bp_show_edit_node(id, refreshType) {
         }
     }
     bp_update_obj_create();
-
 
     if(checkbox) {
         if(node && node.id == 'node1') {

@@ -155,6 +155,19 @@ TABLE.minimal .bp_container {
     box-shadow:  1px 1px 1px 1px rgba(140, 140, 140, 0.6);
 }
 
+DIV.bp_node.statusOK.testmode {
+    background-image:url('images/testmode_ok.png');
+}
+DIV.bp_node.statusWARNING.testmode {
+    background-image:url('images/testmode_warning.png');
+}
+DIV.bp_node.statusCRITICAL.testmode {
+    background-image:url('images/testmode_critical.png');
+}
+DIV.bp_node.statusUNKNOWN.testmode {
+    background-image:url('images/testmode_unknown.png');
+}
+
 DIV.bp_label {
     font-weight: bold;
     line-height: 11px;

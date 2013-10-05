@@ -61,6 +61,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{editmode}              = 0;
+    $c->stash->{testmode}              = $c->{'request'}->{'parameters'}->{'testmode'} || 0;
+    $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
     my $id = $c->{'request'}->{'parameters'}->{'bp'} || '';
@@ -281,6 +283,20 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'refresh' and $id) {
             if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
                 $bp->update_status($c);
+            }
+            # test mode?
+            if($c->stash->{testmode}) {
+                $bp->{'testmode'} = 1;
+                my $testmodes = {};
+                for my $n (@{$bp->{'nodes'}}) {
+                    my $state = $c->{'request'}->{'parameters'}->{$n->{'id'}};
+                    if(defined $state) {
+                        $testmodes->{$n->{'id'}} = $state;
+                        $n->set_status($state, 'testmode', $bp, { testmode => 1 });
+                    }
+                }
+                $c->stash->{testmodes} = $testmodes;
+                $bp->update_status($c, 1); # only recalculate
             }
             $c->stash->{template} = '_bp_graph.tt';
             return 1;

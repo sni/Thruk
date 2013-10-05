@@ -47,6 +47,7 @@ sub new {
         'create_obj_ok'     => 1,
         'scheduled_downtime_depth' => 0,
         'acknowledged'      => 0,
+        'testmode'          => 0,
 
         'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
         'status_text'       => $data->{'status_text'} || '',
@@ -277,11 +278,11 @@ sub update_status {
     my $function = $self->{'function_ref'};
     eval {
         my($status, $short_desc, $status_text, $extra) = &$function($c, $bp, $self, $self->{'function_args'}, $hostdata, $servicedata);
-        $self->_set_status($status, ($status_text || $short_desc), $bp, $extra);
+        $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
     };
     if($@) {
-        $self->_set_status(3, 'Internal Error: '.$@, $bp);
+        $self->set_status(3, 'Internal Error: '.$@, $bp);
     }
 
     # create result if we are linked to an object
@@ -294,7 +295,17 @@ sub update_status {
 }
 
 ##########################################################
-sub _set_status {
+
+=head2 set_status
+
+    set_status($state, $text, $bp, $extra)
+
+extra: contains extra attributes
+
+set status of node
+
+=cut
+sub set_status {
     my($self, $state, $text, $bp, $extra) = @_;
 
     my $last_state = $self->{'status'};
@@ -317,7 +328,7 @@ sub _set_status {
     }
 
     # update some extra attributes
-    for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged/) {
+    for my $key (qw/last_check last_state_change scheduled_downtime_depth acknowledged testmode/) {
         $self->{$key} = $extra->{$key} if defined $extra->{$key};
     }
 
@@ -353,7 +364,7 @@ sub _set_function {
         $fname = lc $fname;
         my $function = \&{'Thruk::BP::Functions::'.$fname};
         if(!defined &$function) {
-            $self->_set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
+            $self->set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
             $self->{'function_ref'}  = $function;

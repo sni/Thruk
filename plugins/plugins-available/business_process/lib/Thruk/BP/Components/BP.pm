@@ -57,6 +57,7 @@ sub new {
         'last_state_change' => 0,
 
         'exported_nodes'    => {},
+        'testmode'          => 0,
     };
     bless $self, $class;
     $self->set_file($c, $file);
@@ -409,6 +410,8 @@ save business process data to temporary edit file
 sub save {
     my ( $self, $c ) = @_;
 
+    return if $self->{'testmode'};
+
     my $obj = {
         name      => $self->{'name'},
         template  => $self->{'template'},
@@ -454,6 +457,7 @@ save run time data
 =cut
 sub save_runtime {
     my ( $self ) = @_;
+    return if $self->{'testmode'};
     return if $self->{'editmode'};
     my $data = {};
     for my $key (@stateful_keys) {

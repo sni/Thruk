@@ -21,6 +21,7 @@
       <div align="center" class='dataTitle'>
         <span id="subtitle">[% subtitle %]</span>
         [% IF editmode %]<br><span style="color: #EB6900">(Edit-Mode)</span>[% END %]
+        [% IF testmode && !editmode %]<br><span style="color: #EB6900">(Test-Mode)</span>[% END %]
       </div>
     </td>
     <td align="right" valign="bottom" width="33%">

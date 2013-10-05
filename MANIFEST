@@ -146,10 +146,10 @@ plugins/plugins-available/business_process/preview.png
 plugins/plugins-available/business_process/root/bp.css
 plugins/plugins-available/business_process/root/bp.js
 plugins/plugins-available/business_process/root/dagre-0.2.0/dagre.min.js
-plugins/plugins-available/business_process/root/images/critical.png
-plugins/plugins-available/business_process/root/images/ok.png
-plugins/plugins-available/business_process/root/images/unknown.png
-plugins/plugins-available/business_process/root/images/warning.png
+plugins/plugins-available/business_process/root/images/testmode_critical.png
+plugins/plugins-available/business_process/root/images/testmode_ok.png
+plugins/plugins-available/business_process/root/images/testmode_unknown.png
+plugins/plugins-available/business_process/root/images/testmode_warning.png
 plugins/plugins-available/business_process/t/bp_cli.t
 plugins/plugins-available/business_process/t/controller_bp.t
 plugins/plugins-available/business_process/t/controller_bp_local.t
