@@ -25,6 +25,7 @@ Business Process
 =cut
 
 my @stateful_keys = qw/status status_text last_check last_state_change/;
+my @saved_keys    = qw/name template rankDir/;
 
 ##########################################################
 
@@ -55,6 +56,7 @@ sub new {
         'status_text'       => 'not yet checked',
         'last_check'        => 0,
         'last_state_change' => 0,
+        'rankDir'           => 'TB',
 
         'exported_nodes'    => {},
         'testmode'          => 0,
@@ -68,7 +70,11 @@ sub new {
         return unless $bpdata;
         return unless $bpdata->{'name'};
     }
+    for my $key (@saved_keys) {
+        $self->{$key} = $bpdata->{$key} if defined $bpdata->{$key};
+    }
     $self->set_label($c, $bpdata->{'name'});
+
 
     return unless $self->{'name'};
 
@@ -413,10 +419,12 @@ sub save {
     return if $self->{'testmode'};
 
     my $obj = {
-        name      => $self->{'name'},
-        template  => $self->{'template'},
         nodes     => [],
     };
+
+    for my $key (@saved_keys) {
+        $obj->{$key} = $self->{$key};
+    }
 
     for my $n (@{$self->{'nodes'}}) {
         push @{$obj->{'nodes'}}, $n->get_save_obj();

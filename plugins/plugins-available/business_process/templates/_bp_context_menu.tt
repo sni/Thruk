@@ -68,6 +68,7 @@
     <li><a href="#tabs-2_[% bp.id %]">Details</a></li>
     <li><a href="#tabs-3_[% bp.id %]">Children</a></li>
     <li><a href="#tabs-4_[% bp.id %]">Link</a></li>
+    <li><a href="#tabs-5_[% bp.id %]">General</a></li>
   </ul>
 
 
@@ -294,6 +295,35 @@
     [% END %]
     </table>
   </div>
+
+
+
+  <!-- TAB 5: GRAPH OPTIONS -->
+  <div id="tabs-5_[% bp.id %]">
+    <table width="100%">
+    <tr>
+      <td align="center" class="bp_type_desc" colspan=2>
+        <p>General options</p>
+      </td>
+    </tr>
+    <tr>
+      <th align="left" valign="top">Graph Options:</th>
+      <td></td>
+    </tr>
+    <tr>
+      <td width=120>Direction</td>
+      <td align="left">
+        <select onchange="bp_redraw_changed('bp_rankDir', this.value)" name="bp_rankDir">
+          <option value="TB">Top-Bottom</option>
+          <option value="LR">Left Right</option>
+        </select>
+      </td>
+    </tr>
+    </table>
+  </div>
+
+
+
 
   </div>
   </form>

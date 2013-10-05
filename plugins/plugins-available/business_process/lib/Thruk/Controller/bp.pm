@@ -62,6 +62,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{editmode}              = 0;
     $c->stash->{testmode}              = $c->{'request'}->{'parameters'}->{'testmode'} || 0;
+    $c->stash->{debug}                 = $c->{'request'}->{'parameters'}->{'debug'} || 0;
     $c->stash->{testmodes}             = {};
     $c->stash->{'objects_templates_file'} = $c->config->{'Thruk::Plugin::BP'}->{'objects_templates_file'} || '';
     $c->stash->{'objects_save_file'}      = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'}      || '';
@@ -231,6 +232,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $node->{'label'} = $label;
 
             $node->_set_function({'function' => $function});
+
+            # bp options
+            for my $key (qw/rankDir/) {
+                $bp->{$key} = $c->{'request'}->{'parameters'}->{'bp_'.$key} || '';
+            }
 
             $bp->save($c);
             $bp->update_status($c, 1);

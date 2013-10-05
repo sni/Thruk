@@ -104,7 +104,9 @@
       </table>
     </td>
   </tr>
+  [% END %]
 
+  [% IF debug %]
   <tr>
     <td style="height: 20px;"></td>
   </tr>
@@ -151,7 +153,6 @@
       </form>
     </td>
   </tr>
-
   [% END %]
 </table>
 
