@@ -784,9 +784,7 @@ function bp_plump(containerId, sourceId, targetId, edge) {
         // need to reverse points if first point is further away than the last
         bp_draw_edge(edge_container, edge_id, tarX, tarY, tarX, tarY-10);
         if(bp_distance(srcX, srcY, edge.points[0].x, edge.points[0].y) > bp_distance(tarX, tarY, edge.points[0].x, edge.points[0].y)) {
-            var tmp1 = srcX, tmp2 = srcY;
-            srcX = tarX; srcY = tarY;
-            tarX = tmp1; tarY = tmp2;
+            edge.points.reverse();
         }
 
         var x1 = srcX, y1 = srcY;
