@@ -8,14 +8,14 @@
         [% PROCESS _infobox.tt %]
         </td>
         <td align="right" valign="top" width="50%">
-          <form method="get" action="conf.cgi">
+          <form method="get" action="conf.cgi" id="obj_type_show_form">
             <table border="0" class="optBox">
               <tr>
                 <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
               </tr>
               <tr>
                 <td align="left" class='reportSelectItem'>
-                  <select name='sub'>
+                  <select name='sub' onchange="document.getElementById('obj_type_show_form').submit()">
                     <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
                     [% IF conf_config.exists('thruk') %]
                     <option value='thruk'[%  IF sub == 'thruk' %] selected [% END %]>Thruk</option>
@@ -34,23 +34,15 @@
                   </select>
                 </td>
               </tr>
-              <tr>
-                <td class='reportSelectItem'>
-                  <input type='submit' value='Show'>
-                </td>
-              </tr>
+              [% IF last_changed || needs_commit || show_save_reload %]
+                <tr>
+                  <td>
+                    [% button('conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes', 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(\'' _ show_save_reload _ '\')') %]
+                  </td>
+                </tr>
+              [% END %]
             </table>
           </form>
-          [% IF last_changed || needs_commit || show_save_reload %]
-          <br>
-          <table border="0" class="optBox" style="position: absolute; right: 3px;">
-            <tr>
-              <td>
-                [% button('conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes', 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(\'' _ show_save_reload _ '\')') %]
-              </td>
-            </tr>
-          </table>
-          [% END %]
           [% PROCESS _help.tt topic = "conf" %]
         </td>
       </tr>
