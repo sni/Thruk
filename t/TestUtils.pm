@@ -14,6 +14,7 @@ use Data::Dumper;
 use Test::More;
 use URI::Escape;
 use Encode qw/decode_utf8/;
+use File::Slurp;
 use Thruk::Utils;
 use Thruk::Utils::External;
 
@@ -142,6 +143,7 @@ sub get_test_hostgroup_cli {
     content_type    => match this content type
     skip_html_lint  => skip html lint check
     skip_doctype    => skip doctype check, even if its an html page
+    skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
     waitfor         => wait till regex occurs (max 60sec)
   }
@@ -301,6 +303,8 @@ sub test_page {
     # check for missing images / css or js
     if($content_type =~ 'text\/html') {
         my $content = $return->{'content'};
+        # check for failed javascript lists
+        verify_html_js($content) unless $opts->{'skip_js_check'};
         $content =~ s/<script[^>]*>.*?<\/script>//gsmxio;
         my @matches1 = $content =~ m/\s+(src|href)='(.+?)'/gio;
         my @matches2 = $content =~ m/\s+(src|href)="(.+?)"/gio;
@@ -603,7 +607,68 @@ sub _list {
     return $data if ref $data eq 'ARRAY';
     return([$data]);
 }
-#########################
+
+#################################################
+# verify js syntax
+sub verify_js {
+    my($file) = @_;
+    my $content = read_file($file);
+    my $matches = _replace_with_marker($content);
+    return unless scalar $matches > 0;
+    _check_marker($file, $content);
+    return;
+}
+
+#################################################
+# verify js syntax in html
+sub verify_html_js {
+    my($content) = @_;
+    $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
+    _check_marker(undef, $content);
+    return;
+}
+
+#################################################
+# verify js syntax in templates
+sub verify_tt {
+    my($file) = @_;
+    my $content = read_file($file);
+    $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
+    _check_marker($file, $content);
+    return;
+}
+
+#################################################
+# verify js syntax in templates
+sub _extract_js {
+    my($text) = @_;
+    _replace_with_marker($text);
+    return $text;
+}
+
+#################################################
+# verify js syntax in templates
+sub _replace_with_marker {
+    my @matches = $_[0]  =~ s/(\,\s*[\)|\}|\]])/JS_ERROR_MARKER:$1/sgmxi;
+    return scalar @matches;
+}
+
+#################################################
+sub _check_marker {
+    my($file, $content) = @_;
+    my @lines = split/\n/mx, $content;
+    my $x = 1;
+    for my $line (@lines) {
+        if($line =~ m/JS_ERROR_MARKER:/mx) {
+            my $orig = $line;
+            $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
+            $orig =~ s/JS_ERROR_MARKER://gmx;
+            fail('found trailing comma in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
+        $x++;
+    }
+}
 
 1;
 
