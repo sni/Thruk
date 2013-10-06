@@ -1530,9 +1530,7 @@ sub DESTROY {
 
 ##########################################################
 sub _merge_answer {
-    my $self   = shift;
-    my $data   = shift;
-    my $type   = shift;
+    my($self, $data, $type) = @_;
     my $c      = $Thruk::Backend::Manager::c;
     my $return = [];
     if( defined $type and lc $type eq 'hash' ) {
