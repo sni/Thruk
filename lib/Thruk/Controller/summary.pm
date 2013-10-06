@@ -297,7 +297,7 @@ sub _display_alert_totals {
                     $sub_title = "Hostgroup '".$ident."' (".$box_title_data->{$ident}->{'alias'}.")";
                 }
                 elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
-                    $sub_title = "Host '".$ident."' (".$box_title_data->{$ident}->{'alias'}.")";
+                    $sub_title = "Host '".$ident."' (".($box_title_data->{$ident}->{'alias'} || 'already removed').")";
                 }
                 elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
                     my($host,$service) = split/;/mx, $ident;
