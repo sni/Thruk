@@ -39,6 +39,7 @@
 
 <script type="text/javascript">
 <!--
+  var editmode = [% editmode %];
   jQuery(document).ready(function() {
     init_bp_buttons();
   });
