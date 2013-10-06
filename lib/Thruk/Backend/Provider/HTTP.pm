@@ -7,6 +7,7 @@ use Data::Dumper;
 use JSON::XS;
 use LWP::UserAgent;
 use Thruk::Utils;
+use Encode qw/encode_utf8/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -684,7 +685,8 @@ sub _req {
     }
 
     if($response->is_success) {
-        my $data_str = $response->decoded_content;
+        # encode content
+        my $data_str = encode_utf8($response->decoded_content);
         my $data;
         eval {
             $data = decode_json($data_str);
