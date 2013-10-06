@@ -285,16 +285,18 @@ sub selectall_arrayref {
     }
 
     if($opt->{'slice'}) {
-        # make an array of hashes
-        my @hash_refs;
-        for my $res (@{$result->{'result'}}) {
+        # make an array of hashes, inplace to safe memory
+        my $rnum = scalar @{$result->{'result'}};
+        my $knum = scalar @{$result->{'keys'}};
+        for(my $x=0;$x<$rnum;$x++) {
+            my $row = $result->{'result'}->[$x];
             my $hash_ref;
-            for(my $x=0;$x<scalar @{$res};$x++) {
-                my $key = $result->{'keys'}->[$x];
+            for(my $y=0;$y<$knum;$y++) {
+                my $key = $result->{'keys'}->[$y];
                 if(exists $opt->{'rename'} and defined $opt->{'rename'}->{$key}) {
                     $key = $opt->{'rename'}->{$key};
                 }
-                $hash_ref->{$key} = $res->[$x];
+                $hash_ref->{$key} = $row->[$y];
             }
             # add callbacks
             if(exists $opt->{'callbacks'}) {
@@ -302,9 +304,9 @@ sub selectall_arrayref {
                     $hash_ref->{$key} = $opt->{'callbacks'}->{$key}->($hash_ref);
                 }
             }
-            push @hash_refs, $hash_ref;
+            $result->{'result'}->[$x] = $hash_ref;
         }
-        return(\@hash_refs);
+        return($result->{'result'});
     }
     elsif(exists $opt->{'callbacks'}) {
         for my $res (@{$result->{'result'}}) {
