@@ -1242,8 +1242,8 @@ sub _set_config {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
-            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg';
+            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/shinken/shinken.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
@@ -1328,18 +1328,18 @@ sub _set_coretype {
         return;
     }
 
+    # try to determine core type from main config
+    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
+        $self->{'coretype'} = 'icinga';
+        return;
+    }
+
     # get core from init script link (omd)
     if(defined $ENV{'OMD_ROOT'}) {
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
             $self->{'coretype'} = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             return;
         }
-    }
-
-    # try to determine core type from main config
-    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
-        $self->{'coretype'} = 'icinga';
-        return;
     }
 
     return;
