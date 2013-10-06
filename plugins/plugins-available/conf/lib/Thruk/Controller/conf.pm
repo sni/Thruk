@@ -722,6 +722,11 @@ sub _process_plugins_page {
         return 1;
     }
     elsif($c->stash->{action} eq 'save') {
+        # don't store in demo mode
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+            return $c->response->redirect('conf.cgi?sub=plugins');
+        }
         if(! -d $plugin_enabled_dir or ! -w $plugin_enabled_dir ) {
             Thruk::Utils::set_message( $c, 'fail_message', 'Make sure plugins folder ('.$plugin_enabled_dir.') is writeable: '.$! );
         }
@@ -786,6 +791,11 @@ sub _process_backends_page {
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     if($c->stash->{action} eq 'save') {
+        # don't store in demo mode
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+            return $c->response->redirect('conf.cgi?sub=backends');
+        }
         if($c->stash->{'readonly'}) {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->response->redirect('conf.cgi?sub=backends');
@@ -1081,6 +1091,11 @@ sub _apply_config_changes {
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
 
     if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
+        # don't store in demo mode
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+            return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
+        }
         if($c->{'obj_db'}->commit($c)) {
             # update changed files
             $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
@@ -1121,6 +1136,11 @@ sub _apply_config_changes {
 
     # config reload
     elsif(defined $c->{'request'}->{'parameters'}->{'reload'}) {
+        # don't store in demo mode
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', "reload is disabled in demo mode" );
+            return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
+        }
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
@@ -1135,6 +1155,11 @@ sub _apply_config_changes {
 
     # save changes to file
     elsif(defined $c->{'request'}->{'parameters'}->{'save'}) {
+        # don't store in demo mode
+        if($c->config->{'demo_mode'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+            return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
+        }
         if($c->{'obj_db'}->commit($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
         }
@@ -1238,6 +1263,11 @@ sub _update_password {
 sub _store_changes {
     my ( $self, $c, $file, $data, $defaults, $update_in_conf ) = @_;
     my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'} || '';
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+        return;
+    }
     $c->log->debug("saving config changes to ".$file);
     my $res     = Thruk::Utils::Conf::update_conf($file, $data, $old_md5, $defaults, $update_in_conf);
     if(defined $res) {

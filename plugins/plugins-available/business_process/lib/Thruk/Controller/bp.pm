@@ -122,6 +122,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'bp'} = $bp;
 
         if($action eq 'commit') {
+            if($c->config->{'demo_mode'}) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'save is disabled in demo mode.' });
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+            }
             $bp->commit($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
             Thruk::BP::Utils::save_bp_objects($c, $bps);

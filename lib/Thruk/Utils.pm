@@ -1042,6 +1042,11 @@ store user data for section
 sub store_user_data {
     my($c, $data) = @_;
 
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        return 1;
+    }
+
     if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
         return 1;
     }
