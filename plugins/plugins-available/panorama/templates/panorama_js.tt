@@ -1,9 +1,7 @@
 ﻿Ext.BLANK_IMAGE_URL        = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
-var theme                  = '[% theme %]';
-var url_prefix             = '[% url_prefix %]';
-var cookie_path            = '[% cookie_path %]';
-var base                   = '[% url_prefix %]thruk/plugins/panorama';
-[%+ PROCESS _header_initial_states.tt +%]
+[% IF thruk_debug %]
+    [%+ PROCESS _panorama_js_globals.tt +%]
+[% END %]
 [%+ PROCESS _common_js_bugs.tt +%]
 
 var ExtState     = [% state %];

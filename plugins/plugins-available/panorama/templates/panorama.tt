@@ -4,12 +4,7 @@
   <head>
     <script type="text/javascript">
     <!--
-    var server_time    = new Date([% date.now * 1000 %]);
-    var client_time    = new Date();
-    var delta_time     = client_time.getTime() - server_time.getTime();
-    var url_prefix     = '[% url_prefix %]';
-    var perf_bar_mode  = '[% perf_bar_mode %]';
-    var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+    [%+ PROCESS _panorama_js_globals.tt +%]
     -->
     </script>
     <title>[% title_prefix %]Thruk Panorama</title>

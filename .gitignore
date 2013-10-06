@@ -47,3 +47,4 @@ themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.76.css
 test_hook.sh
 bp/*.tbp
 bp/*.tbp-*
+root/tests/

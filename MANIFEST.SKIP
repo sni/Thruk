@@ -66,3 +66,4 @@ nytprof.out
 sizeme.db
 test_hook.sh
 bp/\d+\.tbp
+root/tests/
