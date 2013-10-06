@@ -46,18 +46,6 @@ sub get_config_help {
 
 ##########################################################
 
-
-=head1 AUTHOR
-
-Sven Nierlein, 2011, <nierlein@cpan.org>
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
-
 $Monitoring::Config::Help::helpdata = {
           'command' => {
                          'command_line' => '<p>This directive is used to define what is actually executed by Nagios when the command is used for service or host checks, notifications, or event handlers. Before the command line is executed, all valid macros are replaced with their respective values.  See the documentation on macros for determining when you can use different macros.  Note that the command line is <i>not</i> surrounded in quotes.  Also, if you want to pass a dollar sign ($) on the command line, you have to escape it with another dollar sign.</p><p><strong>NOTE</strong>: You may not include a <b>semicolon</b> (;) in the <i>command_line</i> directive, because everything after it will be ignored as a config file comment.  You can work around this limitation by setting one of the <b>$USER$</b> macros in your resource file to a semicolon and then referencing the appropriate $USER$ macro in the <i>command_line</i> directive in place of the semicolon.</p><p>If you want to pass arguments to commands during runtime, you can use <b>$ARGn$</b> macros in the <i>command_line</i> directive of the command definition and then separate individual arguments from the command name (and from each other) using bang (!) characters in the object definition directive (host check command, service event handler command, etc) that references the command.  More information on how arguments in command definitions are processed during runtime can be found in the documentation on macros.</p>',
@@ -80,7 +68,9 @@ $Monitoring::Config::Help::helpdata = {
                          'service_notification_commands' => 'This directive is used to define a list of the <i>short names</i> of the commands used to notify the contact of a <i>service</i> problem or recovery.  Multiple notification commands should be separated by commas.  Allnotification commands are executed when the contact needs to be notified.  The maximum amount of time that a notification command can run is controlled by the notification_timeout option.',
                          'service_notification_options' => 'This directive is used to define the service states for which notifications can be sent out to this contact.  Valid options are a combination of one or more of the following: <b>w</b> = notify on WARNING service states, <b>u</b> = notify on UNKNOWN service states, <b>c</b> = notify on CRITICAL service states, <b>r</b> = notify on service recoveries (OK states), and <b>f</b> = notify when the service starts and stops flapping.  If you specify <b>n</b> (none) as an option, the contact will not receive any type of service notifications.',
                          'service_notification_period' => 'This directive is used to specify the short name of the time period during which the contact can be notified about service problems or recoveries.  You can think of this as an "on call" time for service notifications for the contact.  Read the documentation on time periods for more information on how this works and potential problems that may result from improper use.',
-                         'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.'
+                         'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
+                         'is_admin' => ' This directive is used to determine whether or not the contact can see all object in Shinken WebUI. Values: 0 = normal user, can see all objects he is in contact, 1 = allow contact to see all objects',
+                         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
                        },
           'contactgroup' => {
                               'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
@@ -307,5 +297,19 @@ $Monitoring::Config::Help::helpdata = {
                           },
 
 };
+
+##########################################################
+
+
+=head1 AUTHOR
+
+Sven Nierlein, 2011, <nierlein@cpan.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
 
 1;

@@ -76,6 +76,19 @@ $Monitoring::Config::Object::Service::Defaults = {
     'failure_prediction_enabled'        => { type => 'DEPRECATED' },
 };
 
+# Only shinken has these...
+$Monitoring::Config::Object::Service::ShinkenSpecific = {
+    'business_impact'              => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
+    'criticity'                    => { type => 'ALIAS', 'name' => 'business_impact' },
+    'maintenance_period'           => { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' },
+    'poller_tag'                   => { type => 'STRING', cat => 'Extended' },
+    'reactionner_tag'              => { type => 'STRING', cat => 'Extended' },
+    'resultmodulations'            => { type => 'STRING', cat => 'Extended' },
+    'business_impact_modulations'  => { type => 'STRING', cat => 'Extended' },
+    'escalations'                  => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
+    'icon_set'                     => { type => 'STRING', cat => 'Extended' },
+};
+
 ##########################################################
 
 =head1 METHODS
@@ -89,25 +102,13 @@ sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
     if($coretype eq 'any' or $coretype eq 'shinken') {
-        $Monitoring::Config::Object::Service::Defaults->{'business_impact'}             = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'criticity'}                   = { type => 'ALIAS', 'name' => 'business_impact' };
-        $Monitoring::Config::Object::Service::Defaults->{'maintenance_period'}          = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
-        $Monitoring::Config::Object::Service::Defaults->{'poller_tag'}                  = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'reactionner_tag'}             = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'resultmodulations'}           = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'business_impact_modulations'} = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'escalations'}                 = { type => 'STRING', 'link' => 'escalation', cat => 'Extended' };
-        $Monitoring::Config::Object::Service::Defaults->{'icon_set'}                    = { type => 'STRING', cat => 'Extended' };
+        for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
+            $Monitoring::Config::Object::Service::Defaults->{$key} = $Monitoring::Config::Object::Service::ShinkenSpecific->{$key};
+        }
     } else {
-        delete $Monitoring::Config::Object::Service::Defaults->{'business_impact'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'criticity'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'maintenance_period'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'poller_tag'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'reactionner_tag'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'resultmodulations'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'business_impact_modulations'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'escalations'};
-        delete $Monitoring::Config::Object::Service::Defaults->{'icon_set'};
+        for my $key (keys %{$Monitoring::Config::Object::Service::ShinkenSpecific}) {
+            delete $Monitoring::Config::Object::Service::Defaults->{$key};
+        }
     }
     my $self = {
         'type'        => 'service',

@@ -77,6 +77,20 @@ $Monitoring::Config::Object::Host::Defaults = {
     'failure_prediction_enabled'      => { type => 'DEPRECATED' },
 };
 
+# Only shinken has these...
+$Monitoring::Config::Object::Host::ShinkenSpecific = {
+    'business_impact'             => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
+    'criticity'                   => { type => 'ALIAS', 'name' => 'business_impact' },
+    'maintenance_period'          => { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' },
+    'realm'                       => { type => 'STRING', cat => 'Extended' },
+    'poller_tag'                  => { type => 'STRING', cat => 'Extended' },
+    'reactionner_tag'             => { type => 'STRING', cat => 'Extended' },
+    'resultmodulations'           => { type => 'STRING', cat => 'Extended' },
+    'business_impact_modulations' => { type => 'STRING', cat => 'Extended' },
+    'escalations'                 => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
+    'icon_set'                    => { type => 'STRING', cat => 'Extended' },
+};
+
 ##########################################################
 
 =head1 METHODS
@@ -91,27 +105,13 @@ sub BUILD {
     my $coretype = shift;
 
     if($coretype eq 'any' or $coretype eq 'shinken') {
-        $Monitoring::Config::Object::Host::Defaults->{'business_impact'}             = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'criticity'}                   = { type => 'ALIAS', 'name' => 'business_impact' };
-        $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'}          = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
-        $Monitoring::Config::Object::Host::Defaults->{'realm'}                       = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'poller_tag'}                  = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'reactionner_tag'}             = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'}           = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'} = { type => 'STRING', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'escalations'}                 = { type => 'STRING', 'link' => 'escalation', cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'icon_set'}                    = { type => 'STRING', cat => 'Extended' };
+        for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
+            $Monitoring::Config::Object::Host::Defaults->{$key} = $Monitoring::Config::Object::Host::ShinkenSpecific->{$key};
+        }
     } else {
-        delete $Monitoring::Config::Object::Host::Defaults->{'business_impact'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'realm'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'poller_tag'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'reactionner_tag'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'escalations'};
-        delete $Monitoring::Config::Object::Host::Defaults->{'icon_set'};
+        for my $key (keys %{$Monitoring::Config::Object::Host::ShinkenSpecific}) {
+            delete $Monitoring::Config::Object::Host::Defaults->{$key};
+        }
     }
 
     if($coretype eq 'any' or $coretype eq 'icinga') {

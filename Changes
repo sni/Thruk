@@ -5,6 +5,7 @@ next:
           - show apache status in performance page
           - minemap performance improvements and reduced memory usage
           - configuration git browser got next and previous links
+          - added some more shinken specific config attributes
           - Bug Fixes
             - summary: fixed reports using host/servicegroups in combination with the mysql logcache
             - mysql logcache: fixed service cannot be NULL error on import

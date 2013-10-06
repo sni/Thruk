@@ -46,6 +46,12 @@ $Monitoring::Config::Object::Contact::Defaults = {
     'contact_groups'                => { type => 'ALIAS', 'name' => 'contactgroups', cat => 'Basic' },
 };
 
+# Only shinken has these...
+$Monitoring::Config::Object::Contact::ShinkenSpecific = {
+    'is_admin'              => { type => 'BOOL', cat => 'Extended' },
+    'min_business_impact'   => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
+};
+
 ##########################################################
 
 =head1 METHODS
@@ -57,6 +63,16 @@ return new object
 =cut
 sub BUILD {
     my $class = shift || __PACKAGE__;
+    my $coretype = shift;
+    if($coretype eq 'any' or $coretype eq 'shinken') {
+        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+            $Monitoring::Config::Object::Contact::Defaults->{$key} = $Monitoring::Config::Object::Contact::ShinkenSpecific->{$key};
+        }
+    } else {
+        for my $key (keys %{$Monitoring::Config::Object::Contact::ShinkenSpecific}) {
+            delete $Monitoring::Config::Object::Contact::Defaults->{$key};
+        }
+    }
     my $self = {
         'type'        => 'contact',
         'primary_key' => 'contact_name',
