@@ -1867,21 +1867,7 @@ sub _file_history {
         return if $self->_file_history_commit($c, $commit, $dir);
     }
 
-    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s')."\x1e' -- .";
-    my $out = `$cmd`;
-    my $logs = [];
-    for my $line (split("\x1e", $out)) {
-        my @d = split("\x1f", $line);
-        next if scalar @d < 5;
-        $d[0] =~ s/^\n//mx;
-        push @{$logs}, {
-            'id'           => $d[0],
-            'author_name'  => $d[1],
-            'author_email' => $d[2],
-            'date'         => $d[3],
-            'message'      => $d[4],
-        };
-    }
+    my $logs = $self->_get_git_logs($c, $dir);
 
     Thruk::Backend::Manager::_page_data(undef, $c, $logs);
     $c->stash->{'logs'} = $logs;
@@ -1899,23 +1885,23 @@ sub _file_history_commit {
         return;
     }
 
-    my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%H', '%an', '%ae', '%at', '%s', '%b')."\x1f' ".$commit;
     $c->stash->{'template'}   = 'conf_objects_filehistory_commit.tt';
-    my $output = `$cmd`;
 
-    my @d = split(/\x1f/mx, $output);
-    my $data = {
-            'id'           => $d[0],
-            'author_name'  => $d[1],
-            'author_email' => $d[2],
-            'date'         => $d[3],
-            'message'      => $d[4],
-            'body'         => $d[5],
-            'diff'         => $d[6],
-    };
-    if(scalar @d < 4) {
+    my $data = $self->_get_git_commit($c, $dir, $commit);
+    if(!$data) {
         Thruk::Utils::set_message( $c, 'fail_message', 'Not a valid commit!' );
         return;
+    }
+
+    $c->{'stash'}->{'previous'} = '';
+    $c->{'stash'}->{'next'}     = '';
+    my $logs = $self->_get_git_logs($c, $dir);
+    for my $l (@{$logs}) {
+        if($l->{'id'} eq $data->{'id'}) {
+            $c->{'stash'}->{'previous'} = $self->_get_git_commit($c, $dir, $l->{'previous'}) if $l->{'previous'};
+            $c->{'stash'}->{'next'}     = $self->_get_git_commit($c, $dir, $l->{'next'})     if $l->{'next'};
+            last;
+        }
     }
 
     # make new files visible
@@ -1929,10 +1915,60 @@ sub _file_history_commit {
     $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
     $data->{'diff'} =~ s/^\s+//gmx;
 
+    $c->{'stash'}->{'dir'}    = $dir;
     $c->{'stash'}->{'data'}   = $data;
     $c->{'stash'}->{'links'}  = $diff_link_files;
 
     return 1;
+}
+
+##########################################################
+sub _get_git_logs {
+    my($self, $c, $dir) = @_;
+    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%s')."\x1e' -- .";
+    my $out = `$cmd`;
+    my $logs = [];
+    my $last;
+    for my $line (split("\x1e", $out)) {
+        my @d = split("\x1f", $line);
+        next if scalar @d < 5;
+        $d[0] =~ s/^\n//mx;
+        my $data = {
+            'id'           => $d[0],
+            'author_name'  => $d[1],
+            'author_email' => $d[2],
+            'date'         => $d[3],
+            'message'      => $d[4],
+            'next'         => '',
+            'previous'     => '',
+        };
+        push @{$logs}, $data;
+        $last->{'previous'} = $data->{'id'} if $last;
+        $data->{'next'}     = $last->{'id'} if $last;
+        $last = $data;
+    }
+    return $logs;
+}
+
+##########################################################
+sub _get_git_commit {
+    my($self, $c, $dir, $commit) = @_;
+    my $cmd = "cd '".$dir."' && git show --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%p', '%t', '%s', '%b')."\x1f' ".$commit;
+    my $output = `$cmd`;
+    my @d = split(/\x1f/mx, $output);
+    return if scalar @d < 4;
+    my $data = {
+            'id'           => $d[0],
+            'author_name'  => $d[1],
+            'author_email' => $d[2],
+            'date'         => $d[3],
+            'parent'       => $d[4],
+            'tree'         => $d[5],
+            'message'      => $d[6],
+            'body'         => $d[7],
+            'diff'         => $d[8],
+    };
+    return $data;
 }
 
 ##########################################################
