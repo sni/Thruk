@@ -6,8 +6,6 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Digest::MD5 qw(md5_hex);
-use Monitoring::Livestatus::INET;
-use Monitoring::Livestatus::UNIX;
 use Encode;
 use JSON::XS;
 
@@ -147,7 +145,6 @@ sub new {
       "warnings"                    => 1,       # show warnings, for example on querys without Column: Header
       "logger"                      => undef,   # logger object used for statistical informations and errors / warnings
       "deepcopy"                    => undef,   # copy result set to avoid errors with tied structures
-      "disabled"                    => 0,       # if disabled, this peer will not receive any query
       "retries_on_connection_error" => 3,       # retry x times to connect
       "retry_interval"              => 1,       # retry after x seconds
     };
@@ -175,28 +172,20 @@ sub new {
     bless $self, $class;
 
     # set our peer(s) from the options
-    my $peers = $self->_get_peers();
-
-    if(!defined $peers) {
-        croak('please specify at least one peer, socket or server');
-    }
+    my $peer = $self->_get_peer();
 
     if(!defined $self->{'backend'}) {
-        if(scalar @{$peers} == 1) {
-            my $peer = $peers->[0];
-            $options{'name'} = $peer->{'name'};
-            $options{'peer'} = $peer->{'peer'};
-            if($peer->{'type'} eq 'UNIX') {
-                $self->{'CONNECTOR'} = new Monitoring::Livestatus::UNIX(%options);
-            }
-            elsif($peer->{'type'} eq 'INET') {
-                $self->{'CONNECTOR'} = new Monitoring::Livestatus::INET(%options);
-            }
-            $self->{'peer'} = $peer->{'peer'};
+        $options{'name'} = $peer->{'name'};
+        $options{'peer'} = $peer->{'peer'};
+        if($peer->{'type'} eq 'UNIX') {
+            require Monitoring::Livestatus::UNIX;
+            $self->{'CONNECTOR'} = new Monitoring::Livestatus::UNIX(%options);
         }
-        else {
-            die('what?');
+        elsif($peer->{'type'} eq 'INET') {
+            require Monitoring::Livestatus::INET;
+            $self->{'CONNECTOR'} = new Monitoring::Livestatus::INET(%options);
         }
+        $self->{'peer'} = $peer->{'peer'};
     }
 
     # set names and peer for non multi backends
@@ -226,9 +215,7 @@ Always returns true.
 =cut
 
 sub do {
-    my $self      = shift;
-    my $statement = shift;
-    return if $self->{'disabled'};
+    my($self, $statement) = @_;
     $self->_send($statement);
     return(1);
 }
@@ -274,11 +261,8 @@ column aliases can be defined with a rename hash
 =cut
 
 sub selectall_arrayref {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
-    my $limit     = shift || 0;
-    return if $self->{'disabled'};
+    my($self, $statement, $opt, $limit) = @_;
+    $limit = 0 unless defined $limit;
     my $result;
 
     # make opt hash keys lowercase
@@ -338,7 +322,6 @@ sub selectall_arrayref {
             push @{$result->{'keys'}}, $key;
         }
     }
-
     return($result->{'result'});
 }
 
@@ -357,10 +340,7 @@ Sends a query and returns a hashref with the given key
 =cut
 
 sub selectall_hashref {
-    my $self      = shift;
-    my $statement = shift;
-    my $key_field = shift;
-    my $opt       = shift;
+    my($self, $statement, $key_field, $opt) = @_;
 
     $opt = $self->_lowercase_and_verify_options($opt);
 
@@ -430,9 +410,7 @@ produces a hash with host the contact assosiation
 =cut
 
 sub selectcol_arrayref {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
+    my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
@@ -469,9 +447,7 @@ returns undef if nothing was found
 
 =cut
 sub selectrow_array {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
+    my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
@@ -497,9 +473,7 @@ returns undef if nothing was found
 
 =cut
 sub selectrow_arrayref {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
+    my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
@@ -526,9 +500,7 @@ returns undef if nothing was found
 
 =cut
 sub selectrow_hashref {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
+    my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
@@ -556,9 +528,7 @@ returns undef if nothing was found
 
 =cut
 sub selectscalar_value {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
+    my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
@@ -582,8 +552,7 @@ returns the current setting if called without new value
 
 =cut
 sub errors_are_fatal {
-    my $self  = shift;
-    my $value = shift;
+    my($self, $value) = @_;
     my $old   = $self->{'errors_are_fatal'};
 
     $self->{'errors_are_fatal'}                = $value;
@@ -605,8 +574,7 @@ returns the current setting if called without new value
 
 =cut
 sub warnings {
-    my $self  = shift;
-    my $value = shift;
+    my($self, $value) = @_;
     my $old   = $self->{'warnings'};
 
     $self->{'warnings'}                = $value;
@@ -630,8 +598,7 @@ returns the current setting if called without new value
 
 =cut
 sub verbose {
-    my $self  = shift;
-    my $value = shift;
+    my($self, $value) = @_;
     my $old   = $self->{'verbose'};
 
     $self->{'verbose'}                = $value;
@@ -653,8 +620,7 @@ when using multiple backends, a list of all addresses is returned in list contex
 
 =cut
 sub peer_addr {
-    my $self  = shift;
-
+    my($self) = @_;
     return "".$self->{'peer'};
 }
 
@@ -674,8 +640,7 @@ when using multiple backends, a list of all names is returned in list context
 
 =cut
 sub peer_name {
-    my $self  = shift;
-    my $value = shift;
+    my($self, $value) = @_;
 
     if(defined $value and $value ne '') {
         $self->{'name'} = $value;
@@ -697,70 +662,18 @@ when using multiple backends, a list of all keys is returned in list context
 
 =cut
 sub peer_key {
-    my $self  = shift;
+    my($self) = @_;
 
     if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr." ".$self->peer_name); }
 
     return $self->{'key'};
 }
 
-
-########################################
-
-=head2 marked_bad
-
- $ml->marked_bad()
-
-returns true if the current connection is marked down
-
-=cut
-sub marked_bad {
-    my $self  = shift;
-
-    return 0;
-}
-
-
-########################################
-
-=head2 disable
-
- $ml->disable()
-
-disables this connection, returns the last state.
-
-=cut
-sub disable {
-    my $self  = shift;
-    my $prev = $self->{'disabled'};
-    $self->{'disabled'} = 1;
-    return $prev;
-}
-
-
-########################################
-
-=head2 enable
-
- $ml->enable()
-
-enables this connection, returns the last state.
-
-=cut
-sub enable {
-    my $self  = shift;
-    my $prev = $self->{'disabled'};
-    $self->{'disabled'} = 0;
-    return $prev;
-}
-
 ########################################
 # INTERNAL SUBS
 ########################################
 sub _send {
-    my $self       = shift;
-    my $statement  = shift;
-    my $opt        = shift;
+    my($self, $statement, $opt) = @_;
 
     delete $self->{'meta_data'};
 
@@ -896,29 +809,34 @@ sub _send {
 
     my $limit_start = 0;
     if(defined $opt->{'limit_start'}) { $limit_start = $opt->{'limit_start'}; }
+    # body is already parsed
     my $result;
-    # fix json output
-    $body =~ s/\],\n\]\n$/]]/mx;
-    eval {
-        $result = decode_json($body);
-    };
-    # fix low/high surrogate errors
-    # missing high surrogate character in surrogate pair
-    # surrogate pair expected
-    if($@) {
-        # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
-        $body =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxi;
+    if($status == 200) {
+        $result = $body;
+    } else {
+        my $json_decoder = JSON::XS->new->utf8->relaxed;
+        # fix json output
         eval {
-            $result = decode_json($body);
+            $result = $json_decoder->decode($body);
         };
-    }
-    if($@) {
-        my $message = "ERROR ".$@." in text: '".$body."'\" for statement: '$statement'\n";
-        $self->{'logger'}->error($message) if $self->{'verbose'};
-        if($self->{'errors_are_fatal'}) {
-            croak($message);
+        # fix low/high surrogate errors
+        # missing high surrogate character in surrogate pair
+        # surrogate pair expected
+        if($@) {
+            # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
+            $body =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxi;
+            eval {
+                $result = $json_decoder->decode($body);
+            };
         }
-        return({ keys => [], result => []});
+        if($@) {
+            my $message = "ERROR ".$@." in text: '".$body."'\" for statement: '$statement'\n";
+            $self->{'logger'}->error($message) if $self->{'verbose'};
+            if($self->{'errors_are_fatal'}) {
+                croak($message);
+            }
+            return({ keys => [], result => []});
+        }
     }
     if(!defined $result) {
         my $message = "ERROR undef result for text: '".$body."'\" for statement: '$statement'\n";
@@ -961,8 +879,7 @@ sub _send {
 
 ########################################
 sub _open {
-    my $self      = shift;
-    my $statement = shift;
+    my($self, $statement) = @_;
 
     # return the current socket in keep alive mode
     if($self->{'keepalive'} and defined $self->{'sock'} and $self->{'sock'}->connected) {
@@ -983,8 +900,7 @@ sub _open {
 
 ########################################
 sub _close {
-    my $self  = shift;
-    my $sock  = shift;
+    my($self, $sock) = @_;
     undef $self->{'sock'};
     return($self->{'CONNECTOR'}->_close($sock));
 }
@@ -1090,12 +1006,10 @@ The values from all backends with be summed up to a total.
 ########################################
 # wrapper around _send_socket_do
 sub _send_socket {
-    my $self      = shift;
-    my $statement = shift;
+    my($self, $statement) = @_;
 
     my $retries = 0;
     my($status, $msg, $recv);
-
 
     # try to avoid connection errors
     eval {
@@ -1136,8 +1050,7 @@ sub _send_socket {
 
 ########################################
 sub _send_socket_do {
-    my $self      = shift;
-    my $statement = shift;
+    my($self, $statement) = @_;
     my($recv,$header);
 
     my $sock = $self->_open() or return(491, $self->_get_error(491), $!);
@@ -1155,8 +1068,23 @@ sub _send_socket_do {
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = $self->_parse_header($header, $sock);
     return($status, $msg, undef) if !defined $content_length;
+    my $json_decoder = JSON::XS->new->utf8->relaxed;
     if($content_length > 0) {
-        $sock->read($recv, $content_length) or return($self->_socket_error($statement, $sock, 'reading body from socket failed'));
+        if($status == 200) {
+            my $remaining = $content_length;
+            my $length    = 8192;
+            if($remaining < $length) { $length = $remaining; }
+            while($length > 0 && $sock->read(my $buf, $length)) {
+                # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
+                $buf =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxio;
+                $json_decoder->incr_parse($buf);
+                $remaining = $remaining -$length;
+                if($remaining < $length) { $length = $remaining; }
+            }
+            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, $sock, 'reading body from socket failed: '.$json_decoder->incr_text));
+        } else {
+            $sock->read($recv, $content_length) or return($self->_socket_error($statement, $sock, 'reading body from socket failed'));
+        }
     }
 
     $self->_close($sock) unless $self->{'keepalive'};
@@ -1165,10 +1093,7 @@ sub _send_socket_do {
 
 ########################################
 sub _socket_error {
-    my $self      = shift;
-    my $statement = shift;
-    my $sock      = shift;
-    my $body      = shift;
+    my($self, $statement, $sock, $body) = @_;
 
     my $message = "\n";
     $message   .= "peer                ".Dumper($self->peer_name);
@@ -1191,9 +1116,7 @@ sub _socket_error {
 
 ########################################
 sub _parse_header {
-    my $self   = shift;
-    my $header = shift;
-    my $sock   = shift;
+    my($self, $header, $sock) = @_;
 
     if(!defined $header) {
         return(497, $self->_get_error(497), undef);
@@ -1251,8 +1174,7 @@ pairs:
 
 ########################################
 sub _extract_keys_from_stats_statement {
-    my $self      = shift;
-    my $statement = shift;
+    my($self, $statement) = @_;
 
     my(@header, $new_statement);
 
@@ -1311,8 +1233,7 @@ sub _extract_keys_from_stats_statement {
 
 ########################################
 sub _extract_keys_from_columns_header {
-    my $self      = shift;
-    my $statement = shift;
+    my($self, $statement) = @_;
 
     my(@header, $new_statement);
     for my $line (split/\n/mx, $statement) {
@@ -1350,8 +1271,7 @@ Errorhandling can be done like this:
 
 =cut
 sub _get_error {
-    my $self = shift;
-    my $code = shift;
+    my($self, $code) = @_;
 
     my $codes = {
         '200' => 'OK. Reponse contains the queried data.',
@@ -1381,8 +1301,8 @@ sub _get_error {
 }
 
 ########################################
-sub _get_peers {
-    my $self   = shift;
+sub _get_peer {
+    my($self) = @_;
 
     # set options for our peer(s)
     my %options;
@@ -1447,7 +1367,7 @@ sub _get_peers {
 
     # check if we got a peer
     if(scalar @{$peers} == 0) {
-        croak('please specify at least one peer, socket or server');
+        croak('please specify a peer');
     }
 
     # clean up
@@ -1455,14 +1375,13 @@ sub _get_peers {
     delete $options{'socket'};
     delete $options{'server'};
 
-    return $peers;
+    return $peers->[0];
 }
 
 
 ########################################
 sub _lowercase_and_verify_options {
-    my $self   = shift;
-    my $opts   = shift;
+    my($self, $opts) = @_;
     my $return = {};
 
     # list of allowed options
@@ -1507,10 +1426,7 @@ sub _lowercase_and_verify_options {
 
 ########################################
 sub _log_statement {
-    my $self      = shift;
-    my $statement = shift;
-    my $opt       = shift;
-    my $limit     = shift;
+    my($self, $statement, $opt, $limit) = @_;
     my $d = Data::Dumper->new([$opt]);
     $d->Indent(0);
     my $optstring = $d->Dump;
