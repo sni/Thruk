@@ -24,8 +24,9 @@ Business Process
 
 =cut
 
-my @stateful_keys = qw/status status_text last_check last_state_change/;
-my @saved_keys    = qw/name template rankDir state_type/;
+my @extra_json_keys = qw/id/;
+my @stateful_keys   = qw/status status_text last_check last_state_change/;
+my @saved_keys      = qw/name template rankDir state_type/;
 
 ##########################################################
 
@@ -563,6 +564,20 @@ sub _submit_results_to_core {
     }
 
     return;
+}
+
+##########################################################
+sub TO_JSON {
+    my($self) = @_;
+    my $data = {};
+    for my $key (@extra_json_keys, @stateful_keys, @saved_keys) {
+        $data->{$key} = $self->{$key};
+    }
+    $data->{'nodes'} = [];
+    for my $n (@{$self->{'nodes'}}) {
+        push @{$data->{'nodes'}}, $n->TO_JSON();
+    }
+    return $data;
 }
 
 ##########################################################

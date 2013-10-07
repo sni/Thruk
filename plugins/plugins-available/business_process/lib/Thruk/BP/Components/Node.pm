@@ -19,7 +19,7 @@ Business Process Node
 
 =cut
 
-my @stateful_keys = qw/status status_text last_check last_state_change short_desc
+my @stateful_keys   = qw/status status_text last_check last_state_change short_desc
                        scheduled_downtime_depth acknowledged/;
 
 ##########################################################
@@ -419,6 +419,16 @@ sub _result_to_string {
         $string .= "\n\n".$self->_result_to_string($bp, 1);
     }
     return $string;
+}
+
+##########################################################
+sub TO_JSON {
+    my($self) = @_;
+    my $data = $self->get_save_obj();
+    for my $key (@stateful_keys) {
+        $data->{$key} = $self->{$key};
+    }
+    return $data;
 }
 
 ##########################################################

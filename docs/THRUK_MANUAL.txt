@@ -2916,6 +2916,15 @@ See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring
 for a detailed description of all parameters.
 
 
+==== Business Process
+
+Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=id
+
+Parameters: optional business process id
+
+Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=1
+
+
 
 
 == SLA Reporting

@@ -288,6 +288,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'bp'} = $bp;
 
         if($action eq 'details') {
+            if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {
+                $c->stash->{'json'} = { $bp->{'id'} => $bp->TO_JSON() };
+                return $c->forward('Thruk::View::JSON');
+            }
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;
@@ -330,6 +334,16 @@ sub _bp_start_page {
     # load business processes
     my $bps = Thruk::BP::Utils::load_bp_data($c);
     $c->stash->{'bps'} = $bps;
+
+    if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {
+        my $data = {};
+        for my $bp (@{$bps}) {
+            $data->{$bp->{'id'}} = $bp->TO_JSON();
+        }
+        $c->stash->{'json'} = $data;
+        return $c->forward('Thruk::View::JSON');
+    }
+
 
     Thruk::Utils::ssi_include($c);
 
