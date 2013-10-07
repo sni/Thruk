@@ -741,7 +741,10 @@ sub _ua_post_with_timeout {
     alarm($timeout_for_client);
 
     # make sure nobody else calls alarm in between
-    *CORE::GLOBAL::alarm = sub {};
+    {
+        no warnings 'redefine';
+        *CORE::GLOBAL::alarm = sub(_) {};
+    };
 
     # try to fetch result
     my $res = $ua->post($url, $data);
