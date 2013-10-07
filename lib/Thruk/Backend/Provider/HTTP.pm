@@ -655,7 +655,6 @@ returns result for given request
 sub _req {
     my($self, $sub, $args, $redirects) = @_;
     $redirects = 0 unless defined $redirects;
-    my $skip_enc = 0;
 
     # clean code refs
     _clean_code_refs($args);
@@ -667,8 +666,7 @@ sub _req {
         'args'          => $args,
     };
     if(defined $args and ref $args eq 'HASH') {
-        $options->{'auth'} = $args->{'auth'}     if defined $args->{'auth'};
-        $skip_enc          = $args->{'skip_enc'} if defined $args->{'skip_enc'};
+        $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
     }
 
     my $response = _ua_post_with_timeout(
@@ -689,16 +687,9 @@ sub _req {
     }
 
     if($response->is_success) {
-        # encode content, unless skipped
-        my $data_str;
-        if($skip_enc) {
-            $data_str = $response->decoded_content;
-        } else {
-            $data_str = encode_utf8($response->decoded_content);
-        }
         my $data;
         eval {
-            $data = decode_json($data_str);
+            $data = decode_json($response->decoded_content);
         };
         die($@."\nrequest:\n".Dumper($response)) if $@;
         if($data->{'rc'} == 1) {

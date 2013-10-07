@@ -1957,7 +1957,6 @@ sub _remote_do {
                             auth     => $c->stash->{'remote_user'},
                             sub      => $sub,
                             args     => $args,
-                            skip_enc => 1,
                     });
     };
     if($@) {
@@ -1985,7 +1984,6 @@ sub _remote_do_bg {
                             sub      => $sub,
                             args     => $args,
                             wait     => 1,
-                            skip_enc => 1,
                     });
     die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
     return $res->[2];
