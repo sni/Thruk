@@ -25,7 +25,6 @@ requires 'Class::C3::XS'                          => 0;     # speed up class thi
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
 requires 'Moose'                                  => 0;     # required by Thruk::Action::AddDefaults
 requires 'Socket'                                 => 0;     # required by Monitoring::Livestatus
-requires 'Monitoring::Livestatus'                 => 0;     # required by Thruk::Backend::Manager::Provider::Livestatus
 requires 'Monitoring::Availability'               => 0;     # required by Thruk::Controller::avail
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
