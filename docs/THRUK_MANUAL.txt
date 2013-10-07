@@ -2916,7 +2916,7 @@ See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring
 for a detailed description of all parameters.
 
 
-==== Business Process
+==== Business Process Data
 
 Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=id
 
