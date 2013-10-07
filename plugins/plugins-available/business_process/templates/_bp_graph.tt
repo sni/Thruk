@@ -21,6 +21,9 @@
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
         <div class="bp_node_icons">
+          [% IF n.testmode %]
+            <img src="[% url_prefix %]thruk/plugins/business_process/images/lock.png" alt="Status has been locked by testmode" title="Status has been locked by testmode" height="12" width="12">
+          [% END %]
           [% IF n.scheduled_downtime_depth > 0 %]
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="12" width="12">
           [% END %]
