@@ -685,64 +685,11 @@ function updateSitePanelCheckBox() {
         total['subsections'][subsection] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
         jQuery('INPUT.btn_sites_'+subsection).each(function(i, b) {
             var section = b.value;
-            total['subsections'][subsection]['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
-            jQuery('INPUT.section_'+subsection+'_'+section).each(function(i, b) {
-                if(jQuery(b).hasClass('button_peerDIS') || jQuery(b).hasClass('button_peerHID')) {
-                    total['subsections'][subsection]['sections'][section]['disabled']++;
-                    total['subsections'][subsection]['disabled']++;
-                    total['disabled']++;
-                }
-                else if(jQuery(b).hasClass('button_peerUP')) {
-                    total['subsections'][subsection]['sections'][section]['up']++;
-                    total['subsections'][subsection]['up']++;
-                    total['up']++;
-                }
-                else if(jQuery(b).hasClass('button_peerDOWN')) {
-                    total['subsections'][subsection]['sections'][section]['down']++;
-                    total['subsections'][subsection]['down']++;
-                    total['down']++;
-                } else {
-                    if(thruk_debug_js) { alert("ERROR: no known class found in subsection: " + subsection + ', section: ' + section + ', site: ' + b.title ); }
-                }
-                total['subsections'][subsection]['sections'][section]['total']++;
-                total['subsections'][subsection]['total']++;
-                total['total']++;
-            });
-
-            /* set section button */
-            jQuery('#btn_sites_' + subsection + '_' + section)
-                    .removeClass("button_peerDIS")
-                    .removeClass("button_peerDOWN")
-                    .removeClass("button_peerUP")
-                    .removeClass("button_peerWARN")
-                    .removeClass("button_peerUPDIS")
-                    .removeClass("button_peerDOWNDIS");
-            if(total['subsections'][subsection]['sections'][section]['disabled'] == total['subsections'][subsection]['sections'][section]['total']) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDIS');
-            }
-            else if(total['subsections'][subsection]['sections'][section]['up'] == total['subsections'][subsection]['sections'][section]['total']) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerUP');
-            }
-            else if(total['subsections'][subsection]['sections'][section]['down'] == total['subsections'][subsection]['sections'][section]['total']) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDOWN');
-            }
-            else if(total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] > 0) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerWARN');
-            }
-            else if(total['subsections'][subsection]['sections'][section]['up'] > 0 && total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] == 0) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerUPDIS');
-            }
-            else if(total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] == 0) {
-                jQuery('#btn_sites_' + subsection + '_' + section).addClass('button_peerDOWNDIS');
-            }
-
-            /* set section checkbox */
-            if(total['subsections'][subsection]['sections'][section]['disabled'] > 0) {
-                jQuery('#all_section_' + subsection + '_' + section).attr('checked', false);
-            } else {
-                jQuery('#all_section_' + subsection + '_' + section).attr('checked', true);
-            }
+            total = count_site_section_totals(total, section, subsection);
         });
+        if(jQuery('INPUT.btn_sites_'+subsection).length == 0) {
+            total = count_site_section_totals(total, subsection, 'Default');
+        }
     });
 
     /* check all button */
@@ -751,6 +698,70 @@ function updateSitePanelCheckBox() {
     } else {
         jQuery('#all_backends').attr('checked', true);
     }
+}
+
+/* count totals for a section */
+function count_site_section_totals(total, section, subsection) {
+    var cls_subsection = subsection.replace(/[^\w]/g, '_');
+    var cls_section    = section.replace(/[^\w]/g, '_');
+    total['subsections'][subsection]['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
+    jQuery('INPUT.section_'+cls_subsection+'_'+cls_section).each(function(i, b) {
+        if(jQuery(b).hasClass('button_peerDIS') || jQuery(b).hasClass('button_peerHID')) {
+            total['subsections'][subsection]['sections'][section]['disabled']++;
+            total['subsections'][subsection]['disabled']++;
+            total['disabled']++;
+        }
+        else if(jQuery(b).hasClass('button_peerUP')) {
+            total['subsections'][subsection]['sections'][section]['up']++;
+            total['subsections'][subsection]['up']++;
+            total['up']++;
+        }
+        else if(jQuery(b).hasClass('button_peerDOWN')) {
+            total['subsections'][subsection]['sections'][section]['down']++;
+            total['subsections'][subsection]['down']++;
+            total['down']++;
+        } else {
+            if(thruk_debug_js) { alert("ERROR: no known class found in subsection: " + subsection + ', section: ' + section + ', site: ' + b.title ); }
+        }
+        total['subsections'][subsection]['sections'][section]['total']++;
+        total['subsections'][subsection]['total']++;
+        total['total']++;
+    });
+
+    /* set section button */
+    jQuery('#btn_sites_' + cls_subsection + '_' + cls_section)
+            .removeClass("button_peerDIS")
+            .removeClass("button_peerDOWN")
+            .removeClass("button_peerUP")
+            .removeClass("button_peerWARN")
+            .removeClass("button_peerUPDIS")
+            .removeClass("button_peerDOWNDIS");
+    if(total['subsections'][subsection]['sections'][section]['disabled'] == total['subsections'][subsection]['sections'][section]['total']) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDIS');
+    }
+    else if(total['subsections'][subsection]['sections'][section]['up'] == total['subsections'][subsection]['sections'][section]['total']) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerUP');
+    }
+    else if(total['subsections'][subsection]['sections'][section]['down'] == total['subsections'][subsection]['sections'][section]['total']) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDOWN');
+    }
+    else if(total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] > 0) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerWARN');
+    }
+    else if(total['subsections'][subsection]['sections'][section]['up'] > 0 && total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] == 0) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerUPDIS');
+    }
+    else if(total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] == 0) {
+        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDOWNDIS');
+    }
+
+    /* set section checkbox */
+    if(total['subsections'][subsection]['sections'][section]['disabled'] > 0) {
+        jQuery('#all_section_' + cls_subsection + '_' + cls_section).attr('checked', false);
+    } else {
+        jQuery('#all_section_' + cls_subsection + '_' + cls_section).attr('checked', true);
+    }
+    return total;
 }
 
 /* toogle checkbox by id */
