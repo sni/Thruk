@@ -72,6 +72,7 @@ BEGIN {
     /;
     require Catalyst;
     Catalyst->import(@catalyst_plugins);
+    __PACKAGE__->config( encoding => 'UTF-8' );
 };
 
 ###################################################
@@ -80,6 +81,7 @@ our $VERSION = '1.76';
 ###################################################
 # load config loader
 __PACKAGE__->config(%Thruk::Config::config);
+__PACKAGE__->config( encoding => 'UTF-8' );
 
 ###################################################
 # install leak checker
@@ -312,7 +314,7 @@ L<Thruk::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 
-Sven Nierlein, 2010-2012, <nierlein@cpan.org>
+Sven Nierlein, 2009-2013, <sven.nierlein@consol.de>
 
 =head1 LICENSE
 

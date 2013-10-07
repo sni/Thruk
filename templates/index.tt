@@ -105,7 +105,7 @@
           <h2>Thruk</h2>
           <p align="center">
             <a href="[% home_link %]">[% home_link %]</a><br />
-            Copyright &copy; 2010-2012 Thruk Developer Team.<br />
+            Copyright &copy; 2009-2013 Thruk Developer Team.<br />
             Copyright &copy; 2009 Nagios Core Development Team and Community Contributors.<br />
             Copyright &copy; 1999-2009 Ethan Galstad.<br />
           </p>

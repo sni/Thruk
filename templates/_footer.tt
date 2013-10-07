@@ -1,7 +1,7 @@
 ﻿[% IF use_ajax_search %]
 <img src="[% url_prefix %]thruk/themes/[% theme %]/images/loading-icon.gif" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 [% END %]
-    <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
+    <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2009-2013 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
   [% ssi_footer %]
   </body>
 </html>

@@ -38,7 +38,7 @@ our %config = ('name'                   => 'Thruk',
               'default_view'           => 'TT',
               'View::TT'               => {
                   TEMPLATE_EXTENSION => '.tt',
-                  ENCODING           => 'utf8',
+                  ENCODING           => 'utf-8',
                   INCLUDE_PATH       => $project_root.'/templates',
                   RECURSION          => 1,
                   FILTERS            => {
