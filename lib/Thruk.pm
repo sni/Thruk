@@ -216,6 +216,7 @@ if($ENV{'SIZEME'}) {
     # add signal handler to print memory information
     # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
     $SIG{'USR1'} = sub {
+        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Utils::get_memory_usage());
         eval {
             require Devel::SizeMe;
             Devel::SizeMe::perl_size();
