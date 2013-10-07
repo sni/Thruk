@@ -69,11 +69,11 @@ BEGIN {
     /;
     if($Catalyst::Runtime::VERSION >= 5.90042) {
         # since 5.90042 catalyst encodes by core
-        @catalyst_plugins = grep(!/^Unicode::Encoding$/, @catalyst_plugins);
+        @catalyst_plugins = grep(!/^Unicode::Encoding$/mx, @catalyst_plugins);
     }
     # fcgid setups have no static content
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        @catalyst_plugins = grep(!/^Static::Simple$/, @catalyst_plugins);
+        @catalyst_plugins = grep(!/^Static::Simple$/mx, @catalyst_plugins);
     }
     require Catalyst;
     Catalyst->import(@catalyst_plugins);
