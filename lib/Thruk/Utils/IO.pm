@@ -16,6 +16,7 @@ use Carp;
 use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
 use JSON::XS;
+use Encode qw/encode_utf8/;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -196,6 +197,7 @@ sub json_lock_retrieve {
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
     flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
     while(my $line = <$fh>) {
+        $line = encode_utf8($line);
         $json->incr_parse($line);
     }
     $data = $json->incr_parse;

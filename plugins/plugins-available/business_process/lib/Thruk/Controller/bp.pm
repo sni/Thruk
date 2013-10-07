@@ -146,6 +146,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($action eq 'remove') {
             $bp->remove($c);
+            $bps = Thruk::BP::Utils::load_bp_data($c);
+            Thruk::BP::Utils::save_bp_objects($c, $bps);
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
