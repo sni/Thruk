@@ -2,15 +2,15 @@
 [% WRAPPER _conf_objects_frame.tt %]
 
 
-<table border="0" class='data conftoolobj' width="700">
+<table border="0" class='data conftoolobj' width="800">
   <tr>
-    <th class='data' width="20%" align="left" style="font-weight: normal;">
+    <th class='data' width="160" align="left" style="font-weight: normal; white-space: nowrap;">
       [% IF previous %]
       <a href='conf.cgi?sub=objects&amp;action=history&id=[% previous.id %]&dir=[% dir %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='previous commit' title='previous commit' width="16" height="16" style="vertical-align: middle;"> [% date_format(c, previous.date) %]</a>
       [% END %]
     </th>
-    <th class='data' width="60%"><b>Commit: [% data.message %]</b></th>
-    <th class='data' width="20%" align="left" style="font-weight: normal;">
+    <th class='data'><b>Commit: [% data.message %]</b></th>
+    <th class='data' width="160" align="right" style="font-weight: normal; white-space: nowrap;">
       [% IF next %]
       <a href='conf.cgi?sub=objects&amp;action=history&id=[% next.id %]&dir=[% dir %]'>[% date_format(c, next.date) %] <img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_right.png' border="0" alt='next commit' title='next commit' width="16" height="16" style="vertical-align: middle;"></a>
       [% END %]
