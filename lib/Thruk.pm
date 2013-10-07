@@ -55,12 +55,9 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 BEGIN {
-    my @catalyst_plugins = qw/Thruk::ConfigLoader/;
-    if($Catalyst::Runtime::VERSION < 5.90042) {
-        # since 5.90042 catalyst encodes by core
-        push @catalyst_plugins, 'Unicode::Encoding';
-    }
-    push @catalyst_plugins, qw/
+    my @catalyst_plugins = qw/
+          Thruk::ConfigLoader
+          Unicode::Encoding
           Compress
           Authentication
           Authorization::ThrukRoles
@@ -70,6 +67,14 @@ BEGIN {
           Cache
           Thruk::RemoveNastyCharsFromHttpParam
     /;
+    if($Catalyst::Runtime::VERSION >= 5.90042) {
+        # since 5.90042 catalyst encodes by core
+        @catalyst_plugins = grep(!/^Unicode::Encoding$/, @catalyst_plugins);
+    }
+    # fcgid setups have no static content
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        @catalyst_plugins = grep(!/^Static::Simple$/, @catalyst_plugins);
+    }
     require Catalyst;
     Catalyst->import(@catalyst_plugins);
     __PACKAGE__->config( encoding => 'UTF-8' );
