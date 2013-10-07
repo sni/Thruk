@@ -547,6 +547,7 @@ sub _submit_results_to_core {
             DIR      => $spool,
         );
         $fh->unlink_on_destroy(0);
+        binmode($fh, ":encoding(UTF-8)");
         print $fh "### Active Check Result File ###\n";
         print $fh sprintf("file_time=%d\n\n",time);
         for my $r (@{$results}) {

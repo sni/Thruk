@@ -149,7 +149,7 @@ sub save_bp_objects {
     }
 
     my($fh, $filename) = tempfile();
-    binmode $fh, ":utf8";
+    binmode($fh, ":encoding(UTF-8)");
     for my $hostname (keys %{$obj->{'hosts'}}) {
         print $fh 'define host {', "\n";
         for my $attr (keys %{$obj->{'hosts'}->{$hostname}}) {
