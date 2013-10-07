@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # create combined javascript/css files
 BEGIN {
@@ -7,9 +7,16 @@ BEGIN {
 use lib 'lib';
 use Thruk::Config;
 
-my $dos2unix = "/usr/bin/dos2unix";
-$dos2unix    = "/usr/bin/fromdos"        if -x "/usr/bin/fromdos";
-$dos2unix    = "/opt/local/bin/dos2unix" if -x "/opt/local/bin/dos2unix";
+my($dos2unix, $yuicompr);
+for my $p (reverse split/:/, $ENV{'PATH'}) {
+    $dos2unix = $p.'/dos2unix'       if -x $p.'/dos2unix';
+    $dos2unix = $p.'/fromdos'        if -x $p.'/fromdos';
+    $yuicompr = $p.'/yui-compressor' if -x $p.'/yui-compressor';
+    $yuicompr = $p.'/yuicompressor'  if -x $p.'/yuicompressor';
+}
+
+die("dos2unix is required!")      unless $dos2unix;
+die("yuicompressor is required!") unless $yuicompr;
 
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
@@ -36,7 +43,7 @@ my $files = [
     'themes/themes-available/Thruk/stylesheets/all_in_one-'.$Thruk::Config::VERSION.'.css',
 ];
 for my $file (@{$files}) {
-    my $cmd = 'yui-compressor -o compressed.css '.$file.' && mv compressed.css '.$file;
+    my $cmd = $yuicompr.' -o compressed.css '.$file.' && mv compressed.css '.$file;
     print `$cmd`;
     if($? != 0) {
         print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
@@ -51,7 +58,7 @@ my $files = [
     'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js',
 ];
 for my $file (@{$files}) {
-    my $cmd = 'yui-compressor -o compressed.js '.$file.' && mv compressed.js '.$file;
+    my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
     print `$cmd`;
     if($? != 0) {
         print STDERR "yui-compressor failed, make sure yui-compressor is installed to create compressed files.\n";
