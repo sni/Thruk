@@ -298,7 +298,7 @@
 
 
 
-  <!-- TAB 5: GRAPH OPTIONS -->
+  <!-- TAB 5: GLOBAL OPTIONS -->
   <div id="tabs-5_[% bp.id %]">
     <table width="100%">
     <tr>
@@ -307,8 +307,22 @@
       </td>
     </tr>
     <tr>
-      <th align="left" valign="top">Graph Options:</th>
-      <td></td>
+      <th align="left" valign="top" colspan=2>Data Processing Options:</th>
+    </tr>
+    <tr>
+      <td width=120>State Type</td>
+      <td align="left">
+        <select name="bp_state_type">
+          <option value="both"[% IF bp.state_type == 'both' %] selected[% END %]>Use Hard and Soft States</option>
+          <option value="hard"[% IF bp.state_type == 'hard' %] selected[% END %]>Use Hard States Only</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2><hr></td>
+    </tr>
+    <tr>
+      <th align="left" valign="top" colspan=2>Graph Options:</th>
     </tr>
     <tr>
       <td width=120>Direction</td>

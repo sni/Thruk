@@ -690,7 +690,9 @@ function bp_update_status(evt, node) {
 /* toggle object creation */
 function bp_update_obj_create() {
     var checkbox = document.getElementById('bp_create_link');
-    jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+    if(checkbox) {
+        jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+    }
 }
 
 /* fired if mouse if over a node */

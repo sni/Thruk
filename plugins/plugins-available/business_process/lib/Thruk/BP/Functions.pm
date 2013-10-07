@@ -34,7 +34,7 @@ sub status {
         if(defined $servicedata->{$hostname}->{$description}) {
             $data = $servicedata->{$hostname}->{$description};
         } else {
-            my $services = $c->{'db'}->get_services( filter => [{ 'description' => $description }]);
+            my $services = $c->{'db'}->get_services( filter => [{ 'description' => $description }], extra_columns => [qw/last_hard_state last_hard_state_change/]);
             if(scalar @{$services} > 0) {
                 $data = $services->[0];
             }
@@ -44,11 +44,20 @@ sub status {
         if(defined $hostdata->{$hostname}) {
             $data = $hostdata->{$hostname};
         } else {
-            my $hosts = $c->{'db'}->get_hosts( filter => [{ 'name' => $hostname } ] );
+            my $hosts = $c->{'db'}->get_hosts( filter => [{ 'name' => $hostname } ], extra_columns => [qw/last_hard_state last_hard_state_change/] );
             if(scalar @{$hosts} > 0) {
                 $data = $hosts->[0];
             }
         }
+    }
+
+    # only hard states?
+    if($data and $bp->{'state_type'} eq 'hard' and $data->{'state_type'} != 1) {
+        return($data->{'last_hard_state'},
+               ($n->{'status_text'} || 'no plugin output yet'), # return last status text
+               undef,
+               {'last_state_change' => $data->{'last_hard_state_change'}}
+        );
     }
 
     if($data) {

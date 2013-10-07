@@ -240,7 +240,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $node->_set_function({'function' => $function});
 
             # bp options
-            for my $key (qw/rankDir/) {
+            for my $key (qw/rankDir state_type/) {
                 $bp->{$key} = $c->{'request'}->{'parameters'}->{'bp_'.$key} || '';
             }
 

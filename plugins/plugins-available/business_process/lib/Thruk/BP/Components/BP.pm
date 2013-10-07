@@ -25,7 +25,7 @@ Business Process
 =cut
 
 my @stateful_keys = qw/status status_text last_check last_state_change/;
-my @saved_keys    = qw/name template rankDir/;
+my @saved_keys    = qw/name template rankDir state_type/;
 
 ##########################################################
 
@@ -57,6 +57,7 @@ sub new {
         'last_check'        => 0,
         'last_state_change' => 0,
         'rankDir'           => 'TB',
+        'state_type'        => 'both',
 
         'exported_nodes'    => {},
         'testmode'          => 0,
@@ -517,7 +518,7 @@ sub _bulk_fetch_live_data {
             push @filter, { name => $hostname };
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_hosts(filter => [$filter]);
+        my $data   = $c->{'db'}->get_hosts(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
         $hostdata  = Thruk::Utils::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
@@ -528,7 +529,7 @@ sub _bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->{'db'}->get_services(filter => [$filter]);
+        my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
     return($hostdata, $servicedata);
