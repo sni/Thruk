@@ -18,7 +18,7 @@
     <li[% UNLESS allowed_for_edit %] class="ui-state-disabled"[% END %]><a href="bp.cgi?action=details&amp;edit=1&amp;bp=[% bp.id %]"><span class="ui-icon ui-icon-wrench">&nbsp;</span>Enable Edit Mode</a></li>
   [% END %]
   [% IF editmode || testmode %]
-    <li>
+    <li class="bp_submenu">
       <a href="#"><span class="ui-icon ui-icon-pin-w">&nbsp;</span>Test Mode</a>
       <ul>
         <li><a href="bp.cgi?action=details&amp;bp=[% bp.id %][% IF editmode %]&amp;edit=1[% END %]"><span>&nbsp;</span>Disable Test Mode</a></li>
