@@ -37,6 +37,11 @@ load all or specific business process
 =cut
 sub load_bp_data {
     my($c, $num, $editmode) = @_;
+
+    # make sure our folders exist
+    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp') unless -d $c->config->{'var_path'}.'/bp';
+    Thruk::Utils::IO::mkdir_r($c->config->{'home'}.'/bp')     unless -d $c->config->{'home'}.'/bp';
+
     my $bps   = [];
     my $pattern = '*.tbp';
     if($num) {
