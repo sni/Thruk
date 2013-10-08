@@ -128,7 +128,7 @@ if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
     open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
     Thruk::Utils::IO::close($fh, $pidfile);
-    $SIG{INT}  = sub { _remove_pid();  exit; };
+    $SIG{INT}  = sub { _remove_pid(); exit; };
     $SIG{TERM} = sub { _remove_pid(); exit; };
 }
 END {

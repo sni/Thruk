@@ -180,7 +180,10 @@ sub save_bp_objects {
         # and reload
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         if($cmd) {
-            `$cmd >/dev/null 2>&1 &`;
+            local $SIG{CHLD}='';
+            local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
+            `$cmd >/dev/null 2>&1`;
+            Thruk::Utils::wait_after_reload($c);
         }
     } else {
         # discard file

@@ -270,7 +270,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         });
         $bp->set_label($c, $label);
         die("internal error") unless $bp;
-        Thruk::BP::Utils::update_cron_file($c); # check cronjob
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
     }

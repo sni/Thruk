@@ -2175,17 +2175,7 @@ sub _config_reload {
     _nice_check_output($c);
 
     # wait until core responds again
-    for(1..30) {
-        sleep(1);
-        eval {
-            local $SIG{'PIPE'}='IGNORE'; # exits sometimes on reload
-            $c->{'db'}->reset_failed_backends();
-            $c->{'db'}->get_processinfo();
-        };
-        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
-            last;
-        }
-    }
+    Thruk::Utils::wait_after_reload($c);
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;

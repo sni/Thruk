@@ -1643,6 +1643,35 @@ sub restart_later {
     return;
 }
 
+
+##############################################
+
+=head2 wait_after_reload
+
+  wait_after_reload($c)
+
+wait up to 30 seconds till the core responds
+
+=cut
+
+sub wait_after_reload {
+    my($c) = @_;
+
+    # wait until core responds again
+    for(1..30) {
+        sleep(1);
+        eval {
+            local $SIG{'PIPE'}='IGNORE'; # exits sometimes on reload
+            $c->{'db'}->reset_failed_backends();
+            $c->{'db'}->get_processinfo();
+        };
+        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
+            last;
+        }
+    }
+    return;
+}
+
 ##############################################
 
 =head2 get_cron_entries_from_param
