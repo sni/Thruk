@@ -43,7 +43,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/javascript\/overlib\.js/',
+             '/(javascript\/overlib\.js|all_in_one-.\...\.css)/',
             ],
 });
 
@@ -53,7 +53,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/Dynarch Calendar/',
+             '/data:image/',
              '/jquery\.org\/license/',
              '/\.peerDOWN/',
             ],

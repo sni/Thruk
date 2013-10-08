@@ -22,6 +22,7 @@ set -e
 case "$1" in
     remove)
         rm -rf /var/cache/thruk
+        rmdir /etc/thruk/bp >/dev/null 2>&1
     ;;
     upgrade)
         rm -rf /var/cache/thruk/*
@@ -32,6 +33,7 @@ case "$1" in
         rm -rf /var/cache/thruk
         rm -rf /var/lib/thruk
         rm -rf /var/log/thruk
+        rm -rf /etc/thruk/bp
     ;;
 
     failed-upgrade|abort-install|abort-upgrade|disappear)

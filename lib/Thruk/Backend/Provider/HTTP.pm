@@ -752,7 +752,7 @@ sub _ua_post_with_timeout {
     # make sure nobody else calls alarm in between
     {
         no warnings 'redefine';
-        *CORE::GLOBAL::alarm = sub(_) {};
+        *CORE::GLOBAL::alarm = sub {};
     };
 
     # try to fetch result

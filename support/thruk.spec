@@ -64,7 +64,6 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
-%{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/bp
 %{__mkdir} -p %{buildroot}%{_initrddir}
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
@@ -157,7 +156,7 @@ exit 0
 
 %post
 chkconfig --add thruk
-mkdir -p /var/lib/thruk /var/cache/thruk/reports /var/log/thruk
+mkdir -p /var/lib/thruk /var/cache/thruk/reports /var/log/thruk /etc/thruk/bp
 %if %{defined suse_version}
 chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf /etc/thruk/bp
 a2enmod alias
@@ -167,7 +166,7 @@ a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 /usr/bin/crontab -l -u wwwrun 2>/dev/null | /usr/bin/crontab -u wwwrun -
 %else
-chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
+chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf /etc/thruk/bp
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
