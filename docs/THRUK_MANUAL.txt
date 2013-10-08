@@ -469,6 +469,13 @@ LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
 </VirtualHost>
 -------
 
+[TIP]
+.Example
+Another more complicated example can be found on github:
+https://github.com/sni/Thruk/blob/master/support/apache_fcgid.conf[apache_fcgid.conf].
+This file is used for the official Thruk packages.
+
+
 
 === mod_fastcgi
 
@@ -514,6 +521,12 @@ use this apache example configuration:
         Options FollowSymLinks
         AllowOverride All
     </Directory>
+    <Directory /home/thruk/Thruk/plugins/>
+        order allow,deny
+        allow from all
+        Options FollowSymLinks
+        AllowOverride All
+    </Directory>
 
     Alias /thruk/ /home/thruk/Thruk/root/thruk/
 
@@ -538,6 +551,7 @@ use this apache example configuration:
 
     # rewrite configuration
     RewriteEngine On
+    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^/thruk(.*)$ /tmp/thruk_fastcgi.fcgi/thruk$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
 
@@ -565,6 +579,12 @@ use this apache example configuration:
         order allow,deny
         allow from all
     </Directory>
+    <Directory /home/thruk/Thruk/plugins/>
+        order allow,deny
+        allow from all
+        Options FollowSymLinks
+        AllowOverride All
+    </Directory>
 
     # authorization
     <Location "/">
@@ -587,6 +607,7 @@ use this apache example configuration:
 
     # rewrite configuration
     RewriteEngine On
+    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^/(.*)$ /tmp/thruk_fastcgi.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
 </VirtualHost>
