@@ -74,7 +74,6 @@
     </td>
   </tr>
 
-  [% IF editmode %]
   <tr>
     <td style="height: 20px;"></td>
   </tr>
@@ -82,6 +81,69 @@
   <tr>
     <td align="center" valign="top" class='commandPanel'>
       <div class='dataTitle'>Actions</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='List All Business Processes' title='List All Business Processes' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='bp.cgi'>List All Business Processes</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Status' title='Refresh Status' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='#' onclick="current_node='node1'; bp_refresh('[% bp.id %]', current_node); return false;">Refresh Status</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/shape_handles.png' border="0" alt='Enable Fullscreen Mode' title='Enable Fullscreen Mode' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;minimal=1'>Enable Fullscreen Mode</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='status.cgi?host=[% bp.name | uri %]'>Show Status</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='Show Trends' title='Show Trends' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='trends.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days'>Show Trends</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_text.png' border="0" alt='View Availability Report' title='View Availability Report' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='avail.cgi?show_log_entries=&service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days'>View Availability Report</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View Notifications' title='View Notifications' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='notifications.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days'>View Notifications</a></td>
+              </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='showlog.cgi?host=[% bp.name | uri %]&amp;service=[% bp.name | uri %]'>Show Logfiles</a></td>
+              </tr>
+              [% IF allowed_for_edit && ! editmode %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Business Process' title='Business Process' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;edit=1'>Enable Edit Mode</a></td>
+              </tr>
+              [% END %]
+              [% IF allowed_for_edit && editmode %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Cancel Edit Mode' title='Cancel Edit Mode' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]'>Cancel Edit Mode</a></td>
+              </tr>
+              [% END %]
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  [% IF editmode %]
+  <tr>
+    <td style="height: 20px;"></td>
+  </tr>
+
+  <tr>
+    <td align="center" valign="top" class='commandPanel'>
+      <div class='dataTitle'>Edit Actions</div>
       <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
         <tr>
           <td>
