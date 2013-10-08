@@ -64,6 +64,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/bp
 %{__mkdir} -p %{buildroot}%{_initrddir}
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
@@ -158,7 +159,7 @@ exit 0
 chkconfig --add thruk
 mkdir -p /var/lib/thruk /var/cache/thruk/reports /var/log/thruk
 %if %{defined suse_version}
-chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
+chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf /etc/thruk/bp
 a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic

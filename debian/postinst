@@ -48,12 +48,13 @@ case "$1" in
         fi
 
         # set permissions
-        mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports
+        mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports /etc/thruk/bp
         chown -R www-data: /var/lib/thruk \
                            /var/cache/thruk \
                            /var/log/thruk \
                            /etc/thruk/plugins/plugins-enabled \
-                           /etc/thruk/thruk_local.conf
+                           /etc/thruk/thruk_local.conf \
+                           /etc/thruk/bp
         chown 755 /usr/share/thruk/fcgid_env.sh
         chown 755 /usr/bin/thruk
 
