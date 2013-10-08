@@ -1031,3 +1031,8 @@ hr.sites_collapsed.last {
  border: 0px;
  border-bottom: 2px solid #333;
 }
+
+/* fix business process menu font*/
+#bp_menu {
+    font-size: 11px;
+}

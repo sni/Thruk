@@ -140,13 +140,7 @@ TD.statusEven TD, TD.statusOdd TD {
  border: none;
 }
 
-/* service status styles */
-TD.statusPENDING TD, TD.statusOK TD, TD.statusRECOVERY TD, TD.statusUNKNOWN TD, TD.statusWARNING TD, TD.statusCRITICAL TD {
-/* not sure if this exists */
- border: double 3px red;
-}
-
-TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY {
+TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY, DIV.statusOK {
  color: #669866;
  background-color: #a7ffa7;
  background-image: url("images/gradShortVertGreen.png");
@@ -154,9 +148,9 @@ TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY {
  background-repeat: repeat-x;
  border-bottom: solid 1px #ddd;
 }
-TD.statusOK A, TD.statusRECOVERY A { color: #479048; }
+TD.statusOK A, TD.statusRECOVERY A, DIV.statusOK A { color: #479048; }
 
-TD.statusPENDING, A.statusPENDING {
+TD.statusPENDING, A.statusPENDING, DIV.statusPENDING {
  color: #fff;
  background-color: #fafafa;
  background-image: url("images/gradShortVertGray.png");
@@ -165,7 +159,7 @@ TD.statusPENDING, A.statusPENDING {
  border-bottom: solid 1px #ddd;
 }
 
-TD.statusUNKNOWN, A.statusUNKNOWN {
+TD.statusUNKNOWN, A.statusUNKNOWN, DIV.statusUNKNOWN {
  color: #fff;
  background-color: #ffae01;
  background-image: url("images/gradShortVertOrange.png");
@@ -174,7 +168,7 @@ TD.statusUNKNOWN, A.statusUNKNOWN {
  border-bottom: solid 1px #ddd;
 }
 
-TD.statusWARNING, A.statusWARNING {
+TD.statusWARNING, A.statusWARNING, DIV.statusWARNING {
  color: #fff;
  background-color: #fcff01;
  background-image: url("images/gradShortVertYellow.png");
@@ -183,7 +177,7 @@ TD.statusWARNING, A.statusWARNING {
  border-bottom: solid 1px #ddd;
 }
 
-TD.statusCRITICAL, A.statusCRITICAL {
+TD.statusCRITICAL, A.statusCRITICAL, DIV.statusCRITICAL {
  color: #fff;
  background-color: #ff0000;
  background-image: url("images/gradShortVertRed.png");
@@ -191,7 +185,7 @@ TD.statusCRITICAL, A.statusCRITICAL {
  background-repeat: repeat-x;
  border-bottom: solid 1px #ddd;
 }
-TD.statusPENDING A, TD.statusUNKNOWN A, TD.statusWARNING A, TD.statusCRITICAL A { color: #fff; }
+TD.statusPENDING A, TD.statusUNKNOWN A, TD.statusWARNING A, TD.statusCRITICAL A, DIV.statusPENDING A, DIV.statusUNKNOWN A, DIV.statusWARNING A, DIV.statusCRITICAL A { color: #fff; }
 
 /* host status styles */
 TD.statusHOSTPENDING TD, TD.statusHOSTUP TD, TD.statusHOSTDOWN TD, TD.statusHOSTDOWNACK TD, TD.statusHOSTDOWNSCHED TD, TD.statusHOSTUNREACHALBE TD, TD.statusHOSTUNREACHABLEACK TD, TD.statusHOSTUNREACHABLESCHED TD {
@@ -375,35 +369,3 @@ DIV.itemTotalsTitle {
  text-align: center;
 }
 
-
-/* these styles change how Nagios looks, hopefully for the better, when it's printed */
-@media print {
-  TABLE.status TH.status {
-   border: none;
-   border-bottom: solid 0.5pt black;
-   background: none;
-  }
-  TABLE.status TH.status IMG {
-   display: none;
-  }
-  DIV.hostTotals, DIV.serviceTotals, TABLE.hostTotals TH.hostTotals, TABLE.serviceTotals TH.serviceTotals {
-   border: none;
-   border-bottom: solid 0.5pt black;
-   color: #000;
-  }
-  TABLE.hostTotals, TABLE.serviceTotals {
-   margin-left: 5pt;
-  }
-  DIV.hostTotals, DIV.serviceTotals {
-   font-size: 0.9em;
-   margin-left: 5pt;
-  }
-  TH.hostTotals A, TH.serviceTotals A {
-   font-size: 0.8em;
-  }
-  TABLE.hostTotals TH, TABLE.serviceTotals TH, TABLE.hostTotals TD, TABLE.serviceTotals TD, TH.hostTotals, TH.serviceTotals, TD.hostTotals, TD.serviceTotals, TD.hostTotalsUP, TD.serviceTotalsOK, TD.hostTotalsDOWN, TD.hostTotalsUNREACHABLE, TD.serviceTotalsCRITICAL, TD.hostTotalsPENDING, TD.serviceTotalsPENDING, TD.serviceTotalsWARNING, TD.hostTotalsPROBLEMS, TD.serviceTotalsPROBLEMS, TD.serviceTotalsUNKNOWN, A.hostTotals, A.hostTotals:visited, A.serviceTotals, A.serviceTotals:visited, TABLE.status TD, TABLE.status TD TD, TABLE.status TH.status, TABLE.status TH.status IMG, TD.statusOdd, TD.statusEven, TD.statusEven TD, TD.statusOdd TD, TD.statusPENDING TD, TD.statusOK TD, TD.statusRECOVERY TD, TD.statusUNKNOWN TD, TD.statusWARNING TD, TD.statusCRITICAL TD, TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY, TD.statusOK A, TD.statusRECOVERY A, TD.statusPENDING, A.statusPENDING, TD.statusUNKNOWN, A.statusUNKNOWN, TD.statusWARNING, A.statusWARNING, TD.statusCRITICAL, A.statusCRITICAL, TD.statusPENDING A, TD.statusUNKNOWN A, TD.statusWARNING A, TD.statusCRITICAL A, TD.statusHOSTPENDING TD, TD.statusHOSTUP TD, TD.statusHOSTDOWN TD, TD.statusHOSTDOWNACK TD, TD.statusHOSTDOWNSCHED TD, TD.statusHOSTUNREACHALBE TD, TD.statusHOSTUNREACHABLEACK TD, TD.statusHOSTUNREACHABLESCHED TD, TD.statusHOSTPENDING, TD.statusHOSTPENDING A, TD.statusHOSTUP, TD.statusHOSTUP A, TD.statusHOSTDOWN, TD.statusHOSTDOWNACK, TD.statusHOSTDOWNSCHED, TD.statusHOSTUNREACHABLE, TD.statusHOSTUNREACHABLEACK, TD.statusHOSTUNREACHABLESCHED, TD.statusHOSTDOWN A, TD.statusHOSTDOWNACK A, TD.statusHOSTDOWNSCHED A, TD.statusHOSTUNREACHABLE A, TD.statusHOSTUNREACHABLEACK A, TD.statusHOSTUNREACHABLESCHED A, TD.statusBGUNKNOWN TD, TD.statusBGUNKNOWNACK TD, TD.statusBGUNKNOWNSCHED TD, TD.statusBGWARNING TD, TD.statusBGWARNINGACK TD, TD.statusBGWARNINGSCHED TD, TD.statusBGCRITICAL TD, TD.statusBGCRITICALACK TD, TD.statusBGCRITICALSCHED TD, TD.statusBGDOWN TD, TD.statusBGDOWNACK TD, TD.statusBGDOWNSCHED TD, TD.statusBGUNREACHABLE TD, TD.statusBGUNREACHABLEACK TD, TD.statusBGUNREACHABLESCHED TD, TD.statusBGUNKNOWN, TD.statusBGUNKNOWNACK, TD.statusBGUNKNOWNSCHED, TD.statusBGWARNING, TD.statusBGWARNINGACK, TD.statusBGWARNINGSCHED, TD.statusBGCRITICAL, TD.statusBGCRITICALACK, TD.statusBGCRITICALSCHED, TD.statusBGDOWN, TD.statusBGDOWNACK, TD.statusBGDOWNSCHED, TD.statusBGUNREACHABLE, TD.statusBGUNREACHABLEACK, TD.statusBGUNREACHABLESCHED, TD.miniStatusPENDING A, TD.miniStatusOK A, TD.miniStatusUNKNOWN A, TD.miniStatusWARNING A, TD.miniStatusCRITICAL A, TD.miniStatusUP A, TD.miniStatusDOWN A, TD.miniStatusUNREACHABLE A {
-   color: #000;
-   background-image: none;
-   background-color: #FFF;
-  }
-}

@@ -28,6 +28,7 @@
         <li><a href="#" onclick="bp_test_mode_node(1)"><span class="">&nbsp;</span>Warning</a></li>
         <li><a href="#" onclick="bp_test_mode_node(2)"><span class="">&nbsp;</span>Critical</a></li>
         <li><a href="#" onclick="bp_test_mode_node(3)"><span class="">&nbsp;</span>Unknown</a></li>
+        <li><a href="#" onclick="bp_test_mode_node(4)"><span class="">&nbsp;</span>Pending</a></li>
       </ul>
     </li>
   [% ELSE %]

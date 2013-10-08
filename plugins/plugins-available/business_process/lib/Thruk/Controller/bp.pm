@@ -55,7 +55,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     $c->stash->{title}                 = 'Business Process';
-    $c->stash->{page}                  = 'bp';
+    $c->stash->{page}                  = 'status';
     $c->stash->{template}              = 'bp.tt';
     $c->stash->{subtitle}              = 'Business Process';
     $c->stash->{infoBoxTitle}          = 'Business Process';
