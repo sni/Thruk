@@ -100,6 +100,7 @@ feature     ('plugin_reports2',
 feature     ('https_backends_support',
   -default                                        => 0,
   'LWP::Protocol::https'                          => 0,     # required by Thruk::Backend::Provider::HTTP
+  'LWP::Protocol::connect'                        => 0,     # required by Thruk::Backend::Provider::HTTP
 );
 
 # mysql logcache support

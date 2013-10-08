@@ -138,14 +138,23 @@ sub reconnect {
     $self->{'ua'} = LWP::UserAgent->new;
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
-    $self->{'ua'}->agent('Thruk ');
+    $self->{'ua'}->agent('Thruk');
     if($self->{'proxy'}) {
-        $self->{'ua'}->proxy(['http'], $self->{'proxy'});
+        # http just works
+        $self->{'ua'}->proxy('http', $self->{'proxy'});
+        # ssl depends on which class we have
+        if($INC{'IO/Socket/SSL.pm'}) {
+            $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
+            my $con_proxy = $self->{'proxy'};
+            $con_proxy =~ s#^(http|https)://#connect://#mx;
+            $self->{'ua'}->proxy('https', $con_proxy);
+        } else {
+            # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
+            $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+            # env proxy breaks the ssl proxy above
+            #$self->{'ua'}->env_proxy();
+        }
     }
-    # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
-    $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
-    # env proxy breaks the ssl proxy above
-    #$self->{'ua'}->env_proxy();
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
     return;
 }
