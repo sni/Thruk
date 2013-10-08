@@ -203,11 +203,6 @@ our %config = ('name'                   => 'Thruk',
               'Plugin::Static::Simple' => {
                   'ignore_extensions' => [ qw/tpl tt tt2/ ],
               },
-              'Plugin::Cache'        => {
-                  'backend'           => {
-                    'class'            => "Catalyst::Plugin::Cache::Backend::Memory",
-                  },
-              },
               'Plugin::ConfigLoader'  => {
                 driver => { General => { '-CComments' => 0  } }
               }

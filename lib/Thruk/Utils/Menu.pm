@@ -218,10 +218,9 @@ returns 1 if the current user has this group
 sub has_group {
     my($c, $group) = @_;
 
-    my $cache = $c->cache;
     my $user  = $c->stash->{'remote_user'};
-    if($cache and $user) {
-        my $contactgroups = $cache->get($user);
+    if($user) {
+        my $contactgroups = $c->cache->get->{'users'}->{$user};
         if($contactgroups and $contactgroups->{'contactgroups'}->{$group}) {
             return 1;
        }

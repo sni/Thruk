@@ -527,6 +527,16 @@ sub _run_commands {
         ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
     }
 
+    # cache actions
+    elsif($action eq 'dumpcache') {
+        $data->{'rc'} = 1;
+        $data->{'output'} = Dumper($c->cache->dump);
+    }
+    elsif($action eq 'clearcache') {
+        $data->{'rc'} = 1;
+        $data->{'output'} = Dumper($c->cache->clear);
+    }
+
     # import mongodb/mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);

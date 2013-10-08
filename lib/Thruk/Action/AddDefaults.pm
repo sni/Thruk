@@ -100,10 +100,9 @@ sub add_defaults {
 
     ###############################
     # read cached data
-    my $cache = $c->cache;
     my $cached_data = {};
     if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
-        $cached_data = $cache->get($c->stash->{'remote_user'});
+        $cached_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
     }
 
     ###############################
@@ -131,7 +130,7 @@ sub add_defaults {
         $c->{'db'}->reset_failed_backends();
 
         eval {
-            $last_program_restart = _set_processinfo($c, $cache, $cached_data);
+            $last_program_restart = _set_processinfo($c, $cached_data);
         };
         last unless $@;
         $c->log->debug("retry $x, data source error: $@");
@@ -149,9 +148,7 @@ sub add_defaults {
 
     ###############################
     # read cached data again, groups could have changed
-    $cached_data = $cache->get($c->stash->{'remote_user'}) if defined $c->stash->{'remote_user'};
-    $c->log->debug("cached data:");
-    $c->log->debug(Dumper($cached_data));
+    $cached_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
 
     ###############################
     # disable backends by groups
@@ -240,7 +237,7 @@ sub add_defaults {
     # user / group specific config?
     if($c->stash->{'remote_user'}) {
         $c->stash->{'config_adjustments'} = {};
-        for my $group (sort keys %{$c->cache->get($c->stash->{'remote_user'})->{'contactgroups'}}) {
+        for my $group (sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}) {
             if(defined $c->config->{'Group'}->{$group}) {
                 for my $key (keys %{$c->config->{'Group'}->{$group}}) {
                     $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
@@ -396,7 +393,7 @@ sub _any_backend_enabled {
 
 ########################################
 sub _set_processinfo {
-    my($c, $cache, $cached_data) = @_;
+    my($c, $cached_data) = @_;
     my $last_program_restart     = 0;
     my $processinfo              = $c->{'db'}->get_processinfo();
     $processinfo                 = {} unless defined $processinfo;
@@ -425,7 +422,7 @@ sub _set_processinfo {
                 'prev_last_program_restart' => $last_program_restart,
                 'contactgroups'             => $contactgroups,
             };
-            $cache->set($c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
+            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
             $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
         }
     }
@@ -536,7 +533,7 @@ sub _set_enabled_backends {
 
     # renew state of connections
     if($num_backends > 1 and $c->config->{'check_local_states'}) {
-        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($c->cache, $disabled_backends, $safe);
+        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe);
     }
 
     # when set by args, update

@@ -391,9 +391,8 @@ returns a list of contactgroups by contact
 sub get_contactgroups_by_contact {
     my( $self, $c, $username, $reload ) = @_;
 
-    my $cache       = $c->cache;
     my $cached_data = {};
-    $cached_data    = $cache->get($username) if defined $username;
+    $cached_data    = $c->cache->get->{'users'}->{$username} if defined $username;
     if( !$reload && defined $cached_data->{'contactgroups'} ) {
         return $cached_data->{'contactgroups'};
     }
@@ -405,7 +404,7 @@ sub get_contactgroups_by_contact {
     }
 
     $cached_data->{'contactgroups'} = $contactgroups;
-    $c->cache->set( $username, $cached_data );
+    $c->cache->set('users', $username, $cached_data);
     return $contactgroups;
 }
 
@@ -566,7 +565,7 @@ enables/disables remote backends based on a state from local instances
 =cut
 
 sub set_backend_state_from_local_connections {
-    my( $self, $cache, $disabled, $safe ) = @_;
+    my( $self, $disabled, $safe ) = @_;
 
     my $c = $Thruk::Backend::Manager::c;
 

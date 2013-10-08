@@ -47,6 +47,7 @@ use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Avail;
 use Thruk::Utils::External;
+use Thruk::Utils::Cache qw/cache/;
 use Catalyst::Runtime '5.70';
 
 ###################################################
@@ -64,7 +65,6 @@ BEGIN {
           CustomErrorMessage
           Static::Simple
           Redirect
-          Cache
           Thruk::RemoveNastyCharsFromHttpParam
     /;
     if($Catalyst::Runtime::VERSION >= 5.90042) {
@@ -109,6 +109,10 @@ $Thruk::Utils::IO::config = __PACKAGE__->config;
 binmode(STDOUT, ":encoding(UTF-8)");
 binmode(STDERR, ":encoding(UTF-8)");
 $Data::Dumper::Sortkeys = 1;
+
+###################################################
+# init cache
+__PACKAGE__->cache(__PACKAGE__->config->{'tmp_path'}.'/thruk.cache');
 
 ###################################################
 # save pid

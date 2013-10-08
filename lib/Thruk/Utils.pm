@@ -472,8 +472,7 @@ sub get_dynamic_roles {
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data);
-    my $cache = $c->cache;
-    my $cached_data = defined $username ? $cache->get($username) : {};
+    my $cached_data = defined $username ? $c->cache->get->{'users'}->{$username} : {};
     if(defined $cached_data->{'can_submit_commands'}) {
         # got cached data
         $data = $cached_data->{'can_submit_commands'};
@@ -481,7 +480,7 @@ sub get_dynamic_roles {
     else {
         $data = $c->{'db'}->get_can_submit_commands($username);
         $cached_data->{'can_submit_commands'} = $data;
-        $cache->set($username, $cached_data) if defined $username;
+        $c->cache->set('users', $username, $cached_data) if defined $username;
     }
 
     if(defined $data) {
