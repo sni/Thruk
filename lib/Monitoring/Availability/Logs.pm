@@ -30,6 +30,7 @@ $Monitoring::Availability::Logs::host_states = {
     'UNREACHABLE'       => 2,
     'RECOVERY'          => 0,
     'PENDING'           => 0,
+    '(unknown)'         => 3,
 };
 
 $Monitoring::Availability::Logs::service_states = {
@@ -39,6 +40,7 @@ $Monitoring::Availability::Logs::service_states = {
     'UNKNOWN'           => 3,
     'RECOVERY'          => 0,
     'PENDING'           => 0,
+    '(unknown)'         => 3,
 };
 
 =head1 NAME
