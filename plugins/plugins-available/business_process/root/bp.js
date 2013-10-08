@@ -666,7 +666,8 @@ function bp_update_status(evt, node) {
     }
     else if(n.create_obj) {
         if(n.id == 'node1') {
-            host = n.label;
+            host    = n.label;
+            service = n.label;
         } else {
             var firstnode = bp_get_node('node1');
             host    = firstnode.label;
