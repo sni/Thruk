@@ -389,8 +389,13 @@ sub _result_to_string {
     if($firstnode) {
         $string .= "### Nagios Host Check Result ###\n";
         # translate into host status
-        $status = $status <= 1 ? 0 : 1;
+        if($status == 0 || $status == 1 || $status == 4) {
+            $status = 0;
+        } else {
+            $status = 1;
+        }
     } else {
+        if($status == 4) { $status = 0 };
         $string .= "### Nagios Service Check Result ###\n";
     }
     $string .= sprintf "# Time: %s\n",scalar localtime time();
