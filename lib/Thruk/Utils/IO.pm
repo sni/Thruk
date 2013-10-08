@@ -68,6 +68,7 @@ create folder recursive
 
 sub mkdir_r {
     for my $dirname (@_) {
+        next if -d $dirname;
         my $path = '';
         for my $part (split/(\/)/mx, $dirname) {
             $path .= $part;

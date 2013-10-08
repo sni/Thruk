@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 28;
+    plan tests => 41;
 }
 
 BEGIN {
@@ -18,6 +18,7 @@ BEGIN {
 # test some pages
 my $pages = [
     '/thruk/cgi-bin/bp.cgi',
+    { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
 ];
 
 for my $url (@{$pages}) {

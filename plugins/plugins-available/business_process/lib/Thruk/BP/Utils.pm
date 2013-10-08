@@ -39,8 +39,9 @@ sub load_bp_data {
     my($c, $num, $editmode) = @_;
 
     # make sure our folders exist
-    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp') unless -d $c->config->{'var_path'}.'/bp';
-    Thruk::Utils::IO::mkdir_r($c->config->{'home'}.'/bp')     unless -d $c->config->{'home'}.'/bp';
+    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
+    Thruk::Utils::IO::mkdir_r($base_folder);
 
     my $bps   = [];
     my $pattern = '*.tbp';
@@ -48,7 +49,7 @@ sub load_bp_data {
         return($bps) unless $num =~ m/^\d+$/mx;
         $pattern = $num.'.tbp';
     }
-    my @files = glob($c->config->{'home'}.'/bp/'.$pattern);
+    my @files = glob($base_folder.'/'.$pattern);
     for my $file (@files) {
         my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
         push @{$bps}, $bp if $bp;
@@ -72,12 +73,13 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
+    my $base_folder = Thruk::BP::Utils::base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
-    Thruk::Utils::IO::mkdir_r($c->config->{'home'}.'/bp');
-    while(-e $c->config->{'home'}.'/bp/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
+    Thruk::Utils::IO::mkdir_r($base_folder);
+    while(-e $base_folder.'/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
         $num++;
     }
-    return($c->config->{'home'}.'/bp/'.$num.'.tbp', $num);
+    return($base_folder.'/'.$num.'.tbp', $num);
 }
 
 ##########################################################
@@ -94,7 +96,7 @@ sub make_uniq_label {
 
     # gather names of all BPs and editBPs
     my $names = {};
-    my @files = glob($c->config->{'home'}.'/bp/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
+    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
     for my $file (@files) {
         next if $bp_id and $file =~ m#/$bp_id\.tbp(.edit|)$#mx;
         my $data = Thruk::Utils::IO::json_lock_retrieve($file);
@@ -223,15 +225,16 @@ remove old edit files
 sub clean_orphaned_edit_files {
     my($c, $threshold) = @_;
     $threshold = 86400 unless defined $threshold;
-    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
-    for my $file (@files) {
-        my $bpfile = $file;
-        $bpfile =~ s/\.edit$//mx;
-        $bpfile =~ s/^.*\///mx;
-        if(!-e $c->config->{'home'}.'/'.$bpfile) {
-            my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
-            next if $mtime > (time() - $threshold);
-            unlink($file);
+    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    for my $pattern (qw/edit runtime/) {
+    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.'.$pattern);
+        for my $file (@files) {
+            $file =~ m/\/(\d+)\.tbp\.$pattern/mx;
+            if($1 && !-e $base_folder.'/'.$1.'.tbp') {
+                my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+                next if $mtime > (time() - $threshold);
+                unlink($file);
+            }
         }
     }
     return;
@@ -255,7 +258,7 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my @files = glob($c->config->{'home'}.'/bp/*.tbp');
+    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp');
     if(scalar @files > 0) {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
@@ -386,6 +389,23 @@ sub clean_nasty {
     my($str) = @_;
     $str =~ s#[`~!\$%^&*\|'"<>\?,\(\)=]*##gmxo;
     return($str);
+}
+
+##########################################################
+
+=head2 base_folder
+
+    base_folder($c)
+
+return base folder of business process files
+
+=cut
+sub base_folder {
+    my($c) = @_;
+    if($ENV{'CATALYST_CONFIG'}) {
+        return($ENV{'CATALYST_CONFIG'}.'/bp');
+    }
+    return($c->config->{'home'}.'/bp');
 }
 
 ##########################################################
