@@ -317,7 +317,7 @@ sub get_url {
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
 
-    my @res = Thruk::Utils::CLI::_request_url($c, $url);
+    my @res = Thruk::Utils::CLI::request_url($c, $url);
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
         $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
@@ -339,13 +339,11 @@ sub get_url {
             }
         }
         if($Thruk::Utils::PDF::ctype eq 'text/html') {
-            my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
-            $result->{'result'} = _replace_css_and_images($result->{'result'});
-            $result->{'result'} = _replace_links($result->{'result'}, $url, $report_base_url);
-
+            my $include_js = 1;
             if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
-                $result->{'result'} =~ s/<script[^>]*>.*?<\/script>//gsmxi;
+                $include_js = 0;
             }
+            $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
@@ -555,10 +553,33 @@ sub dump {
 }
 
 ##########################################################
+
+=head2 html_all_inclusive
+
+  html_all_inclusive($c, $url, $page, [$include_js])
+
+make html page include all remove css, js and images
+
+=cut
+sub html_all_inclusive {
+    my($c, $url, $page, $include_js) = @_;
+    $include_js = 0 unless defined $include_js;
+    $c->stash->{'param'}->{'js'} = $include_js;
+    my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
+    $page = _replace_css_and_images($page);
+    $page = _replace_links($page, $url, $report_base_url);
+
+    if(!$include_js) {
+        $page =~ s/<script[^>]*>.*?<\/script>//gsmxi;
+    }
+    return($page);
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _replace_css_and_images {
-    my $text = shift;
+    my($text) = @_;
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     $text =~ s/<link[^>]*href=("|')([^'"]*\.css)("|')[^>]*>/&_replace_css($2)/gemx;
     $text =~ s/<script[^>]*src=("|')([^'"]*\.js)("|')><\/script>/&_replace_js($2)/gemx;
@@ -647,7 +668,7 @@ sub _replace_img {
         if($url =~ m|^\w+\.cgi|gmx) {
             $url = '/thruk/cgi-bin/'.$url;
         }
-        my @res = Thruk::Utils::CLI::_request_url($c, $url);
+        my @res = Thruk::Utils::CLI::request_url($c, $url);
         my $result = $res[1];
         my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
         $image_cache->{$url} = $a.$b.$text.$d.$e;

@@ -162,6 +162,98 @@ sub store_objects {
     return;
 }
 
+##############################################
+
+=head2 request_url
+
+    request_url($c, $url, [$all_inclusive])
+
+returns requested url as string. In list context returns ($code, $result)
+
+=cut
+sub request_url {
+    my($c, $url) = @_;
+
+    local $ENV{'REQUEST_URI'}      = $url;
+    local $ENV{'SCRIPT_NAME'}      = $url;
+          $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+    local $ENV{'QUERY_STRING'}     = $1 if defined $1;
+    local $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
+    local $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
+    local $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
+    local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
+    local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+    local $ENV{'HTTP_RESULT'}      = {};
+
+    # reset args, otherwise they will be interpreted as args for the script runner
+    @ARGV = ();
+
+    require Catalyst::ScriptRunner;
+    Catalyst::ScriptRunner->import();
+    Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+    my $result = $ENV{'HTTP_RESULT'};
+
+    if($result->{'code'} == 302
+       and defined $result->{'headers'}
+       and defined $result->{'headers'}->{'Location'}
+       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
+        my $jobid = $1;
+        my $x = 0;
+        while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
+            my $sleep = 0.1 * $x;
+            $sleep = 1 if $x > 10;
+            sleep($sleep);
+            $url = $result->{'headers'}->{'Location'} if defined $result->{'headers'}->{'Location'};
+            local $ENV{'REQUEST_URI'}      = $url;
+            local $ENV{'SCRIPT_NAME'}      = $url;
+                  $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+            local $ENV{'QUERY_STRING'}     = $1 if defined $1;
+            Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+            $result = $ENV{'HTTP_RESULT'};
+            $x++;
+        }
+    }
+
+    if($result->{'code'} == 302
+          and defined $result->{'headers'}->{'Set-Cookie'}
+          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mxo
+    ) {
+        require URI::Escape;
+        my $txt = URI::Escape::uri_unescape($2);
+        my $msg = '';
+        if($1 eq 'success_message') {
+            $msg = 'OK';
+        } else {
+            $msg = 'FAILED';
+        }
+        $txt = $msg.' - '.$txt."\n";
+        return($result->{'code'}, $result, $txt) if wantarray;
+        return $txt;
+    }
+    elsif($result->{'code'} == 500) {
+        my $txt = 'request failed: '.$result->{'code'}." - internal error, please consult your logfiles\n";
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
+        return($result->{'code'}, $result, $txt) if wantarray;
+        return $txt;
+    }
+    elsif($result->{'code'} != 200) {
+        my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
+        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
+        return($result->{'code'}, $result, $txt) if defined wantarray;
+        return $txt;
+    }
+
+    # clean error message if there is one
+    if($result->{'result'} =~ m/<span\sclass="fail_message">(.*?)<\/span>/mxo) {
+        my $txt = 'ERROR - '.$1."\n";
+        return(500, $result, $txt) if wantarray;
+        return $txt;
+    }
+
+    return($result->{'code'}, $result) if wantarray;
+    return $result->{'result'};
+}
 
 ##############################################
 # INTERNAL SUBS
@@ -397,7 +489,7 @@ sub _run_commands {
 
     # request url
     elsif($action =~ /^url=(.*)$/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_url($c, $1);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_url($c, $1, $opt);
     }
 
     # report or report mails
@@ -521,91 +613,6 @@ sub _cmd_listbackends {
     }
     $output .= sprintf("-------------------------------------------------\n");
     return $output;
-}
-
-##############################################
-sub _request_url {
-    my($c, $url) = @_;
-
-    local $ENV{'REQUEST_URI'}      = $url;
-    local $ENV{'SCRIPT_NAME'}      = $url;
-          $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-    local $ENV{'QUERY_STRING'}     = $1 if defined $1;
-    local $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
-    local $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
-    local $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
-    local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
-    local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
-    local $ENV{'HTTP_RESULT'}      = {};
-
-    # reset args, otherwise they will be interpreted as args for the script runner
-    @ARGV = ();
-
-    require Catalyst::ScriptRunner;
-    Catalyst::ScriptRunner->import();
-    Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-    my $result = $ENV{'HTTP_RESULT'};
-
-    if($result->{'code'} == 302
-       and defined $result->{'headers'}
-       and defined $result->{'headers'}->{'Location'}
-       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
-        my $jobid = $1;
-        my $x = 0;
-        while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
-            my $sleep = 0.1 * $x;
-            $sleep = 1 if $x > 10;
-            sleep($sleep);
-            $url = $result->{'headers'}->{'Location'} if defined $result->{'headers'}->{'Location'};
-            local $ENV{'REQUEST_URI'}      = $url;
-            local $ENV{'SCRIPT_NAME'}      = $url;
-                  $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-            local $ENV{'QUERY_STRING'}     = $1 if defined $1;
-            Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-            $result = $ENV{'HTTP_RESULT'};
-            $x++;
-        }
-    }
-
-    if($result->{'code'} == 302
-          and defined $result->{'headers'}->{'Set-Cookie'}
-          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mxo
-    ) {
-        require URI::Escape;
-        my $txt = URI::Escape::uri_unescape($2);
-        my $msg = '';
-        if($1 eq 'success_message') {
-            $msg = 'OK';
-        } else {
-            $msg = 'FAILED';
-        }
-        $txt = $msg.' - '.$txt."\n";
-        return($result->{'code'}, $result, $txt) if wantarray;
-        return $txt;
-    }
-    elsif($result->{'code'} == 500) {
-        my $txt = 'request failed: '.$result->{'code'}." - internal error, please consult your logfiles\n";
-        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
-        return($result->{'code'}, $result, $txt) if wantarray;
-        return $txt;
-    }
-    elsif($result->{'code'} != 200) {
-        my $txt = 'request failed: '.$result->{'code'}." - ".$result->{'result'}."\n";
-        _debug(Dumper($result)) if $Thruk::Utils::CLI::verbose >= 2;
-        return($result->{'code'}, $result, $txt) if defined wantarray;
-        return $txt;
-    }
-
-    # clean error message if there is one
-    if($result->{'result'} =~ m/<span\sclass="fail_message">(.*?)<\/span>/mxo) {
-        my $txt = 'ERROR - '.$1."\n";
-        return(500, $result, $txt) if wantarray;
-        return $txt;
-    }
-
-    return($result->{'code'}, $result) if wantarray;
-    return $result->{'result'};
 }
 
 ##############################################
@@ -882,7 +889,7 @@ sub _cmd_downtimetask {
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
-    my @res = _request_url($c, $url);
+    my @res = request_url($c, $url);
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
     return("failed\n", 1) unless $res[0] == 200; # error is already printed
 
@@ -899,13 +906,24 @@ sub _cmd_downtimetask {
 
 ##############################################
 sub _cmd_url {
-    my($c, $url) = @_;
+    my($c, $url, $opt) = @_;
     $c->stats->profile(begin => "_cmd_url()");
+
+    if($opt->{'all_inclusive'} and !$c->config->{'use_feature_reports'}) {
+        return("all-inclusive options requires the reports plugin to be enabled", 1);
+    }
 
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/thruk/cgi-bin/'.$url;
     }
-    my @res = _request_url($c, $url);
+    my @res = request_url($c, $url);
+
+    # All Inclusive?
+    if($res[0] == 200 && $res[1]->{'result'} and $opt->{'all_inclusive'}) {
+        require Thruk::Utils::Reports::Render;
+        $Thruk::Utils::Reports::Render::c = $c;
+        $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
+    }
 
     $c->stats->profile(end => "_cmd_url()");
     my $rc = $res[0] >= 400 ? 1 : 0;

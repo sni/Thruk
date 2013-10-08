@@ -435,7 +435,7 @@ sub get_url {
         $url = $url.'&nav=0';
     }
 
-    my @res = Thruk::Utils::CLI::_request_url($c, $url);
+    my @res = Thruk::Utils::CLI::request_url($c, $url);
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
         $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
@@ -1030,7 +1030,7 @@ sub _replace_img {
         if($url =~ m|^\w+\.cgi|gmx) {
             $url = '/thruk/cgi-bin/'.$url;
         }
-        my @res = Thruk::Utils::CLI::_request_url($c, $url);
+        my @res = Thruk::Utils::CLI::request_url($c, $url);
         my $result = $res[1];
         my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
         return $a.$b.$text.$d.$e;

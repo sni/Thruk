@@ -37,6 +37,28 @@ TestUtils::test_command({
     exit    => 3,
 });
 
+# url export
+TestUtils::test_command({
+    cmd     => $BIN.' tac.cgi',
+    like => ['/Tactical Monitoring Overview/',
+             '/Network Outages/',
+             '/Monitoring Features/',
+             '/javascript\/overlib\.js/',
+            ],
+});
+
+# url export, all-inclusive
+TestUtils::test_command({
+    cmd     => $BIN.' --all-inclusive tac.cgi',
+    like => ['/Tactical Monitoring Overview/',
+             '/Network Outages/',
+             '/Monitoring Features/',
+             '/Dynarch Calendar/',
+             '/jquery\.org\/license/',
+             '/\.peerDOWN/',
+            ],
+});
+
 # list backends
 TestUtils::test_command({
     cmd  => $BIN.' -l',

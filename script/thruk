@@ -57,6 +57,7 @@ Getopt::Long::GetOptions (
    "a|action=s"         => \$options->{'action'},
    "y|yes"              => \$options->{'yes'},
    "f|force"            => \$options->{'force'},
+   "i|all-inclusive"    => \$options->{'all_inclusive'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or print "usage: $0 [<options>] <action>\nsee --help for detailed help.";
 if($options->{'help'}) {
@@ -149,6 +150,7 @@ script has the following arguments
 
     perform selected action:
       - url=<url>                   output url result
+        -i / --all-inclusive        includes all css, javascript and images in the resulting html page
       - report=<nr>                 generate report
       - reportmail=<nr>             send report by mail
 
