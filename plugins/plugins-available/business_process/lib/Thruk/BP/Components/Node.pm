@@ -422,6 +422,14 @@ sub _result_to_string {
 }
 
 ##########################################################
+
+=head2 TO_JSON
+
+    TO_JSON()
+
+returns data needed to represent this module in json
+
+=cut
 sub TO_JSON {
     my($self) = @_;
     my $data = $self->get_save_obj();

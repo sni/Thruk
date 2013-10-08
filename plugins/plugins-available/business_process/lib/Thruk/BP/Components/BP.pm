@@ -567,6 +567,14 @@ sub _submit_results_to_core {
 }
 
 ##########################################################
+
+=head2 TO_JSON
+
+    TO_JSON()
+
+returns data needed to represent this module in json
+
+=cut
 sub TO_JSON {
     my($self) = @_;
     my $data = {};
