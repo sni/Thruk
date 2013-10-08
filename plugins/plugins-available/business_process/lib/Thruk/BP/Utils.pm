@@ -269,7 +269,7 @@ sub update_cron_file {
         push @{$cron_entries}, ['*/'.$rate.' * * * *', $cmd] if $rate != 1;
     }
 
-    Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
+    Thruk::Utils::update_cron_file($c, 'business process', $cron_entries);
     return 1;
 }
 
