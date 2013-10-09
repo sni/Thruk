@@ -15,7 +15,7 @@ else
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
 fi
 
-eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+eval 'exec perl -x $0 ${1+"$@"} ;'
     if 0;
 
 #! -*- perl -*-
