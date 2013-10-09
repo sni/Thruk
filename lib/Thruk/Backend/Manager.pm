@@ -677,6 +677,13 @@ sub logcache_stats {
             $stats->{$key}->{'end'}   = $end;
         }
     }
+
+    # clean up connections
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        $peer->{'logcache'}->_disconnect() if $peer->{'logcache'};
+    }
+
     return $stats;
 }
 
