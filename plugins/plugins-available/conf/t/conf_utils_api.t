@@ -231,7 +231,7 @@ sleep(1);
 ###########################################################
 # really stop test server
 END {
-    `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1` if $httppid;
+    `ps auxww | grep -- '-p $testport' | awk '{ print \$2 }' | xargs kill >/dev/null 2>&1` if $httppid;
     kill(9, $socketpid) if $socketpid;
     `rm -rf $http_dir $local_dir`;
 }
