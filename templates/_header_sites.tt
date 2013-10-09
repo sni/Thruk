@@ -31,7 +31,10 @@
       [% SET class = 'button_peerDIS'  IF backend_detail.$pd.disabled == 6 %][%# hidden by config tool #%]
       [% SET class = 'button_peerUP'   IF backend_detail.$pd.disabled == 7 %][%# active by config tool #%]
       [% SET class = 'button_peerDOWN' IF failed_backends.defined(pd) %][%# other errors #%]
-      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %] section_[% subsection.replace('[^\w]', '_') %] section_[% subsection.replace('[^\w]', '_') %]_[% section.replace('[^\w]', '_') %]" value="[% name %]" title="[% IF failed_backends.defined(pd) %][% escape_js(failed_backends.$pd) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
+      [% last_error = name _ ': OK' %]
+      [% IF failed_backends.defined(pd) %][% last_error = escape_js(failed_backends.$pd) %][% END %]
+      [% IF backend_detail.$pd.last_error %][% last_error = escape_js(backend_detail.$pd.last_error) %][% END %]
+      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %] section_[% subsection.replace('[^\w]', '_') %] section_[% subsection.replace('[^\w]', '_') %]_[% section.replace('[^\w]', '_') %]" value="[% name %]" title="[% last_error %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
 
       [% IF show_sitepanel != 'list' %]
       [% IF class == 'button_peerUP'   %][% up       = up       + 1; totals.$subsection.$section.up       = totals.$subsection.$section.up       + 1 %][% END %]
