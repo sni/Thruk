@@ -26,6 +26,7 @@ my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 $branch          = $gitbranch unless $branch ne '';
 
+$ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
@@ -81,7 +82,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_pnp_url'         => \&Thruk::Utils::get_pnp_url,
                                           'get_graph_url'       => \&Thruk::Utils::get_graph_url,
                                           'get_action_url'       => \&Thruk::Utils::get_action_url,
-                                          'make_test_mode'      => (defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST') ? 1 : 0,
+                                          'make_test_mode'      => $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0,
                                           'button'              => \&Thruk::Utils::Filter::button,
                                           'fullversion'         => \&Thruk::Utils::Filter::fullversion,
                                           'reduce_number'       => \&Thruk::Utils::reduce_number,
