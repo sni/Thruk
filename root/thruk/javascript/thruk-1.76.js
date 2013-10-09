@@ -688,6 +688,7 @@ function updateSitePanelCheckBox() {
             total = count_site_section_totals(total, section, subsection);
         });
         if(jQuery('INPUT.btn_sites_'+subsection).length == 0) {
+            total['subsections']['Default'] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
             total = count_site_section_totals(total, subsection, 'Default');
         }
     });
