@@ -4,10 +4,12 @@ use parent 'Plack::Handler::CGI';
 use strict;
 use warnings;
 
+our $http_result;
+
 sub _handle_response {
     my ($self, $res) = @_;
     my %headers = @{$res->[1]};
-    $ENV{'HTTP_RESULT'} = {
+    $Plack::Handler::Thrukembedded::http_result = {
         headers => \%headers,
         code    => $res->[0],
     };
@@ -32,13 +34,13 @@ sub _handle_response {
     else {
         return Plack::Handler::Thrukembedded::Writer->new;
     }
-    $ENV{'HTTP_RESULT'}->{'result'} = $result;
+    $Plack::Handler::Thrukembedded::http_result->{'result'} = $result;
     return;
 }
 
 package Plack::Handler::Thrukembedded::Writer;
 sub new   { return bless \do { my $x }, $_[0] };
-sub write { return $ENV{'HTTP_RESULT'}->{'result'} = $_[1] };
+sub write { return $Plack::Handler::Thrukembedded::http_result->{'result'} = $_[1] };
 sub close { return; };
 
 1;

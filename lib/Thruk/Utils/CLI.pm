@@ -184,7 +184,6 @@ sub request_url {
     local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
     local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
-    local $ENV{'HTTP_RESULT'}      = {};
 
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();
@@ -192,7 +191,7 @@ sub request_url {
     require Catalyst::ScriptRunner;
     Catalyst::ScriptRunner->import();
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-    my $result = $ENV{'HTTP_RESULT'};
+    my $result = $Plack::Handler::Thrukembedded::http_result;
 
     if($result->{'code'} == 302
        and defined $result->{'headers'}
@@ -210,7 +209,7 @@ sub request_url {
                   $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
             local $ENV{'QUERY_STRING'}     = $1 if defined $1;
             Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-            $result = $ENV{'HTTP_RESULT'};
+            $result = $Plack::Handler::Thrukembedded::http_result;
             $x++;
         }
     }
