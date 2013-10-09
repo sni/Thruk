@@ -751,7 +751,7 @@ sub _ua_post_with_timeout {
 
     # make sure nobody else calls alarm in between
     {
-        no warnings 'redefine';
+        no warnings qw(redefine prototype);
         *CORE::GLOBAL::alarm = sub {};
     };
 
