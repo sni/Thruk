@@ -291,6 +291,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $c->stash->{'json'} = { $bp->{'id'} => $bp->TO_JSON() };
                 return $c->forward('Thruk::View::JSON');
             }
+            # try to find this bp on any system
+            my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
+            $c->stash->{'bp_backend'} = '';
+            if(scalar @{$hosts} > 0) {
+                $c->stash->{'bp_backend'} = $hosts->[0]->{'peer_key'};
+            }
+
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;

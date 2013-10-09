@@ -677,12 +677,12 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link_service').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link_host').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
     }
 
     return false;
