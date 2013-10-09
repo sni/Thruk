@@ -1510,7 +1510,7 @@ sub _get_subfilter {
     }
 
     if(ref $inp eq 'HASH') {
-        for my $key (keys %{$inp}) {
+        for my $key (sort keys %{$inp}) {
             my $val = $inp->{$key};
             # simple operator
             if(ref $val eq 'HASH' and scalar keys %{$val} == 1) {
@@ -1573,7 +1573,7 @@ sub _get_subfilter {
         # multiple hash keys have to be an array
         if(scalar keys %{$filter} > 1) {
             my @filter;
-            for my $key (keys %{$filter}) {
+            for my $key (sort keys %{$filter}) {
                 push @filter, {$key => $filter->{$key}};
             }
             return \@filter;

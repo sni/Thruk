@@ -150,8 +150,8 @@ test_filter(
 #####################################################################
 test_filter(
     'simple and',
-    [ { 'host_name' => 'host', 'description' => 'service' } ],
-    " WHERE (host_name = 'host' AND description = 'service')",
+    [ { 'description' => 'service', 'host_name' => 'host' } ],
+    " WHERE (description = 'service' AND host_name = 'host')",
 );
 
 #####################################################################

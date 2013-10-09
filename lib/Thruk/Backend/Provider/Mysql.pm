@@ -787,7 +787,7 @@ sub _get_subfilter {
         # multiple keys will be converted to list
         # { 'key' => 'v', 'key2' => v }
         my $list = [];
-        for my $k (keys %{$inp}) {
+        for my $k (sort keys %{$inp}) {
             push @{$list}, {$k => $inp->{$k}};
         }
         return $self->_get_subfilter({'-and' => $list});

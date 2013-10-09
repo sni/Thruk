@@ -4,6 +4,7 @@ use Data::Dumper;
 use Test::More tests => 20;
 $Data::Dumper::Sortkeys = 1;
 
+$ENV{'THRUK_SRC'} = 'TEST';
 use_ok('Thruk::Backend::Provider::Mongodb');
 
 my $m = Thruk::Backend::Provider::Mongodb->new({peer => 'localhost:12345/dbname'});
@@ -88,8 +89,8 @@ test_filter(
 #####################################################################
 test_filter(
     'simple and',
-    [ { 'host_name' => 'host', 'description' => 'service' } ],
-    [ { 'host_name' => 'host' }, { 'description' => 'service' } ],
+    [ { 'description' => 'service',     'host_name' => 'host' } ],
+    [ { 'description' => 'service' }, { 'host_name' => 'host' } ],
 );
 
 #####################################################################
@@ -130,8 +131,8 @@ test_filter(
 #####################################################################
 test_filter(
     'hash list',
-    { '-and' => { 'state' => 1, 'has_been_checked' => 1 } },
-    { '$and' => [ { 'state' => 1 }, { 'has_been_checked' => 1 } ] }
+    { '-and' => {   'has_been_checked' => 1,     'state' => 1 } },
+    { '$and' => [ { 'has_been_checked' => 1 }, { 'state' => 1 } ] }
 );
 
 #####################################################################
@@ -144,8 +145,8 @@ test_filter(
 #####################################################################
 test_filter(
     'tripple filter',
-    { '-and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '!=' => undef },   'state' => 1 } ] },
-    { '$and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '$ne' => '' } }, { 'state' => 1 } ] },
+    { '-and' => [ { 'type' => 'SERVICE ALERT' }, 'state' => 1,     { 'service_description' => { '!=' => undef } } ] },
+    { '$and' => [ { 'type' => 'SERVICE ALERT' }, { 'state' => 1 }, { 'service_description' => { '$ne' => ''   } } ] },
 );
 
 #####################################################################
