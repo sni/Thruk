@@ -93,11 +93,11 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Status' title='Refresh Status' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='#' onclick="current_node='node1'; bp_refresh('[% bp.id %]', current_node); return false;">Refresh Status</a></td>
               </tr>
+              [% IF bp_backend %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/shape_handles.png' border="0" alt='Enable Fullscreen Mode' title='Enable Fullscreen Mode' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;minimal=1'>Enable Fullscreen Mode</a></td>
               </tr>
-              [% IF bp_backend %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Status</a></td>
