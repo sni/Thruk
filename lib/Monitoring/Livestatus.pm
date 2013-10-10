@@ -1017,8 +1017,6 @@ sub _send_socket {
     eval {
         local $SIG{PIPE} = sub {
             die("broken pipe");
-            $self->{'logger'}->debug("broken pipe, closing socket") if $self->{'verbose'};
-            $self->_close($self->{'sock'});
         };
 
         if($self->{'retries_on_connection_error'} <= 0) {

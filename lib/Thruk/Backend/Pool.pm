@@ -3,6 +3,7 @@ package Thruk::Backend::Pool;
 use strict ();
 use warnings ();
 use threads ();
+use Carp qw/confess/;
 
 use Thruk::Pool::Simple ();
 use Thruk::Backend::Peer ();
@@ -19,6 +20,10 @@ Pool of backend connections
 =head1 METHODS
 
 =cut
+
+$SIG{PIPE} = sub {
+    confess("broken pipe");
+};
 
 ######################################
 
