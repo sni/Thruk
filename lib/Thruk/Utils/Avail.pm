@@ -463,7 +463,9 @@ sub calculate_availability {
         }
     }
     push @typefilter, { class => 2 }; # programm messages
-    push @typefilter, { type => { '~~' => 'TIMEPERIOD TRANSITION' }};
+    if($rpttimeperiod) {
+        push @typefilter, { type => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }};
+    }
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
