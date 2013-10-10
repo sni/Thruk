@@ -281,7 +281,7 @@ $objects->init();
 $objs = $objects->get_objects();
 is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
 is(scalar @{$objs}, 2, "number of objects");
-$parsedfile = $objects->{'files'}->[0];
+$parsedfile = $objects->get_file_by_path('./t/xt/conf/data/6/servicegroups_iso-8859.cfg');
 $obj = $parsedfile->{'objects'}->[0];
 my $g1 = {
   'servicegroup_name' => 'project_12345',
@@ -294,7 +294,7 @@ my $g2 = {
   'alias'             => 'Mandantenübergreifender Login',
 };
 
-$parsedfile = $objects->{'files'}->[1];
+$parsedfile = $objects->get_file_by_path('./t/xt/conf/data/6/servicegroups_utf8.cfg');
 $obj = $parsedfile->{'objects'}->[0];
 is_deeply($obj->{'conf'}, $g2, 'parsed UTF-8 group');
 
