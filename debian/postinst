@@ -60,9 +60,9 @@ case "$1" in
 
         # reload new apache config
         if which invoke-rc.d >/dev/null 2>&1; then
-            invoke-rc.d apache2 reload
+            invoke-rc.d apache2 reload || true
         else
-            /etc/init.d/apache2 reload
+            /etc/init.d/apache2 reload || true
         fi
 
         # create empty crontab

@@ -26,7 +26,7 @@ case "$1" in
     ;;
     upgrade)
         rm -rf /var/cache/thruk/*
-        mkdir /var/cache/thruk/reports
+        mkdir -p /var/cache/thruk/reports
         chown -R www-data: /var/cache/thruk
     ;;
     purge)
