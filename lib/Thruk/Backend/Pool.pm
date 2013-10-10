@@ -344,16 +344,28 @@ sub do_on_peer {
     if(ref $arg eq 'ARRAY') {
         for(my $x = 0; $x <= scalar @{$arg}; $x++) {
             if($arg->[$x] and $arg->[$x] eq 'eval') {
+                my $inc;
                 my $code = $arg->[$x+1];
                 if(ref($code) eq 'HASH') {
-                    $inc  = $code->{'inc'};
+                    chomp(my $pwd = `pwd`);
+                    for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : $pwd.'/plugins/plugins-available/')) {
+                        if(-e $path.'/'.$code->{'inc'}) {
+                            $inc  = $path.'/'.$code->{'inc'};
+                            last;
+                        }
+                    }
                     $code = $code->{'code'};
-                    @INC = @{$inc} if $inc;
+                    push @INC, $inc if $inc;
                 }
                 ## no critic
                 eval($code);
                 ## use critic
-                die($@) if $@;
+                if($@) {
+                    require Data::Dumper;
+                    Data::Dumper->import();
+                    die("eval failed:".Dumper(`pwd`, $arg, $@));
+                }
+                pop @INC if $inc;
             }
         }
     }

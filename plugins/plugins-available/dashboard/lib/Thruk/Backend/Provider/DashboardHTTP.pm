@@ -3,7 +3,6 @@ package Thruk::Backend::Provider::HTTP;
 use strict;
 use warnings;
 use Carp;
-use Thruk::Backend::Provider::HTTP;
 
 =head1 NAME
 

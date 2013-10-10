@@ -1,15 +1,15 @@
 package Thruk::Controller::dashboard;
+use parent 'Catalyst::Controller';
 
 use strict;
 use warnings;
 use utf8;
 use Carp;
-use Thruk::Utils::Status;
 use List::Compare;
 use List::MoreUtils;
+use Thruk::Utils::Status;
 use Thruk::Backend::Provider::DashboardLivestatus;
 use Thruk::Backend::Provider::DashboardHTTP;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
@@ -59,7 +59,7 @@ page: /thruk/cgi-bin/dashboard.cgi
 =cut
 
 sub index : Path : Args(0) : MyAction('AddDefaults') : Path('/thruk/cgi-bin/dashboard.cgi') {
-my( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     my $style = $c->{'request'}->{'parameters'}->{'style'} || 'dashboard';
     if($style ne 'dashboard') {
@@ -118,7 +118,7 @@ sub _process_dashboard_page {
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
-    my $eval = { code => 'require Thruk::Backend::Provider::DashboardLivestatus', inc => \@INC };
+    my $eval = { code => 'require Thruk::Backend::Provider::DashboardLivestatus', inc => 'dashboard/lib' };
 
     # we need the hostname, address etc...
     my $host_data;

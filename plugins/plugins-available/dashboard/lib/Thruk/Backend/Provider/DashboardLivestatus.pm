@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Carp;
 use Thruk::Utils;
-use Thruk::Backend::Provider::Livestatus;
 
 =head1 NAME
 
