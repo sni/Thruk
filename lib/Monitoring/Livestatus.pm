@@ -1021,7 +1021,7 @@ sub _send_socket {
 
         if($self->{'retries_on_connection_error'} <= 0) {
             ($status, $msg, $recv) = $self->_send_socket_do($statement);
-            return;
+            return($status, $msg, $recv);
         }
 
         while((!defined $status or ($status == 491 or $status == 497 or $status == 500)) and $retries < $self->{'retries_on_connection_error'}) {
@@ -1038,7 +1038,7 @@ sub _send_socket {
     if($@) {
         $self->{'logger'}->debug("try 1 failed: $@") if $self->{'verbose'};
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
-            return $self->_send_socket_do($statement);
+            return($self->_send_socket_do($statement));
         }
         croak($@) if $self->{'errors_are_fatal'};
     }

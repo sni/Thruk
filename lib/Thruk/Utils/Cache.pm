@@ -13,6 +13,7 @@ Cache Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
+use Thruk::Utils::IO;
 use Storable qw/lock_nstore lock_retrieve/;
 
 require Exporter;
@@ -148,7 +149,7 @@ sub _update {
         # only check every x seconds
         if($now > $self->{'_checked'} + 5) {
             $self->{'_checked'} = $now;
-            my @stat = stat($self->{'_cachefile'});
+            my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
             if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
                 $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
                 $self->{'_stat'} = \@stat;
@@ -156,8 +157,9 @@ sub _update {
             }
         }
         if($update) {
+            my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
             $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
-            $self->{'_stat'} = [stat($self->{'_cachefile'})];
+            $self->{'_stat'} = \@stat;
         }
     } else {
         # did not exist before, so create an empty cache
@@ -178,7 +180,9 @@ store cache to disk
 sub _store {
     my($self) = @_;
     lock_nstore($self->{'_data'}, $self->{'_cachefile'});
-    $self->{'_stat'}    = [stat($self->{'_cachefile'})];
+    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
+    $self->{'_stat'}    = \@stat;
+    Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
     my $now = time();
     $self->{'_checked'} = $now;
     return;
