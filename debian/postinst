@@ -69,7 +69,7 @@ case "$1" in
         /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
 
         # update cron entries
-        /usr/bin/thruk -a installcron --local > /dev/null
+        /usr/bin/thruk -a clearcache,installcron --local > /dev/null
 
         echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
     ;;

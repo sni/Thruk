@@ -176,7 +176,7 @@ if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   echo "******************************************";
 fi
 %endif
-/usr/bin/thruk -a installcron --local > /dev/null
+/usr/bin/thruk -a clearcache,installcron --local > /dev/null
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 

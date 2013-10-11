@@ -455,15 +455,33 @@ sub _run_commands {
     };
 
     # which command to run?
-    my $action = $opt->{'action'};
-    if(!$action and defined $opt->{'url'} and scalar @{$opt->{'url'}} > 0) {
-        $action = 'url='.$opt->{'url'}->[0];
+    my @actions = split(/\s*,\s*/mx, $opt->{'action'});
+
+    if(scalar @actions == 0 and defined $opt->{'url'} and scalar @{$opt->{'url'}} > 0) {
+        push @actions, 'url='.$opt->{'url'}->[0];
     }
-    if(defined $opt->{'listbackends'}) {
-        $action = 'listbackends';
+    if(scalar @actions == 0 and defined $opt->{'listbackends'}) {
+        push @actions, 'listbackends';
     }
 
-    $c->stats->profile(begin => "_run_commands($action)");
+    my($rc, $output) = (0, '');
+    for my $action (@actions) {
+        my $res = _run_command_action($c, $opt, $src, $action);
+        $data->{'rc'}     += $res->{'rc'};
+        $data->{'output'} .= $res->{'output'};
+    }
+    return($data);
+}
+
+##############################################
+sub _run_command_action {
+    my($c, $opt, $src, $action) = @_;
+    $c->stats->profile(begin => "_run_command_action($action)");
+
+    my $data = {
+        'output'  => '',
+        'rc'      => 0,
+    };
 
     # raw query
     if($action eq 'raw') {
@@ -560,7 +578,7 @@ sub _run_commands {
         $data->{'rc'}     = 1;
     }
 
-    $c->stats->profile(end => "_run_commands($action)");
+    $c->stats->profile(end => "_run_command_action($action)");
 
     return $data;
 }
