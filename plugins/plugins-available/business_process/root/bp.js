@@ -892,6 +892,7 @@ function bp_redraw(evt) {
 
     // adjust size of container
     var container = document.getElementById(containerId);
+    if(!container) { return false; }
     var w = jQuery(window).width() - container.parentNode.offsetLeft - 5;
     var h = jQuery(window).height() - container.parentNode.offsetTop -10;
     if(!minimal) {
