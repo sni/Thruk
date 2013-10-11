@@ -775,6 +775,7 @@ sub close_logcache_connections {
         my $peer = $c->{'db'}->get_peer_by_key($key);
         $peer->{'logcache'}->_disconnect() if $peer->{'logcache'};
     }
+    return;
 }
 
 
