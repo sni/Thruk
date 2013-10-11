@@ -67,6 +67,24 @@ TestUtils::test_command({
             ],
 });
 
+# clearcache
+TestUtils::test_command({
+    cmd  => $BIN.' ./script/thruk -a clearcache',
+    like => ['/^$/'],
+});
+
+# dumpcache
+TestUtils::test_command({
+    cmd  => $BIN.' ./script/thruk -a dumpcache',
+    like => ['/^\$VAR1/'],
+});
+
+# 2 commands
+TestUtils::test_command({
+    cmd  => $BIN.' ./script/thruk -a clearcache,dumpcache',
+    like => ['/^\$VAR1/'],
+});
+
 # create recurring downtime
 TestUtils::test_command({
     cmd  => $BIN.' "/thruk/cgi-bin/extinfo.cgi?type=6&recurring=save&target=host&host='.$host.'&duration=5&send_type_1=day&send_hour_1=5&send_minute_1=0&nr=999"',

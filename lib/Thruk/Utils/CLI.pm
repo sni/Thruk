@@ -455,13 +455,16 @@ sub _run_commands {
     };
 
     # which command to run?
-    my @actions = split(/\s*,\s*/mx, $opt->{'action'});
+    my @actions = split(/\s*,\s*/mx, ($opt->{'action'} || ''));
 
     if(scalar @actions == 0 and defined $opt->{'url'} and scalar @{$opt->{'url'}} > 0) {
         push @actions, 'url='.$opt->{'url'}->[0];
     }
     if(scalar @actions == 0 and defined $opt->{'listbackends'}) {
         push @actions, 'listbackends';
+    }
+    if(scalar @actions == 1) {
+        return(_run_command_action($c, $opt, $src, $actions[0]));
     }
 
     my($rc, $output) = (0, '');
@@ -546,11 +549,11 @@ sub _run_command_action {
 
     # cache actions
     elsif($action eq 'dumpcache') {
-        $data->{'rc'} = 1;
+        $data->{'rc'} = 0;
         $data->{'output'} = Dumper($c->cache->dump);
     }
     elsif($action eq 'clearcache') {
-        $data->{'rc'} = 1;
+        $data->{'rc'} = 0;
         $data->{'output'} = Dumper($c->cache->clear);
     }
 
