@@ -23,10 +23,8 @@
     <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
     <div class='commentTitle'>Host Comments</div>
     <div class='comment'>
-      [% UNLESS c.config.command_disabled.exists('1') %]
-      [% UNLESS c.check_user_roles_wrapper('authorized_for_read_only') %]
+      [% UNLESS c.config.command_disabled.exists('1') || c.check_user_roles_wrapper('authorized_for_read_only') %]
       <img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
-      [% END %]
       [% END %]
     </div><br>
 
@@ -57,10 +55,8 @@
     <br>
     <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
     <div class='commentTitle'>Service Comments</div>
-    [% UNLESS c.config.command_disabled.exists('3') %]
-    [% IF c.check_cmd_permissions('host', c.request.parameters.host) %]
+    [% UNLESS c.config.command_disabled.exists('3') || c.check_user_roles_wrapper('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div>
-    [% END %]
     [% END %]
     [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 sortprefix='_svc' %]
 <br>
