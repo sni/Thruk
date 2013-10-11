@@ -679,10 +679,7 @@ sub logcache_stats {
     }
 
     # clean up connections
-    for my $key (@{$c->stash->{'backends'}}) {
-        my $peer = $c->{'db'}->get_peer_by_key($key);
-        $peer->{'logcache'}->_disconnect() if $peer->{'logcache'};
-    }
+    close_logcache_connections($c);
 
     return $stats;
 }
@@ -761,6 +758,25 @@ sub _renew_logcache {
     $self->_do_on_peers( 'renew_logcache', \@_, 1);
     return;
 }
+
+########################################
+
+=head2 close_logcache_connections
+
+  close_logcache_connections($c)
+
+close all logcache connections
+
+=cut
+sub close_logcache_connections {
+    my($c) = @_;
+    # clean up connections
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        $peer->{'logcache'}->_disconnect() if $peer->{'logcache'};
+    }
+}
+
 
 ########################################
 

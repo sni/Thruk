@@ -989,6 +989,7 @@ sub _cmd_import_logs {
             $stats= Thruk::Backend::Provider::Mongodb->_log_stats($c);
         }
         $c->stats->profile(end => "_cmd_import_logs()");
+        Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats."\n", 0);
     } else {
         my $t0 = [gettimeofday];
@@ -1003,6 +1004,7 @@ sub _cmd_import_logs {
         my $action = "imported";
         $action    = "updated" if $mode eq 'authupdate';
         $action    = "removed" if $mode eq 'clean';
+        Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
         return(sprintf("OK - %s %i log items from %i site%s successfully in %.2fs (%i/s)\n",
                        $action,
