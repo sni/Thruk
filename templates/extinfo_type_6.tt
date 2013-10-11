@@ -21,7 +21,7 @@
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
     [% UNLESS c.config.command_disabled.exists('55') %]
-    [% IF c.check_cmd_permissions('host', c.request.parameters.host) %]
+    [% UNLESS c.check_user_roles_wrapper('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
     [% END %]
     [% END %]
@@ -54,7 +54,7 @@
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
     [% UNLESS c.config.command_disabled.exists('56') %]
-    [% IF c.check_cmd_permissions('service', c.request.parameters.service, c.request.parameters.host) %]
+    [% UNLESS c.check_user_roles_wrapper('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div>
     [% END %]
     [% END %]
