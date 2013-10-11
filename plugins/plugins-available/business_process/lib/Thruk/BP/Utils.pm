@@ -142,8 +142,9 @@ sub save_bp_objects {
     my($c, $bps) = @_;
 
     my $file = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
-    return unless $file;
+    return(1, 'ok') unless $file;
 
+    my($rc, $msg) = (0, 'reload ok');
     my $obj = {'hosts' => {}, 'services' => {}};
     for my $bp (@{$bps}) {
         my $data = $bp->get_objects_conf();
@@ -182,7 +183,8 @@ sub save_bp_objects {
         if($cmd) {
             local $SIG{CHLD}='';
             local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-            `$cmd >/dev/null 2>&1`;
+            my $out = `$cmd 2>&1`;
+            ($rc, $msg) = ($?, $out);
             Thruk::Utils::wait_after_reload($c);
         }
     } else {
@@ -190,7 +192,7 @@ sub save_bp_objects {
         unlink($filename);
     }
 
-    return;
+    return($rc, $msg);
 }
 
 ##########################################################

@@ -128,9 +128,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             $bp->commit($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
-            Thruk::BP::Utils::save_bp_objects($c, $bps);
+            my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
+            }
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
             my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
             $bps->[0]->update_status($c);
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
@@ -147,9 +150,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'remove') {
             $bp->remove($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
-            Thruk::BP::Utils::save_bp_objects($c, $bps);
+            my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
+            if($rc != 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
+            }
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' }) unless $rc != 0;
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
         }
         elsif($action eq 'clone') {

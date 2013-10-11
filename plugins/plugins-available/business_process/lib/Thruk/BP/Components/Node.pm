@@ -243,12 +243,12 @@ sub get_objects_conf {
     }
 
     $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
-        'host_name'      => $bp->{'name'},
-        'description'    => $self->{'label'},
-        'display_name'   => $self->{'label'},
-        'use'            => $self->{'template'} || 'thruk-bp-node-template',
-        '_THRUK_BP_ID'   => $bp->{'id'},
-        '_THRUK_NODE_ID' => $self->{'id'},
+        'host_name'           => $bp->{'name'},
+        'service_description' => $self->{'label'},
+        'display_name'        => $self->{'label'},
+        'use'                 => $self->{'template'} || 'thruk-bp-node-template',
+        '_THRUK_BP_ID'        => $bp->{'id'},
+        '_THRUK_NODE_ID'      => $self->{'id'},
     };
 
     return($obj);
