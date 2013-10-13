@@ -280,7 +280,7 @@ sub after_execute {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
     $c->stash->{'refresh_rate'} = $c->{'request'}->{'parameters'}->{'refresh'} if defined $c->{'request'}->{'parameters'}->{'refresh'};
-    if($c->stash->{'refresh_rate'} == 0) {
+    if(defined $c->stash->{'refresh_rate'} && $c->stash->{'refresh_rate'} == 0) {
         $c->stash->{'no_auto_reload'} = 1;
     }
 
