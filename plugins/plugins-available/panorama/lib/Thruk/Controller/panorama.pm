@@ -159,6 +159,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         return $c->response->redirect("panorama.cgi");
     }
 
+    $c->stash->{default_nagvis_base_url} = '';
+    $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
+
     $c->stash->{template} = 'panorama.tt';
     return 1;
 }

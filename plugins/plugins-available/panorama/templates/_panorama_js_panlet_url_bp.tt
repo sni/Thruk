@@ -1,4 +1,4 @@
-Ext.define('TP.PanletBP', {
+﻿Ext.define('TP.PanletBP', {
     extend: 'TP.PanletUrl',
 
     title: 'Business Process',
@@ -28,7 +28,8 @@ Ext.define('TP.PanletBP', {
             queryMode:      'local',
             valueField:     'id',
             displayField:   'name',
-            store:          panel.graph_store
+            store:           panel.graph_store,
+            emptyText:      'select business process to display'
         });
         panel.down('form').add(panel.graph_combo);
 

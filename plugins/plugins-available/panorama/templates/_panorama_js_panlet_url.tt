@@ -108,6 +108,7 @@
             fieldLabel: 'URL',
             xtype:      'textfield',
             name:       'url',
+            emptyText:  'target url, ex.: http://thruk.org/ or relative url',
             listeners: {
                 change: function(This, newV, oldV, eOpts) {
                     var pan = This.up('panel');
@@ -131,7 +132,8 @@
         }, {
             fieldLabel: 'CSS Selector',
             xtype:      'textfield',
-            name:       'selector'
+            name:       'selector',
+            emptyText:  'optional css selector, ex.: DIV#id_of_element'
         }, {
             fieldLabel: 'Keep CSS',
             xtype:      'checkbox',

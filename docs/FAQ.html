@@ -2,8 +2,8 @@
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.2" />
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.6" />
 <title>Frequently Asked Questions</title>
 <style type="text/css">/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
 
@@ -643,7 +643,7 @@ h4#_peer + div > ul tt {
 </style>
 
 </head>
-<body style="max-width:800">
+<body class="article" style="max-width:800">
 <div id="header">
 <h1>Frequently Asked Questions</h1>
 <div id="toc"><div id="toctitle">Table of Contents</div>
@@ -679,47 +679,68 @@ h4#_peer + div > ul tt {
 
 </div>
 <div id="content">
+<div class="sect1">
 <h2 id="_general">General</h2>
 <div class="sectionbody">
-<h3 id="_is_thruk_an_abbreviation_what_does_thruk_mean">Is Thruk an Abbreviation? What does Thruk mean?</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_is_thruk_an_abbreviation_what_does_thruk_mean">Is Thruk an Abbreviation? What does Thruk mean?</h3>
 <div class="paragraph"><p>Thruk is just a random word and has no meaning. Pronounce it like <em>Truck</em>.</p></div>
-<h3 id="_where_is_the_statusmap">Where is the statusmap?</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_where_is_the_statusmap">Where is the statusmap?</h3>
 <div class="paragraph"><p>The statusmap got replaced by a own variant which is more scalable in
 large environments. Its shipped as Thruk addon, but enabled by
 default. See the <a href="http://thruk.org/plugins.html">plugins page</a> for details and screenshots.</p></div>
-<h3 id="_authorization_authentication_is_not_working">Authorization/Authentication is not working</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_authorization_authentication_is_not_working">Authorization/Authentication is not working</h3>
 <div class="paragraph"><p>Authentication is done by the webserver, so authentication is only available
 with the fastcgi version.</p></div>
-<h3 id="_all_dates_and_times_are_displayed_with_the_wrong_timezone">All dates and times are displayed with the wrong timezone</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_all_dates_and_times_are_displayed_with_the_wrong_timezone">All dates and times are displayed with the wrong timezone</h3>
 <div class="paragraph"><p>Try to set the use_timezone configuration option in your
 thruk_local.conf</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
-<h3 id="_how_do_i_select_hosts_services_on_the_status_page">How do i select hosts/services on the status page?</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_how_do_i_select_hosts_services_on_the_status_page">How do i select hosts/services on the status page?</h3>
 <div class="paragraph"><p>Just click on the empty table row when the row is highlighted. This only works
 if you do not click on a link.</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_where_can_i_see_the_full_command_line_for_a_host_or_servicecheck">Where can i see the full command line for a host or servicecheck?</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>You have to enable the option <em>set show_full_commandline</em>. It&#8217;s
 disabled for security reasons by default. So be careful to not display
 any passwords though the webinterface.</p></div>
 </div>
+</div>
+<div class="sect1">
 <h2 id="_customization">Customization</h2>
 <div class="sectionbody">
-<h3 id="_how_to_change_the_side_menu">How to change the side menu</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_how_to_change_the_side_menu">How to change the side menu</h3>
 <div class="paragraph"><p>The main left menu is highly editable through menu_local.conf. It is
 recommended apply changes only to your menu_local.conf in order to
 avoid conflicts on updating Thruk.</p></div>
 <div class="paragraph"><p>Open your menu_local.conf (create one if it does not exists) with your
 preferred text editor and check the config.</p></div>
+<div class="sect3">
 <h4 id="_adding_new_section">Adding new Section</h4>
 <div class="paragraph"><p>You can add new sections with:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>add_section('name' =&gt; 'General');</tt></pre>
 </div></div>
+</div>
+<div class="sect3">
 <h4 id="_adding_a_new_link">Adding a new Link</h4>
 <div class="paragraph"><p>To add a new link use the following syntax:</p></div>
 <div class="literalblock">
@@ -755,6 +776,8 @@ icon: Used for themes which support icons.
 </div></div>
 <div class="paragraph"><p><em>add_link</em> always adds the new link to the last section. Use <em>insert_item</em> to
 add a link to any section.</p></div>
+</div>
+<div class="sect3">
 <h4 id="_including_original_side_navigation">Including original side navigation</h4>
 <div class="paragraph"><p>You can include the main menu config with the perl do statement.
 Ex.: If you just want to add a new link to your config menu, your
@@ -767,6 +790,8 @@ add_link('name' =&gt; 'Wato', 'href' =&gt; '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.
 <div class="paragraph"><p>This example just puts the Wato link from check_mks Multisite in your
 config section. Replace the ENV part with a proper path if you do not
 use <a href="http://omdistro.org">OMD</a>.</p></div>
+</div>
+<div class="sect3">
 <h4 id="_inserting_item_in_existing_section">Inserting item in existing Section</h4>
 <div class="paragraph"><p>Adding Items to existing sections can also be achieved by
 <em>insert_item</em>:</p></div>
@@ -775,6 +800,8 @@ use <a href="http://omdistro.org">OMD</a>.</p></div>
 <pre><tt>do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
 insert_item('General', { 'href' =&gt; 'http://your-company.com', 'name' =&gt; 'Company' });</tt></pre>
 </div></div>
+</div>
+<div class="sect3">
 <h4 id="_removing_item_in_existing_section">Removing item in existing Section</h4>
 <div class="paragraph"><p>Existing Items can be removed with the <em>remove_item</em> function:</p></div>
 <div class="literalblock">
@@ -782,6 +809,8 @@ insert_item('General', { 'href' =&gt; 'http://your-company.com', 'name' =&gt; 'C
 <pre><tt>do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
 remove_item('Reports', 'Availability');</tt></pre>
 </div></div>
+</div>
+<div class="sect3">
 <h4 id="_make_item_available_for_some_groups_only">Make item available for some groups only</h4>
 <div class="paragraph"><p>Just wrap your changes in a <em>has_group</em>.</p></div>
 <div class="literalblock">
@@ -791,6 +820,8 @@ remove_item('Reports', 'Availability');</tt></pre>
   add_link('name' =&gt; 'Admin Link', 'href' =&gt; '.../only_for_admins.html');
 }</tt></pre>
 </div></div>
+</div>
+<div class="sect3">
 <h4 id="_make_item_available_for_some_roles_only">Make item available for some roles only</h4>
 <div class="paragraph"><p>Just wrap your changes in a <em>has_role</em>.</p></div>
 <div class="literalblock">
@@ -800,7 +831,10 @@ remove_item('Reports', 'Availability');</tt></pre>
   add_link('name' =&gt; 'Admin Link', 'href' =&gt; '.../only_for_some_roles.html');
 }</tt></pre>
 </div></div>
-<h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3><div style="clear:left"></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3>
 <div class="paragraph"><p>Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set</p></div>
 <div class="literalblock">
@@ -825,7 +859,9 @@ add_sub_link('name' =&gt; "demo",       'href' =&gt; '/nagvis/frontend/nagvis-js
 add_sub_link('name' =&gt; "demo-map2",  'href' =&gt; '/nagvis/frontend/nagvis-js/index.php?mod=Map&amp;act=view&amp;show=demo-map2');</tt></pre>
 </div></div>
 <div class="paragraph"><p>Thruk has to be restarted.</p></div>
-<h3 id="_how_can_i_integrate_nagvis_maps_in_the_panorama_dashboard">How can i integrate Nagvis Maps in the Panorama Dashboard</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_integrate_nagvis_maps_in_the_panorama_dashboard">How can i integrate Nagvis Maps in the Panorama Dashboard</h3>
 <div class="paragraph"><p>Choose <em>Generic Url Panlet</em> from the <em>New Panlet</em> list. Then enter
 the following url:</p></div>
 <div class="literalblock">
@@ -834,16 +870,79 @@ the following url:</p></div>
 </div></div>
 <div class="paragraph"><p>Replace demo-automap with the name of your map. If you use OMD, you have
 to prepend the site name to the url.</p></div>
-<h3 id="_how_can_i_add_more_themes">How can i add more themes?</h3><div style="clear:left"></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">
+<div class="title">nagvis panel</div>
+<div class="paragraph"><p>There is a dedicated nagvis panel since Thruk release 1.78.</p></div>
+</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_add_more_themes">How can i add more themes?</h3>
 <div class="paragraph"><p>Themes are located under <em>themes</em>. Just copy and modify the one you
 like. See the <a href="http://thruk.org/themes.html">themes page</a> for details.</p></div>
-<h3 id="_how_can_i_disable_themes">How can i disable themes?</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_disable_themes">How can i disable themes?</h3>
 <div class="paragraph"><p>Themes can be disabled by removing the symlink from your
 <em>themes/themes-enabled</em> directory.
 See the <a href="http://thruk.org/themes.html">themes page</a> for details.</p></div>
-<h3 id="_how_can_i_customize_reports">How can i customize reports?</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_customize_reports">How can i customize reports?</h3>
 <div class="paragraph"><p>Customizing reports is coverd in the <a href="http://thruk.org/documentation.html#_customized_reports">official documenation</a>.</p></div>
-<h3 id="_why_are_the_pnp_graphs_missing_in_my_reports">Why are the PNP graphs missing in my reports?</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_why_are_the_pnp_graphs_missing_in_my_reports">Why are the PNP graphs missing in my reports?</h3>
 <div class="paragraph"><p>First you need a working PNP installation. Then check
 the <a href="http://thruk.org/documentation.html#_pnp_export">official documenation</a>.</p></div>
 <div class="paragraph"><p>If nothing helps, add some debug output to the script which is responsible for
@@ -855,7 +954,9 @@ the pnp export (experienced users only).</p></div>
 set -x</tt></pre>
 </div></div>
 <div class="paragraph"><p>Then regenerate a report and investigate that new logfile.</p></div>
-<h3 id="_how_can_i_create_a_readonly_panorama_dashboard_for_my_boss">How can i create a readonly Panorama dashboard for my boss</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_create_a_readonly_panorama_dashboard_for_my_boss">How can i create a readonly Panorama dashboard for my boss</h3>
 <div class="paragraph"><p>In combination with the user specific settings, this can easily be achieved in
 your thruk_local.conf:</p></div>
 <div class="listingblock">
@@ -869,7 +970,9 @@ your thruk_local.conf:</p></div>
 </div></div>
 <div class="paragraph"><p>The default view can be exported from the <em>Settings</em> menu inside the panorama
 dashboard.</p></div>
-<h3 id="_how_can_i_set_custom_page_titles">How can i set custom page titles</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_how_can_i_set_custom_page_titles">How can i set custom page titles</h3>
 <div class="paragraph"><p>There are few ways to do this. The first way is you can turn on the
 use_bookmark_titles in your thruk_local.conf:</p></div>
 <div class="listingblock">
@@ -881,24 +984,34 @@ that bookmark will be used as the page title.
 The second option is on most pages adding <em>title=your title here</em> to
 the url will set a custom title</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<h3 id="_is_it_possible_to_operate_thruk_in_a_cluster">Is it possible to operate Thruk in a cluster?</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_is_it_possible_to_operate_thruk_in_a_cluster">Is it possible to operate Thruk in a cluster?</h3>
 <div class="paragraph"><p>Yes, just put a load balancer before 2 (or more) Thruk installations
 and make sure the <em>var_path</em> directory is shared between all instances ( by
 NFS, DRBD or similar ). There is usually not much traffic in this
 folder.</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_hacking_thruk">Hacking Thruk</h2>
 <div class="sectionbody">
-<h3 id="_within_omd">Within OMD</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_within_omd">Within OMD</h3>
 <div class="paragraph"><p>If you are using OMD, then you just might want to follow this guide:
 <a href="https://github.com/sni/omd_utils/tree/master/thruk_developer">https://github.com/sni/omd_utils/tree/master/thruk_developer</a>
 Which connects a test OMD site to the git version of Thruk. This works quite
 well as long as there are only small changes in the perl module dependencies.</p></div>
 <div class="paragraph"><p>The installer adds a new OMD daemon which restarts Thruk whenever you change
 a perl file or template.</p></div>
-<h3 id="_install_test_environment_from_source">Install Test Environment from Source</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_install_test_environment_from_source">Install Test Environment from Source</h3>
 <div class="olist arabic"><ol class="arabic">
 <li>
 <p>
@@ -956,9 +1069,13 @@ create a git patch
 </li>
 </ol></div>
 </div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_errors">Errors</h2>
 <div class="sectionbody">
-<h3 id="_backend_not_available">Backend not available</h3><div style="clear:left"></div>
+<div class="sect2">
+<h3 id="_backend_not_available">Backend not available</h3>
 <div class="paragraph"><p>The socat solution for using livestatus with SSL does not longer work
 due to problems with socat and json data. If you see errors like:</p></div>
 <div class="listingblock">
@@ -968,7 +1085,9 @@ due to problems with socat and json data. If you see errors like:</p></div>
 </div></div>
 <div class="paragraph"><p>and you use socat for livestatus over ssl, please change to stunnel or
 ssh with the normal xinetd solution.</p></div>
-<h3 id="_undefined_symbol_perl_istack_sp_ptr">undefined symbol: Perl_Istack_sp_ptr</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_undefined_symbol_perl_istack_sp_ptr">undefined symbol: Perl_Istack_sp_ptr</h3>
 <div class="paragraph"><p>You will get perl errors about undefined symbols when you try to
 install a debian package on ubuntu or a ubuntu 11 deb file on ubuntu
 12 or any package on a different platform than the package was build
@@ -980,14 +1099,18 @@ for.</p></div>
 <div class="paragraph"><p>The solution is simple: use the right package for your distribution.
 If there is no package is available for your platform, use the source
 installation.</p></div>
-<h3 id="_broken_pdf_reports_in_centos_rhel_5">Broken PDF Reports in Centos/Rhel 5</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_broken_pdf_reports_in_centos_rhel_5">Broken PDF Reports in Centos/Rhel 5</h3>
 <div class="paragraph"><p>PDF reports won&#8217;t work with libcairo &lt; 1.8.8. Therefor you may use the
 prepared packages for cairo 1.8.8 on rhel/centos 5 on the
 <a href="http://thruk.org/download.html">download
 page</a>.</p></div>
 <div class="paragraph"><p>The new <em>reports2</em> module should work fine, even on older Redhat
 boxes.</p></div>
-<h3 id="_premature_end_of_script_headers_fcgid_env_sh">Premature end of script headers: fcgid_env.sh</h3><div style="clear:left"></div>
+</div>
+<div class="sect2">
+<h3 id="_premature_end_of_script_headers_fcgid_env_sh">Premature end of script headers: fcgid_env.sh</h3>
 <div class="paragraph"><p>A few things to check:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1022,10 +1145,12 @@ changes active).</p></div>
 </ul></div>
 </div>
 </div>
+</div>
+</div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-08-11 22:00:50 CEST
+Last updated 2013-10-13 19:41:36 CEST
 </div>
 </div>
 </body>

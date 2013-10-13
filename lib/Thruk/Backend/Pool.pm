@@ -88,6 +88,7 @@ sub set_default_config {
         use_feature_histogram           => 0,
         use_feature_configtool          => 0,
         use_feature_recurring_downtime  => 1,
+        use_feature_bp                  => 0,
         use_service_description         => 0,
         use_bookmark_titles             => 0,
         use_dynamic_titles              => 1,

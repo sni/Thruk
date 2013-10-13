@@ -1,17 +1,119 @@
-Ext.define('TP.PanletNagvis', {
+﻿Ext.define('TP.PanletNagvis', {
     extend: 'TP.PanletUrl',
 
-    title: 'Business Process',
+    title: 'Nagvis Maps',
     height: 300,
     width:  600,
 
     initComponent: function() {
-        this.callParent();
-        this.xdata.url      = '';
-        this.xdata.selector = '';
-        this.xdata.keepcss  = true;
-        this.reloadOnSiteChanges = true;
+        var panel = this;
+        panel.callParent();
+        panel.xdata.url      = '';
+        panel.xdata.selector = '';
+        panel.xdata.keepcss  = true;
+        panel.xdata.graph    = '';
+        panel.xdata.base_url = '[% default_nagvis_base_url %]';
+        panel.reloadOnSiteChanges = false;
+        panel.last_url       = '';
+        panel.graphs_loaded  = 0;
 
-        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends', 'selector', 'keepcss']);
+        TP.hideFormElements(panel.down('form').getForm(), ['url', 'backends', 'selector', 'keepcss']);
+        this.down('form').add({
+            fieldLabel: 'Nagvis Base Url',
+            xtype:      'textfield',
+            name:       'base_url',
+            emptyText:  'nagvis base url, ex.: /nagvis'
+        });
+        panel.loader = {};
+
+        panel.graph_store = new Ext.data.Store({
+                fields: ['name', 'id'],
+                data: []
+        });
+        panel.graph_combo = new Ext.form.field.ComboBox({
+            fieldLabel:     'Graph',
+            name:           'graph',
+            queryMode:      'local',
+            valueField:     'id',
+            displayField:   'name',
+            store:           panel.graph_store,
+            emptyText:      'select map to display',
+            listeners: {
+                focus: function() {
+                    panel.updateGraphs();
+                },
+                expand: function() {
+                    panel.updateGraphs();
+                }
+            }
+        });
+        panel.down('form').add(panel.graph_combo);
+
+        /* available graphs loader */
+        panel.updateGraphs = function() {
+            var form   = this.down('form').getForm();
+            var values = form.getValues();
+            panel.xdata.base_url = values.base_url;
+            if(!panel.xdata.base_url) { return; }
+            if(panel.graphs_loaded)   { return; }
+            var now    = new Date();
+            var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
+            Ext.Ajax.request({
+                url: url,
+                method: 'POST',
+                callback: function(options, success, response) {
+                    var data  = TP.getResponse(panel, response);
+                    var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
+                    if(matches && matches.length > 0) {
+                        panel.graphs_loaded = 1;
+                        var newdata = {};
+                        for(var nr in matches) {
+                            var m = matches[nr];
+                            var name = m.match(/>([^<]*)<\/a>/);
+                            var link = m.match(/show=([^"]*)"/);
+                            newdata[link[1]] = {
+                                name: name[1],
+                                id:   link[1]
+                            };
+                        }
+                        panel.graph_combo.store.removeAll();
+                        for(var nr in newdata) {
+                            panel.graph_combo.store.loadRawData(newdata[nr], true);
+                        }
+                        panel.graph_combo.setValue(panel.xdata.graph);
+                    } else {
+                        panel.graphs_loaded = 0;
+                    }
+                }
+            });
+        };
+
+        panel.gearInitCallback = function(This) {
+            panel.graphs_loaded = 0;
+            panel.updateGraphs();
+        };
+
+        panel.refreshHandler = function() {
+            if(panel.xdata.graph && panel.xdata.base_url) {
+                var newUrl = panel.xdata.base_url+'/index.php?mod=Map&act=view&show='+panel.xdata.graph;
+                if(panel.xdata.url != newUrl) {
+                    panel.xdata.url = newUrl;
+                    panel.saveState();
+                }
+                var iframeObj = panel.items.getAt(1).getEl();
+                if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
+                    iframeObj.dom.src = panel.xdata.url;
+                    panel.last_url = panel.xdata.url;
+                }
+            } else {
+                panel.xdata.url = '';
+            }
+        };
+        /* manual refresh update nagvis map */
+        panel.manualRefresh = function() {
+            panel.body.mask('Loading...');
+            panel.last_url = '';
+            panel.refreshHandler();
+        };
     }
 });

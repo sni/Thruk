@@ -113,7 +113,7 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/world.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
                     }
-                    [% IF c.config.use_feature_bp %]
+                    [% IF use_feature_bp %]
                     , {
                         text:   'Business Process Map',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_organisation.png',
