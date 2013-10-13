@@ -350,11 +350,19 @@ sub _bp_start_page {
     $c->stash->{'bps'} = $bps;
 
     if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {
-        my $data = {};
-        for my $bp (@{$bps}) {
-            $data->{$bp->{'id'}} = $bp->TO_JSON();
+        if($c->{'request'}->{'parameters'}->{'format'} and $c->{'request'}->{'parameters'}->{'format'} eq 'search') {
+            my $data = [];
+            for my $bp (@{$bps}) {
+                push @{$data}, $bp->{'name'};
+            }
+            $c->stash->{'json'} = [ { 'name' => "business processs", 'data' => $data } ];
+        } else {
+            my $data = {};
+            for my $bp (@{$bps}) {
+                $data->{$bp->{'id'}} = $bp->TO_JSON();
+            }
+            $c->stash->{'json'} = $data;
         }
-        $c->stash->{'json'} = $data;
         return $c->forward('Thruk::View::JSON');
     }
 

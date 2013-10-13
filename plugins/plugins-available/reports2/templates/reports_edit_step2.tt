@@ -1,4 +1,5 @@
 ﻿[% temp = 'reports/' _ r.template %]
+[% edit_types = '' %]
 [% PROCESS $temp block = 'edit' %]
   [% FOREACH f = required_fields %]
   [% key     = f.keys.0 %]
@@ -213,6 +214,7 @@
           [% END %]
         </select>
       [% ELSE %]
+      [% PROCESS $temp block = 'edit_types' %]
       [% PROCESS custom_reports_edit_step2.tt %]
         [% IF key %]
         <input type="text" name="params.[% key %]" value="[% escape_html(value) %]">

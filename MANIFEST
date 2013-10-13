@@ -163,6 +163,7 @@ plugins/plugins-available/business_process/templates/_bp_frame.tt
 plugins/plugins-available/business_process/templates/_bp_graph.tt
 plugins/plugins-available/business_process/templates/bp.tt
 plugins/plugins-available/business_process/templates/bp_details.tt
+plugins/plugins-available/business_process/templates/reports/sla_business_process.tt
 plugins/plugins-available/conf/description.txt
 plugins/plugins-available/conf/lib/Catalyst/Model/Objects/Class.pm
 plugins/plugins-available/conf/lib/Monitoring/Config.pm
