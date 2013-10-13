@@ -742,6 +742,7 @@ plugins/plugins-available/panorama/root/images/btn_downtime.png
 plugins/plugins-available/panorama/root/images/bug_error.png
 plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
+plugins/plugins-available/panorama/root/images/chart_organisation.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
@@ -770,6 +771,7 @@ plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
+plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/panorama-1.76.css
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
@@ -793,6 +795,8 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_stats.
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_pnp.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_service.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_bp.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_nagvis.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_global.tt
 plugins/plugins-available/panorama/templates/_panorama_js_slider.tt

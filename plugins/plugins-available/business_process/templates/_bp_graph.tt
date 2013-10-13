@@ -16,10 +16,15 @@
     [% END %]
     [% IF n.defined('short_desc') %][% short_desc = n.short_desc %][% END %]
     [% IF n.testmode %][% short_desc = 'testmode' %][% END %]
-    <div id='[% n.id %]' class='bp_node clickable [% statusClass %][% IF n.testmode %] testmode[% END %]' onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);">
+    [% IF no_menu && n.create_obj %]
+    <a href="extinfo.cgi?type=2&amp;host=[% bp.name | uri %]&service=[% n.label | uri %]&backend=[% bp_backend %]" target="_blank">
+    [% END %]
+    <div id='[% n.id %]' class='bp_node [% UNLESS no_menu %]clickable[% END %] [% statusClass %][% IF n.testmode %] testmode[% END %]' [% UNLESS no_menu %]onmousedown="bp_context_menu_open(event, this)" onmouseover="bp_mouse_over_node(event, this);" onmouseout="bp_mouse_out_node(event, this);"[% END %]>
         <div class="bp_label"><span class="bp_label">[% n.label %]</span></div>
         <div class="bp_sublabel" title="[% escape_html(short_desc) %]">[% short_desc %]</div>
+        [% UNLESS no_menu %]
         <a href="#" onclick="bp_context_menu_open(event, {id:'[% n.id %]'})" class="bp_node_edit_icon"><span class="ui-icon ui-icon-wrench">&nbsp;</span></a>
+        [% END %]
         <div class="bp_node_icons">
           [% IF n.testmode %]
             <img src="[% url_prefix %]thruk/plugins/business_process/images/lock.png" alt="Status has been locked by testmode" title="Status has been locked by testmode" height="12" width="12">
@@ -37,6 +42,9 @@
         </div>
         [% END %]
     </div>
+    [% IF no_menu && n.create_obj %]
+    </a>
+    [% END +%]
     [%+ END %]
   </div>
 </div>
@@ -79,10 +87,11 @@
       [%+ END %]
     ];
 
-    var bp_id     = [% bp.id %];
-    var editmode  = [% editmode %];
-    var testmode  = [% testmode %];
-    var testmodes = [% json_encode(testmodes) %];
+    var bp_id      = [% bp.id %];
+    var editmode   = [% editmode %];
+    var testmode   = [% testmode %];
+    var bp_no_menu = [% no_menu %];
+    var testmodes  = [% json_encode(testmodes) %];
 
     var bp_graph_options = {
         'bp_rankDir': '[% bp.rankDir %]',

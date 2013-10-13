@@ -78,6 +78,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $allowed_for_edit = 1;
     }
     $c->stash->{allowed_for_edit} = $allowed_for_edit;
+    $c->stash->{allowed_for_edit} = 0 if $c->{'request'}->{'parameters'}->{'readonly'};
+    $c->stash->{no_menu}          = $c->{'request'}->{'parameters'}->{'no_menu'} ? 1 : 0;
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || 'show';
 
@@ -292,26 +294,26 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
 
+        if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
+            $bp->update_status($c);
+        }
+        # try to find this bp on any system
+        my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
+        $c->stash->{'bp_backend'} = '';
+        if(scalar @{$hosts} > 0) {
+            $c->stash->{'bp_backend'} = $hosts->[0]->{'peer_key'};
+        }
+
         if($action eq 'details') {
             if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {
                 $c->stash->{'json'} = { $bp->{'id'} => $bp->TO_JSON() };
                 return $c->forward('Thruk::View::JSON');
             }
-            # try to find this bp on any system
-            my $hosts = $c->{'db'}->get_hosts( filter => [ { 'name' => $bp->{'name'} } ] );
-            $c->stash->{'bp_backend'} = '';
-            if(scalar @{$hosts} > 0) {
-                $c->stash->{'bp_backend'} = $hosts->[0]->{'peer_key'};
-            }
-
             $c->stash->{'auto_reload_fn'} = 'bp_refresh_bg';
             $c->stash->{'template'}       = 'bp_details.tt';
             return 1;
         }
-        elsif($action eq 'refresh' and $id) {
-            if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
-                $bp->update_status($c);
-            }
+        elsif($action eq 'refresh') {
             # test mode?
             if($c->stash->{testmode}) {
                 $bp->{'testmode'} = 1;
@@ -361,7 +363,6 @@ sub _bp_start_page {
 
     return 1;
 }
-
 
 ##########################################################
 

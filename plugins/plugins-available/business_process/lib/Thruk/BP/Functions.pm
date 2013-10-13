@@ -218,6 +218,21 @@ sub equals {
 }
 
 ##########################################################
+
+=head2 random
+
+    random($c, $bp, $n)
+
+returns random state
+
+=cut
+sub random {
+    my($c, $bp, $n) = @_;
+    my $state = int(rand(4));
+    return($state, 'random', Thruk::BP::Utils::state2text($state).' - Random state is '.Thruk::BP::Utils::state2text($state));
+}
+
+##########################################################
 sub _get_nodes_grouped_by_state {
     my($n, $bp) = @_;
     my $states = {};

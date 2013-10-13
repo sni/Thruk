@@ -1,0 +1,17 @@
+Ext.define('TP.PanletNagvis', {
+    extend: 'TP.PanletUrl',
+
+    title: 'Business Process',
+    height: 300,
+    width:  600,
+
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url      = '';
+        this.xdata.selector = '';
+        this.xdata.keepcss  = true;
+        this.reloadOnSiteChanges = true;
+
+        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends', 'selector', 'keepcss']);
+    }
+});

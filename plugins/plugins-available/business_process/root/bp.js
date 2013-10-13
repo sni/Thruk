@@ -15,8 +15,10 @@ function init_bp_buttons() {
       document.captureEvents(Event.MOUSEDOWN);
     }
 
-    document.onmousedown   = bp_context_menu_open;
-    document.oncontextmenu = bp_context_menu_open;
+    if(!bp_no_menu) {
+        document.onmousedown   = bp_context_menu_open;
+        document.oncontextmenu = bp_context_menu_open;
+    }
     window.onresize        = bp_redraw;
 
     // initialize graph options in edit mode
@@ -50,7 +52,7 @@ function bp_refresh(bp_id, node_id, callback, refresh_only) {
     var ts = new Date().getTime();
     var old_nodes = nodes;
     is_refreshing = true;
-    var url = 'bp.cgi?_='+ts+'&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1)+"&testmode="+testmode;
+    var url = 'bp.cgi?_='+ts+'&action=refresh&edit='+editmode+'&bp='+bp_id+'&update='+(refresh_only ? 0 : 1)+"&testmode="+testmode+"&no_menu="+bp_no_menu;
     jQuery('#bp'+bp_id).load(url, testmodes, function(responseText, textStatus, XMLHttpRequest) {
         is_refreshing = false;
         if(!minimal) {

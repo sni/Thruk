@@ -10,6 +10,9 @@ next:
           - added some more shinken specific config attributes
           - memory usage / performance improvements with large data
           - replace caching module with internal module
+          - panorama
+            - added business process panel
+            - added nagvis panel
           - Bug Fixes
             - summary: fixed reports using host/servicegroups in combination with the mysql logcache
             - mysql logcache: fixed service cannot be NULL error on import

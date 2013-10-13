@@ -2,7 +2,7 @@
     extend: 'Ext.data.Model',
     fields: [
         {name: 'image_url', type: 'string'},
-        {name: 'ds_name',   type: 'string'},
+        {name: 'name',      type: 'string'},
         {name: 'source',    type: 'number'}
     ]
 });
@@ -28,7 +28,7 @@ Ext.define('TP.PanletPNP', {
         /* update source selector */
         this.source_store = Ext.create('Ext.data.Store', {
             model: 'TP_Sources',
-            data : [ {ds_name: '0', source: 0, image_url: ''} ]
+            data : [ {name: '0', source: 0, image_url: ''} ]
         });
         this.updateSource = function() {
             var panel  = this;
@@ -48,7 +48,7 @@ Ext.define('TP.PanletPNP', {
                                 var row = tmp[nr];
                                 var match = row.image_url.match(/\&source=(\d+)\&/);
                                 data[match[1]] = {
-                                    ds_name: tmp[nr].ds_name,
+                                    name:    tmp[nr].ds_name,
                                     source:  match[1]
                                 };
                             }
@@ -142,7 +142,7 @@ Ext.define('TP.PanletPNP', {
             fieldLabel:     'Source',
             name:           'source',
             queryMode:      'local',
-            displayField:   'ds_name',
+            displayField:   'name',
             valueField:     'source',
             forceSelection: true,
             editable:       false,

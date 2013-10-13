@@ -38,50 +38,6 @@ Ext.define('TP.TabBar', {
             href:     '#',
             html:     'Report',
             tooltip:  'Send Bug Report'
-        }, {
-            iconCls:  'user-tab',
-            closable:  false,
-            tooltip:  'user menu',
-            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     '[% remote_user %]&nbsp;&nbsp;',
-            menu: {
-                items: [/*{
-                        text: 'Switch User',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
-                        handler: function() {}
-                }*/
-               {
-                        text: 'About',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
-                        handler: function() { TP.aboutWindow() }
-                    },
-                    [%+ UNLESS readonly +%]
-                    {
-                        text: 'Settings',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
-                        handler: function() { TP.settingsWindow() }
-                    },
-                    [%+ END +%]
-                    /* Exit */
-                    '-',
-                    [% IF cookie_auth %]
-                    {
-                        text:   'Logout',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
-                        handler: function() {
-                            window.location = 'login.cgi?logout';
-                        }
-                    },
-                    [% END %]
-                    {
-                        text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
-                        handler: function() {
-                            window.location = '../';
-                        }
-                    }
-                ]
-            }
         }
         [% UNLESS readonly %]
         , {
@@ -152,9 +108,20 @@ Ext.define('TP.TabBar', {
                         text:   'PNP Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_curve.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
-                    },
+                    }, {
+                        text:   'Nagvis Map',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/world.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
+                    }
+                    [% IF c.config.use_feature_bp %]
+                    , {
+                        text:   'Business Process Map',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_organisation.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletBP'}) }
+                    }
+                    [% END %]
                     /* Mod-Gearman */
-                    '-', {
+                    ,'-', {
                         text:   'Mod-Gearman Metrics',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/modgearman.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
@@ -173,7 +140,51 @@ Ext.define('TP.TabBar', {
             }
         }
         [% END %]
-        ]
+        , {
+            iconCls:  'user-tab',
+            closable:  false,
+            tooltip:  'user menu',
+            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
+            html:     '[% remote_user %]&nbsp;&nbsp;',
+            menu: {
+                items: [/*{
+                        text: 'Switch User',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
+                        handler: function() {}
+                }*/
+               {
+                        text: 'About',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
+                        handler: function() { TP.aboutWindow() }
+                    },
+                    [%+ UNLESS readonly +%]
+                    {
+                        text: 'Settings',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
+                        handler: function() { TP.settingsWindow() }
+                    },
+                    [%+ END +%]
+                    /* Exit */
+                    '-',
+                    [% IF cookie_auth %]
+                    {
+                        text:   'Logout',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
+                        handler: function() {
+                            window.location = 'login.cgi?logout';
+                        }
+                    },
+                    [% END %]
+                    {
+                        text:   'Exit Panorama View',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        handler: function() {
+                            window.location = '../';
+                        }
+                    }
+                ]
+            }
+        }]
     },
     initComponent: function() {
         this.callParent();

@@ -78,6 +78,11 @@
                 TP.defaultSiteRefreshHandler(this);
             }
         };
+        this.manualRefresh = function() {
+            this.body.mask('Loading...');
+            this.refreshHandler();
+        };
+
 
         /* url content should be in an iframe */
         this.add({
@@ -87,6 +92,14 @@
                 src : '',
                 style: {
                     border: 0
+                }
+            },
+            listeners: {
+                load: {
+                    element: 'el',
+                    fn: function () {
+                        this.parent().unmask();
+                    }
                 }
             }
         });

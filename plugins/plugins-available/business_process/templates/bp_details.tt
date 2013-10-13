@@ -1,6 +1,8 @@
 ﻿[% WRAPPER _bp_frame.tt subtitle=bp.name %]
 
+[% UNLESS no_menu %]
 [% PROCESS _bp_context_menu.tt %]
+[% END %]
 
 [% IF editmode %]
   <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">

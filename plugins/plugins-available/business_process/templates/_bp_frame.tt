@@ -30,7 +30,8 @@
 
 <script type="text/javascript">
 <!--
-  var editmode = [% editmode %];
+  var bp_no_menu = '[% no_menu %]';
+  var editmode   = [% editmode %];
   jQuery(document).ready(function() {
     init_bp_buttons();
   });
