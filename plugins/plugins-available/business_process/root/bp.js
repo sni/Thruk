@@ -881,6 +881,8 @@ function bp_redraw(evt) {
         containerId = 'container'+bp_id;
     } catch(e) { return false; }
     if(!bp_graph_layout) { return false; }
+    var inner = document.getElementById('inner_'+containerId);
+    inner.style.left = '0px';
 
     var maxX = 0, maxY = 0, minY = -1;
     bp_graph_layout.eachNode(function(u, value) {
@@ -914,6 +916,8 @@ function bp_redraw(evt) {
     var zoom = zoomY;
     if(zoomX < zoomY) { zoom = zoomX; }
     if(zoom < 1) {
+        // round to 0.05
+        zoom = Math.floor(zoom * 20) / 20;
         bp_zoom('inner_'+containerId, zoom);
     }
     original_zoom = zoom;
@@ -924,8 +928,7 @@ function bp_redraw(evt) {
     }
 
     // center align inner container
-    var inner = document.getElementById('inner_'+containerId);
-    var offset = (w - maxX) / 2;
+    var offset = ((w - maxX*zoom) / 2);
     if(offset < 0) {offset = 0;}
     inner.style.left = offset+'px';
 
