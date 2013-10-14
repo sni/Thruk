@@ -5,7 +5,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 170;
+    plan tests => 178;
 }
 BEGIN {
     use lib('t');
@@ -45,6 +45,10 @@ for my $l (sort keys %{$languages}) {
     is(ref $tr, 'HASH', 'got translation table');
     next if $abrv eq 'en';
     for my $p (sort keys %{$local_patterns}) {
+        if(!defined $tr->{$p}) {
+            fail($p.' does not exist in language pack '.$abrv);
+            $tr->{$p} = '';
+        }
         ok(defined $tr->{$p}, $abrv.': "'.$p.'"');
         if(substr($p, -1) eq ':') {
             is(substr($tr->{$p}, -1), ':', 'translation pattern does end with colon');
