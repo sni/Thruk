@@ -55,6 +55,8 @@ Ext.define('TP.formFilterSelect', {
         forceSelection: true,
         autoSelect:     true,
         width:          140,
+        last_url:       '',
+        updating:       false,
         store:          ['Search',
                          'Check Period',
                          'Comment',
@@ -76,6 +78,7 @@ Ext.define('TP.formFilterSelect', {
                          '% State Change'],
         listeners: {
             change: function(This, newV, oldV, eOpts) {
+                if(This.updating) { return; };
                 /* update value store */
                 var panel = This.up('panel');
                 newV = newV.toLowerCase();
@@ -87,16 +90,21 @@ Ext.define('TP.formFilterSelect', {
                         type = 'timeperiod';
                     }
                     var url = 'status.cgi?format=search&hash=1&type='+type;
-                    Ext.Ajax.request({
-                        url: url,
-                        method: 'POST',
-                        callback: function(options, success, response) {
-                            var tmp  = TP.getResponse(undefined, response);
-                            if(tmp) {
-                                TP.updateArrayStore(combo.store, tmp[0].data);
+                    if(This.last_url != url) {
+                        This.updating = true;
+                        This.last_url = url;
+                        Ext.Ajax.request({
+                            url: url,
+                            method: 'POST',
+                            callback: function(options, success, response) {
+                                This.updating = false;
+                                var tmp  = TP.getResponse(undefined, response);
+                                if(tmp) {
+                                    TP.updateArrayStore(combo.store, tmp[0].data);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 panel.check_changed(newV);
             }

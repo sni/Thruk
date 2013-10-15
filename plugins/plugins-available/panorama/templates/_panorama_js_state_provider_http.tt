@@ -99,6 +99,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
     saveChanges: function(async) {
         [% IF readonly %]return;[% END %]
+        if(!TP.initialized) { return; }
         if(async == undefined) { async = true; }
         var sum = Ext.JSON.encode(ExtState);
         if(sum == this.lastdata) {

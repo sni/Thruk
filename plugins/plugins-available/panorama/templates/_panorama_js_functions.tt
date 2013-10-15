@@ -561,6 +561,7 @@ var TP = {
     },
     /* update an array store with new data */
     updateArrayStore: function(store, data) {
+        if(!store) { return; }
         store.suspendEvents(false);
         store.removeAll();
         for(var nr in data) {
