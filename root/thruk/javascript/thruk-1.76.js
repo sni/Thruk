@@ -3965,6 +3965,7 @@ var ajax_search = {
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
+        if(!input) { return; }
 
         results.sort(sort_by('top_hits', false));
 
