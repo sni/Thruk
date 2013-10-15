@@ -121,6 +121,7 @@ Ext.define('TP.formFilterSelect', {
         name:           'value',
         xtype:          'combobox',
         width:          182,
+        queryMode:      'local',
         store:          []
     }, {
         xtype:          'datetimefield',

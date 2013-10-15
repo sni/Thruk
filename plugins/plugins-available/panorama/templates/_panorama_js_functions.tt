@@ -561,10 +561,12 @@ var TP = {
     },
     /* update an array store with new data */
     updateArrayStore: function(store, data) {
+        store.suspendEvents(false);
         store.removeAll();
         for(var nr in data) {
             store.loadRawData([[data[nr]]], true);
         }
+        store.resumeEvents();
     },
     /* return location object for url */
     getLocationObject: function(url) {
