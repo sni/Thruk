@@ -22,7 +22,7 @@
     'Servicegroup:'                         => 'Groupe de service:',
     'Event Report'                          => 'Rapport d\'événement',
     'SLA Report'                            => 'Rapport de SLA',
-    'Business Process:'                     => 'Business Process:',
+    'Business Process:'                     => 'Processus Métier:',
     'Report Timeperiod:'                    => 'Période du rapport:',
     'Legend'                                => 'Légende',
     'Host Alert'                            => 'Alerte d\'hôte',
