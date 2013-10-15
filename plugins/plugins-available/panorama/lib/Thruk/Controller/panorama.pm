@@ -63,6 +63,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
+    $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
 
     if(defined $c->request->query_keywords) {
         if($c->request->query_keywords eq 'state') {
