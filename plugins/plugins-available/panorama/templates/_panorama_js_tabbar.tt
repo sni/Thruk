@@ -39,15 +39,60 @@ Ext.define('TP.TabBar', {
             html:     'Report',
             tooltip:  'Send Bug Report'
         }
+        , {
+            iconCls:  'user-tab',
+            closable:  false,
+            tooltip:  'user menu',
+            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
+            html:     '[% remote_user %]&nbsp;&nbsp;',
+            menu: {
+                items: [/*{
+                        text: 'Switch User',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
+                        handler: function() {}
+                }*/
+               {
+                        text: 'About',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
+                        handler: function() { TP.aboutWindow() }
+                    },
+                    [%+ UNLESS readonly +%]
+                    {
+                        text: 'Settings',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
+                        handler: function() { TP.settingsWindow() }
+                    },
+                    [%+ END +%]
+                    /* Exit */
+                    '-',
+                    [% IF cookie_auth %]
+                    {
+                        text:   'Logout',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
+                        handler: function() {
+                            window.location = 'login.cgi?logout';
+                        }
+                    },
+                    [% END %]
+                    {
+                        text:   'Exit Panorama View',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        handler: function() {
+                            window.location = '../';
+                        }
+                    }
+                ]
+            }
+        }
         [% UNLESS readonly %]
         , {
-            title: '',
+            title:    'add new panel',
             closable: false,
-            minWidth: 28,
-            iconCls: 'gear-tab',
+            minWidth: 70,
+            iconCls:  'gear-tab',
             tooltip:  'add panlets',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     ' ',
+            html:     'add',
             menu: {
                 items: [{
                     /* Server */
@@ -140,51 +185,7 @@ Ext.define('TP.TabBar', {
             }
         }
         [% END %]
-        , {
-            iconCls:  'user-tab',
-            closable:  false,
-            tooltip:  'user menu',
-            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     '[% remote_user %]&nbsp;&nbsp;',
-            menu: {
-                items: [/*{
-                        text: 'Switch User',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
-                        handler: function() {}
-                }*/
-               {
-                        text: 'About',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
-                        handler: function() { TP.aboutWindow() }
-                    },
-                    [%+ UNLESS readonly +%]
-                    {
-                        text: 'Settings',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
-                        handler: function() { TP.settingsWindow() }
-                    },
-                    [%+ END +%]
-                    /* Exit */
-                    '-',
-                    [% IF cookie_auth %]
-                    {
-                        text:   'Logout',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
-                        handler: function() {
-                            window.location = 'login.cgi?logout';
-                        }
-                    },
-                    [% END %]
-                    {
-                        text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
-                        handler: function() {
-                            window.location = '../';
-                        }
-                    }
-                ]
-            }
-        }]
+        ]
     },
     initComponent: function() {
         this.callParent();
