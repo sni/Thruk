@@ -299,6 +299,8 @@ sub _process_json_page {
 
     # servicemembers
     if($type eq 'servicemember') {
+        return unless Thruk::Utils::Conf::set_object_model($c);
+        $c->{'obj_db'}->read_rc_file();
         my $members = [];
         my $objects = $c->{'obj_db'}->get_objects_by_type('host');
         for my $host (@{$objects}) {

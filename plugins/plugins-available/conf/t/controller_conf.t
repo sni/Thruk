@@ -7,7 +7,7 @@ use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
-    my $tests = 1222;
+    my $tests = 1232;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan tests => $tests     if !defined $ENV{'CATALYST_SERVER'};
     plan tests => ($tests+1) if  defined $ENV{'CATALYST_SERVER'};
@@ -159,6 +159,7 @@ my $other_json = [
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=macro',                        like => [ '"macros"', 'HOSTADDRESS'] },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=pluginhelp&plugin=##PLUGIN##', like => '"plugin_help" :' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=pluginpreview',                like => '"plugin_output" :' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers',               like => '"servicemembers",' },
 ];
 for my $url (@{$other_json}) {
     $url->{'url'} =~ s/\#\#PLUGIN\#\#/$plugin/gmx;
