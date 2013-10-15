@@ -247,15 +247,14 @@ sub get_hosts {
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
+        $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
     }
 
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
 
     unless(wantarray) {
         confess("get_hosts() should not be called in scalar context");
     }
-
     return($data, undef, $size);
 }
 
@@ -926,7 +925,7 @@ sub _get_class {
         }
     }
 
-    $options->{'options'}->{'AddPeer'} = 1;
+    $options->{'options'}->{'AddPeer'} = 1 if(!defined $options->{'AddPeer'} or $options->{'AddPeer'} == 1);
     $class = $class->options($options->{'options'});
 
     return $class;
