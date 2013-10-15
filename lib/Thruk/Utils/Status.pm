@@ -1793,20 +1793,28 @@ get matrix of services usable by a minemap
 
 =cut
 sub get_service_matrix {
-    my( $c, $servicefilter ) = @_;
+    my( $c, $hostfilter, $servicefilter ) = @_;
 
     # add comments and downtimes
     Thruk::Utils::Status::set_comments_and_downtimes($c);
 
-    # fetch hostnames first
-    my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
+    my $uniq_hosts = {};
 
-    # get pages hosts
-    my $uniq_hosts    = {};
-    for my $svc (@{$hostnames}) {
-        $uniq_hosts->{$svc->{'host_name'}} = 1;
+    if(defined $servicefilter) {
+        # fetch hostnames first
+        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
+        for my $svc (@{$hostnames}) {
+            $uniq_hosts->{$svc->{'host_name'}} = 1;
+        }
+    } else {
+        # fetch hostnames first
+        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'] );
+
+        # get pages hosts
+        for my $hst (@{$hostnames}) {
+            $uniq_hosts->{$hst->{'name'}} = 1;
+        }
     }
-    undef $hostnames;
 
     my @keys = sort keys %{$uniq_hosts};
     Thruk::Backend::Manager::_page_data(undef, $c, \@keys);
@@ -1815,7 +1823,7 @@ sub get_service_matrix {
     for my $host_name (@{$c->{'stash'}->{'data'}}) {
         push @{$filter}, { 'host_name' => $host_name };
     }
-    my $hostfilter = Thruk::Utils::combine_filter( '-or', $filter );
+    $hostfilter = Thruk::Utils::combine_filter( '-or', $filter );
     my $combined_filter = $hostfilter;
     if($servicefilter) {
         $combined_filter = Thruk::Utils::combine_filter( '-and', [ $servicefilter, $hostfilter ] );

@@ -839,7 +839,7 @@ sub _task_servicesminemap {
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $servicefilter);
+    my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $hostfilter, $servicefilter);
 
     # automatically adjust service column hight
     my $longest_description = 0;
@@ -1078,7 +1078,7 @@ sub _do_filter {
                     }
                 }
                 elsif($type eq 'type') {
-                    $val = lc($val)
+                    $val = lc($val || '')
                 }
                 elsif($type eq 'val_pre') {
                     if(!defined $val) { $val = ''; }

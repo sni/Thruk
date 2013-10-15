@@ -71,7 +71,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $servicefilter);
+    my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $hostfilter, $servicefilter);
     $c->stash->{services}     = $uniq_services;
     $c->stash->{hostnames}    = $hosts;
     $c->stash->{matrix}       = $matrix;
