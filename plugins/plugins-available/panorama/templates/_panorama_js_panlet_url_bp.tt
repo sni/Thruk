@@ -65,7 +65,7 @@
         };
 
         panel.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
-            panel.refreshHandler();
+            panel.manualRefresh();
         });
 
         panel.refreshHandler = function() {
@@ -91,11 +91,11 @@
         };
         /* manual refresh update business process */
         panel.manualRefresh = function() {
-            panel.body.mask('Loading...');
             panel.last_url = '';
             var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&minimal=1&nav=0&update=1';
             var iframeObj = panel.items.getAt(1).getEl();
             if(iframeObj && iframeObj.dom) {
+                panel.body.mask('Loading...');
                 iframeObj.dom.src = newUrl;
             }
         };

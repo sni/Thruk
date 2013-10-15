@@ -49,6 +49,14 @@
         });
         panel.down('form').add(panel.graph_combo);
 
+        panel.graph_combo_error_label = new Ext.form.field.Display({
+            hideEmptyLabel: false,
+            name:       'grapherror',
+            activeError: true,
+            value:      'testlabel'
+        });
+        panel.down('form').add(panel.graph_combo_error_label);
+
         /* available graphs loader */
         panel.updateGraphs = function() {
             var form   = this.down('form').getForm();
@@ -60,29 +68,38 @@
             var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
             Ext.Ajax.request({
                 url: url,
-                method: 'POST',
+                method: 'GET',
                 callback: function(options, success, response) {
-                    var data  = TP.getResponse(panel, response);
-                    var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
-                    if(matches && matches.length > 0) {
-                        panel.graphs_loaded = 1;
-                        var newdata = {};
-                        for(var nr in matches) {
-                            var m = matches[nr];
-                            var name = m.match(/>([^<]*)<\/a>/);
-                            var link = m.match(/show=([^"]*)"/);
-                            newdata[link[1]] = {
-                                name: name[1],
-                                id:   link[1]
-                            };
+                    if(success) {
+                        var data  = TP.getResponse(panel, response);
+                        var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
+                        if(matches && matches.length > 0) {
+                            panel.graphs_loaded = 1;
+                            var newdata = {};
+                            for(var nr in matches) {
+                                var m = matches[nr];
+                                var name = m.match(/>([^<]*)<\/a>/);
+                                var link = m.match(/show=([^"]*)"/);
+                                newdata[link[1]] = {
+                                    name: name[1],
+                                    id:   link[1]
+                                };
+                            }
+                            panel.graph_combo.store.removeAll();
+                            for(var nr in newdata) {
+                                panel.graph_combo.store.loadRawData(newdata[nr], true);
+                            }
+                            panel.graph_combo.setValue(panel.xdata.graph);
+                            panel.graph_combo_error_label.unsetActiveError();
+                            panel.graph_combo_error_label.setValue('');
+                        } else {
+                            success = false;
                         }
-                        panel.graph_combo.store.removeAll();
-                        for(var nr in newdata) {
-                            panel.graph_combo.store.loadRawData(newdata[nr], true);
-                        }
-                        panel.graph_combo.setValue(panel.xdata.graph);
-                    } else {
+                    }
+                    if(!success) {
                         panel.graphs_loaded = 0;
+                        panel.graph_combo_error_label.setActiveError('');
+                        panel.graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication.');
                     }
                 }
             });
@@ -107,6 +124,7 @@
                 }
             } else {
                 panel.xdata.url = '';
+                panel.body.unmask();
             }
         };
         /* manual refresh update nagvis map */
