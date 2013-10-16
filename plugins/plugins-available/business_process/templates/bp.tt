@@ -33,8 +33,8 @@
   <tr class="[%+ IF loop.first +%] firstrow[% END %]">
     <td class="status [% rowclass %]" align="left"><a href="bp.cgi?action=details&bp=[% bp.id %]"><b>[% bp.name %]</b></a></td>
     <td class="status [% rowclass %]" align="right" nowrap>
+      <a href="bp.cgi?action=details&amp;bp=[% bp.id %]&amp;testmode=1"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_explore.png' border="0" alt='Business Impact Analysis' title='Business Impact Analysis' width="16" height="16"></a>
       <a href="status.cgi?host=[% bp.name | uri %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='Show Service Details' title='Show Service Details' width="16" height="16"></a>
-      <a href="bp.cgi?action=details&bp=[% bp.id %]&amp;minimal=1" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/shape_handles.png' border="0" alt='Show Graph Fullscreen' title='Show Graph Fullscreen' width="16" height="16"></a>
       <a href="bp.cgi?action=details&bp=[% bp.id %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Graph' title='Show Graph' width="16" height="16"></a>
     </td>
     <td class="status [% statusClass %]" align="center">[% statusText %]</td>

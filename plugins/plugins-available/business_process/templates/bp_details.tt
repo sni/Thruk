@@ -121,6 +121,12 @@
                 <td class='command'><a href='showlog.cgi?host=[% bp.name | uri %]&amp;service=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Logfiles</a></td>
               </tr>
               [% END %]
+              [% IF !testmode %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_explore.png' border="0" alt='Business Impact Analysis' title='Business Impact Analysis' width="16" height="16" style="vertical-align: top;"></td>
+                <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;testmode=1'>Business Impact Analysis</a></td>
+              </tr>
+              [% END %]
               [% IF allowed_for_edit && ! editmode %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Business Process' title='Business Process' width="16" height="16" style="vertical-align: top;"></td>
