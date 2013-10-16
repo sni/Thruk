@@ -2351,7 +2351,7 @@ need the roles:
  - authorized_for_configuration_information
  - authorized_for_system_commands
 
-ex.:
+Configuration Example:
 
   <Component Thruk::Plugin::BP>
     spool_dir              = /var/nagios/rw/check_results
@@ -2386,6 +2386,7 @@ Run this hook command after saving a business process.
 ==== refresh_interval
 Refresh interval defines how often business processes
 will be recalculated and refreshed. (in minutes)
+
 
 
 
@@ -3161,6 +3162,10 @@ prosesses across multiple sites, but the calculation will happen all in one
 single local site. Thruk needs to able to access the 'check_results' folder to
 submit results and a config file to create hosts and services for your objects.
 
+In 'edit mode' nodes can be changed by right-clicking them and select
+'Edit Node'. General options, like using hard or soft states can be
+changed in the 'General' Tab of any node.
+
 === How it works
 
 .Business Process Workflow
@@ -3201,9 +3206,9 @@ something similar.
 .notifications
 =======
 As each business process will result in at least one host and one
-service. It is recommended to setup notifications on the host unless
-you need notifications for the warning state of the business process
-too. Then use the service object of each business process.
+service. It is recommended to setup notifications on the service,
+because the host will almost always be ok and only change the state
+if some internal error happens.
 =======
 
 

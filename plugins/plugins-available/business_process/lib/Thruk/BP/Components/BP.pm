@@ -11,6 +11,7 @@ use Scalar::Util qw/weaken isweak/;
 use Thruk::Utils;
 use Thruk::Utils::IO;
 use Thruk::BP::Components::Node;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 NAME
 
@@ -25,7 +26,7 @@ Business Process
 =cut
 
 my @extra_json_keys = qw/id/;
-my @stateful_keys   = qw/status status_text last_check last_state_change/;
+my @stateful_keys   = qw/status status_text last_check last_state_change time/;
 my @saved_keys      = qw/name template rankDir state_type/;
 
 ##########################################################
@@ -53,6 +54,7 @@ sub new {
         'datafile'          => undef,
         'editfile'          => undef,
 
+        'time'              => 0,
         'status'            => 4,
         'status_text'       => 'not yet checked',
         'last_check'        => 0,
@@ -120,7 +122,7 @@ sub load_runtime_data {
 
     my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'datafile'});
 
-    for my $key (qw/status status_text last_check last_state_change/) {
+    for my $key (@stateful_keys) {
         $self->{$key} = $data->{$key} if defined $data->{$key};
     }
 
@@ -146,6 +148,8 @@ update status of business process
 sub update_status {
     my ( $self, $c, $type ) = @_;
     die("no context") unless $c;
+
+    my $t0 = [gettimeofday];
 
     $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
@@ -180,11 +184,14 @@ sub update_status {
     # everything else is non-edit only
     return if $self->{'editmode'};
 
-    # store runtime data
-    $self->save_runtime();
-
     # submit back to core
     $self->_submit_results_to_core($c, $results);
+
+    # save runtime
+    $self->{'time'} = tv_interval($t0);
+
+    # store runtime data
+    $self->save_runtime();
 
     return;
 }

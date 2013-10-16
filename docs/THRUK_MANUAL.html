@@ -21174,7 +21174,7 @@ authorized_for_system_commands
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="paragraph"><p>Configuration Example:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::BP&gt;
@@ -22665,6 +22665,9 @@ and illustrate your business intelligence models. It is possible to span busines
 prosesses across multiple sites, but the calculation will happen all in one
 single local site. Thruk needs to able to access the <em>check_results</em> folder to
 submit results and a config file to create hosts and services for your objects.</p></div>
+<div class="paragraph"><p>In <em>edit mode</em> nodes can be changed by right-clicking them and select
+<em>Edit Node</em>. General options, like using hard or soft states can be
+changed in the <em>General</em> Tab of any node.</p></div>
 <div class="sect2">
 <h3 id="_how_it_works_3">How it works</h3>
 <div class="paragraph"><div class="title">Business Process Workflow</div><p><span class="image">
@@ -23349,9 +23352,9 @@ gAAjPsXPpABEh6evxaekSs3pTaXqYf2zx6N6T6x6/N8qj/j6H2ll/uhtrRpgAAAAAElFTkSuQmCC" />
 <td class="content">
 <div class="title">notifications</div>
 <div class="paragraph"><p>As each business process will result in at least one host and one
-service. It is recommended to setup notifications on the host unless
-you need notifications for the warning state of the business process
-too. Then use the service object of each business process.</p></div>
+service. It is recommended to setup notifications on the service,
+because the host will almost always be ok and only change the state
+if some internal error happens.</p></div>
 </td>
 </tr></table>
 </div>
@@ -23395,7 +23398,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-16 13:16:41 CEST
+Last updated 2013-10-16 14:36:16 CEST
 </div>
 </div>
 </body>

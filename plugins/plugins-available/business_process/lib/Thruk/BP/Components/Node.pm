@@ -386,24 +386,22 @@ sub _result_to_string {
     my $string = "";
     my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
     my $status    = $self->{'status'};
+    my $output    = '';
     if($firstnode) {
         $string .= "### Nagios Host Check Result ###\n";
-        # translate into host status
-        if($status == 0 || $status == 1 || $status == 4) {
-            $status = 0;
-        } else {
-            $status = 1;
-        }
+        # host status is ok unless there were errors with the bp itself
+        $status = 0;
+        $output = sprintf('OK - business process calculation of %d nodes complete in %.3fs|runtime=%.3fs', scalar @{$bp->{'nodes'}}, $bp->{'time'}, $bp->{'time'});
     } else {
         if($status == 4) { $status = 0 };
         $string .= "### Nagios Service Check Result ###\n";
+        $output = $self->{'status_text'} || $self->{'short_desc'};
     }
     $string .= sprintf "# Time: %s\n",scalar localtime time();
     $string .= sprintf "host_name=%s\n", $bp->{'name'};
     if(!$firstnode) {
         $string .= sprintf "service_description=%s\n", $self->{'label'};
     }
-    my $output = $self->{'status_text'} || $self->{'short_desc'};
     # remove trailing newlines and quote the remaining ones
     $output =~ s/[\r\n]*$//mxo;
     $output =~ s/\n/\\n/gmxo;
