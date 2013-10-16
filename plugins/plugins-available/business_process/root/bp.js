@@ -819,6 +819,13 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     var srcY = upos.top + 15;
     var tarX = lpos.left + 55;
     var tarY = lpos.top + 15;
+    if((tarY - srcY) == 70) {
+        // smarter edge placement for normal edges
+        bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY+35);
+        bp_draw_edge(edge_container, edge_id, srcX, srcY+35, tarX, srcY+35);
+        bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
+        return;
+    }
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
 

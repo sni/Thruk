@@ -197,19 +197,19 @@
               <tr class='data'>
                 <td>Node Seperation</td>
                 <td>
-                  <input type="text" value="" name="bp_nodeSep" onkeyup="bp_redraw_changed('bp_nodeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_nodeSep">
+                  <input type="text" value="20" name="bp_nodeSep" onkeyup="bp_redraw_changed('bp_nodeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_nodeSep">
                 </td>
               </tr>
               <tr class='data'>
                 <td>Edge Seperation</td>
                 <td>
-                  <input type="text" value="" name="bp_edgeSep" onkeyup="bp_redraw_changed('bp_edgeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_edgeSep">
+                  <input type="text" value="10" name="bp_edgeSep" onkeyup="bp_redraw_changed('bp_edgeSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_edgeSep">
                 </td>
               </tr>
               <tr class='data'>
                 <td>Rank Seperation</td>
                 <td>
-                  <input type="text" value="" name="bp_rankSep" onkeyup="bp_redraw_changed('bp_rankSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_rankSep">
+                  <input type="text" value="30" name="bp_rankSep" onkeyup="bp_redraw_changed('bp_rankSep', Math.ceil(this.value))" onkeydown="bp_input_keys(event, this)" id="bp_rankSep">
                 </td>
               </tr>
             </table>
