@@ -2106,6 +2106,9 @@ for details.
         *** `obj_reload_cmd`  Commandline to reload the config.
         *** `obj_readonly`    Filename pattern to define readonly objects.
                               For example for generated config files.
+                              The same effect can be achieved by
+                              adding "# thruk: readonly" on top of a
+                              object config file.
         *** `obj_dir`         Path to your objects. Enables the objects editor.
                               Reads all *.cfg from this folder and all subfolders.
                               (only needed when not using 'core_conf')
