@@ -200,6 +200,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'edit_node' and $nodeid) {
             my $type = lc($c->{'request'}->{'parameters'}->{'bp_function'} || '');
             my $node = $bp->get_node($nodeid); # node from the 'node' parameter
+            if(!$node) {
+                $c->stash->{'json'} = { rc => 1, 'message' => 'ERROR: no such node' };
+                return $c->forward('Thruk::View::JSON');
+            }
 
             my @arg;
             for my $x (1..10) {
