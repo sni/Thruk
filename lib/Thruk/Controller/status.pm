@@ -156,11 +156,11 @@ sub _process_raw_request {
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
-                @{$data} = grep {/$filter/mx} @{$data};
+                @{$data} = grep {/$filter/mx} @{$data} if $filter;
             }
             elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
                 $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
-                @{$data} = grep {/$filter/mx} @{$data};
+                @{$data} = grep {/$filter/mx} @{$data} if $filter;
             }
             elsif($type eq 'service' or $type eq 'services') {
                 my $host = $c->{'request'}->{'parameters'}->{'host'};
