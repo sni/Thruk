@@ -30,7 +30,49 @@
         });
     }
 });
-
+Ext.define('SearchModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'text', type: 'string'},
+        {name: 'value',  type: 'string'}
+    ]
+});
+var searchStore = Ext.create('Ext.data.Store', {
+    pageSize: 15,
+    model: 'SearchModel',
+    remoteSort: true,
+    remoteFilter: true,
+    listeners: {
+        beforeload: function(store, operation, eOpts) {
+            if(!searchStore.search_type) { return false; }
+            var type = searchStore.search_type.toLowerCase();
+            if(type == 'check period' || type == 'notification period') {
+                type = 'timeperiod';
+            }
+            if(type == 'parent') {
+                type = 'host';
+            }
+            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod') {
+                store.proxy.extraParams['type'] = type;
+            } else {
+                return false;
+            }
+            return true;
+        }
+    },
+    proxy: {
+        type: 'ajax',
+        url: 'status.cgi',
+        extraParams: {
+            format: 'search',
+            hash:   1
+        },
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    }
+});
 Ext.define('TP.formFilterSelect', {
     extend: 'Ext.panel.Panel',
 
@@ -55,8 +97,6 @@ Ext.define('TP.formFilterSelect', {
         forceSelection: true,
         autoSelect:     true,
         width:          140,
-        last_url:       '',
-        updating:       false,
         store:          ['Search',
                          'Check Period',
                          'Comment',
@@ -75,40 +115,7 @@ Ext.define('TP.formFilterSelect', {
                          'Parent',
                          'Service',
                          'Servicegroup',
-                         '% State Change'],
-        listeners: {
-            change: function(This, newV, oldV, eOpts) {
-                if(This.updating) { return; };
-                /* update value store */
-                var panel = This.up('panel');
-                newV = newV.toLowerCase();
-                var combo = panel.items.getAt(3);
-                combo.store.removeAll();
-                if(newV == 'host' || newV == 'service' || newV == 'hostgroup' || newV == 'servicegroup' || newV == 'check period' || newV == 'notification period') {
-                    var type = newV;
-                    if(newV == 'check period' || newV == 'notification period') {
-                        type = 'timeperiod';
-                    }
-                    var url = 'status.cgi?format=search&hash=1&type='+type;
-                    if(This.last_url != url) {
-                        This.updating = true;
-                        This.last_url = url;
-                        Ext.Ajax.request({
-                            url: url,
-                            method: 'POST',
-                            callback: function(options, success, response) {
-                                This.updating = false;
-                                var tmp  = TP.getResponse(undefined, response);
-                                if(tmp) {
-                                    TP.updateArrayStore(combo.store, tmp[0].data);
-                                }
-                            }
-                        });
-                    }
-                }
-                panel.check_changed(newV);
-            }
-        }
+                         '% State Change']
     }, {
         name:           'val_pre',
         xtype:          'textfield',
@@ -128,9 +135,25 @@ Ext.define('TP.formFilterSelect', {
     }, {
         name:           'value',
         xtype:          'combobox',
-        width:          182,
-        queryMode:      'local',
-        store:          []
+        width:          270,
+        queryMode:      'remote',
+        store:          searchStore,
+        triggerAction:  'all',
+        pageSize:       true,
+        selectOnFocus:  true,
+        typeAhead:      true,
+        minChars:       0,
+        listeners: {
+            'expand': function(field, eOpts) {
+                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+            },
+            'change': function(This, newValue, oldValue, eOpts) {
+                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+            },
+            'keyup': function() {
+                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+            }
+        }
     }, {
         xtype:          'datetimefield',
         name:           'value_date'
@@ -147,7 +170,6 @@ Ext.define('TP.formFilterSelect', {
             })}
         }
     }],
-
     /* check datetime or input field */
     check_changed: function(v) {
         if(!this.items.getAt(1).rendered || !this.items.getAt(3).rendered || !this.items.getAt(4).rendered) {
@@ -228,7 +250,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Host Status Types',
                     name:       'hoststatustypes',
                     xtype:      'tp_combobox_sum',
-                    width:      373,
+                    width:      460,
                     value:      [1,2,4,8],
                     sum_values: {'15': 'All', '12': 'All Problems' },
                     store:      [[2,'Up'], [4,'Down'], [8,'Unreachable'], [1,'Pending']]
@@ -236,7 +258,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Host Properties',
                     name:       'hostprops',
                     xtype:      'tp_combobox_sum',
-                    width:      373,
+                    width:      460,
                     columns:    true,
                     value:      [],
                     sum_values: {'0': 'Any' },
@@ -257,7 +279,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Service Status Types',
                     name:       'servicestatustypes',
                     xtype:      'tp_combobox_sum',
-                    width:      373,
+                    width:      460,
                     value:      [1,2,4,8,16],
                     sum_values: {'31': 'All', '28': 'All Problems' },
                     store:      [[2,'Ok'],[4,'Warning'],[8,'Unknown'],[16,'Critical'],[1,'Pending']]
@@ -265,7 +287,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Service Properties',
                     name:       'serviceprops',
                     xtype:      'tp_combobox_sum',
-                    width:      373,
+                    width:      460,
                     columns:    true,
                     value:      [],
                     sum_values: {'0': 'Any' },

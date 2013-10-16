@@ -136,10 +136,15 @@ sub _process_raw_request {
 
     if( $c->stash->{'output_format'} eq 'search' ) {
         if( exists $c->{'request'}->{'parameters'}->{'type'} ) {
+            my $filter;
+            if($c->{'request'}->{'parameters'}->{'query'}) {
+                $filter = $c->{'request'}->{'parameters'}->{'query'};
+                $filter =~ s/\s+/\.\*/gmx;
+            }
             my $type = $c->{'request'}->{'parameters'}->{'type'};
             my $data;
             if($type eq 'contact') {
-                my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ] );
+                my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ] );
                 if(ref($contacts) eq 'ARRAY') {
                     for my $contact (@{$contacts}) {
                         push @{$data}, $contact->{'name'} . ' - '.$contact->{'alias'};
@@ -147,13 +152,15 @@ sub _process_raw_request {
                 }
             }
             elsif($type eq 'host' or $type eq 'hosts') {
-                $data = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+                $data = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => { '~~' => $filter } ] );
             }
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+                @{$data} = grep {/$filter/mx} @{$data};
             }
             elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
                 $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+                @{$data} = grep {/$filter/mx} @{$data};
             }
             elsif($type eq 'service' or $type eq 'services') {
                 my $host = $c->{'request'}->{'parameters'}->{'host'};
@@ -165,10 +172,10 @@ sub _process_raw_request {
                     }
                     $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
                 }
-                $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter ] );
+                $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter, description => { '~~' => $filter } ] );
             }
             elsif($type eq 'timeperiod' or $type eq 'timeperiods') {
-                $data = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
+                $data = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods', name => { '~~' => $filter } ) ] );
             }
             elsif($type eq 'custom variable') {
                 $data = [];
@@ -176,6 +183,13 @@ sub _process_raw_request {
                 die("unknown type: " . $type);
             }
             my $json = [ { 'name' => $type."s", 'data' => $data } ];
+            if($c->{'request'}->{'parameters'}->{'hash'}) {
+                my $total = scalar @{$data};
+                Thruk::Backend::Manager::_page_data(undef, $c, $data);
+                my $list = [];
+                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } };
+                $json = { 'data' => $list, 'total' => $total };
+            }
             $c->stash->{'json'} = $json;
             $c->forward('Thruk::View::JSON');
             return;

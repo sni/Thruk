@@ -564,10 +564,13 @@ var TP = {
         if(!store) { return; }
         store.suspendEvents(false);
         store.removeAll();
-        for(var nr in data) {
-            store.loadRawData([[data[nr]]], true);
+        var num = data.length-1;
+        for(var x=0;x<num;x++) {
+            store.loadRawData([[data[x]]], true);
         }
         store.resumeEvents();
+        // add last one to trigger some events
+        store.loadRawData([[data[x]]], true);
     },
     /* return location object for url */
     getLocationObject: function(url) {
