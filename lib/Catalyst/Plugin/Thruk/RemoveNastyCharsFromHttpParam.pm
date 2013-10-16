@@ -34,6 +34,7 @@ sub prepare_uploads {
         next if $key =~ /^\w{3}_s\d+_op/mx;
         next if $key =~ /^data\./mx;
         next if $key =~ /^obj\./mx;
+        next if $key =~ /pattern/mx;
         my $value = $c->request->{'parameters'}->{$key};
         if ( ref $value && ref $value ne 'ARRAY' ) {
             next;
