@@ -15,7 +15,7 @@ function init_bp_buttons() {
       document.captureEvents(Event.MOUSEDOWN);
     }
 
-    if(!bp_no_menu) {
+    if(bp_no_menu != 1) {
         document.onmousedown   = bp_context_menu_open;
         document.oncontextmenu = bp_context_menu_open;
     }
@@ -821,9 +821,6 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     var tarY = lpos.top + 15;
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
     //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
-
-    // need to reverse points if first point is further away than the last
-    bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY);
 
     var x1 = srcX, y1 = srcY;
     jQuery.each(edge.points, function(nr, p) {
