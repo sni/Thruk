@@ -1167,6 +1167,11 @@ var sort_by = function(field, reverse, primer) {
    }
 }
 
+/* numeric comparison function */
+function compareNumeric(a, b) {
+   return a - b;
+}
+
 /* make right pane visible */
 function cron_change_date(id) {
     // get selected value
@@ -1569,8 +1574,8 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
 
     if(local_perf_bar_mode == 'worst') {
         if(keys(worst_graphs).length == 0) { return([]); }
-        var sortedkeys   = keys(worst_graphs).sort().reverse();
-        var sortedgraphs = keys(worst_graphs[sortedkeys[0]]).sort().reverse();
+        var sortedkeys   = keys(worst_graphs).sort(compareNumeric).reverse();
+        var sortedgraphs = keys(worst_graphs[sortedkeys[0]]).sort(compareNumeric).reverse();
         return([worst_graphs[sortedkeys[0]][sortedgraphs[0]]]);
     }
     if(local_perf_bar_mode == 'match') {
