@@ -39,11 +39,13 @@ sub new {
         'function_ref'      => undef,
         'function_args'     => [],
         'depends'           => Thruk::Utils::list($data->{'depends'} || []),
-        'parents'           => $data->{'parents'}    || [],
-        'host'              => $data->{'host'}       || '',
-        'service'           => $data->{'service'}    || '',
-        'template'          => $data->{'template'}   || '',
-        'create_obj'        => $data->{'create_obj'} || 0,
+        'parents'           => $data->{'parents'}       || [],
+        'host'              => $data->{'host'}          || '',
+        'service'           => $data->{'service'}       || '',
+        'hostgroup'         => $data->{'hostgroup'}     || '',
+        'servicegroup'      => $data->{'servicegroup'}  || '',
+        'template'          => $data->{'template'}      || '',
+        'create_obj'        => $data->{'create_obj'}    || 0,
         'create_obj_ok'     => 1,
         'scheduled_downtime_depth' => 0,
         'acknowledged'      => 0,
@@ -200,7 +202,7 @@ sub get_save_obj {
         label  => $self->{'label'},
     };
 
-    # host / service
+    # save this keys
     for my $key (qw/template create_obj/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
@@ -258,7 +260,7 @@ sub get_objects_conf {
 
 =head2 update_status
 
-    update_status($c, $bp, [$hostdata], [$servicedata], [$type])
+    update_status($c, $bp, [$livedata], [$type])
 
 type:
     0 / undef:      update always
@@ -268,7 +270,7 @@ update status of node
 
 =cut
 sub update_status {
-    my($self, $c, $bp, $hostdata, $servicedata, $type) = @_;
+    my($self, $c, $bp, $livedata, $type) = @_;
     $type = 0 unless defined $type;
     delete $bp->{'need_update'}->{$self->{'id'}};
 
@@ -277,7 +279,12 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $short_desc, $status_text, $extra) = &$function($c, $bp, $self, $self->{'function_args'}, $hostdata, $servicedata);
+        my($status, $short_desc, $status_text, $extra) = &$function($c,
+                                                                    $bp,
+                                                                    $self,
+                                                                    $self->{'function_args'},
+                                                                    $livedata,
+                                                                    );
         $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
     };
@@ -375,7 +382,16 @@ sub _set_function {
         $self->{'host'}       = $self->{'function_args'}->[0] || '';
         $self->{'service'}    = $self->{'function_args'}->[1] || '';
         $self->{'template'}   = '';
-        $self->{'create_obj'} = 0 unless $self->{'id'} eq 'node1';
+        $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
+    }
+    if($self->{'function'} eq 'groupstatus') {
+        if($self->{'function_args'}->[0] eq 'hostgroup') {
+            $self->{'hostgroup'}    = $self->{'function_args'}->[1] || '';
+        } else {
+            $self->{'servicegroup'} = $self->{'function_args'}->[1] || '';
+        }
+        $self->{'template'}    = '';
+        $self->{'create_obj'}  = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
     }
     return;
 }

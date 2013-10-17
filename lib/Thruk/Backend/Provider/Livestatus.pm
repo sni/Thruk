@@ -317,9 +317,11 @@ returns a list of hostgroups
 =cut
 sub get_hostgroups {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name alias members action_url notes notes_url
-        /];
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name alias members action_url notes notes_url
+            /];
+    }
     return $self->_get_table('hostgroups', \%options);
 }
 
@@ -445,9 +447,11 @@ returns a list of servicegroups
 =cut
 sub get_servicegroups {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name alias members action_url notes notes_url
-        /];
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name alias members action_url notes notes_url
+            /];
+    }
     return $self->_get_table('servicegroups', \%options);
 }
 

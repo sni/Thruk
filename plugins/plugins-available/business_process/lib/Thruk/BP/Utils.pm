@@ -325,6 +325,7 @@ sub join_args {
     my($args) = @_;
     my @arg;
     for my $a (@{$args}) {
+        $a = '' unless defined $a;
         if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
             push @arg, $a;
         } else {

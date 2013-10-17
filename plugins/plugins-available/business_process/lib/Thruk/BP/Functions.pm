@@ -21,34 +21,23 @@ functions used to calculate business processes
 
 =head2 status
 
-    status($c, $bp, $n, [$args: $hostname, $description], [$hostdata], [$servicedata])
+    status($c, $bp, $n, \@($hostname, $description), \%livedata)
 
 returns status based on real service or host
 
 =cut
 sub status {
-    my($c, $bp, $n, $args, $hostdata, $servicedata) = @_;
+    my($c, $bp, $n, $args, $livedata) = @_;
     my($hostname, $description) = @{$args};
     my $data;
+
+    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+
     if($hostname and $description) {
-        if(defined $servicedata->{$hostname}->{$description}) {
-            $data = $servicedata->{$hostname}->{$description};
-        } else {
-            my $services = $c->{'db'}->get_services( filter => [{ 'description' => $description }], extra_columns => [qw/last_hard_state last_hard_state_change/]);
-            if(scalar @{$services} > 0) {
-                $data = $services->[0];
-            }
-        }
+        $data = $livedata->{'services'}->{$hostname}->{$description};
     }
     elsif($hostname) {
-        if(defined $hostdata->{$hostname}) {
-            $data = $hostdata->{$hostname};
-        } else {
-            my $hosts = $c->{'db'}->get_hosts( filter => [{ 'name' => $hostname } ], extra_columns => [qw/last_hard_state last_hard_state_change/] );
-            if(scalar @{$hosts} > 0) {
-                $data = $hosts->[0];
-            }
-        }
+        $data = $livedata->{'hosts'}->{$hostname};
     }
 
     # only hard states?
@@ -67,6 +56,102 @@ sub status {
         return(3, 'no such service');
     }
     return(3, 'no such host');
+}
+
+##########################################################
+
+=head2 groupstatus
+
+    groupstatus($c, $bp, $n, [$args: $hostgroup, $servicegroup], [$hostgroupdata], [$servicegroupdata])
+
+returns status based on real service or host
+
+=cut
+sub groupstatus {
+    my($c, $bp, $n, $args, $livedata) = @_;
+    my($grouptype, $groupname, $hostwarn, $hostcrit, $servicewarn, $servicecrit) = @{$args};
+    $livedata = $bp->bulk_fetch_live_data($c) unless defined $livedata;
+
+    my $data;
+    if(lc($grouptype) eq 'hostgroup') {
+        $data = $livedata->{'hostgroups'}->{$groupname};
+    } else {
+        $data = $livedata->{'servicegroups'}->{$groupname};
+    }
+    return(3, 'no such '.$grouptype) unless $data;
+
+    my($total_hosts, $good_hosts, $down_hosts) = (0,0,0);
+    if(lc($grouptype) eq 'hostgroup') {
+        $total_hosts = $data->{'num_hosts'};
+        $good_hosts  = $data->{'num_hosts_up'}   + $data->{'num_hosts_pending'};
+        $down_hosts  = $data->{'num_hosts_down'} + $data->{'num_hosts_unreach'};
+    }
+
+    my($total_services, $good_services, $down_services) = ($data->{'num_services'},0,0);
+    $good_services  = $data->{'num_services_ok'}   + $data->{'num_services_pending'} + $data->{'num_services_warn'};
+    $down_services  = $data->{'num_services_crit'} + $data->{'num_services_unknown'};
+
+    my $perfdata = 'services_up='.$good_services.' services_down='.$down_services;
+    if(lc($grouptype) eq 'hostgroup') {
+        $perfdata = 'hosts_up='.$good_hosts.' hosts_down='.$down_hosts.' '.$perfdata;
+    }
+
+    my $status = 0;
+    my $output = "";
+    my $have_threshold = 0;
+    if(lc($grouptype) eq 'hostgroup') {
+        if(defined $hostwarn and $hostwarn ne '') {
+            $have_threshold = 1;
+            if($hostwarn =~ m/^(\d+)%$/mx) { $hostwarn = $total_hosts / 100 * $1; }
+            if($hostwarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host warning threshold must be numeric"; }
+            if($down_hosts >= $hostwarn) {
+                $status = 1;
+            }
+        }
+        if(defined $hostcrit and $hostcrit ne '') {
+            $have_threshold = 1;
+            if($hostcrit =~ m/^(\d+)%$/mx) { $hostcrit = $total_hosts / 100 * $1; }
+            if($hostcrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - host critical threshold must be numeric"; }
+            if($down_hosts >= $hostcrit) {
+                $status = 2;
+            }
+        }
+    }
+    if(defined $servicewarn and $servicewarn ne '') {
+        $have_threshold = 1;
+        if($servicewarn =~ m/^(\d+)%$/mx) { $servicewarn = $total_services / 100 * $1; }
+        if($servicewarn !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service warning threshold must be numeric"; }
+        if($down_services >= $servicewarn) {
+            $status = 1 unless $status > 1;
+        }
+    }
+    if(defined $servicecrit and $servicecrit ne '') {
+        $have_threshold = 1;
+        if($servicecrit =~ m/^(\d+)%$/mx) { $servicecrit = $total_services / 100 * $1; }
+        if($servicecrit !~ m/^(\d+|\d+\.\d+)$/mx) { $status = 3; $output = "UNKNOWN - service critical threshold must be numeric"; }
+        if($down_services >= $servicecrit) {
+            $status = 2;
+        }
+    }
+    if(!$have_threshold) {
+        if(lc($grouptype) eq 'hostgroup') {
+            $status = 2 if $data->{'worst_host_state'} > 0;
+        }
+        $status = $data->{'worst_service_state'} if $status < $data->{'worst_service_state'};
+    }
+
+    my $hostoutput = "";
+    if(lc($grouptype) eq 'hostgroup') {
+        $hostoutput = sprintf("%d/%d hosts up, ", $good_hosts, $total_hosts);
+    }
+
+    $output = sprintf("%s - %s%d/%d services up|%s",
+                            Thruk::BP::Utils::state2text($status),
+                            $hostoutput,
+                            $good_services, $total_services,
+                            $perfdata) unless $output;
+
+    return($status, $groupname.' ('.$grouptype.')', $output);
 }
 
 ##########################################################

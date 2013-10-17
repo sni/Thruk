@@ -1605,10 +1605,10 @@ sub _merge_hostgroup_answer {
         for my $row ( @{ $data->{$key} } ) {
             if( !defined $groups->{ $row->{'name'} } ) {
                 $groups->{ $row->{'name'} } = $row;
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ];
+                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ] if $row->{'members'};
             }
             else {
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ];
+                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             }
 
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
@@ -1647,10 +1647,10 @@ sub _merge_servicegroup_answer {
         for my $row ( @{ $data->{$key} } ) {
             if( !defined $groups->{ $row->{'name'} } ) {
                 $groups->{ $row->{'name'} } = $row;
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ];
+                $groups->{ $row->{'name'} }->{'members'} = [ @{ $row->{'members'} } ] if $row->{'members'};
             }
             else {
-                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ];
+                $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             }
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
             $groups->{ $row->{'name'} }->{'backends_hash'}->{ $row->{'peer_name'} } = 1;

@@ -56,7 +56,7 @@ LI.bp_menu_seperator.ui-state-disabled A {
 }
 
 DIV.ui-dialog INPUT[type=text] {
-    width: 265px;
+    width: 320px;
 }
 
 .bp_type_desc {
@@ -89,7 +89,7 @@ DIV.ui-dialog INPUT[type=text] {
     margin-left: 3px;
     float: left;
 }
-.bp_status_extinfo_link_host, .bp_status_extinfo_link_service {
+.bp_status_extinfo_link {
     position: absolute;
     top: 2px;
     right: 2px;

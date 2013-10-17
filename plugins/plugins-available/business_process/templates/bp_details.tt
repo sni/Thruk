@@ -35,8 +35,7 @@
                 <td>
                   <div style="position: relative;">
                     <span id="bp_status_label"></span>
-                    <div class="bp_status_extinfo_link_host"></div>
-                    <div class="bp_status_extinfo_link_service"></div>
+                    <div class="bp_status_extinfo_link"></div>
                   </div>
                 </td>
               </tr>

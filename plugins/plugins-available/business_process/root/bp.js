@@ -223,6 +223,7 @@ function bp_confirmed_rename(node) {
     var text = jQuery('#bp_rename_text').val();
     bp_post_and_refresh('bp.cgi?action=rename_node&bp='+bp_id+'&node='+node.id+'&label='+text, [], node.id);
     hideElement('bp_menu');
+    bp_context_menu = false;
 }
 
 /* post url and refresh on success*/
@@ -263,6 +264,7 @@ function bp_show_remove() {
 function bp_confirmed_remove(node) {
     bp_post_and_refresh('bp.cgi?action=remove_node&bp='+bp_id+'&node='+node.id, []);
     hideElement('bp_menu');
+    bp_context_menu = false;
 }
 
 /* run command on enter */
@@ -340,7 +342,7 @@ function bp_select_type(type) {
     bp_show_edit_node(undefined, false);
     jQuery('.bp_type_box').attr('checked', false).button("refresh");
     jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
-    jQuery.each(['status', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
+    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
@@ -355,13 +357,14 @@ function bp_select_type(type) {
     } else {
         jQuery('#bp_edit_node_form').find('INPUT[name=bp_label_'+type+']').val('');
     }
-    if     (type == 'status')   { bp_select_status(node)    }
-    else if(type == 'fixed')    { bp_select_fixed(node)     }
-    else if(type == 'at_least') { bp_select_at_least(node)  }
-    else if(type == 'not_more') { bp_select_not_more(node)  }
-    else if(type == 'best')     { bp_select_best(node)      }
-    else if(type == 'worst')    { bp_select_worst(node)     }
-    else if(type == 'equals')   { bp_select_equals(node)    }
+    if     (type == 'status')      { bp_select_status(node)      }
+    else if(type == 'groupstatus') { bp_select_groupstatus(node) }
+    else if(type == 'fixed')       { bp_select_fixed(node)       }
+    else if(type == 'at_least')    { bp_select_at_least(node)    }
+    else if(type == 'not_more')    { bp_select_not_more(node)    }
+    else if(type == 'best')        { bp_select_best(node)        }
+    else if(type == 'worst')       { bp_select_worst(node)       }
+    else if(type == 'equals')      { bp_select_equals(node)      }
     jQuery('#bp_function').val(type);
 }
 
@@ -376,6 +379,32 @@ function bp_select_status(node) {
             text:  { 'bp_arg1_status': '', 'bp_arg2_status': '' }
         });
     }
+}
+
+/* show node type select: groupstatus */
+function bp_select_groupstatus(node) {
+    if(node && node.func.toLowerCase() == 'groupstatus') {
+        bp_fill_select_form({
+            radio: { 'bp_arg1_groupstatus': [ node.func_args[0].toLowerCase(), '.bp_groupstatus_radio'] },
+            text:  { 'bp_arg2_groupstatus': node.func_args[1],
+                     'bp_arg3_groupstatus': node.func_args[2],
+                     'bp_arg4_groupstatus': node.func_args[3],
+                     'bp_arg5_groupstatus': node.func_args[4],
+                     'bp_arg6_groupstatus': node.func_args[5]
+                   }
+        });
+    } else {
+        bp_fill_select_form({
+            radio: { 'bp_arg1_groupstatus': [ 'hostgroup', '.bp_groupstatus_radio'] },
+            text:  { 'bp_arg2_groupstatus': '',
+                     'bp_arg3_groupstatus': '',
+                     'bp_arg4_groupstatus': '',
+                     'bp_arg5_groupstatus': '',
+                     'bp_arg6_groupstatus': ''
+                   }
+        });
+    }
+    bp_groupstatus_check_changed();
 }
 
 /* show node type select: fixed */
@@ -440,6 +469,23 @@ function bp_select_at_least(node) {
     }
 }
 
+/* return type from group status radio buttons */
+function bp_get_type_from_groupstatus() {
+    return(jQuery("input[name='bp_arg1_groupstatus']:checked").val());
+}
+
+/* host thresholds are only available for hostgroups */
+function bp_groupstatus_check_changed() {
+    var val = bp_get_type_from_groupstatus();
+    if(val == 'servicegroup') {
+        jQuery('#bp_arg3_groupstatus').attr('disabled', true);
+        jQuery('#bp_arg4_groupstatus').attr('disabled', true);
+    } else {
+        jQuery('#bp_arg3_groupstatus').attr('disabled', false);
+        jQuery('#bp_arg4_groupstatus').attr('disabled', false);
+    }
+    jQuery('#bp_arg2_groupstatus').attr('placeholder', val);
+}
 /* show add node dialog */
 var $edit_dialog;
 function bp_show_edit_node(id, refreshType) {
@@ -460,7 +506,7 @@ function bp_show_edit_node(id, refreshType) {
     // tab dialog (http://forum.jquery.com/topic/combining-ui-dialog-and-tabs)
     jQuery("#edit_dialog_"+bp_id).tabs().dialog({
         autoOpen: false, modal: true,
-        width: 430, height: 320,
+        width: 470, height: 350,
         draggable: false, // disable the dialog's drag we're using the tabs titlebar instead
         modal: true,
         closeOnEscape: true,
@@ -637,11 +683,24 @@ function bp_update_status(evt, node) {
     if(status == 4) { statusName = 'PENDING'; }
     jQuery('#bp_status_status').html('<div class="statusField status'+statusName+'">  '+statusName+'  </div>');
     jQuery('#bp_status_label').html(n.label);
-    jQuery('#bp_status_plugin_output').html("<span id='bp_status_plugin_output_title'>"+n.status_text+"<\/span>");
-    jQuery('#bp_status_plugin_output_title').attr('title', n.status_text);
+
+    var status_text = n.status_text.replace(/\|.*$/, '');
+    jQuery('#bp_status_plugin_output').html("<span id='bp_status_plugin_output_title'>"+status_text+"<\/span>");
+    jQuery('#bp_status_plugin_output_title').attr('title', status_text);
+
     jQuery('#bp_status_last_check').html(n.last_check);
     jQuery('#bp_status_duration').html(n.duration);
-    jQuery('#bp_status_function').html(n.func + '('+n.func_args.join(', ')+')');
+
+    var funct = n.func + '(';
+    for(var nr in n.func_args) {
+        var a = n.func_args[nr];
+        if(!a.match(/^(\d+|\d+\.\d+)$/)) { a = "'"+a+"'"; }
+        funct += a + ', ';
+    }
+    funct = funct.replace(/,\s*$/, ''); // remove last ,
+    while(funct.match(/, ''$/)) { funct = funct.replace(/, ''$/, ''); } // remove trailing empty args
+    funct += ')';
+    jQuery('#bp_status_function').html(funct);
 
     if(n.scheduled_downtime_depth > 0) {
         jQuery('#bp_status_icon_downtime').css('display', '');
@@ -654,8 +713,7 @@ function bp_update_status(evt, node) {
         jQuery('#bp_status_icon_ack').css('display', 'none');
     }
 
-    jQuery('.bp_status_extinfo_link_host').css('display', 'none');
-    jQuery('.bp_status_extinfo_link_service').css('display', 'none');
+    jQuery('.bp_status_extinfo_link').css('display', 'none');
 
 
     var service, host;
@@ -679,12 +737,21 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(service) {
-        jQuery('.bp_status_extinfo_link_service').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link_host').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+    }
+    // hostgroup link
+    else if(n.hostgroup) {
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>");
+    }
+
+    // servicegroup link
+    else if(n.servicegroup) {
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>");
     }
 
     return false;

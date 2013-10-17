@@ -207,7 +207,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             my @arg;
             for my $x (1..10) {
-                push @arg, $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type};
+                $arg[$x-1] = $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type} if defined $c->{'request'}->{'parameters'}->{'bp_arg'.$x.'_'.$type};
             }
             my $function = sprintf("%s(%s)", $type, Thruk::BP::Utils::join_args(\@arg));
 

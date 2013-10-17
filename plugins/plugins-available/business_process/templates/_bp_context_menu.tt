@@ -44,12 +44,13 @@
       <th colspan=3 align="center">Aggregation Functions</th>
     </tr>
     <tr>
-      <td rowspan=2 style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_type('status')"></td>
+      <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_type('status')"></td>
       <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_type('best')"></td>
       <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_type('at_least')"></td>
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_type('equals')"></td>
     </tr>
     <tr>
+      <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host- / Service- group" onclick="bp_select_type('groupstatus')"></td>
       <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_type('worst')"></td>
       <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_type('not_more')"></td>
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_type('fixed')"></td>
@@ -76,18 +77,19 @@
   <!-- TAB 1: TYPE -->
   <div id="tabs-1_[% bp.id %]" align="center">
     <input type="hidden" name="bp_function" id="bp_function" value="">
-    <table>
+    <table style="margin-top: 25px;">
       <tr>
         <th>Live Status</th>
         <th colspan=3 align="center">Aggregation Functions</th>
       </tr>
       <tr>
-        <td rowspan=2 style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_status" value="Status" onclick="bp_select_type('status')"/><label for="bp_check_status" class="bp_type_box_label">Host / Service Status</label></td>
+        <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_status" value="Status" onclick="bp_select_type('status')"/><label for="bp_check_status" class="bp_type_box_label">Host / Service Status</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_best" value="Best" onclick="bp_select_type('best')"/><label for="bp_check_best" class="bp_type_box_label">Best</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_at_least" value="At Least" onclick="bp_select_type('at_least')"/><label for="bp_check_at_least" class="bp_type_box_label">&gt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_equals" value="Equals" onclick="bp_select_type('equals')"/><label for="bp_check_equals" class="bp_type_box_label">=</label></td>
       </tr>
       <tr>
+        <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_groupstatus" value="Groupstatus" onclick="bp_select_type('groupstatus')"/><label for="bp_check_groupstatus" class="bp_type_box_label">Host- / Service- group</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_worst" value="Worst" onclick="bp_select_type('worst')"/><label for="bp_check_worst" class="bp_type_box_label">Worst</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_not_more" value="Not_More" onclick="bp_select_type('not_more')"/><label for="bp_check_not_more" class="bp_type_box_label">&lt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_fixed" value="Fixed" onclick="bp_select_type('fixed')"/><label for="bp_check_fixed" class="bp_type_box_label">Dummy</label></td>
@@ -116,6 +118,43 @@
 </tr>
 [% END %]
 
+
+<!-- hostgroup/servicegroup status type select -->
+[% WRAPPER _bp_context_menu_frame.tt
+    div_id='bp_select_groupstatus'
+    function='groupstatus'
+    div_help='Uses status from the selected host- or servicegroup. Thresholds are calculated against the number of failed objects. Not using thresholds will display the worst host/servicestate.'
+%]
+<tr>
+  <th align="right">Type</th>
+  <td align="left">
+    <div class="bp_groupstatus_radio">
+      <input type="radio" value="hostgroup"    id="bp_groupstatus_hostgroup"    name="bp_arg1_groupstatus" onChange="bp_groupstatus_check_changed()" /><label for="bp_groupstatus_hostgroup">Hostgroup</label>
+      <input type="radio" value="servicegroup" id="bp_groupstatus_servicegroup" name="bp_arg1_groupstatus" onChange="bp_groupstatus_check_changed()" /><label for="bp_groupstatus_servicegroup">Servicegroup</label>
+    </div>
+  </td>
+</tr>
+<tr>
+  <th align="right">Group</th>
+  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp', autosubmit:false })"[% END %]></td>
+</tr>
+<tr>
+  <th align="right" nowrap>Hosts Warning</th>
+  <td align="left"><input type="text" value="" id="bp_arg3_groupstatus" name="bp_arg3_groupstatus" placeholder="opt. hosts warn. threshold, ex: 5 or 10%"></td>
+</tr>
+<tr>
+  <th align="right" nowrap>Hosts Critical</th>
+  <td align="left"><input type="text" value="" id="bp_arg4_groupstatus" name="bp_arg4_groupstatus" placeholder="opt. hosts crit. threshold, ex: 5 or 10%"></td>
+</tr>
+<tr>
+  <th align="right" nowrap>Services Warn.</th>
+  <td align="left"><input type="text" value="" id="bp_arg5_groupstatus" name="bp_arg5_groupstatus" placeholder="opt. services warn. threshold, ex: 5 or 10%"></td>
+</tr>
+<tr>
+  <th align="right" nowrap>Services Crit.</th>
+  <td align="left"><input type="text" value="" id="bp_arg6_groupstatus" name="bp_arg6_groupstatus" placeholder="opt. services crit. threshold, ex: 5 or 10%"></td>
+</tr>
+[% END %]
 
 
 <!-- dummy/fixed type select -->
@@ -147,6 +186,9 @@
     function='best'
     div_help='Shows the best state of all nodes.'
 %]
+  <tr>
+    <td align="center" colspan=2 class="bp_type_desc">this aggregation function does not have any arguments.</td>
+  </tr>
 [% END %]
 
 <!-- worst type select -->
@@ -155,6 +197,9 @@
     function='worst'
     div_help='Shows the worst state of all nodes.'
 %]
+  <tr>
+    <td align="center" colspan=2 class="bp_type_desc">this aggregation function does not have any arguments.</td>
+  </tr>
 [% END %]
 
 <!-- exactly/equal type select -->
@@ -211,7 +256,7 @@
       <td align="center" colspan=2 class="bp_type_desc">Change relationships for this node.</td>
     </tr>
     <tr>
-      <td colspan=2>
+      <td colspan=2 align="center">
         <table><tr><td class="filter">
           <table style="width:100%;">
             <tr>
@@ -318,6 +363,12 @@
           <option value="hard"[% IF bp.state_type == 'hard' %] selected[% END %]>Use Hard States Only</option>
         </select>
       </td>
+    <tr>
+      <td align="center" colspan=2 class="bp_type_desc">
+          <b>Note:</b> Hostgroup and Servicegroup aggregations will always use Hard and Soft states.<br>
+          This is a limitation of the livestatus broker.
+      </td>
+    </tr>
     </tr>
     <tr>
       <td colspan=2><hr></td>

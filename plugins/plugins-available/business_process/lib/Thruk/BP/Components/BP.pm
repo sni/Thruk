@@ -155,11 +155,11 @@ sub update_status {
     my $last_state = $self->{'status'};
 
     my $results = [];
-    my($hostdata, $servicedata);
+    my($livedata);
     if($type == 0) {
-        ($hostdata, $servicedata) = $self->_bulk_fetch_live_data($c);
+        $livedata = $self->bulk_fetch_live_data($c);
         for my $n (@{$self->{'nodes'}}) {
-            my $r = $n->update_status($c, $self, $hostdata, $servicedata);
+            my $r = $n->update_status($c, $self, $livedata);
             push @{$results}, $r if $r;
         }
     }
@@ -168,7 +168,7 @@ sub update_status {
     while(scalar keys %{$self->{'need_update'}} > 0) {
         $iterations++;
         for my $id (keys %{$self->{'need_update'}}) {
-            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $hostdata, $servicedata, $type);
+            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $livedata, $type);
             push @{$results}, $r if $r;
         }
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
@@ -502,14 +502,24 @@ sub make_new_node_id {
 }
 
 ##########################################################
-sub _bulk_fetch_live_data {
+
+=head2 bulk_fetch_live_data
+
+return all live data needed for this business process
+
+=cut
+sub bulk_fetch_live_data {
     my($self, $c) = @_;
 
     # bulk fetch live data
-    my $hostfilter    = {};
-    my $servicefilter = {};
-    my $hostdata      = {};
-    my $servicedata   = {};
+    my $hostfilter         = {};
+    my $servicefilter      = {};
+    my $hostgroupfilter    = {};
+    my $servicegroupfilter = {};
+    my $hostdata           = {};
+    my $servicedata        = {};
+    my $hostgroupdata      = {};
+    my $servicegroupdata   = {};
     for my $n (@{$self->{'nodes'}}) {
         if(lc $n->{'function'} eq 'status') {
             if($n->{'host'} and $n->{'service'}) {
@@ -517,6 +527,14 @@ sub _bulk_fetch_live_data {
             }
             elsif($n->{'host'}) {
                 $hostfilter->{$n->{'host'}} = 1;
+            }
+        }
+        elsif(lc $n->{'function'} eq 'groupstatus') {
+            if($n->{'hostgroup'}) {
+                $hostgroupfilter->{$n->{'hostgroup'}} = 1;
+            }
+            elsif($n->{'servicegroup'}) {
+                $servicegroupfilter->{$n->{'servicegroup'}} = 1;
             }
         }
     }
@@ -540,7 +558,36 @@ sub _bulk_fetch_live_data {
         my $data   = $c->{'db'}->get_services(filter => [$filter], extra_columns => [qw/last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Utils::array2hash($data, 'host_name', 'description');
     }
-    return($hostdata, $servicedata);
+    if(scalar keys %{$hostgroupfilter} > 0) {
+        my @filter;
+        for my $hostgroupname (keys %{$hostgroupfilter}) {
+            push @filter, { name => $hostgroupname };
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_hostgroups(filter => [$filter], columns => [qw/name num_hosts num_hosts_down num_hosts_pending
+                                                                                 num_hosts_unreach num_hosts_up num_services num_services_crit
+                                                                                 num_services_ok num_services_pending num_services_unknown
+                                                                                 num_services_warn worst_service_state worst_host_state/]);
+        $hostgroupdata  = Thruk::Utils::array2hash($data, 'name');
+    }
+    if(scalar keys %{$servicegroupfilter} > 0) {
+        my @filter;
+        for my $servicegroupname (keys %{$servicegroupfilter}) {
+            push @filter, { name => $servicegroupname };
+        }
+        my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
+        my $data   = $c->{'db'}->get_servicegroups(filter => [$filter], columns => [qw/name num_services num_services_crit
+                                                                                       num_services_ok num_services_pending num_services_unknown
+                                                                                       num_services_warn worst_service_state/]);
+        $servicegroupdata  = Thruk::Utils::array2hash($data, 'name');
+    }
+
+    return({
+        'hosts'         => $hostdata,
+        'services'      => $servicedata,
+        'hostgroups'    => $hostgroupdata,
+        'servicegroups' => $servicegroupdata
+    });
 }
 
 ##########################################################
