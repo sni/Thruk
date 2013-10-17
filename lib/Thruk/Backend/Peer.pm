@@ -122,6 +122,7 @@ sub _initialise_peer {
     $self->{'name'}          = $config->{'name'};
     $self->{'type'}          = $config->{'type'};
     $self->{'hidden'}        = defined $config->{'hidden'} ? $config->{'hidden'} : 0;
+    $self->{'display'}       = defined $config->{'display'} ? $config->{'display'} : 1;
     $self->{'groups'}        = $config->{'groups'};
     $self->{'resource_file'} = $config->{'options'}->{'resource_file'};
     $self->{'section'}       = $config->{'section'} || 'Default';

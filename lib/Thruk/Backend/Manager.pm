@@ -132,15 +132,19 @@ returns list of hidden backends
 =cut
 
 sub disable_hidden_backends {
-    my $self               = shift;
-    my $disabled_backends  = shift || {};
-    my $peers              = $self->get_peers();
+    my($self, $disabled_backends, $display_too) = @_;
+
+    $disabled_backends = {} unless $disabled_backends;
+    my $peers          = $self->get_peers();
 
     # only hide them, if we have more than one
     return $disabled_backends if scalar @{$peers} <= 1;
 
     for my $peer (@{$peers}) {
         if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+            $disabled_backends->{$peer->{'key'}} = 2;
+        }
+        if($display_too and defined $peer->{'display'} and $peer->{'display'} == 0) {
             $disabled_backends->{$peer->{'key'}} = 2;
         }
     }

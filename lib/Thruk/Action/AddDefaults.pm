@@ -517,7 +517,11 @@ sub _set_enabled_backends {
     }
     elsif(defined $c->{'db'}) {
         $c->log->debug('_set_enabled_backends() using defaults');
-        $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends);
+        my $display_too = 0;
+        if(defined $c->{'request'}->{'headers'}->{'user-agent'} and $c->{'request'}->{'headers'}->{'user-agent'} !~ m/thruk/mxi) {
+            $display_too = 1;
+        }
+        $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends, $display_too);
     }
 
     ###############################

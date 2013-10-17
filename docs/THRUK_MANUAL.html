@@ -20821,7 +20821,18 @@ for details.</p></div>
 <p>
 <tt>hidden</tt>        should this peer be hidden initially ( can be reenabled
                         via gui switch ) Only useful with more than one
-                        backend.
+                        backend. Setting this option removes this
+                        backend from any report or cli action unless
+                        backends are specified explicitly.
+</p>
+</li>
+<li>
+<p>
+<tt>display</tt>       Set to 0 if you want to hide this backend from
+                        the default view. This can be changed by the
+                        site panel again. In opposite to the <em>hidden</em>
+                        flag, backends set to display=0 are still used
+                        for automatic actions and reports.
 </p>
 </li>
 <li>
@@ -23398,7 +23409,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-16 14:36:16 CEST
+Last updated 2013-10-17 17:47:30 CEST
 </div>
 </div>
 </body>

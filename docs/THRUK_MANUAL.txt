@@ -2082,7 +2082,14 @@ for details.
      ** `type`          type of this connection. Can be 'livestatus', 'http' or 'mongodb'
      ** `hidden`        should this peer be hidden initially ( can be reenabled
                         via gui switch ) Only useful with more than one
-                        backend.
+                        backend. Setting this option removes this
+                        backend from any report or cli action unless
+                        backends are specified explicitly.
+     ** `display`       Set to 0 if you want to hide this backend from
+                        the default view. This can be changed by the
+                        site panel again. In opposite to the 'hidden'
+                        flag, backends set to display=0 are still used
+                        for automatic actions and reports.
      ** `groups`        if set, only contacts from these groups have access. You
                         may add multiple groups separated by comma. Users
                         without the right contactgroup don't even see
