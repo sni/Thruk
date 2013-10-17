@@ -4087,7 +4087,9 @@ var ajax_search = {
         window.setTimeout("ajax_search.stop_events=false;", 200);
         ajax_search.dont_hide=true;
         window.setTimeout("ajax_search.dont_hide=false", 500);
-        input.focus();
+        try { // Error: Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus.
+            input.focus();
+        } catch(e) {}
     },
 
     onempty: function() {
