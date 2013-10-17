@@ -693,7 +693,7 @@ function bp_update_status(evt, node) {
 
     var funct = n.func + '(';
     for(var nr in n.func_args) {
-        var a = n.func_args[nr];
+        var a = ""+n.func_args[nr];
         if(!a.match(/^(\d+|\d+\.\d+)$/)) { a = "'"+a+"'"; }
         funct += a + ', ';
     }
