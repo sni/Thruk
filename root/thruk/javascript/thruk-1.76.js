@@ -3665,6 +3665,7 @@ var ajax_search = {
             if(!sel.disabled) {
                 var backends = jQuery('#'+backend_select).val();
                 if(backends != undefined) {
+                    if(typeof(backends) == 'string') { backends = [backends]; }
                     jQuery.each(backends, function(i, val) {
                         search_url = search_url + '&backend=' + val;
                     });

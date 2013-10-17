@@ -38,28 +38,40 @@
     </td>
   </tr>
 
+  [% IF backends.size > 1 %]
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Backend</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name="d_backends" id="d_backends" style="min-width: 180px;"[% IF !can_edit %] disabled[% END %]>
+        [% FOREACH b = backends %]
+        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  [% END %]
   <tr id="input_host">
     <td class="dataEven" align="center"><b>Host</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_service">
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host', backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_hostgroup">
     <td class="dataEven" align="center"><b>Hostgroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_servicegroup">
     <td class="dataEven" align="center"><b>Servicegroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
 
@@ -69,18 +81,6 @@
       <input type="text" name="comment" value="[% rd.comment %]"[% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
-  [% IF backends.size > 1 %]
-  <tr>
-    <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name="d_backends" multiple style="min-width: 180px;"[% IF !can_edit %] disabled[% END %]>
-        [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
-        [% END %]
-      </select>
-    </td>
-  </tr>
-  [% END %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
     <td class="dataOdd" align="left" colspan=2>
