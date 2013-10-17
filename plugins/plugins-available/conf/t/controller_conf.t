@@ -159,7 +159,7 @@ my $other_json = [
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=macro',                        like => [ '"macros"', 'HOSTADDRESS'] },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=pluginhelp&plugin=##PLUGIN##', like => '"plugin_help" :' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=pluginpreview',                like => '"plugin_output" :' },
-    { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers',               like => '"servicemembers",' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers',               like => '"servicemembers"' },
 ];
 for my $url (@{$other_json}) {
     $url->{'url'} =~ s/\#\#PLUGIN\#\#/$plugin/gmx;
