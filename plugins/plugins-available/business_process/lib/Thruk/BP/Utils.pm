@@ -179,7 +179,10 @@ sub save_bp_objects {
 
     # check if something changed
     if($new_hex ne $old_hex) {
-        move($filename, $file) or die('move failed: '.$!);
+        if(!move($filename, $file)) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'move '.$filename.' to '.$file.' failed: '.$! });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+        }
         # and reload
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         if($cmd) {
