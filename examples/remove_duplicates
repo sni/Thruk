@@ -78,7 +78,6 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Term::ANSIColor;
-use Term::ReadKey;
 use Pod::Usage;
 use Getopt::Long;
 
@@ -102,6 +101,14 @@ GetOptions (
 ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
 pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
 my $always_auto = $opt->{'always_auto'};
+
+##############################################
+my $has_readkey = 0;
+eval {
+    require Term::ReadKey;
+    Term::ReadKey->import();
+    $has_readkey = 1;
+};
 
 ##############################################
 my($odb, $c);
@@ -406,10 +413,15 @@ sub _merge_objects {
 
 ##############################################
 sub _readkey {
-    ReadMode('cbreak');
-    while(ReadKey(-1)) {}; # empty key buffer first
-    my $key = ReadKey(0);
-    ReadMode('normal');
+    my $key;
+    if($has_readkey) {
+        ReadMode('cbreak');
+        while(ReadKey(-1)) {}; # empty key buffer first
+        $key = ReadKey(0);
+        ReadMode('normal');
+    } else {
+        chomp($key = <STDIN>);
+    }
     if(!defined $key) {
         print "\n\nno user input! please run interactive or run with -a -y\n\n";
         exit 3;
