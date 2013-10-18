@@ -278,7 +278,7 @@ sub calculate_overall_processinfo {
     for my $peer (keys %{$pi}) {
         for my $key (keys %{$pi->{$peer}}) {
             my $value = $pi->{$peer}->{$key};
-            if($value eq "0" or $value eq "1") {
+            if(defined $value and ($value eq "0" or $value eq "1")) {
                 if(!defined $return->{$key}) {
                     $return->{$key} = $value;
                 }elsif($return->{$key} == -1) {
