@@ -108,6 +108,8 @@ install: build
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/thruk $(CURDIR)/debian/thruk/usr/bin/thruk
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/naglint $(CURDIR)/debian/thruk/usr/bin/naglint
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/nagexp $(CURDIR)/debian/thruk/usr/bin/nagexp
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/thruk_auth $(CURDIR)/debian/thruk/usr/lib/thruk/
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk_templates.cfg $(CURDIR)/debian/thruk/usr/share/thruk/
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/support
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/debian
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/LICENSE

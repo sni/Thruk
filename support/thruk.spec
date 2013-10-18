@@ -119,6 +119,7 @@ mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/th
 mv %{buildroot}%{_datadir}/thruk/script/thruk %{buildroot}%{_bindir}/thruk
 mv %{buildroot}%{_datadir}/thruk/script/naglint %{buildroot}%{_bindir}/naglint
 mv %{buildroot}%{_datadir}/thruk/script/nagexp %{buildroot}%{_bindir}/nagexp
+mv %{buildroot}%{_datadir}/thruk/script/thruk_auth %{buildroot}/usr/lib/thruk/
 %if %{defined suse_version}
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf
 %else

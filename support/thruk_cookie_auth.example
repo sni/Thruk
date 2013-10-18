@@ -1,7 +1,8 @@
+# put this line outside your virtual hosts
 RewriteLock "/var/cache/thruk/apache_rewrite.lock"
-RewriteMap  users prg:/usr/share/thruk/script/thruk_auth
 
-# make all cookies accessible by the url
+# put everything else inside your vhost
+RewriteMap  users prg:/usr/lib/thruk/thruk_auth
 RewriteCond %{REQUEST_URI}           !^/thruk/cgi-bin/restricted.cgi
 RewriteCond %{HTTP_COOKIE}           (thruk_auth=[^;]+|$)  [NC]
 RewriteRule ^/(.*)$                  /%1/%{REMOTE_ADDR}/____/$1/____/%{QUERY_STRING} [C,NS]
