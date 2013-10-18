@@ -23282,7 +23282,68 @@ Results are submited to Nagios by using the check_results folder.
 </p>
 </li>
 </ul></div>
-<div class="sect3">
+<h4 id="_setup">Setup</h4>
+<div class="paragraph"><p>If you are not using OMD, you will have to do some manual steps:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+copy the &lt;Component Thruk::Plugin::BP&gt; block from your
+   /etc/thruk/thruk.conf into your thruk_local.conf in order to make
+   some local adjustments.
+</p>
+</li>
+<li>
+<p>
+copy the Thruk BP Templates from either
+   <a href="https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg">github</a>
+   or /usr/share/thruk/thruk_templates.cfg into your nagios conf.d
+   folder, ex .:/etc/nagios/conf.d/thruk_bp_templates.cfg
+</p>
+</li>
+<li>
+<p>
+change the <em>objects_templates_file</em> to that location.
+</p>
+</li>
+<li>
+<p>
+create an empty file thruk_bp_generated.cfg, ex.:
+   /etc/nagios/conf.d/thruk_bp_generated.cfg
+</p>
+</li>
+<li>
+<p>
+change <em>objects_save_file</em> to that location.
+</p>
+</li>
+<li>
+<p>
+make that file editable for the webserver/thruk user. ex.: <em>chown
+   www-data: /etc/nagios/conf.d/thruk_bp_generated.cfg</em>
+</p>
+</li>
+<li>
+<p>
+change the <em>spool_dir</em> to ex.: /var/nagios/rw/check_results or
+   whatever your nagios <em>check_result_path</em> points too.
+</p>
+</li>
+<li>
+<p>
+make sure your webserver/thruk user is allowed to write to that
+   folder, ex.: <em>chgrp www-data /var/nagios/rw/check_results &amp;&amp; chmod
+   g+rwx /var/nagios/rw/check_results</em>
+</p>
+</li>
+<li>
+<p>
+set <em>objects_reload_cmd</em> to  "sudo -u nagios /etc/init.d/nagios
+   reload". You will need to add sudo permissions to get this working.
+   ex.: put "thruk ALL=(ALL) NOPASSWD: /etc/init.d/nagios" in your
+   /etc/sudoers.
+</p>
+</li>
+</ul></div>
 <h4 id="_integration_in_nagios">Integration in Nagios</h4>
 <div class="paragraph"><p>Thruk will create Hosts and Services for selected nodes of your business model.
 That way it is possible to send notifications, even for sub steps of the business
@@ -23409,7 +23470,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-17 17:47:30 CEST
+Last updated 2013-10-18 23:17:51 CEST
 </div>
 </div>
 </body>

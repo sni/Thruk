@@ -276,6 +276,11 @@ NFS, DRBD or similar ). There is usually not much traffic in this
 folder.
 
 
+=== How can i enable the business process addon.
+It works out of the box with OMD. If not using OMD, some manual steps
+are required which are described in the
+http://thruk.org/documentation.html#_business_process[official documenation].
+
 
 == Hacking Thruk
 === Within OMD
