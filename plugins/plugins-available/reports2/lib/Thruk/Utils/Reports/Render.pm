@@ -789,6 +789,10 @@ sub _read_static_content_file {
     return '' if $url eq '';
     if(-e $file) {
         return read_file($file);
+    } else {
+        if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'TEST') {
+            die('missing file in report: '.$file);
+        }
     }
 
     croak("_read_static_content_file($url) $file: $!") if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
