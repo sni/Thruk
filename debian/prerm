@@ -10,6 +10,7 @@ case "$1" in
     /usr/bin/thruk -a uninstallcron --local || echo "ERROR: removing cron failed, please remove www-data cron manually"
     invoke-rc.d thruk stop || echo
     rm -f /usr/share/thruk/root/thruk/plugins/*
+    rmdir /usr/share/thruk/root/thruk/plugins
   ;;
 
   upgrade|failed-upgrade)

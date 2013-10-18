@@ -214,6 +214,7 @@ case "$*" in
     # POSTUN
     rm -rf %{_localstatedir}/cache/thruk
     rm -f %{_datadir}/thruk/root/thruk/plugins/*
+    rmdir %{_datadir}/thruk/root/thruk/plugins
     %{insserv_cleanup}
     ;;
   1)
