@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use File::Temp qw/tempdir/;
 
 BEGIN {
     plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
@@ -14,10 +15,14 @@ BEGIN {
 }
 
 ###########################################################
-my @files;
+my(@files, $tmpdir);
 if(scalar @ARGV == 0) {
-    plan(tests => 16);
+    plan(tests => 26);
     @files = glob('examples/*');
+    $tmpdir = tempdir( CLEANUP => 1 );
+    mkdir($tmpdir);
+    ok(-d $tmpdir, $tmpdir.' created');
+    `cp -rp t/data/remove_duplicates/* $tmpdir/`;
 } else {
     @files = @ARGV;
 }
@@ -25,8 +30,9 @@ if(scalar @ARGV == 0) {
 ###########################################################
 # some examples will need arguments
 my $args = {
-    'examples/objectcache2csv'  => 't/data/naglint/basic/in.cfg hostgroup',
-    'examples/contacts2csv'     => 't/data/naglint/basic/in.cfg',
+    'examples/objectcache2csv'   => 't/data/naglint/basic/in.cfg hostgroup',
+    'examples/contacts2csv'      => 't/data/naglint/basic/in.cfg',
+    'examples/remove_duplicates' => '-ay '.$tmpdir.'/core.cfg',
 };
 
 ###########################################################
@@ -35,7 +41,16 @@ for my $file (@files) {
 }
 
 ###########################################################
-done_testing() if scalar @ARGV > 0;
+if(!scalar @ARGV > 0) {
+    TestUtils::test_command({
+        cmd  => '/usr/bin/diff -ru t/data/remove_duplicates/expect.cfg '.$tmpdir.'/test.cfg',
+        like => ['/^$/'],
+    });
+    `rm -rf $tmpdir` if $tmpdir;
+    ok(!-d $tmpdir, $tmpdir.' removed');
+} else {
+    done_testing();
+}
 exit;
 
 

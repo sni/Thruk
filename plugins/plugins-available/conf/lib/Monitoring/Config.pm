@@ -217,7 +217,7 @@ sub commit {
     my $filesroot = $self->get_files_root();
 
     # run pre hook
-    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
+    if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         local $SIG{CHLD}        = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
@@ -281,7 +281,7 @@ sub commit {
     }
 
     # run post hook
-    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
+    if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         local $SIG{CHLD}        = 'DEFAULT';
         system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);

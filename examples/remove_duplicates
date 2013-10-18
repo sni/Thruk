@@ -1,0 +1,419 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm -a $(cd `dirname $0` && pwd) != '/usr/share/thruk/examples' ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+##############################################
+
+=head1 NAME
+
+remove_duplicates - remove duplicate objects from object configuration
+
+=head1 SYNOPSIS
+
+Usage: ./remove_duplicates [ -a ] [ -y ] [ -h ] [.../nagios.cfg]
+
+=head1 DESCRIPTION
+
+command line utility to remove duplicate objects interactively from the object configuration.
+You have to commit changes via the Thruk config afterwards. Changes won't be written to
+the config files.
+
+Run this script from inside a OMD instance.
+
+=head1 OPTIONS
+
+nagexp has the following arguments:
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-a> , B<--auto>
+
+    accecpt auto solution everywhere
+
+=item B<-y> , B<--yes>
+
+    answer yes on all yes/no questions. Currently only used for the last
+    question when saving to disk.
+
+=back
+
+=head1 EXAMPLE
+
+    OMD[test]:~$ ./examples/remove_duplicates.pl -a
+
+=head1 AUTHOR
+
+2013, Sven Nierlein, <sven.nierlein@consol.de>
+
+=cut
+
+##############################################
+
+use strict;
+use warnings;
+use Data::Dumper;
+use Carp;
+use Term::ANSIColor;
+use Term::ReadKey;
+use Pod::Usage;
+use Getopt::Long;
+
+use Monitoring::Config;
+use Thruk::Utils::CLI;
+
+##############################################
+my $opt ={
+    'files'       => [],
+    'help'        => 0,
+    'always_auto' => 0,
+    'always_yes'  => 0,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+   "h|help"         => \$opt->{'help'},
+   "a|app"          => \$opt->{'always_auto'},
+   "y|yes"          => \$opt->{'always_yes'},
+   "<>"             => sub { push @{$opt->{'files'}}, $_[0] },
+) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+my $always_auto = $opt->{'always_auto'};
+
+##############################################
+my($odb, $c);
+if($opt->{'files'}->[0]) {
+    if(!-f $opt->{'files'}->[0]) {
+        print $opt->{'files'}->[0].": ".$!."\n";
+        exit 3;
+    }
+    $odb = Monitoring::Config->new({ core_conf => "".$opt->{'files'}->[0], 'force' => 1 })->init();
+    if($odb->{'errors'} and scalar @{$odb->{'errors'}} > 0 and scalar keys %{$odb->{'objects'}} == 0) {
+        print join("\n", @{$odb->{'errors'}}), "\n";
+        exit 3;
+    }
+}
+else {
+    my $cli = Thruk::Utils::CLI->new;
+    $c = $cli->get_c();
+    $odb = $cli->get_object_db();
+}
+
+$odb->set_save_config();
+
+my $duplicates = {};
+for my $obj (@{$odb->get_objects()}) {
+    next if $obj->{'disabled'};
+    my $type = $obj->get_type();
+    my $name = $obj->get_name();
+    unless(defined $name) {
+        delete $obj->{'file'}->{'objects'}; # make it less text
+        confess("object without a name\n".Dumper($obj));
+    }
+    $duplicates->{$type}->{$name} = [] unless defined $duplicates->{$type}->{$name};
+    push @{$duplicates->{$type}->{$name}}, $obj->get_id();
+}
+
+# count changes
+my $total = 0;
+for my $type (keys %{$duplicates}) {
+    next if $type eq 'service';
+    for my $name (keys %{$duplicates->{$type}}) {
+        my @ids = @{$duplicates->{$type}->{$name}};
+        $total += scalar @ids - 1;
+    }
+}
+my $x = 0;
+for my $type (keys %{$duplicates}) {
+    next if $type eq 'service';
+    for my $name (keys %{$duplicates->{$type}}) {
+        my @ids = @{$duplicates->{$type}->{$name}};
+        while(scalar @ids > 1) {
+            my($obj1, $obj2) = _get_both_compare_objects_by_type($odb, $ids[0], $ids[1]);
+            print `/usr/bin/clear`;
+            $x++;
+            my $userinput = '';
+            if(!$obj1->has_object_changed($obj2->{'conf'})) {
+                print "($x/$total) found identical ".$type." object '".$name."', choose one:\n";
+                _compare_objs($obj1, $obj2);
+                while($userinput ne '1' and $userinput ne '2' and $userinput ne 'a' ) {
+                    print "keep which one? (s for skip, a = auto safe to left file) [1|2|s|a] > ";
+                    if($always_auto) {
+                        $userinput = 'a';
+                        print "a\n";
+                    } else {
+                        $userinput = _readkey();
+                    }
+                    last if $userinput eq "s";
+                    $odb->delete_object($obj1) if $userinput eq "2";
+                    $odb->delete_object($obj2) if $userinput eq "1";
+                    $odb->delete_object($obj2) if $userinput eq "a";
+                }
+            } else {
+                print "($x/$total) merge ".$type." object '".$name."' from:\n";
+                _compare_objs($obj1, $obj2);
+                while($userinput ne '1' and $userinput ne '2' and $userinput ne 'm' and $userinput ne 'a') {
+                    print "choose which one or merge? (s for skip, auto = merge both into left file) [1|2|s|m|a] > ";
+                    if($always_auto) {
+                        $userinput = 'a';
+                        print "a\n";
+                    } else {
+                        $userinput = _readkey();
+                    }
+                    last if $userinput eq "s";
+                    $odb->delete_object($obj1)      if $userinput eq "2";
+                    $odb->delete_object($obj2)      if $userinput eq "1";
+                    $userinput =
+                       _merge_objects($obj1, $obj2) if $userinput eq "m";
+                    _merge_objects($obj1, $obj2, 1) if $userinput eq "a";
+                }
+            }
+            _store();
+
+            # remove id from list
+            shift @ids;
+            shift @ids;
+            if($userinput eq '1' or $userinput eq 'a') {
+                unshift @ids, $obj1->get_id();
+            } else {
+                unshift @ids, $obj2->get_id();
+            }
+        }
+    }
+}
+_store();
+if($x > 0 and $c) {
+    print "\n**************\n";
+    print "changes must be commited via the thruk gui!";
+    print "\n**************\n";
+} else {
+    my $userinput = '';
+    while($userinput ne 'y' and $userinput ne 'n') {
+        print "save changes to disk? [y|n] > ";
+        if($opt->{'always_yes'}) {
+            $userinput = 'y';
+            print "y\n";
+        } else {
+            $userinput = _readkey();
+        }
+    }
+    if($userinput eq 'y') {
+        $odb->commit();
+        print "changes written to disk.\n";
+    }
+}
+print "done.\n";
+exit 0;
+
+##############################################
+sub _store {
+    $odb->{'needs_commit'} = 1;
+    $odb->{'last_changed'} = time();
+    Thruk::Utils::Conf::store_model_retention($c) if $c;
+}
+
+##############################################
+sub _uniq {
+    my %seen = ();
+    my @unique_array = grep { ! $seen{$_}++ } @_ ;
+    return \@unique_array;
+}
+
+##############################################
+sub _get_small_path {
+    my($p1,$p2,$l1,$l2) = @_;
+    if($p1 eq $p2) {
+        my $f1 = $p1;
+        $f1 =~ s|^.*/||gmx;
+        return($f1.':'.$l1, $f1.':'.$l2);
+    }
+    my @p1 = split('/', $p1);
+    my @p2 = split('/', $p2);
+    while(defined $p1[0] and defined $p2[0] and $p1[0] eq $p2[0]) {
+        shift @p1;
+        shift @p2;
+    }
+    my $f1 = substr('/'.join('/', @p1), 0, 25);
+    my $f2 = substr('/'.join('/', @p2), 0, 25);
+    return($f1,$f2);
+}
+
+##############################################
+sub _get_both_compare_objects_by_type {
+    my($odb, $id1, $id2) = @_;
+    my $tmp1 = $odb->get_object_by_id($id1);
+    my $tmp2 = $odb->get_object_by_id($id2);
+    confess("got no object for id ".$id1) unless defined($tmp1);
+    confess("got no object for id ".$id2) unless defined($tmp2);
+    # sort objects by path
+    my $paths = {
+        $tmp1->{'file'}->{'path'}.':'.$tmp1->{'line'} => $tmp1,
+        $tmp2->{'file'}->{'path'}.':'.$tmp2->{'line'} => $tmp2,
+    };
+    my @sorted = sort keys %{$paths};
+    my $obj1 = $paths->{$sorted[0]};
+    my $obj2 = $paths->{$sorted[1]};
+    return($obj1, $obj2);
+}
+
+##############################################
+sub _compare_objs {
+    my($obj1, $obj2, $attr) = @_;
+    my $print = 1;
+    $print = 0 if $always_auto and $attr;
+
+    print "1: ".$obj1->{'file'}->{'path'}.":".$obj1->{'line'}."\n"   if $print;
+    print "2: ".$obj2->{'file'}->{'path'}.":".$obj2->{'line'}."\n\n" if $print;
+    my($f1,$f2) = _get_small_path($obj1->{'file'}->{'path'}, $obj2->{'file'}->{'path'}, $obj1->{'line'}, $obj2->{'line'});
+    printf("%-20s | %-30s | %-30s\n", "Attr", "1: ".$f1, "2: ".$f2) if $print;
+    print ("-" x 80, "\n") if $print;
+    my $keys = _uniq(keys %{$obj1->{'conf'}}, keys %{$obj2->{'conf'}});
+
+    for my $key (@{$obj1->get_sorted_keys($keys)}) {
+        next if defined $attr and $key ne $attr; # used for line by line matching
+        my $printed = 0;
+        my $val1 = $obj1->{'conf'}->{$key};
+        my $val2 = $obj2->{'conf'}->{$key};
+        $val1 = '' unless defined $val1;
+        $val2 = '' unless defined $val2;
+        $val1 = join(",", @{$val1}) if ref $val1 eq 'ARRAY';
+        $val2 = join(",", @{$val2}) if ref $val2 eq 'ARRAY';
+        my $print_key = substr($key, 0, 20);
+        if($val1 ne $val2) {
+            print color 'bold red' if $print;
+            if(ref $obj1->{'conf'}->{$key} eq 'ARRAY') {
+                my $x = 0;
+                while($x < scalar @{$obj1->{'conf'}->{$key}} or $x < scalar @{$obj2->{'conf'}->{$key}}) {
+                    $val1 = $obj1->{'conf'}->{$key}->[$x];
+                    $val2 = $obj2->{'conf'}->{$key}->[$x];
+                    $val1 = '' unless defined $val1;
+                    $val2 = '' unless defined $val2;
+                    printf("%-20s | %-30s | %-30s\n", $x == 0 ? $print_key : '', $val1, $val2) if $print;
+                    $printed = 1;
+                    $x++;
+                }
+            }
+            elsif(length($val1) + length($val2) > 60) {
+                printf("%-20s | %-30s\n%-20s | %-30s\n", $print_key, $val1, "", $val2) if $print;
+                $printed = 1;
+            }
+        } else {
+            return if $attr;
+            $val1 = substr($val1, 0, 29);
+            $val2 = substr($val1, 0, 29);
+        }
+        printf("%-20s | %-30s | %-30s\n", $print_key, $val1, $val2) if !$printed and $print;
+        print color 'reset' if $print;
+    }
+    return 1;
+}
+
+##############################################
+sub _merge_objects {
+    my($obj1, $obj2, $auto) = @_;
+    my $keys = _uniq(keys %{$obj1->{'conf'}}, keys %{$obj2->{'conf'}});
+    my $newconf = {};
+    for my $key (@{$obj1->get_sorted_keys($keys)}) {
+        print `/usr/bin/clear` unless $always_auto;
+        unless(_compare_objs($obj1, $obj2, $key)) {
+            $newconf->{$key} = $obj1->{'conf'}->{$key};
+            next;
+        }
+        my $userinput = '';
+        my $is_array = ref $obj1->{'conf'}->{$key} eq 'ARRAY' ? 1 : 0;
+        while($userinput ne '1' and $userinput ne '2' and $userinput ne 'd' and $userinput ne 'b') {
+            print "keep which one? (d = delete, b = both) [1|2|d|b] > " if $is_array;
+            print "keep which one? (d = delete) [1|2|d] > "             if !$is_array;
+            if($auto) {
+                $userinput = 'b';
+                print "b\n";
+            } else {
+                $userinput = _readkey();
+            }
+            last if $userinput eq "d";
+            if($userinput eq "1") {
+                $newconf->{$key} = $obj1->{'conf'}->{$key};
+            }
+            elsif($userinput eq "2") {
+                $newconf->{$key} = $obj2->{'conf'}->{$key};
+            }
+            elsif($is_array and $userinput eq "b") {
+                if(index(join(',', @{$obj1->{'conf'}->{$key}}), join(',', @{$obj2->{'conf'}->{$key}})) != -1) {
+                    $newconf->{$key} = $obj1->{'conf'}->{$key};
+                }
+                elsif(index(join(',', @{$obj2->{'conf'}->{$key}}), join(',', @{$obj1->{'conf'}->{$key}})) != -1) {
+                    $newconf->{$key} = $obj2->{'conf'}->{$key};
+                } else {
+                    $newconf->{$key} = _uniq(@{$obj1->{'conf'}->{$key}}, @{$obj2->{'conf'}->{$key}});
+                }
+            }
+            elsif(!$is_array and $userinput eq "b" and !defined $obj1->{'conf'}->{$key}) {
+                $newconf->{$key} = $obj2->{'conf'}->{$key};
+            }
+            elsif(!$is_array and $userinput eq "b" and !defined $obj2->{'conf'}->{$key}) {
+                $newconf->{$key} = $obj1->{'conf'}->{$key};
+            } else {
+                # unsolved conflict, user has to choose
+                undef $userinput;
+            }
+        }
+    }
+
+    print "\n\n";
+    print "save new config into:\n";
+    print "1: ".$obj1->{'file'}->{'path'}.":".$obj1->{'line'}."\n";
+    print "2: ".$obj2->{'file'}->{'path'}.":".$obj2->{'line'}."\n\n";
+    my $userinput = '';
+    while($userinput ne '1' and $userinput ne '2') {
+        print "save new config to which one? [1|2] > ";
+        if($auto) {
+            $userinput = '1';
+            print "1\n";
+        } else {
+            $userinput = _readkey();
+        }
+        $odb->delete_object($obj1) if $userinput eq "2";
+        $odb->delete_object($obj2) if $userinput eq "1";
+        $odb->update_object($obj1, $newconf) if $userinput eq "1";
+        $odb->update_object($obj2, $newconf) if $userinput eq "2";
+    }
+
+    return $userinput;
+}
+
+##############################################
+sub _readkey {
+    ReadMode('cbreak');
+    while(ReadKey(-1)) {}; # empty key buffer first
+    my $key = ReadKey(0);
+    ReadMode('normal');
+    if(!defined $key) {
+        print "\n\nno user input! please run interactive or run with -a -y\n\n";
+        exit 3;
+    }
+    print $key."\n";
+    return $key;
+}
