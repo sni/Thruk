@@ -93,6 +93,7 @@ git add                     \
     lib/Thruk/Config.pm     \
     script/naglint          \
     script/nagexp           \
-    script/nagimp
+    script/nagimp           \
+    .gitignore
 git co docs/FAQ.html
 git status

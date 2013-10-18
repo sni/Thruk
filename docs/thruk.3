@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2013-08-23" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2013-10-13" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -203,9 +203,10 @@ script has the following arguments
 .Ve
 .IP "\fB\-a\fR \fIaction\fR, \fB\-\-action\fR=\fIaction\fR" 4
 .IX Item "-a action, --action=action"
-.Vb 4
+.Vb 5
 \&    perform selected action:
 \&      \- url=<url>                   output url result
+\&        \-i / \-\-all\-inclusive        includes all css, javascript and images in the resulting html page
 \&      \- report=<nr>                 generate report
 \&      \- reportmail=<nr>             send report by mail
 \&
@@ -223,6 +224,7 @@ script has the following arguments
 \&      \- uninstallcron               remove all thruk cronjobs
 \&                                    (only needed during package deinstallation)
 \&      \- compile                     compile templates for faster access
+\&      \- bpd                         start business process daemon
 \&
 \&    Testing Commands
 \&      \- listbackends                list all backends

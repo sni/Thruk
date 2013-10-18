@@ -1,9 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon
-          - new --all-inclusive/-i mode for cli html page export with includes all css, js and
-            images in one sinlge page
+          - new --all-inclusive/-i mode for cli html page export which includes all css, js and
+            images in one single page
           - show apache status in performance page
           - minemap performance improvements and reduced memory usage
           - configuration git browser got next and previous links
