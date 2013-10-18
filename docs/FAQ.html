@@ -983,6 +983,14 @@ use_bookmark_titles in your thruk_local.conf:</p></div>
 that bookmark will be used as the page title.
 The second option is on most pages adding <em>title=your title here</em> to
 the url will set a custom title</p></div>
+<div class="sect3">
+<h4 id="_how_can_i_enable_form_based_authentication">How can i enable form based authentication</h4>
+<div class="paragraph"><p>In order to use the form or cookie based authentication like demo.thruk.org does,
+you have to do two small changes in your apache configuration.
+Get <a href="https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example">thruk_cookie_auth.example</a>
+and put everything except the RewriteLock into the virtualhost of your choice.
+The RewriteLock must be outside any virtualhost. After that, restart the apache.</p></div>
+</div>
 </div>
 </div>
 </div>
@@ -1150,7 +1158,7 @@ changes active).</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-13 19:41:36 CEST
+Last updated 2013-10-18 22:41:10 CEST
 </div>
 </div>
 </body>

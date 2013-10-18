@@ -258,6 +258,14 @@ The second option is on most pages adding 'title=your title here' to
 the url will set a custom title
 
 
+==== How can i enable form based authentication
+In order to use the form or cookie based authentication like demo.thruk.org does,
+you have to do two small changes in your apache configuration.
+Get https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
+and put everything except the RewriteLock into the virtualhost of your choice.
+The RewriteLock must be outside any virtualhost. After that, restart the apache.
+
+
 
 == Installation
 
