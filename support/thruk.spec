@@ -129,6 +129,7 @@ mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfd
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
 mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/thruk
+mv %{buildroot}%{_datadir}/thruk/support/thruk_templates.cfg %{buildroot}%{_datadir}/thruk/
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
