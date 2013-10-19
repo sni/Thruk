@@ -239,6 +239,7 @@ exit 0
 %attr(755,root,root) %{_bindir}/naglint
 %attr(755,root,root) %{_bindir}/nagexp
 %attr(755,root,root) %{_initrddir}/thruk
+%attr(755,root,root) /usr/lib/thruk/thruk_auth
 %config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
