@@ -2654,6 +2654,15 @@ thruk_local.conf:
   logcache = mysql://username:password@localhost:3306/thruk_logs
 -------
 
+[TIP]
+.create mysql user and tables
+=======
+ #> mysql -u root -p
+ mysql> CREATE USER 'thruk'@'localhost' IDENTIFIED BY '****';
+ mysql> CREATE DATABASE IF NOT EXISTS `thruk`;
+ mysql> GRANT ALL PRIVILEGES ON `thruk`.* TO 'thruk'@'localhost';
+=======
+
 
 === Actions
 
@@ -2682,7 +2691,9 @@ Logfile Cache Update
 -------
 
 The logcacheupdate imports the delta since the last update. That's pretty
-fast and done automatically whenever you access logfiles via Thruk.
+fast and done automatically whenever you access logfiles via Thruk. However,
+if you access the eventlog page only once in a while, it would be a good idea
+to update the logcache periodically by a cronjob.
 
 
 ==== Import from Logfile Archive Files
