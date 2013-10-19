@@ -14,6 +14,8 @@ BEGIN {
     import TestUtils;
 }
 
+$ENV{'TERM'} = 'xterm' unless defined $ENV{'TERM'};
+
 ###########################################################
 my(@files, $tmpdir);
 if(scalar @ARGV == 0) {
