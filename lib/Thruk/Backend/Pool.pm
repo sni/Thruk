@@ -432,7 +432,9 @@ sub get_config {
 
     my %config;
     for my $file (@files) {
-        my %conf = Config::General::ParseConfig($file);
+        my %conf = Config::General::ParseConfig(-ConfigFile => $file,
+                                                -UTF8       => 1,
+        );
         for my $key (keys %conf) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 $config{$key} = { %{$config{$key}}, %{$conf{$key}} };
