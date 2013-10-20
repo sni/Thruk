@@ -112,11 +112,11 @@ $Data::Dumper::Sortkeys = 1;
 
 ###################################################
 # init cache
+Thruk::Utils::IO::mkdir(__PACKAGE__->config->{'tmp_path'});
 __PACKAGE__->cache(__PACKAGE__->config->{'tmp_path'}.'/thruk.cache');
 
 ###################################################
 # save pid
-Thruk::Utils::IO::mkdir(__PACKAGE__->config->{'tmp_path'});
 my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
