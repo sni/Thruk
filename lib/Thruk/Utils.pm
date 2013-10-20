@@ -22,6 +22,7 @@ use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::IO;
+use Config::General;
 
 ##############################################
 =head1 METHODS
@@ -220,7 +221,6 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
-        require Config::General;
         my $conf = new Config::General($file);
         %{$config->{'cgi_cfg'}} = $conf->getall;
     }
