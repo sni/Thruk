@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use Test::More;
-use File::Temp qw/tempdir/;
 
 BEGIN {
     plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
@@ -14,17 +13,11 @@ BEGIN {
     import TestUtils;
 }
 
-$ENV{'TERM'} = 'xterm' unless defined $ENV{'TERM'};
-
 ###########################################################
-my(@files, $tmpdir);
+my @files;
 if(scalar @ARGV == 0) {
-    plan(tests => 26);
+    plan(tests => 16);
     @files = glob('examples/*');
-    $tmpdir = tempdir( CLEANUP => 1 );
-    mkdir($tmpdir);
-    ok(-d $tmpdir, $tmpdir.' created');
-    `cp -rp t/data/remove_duplicates/* $tmpdir/`;
 } else {
     @files = @ARGV;
 }
@@ -34,23 +27,16 @@ if(scalar @ARGV == 0) {
 my $args = {
     'examples/objectcache2csv'   => 't/data/naglint/basic/in.cfg hostgroup',
     'examples/contacts2csv'      => 't/data/naglint/basic/in.cfg',
-    'examples/remove_duplicates' => '-ay '.$tmpdir.'/core.cfg',
 };
 
 ###########################################################
 for my $file (@files) {
+    next if $file eq 'examples/remove_duplicates'; # there is an extra test for this
     check_example($file);
 }
 
 ###########################################################
-if(!scalar @ARGV > 0) {
-    TestUtils::test_command({
-        cmd  => '/usr/bin/diff -ru t/data/remove_duplicates/expect.cfg '.$tmpdir.'/test.cfg',
-        like => ['/^$/'],
-    });
-    `rm -rf $tmpdir` if $tmpdir;
-    ok(!-d $tmpdir, $tmpdir.' removed');
-} else {
+if(scalar @ARGV > 0) {
     done_testing();
 }
 exit;

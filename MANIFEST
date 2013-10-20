@@ -1070,6 +1070,7 @@ t/100-backend_mongodb.t
 t/100-backend_mysql.t
 t/100-backend_mysql_utf8.t
 t/100-backend_shinken.t
+t/100-cli-examples-dups.t
 t/100-cli-examples.t
 t/100-cli-naglint.t
 t/100-cli-naglint2.t
