@@ -137,6 +137,7 @@ sub _do_report {
         my $gd_image = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
         my $dir = $c->config->{'var_path'}."/jobs/".$c->stash->{job_id};
         open(my $fh, '>', $dir."/graph.png");
+        binmode($fh);
         print $fh $gd_image->png;
         Thruk::Utils::IO::close($fh, $dir."/graph.png");
     }
@@ -494,7 +495,16 @@ sub _draw_text {
         $title = "State History For Host '".$host."'";
     }
     my $string_width  = length($title) * $font_width;
-    $im->string(gdSmallFont,($drawing_width/2)-($string_width/2)+$drawing_x_offset,$font_height, $title, $color);
+
+    my $ttf = '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf';
+    if(-e $ttf) {
+        # truetype fonts are the only way to support utf8
+        $im->stringFT($color,$ttf,10,0,($drawing_width/2)-($string_width/2)+$drawing_x_offset,$font_height+2,
+              $title,
+              { charmap  => 'Unicode'});
+    } else {
+        $im->string(gdSmallFont,($drawing_width/2)-($string_width/2)+$drawing_x_offset,$font_height, $title, $color);
+    }
 
     # report start/end date
     my $from_to = strftime($c->config->{'datetime_format_trends'}, localtime($start))." to ".strftime($c->config->{'datetime_format_trends'}, localtime($end));
