@@ -73,13 +73,17 @@ nagexp has the following arguments:
 
 ##############################################
 
+BEGIN {
+    $ENV{'TERM'} = 'xterm' unless $ENV{'TERM'};
+};
+
 use strict;
 use warnings;
 use Data::Dumper;
 use Carp;
-use Term::ANSIColor;
 use Pod::Usage;
 use Getopt::Long;
+use Term::ANSIColor;
 
 use Monitoring::Config;
 use Thruk::Utils::CLI;
@@ -104,7 +108,7 @@ my $always_auto = $opt->{'always_auto'};
 
 ##############################################
 my $has_readkey = 0;
-if($ENV{'TERM'}) {
+if(-t 0) {
     eval {
         require Term::ReadKey;
         Term::ReadKey->import();
@@ -162,7 +166,7 @@ for my $type (keys %{$duplicates}) {
         my @ids = @{$duplicates->{$type}->{$name}};
         while(scalar @ids > 1) {
             my($obj1, $obj2) = _get_both_compare_objects_by_type($odb, $ids[0], $ids[1]);
-            print `/usr/bin/clear`;
+            print `/usr/bin/clear 2>/dev/null`;
             $x++;
             my $userinput = '';
             if(!$obj1->has_object_changed($obj2->{'conf'})) {
@@ -346,7 +350,7 @@ sub _merge_objects {
     my $keys = _uniq(keys %{$obj1->{'conf'}}, keys %{$obj2->{'conf'}});
     my $newconf = {};
     for my $key (@{$obj1->get_sorted_keys($keys)}) {
-        print `/usr/bin/clear` unless $always_auto;
+        print `/usr/bin/clear 2>/dev/null` unless $always_auto;
         unless(_compare_objs($obj1, $obj2, $key)) {
             $newconf->{$key} = $obj1->{'conf'}->{$key};
             next;
