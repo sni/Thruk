@@ -104,11 +104,13 @@ my $always_auto = $opt->{'always_auto'};
 
 ##############################################
 my $has_readkey = 0;
-eval {
-    require Term::ReadKey;
-    Term::ReadKey->import();
-    $has_readkey = 1;
-};
+if($ENV{'TERM'}) {
+    eval {
+        require Term::ReadKey;
+        Term::ReadKey->import();
+        $has_readkey = 1;
+    };
+}
 
 ##############################################
 my($odb, $c);

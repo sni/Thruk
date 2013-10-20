@@ -6,7 +6,6 @@ use File::Temp qw/tempdir/;
 BEGIN {
     plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'backends required' if !-s 'thruk_local.conf';
-    plan skip_all => 'TERM not set'      if !$ENV{'TERM'};
 }
 
 BEGIN {
