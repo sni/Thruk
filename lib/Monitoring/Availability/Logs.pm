@@ -164,12 +164,12 @@ sub _store_logs_from_string {
 
 ########################################
 sub _store_logs_from_file {
-    my $self   = shift;
-    my $file   = shift;
+    my($self, $file) = @_;
     return unless defined $file;
-
     open(my $FH, '<', $file) or croak('cannot read file '.$file.': '.$!);
+    binmode($FH);
     while(my $line = <$FH>) {
+        Thruk::Utils::decode_any($line);
         chomp($line);
         my $data = &parse_line($line);
         push @{$self->{'logs'}}, $data if defined $data;

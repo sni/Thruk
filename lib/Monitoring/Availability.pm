@@ -600,9 +600,10 @@ sub _compute_availability_line_by_line {
 
     # process all log lines we got
     # logs should be sorted already
-    while(<$fh>) {
-        chop;
-        my $data = &Monitoring::Availability::Logs::parse_line($_);
+    while(my $line = <$fh>) {
+        Thruk::Utils::decode_any($line);
+        chomp($line);
+        my $data = &Monitoring::Availability::Logs::parse_line($line);
         next unless $data;
         &_compute_for_data($self,$last_time, $data, $result);
         # set timestamp of last log line
