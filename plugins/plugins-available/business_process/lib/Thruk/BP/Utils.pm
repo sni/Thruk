@@ -142,7 +142,7 @@ sub save_bp_objects {
     my($c, $bps) = @_;
 
     my $file = $c->config->{'Thruk::Plugin::BP'}->{'objects_save_file'};
-    return(1, 'ok') unless $file;
+    return(0, 'ok') unless $file;
 
     my($rc, $msg) = (0, 'reload ok');
     my $obj = {'hosts' => {}, 'services' => {}};
