@@ -1,9 +1,5 @@
 package Thruk::Controller::shinken_features;
 
-=encoding utf8
-
-=cut
-
 use strict;
 use warnings;
 use utf8;
