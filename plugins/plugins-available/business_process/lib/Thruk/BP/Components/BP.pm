@@ -610,6 +610,7 @@ sub _submit_results_to_core {
             print $fh $r,"\n";
         }
         Thruk::Utils::IO::close($fh, $fh->filename);
+        chmod(0664, $fh->filename); # make sure the core can read it
 
         my $file = $fh->filename.'.ok';
         sysopen my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY
