@@ -1096,6 +1096,7 @@ t/300-controller_histogram.t
 t/300-controller_history.t
 t/300-controller_notifications.t
 t/300-controller_outages.t
+t/300-controller_remote.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
 t/300-controller_status.t

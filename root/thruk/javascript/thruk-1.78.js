@@ -1321,7 +1321,7 @@ function getErrorText(details) {
 
 /* create error text for bug reports */
 function sendJSError(scripturl, text) {
-    if(window.XMLHttpRequest) {
+    if(text && window.XMLHttpRequest) {
         var xhr = new XMLHttpRequest();
         text = '---------------\nJS-Error:\n'+text+'---------------\n';
         xhr.open("POST", scripturl);

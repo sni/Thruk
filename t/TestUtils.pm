@@ -15,6 +15,7 @@ use Test::More;
 use URI::Escape;
 use Encode qw/decode_utf8/;
 use File::Slurp;
+use HTTP::Request::Common;
 use Thruk::Utils;
 use Thruk::Utils::External;
 
@@ -133,6 +134,7 @@ sub get_test_hostgroup_cli {
   needs test hash
   {
     url             => url to test
+    post            => do post request with this data
     follow          => follow redirects
     fail            => request should fail
     redirect        => request should redirect
@@ -158,7 +160,7 @@ sub test_page {
 
     ok($opts->{'url'}, $opts->{'url'});
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
@@ -556,8 +558,13 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to) = @_;
-    my $request = request($url);
+    my($url, $start_to, $post) = @_;
+    my $request;
+    if($post) {
+        $request = request POST $url, $post;
+    } else {
+        $request = request($url);
+    }
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/mxo) {
         my $link = $1;
         $link    =~ s/^wait\#//mxo;

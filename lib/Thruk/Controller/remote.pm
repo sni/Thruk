@@ -79,14 +79,19 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
 
     # log requests?
     if($action eq 'log' and $c->{'request'}->{'method'} eq 'POST') {
-        my $file = "".$c->{'request'}->body();
-        if($file and -e $file) {
-            my $msg = read_file($file);
-            unlink($file);
-            $c->log->error($msg);
-        } else {
-            $c->log->error('log request without a file: '.Dumper($c->{'request'}));
+        my $body = $c->{'request'}->body();
+        if($body) {
+            if(ref $body eq 'File::Temp') {
+                my $file = $body->filename();
+                if($file and -e $file) {
+                    my $msg = read_file($file);
+                    unlink($file);
+                    $c->log->error($msg);
+                    return;
+                }
+            }
         }
+        $c->log->error('log request without a file: '.Dumper($c->{'request'}));
         return;
     }
 
