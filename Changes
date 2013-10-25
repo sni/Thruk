@@ -8,6 +8,7 @@ not yet released
           - Panorama
             - fixed nagvis panel displaying load error
             - fixed using default view with readonly mode
+            - fixed draggable panels in readonly mode
           - Bug Fixes
             - fixed cascaded configs for sub components
 

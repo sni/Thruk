@@ -13,6 +13,7 @@
     [% IF readonly %]
     resizable: false,
     closable: false,
+    draggable: false,
     [% ELSE %]
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
