@@ -37,7 +37,6 @@ Ext.state.HttpProvider = function(config){
 
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     set: function(name, value) {
-        [% IF readonly %]return;[% END %]
         if(typeof value == "undefined" || value === null) {
             this.clear(name);
             return;
@@ -47,7 +46,6 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     clear: function(name) {
-        [% IF readonly %]return;[% END %]
         this.clearValue(name);
         Ext.state.HttpProvider.superclass.clear.call(this, name);
     },
@@ -63,7 +61,6 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     setValue: function(name, value) {
-        [% IF readonly %]return;[% END %]
         encoded = this.encodeValue(value)
         if(ExtState[name] != undefined && ExtState[name] == encoded) {
             return;
