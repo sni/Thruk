@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 not yet released
           - Business Process
             - openend result spool files permissons
+          - Config Tool
+            - fixed plugin help accordion size
 
 1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon

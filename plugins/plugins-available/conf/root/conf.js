@@ -390,9 +390,9 @@ function init_plugin_help_accordion(id) {
         collapsible: true,
         active:      'none',
         clearStyle:  true,
-        autoHeight:  false,
+        heightStyle: 'content',
         fillSpace:   true,
-        change:      function(event, ui) {
+        activate:    function(event, ui) {
             if(ui.newHeader.size() == 0) {
                 // accordion is closing
                 return;
@@ -498,7 +498,7 @@ function check_plugin_exec(id) {
 function close_accordion() {
     // close the helper accordion
     if($accordion) {
-        $accordion.accordion("activate", false);
+        $accordion.accordion({active: false});
     }
 }
 

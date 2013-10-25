@@ -7,7 +7,7 @@
     <tr>
       <td class="attrName"><b>Choose Plugin</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion()" onfocus="this.click(); ajax_search.autoopen=false;"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
+        <input type="text" id="[% id %]_inp_plugin" value="" onchange="close_accordion()" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
       </td>
     </tr>
     <tr>
