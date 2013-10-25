@@ -99,7 +99,13 @@
                     if(!success) {
                         panel.graphs_loaded = 0;
                         panel.graph_combo_error_label.setActiveError('');
-                        panel.graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication.');
+                        if(response.status == 404) {
+                            panel.graph_combo_error_label.setValue('loading graphs failed, no nagvis found under this url: ' + response.status + ' - ' + response.statusText);
+                        } else if(response.status) {
+                            panel.graph_combo_error_label.setValue('loading graphs failed: ' + response.status + ' - ' + response.statusText);
+                        } else {
+                            panel.graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication problems.');
+                        }
                     }
                 }
             });
