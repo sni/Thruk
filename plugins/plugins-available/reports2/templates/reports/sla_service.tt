@@ -56,7 +56,9 @@
         [% WRAPPER 'reports/comp/page_standard.tt'  %]
           [% PROCESS 'reports/comp/sla_graph_page.tt' %]
         [% END %]
-        [% PROCESS 'reports/comp/sla_outages.tt' %]
+        [% IF avail_data.services.size == 1 %]
+          [% PROCESS 'reports/comp/sla_outages.tt' %]
+        [% END %]
       [% END %]
     [% END %]
 
