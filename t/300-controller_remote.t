@@ -1,8 +1,6 @@
 use strict;
 use warnings;
-use Test::More;
-
-plan tests => 11;
+use Test::More tests => 11;
 
 BEGIN {
     use lib('t');
