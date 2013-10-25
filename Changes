@@ -7,6 +7,8 @@ not yet released
             - fixed plugin help accordion size
           - Panorama
             - fixed nagvis panel displaying load error
+          - Bug Fixes
+            - fixed cascaded configs for sub components
 
 1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon

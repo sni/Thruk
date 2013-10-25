@@ -239,6 +239,13 @@ sub add_defaults {
         $c->stash->{'config_adjustments'} = {};
         for my $group (sort keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}) {
             if(defined $c->config->{'Group'}->{$group}) {
+                # move components one level up
+                if($c->config->{'Group'}->{$group}->{'Component'}) {
+                    for my $key (keys %{$c->config->{'Group'}->{$group}->{'Component'}}) {
+                        $c->config->{'Group'}->{$group}->{$key} = delete $c->config->{'Group'}->{$group}->{'Component'}->{$key};
+                    }
+                    delete $c->config->{'Group'}->{$group}->{'Component'};
+                }
                 for my $key (keys %{$c->config->{'Group'}->{$group}}) {
                     $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
                     $c->config->{$key} = $c->config->{'Group'}->{$group}->{$key};
@@ -246,6 +253,12 @@ sub add_defaults {
             }
         }
         if(defined $c->config->{'User'}->{$c->stash->{'remote_user'}}) {
+            if($c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}) {
+                for my $key (keys %{$c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}}) {
+                    $c->config->{'User'}->{$c->stash->{'remote_user'}}->{$key} = delete $c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'}->{$key};
+                }
+                delete $c->config->{'User'}->{$c->stash->{'remote_user'}}->{'Component'};
+            }
             for my $key (keys %{$c->config->{'User'}->{$c->stash->{'remote_user'}}}) {
                 $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
                 $c->config->{$key} = $c->config->{'User'}->{$c->stash->{'remote_user'}}->{$key};
