@@ -37,7 +37,7 @@
             valueField:     'id',
             displayField:   'name',
             store:           panel.graph_store,
-            emptyText:      'select map to display',
+            emptyText:      'select a map',
             listeners: {
                 focus: function() {
                     panel.updateGraphs();
@@ -53,7 +53,7 @@
             hideEmptyLabel: false,
             name:       'grapherror',
             activeError: true,
-            value:      'testlabel'
+            value:      ' '
         });
         panel.down('form').add(panel.graph_combo_error_label);
 
@@ -64,6 +64,8 @@
             panel.xdata.base_url = values.base_url;
             if(!panel.xdata.base_url) { return; }
             if(panel.graphs_loaded)   { return; }
+            panel.graph_combo.setRawValue('loading maps...');
+            panel.graph_combo.disable();
             var now    = new Date();
             var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
             Ext.Ajax.request({
@@ -71,7 +73,7 @@
                 method: 'GET',
                 callback: function(options, success, response) {
                     if(success) {
-                        var data  = TP.getResponse(panel, response);
+                        var data  = TP.getResponse(panel, response, true);
                         var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
                         if(matches && matches.length > 0) {
                             panel.graphs_loaded = 1;
@@ -92,6 +94,7 @@
                             panel.graph_combo.setValue(panel.xdata.graph);
                             panel.graph_combo_error_label.unsetActiveError();
                             panel.graph_combo_error_label.setValue('');
+                            panel.graph_combo.enable();
                         } else {
                             success = false;
                         }

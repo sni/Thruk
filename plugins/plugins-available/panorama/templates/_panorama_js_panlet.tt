@@ -34,10 +34,10 @@
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
                 this.items.getAt(0).hide();
+                this.gearitem.down('form').getForm().reset();
                 if(this.gearInitCallback) {
                     this.gearInitCallback(this);
                 }
-                this.gearitem.down('form').getForm().reset();
                 this.gearitem.show();
             } else {
                 this.items.getAt(0).show();
