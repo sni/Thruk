@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-not yet released
+
+1.78-2   Sun Oct 27 16:41:56 CET 2013
           - Business Process
             - openend result spool files permissons
           - Config Tool

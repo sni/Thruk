@@ -1,6 +1,6 @@
 Name:          thruk
 Version:       1.78
-Release: 1%{?dist}
+Release: 2%{?dist}
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
