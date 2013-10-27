@@ -280,3 +280,8 @@ LI#o_objects > INS {
 LI#o_objects > UL {
   margin-left: -17px;
 }
+
+TABLE.conf_references TH, TABLE.conf_references TD {
+  text-align: left;
+  padding-right: 15px;
+}

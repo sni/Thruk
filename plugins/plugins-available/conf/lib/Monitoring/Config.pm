@@ -1780,7 +1780,9 @@ sub _newest_file {
 
 ##########################################################
 sub _check_references {
-    my($self) = @_;
+    my $self = shift;
+    my %options = @_;
+
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
     my @parse_errors;
     $self->_all_object_links_callback(sub {
@@ -1788,13 +1790,29 @@ sub _check_references {
         return if $obj->{'disabled'};
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
-                push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                if($options{'hash'}) {
+                    push @parse_errors, { type  => $link.' template',
+                                          state => 'nonexistant',
+                                          name  => $val,
+                                          src   => Thruk::Utils::Conf::_link_obj($obj),
+                                        };
+                } else {
+                    push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                }
             }
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
             # hostgroups are allowed to have a register 0
             if($link ne 'hostgroup' or !defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
-                push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                if($options{'hash'}) {
+                    push @parse_errors, { type  => $link,
+                                          state => 'nonexistant',
+                                          name  => $val,
+                                          src   => Thruk::Utils::Conf::_link_obj($obj),
+                                        };
+                } else {
+                    push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                }
             }
         }
     });
@@ -1810,7 +1828,7 @@ sub _check_orphaned_objects {
     $self->{'stats'}->profile(begin => "M::C::_check_orphaned_objects()") if defined $self->{'stats'};
     my @errors;
 
-    # get build list of objects
+    # build list of objects
     my $all_templates = {};
     my $all_objects   = {};
     for my $type (keys %{$self->{'objects'}->{'byname'}}) {
@@ -1835,7 +1853,11 @@ sub _check_orphaned_objects {
     });
     for my $type (keys %{$all_templates}) {
         for my $name (keys %{$all_templates->{$type}}) {
-            push @errors, $type." template '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}));
+            push @errors, { type  => $type." template",
+                            name  => $name,
+                            state => 'unused',
+                            src   => Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}))
+                        };
         }
     }
     for my $type (keys %{$all_objects}) {
@@ -1844,7 +1866,11 @@ sub _check_orphaned_objects {
         for my $name (keys %{$all_objects->{$type}}) {
             my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
             next if defined $obj->{'conf'}->{'members'};
-            push @errors, $type." object '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($obj);
+            push @errors, { type  => $type,
+                            name  => $name,
+                            state => 'unused',
+                            src   => Thruk::Utils::Conf::_link_obj($obj),
+                        };
         }
     }
 
@@ -1855,6 +1881,17 @@ sub _check_orphaned_objects {
 
 ##########################################################
 # run callback function for every link
+#
+# ex.: _all_object_links_callback(sub {
+#          my($file, $obj, $attr, $link, $val, $args) = @_;
+#          $file  = reference to file object
+#          $obj   = reference to object itself
+#          $attr  = attribute name of link, ex.: use, members, ...
+#          $link  = link type, ex.: host, hostgroup, ...
+#          $val   = value name, ex.: hostgroup_abc, generic-host, ...
+#          $args  = optional arguments of commands
+#      })
+#
 sub _all_object_links_callback {
     my($self, $cb) = @_;
 

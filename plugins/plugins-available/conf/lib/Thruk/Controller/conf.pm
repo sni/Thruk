@@ -1200,8 +1200,8 @@ sub _process_tools_page {
     my $tool   = $c->{'request'}->{'parameters'}->{'tools'} || 'start';
 
     if($tool eq 'check_object_references') {
-        my $warnings = [ @{$c->{'obj_db'}->_check_references()}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
-        @{$warnings} = sort @{$warnings};
+        my $warnings = [ @{$c->{'obj_db'}->_check_references(hash => 1)}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
+        @{$warnings} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$warnings};
         $c->stash->{'warnings'} = $warnings;
     }
 
