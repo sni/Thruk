@@ -11,6 +11,7 @@ not yet released
             - fixed draggable panels in readonly mode
           - Bug Fixes
             - fixed cascaded configs for sub components
+            - fixed perfbars with zero values (awiddersheim)
 
 1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon
