@@ -12,6 +12,7 @@ not yet released
           - Bug Fixes
             - fixed cascaded configs for sub components
             - fixed perfbars with zero values (awiddersheim)
+            - fixed listing recurring downtimes with limited permissions
 
 1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon

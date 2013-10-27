@@ -392,8 +392,8 @@ sub _get_downtimes_list {
     }
 
     # host and service filter
-    push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] };
-    push @hostfilter, { name => $host };
+    push @servicefilter, { -and => [ { description => $service }, { host_name => $host} ] } if $service;
+    push @hostfilter, { name => $host }                                                     if $host;
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
     my $host_data    = $c->{'db'}->get_hosts(    filter => \@hostfilter,    columns => [qw/name groups/]);
