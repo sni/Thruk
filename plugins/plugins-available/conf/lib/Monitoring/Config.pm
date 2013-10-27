@@ -1866,6 +1866,7 @@ sub _check_orphaned_objects {
         for my $name (keys %{$all_objects->{$type}}) {
             my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
             next if defined $obj->{'conf'}->{'members'};
+            next if $type eq 'host';
             push @errors, { type  => $type,
                             name  => $name,
                             state => 'unused',
