@@ -1459,8 +1459,8 @@ sub set_comments_and_downtimes {
     # add comments and downtimes
     my $comments  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
     my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
-    my $downtimes_by_host;
-    my $downtimes_by_host_service;
+    my $downtimes_by_host         = {};
+    my $downtimes_by_host_service = {};
     if($downtimes) {
         for my $downtime ( @{$downtimes} ) {
             if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
@@ -1473,8 +1473,8 @@ sub set_comments_and_downtimes {
     }
     $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
     $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
-    my $comments_by_host;
-    my $comments_by_host_service;
+    my $comments_by_host         = {};
+    my $comments_by_host_service = {};
     if($comments) {
         for my $comment ( @{$comments} ) {
             if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
