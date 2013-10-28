@@ -211,6 +211,9 @@ Ext.define('TP.TabBar', {
         this.addListener('afterrender', function(This, eOpts) {
             TP.startServerTime();
         });
+        if(!ExtState[this.id]) {
+            TP.initialized = true;
+        }
     },
     getState:   function() {
         var item_ids = [];
