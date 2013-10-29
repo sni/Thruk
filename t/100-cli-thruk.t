@@ -62,7 +62,7 @@ TestUtils::test_command({
 # list backends
 TestUtils::test_command({
     cmd  => $BIN.' -l',
-    like => ['/\s+\*\s*\w{5}\s*\w+/',
+    like => ['/\s+\*\s*\w{5}\s*[^\s]+/',
              '/Def\s+Key\s+Name/'
             ],
 });
