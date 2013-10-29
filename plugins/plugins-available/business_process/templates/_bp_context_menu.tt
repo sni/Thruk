@@ -60,11 +60,11 @@
 
 
 <div id="edit_dialog_[% bp.id %]" style="display: none;">
-  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;">
+  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 100%;">
   <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
   <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
 
-  <div>
+  <div style="height: 100%;">
   <ul>
     <li><a href="#tabs-1_[% bp.id %]">Type</a></li>
     <li><a href="#tabs-2_[% bp.id %]">Details</a></li>
@@ -250,15 +250,15 @@
 
 
   <!-- TAB 3: CHILDREN -->
-  <div id="tabs-3_[% bp.id %]">
-  <table width="100%">
+  <div id="tabs-3_[% bp.id %]" style="height: 85%;">
+  <table width="100%" style="height: 100%;">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Change relationships for this node.</td>
     </tr>
     <tr>
-      <td colspan=2 align="center">
-        <table><tr><td class="filter">
-          <table style="width:100%;">
+      <td colspan=2 align="center" style="height: 100%;">
+        <table width="100%" style="height: 100%;"><tr><td class="filter">
+          <table style="width:100%; height: 100%;">
             <tr>
               <td class="attrName"><b>Available</b></td>
               <td>&nbsp;</td>
@@ -266,18 +266,18 @@
             </tr>
             <tr>
               <td class="attrName">
-                <input type="text" class="filter_available" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
+                <input type="text" class="filter_available" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
               </td>
-              <td align="center" valign="middle">
-                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true); return false;">&gt;&gt;</button><br>
-                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
+              <td align="center" valign="middle" style="width: 42px;">
+                <button class="bp_button bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true); return false;">&gt;&gt;</button><br>
+                <button class="bp_button bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
               </td>
-              <td class="attrName">
-                <input type="text" class="filter_selected" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
+              <td class="attrName" style="height: 100%;">
+                <input type="text" class="filter_selected" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
                     <option disabled>loading...</option>
                 </select>
               </td>
