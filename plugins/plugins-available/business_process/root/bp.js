@@ -881,28 +881,54 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     jQuery(container).append('<div id="'+edge_id+'"><\/div>');
     var edge_container = jQuery('#'+edge_id);
 
-    // draw "line" from top middle of lower node
     var srcX = upos.left + 55;
-    var srcY = upos.top + 15;
+    var srcY = upos.top + 20;
     var tarX = lpos.left + 55;
-    var tarY = lpos.top + 15;
-    if((tarY - srcY) == 70) {
-        // smarter edge placement for normal edges
-        bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY+35);
-        bp_draw_edge(edge_container, edge_id, srcX, srcY+35, tarX, srcY+35);
-        bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
-        return;
-    }
-    //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
-    //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
+    var tarY = lpos.top + 20;
+    if(bp_graph_options.bp_rankDir == 'TB') {
+        // Top -> Bottom Graphs
 
-    var x1 = srcX, y1 = srcY;
-    jQuery.each(edge.points, function(nr, p) {
-        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
-        bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
-        x1 = p.x; y1 = p.y;
-    });
-    bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+        // draw "line" from top middle of lower node
+        if((tarY - srcY) == 70) {
+            // smarter edge placement for normal edges
+            bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY+35);
+            bp_draw_edge(edge_container, edge_id, srcX, srcY+35, tarX, srcY+35);
+            bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
+            return;
+        }
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
+
+        // complicated layout
+        var x1 = srcX, y1 = srcY;
+        jQuery.each(edge.points, function(nr, p) {
+            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+            bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
+            x1 = p.x; y1 = p.y;
+        });
+        bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+    } else {
+        // Left -> Right Graphs
+
+        // draw "line" from right middle of left node
+        if((tarX - srcX) == 150) {
+            // smarter edge placement for normal edges
+            bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX+75, srcY);
+            bp_draw_edge(edge_container, edge_id, srcX+75, srcY, srcX+75, tarY);
+            bp_draw_edge(edge_container, edge_id, srcX+75, tarY, tarX, tarY);
+            return;
+        }
+
+        // complicated layout
+        bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX+75, srcY);
+        var x1 = srcX+75, y1 = srcY;
+        jQuery.each(edge.points, function(nr, p) {
+            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+            bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
+            x1 = p.x; y1 = p.y;
+        });
+        bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+    }
 
     return;
 }
