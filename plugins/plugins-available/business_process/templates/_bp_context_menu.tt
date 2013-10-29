@@ -380,8 +380,8 @@
       <td width=120>Direction</td>
       <td align="left">
         <select onchange="bp_redraw_changed('bp_rankDir', this.value)" name="bp_rankDir">
-          <option value="TB">Top-Bottom</option>
-          <option value="LR">Left Right</option>
+          <option value="TB"[% IF bp.rankDir == 'TB' %] selected[% END %]>Top-Bottom</option>
+          <option value="LR"[% IF bp.rankDir == 'LR' %] selected[% END %]>Left Right</option>
         </select>
       </td>
     </tr>
