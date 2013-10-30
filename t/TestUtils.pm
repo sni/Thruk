@@ -92,7 +92,7 @@ sub get_test_timeperiod {
     ok( $request->is_success, 'get_test_timeperiod() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $timeperiod;
-    if($page =~ m/id="timeperiod_.*?">\s*(<td[^>]+>\s+<i>all<\/i>\s*<\/td>|)<td\ class='dataOdd'>([^<]+)<\/td>/gmxo) {
+    if($page =~ m/id="timeperiod_.*?">\s*(<td[^>]+>\s*<i>all<\/i>\s*<\/td>|)\s*<td\ class='dataOdd'>([^<]+)<\/td>/gmxo) {
         $timeperiod = $2;
     }
     isnt($timeperiod, undef, "got a timeperiod from config.cgi") or bail_out_req('got no test config, cannot test.', $request);
