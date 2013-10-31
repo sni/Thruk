@@ -4,6 +4,7 @@ next:
           - Business Process
             - fixed saving graph direction
             - fixed edge layout for left-right graphs
+            - fixed submiting results in test mode
           - Panorama
             - fixed not saving when starting with an empty set
 

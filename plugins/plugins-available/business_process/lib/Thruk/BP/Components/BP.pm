@@ -182,7 +182,7 @@ sub update_status {
     }
 
     # everything else is non-edit only
-    return if $self->{'editmode'};
+    return if $self->{'editmode'} or $self->{'testmode'};
 
     # submit back to core
     $self->_submit_results_to_core($c, $results);
