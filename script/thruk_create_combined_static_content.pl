@@ -15,8 +15,10 @@ for my $p (reverse split/:/, $ENV{'PATH'}) {
     $yuicompr = $p.'/yuicompressor'  if -x $p.'/yuicompressor';
 }
 
-die("dos2unix is required!")      unless $dos2unix;
-die("yuicompressor is required!") unless $yuicompr;
+unless($ENV{THRUK_SKIP_COMPRESS}) {
+    die("dos2unix is required!")      unless $dos2unix;
+    die("yuicompressor is required!") unless $yuicompr;
+}
 
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
@@ -35,6 +37,8 @@ for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
 }
+
+exit 0 if $ENV{THRUK_SKIP_COMPRESS};
 
 #################################################
 # try to minify css
