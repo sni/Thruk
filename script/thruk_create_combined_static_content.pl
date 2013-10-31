@@ -38,7 +38,10 @@ for my $cmd (@{$cmds}) {
     exit 1 if $? != 0;
 }
 
-exit 0 if $ENV{THRUK_SKIP_COMPRESS};
+if($ENV{THRUK_SKIP_COMPRESS}) {
+    print STDERR "skipping compression upon request\n";
+    exit;
+}
 
 #################################################
 # try to minify css
