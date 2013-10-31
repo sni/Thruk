@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
+use Storable qw/dclone/;
 use Monitoring::Livestatus::Class::Lite;
 use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
@@ -209,7 +210,10 @@ returns a list of hosts
 sub get_hosts {
     my($self, %options) = @_;
 
-    $self->_replace_callbacks($options{'options'}->{'callbacks'});
+    if($options{'options'}->{'callbacks'}) {
+        %options = %{dclone(\%options)};
+        $self->_replace_callbacks($options{'options'}->{'callbacks'});
+    }
 
     # try to reduce the amount of transfered data
     my($size, $limit);
