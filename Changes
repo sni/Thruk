@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.78-3   Sat Nov  2 00:45:00 CET 2013
           - Business Process
             - fixed saving graph direction
             - fixed edge layout for left-right graphs
