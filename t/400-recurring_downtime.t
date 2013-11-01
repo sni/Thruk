@@ -58,7 +58,7 @@ for my $downtime (@{$test_downtime}) {
     my $host = $downtime->{'host'};
     my $user = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
     my $grephost = $host;
-    $grephost =~ s/'/_/gmx;
+    $grephost =~ s/["'\/\s;]+/_/gmx;
     my $cronentry = `crontab -l $user | grep downtimetask | grep '$grephost'`;
     chomp($cronentry);
     like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");

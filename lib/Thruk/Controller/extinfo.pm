@@ -535,7 +535,7 @@ sub _get_data_file_name {
         $name = 'sg_'.$servicegroup;
     }
     confess("unknown type") unless $name;
-    $name =~ s/[^\w_\-\.]/_/gmx;
+    $name =~ s/["'\/\s;]/_/gmx;
 
     if(!defined $nr or $nr !~ m/^\d+$/mx) {
         $nr = 1;
