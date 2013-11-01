@@ -932,7 +932,7 @@ sub _process_objects_page {
     $c->{'obj_db'}->read_rc_file();
 
     # check if we have a history for our configs
-    my $files_root = $c->{'obj_db'}->get_files_root();
+    my $files_root = $self->_set_files_stash($c);
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
     {
         local $SIG{CHLD} = 'DEFAULT';
