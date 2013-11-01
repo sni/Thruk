@@ -3686,6 +3686,7 @@ var ajax_search = {
                || search_type == 'service'
                || search_type == 'servicegroup'
                || search_type == 'timeperiod'
+               || search_type == 'priority'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -3697,6 +3698,9 @@ var ajax_search = {
             }
             if(search_type == 'notification period') {
                 ajax_search.search_type = 'timeperiod';
+            }
+            if(search_type == 'business impact') {
+                ajax_search.search_type = 'priority';
             }
             if(   search_type == 'contact'
                || search_type == 'comment'
@@ -3710,7 +3714,7 @@ var ajax_search = {
                || search_type == 'duration'
                || search_type == 'downtime duration'
                || search_type == 'custom variable'
-               || search_type == 'business impact' ) {
+            ) {
                 ajax_search.search_type = 'none';
             }
         }
@@ -3869,6 +3873,11 @@ var ajax_search = {
         var input = document.getElementById(ajax_search.input_field);
         if(!input) { return; }
         if(ajax_search.base == undefined || ajax_search.base.length == 0) { return; }
+
+        // business impact prioritys are fixed
+        if(ajax_search.search_type == 'priority') {
+            ajax_search.base = [{ name: 'prioritys', data: ["1","2","3","4","5"] }];
+        }
 
         pattern = input.value;
         if(ajax_search.list) {

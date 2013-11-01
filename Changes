@@ -7,6 +7,8 @@ next:
             - fixed submiting results in test mode
           - Panorama
             - fixed not saving when starting with an empty set
+          - Shinken
+            - fixed livestatus error when using wrong business impact filter
 
 1.78-2   Sun Oct 27 16:41:56 CET 2013
           - Business Process

@@ -804,6 +804,8 @@ sub single_search {
         # Business Impact (criticity) is only available in Shinken
         elsif ( $filter->{'type'} eq 'business impact' || $filter->{'type'} eq 'priority' ) {
             next unless $c->stash->{'enable_shinken_features'};
+            # value has to be numeric, otherwise shinken breaks
+            $value =~ s/[^\d]//gmx; $value = 0 unless $value;
             push @hostfilter,    { criticity => { $op => $value } };
             push @servicefilter, { criticity => { $op => $value } };
         }
