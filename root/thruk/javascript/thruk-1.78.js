@@ -1481,20 +1481,22 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
             tmp[1] = tmp[1].replace(/,/g, '.');
-            var data = tmp[1].match(/^([\d\.\-]+)([\w%]+);([\d\.\-]*:?|~:|:?)([\d\.\-]*);([\d\.\-]*:?|~:|:?)([\d\.\-]*);([\d\.\-]*);([\d\.\-]*)/);
-            data[3] = data[3].replace(/~?:/, '');
-            data[5] = data[5].replace(/~?:/, '');
+            var data = tmp[1].match(
+                /^(-?\d+(\.\d+)?)([\w%]*);(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;*$/
+            );
+            data[4]  = (data[4]  != null) ? data[4].replace(/~?:/, '')  : '';
+            data[11] = (data[11] != null) ? data[11].replace(/~?:/, '') : '';
             perf_data.push({
                 key:      tmp[0],
                 perf:     tmp[1],
-                val:      (data != null && data[1] != '') ? parseFloat(data[1]) : '',
-                unit:     data != null  ? data[2]  : '',
-                warn_min: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
-                warn_max: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
-                crit_min: (data != null && data[5] != '') ? parseFloat(data[5]) : '',
-                crit_max: (data != null && data[6] != '') ? parseFloat(data[6]) : '',
-                min:      (data != null && data[7] != '') ? parseFloat(data[7]) : '',
-                max:      (data != null && data[8] != '') ? parseFloat(data[8]) : ''
+                val:      (data[1]  != null && data[1]  != '') ? parseFloat(data[1])  : '',
+                unit:      data[3]  != null  ? data[3]  :  '',
+                warn_min: (data[4]  != null && data[4]  != '') ? parseFloat(data[4])  : '',
+                warn_max: (data[8]  != null && data[8]  != '') ? parseFloat(data[8])  : '',
+                crit_min: (data[11] != null && data[11] != '') ? parseFloat(data[11]) : '',
+                crit_max: (data[15] != null && data[15] != '') ? parseFloat(data[15]) : '',
+                min:      (data[18] != null && data[18] != '') ? parseFloat(data[18]) : '',
+                max:      (data[21] != null && data[21] != '') ? parseFloat(data[21]) : ''
             });
         } catch(e) {}
     }
