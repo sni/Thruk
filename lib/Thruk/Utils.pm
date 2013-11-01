@@ -1903,6 +1903,7 @@ sub precompile_templates {
     };
 
     for my $file (keys %{$uniq}) {
+        next if $file eq 'error.tt';
         eval {
             $c->view("TT")->render($c, $file);
         };
