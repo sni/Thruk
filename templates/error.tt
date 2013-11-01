@@ -30,6 +30,7 @@
   <div class='errorMessage'>[% errorMessage %]</div>
   <div class='errorDescription'>[% errorDescription %]</div>
   [% ELSE %]
+  [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
   <div class='errorMessage'>internal server error</div>
   <div class='errorDescription'>internal server error occured, please look at your catalyst logfile</div>
   [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
