@@ -3,6 +3,15 @@ Frequently Asked Questions
 
 == General
 
+=== What is Thruk?
+Thruk is a Webgui for Nagios (and compatible) based on the Livestatus
+API. It's capable of merging multiple cores into a single display
+while being much faster than the original cgis. In addition there have
+been tons of usability improvments and there are plenty of useful
+addons included like a dashboard, business process addons, a
+configuration interface and many more...
+
+
 === Is Thruk an Abbreviation? What does Thruk mean?
 
 Thruk is just a random word and has no meaning. Pronounce it like 'Truck'.
