@@ -22,7 +22,7 @@ Generic Access to Thruks Config
 our $VERSION = '1.78';
 
 my $project_root = Catalyst::Utils::home('Thruk::Config');
-my $branch = '2';
+my $branch       = '3';
 my $gitbranch    = get_git_name($project_root);
 $branch          = $gitbranch unless $branch ne '';
 
