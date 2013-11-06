@@ -1958,10 +1958,13 @@ sub _set_result_defaults {
         $data = {};
         for my $type (qw{hosts services}) {
             for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
+                            _active_1_perc _active_5_perc _active_15_perc _active_60_perc _active_all_perc
                             _passive_sum _passive_1_sum _passive_5_sum _passive_15_sum _passive_60_sum _passive_all_sum
+                            _passive_1_perc _passive_5_perc _passive_15_perc _passive_60_perc _passive_all_perc
                             _execution_time_sum _latency_sum _active_state_change_sum _execution_time_min _latency_min _active_state_change_min _execution_time_max _latency_max
                             _active_state_change_max _passive_state_change_sum _passive_state_change_min _passive_state_change_max
-                            _execution_time_avg _latency_avg }) {
+                            _execution_time_avg _latency_avg _active_state_change_avg _passive_state_change_avg
+                        }) {
                 $data->{$type.$key} = 0;
             }
         }
