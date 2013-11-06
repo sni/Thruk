@@ -621,8 +621,8 @@ sub _list {
 # verify js syntax
 sub verify_js {
     my($file) = @_;
-    next if $file =~ m/jit-yc.js/gmx;
-    next if $file =~ m/jquery.mobile.router/gmx;
+    return if $file =~ m/jit-yc.js/gmx;
+    return if $file =~ m/jquery.mobile.router/gmx;
     my $content = read_file($file);
     my $matches = _replace_with_marker($content);
     return unless scalar $matches > 0;
