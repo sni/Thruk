@@ -1003,12 +1003,14 @@ DIV.perf_bar_warn {
   border: 0;
   border-right: 1px solid #DEDC10;
   position: absolute;
+  z-index: +1;
 }
 
 DIV.perf_bar_crit {
   border: 0;
   border-right: 1px solid #B36969;
   position: absolute;
+  z-index: +1;
 }
 
 TD.toolbar IMG {

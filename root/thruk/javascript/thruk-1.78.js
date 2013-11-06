@@ -1481,16 +1481,22 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
             tmp[1] = tmp[1].replace(/,/g, '.');
-            var data = tmp[1].match(/^([\d\.\-]+)([\w%]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
+            var data = tmp[1].match(
+                /^(-?\d+(\.\d+)?)([\w%]*);(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;*$/
+            );
+            data[4]  = (data[4]  != null) ? data[4].replace(/~?:/, '')  : '';
+            data[11] = (data[11] != null) ? data[11].replace(/~?:/, '') : '';
             perf_data.push({
-                key:  tmp[0],
-                perf: tmp[1],
-                val:  (data != null && data[1] != '') ? parseFloat(data[1]) : '',
-                unit:  data != null  ? data[2]  : '',
-                warn: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
-                crit: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
-                min:  (data != null && data[5] != '') ? parseFloat(data[5]) : '',
-                max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
+                key:      tmp[0],
+                perf:     tmp[1],
+                val:      (data[1]  != null && data[1]  != '') ? parseFloat(data[1])  : '',
+                unit:      data[3]  != null  ? data[3]  :  '',
+                warn_min: (data[4]  != null && data[4]  != '') ? parseFloat(data[4])  : '',
+                warn_max: (data[8]  != null && data[8]  != '') ? parseFloat(data[8])  : '',
+                crit_min: (data[11] != null && data[11] != '') ? parseFloat(data[11]) : '',
+                crit_max: (data[15] != null && data[15] != '') ? parseFloat(data[15]) : '',
+                min:      (data[18] != null && data[18] != '') ? parseFloat(data[18]) : '',
+                max:      (data[21] != null && data[21] != '') ? parseFloat(data[21]) : ''
             });
         } catch(e) {}
     }
@@ -1504,11 +1510,17 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
             graph = res[nr];
             if(graph != undefined) {
                 result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
-                if(graph.warn_width != null) {
-                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width+'px;">&nbsp;<\/div>';
+                if(graph.warn_width_min != null) {
+                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_min+'px;">&nbsp;<\/div>';
                 }
-                if(graph.crit_width != null) {
-                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width+'px;">&nbsp;<\/div>';
+                if(graph.crit_width_min != null) {
+                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_min+'px;">&nbsp;<\/div>';
+                }
+                if(graph.warn_width_max != null) {
+                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_max+'px;">&nbsp;<\/div>';
+                }
+                if(graph.crit_width_max != null) {
+                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_max+'px;">&nbsp;<\/div>';
                 }
                 result += '<img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
                 result += '<\/div>';
@@ -1532,6 +1544,13 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     return result;
 }
 
+/* figures out where warning/critical values should go
+ * on the perfbars
+ */
+function plot_point(value, max, size) {
+    return(Math.round((Math.abs(value) / max * 100) / 100 * size));
+}
+
 /* return human readable perfdata */
 function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var size   = 75;
@@ -1539,9 +1558,9 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var worst_graphs = {};
     for(var nr in perfdata) {
         var d = perfdata[nr];
-        if(d.max  == '' && d.unit == '%') { d.max = 100;    }
-        if(d.max  == '' && d.crit != '')  { d.max = d.crit; }
-        if(d.max  == '' && d.warn != '')  { d.max = d.warn; }
+        if(d.max  == '' && d.unit == '%')     { d.max = 100;        }
+        if(d.max  == '' && d.crit_max != '')  { d.max = d.crit_max; }
+        if(d.max  == '' && d.warn_max != '')  { d.max = d.warn_max; }
         if(d.val !== '' && d.max  != '')  {
             var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }
@@ -1550,19 +1569,39 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             if(state == 1) { var pic = 'thermwarn.png'; }
             if(state == 2) { var pic = 'thermcrit.png'; }
             perc = Math.round(perc / 100 * size);
-            var warn_perc = null;
-            if(d.warn != '' && d.warn < d.max) { warn_perc = Math.round((Math.abs(d.warn) / d.max * 100) / 100 * size); if(warn_perc == size) {warn_perc = null;}; }
-            var crit_perc = null;
-            if(d.crit != '' && d.crit < d.max) { crit_perc = Math.round((Math.abs(d.crit) / d.max * 100) / 100 * size); if(crit_perc == size) {crit_perc = null;}; if(crit_perc == warn_perc) {warn_perc = null;}; }
+            var warn_perc_min = null;
+            if(d.warn_min != '' && d.warn_min > d.min) {
+                warn_perc_min = plot_point(d.warn_min, d.max, size);
+                if(warn_perc_min == 0) {warn_perc_min = null;}
+            }
+            var crit_perc_min = null;
+            if(d.crit_min != '' && d.crit_min > d.min) {
+                crit_perc_min = plot_point(d.crit_min, d.max, size)
+                if(crit_perc_min == 0) {crit_perc_min = null;}
+                if(crit_perc_min == warn_perc_min) {warn_perc_min = null;}
+            }
+            var warn_perc_max = null;
+            if(d.warn_max != '' && d.warn_max < d.max) {
+                warn_perc_max = plot_point(d.warn_max, d.max, size);
+                if(warn_perc_max == size) {warn_perc_max = null;}
+            }
+            var crit_perc_max = null;
+            if(d.crit_max != '' && d.crit_max < d.max) {
+                crit_perc_max = plot_point(d.crit_max, d.max, size)
+                if(crit_perc_max == size) {crit_perc_max = null;}
+                if(crit_perc_max == warn_perc_max) {warn_perc_max = null;}
+            }
             var graph = {
-                title:      d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
-                div_width:  size,
-                img_width:  perc,
-                pic:        pic,
-                field:      d.key,
-                val:        d.val,
-                warn_width: warn_perc,
-                crit_width: crit_perc
+                title:          d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
+                div_width:      size,
+                img_width:      perc,
+                pic:            pic,
+                field:          d.key,
+                val:            d.val,
+                warn_width_min: warn_perc_min,
+                crit_width_min: crit_perc_min,
+                warn_width_max: warn_perc_max,
+                crit_width_max: crit_perc_max
             };
             if(worst_graphs[state] == undefined) { worst_graphs[state] = {}; }
             worst_graphs[state][perc] = graph;
