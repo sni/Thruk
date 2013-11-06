@@ -1507,8 +1507,8 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     var res = perf_parse_data(check_command, state, plugin_output, perf_data);
     if(res != null) {
         for(var nr in res.reverse()) {
-            graph = res[nr];
-            if(graph != undefined) {
+            if(res[nr] != undefined) {
+                var graph = res[nr];
                 result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
                 if(graph.warn_width_min != null) {
                     result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width_min+'px;">&nbsp;<\/div>';

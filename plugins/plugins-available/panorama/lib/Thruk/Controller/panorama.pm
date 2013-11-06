@@ -866,6 +866,7 @@ sub _task_servicesminemap {
         $service2index->{$svc} = $index;
         push @{$json->{'columns'}}, {
                     'header'    => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
+                    'headerIE'  => '<div class="vertical" style="top: 8px; width: '.($height-20).'px;">'.$svc.'</div>',
                     'width'     => 20,
                     'height'    => $height,
                     'dataIndex' => $index,

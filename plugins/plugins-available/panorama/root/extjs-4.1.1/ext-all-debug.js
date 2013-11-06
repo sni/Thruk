@@ -46208,7 +46208,12 @@ Ext.define('Ext.AbstractComponent', {
         } else {
             me.html = Ext.isObject(htmlOrData) ? Ext.DomHelper.markup(htmlOrData) : htmlOrData;
             if (me.rendered) {
-                me.getTargetEl().update(me.html, loadScripts, cb);
+                // THRUK: breaks on IE 8 otherwise
+                if(Ext.isIE && me.html.match('Object')) {
+                    debug(me.html);
+                } else {
+                    me.getTargetEl().update(me.html, loadScripts, cb);
+                }
             }
         }
 

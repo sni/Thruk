@@ -58,6 +58,9 @@
                             if(key2 == 'renderer') {
                                 eval('data.columns[key][key2]=' + data.columns[key][key2]);
                             }
+                            if(Ext.isIE && key2 == 'headerIE') {
+                                data.columns[key]['header'] = data.columns[key]['headerIE'];
+                            }
                         }
                     }
                     this.gridStore = Ext.create('Ext.data.Store', {
@@ -130,10 +133,13 @@
             },
             adjustPageSize: function() {
                 var panlet      = this.up('panel');
-                var bodySize    = Ext.get(panlet.id + '_gridpanel-body').getSize();
-                if(bodySize.height > 2) {
-                    panlet.xdata.pageSize = Math.floor(bodySize.height / 25.5);
-                    if(panlet.xdata.pageSize <= 0) { panlet.xdata.pageSize = 1; }
+                var panletBody  = Ext.get(panlet.id + '_gridpanel-body');
+                if(panletBody) {
+                    var bodySize    = panletBody.getSize();
+                    if(bodySize.height > 2) {
+                        panlet.xdata.pageSize = Math.floor(bodySize.height / 25.5);
+                        if(panlet.xdata.pageSize <= 0) { panlet.xdata.pageSize = 1; }
+                    }
                 }
                 panlet.refreshHandler();
             },

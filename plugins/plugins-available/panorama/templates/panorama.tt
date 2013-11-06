@@ -16,11 +16,14 @@
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk-[% version %].js"></script>
     [% ELSE %]
+    <!--[IF IE]>
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
+    <![ENDIF]-->
     <!--[IF !IE]> -->
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all.js"></script>
+    <!-- <![ENDIF]-->
     <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_dc=[% date.now %]"></script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk-[% version %].js"></script>
-    <!-- <![ENDIF]-->
     [% END %]
     [% PROCESS custom_perf_bar_adjustments.tt %]
 </head>
@@ -32,15 +35,6 @@
 -->
 </script>
 [% END %]
-<!--[IF IE]>
-[% IF thruk_debug %]
-<script type="text/javascript">
-alert("Thruks Panorama View does not support Internet Explorer. Please use almost any other browser instead.");
-</script>
-[% ELSE %]
-Thruks Panorama View does not support Internet Explorer. Please use almost any other browser instead.
-[% END %]
-<![ENDIF]-->
 [%+ FOREACH i = preload_img %]
 <img src="[% url_prefix %]thruk/plugins/panorama/images/[% i %]" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 [%+ END %]
