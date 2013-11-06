@@ -43,7 +43,7 @@
                     var data  = TP.getResponse(panel, response);
                     if(data) {
                         var newdata = {};
-                        for(var nr in data) {
+                        for(var nr=0; nr<data.length; nr++) {
                             var row = data[nr];
                             newdata[row['id']] = {
                                 name: row['name'],
@@ -51,7 +51,7 @@
                             };
                         }
                         panel.graph_combo.store.removeAll();
-                        for(var nr in newdata) {
+                        for(var nr=0; nr<newdata.length; nr++) {
                             panel.graph_combo.store.loadRawData(newdata[nr], true);
                         }
                         panel.graph_combo.setValue(panel.xdata.graph);

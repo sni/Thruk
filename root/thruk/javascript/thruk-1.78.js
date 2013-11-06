@@ -433,7 +433,7 @@ function reloadPage() {
     saveScroll();
 
     var urlArgs  = toQueryParams();
-    for(key in additionalParams) {
+    for(var key in additionalParams) {
         urlArgs[key] = additionalParams[key];
     }
 
@@ -977,7 +977,7 @@ function get_trimmed_pattern(pattern) {
 /* return keys as array */
 function keys(obj) {
     var k = [];
-    for(key in obj) {
+    for(var key in obj) {
         k.push(key);
     }
     return k;
@@ -1306,14 +1306,14 @@ function getErrorText(details) {
     text = text + "Browser:    " + navigator.userAgent + "\n";
     text = text + "Backends:   ";
     var first = 1;
-    for(var nr in initial_backends) {
+    for(var nr=0; nr<initial_backends.length; nr++) {
         if(!first) { text = text + '            '; }
         text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
         first = 0;
     }
     text = text + details;
     text = text + "Stacktrace:\n";
-    for(var nr in thruk_errors) {
+    for(var nr=0; nr<thruk_errors.length; nr++) {
         text = text + thruk_errors[nr]+"\n";
     }
     return(text);
@@ -1476,7 +1476,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     if(is_host && state == 1) { state = 2; } // set critical state for host checks
     var result    = '';
     var perf_data = [];
-    for(var nr in matches) {
+    for(var nr=0; nr<matches.length; nr++) {
         try {
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
@@ -1506,7 +1506,8 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     }
     var res = perf_parse_data(check_command, state, plugin_output, perf_data);
     if(res != null) {
-        for(var nr in res.reverse()) {
+        res = res.reverse();
+        for(var nr=0; nr<res.length; nr++) {
             if(res[nr] != undefined) {
                 var graph = res[nr];
                 result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
@@ -1556,7 +1557,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var size   = 75;
     var result = [];
     var worst_graphs = {};
-    for(var nr in perfdata) {
+    for(var nr=0; nr<perfdata.length; nr++) {
         var d = perfdata[nr];
         if(d.max  == '' && d.unit == '%')     { d.max = 100;        }
         if(d.max  == '' && d.crit_max != '')  { d.max = d.crit_max; }
@@ -1622,9 +1623,9 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
         if(check_command == 'check_mk-cpu.loads') { return(perf_get_graph_from_result('load15', result)); }
         var matches = plugin_output.match(/([\d\.]+)/g);
         if(matches != null) {
-            for(var nr in matches) {
+            for(var nr=0; nr<matches.length; nr++) {
                 var val = matches[nr];
-                for(var nr2 in result) {
+                for(var nr2=0; nr2<result.length; nr2++) {
                     if(result[nr2].val == val) {
                         return([result[nr2]]);
                     }
@@ -1642,7 +1643,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
 
 /* try to get only a specific key form our result */
 function perf_get_graph_from_result(key, result) {
-    for(var nr in result) {
+    for(var nr=0; nr<result.length; nr++) {
         if(result[nr].field == key) {
             return([result[nr]]);
         }

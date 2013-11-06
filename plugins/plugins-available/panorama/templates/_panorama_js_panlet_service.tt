@@ -72,7 +72,7 @@
                 callback: function(options, success, response) {
                     var data  = TP.getResponse(panel, response);
                     panel.host_combo.store.removeAll();
-                    for(var nr in data.data) {
+                    for(var nr=0; nr<data.data.length; nr++) {
                         panel.host_combo.store.loadRawData(data.data[nr], true);
                     }
                     panel.host_combo.setValue(panel.xdata.host);
@@ -94,7 +94,7 @@
                     callback: function(options, success, response) {
                         var data  = TP.getResponse(panel, response);
                         panel.service_combo.store.removeAll();
-                        for(var nr in data.data) {
+                        for(var nr=0; nr<data.data.length; nr++) {
                             panel.service_combo.store.loadRawData(data.data[nr], true);
                         }
                         panel.service_combo.setValue(panel.xdata.service);

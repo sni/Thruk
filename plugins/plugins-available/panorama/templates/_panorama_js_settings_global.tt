@@ -129,7 +129,7 @@ TP.settingsWindow = function() {
             TP.startServerTime();
             /* start refresh for all panlets with global refresh rate */
             var panels = TP.getAllPanel();
-            for(var nr in panels) {
+            for(var nr=0; nr<panels.length; nr++) {
                 var p = panels[nr];
                 if(p.xdata.refresh == -1) {
                     p.startInterval();
@@ -159,7 +159,7 @@ TP.settingsWindow = function() {
                 var form = This.down('form').getForm();
                 // reset backends to global ones
                 tab.xdata.backends = [];
-                for(var nr in initial_backends) {
+                for(var nr=0; nr<initial_backends.length; nr++) {
                     if(initial_backends[nr].state != 2) {
                         tab.xdata.backends.push(nr);
                     }
@@ -188,11 +188,11 @@ TP.settingsWindow = function() {
 
 /* set backends from list */
 TP.setBackends = function(backends) {
-    for(var nr in initial_backend_states) {
+    for(var nr=0; nr<initial_backend_states.length; nr++) {
         initial_backend_states[nr] = 2;
         initial_backends[nr].state = 2;
     }
-    for(var nr in backends) {
+    for(var nr=0; nr<backends.length; nr++) {
         var b = backends[nr];
         initial_backend_states[b] = 0;
         initial_backends[b].state = 0;

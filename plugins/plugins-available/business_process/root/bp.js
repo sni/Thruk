@@ -692,7 +692,7 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_duration').html(n.duration);
 
     var funct = n.func + '(';
-    for(var nr in n.func_args) {
+    for(var nr=0; nr<n.func_args.length; nr++) {
         var a = ""+n.func_args[nr];
         if(!a.match(/^(\d+|\d+\.\d+)$/)) { a = "'"+a+"'"; }
         funct += a + ', ';

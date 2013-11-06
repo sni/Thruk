@@ -78,7 +78,7 @@
                         if(matches && matches.length > 0) {
                             panel.graphs_loaded = 1;
                             var newdata = {};
-                            for(var nr in matches) {
+                            for(var nr=0; nr<matches.length; nr++) {
                                 var m = matches[nr];
                                 var name = m.match(/>([^<]*)<\/a>/);
                                 var link = m.match(/show=([^"]*)"/);
@@ -88,7 +88,7 @@
                                 };
                             }
                             panel.graph_combo.store.removeAll();
-                            for(var nr in newdata) {
+                            for(var nr=0; nr<newdata.length; nr++) {
                                 panel.graph_combo.store.loadRawData(newdata[nr], true);
                             }
                             panel.graph_combo.setValue(panel.xdata.graph);

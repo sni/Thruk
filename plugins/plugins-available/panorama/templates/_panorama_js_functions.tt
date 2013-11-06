@@ -172,7 +172,7 @@ var TP = {
         var tabpan = Ext.getCmp('tabpan');
         tabpan.items.each(function(panel) {
             if(panel.window_ids) {
-                for(var nr in panel.window_ids) {
+                for(var nr=0; nr<panel.window_ids.length; nr++) {
                     var id = panel.window_ids[nr];
                     var w  = Ext.getCmp(id);
                     if(id != win.id && (panel.id == win.panel_id || w.xdata.pinned == true )) {
@@ -209,7 +209,7 @@ var TP = {
             br: { x:x+(box.tr.x-box.tl.x), y:y+(box.br.y-box.tr.y) }
         };
 
-        for(var nr in boxes) {
+        for(var nr=0; nr<boxes.length; nr++) {
             var b = boxes[nr];
             /* check if these boxes overlap */
             if(TP.boxOverlap(tmp_box, b)) { return true; }
@@ -228,7 +228,7 @@ var TP = {
     /* hide element in given form */
     hideFormElements: function(form, list) {
         form.getFields().each(function(f, i) {
-            for(var nr in list) {
+            for(var nr=0; nr<list.length; nr++) {
                 if(f.name == list[nr]) { f.hide() }
             }
         });
@@ -236,7 +236,7 @@ var TP = {
     /* refresh all site specific panlets */
     refreshAllSitePanel: function() {
         var panels = TP.getAllPanel();
-        for(var nr in panels) {
+        for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(p.reloadOnSiteChanges != undefined && p.reloadOnSiteChanges == true && p.isVisible()) {
                 p.refreshHandler();
@@ -245,7 +245,7 @@ var TP = {
     },
     refreshAllPanel: function() {
         var panels = TP.getAllPanel();
-        for(var nr in panels) {
+        for(var nr=0; nr<panels.length; nr++) {
             panels[nr].refreshHandler();
         }
     },
@@ -255,7 +255,7 @@ var TP = {
         var tabpan = Ext.getCmp('tabpan');
         tabpan.items.each(function(panel) {
             if(panel.window_ids) {
-                for(var nr in panel.window_ids) {
+                for(var nr=0; nr<panel.window_ids.length; nr++) {
                     var id = panel.window_ids[nr];
                     var p  = Ext.getCmp(id);
                     if(p) { // can be undefined unless already rendered
@@ -289,11 +289,11 @@ var TP = {
 
         /* checkbox groups are different */
         var items = form.getFields().items;
-        for(var i in items) {
+        for(var i=0; i<items.length; i++) {
             var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 f.removeAll();
-                for(var x in initial_backends) {
+                for(var x=0; x<initial_backends.length; x++) {
                     var checked = false;
                     if(Ext.Array.contains(data.backends, x)) { checked = true; }
                     f.add({ boxLabel: initial_backends[x].name, name: 'backends', inputValue: x, checked: checked });
@@ -313,19 +313,19 @@ var TP = {
         };
         /* checkboxgroups are different */
         var items = form.getFields().items;
-        for(var i in items) {
+        for(var i=0; i<items.length; i++) {
             var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 var result = {};
                 var checked = f.getChecked();
-                for(var nr in checked) {
+                for(var nr=0; nr<checked.length; nr++) {
                     c = checked[nr];
                     if(result[c.name] == undefined) {
                         result[c.name] = [];
                     }
                     result[c.name].push(c.inputValue);
                 }
-                for(var nr in result) {
+                for(var nr=0; nr<result.length; nr++) {
                     data[nr] = result[nr];
                 }
             }
@@ -363,13 +363,13 @@ var TP = {
         if(panels.length > 30) {
             var delay    = 0;
             var interval = 60 / panels.length;
-            for(var nr in panels) {
+            for(var nr=0; nr<panels.length; nr++) {
                 window.setTimeout(Ext.bind(panels[nr].startInterval, panels[nr], []), delay);
                 delay = delay + Math.round(interval*1000);
             }
         } else {
             // no delay required
-            for(var nr in panels) {
+            for(var nr=0; nr<panels.length; nr++) {
                 panels[nr].startInterval();
             }
         }
@@ -377,7 +377,7 @@ var TP = {
     },
     stopAllPanelRefresh: function() {
         var panels = TP.getAllPanel();
-        for(var nr in panels) {
+        for(var nr=0; nr<panels.length; nr++) {
             panels[nr].stopInterval();
         }
     },
@@ -449,7 +449,7 @@ var TP = {
                 Ext.util.Cookies.clear('thruk_message', '[% cookie_path %]');
             }
             if(data.errors) {
-                for(var nr in data.errors) {
+                for(var nr=0; nr<data.errors.length; nr++) {
                     TP.Msg.msg("fail_message~~"+data.errors[nr].message);
                 }
             }

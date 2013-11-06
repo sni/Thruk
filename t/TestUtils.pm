@@ -621,6 +621,8 @@ sub _list {
 # verify js syntax
 sub verify_js {
     my($file) = @_;
+    next if $file =~ m/jit-yc.js/gmx;
+    next if $file =~ m/jquery.mobile.router/gmx;
     my $content = read_file($file);
     my $matches = _replace_with_marker($content);
     return unless scalar $matches > 0;
@@ -658,8 +660,19 @@ sub _extract_js {
 #################################################
 # verify js syntax in templates
 sub _replace_with_marker {
-    my @matches = $_[0]  =~ s/(\,\s*[\)|\}|\]])/JS_ERROR_MARKER:$1/sgmxi;
-    return scalar @matches;
+    my $errors  = 0;
+
+    # trailing commas
+    my @matches = $_[0]  =~ s/(\,\s*[\)|\}|\]])/JS_ERROR_MARKER1:$1/sgmxi;
+    $errors    += scalar @matches;
+
+    # insecure for loops which do not work in IE8
+    @matches = $_[0]  =~ s/(for\s*\(.*\s+in\s+.*\))/JS_ERROR_MARKER2:$1/gmxi;
+    # for(var key in... is ok
+    @matches = grep {!/var\s+key/} @matches;
+    $errors    += scalar @matches;
+
+    return $errors;
 }
 
 #################################################
@@ -668,11 +681,17 @@ sub _check_marker {
     my @lines = split/\n/mx, $content;
     my $x = 1;
     for my $line (@lines) {
-        if($line =~ m/JS_ERROR_MARKER:/mx) {
+        if($line =~ m/JS_ERROR_MARKER1:/mx) {
             my $orig = $line;
             $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
-            $orig =~ s/JS_ERROR_MARKER://gmx;
+            $orig =~ s/JS_ERROR_MARKER1://gmx;
             fail('found trailing comma in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
+        if($line =~ m/JS_ERROR_MARKER2:/mx and $line !~ m/var\s+key/) {
+            my $orig = $line;
+            $orig =~ s/JS_ERROR_MARKER2://gmx;
+            fail('found insecure for loop in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
         $x++;

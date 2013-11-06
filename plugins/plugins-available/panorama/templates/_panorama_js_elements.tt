@@ -20,7 +20,7 @@
             });
             This.getPicker().addListener('show', function(This, eOpts) {
                 var lis = Ext.DomQuery.select('li', This.getEl().dom);
-                for(var nr in lis) {
+                for(var nr=0; nr<lis.length; nr++) {
                     var el = Ext.get(lis[nr]);
                     if(nr%2==0) {
                         el.addCls('picker_even');
@@ -42,7 +42,7 @@
                 return this._getDisplayValue();
             }
             var sum = 0;
-            for(var nr in this.displayTplData) {
+            for(var nr=0; nr<this.displayTplData.length; nr++) {
                 sum += this.displayTplData[nr].field1;
             }
             if(this.sum_values[''+sum] != undefined) {

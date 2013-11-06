@@ -44,7 +44,7 @@ Ext.define('TP.PanletPNP', {
                         var data = [];
                         var tmp  = TP.getResponse(panel, response);
                         if(tmp) {
-                            for(var nr in tmp) {
+                            for(var nr=0; nr<tmp.length; nr++) {
                                 var row = tmp[nr];
                                 var match = row.image_url.match(/\&source=(\d+)\&/);
                                 data[match[1]] = {
@@ -54,7 +54,7 @@ Ext.define('TP.PanletPNP', {
                             }
                         }
                         panel.source_combo.store.removeAll();
-                        for(var nr in data) {
+                        for(var nr=0; nr<data.length; nr++) {
                             panel.source_combo.store.loadRawData(data[nr], true);
                         }
                         panel.source_combo.setValue(panel.xdata.source);

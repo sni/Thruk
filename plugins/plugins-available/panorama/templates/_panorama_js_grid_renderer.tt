@@ -301,7 +301,7 @@ TP.render_clickable_host_list = function(v, td, item, row, col, store, view) {
     } else {
         return '';
     }
-    for(var nr in v) {
+    for(var nr=0; nr<v.length; nr++) {
         host = v[nr];
         msg += "<span class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+host+"<\/span>";
         if(nr+1 < v.length) {
@@ -443,7 +443,7 @@ TP.calculate_first_notification_delay_remaining = function(obj) {
 
 /* return action info icon */
 function action_icon(o, action_icon) {
-    for(var nr in o.custom_variable_names) {
+    for(var nr=0; nr<o.custom_variable_names.length; nr++) {
         if(o.custom_variable_names[nr] == 'ACTION_ICON') {
             return o.custom_variable_values[nr];
         }

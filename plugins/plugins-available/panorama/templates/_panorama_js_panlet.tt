@@ -324,7 +324,7 @@
         TP.defaultSiteRefreshHandler(this);
     },
     getTool: function(name) {
-        for(var nr in this.tools) {
+        for(var nr=0; nr<this.tools.length; nr++) {
             if(this.tools[nr].type == name) {
                 return(this.tools[nr]);
             }

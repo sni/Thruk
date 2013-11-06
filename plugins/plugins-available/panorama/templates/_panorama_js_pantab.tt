@@ -17,7 +17,7 @@
     },
     listeners: {
         beforedestroy: function( This, eOpts ) {
-            for(nr in This.window_ids) {
+            for(var nr=0; nr<This.window_ids; nr++) {
                 Ext.getCmp(This.window_ids[nr]).destroy();
             }
             var tabpan = Ext.getCmp('tabpan');
@@ -26,7 +26,7 @@
             cp.clear(this.id);
         },
         activate: function(This, eOpts) {
-            for(nr in This.window_ids) {
+            for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
                     panlet.show(false);
@@ -39,7 +39,7 @@
             }
         },
         hide: function(This, eOpts) {
-            for(nr in This.window_ids) {
+            for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet && !panlet.xdata.pinned) {
                     panlet.hide(false);
@@ -51,7 +51,7 @@
             if(header) { header.hide() }
         },
         beforerender: function(This, eOpts) {
-            for(nr in This.window_ids) {
+            for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet && !panlet.xdata.pinned) {
                     panlet.hide();
@@ -67,7 +67,7 @@
     },
     applyState: function(state) {
         if(state) {
-            for(nr in state.window_ids) {
+            for(var nr=0; nr<state.window_ids.length; nr++) {
                 if(state.window_ids[nr]) {
                     // delayed panlet creation
                     var autoshow = false;

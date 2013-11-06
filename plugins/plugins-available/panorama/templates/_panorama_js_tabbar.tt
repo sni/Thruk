@@ -238,7 +238,7 @@ Ext.define('TP.TabBar', {
                     TP.initial_active_tab = state.item_ids[state.activeTab - 1];
                 }
                 this.xdata = state.xdata;
-                for(nr in state.item_ids) {
+                for(var nr=0; nr<state.item_ids.length; nr++) {
                     TP.add_pantab(state.item_ids[nr]);
                 };
                 this.setActiveTab(state.activeTab);

@@ -357,7 +357,7 @@ TP.filterWindow = function(ftype, base_el) {
             serviceprops:       TP.dec2bin(val.serviceprops)
         };
         if(Ext.isArray(val.type)) {
-            for(var nr in val.type) {
+            for(var nr=0; nr<val.type.length; nr++) {
                 form.insert(form.items.length-1, {
                     xtype:     'tp_filter_select',
                     val_op:     val.op[nr],

@@ -33,7 +33,7 @@
                 var data = TP.getResponse(this, response);
                 if(data) {
                     var fields = [];
-                    for(key in data.columns) {
+                    for(var key in data.columns) {
                         fields.push(data.columns[key].dataIndex);
                     }
                     this.pieStore = Ext.create('Ext.data.Store', {
