@@ -43,16 +43,16 @@
                     var data  = TP.getResponse(panel, response);
                     if(data) {
                         var newdata = {};
-                        for(var nr=0; nr<data.length; nr++) {
-                            var row = data[nr];
+                        for(var key in data) {
+                            var row = data[key];
                             newdata[row['id']] = {
                                 name: row['name'],
                                 id:   row['id']
                             };
                         }
                         panel.graph_combo.store.removeAll();
-                        for(var nr=0; nr<newdata.length; nr++) {
-                            panel.graph_combo.store.loadRawData(newdata[nr], true);
+                        for(var key in newdata) {
+                            panel.graph_combo.store.loadRawData(newdata[key], true);
                         }
                         panel.graph_combo.setValue(panel.xdata.graph);
                     }
@@ -76,6 +76,9 @@
                     refresh = tab.xdata.refresh;
                 }
                 var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&minimal=1&nav=0&refresh='+refresh;
+                if(!panel.xdata.graph) {
+                    newUrl = 'about:blank';
+                }
                 if(panel.xdata.url != newUrl) {
                     panel.xdata.url = newUrl;
                     panel.saveState();
@@ -93,6 +96,9 @@
         panel.manualRefresh = function() {
             panel.last_url = '';
             var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&minimal=1&nav=0&update=1';
+            if(!panel.xdata.graph) {
+                newUrl = 'about:blank';
+            }
             var iframeObj = panel.items.getAt(1).getEl();
             if(iframeObj && iframeObj.dom) {
                 panel.body.mask('Loading...');

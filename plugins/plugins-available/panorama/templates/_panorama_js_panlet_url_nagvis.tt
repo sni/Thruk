@@ -88,8 +88,8 @@
                                 };
                             }
                             panel.graph_combo.store.removeAll();
-                            for(var nr=0; nr<newdata.length; nr++) {
-                                panel.graph_combo.store.loadRawData(newdata[nr], true);
+                            for(var key in newdata) {
+                                panel.graph_combo.store.loadRawData(newdata[key], true);
                             }
                             panel.graph_combo.setValue(panel.xdata.graph);
                             panel.graph_combo_error_label.unsetActiveError();
