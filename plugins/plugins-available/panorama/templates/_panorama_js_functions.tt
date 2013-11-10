@@ -106,6 +106,10 @@ var TP = {
             tb.window_ids.push(win.id);
             tb.saveState();
         }
+        var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
+        if(tmp.length > 0) {
+            tmp[0].innerHTML = "loading panel "+TP.getAllPanel().length+"...";
+        }
         return true;
     },
 
