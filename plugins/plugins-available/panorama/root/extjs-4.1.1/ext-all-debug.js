@@ -46210,7 +46210,10 @@ Ext.define('Ext.AbstractComponent', {
             if (me.rendered) {
                 // THRUK: breaks on IE 8 otherwise
                 if(Ext.isIE && me.html.match('Object')) {
-                    debug(me.html);
+                    try { // console may be not available
+                        console.log(me.html);
+                        console.trace();
+                    } catch(e) {}
                 } else {
                     me.getTargetEl().update(me.html, loadScripts, cb);
                 }

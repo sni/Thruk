@@ -3,9 +3,9 @@
 // workaround for non-exsting keys() in IE8
 Object.keys = Object.keys || function(o) {
     var result = [];
-    for(var name in o) {
-        if (o.hasOwnProperty(name))
-          result.push(name);
+    for(var key in o) {
+        if (o.hasOwnProperty(key))
+          result.push(key);
     }
     return result;
 };

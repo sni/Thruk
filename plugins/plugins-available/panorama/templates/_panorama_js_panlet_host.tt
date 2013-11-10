@@ -317,7 +317,8 @@ Ext.define('TP.PanletHost', {
             if(this.xdata.host == '') {
                 this.gearHandler();
             } else {
-                this.manualRefresh();
+                // update must be delayed, IE8 breaks otherwise
+                window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
             }
         });
 
