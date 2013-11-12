@@ -2055,12 +2055,12 @@ sub _parse_date {
         $timestamp = $1;
     }
 
-    # real date?
+    # real date (YYYY-MM-DD HH:MM:SS)
     elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{12})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
 
-    # real date without seconds?
+    # real date without seconds (YYYY-MM-DD HH:MM:SS)
     elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,0);
     }
