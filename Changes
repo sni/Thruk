@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - support US date format in url querys
           - Panorama
             - added experimental IE support
 

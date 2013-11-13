@@ -2056,13 +2056,18 @@ sub _parse_date {
     }
 
     # real date (YYYY-MM-DD HH:MM:SS)
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{12})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
 
-    # real date without seconds (YYYY-MM-DD HH:MM:SS)
+    # real date without seconds (YYYY-MM-DD HH:MM)
     elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,0);
+    }
+
+    # US date format (MM-DD-YYYY HH:MM:SS)
+    elsif($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        $timestamp = Mktime($3,$1,$2, $4,$5,$6);
     }
 
     # everything else
