@@ -18,6 +18,7 @@ Ext.define('TP.CookieProvider', {
 
     /* set state from object */
     loadData: function(data) {
+        ExtState = data;
         for(var key in data) {
             this.set(key, data[key]);
         }
