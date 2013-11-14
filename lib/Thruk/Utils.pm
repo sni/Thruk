@@ -1573,6 +1573,7 @@ sub set_user {
     $c->stash->{'remote_user'} = $username;
     $c->authenticate({});
     $c->stash->{'remote_user'}= $c->user->get('username');
+    set_dynamic_roles($c);
     return;
 }
 

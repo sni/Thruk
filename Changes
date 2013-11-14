@@ -4,6 +4,8 @@ next:
           - support US date format in url querys
           - Panorama
             - added experimental IE support
+          - Reports
+            - fixed permission problem when using groups in cgi.cfg
 
 1.78-3   Sat Nov  2 00:45:00 CET 2013
           - Business Process
