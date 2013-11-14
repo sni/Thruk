@@ -46209,7 +46209,10 @@ Ext.define('Ext.AbstractComponent', {
             me.html = Ext.isObject(htmlOrData) ? Ext.DomHelper.markup(htmlOrData) : htmlOrData;
             if (me.rendered) {
                 // THRUK: breaks on IE 8 otherwise
-                if(Ext.isIE && me.html.match('Object')) {
+                if(Ext.isIE && (
+                        me.html.match('Object')
+                     || me.html.match('<div downtimes=')
+                  )) {
                     try { // console may be not available
                         console.log(me.html);
                         console.trace();
