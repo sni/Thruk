@@ -95,6 +95,7 @@
             Ext.apply(this, state);
         } else {
             TP.initialized = true;
+            if(TP.initMask) { TP.initMask.destroy() }
         }
     }
 });

@@ -19,7 +19,6 @@ function ucfirst(str) {
 }
 
 /* global Thruk Panorama Object */
-Ext.namespace("TP");
 var TP = {
     snap_x: 20,
     snap_y: 20,
@@ -106,9 +105,11 @@ var TP = {
             tb.window_ids.push(win.id);
             tb.saveState();
         }
+        // update initial panlet counter
         var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
         if(tmp.length > 0) {
-            tmp[0].innerHTML = "loading panel "+TP.getAllPanel().length+"...";
+            tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
+            TP.cur_panels++;
         }
         return true;
     },
@@ -378,6 +379,7 @@ var TP = {
             }
         }
         TP.initialized = true;
+        if(TP.initMask) { TP.initMask.destroy() }
     },
     stopAllPanelRefresh: function() {
         var panels = TP.getAllPanel();

@@ -213,6 +213,7 @@ Ext.define('TP.TabBar', {
         });
         if(!ExtState[this.id]) {
             TP.initialized = true;
+            if(TP.initMask) { TP.initMask.destroy() }
         }
     },
     getState:   function() {
@@ -230,8 +231,6 @@ Ext.define('TP.TabBar', {
         }
     },
     applyState: function(state) {
-        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:'loading...'});
-        TP.initMask.show();
         Ext.dom.Query.select('.x-mask')[0].style.zIndex         = 100000;
         Ext.dom.Query.select('.x-mask-loading')[0].style.zIndex = 100001;
         try {
@@ -259,7 +258,9 @@ Ext.define('TP.TabBar', {
                 window.location = 'panorama.cgi?clean=1';
             }
         }
-        window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive+500);
+        if(TP.initMask) {
+            window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive);
+        }
     }
     ,items: [{
         title: '',
