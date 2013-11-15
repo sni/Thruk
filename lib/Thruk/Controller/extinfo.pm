@@ -619,11 +619,10 @@ sub _process_host_page {
     }
 
     # object source
-    $c->stash->{'source'} = '';
     my $custvars = Thruk::Utils::get_custom_vars($host);
-    if(defined $custvars->{'SRC'}) {
-        $c->stash->{'source'} = $custvars->{'SRC'};
-    }
+    $c->stash->{'source'}  = $custvars->{'SRC'}  || '';
+    $c->stash->{'source2'} = $custvars->{'SRC2'} || '';
+    $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
@@ -743,11 +742,10 @@ sub _process_service_page {
     }
 
     # object source
-    $c->stash->{'source'} = '';
     my $custvars = Thruk::Utils::get_custom_vars($service);
-    if(defined $custvars->{'SRC'}) {
-        $c->stash->{'source'} = $custvars->{'SRC'};
-    }
+    $c->stash->{'source'}  = $custvars->{'SRC'}  || '';
+    $c->stash->{'source2'} = $custvars->{'SRC2'} || '';
+    $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);

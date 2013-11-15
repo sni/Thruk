@@ -492,6 +492,18 @@
                 <th class='comment' nowrap>Source</th>
                 <td class='comment'><pre class="no_margin config_info">[% source %]</pre></td>
               </tr>
+              [% IF source2 %]
+              <tr>
+                <th class='comment' nowrap></th>
+                <td class='comment'><pre class="no_margin config_info">[% source2 %]</pre></td>
+              </tr>
+              [% END %]
+              [% IF source3 %]
+              <tr>
+                <th class='comment' nowrap></th>
+                <td class='comment'><pre class="no_margin config_info">[% source3 %]</pre></td>
+              </tr>
+              [% END %]
               [% END %]
               <tr>
                 <th class='comment' nowrap>Check Command</th>
