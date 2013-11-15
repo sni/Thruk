@@ -399,7 +399,7 @@ sub _process_hostdetails_page {
 
     # do the sort
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {

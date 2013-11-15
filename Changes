@@ -6,6 +6,8 @@ next:
             - added experimental IE support
           - Reports
             - fixed permission problem when using groups in cgi.cfg
+          - Bug Fixes
+            - corrected default sorting of hosts page
 
 1.78-3   Sat Nov  2 00:45:00 CET 2013
           - Business Process
