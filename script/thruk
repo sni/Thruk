@@ -59,7 +59,10 @@ Getopt::Long::GetOptions (
    "f|force"            => \$options->{'force'},
    "i|all-inclusive"    => \$options->{'all_inclusive'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
-) or print "usage: $0 [<options>] <action>\nsee --help for detailed help.";
+) or do {
+    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
+    exit 3;
+};
 if($options->{'help'}) {
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
