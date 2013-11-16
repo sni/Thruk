@@ -1043,3 +1043,8 @@ hr.sites_collapsed.last {
 #bp_menu {
     font-size: 11px;
 }
+
+/* fix issue with some themes and left aligned year/month in calendar popup */
+.DynarchCalendar TABLE {
+  margin: auto;
+}
