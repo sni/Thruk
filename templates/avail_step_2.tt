@@ -66,8 +66,5 @@
         </table>
       </form>
     </div>
-    [% IF report_type == 'hosts' or report_type == 'services' %]
-    <div align="center" class='helpfulHint'>Tip: If you want to have the option of getting the availability data in CSV format, select '<b>** ALL [% IF report_type == 'hosts' %]HOSTS[% ELSE %]SERVICES[% END %] **</b>' from the pull-down menu.</div>
-    [% END %]
 
 [% PROCESS _footer.tt %]

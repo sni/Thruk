@@ -48,10 +48,18 @@ sub calculate_availability {
     $csvoutput = 1 if exists $c->{'request'}->{'parameters'}->{'csvoutput'};
 
     if(defined $hostgroup and $hostgroup ne '') {
-        $c->stash->{template}   = 'avail_report_hostgroup.tt';
+        if($csvoutput) {
+            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
+        } else {
+            $c->stash->{template}   = 'avail_report_hostgroup.tt';
+        }
     }
     elsif(defined $service and $service ne 'all') {
-        $c->stash->{template}   = 'avail_report_service.tt';
+        if($csvoutput) {
+            $c->stash->{template} = 'avail_report_services_csv.tt';
+        } else {
+            $c->stash->{template}   = 'avail_report_service.tt';
+        }
     }
     elsif(defined $service and $service eq 'all') {
         if($csvoutput) {
@@ -61,10 +69,18 @@ sub calculate_availability {
         }
     }
     elsif(defined $servicegroup and $servicegroup ne '') {
-        $c->stash->{template}   = 'avail_report_servicegroup.tt';
+        if($csvoutput) {
+            $c->stash->{template} = 'avail_report_services_csv.tt';
+        } else {
+            $c->stash->{template}   = 'avail_report_servicegroup.tt';
+        }
     }
     elsif(defined $host and $host ne 'all') {
-        $c->stash->{template}   = 'avail_report_host.tt';
+        if($csvoutput) {
+            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
+        } else {
+            $c->stash->{template}   = 'avail_report_host.tt';
+        }
     }
     elsif(defined $host and $host eq 'all') {
         if($csvoutput) {
@@ -184,7 +200,7 @@ sub calculate_availability {
     my $initial_states = { 'hosts' => {}, 'services' => {} };
 
     # for which services do we need availability data?
-    my $hosts = [];
+    my $hosts    = [];
     my $services = [];
 
     my $softlogfilter;
@@ -535,6 +551,16 @@ sub calculate_availability {
     }
     elsif($show_log_entries) {
         $c->stash->{'logs'} = $ma->get_condensed_logs() || [];
+    }
+
+    # csv output needs host list
+    if($csvoutput) {
+        if(!defined $c->stash->{'hosts'}) {
+            $c->stash->{'hosts'} = $c->stash->{'avail_data'}->{'hosts'};
+        }
+        if(!defined $c->stash->{'services'} || scalar keys %{$c->stash->{'services'}} == 0) {
+            $c->stash->{'services'} = $c->stash->{'avail_data'}->{'services'};
+        }
     }
 
     $c->stats->profile(end => "got logs");
