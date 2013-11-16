@@ -7,6 +7,8 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
 plan tests => 8;
 
+alarm(120);
+
 # create a tmp directory
 mkdir('tmppatches') or die("cannot create tmp folder: $!");
 
