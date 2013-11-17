@@ -4,6 +4,7 @@ next:
           - support csv output in availability reports for every reporttype and not only all hosts/services
           - support US date format in url querys
           - added performance data overview (kudos to adagios for the inspiration)
+          - support ranges in performance data bar (awiddersheim)
           - Panorama
             - added experimental IE support
           - Reports
