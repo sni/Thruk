@@ -292,7 +292,8 @@ sub init_backend_thread_pool {
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};
             if($peer_config->{'groups'} and !$config->{'deprecations_shown'}->{'backend_groups'}) {
-                print STDERR "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.\n";
+                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
+                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }

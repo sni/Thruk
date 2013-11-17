@@ -26,13 +26,21 @@ sub finalize_config {
 =cut
 
 sub finalize {
-    my $c = shift;
+    my($c) = @_;
     # restore user adjusted config
     if($c->stash->{'config_adjustments'}) {
         for my $key (keys %{$c->stash->{'config_adjustments'}}) {
             $c->config->{$key} = $c->stash->{'config_adjustments'}->{$key};
         }
     }
+
+    if($Thruk::deprecations_log) {
+        for my $warning (@{$Thruk::deprecations_log}) {
+            $c->log->info($warning);
+        }
+        undef $Thruk::deprecations_log;
+    }
+
     return $c->next::method(@_);
 }
 

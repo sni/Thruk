@@ -31,6 +31,14 @@ Thruk::Utils::Menu::insert_item('Reports', {
 Thruk->config->{'use_feature_reports'} = 'reports.cgi';
 
 ######################################
+# this module is deprecated
+if(!Thruk->config->{'deprecations_shown'}->{'module_reports'}) {
+    $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
+    push @{$Thruk::deprecations_log}, "*** DEPRECATED: the report module is deprecated and will be removed in future releases. Use reports2 instead.";
+    Thruk->config->{'deprecations_shown'}->{'module_reports'} = 1;
+}
+
+######################################
 
 =head2 reports_cgi
 
