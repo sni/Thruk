@@ -35,8 +35,13 @@ sub finalize {
     }
 
     if($Thruk::deprecations_log) {
-        for my $warning (@{$Thruk::deprecations_log}) {
-            $c->log->info($warning);
+        if(    $ENV{'THRUK_SRC'} ne 'TEST'
+           and $ENV{'THRUK_SRC'} ne 'CLI'
+           and $ENV{'THRUK_SRC'} ne 'SCRIPTS'
+        ) {
+            for my $warning (@{$Thruk::deprecations_log}) {
+                $c->log->info($warning);
+            }
         }
         undef $Thruk::deprecations_log;
     }
