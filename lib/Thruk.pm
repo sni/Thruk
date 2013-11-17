@@ -188,11 +188,6 @@ __PACKAGE__->config->{'ssi_path'}     = $ssi_dir;
 
 ###################################################
 # load and parse cgi.cfg into $c->config
-if(exists __PACKAGE__->config->{'cgi_cfg'}) {
-    warn("cgi_cfg option is deprecated and has been renamed to cgi.cfg!");
-    __PACKAGE__->config->{'cgi.cfg'} = __PACKAGE__->config->{'cgi_cfg'};
-    delete __PACKAGE__->config->{'cgi_cfg'};
-}
 unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log)) {
     die("\n\n*****\nfailed to load cgi config: ".__PACKAGE__->config->{'cgi.cfg'}."\n*****\n\n");
 }
