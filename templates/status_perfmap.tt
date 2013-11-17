@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]

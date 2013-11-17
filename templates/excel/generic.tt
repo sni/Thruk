@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% size = 1 %]
 [% IF data %][% size = data.size + 1 %][% END %]
 <workbook>
