@@ -977,6 +977,8 @@ sub _process_perfmap_page {
         for(my $x = 0; $x < scalar @matches; $x=$x+2) {
             my $key = $matches[$x];
             my $val = $matches[$x+1];
+            $key =~ s/^'//gmxo;
+            $key =~ s/'$//gmxo;
             $val =~ s/;.*$//gmxo;
             $val =~ s/,/./gmxo;
             $val =~ m/^([\d\.]+)(.*?)$/mx;
