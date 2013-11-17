@@ -390,7 +390,7 @@ var TP = {
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         var res  = timedef.match(/^(\d+)(\w{1})/);
-        if(res.length == 1) {
+        if(res && res.length == 1) {
             return 3600;
         }
         var nr    = res[1];
