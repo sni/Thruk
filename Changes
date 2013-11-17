@@ -9,6 +9,8 @@ next:
             - added experimental IE support
           - Reports
             - fixed permission problem when using groups in cgi.cfg
+          - Config Tool
+            - fixed saving command lines with escaped semicolons
           - Bug Fixes
             - corrected default sorting of hosts page
             - fixed display issue with left aligned calendar popup (awiddersheim)

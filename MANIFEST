@@ -1136,6 +1136,8 @@ t/data/naglint/duplicate/in.cfg
 t/data/naglint/duplicate/out.cfg
 t/data/naglint/empty_attr/in.cfg
 t/data/naglint/empty_attr/out.cfg
+t/data/naglint/escaped_semicolon/in.cfg
+t/data/naglint/escaped_semicolon/out.cfg
 t/data/naglint/long_commands/in.cfg
 t/data/naglint/long_commands/out.cfg
 t/data/naglint/long_commands_comment/in.cfg

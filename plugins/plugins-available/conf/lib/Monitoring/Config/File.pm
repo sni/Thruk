@@ -292,6 +292,10 @@ sub _parse_line {
         return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
 
+    # escaped semicolons are allowed
+    my $semicolonreplacement = chr(0).chr(0);
+    $line =~ s/\\;/$semicolonreplacement/gmxo;
+
     # inline comments only with ; not with #
     if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
         $line = $1;
@@ -299,6 +303,8 @@ sub _parse_line {
         my($key, $value) = split(/\s+/mxo, $line, 2);
         $inl_comments->{$key} = $2 if defined $key;
     }
+
+    $line =~ s/$semicolonreplacement/\\;/gmxo;
 
     $linenr = $. unless defined $linenr;
     $self->{'lines'} = $linenr; # increase line counter
