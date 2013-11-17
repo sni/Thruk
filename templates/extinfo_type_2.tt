@@ -25,7 +25,8 @@
                 [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
                 [% END %]
-                <br><a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a><br>
+                <br><a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]&style=perfmap'>As Performance Map</a>)
+                <br>
               </td>
             </tr>
           </table>

@@ -6,7 +6,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1059;
+    plan tests => 1087;
 }
 
 BEGIN {
@@ -102,6 +102,9 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?style=hostsummary&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
     '/thruk/cgi-bin/status.cgi?style=hostgroup&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
 
+# Performance Map
+    '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service,
+
 # Bugs
     # Paging all when nothing found -> div by zero
     '/thruk/cgi-bin/status.cgi?style=detail&nav=0&entries=all&hidesearch=2&hidetop=1&s0_hoststatustypes=15&s0_servicestatustypes=29&s0_hostprops=0&s0_serviceprops=8&update.x=4&update.y=9&s0_serviceprop=8&s0_type=service&s0_op=%3D&s0_value=nonexstiant_service_check',
@@ -129,6 +132,7 @@ $pages = [
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service.'&view_mode=xls',
 ];
 
 for my $url (@{$pages}) {
@@ -146,6 +150,7 @@ $pages = [
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=json',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json&columns=state,name',
+    '/thruk/cgi-bin/status.cgi?style=perfmap&dfl_s0_type=service&dfl_s0_op=%3D&dfl_s0_value='.$service.'&view_mode=json',
 ];
 
 for my $url (@{$pages}) {

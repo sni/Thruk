@@ -1404,11 +1404,11 @@ sub set_selected_columns {
 
     for my $prefix ('', 'host_', 'service_') {
         my $columns = {};
-        my $last_col = 30;
-        for my $x (0..30) { $columns->{$x} = 1; }
+        my $last_col = 50;
+        for my $x (0..50) { $columns->{$x} = 1; }
         if(defined $c->{'request'}->{'parameters'}->{$prefix.'columns'}) {
             $last_col = 0;
-            for my $x (0..30) { $columns->{$x} = 0; }
+            for my $x (0..50) { $columns->{$x} = 0; }
             my $cols = $c->{'request'}->{'parameters'}->{$prefix.'columns'};
             for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
                 $columns->{$nr} = 1;

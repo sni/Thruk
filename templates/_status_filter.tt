@@ -45,6 +45,15 @@
                 <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
                 <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
                 <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
+                [% has_service_filter = 0 %]
+                [% FOREACH s = search.text_filter %]
+                  [% IF s.type == 'service' || s.type == 'search' %][% has_service_filter = 1 %][% END %]
+                [% END %]
+                [% IF style == 'perfmap' || has_service_filter %]
+                <option value="perfmap"[% IF         style == 'perfmap' && substyle == 'service'                                %] selected[% END %]>Performancedata</option>
+                [% ELSE %]
+                <option value="perfmap" disabled>Performancedata</option>
+                [% END %]
               </optgroup>
               [% FOREACH groupname = additional_views.keys.sort %]
               <optgroup label="[% groupname %]">

@@ -33,7 +33,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                             'grid'       => 1, 'hostgrid'     => 1, 'servicegrid'     => 1,
                             'overview'   => 1, 'hostoverview' => 1, 'serviceoverview' => 1,
                             'summary'    => 1, 'hostsummary'  => 1, 'servicesummary'  => 1,
-                            'combined'   => 1,
+                            'combined'   => 1, 'perfmap'      => 1,
                         };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
@@ -120,6 +120,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     elsif ( $style eq 'combined' ) {
         $self->_process_combined_page($c);
+    }
+    elsif ( $style eq 'perfmap' ) {
+        $c->stash->{substyle} = 'service';
+        $self->_process_perfmap_page($c);
     }
 
     $c->stash->{template} = 'status_' . $style . '.tt';
@@ -930,6 +934,105 @@ sub _process_combined_page {
     return 1;
 }
 
+##########################################################
+# create the perfmap details page
+sub _process_perfmap_page {
+    my( $self, $c ) = @_;
+
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
+    # which host to display?
+    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    # add comments and downtimes
+    Thruk::Utils::Status::set_comments_and_downtimes($c);
+
+    # do the sort
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $order      = "ASC";
+    $order = "DESC" if $sorttype == 2;
+
+    # get all services
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ]  );
+    my $data = [];
+    my $keys = {};
+    for my $svc (@{$services}) {
+        my $svc_data = {
+            host_name           => $svc->{'host_name'},
+            host_state          => $svc->{'host_state'},
+            host_address        => $svc->{'host_address'},
+            host_display_name   => $svc->{'host_display_name'},
+            description         => $svc->{'description'},
+            display_name        => $svc->{'display_name'},
+            has_been_checked    => $svc->{'has_been_checked'},
+            peer_key            => $svc->{'peer_key'},
+            plugin_output       => $svc->{'plugin_output'},
+            state               => $svc->{'state'},
+            perf                => {},
+        };
+        my $perfdata = $svc->{'perf_data'};
+        my @matches  = $perfdata =~ m/([^\s]+|'[^']+')=([^\s]*)/gmxoi;
+        for(my $x = 0; $x < scalar @matches; $x=$x+2) {
+            my $key = $matches[$x];
+            my $val = $matches[$x+1];
+            $val =~ s/;.*$//gmxo;
+            $val =~ s/,/./gmxo;
+            $val =~ m/^([\d\.]+)(.*?)$/mx;
+            $svc_data->{'perf'}->{$key} = 1;
+            $keys->{$key} = 1;
+            $svc_data->{$key} = $1.$2;
+            $svc_data->{$key.'_sort'} = $1;
+        }
+        push @{$data}, $svc_data;
+    }
+
+    if( $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        $c->stash->{'last_col'} = chr(65+(scalar keys %{$keys})-1);
+        my $filename = 'performancedata.xls';
+        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->stash->{'name'}     = 'Performance';
+        $c->stash->{'data'}     = $data;
+        $c->stash->{'col_sel'}  = $c->stash->{'columns'};
+        $c->stash->{'col_tr'}   = { 'host_name' => 'Hostname', 'description' => 'Service' };
+        $c->stash->{'columns'}  = ['host_name', 'description', sort keys %{$keys}];
+        $c->stash->{'template'} = 'excel/generic.tt';
+        return $c->detach('View::Excel');
+    }
+    if ( $view_mode eq 'json' ) {
+        # remove unwanted colums
+        for my $d (@{$data}) {
+            delete $d->{'peer_key'};
+            delete $d->{'perf'};
+            delete $d->{'has_been_checked'};
+            for my $k (keys %{$keys}) {
+                delete $d->{$k.'_sort'};
+            }
+        }
+        $c->stash->{'json'} = $data;
+        return $c->detach('View::JSON');
+    }
+
+    # sort things?
+    if(defined $keys->{$sortoption}) {
+        $data = Thruk::Backend::Manager::_sort($c, $data, { $order => $sortoption.'_sort'});
+    } elsif($sortoption eq "1") {
+        $c->stash->{'sortoption'}  = '';
+    } elsif($sortoption eq "2") {
+        $data = Thruk::Backend::Manager::_sort($c, $data, { $order => ['description', 'host_name']});
+        $c->stash->{'sortoption'}  = '';
+    }
+
+    $c->stash->{'perf_keys'} = $keys;
+    Thruk::Backend::Manager::_page_data(undef, $c, $data);
+
+    $c->stash->{'orderby'}  = $sortoption;
+    $c->stash->{'orderdir'} = $order;
+
+    return 1;
+}
 
 ##########################################################
 # store bookmarks and redirect to last page

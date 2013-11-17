@@ -1347,6 +1347,7 @@ templates/excel/_status_detail_worksheet.tt
 templates/excel/_status_hostdetail_worksheet.tt
 templates/excel/comments.tt
 templates/excel/downtimes.tt
+templates/excel/generic.tt
 templates/excel/logs.tt
 templates/excel/notifications.tt
 templates/excel/status_combined.tt
@@ -1381,6 +1382,7 @@ templates/status_detail.tt
 templates/status_grid.tt
 templates/status_hostdetail.tt
 templates/status_overview.tt
+templates/status_perfmap.tt
 templates/status_summary.tt
 templates/summary_report.tt
 templates/summary_report_alert_producer.tt
