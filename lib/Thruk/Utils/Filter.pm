@@ -40,14 +40,20 @@ sub throw {
 
 =head2 duration
 
-  my $string = duration($seconds);
+  my $string = duration($seconds, [$options]);
 
 formats a duration into the
 format: 0d 0h 29m 43s
 
+  $options:
+        0    =>    0h 0m 15s
+        1    => 0d 0h 0m 15s  (default)
+        2    =>   0min 14sec
+        3    =>       0m 04s
+
 =cut
 sub duration {
-    my($duration, $withdays) = @_;
+    my($duration, $options) = @_;
     my $minus    = '';
 
     confess("undef duration in duration(): ".$duration) unless defined $duration;
@@ -56,15 +62,13 @@ sub duration {
         $minus    = '-';
     }
 
-    $withdays = 1 unless defined $withdays;
-
-    confess("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
+    $options = 1 unless defined $options;
 
     my $days    = 0;
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
-    if($withdays == 1) {
+    if($options == 1) {
         if($duration >= 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;
@@ -80,13 +84,19 @@ sub duration {
     }
     $seconds = $duration;
 
-    if($withdays == 1) {
+    if($options == 0) {
+        return($minus.$hours."h ".$minutes."m ".$seconds."s");
+    }
+    elsif($options == 1) {
         return($minus.$days."d ".$hours."h ".$minutes."m ".$seconds."s");
     }
-    if($withdays == 2) {
+    elsif($options == 2) {
         return($minus.$minutes."min ".$seconds."sec");
     }
-    return($minus.$hours."h ".$minutes."m ".$seconds."s");
+    elsif($options == 3) {
+        return(CORE::sprintf("%s%dm %02ds", $minus, $minutes, $seconds));
+    }
+    confess("unknown options in duration(): ".$options);
 }
 
 
