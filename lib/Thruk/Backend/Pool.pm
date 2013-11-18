@@ -158,7 +158,7 @@ sub set_default_config {
                                            },
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
         'show_error_reports'            => 1,
-        'skip_js_errors'                => [ 'cluetip is not a function' ],
+        'skip_js_errors'                => [ 'cluetip is not a function', 'sprite._defaults is undefined' ],
         'cookie_auth_login_url'             => 'thruk/cgi-bin/login.cgi',
         'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',
         'cookie_auth_session_timeout'       => 86400,
