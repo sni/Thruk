@@ -1457,6 +1457,27 @@ function thruk_message(rc, message) {
     thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", fade_away_in);
 }
 
+/* set hash of url */
+function set_hash(value) {
+    // replace history otherwise we have to press back twice
+    if (history.replaceState) {
+        history.replaceState({}, "", '#'+value);
+    } else {
+        window.location.replace('#'+value);
+    }
+}
+
+/* get hash of url */
+function get_hash() {
+    var hash;
+    if(window.location.hash != '#') {
+        var values = window.location.hash.split("/");
+        if(values[0]) {
+            hash = values[0].replace(/^#/, '');
+        }
+    }
+    return(hash);
+}
 
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
@@ -4486,22 +4507,12 @@ function set_png_img(start, end, id) {
         styleElements(obj, "commentEven pnpSelected", 1);
     } else {
         // get id from hash
-        if(window.location.hash != '#') {
-            var values = window.location.hash.split("/");
-            if(values[0]) {
-                id = values[0].replace(/^#/, '');
-            }
-        }
+        id = get_hash();
     }
 
     if(id) {
         // replace history otherwise we have to press back twice
-        var newhash = "#" + id + "/" + start + "/" + end;
-        if (history.replaceState) {
-            history.replaceState({}, "", newhash);
-        } else {
-            window.location.replace(newhash);
-        }
+        set_hash(id + "/" + start + "/" + end);
     }
 
     // reset reload timer for page

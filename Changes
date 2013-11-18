@@ -8,6 +8,7 @@ next:
           - Panorama
             - added experimental IE support
           - Reports
+            - added filter button to only show my/public/all reports
             - fixed permission problem when using groups in cgi.cfg
           - Config Tool
             - fixed saving command lines with escaped semicolons

@@ -24,6 +24,8 @@ function init_report_tool_buttons() {
         text: false
     });
 
+    jQuery('.radioset').buttonset();
+
     jQuery('.report_remove_button').button({
         icons: {primary: 'ui-remove-button'}
     }).click(function() {
@@ -69,4 +71,23 @@ function update_reports_type_step2() {
     // scroll to bottom
     window.scroll(0, jQuery(document).height());
     jQuery('TR.report_options TD').effect('highlight', {}, 1000);
+}
+
+/* show hide specific types of reports */
+function reports_view(typ) {
+    if(typ == 'all') {
+        jQuery('#reports_table TR').each(function(nr, el) {
+            showElement(el);
+        });
+    } else {
+        jQuery('#reports_table TR').each(function(nr, el) {
+            if(nr > 0) {
+                hideElement(el);
+            }
+        });
+        jQuery('#reports_table TR.'+typ).each(function(nr, el) {
+            showElement(el);
+        });
+    }
+    set_hash(typ);
 }

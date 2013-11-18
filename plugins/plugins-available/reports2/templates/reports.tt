@@ -20,11 +20,23 @@
 </table>
 
 [% running = 0 %]
-<div style="margin-left: 10px; display: table;">
-  <div style="text-align: left; float: left; line-height: 29px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
-  <div style="text-align: right; margin-bottom: 3px;"><a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a></div>
+<table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
+  <tr>
+    <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
+    <td align="center">
+      <div class="radioset">
+        <input type="radio" id="view1" name="radio" onclick="reports_view('my')"    ><label for="view1">My</label>
+        <input type="radio" id="view2" name="radio" onclick="reports_view('public')"><label for="view2">Public</label>
+        <input type="radio" id="view3" name="radio" onclick="reports_view('all')"   ><label for="view3">All</label>
+      </div>
+    </td>
+    <td align="right">
+      <a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a>
+    </td>
+  </tr>
+</table>
 <div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap>Description</th>
@@ -40,7 +52,7 @@
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
-  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %]">
+  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
     <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
@@ -55,7 +67,7 @@
       [% ELSE %]
         [% IF r.var.start_time %]
           [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
-          [% duration(end_time - r.var.start_time) %]
+          [% duration(end_time - r.var.start_time, 3) %]
         [% END %]
       [% END %]
     </td>
@@ -116,6 +128,13 @@
 
 <script type="text/javascript">
 <!--
+  var typ = get_hash();
+  if(typ == undefined) { typ = 'my' }
+  reports_view(typ);
+  if(typ == 'my')          { jQuery('#view1').attr('checked', 'checked') }
+  else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }
+  else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
+  else                     { jQuery('#view1').attr('checked', 'checked') }
   var update_reports_status_int;
   init_report_tool_buttons();
   [% IF running > 0 %]

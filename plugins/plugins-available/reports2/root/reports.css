@@ -56,3 +56,7 @@ body.status TABLE.weekly_days TD {
   padding-top: 0px;
   line-height: 8px;
 }
+
+.ui-buttonset .ui-button {
+    margin-right: -5px;
+}
