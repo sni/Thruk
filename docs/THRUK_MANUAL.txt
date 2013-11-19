@@ -3006,6 +3006,9 @@ into a 'reports' subfolder of the 'user_template_path'.
 See http://thruk.org/api/Thruk/Utils/Reports/Render.html for details on
 available functions and examples.
 
+The Templates itself are written in Template::Toolkit which is
+perfectly documented at http://template-toolkit.org/docs/manual/index.html
+
 ==== Converting
 
 The generated HTML report will be converted into a pdf file using wkhtml2pdf
