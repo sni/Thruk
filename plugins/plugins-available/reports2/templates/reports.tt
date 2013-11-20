@@ -145,5 +145,6 @@
   [% IF highlight %]
   jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
   [%+ END +%]
+  table_search_cb['statusTable'] = reports_view;
 -->
 </script>

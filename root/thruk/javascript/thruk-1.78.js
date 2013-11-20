@@ -1237,6 +1237,7 @@ function add_cron_row(tbl_id) {
 
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
+var table_search_cb = {};
 function table_search(input_id, table_ids) {
     table_search_input_id  = input_id;
     table_search_table_ids = table_ids;
@@ -1244,9 +1245,15 @@ function table_search(input_id, table_ids) {
     table_search_timer = window.setTimeout('do_table_search()', 300);
 }
 /* do the search work */
-function do_table_search() {
+function do_table_search(hide_only) {
     var ids      = table_search_table_ids;
     var value    = jQuery('#'+table_search_input_id).val();
+    if(value == undefined) {
+        return;
+    }
+    if(hide_only == undefined) {
+        hide_only = false;
+    }
     value        = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
@@ -1270,10 +1277,19 @@ function do_table_search() {
                 if(found == 0) {
                     hideElement(row);
                 } else {
-                    showElement(row);
+                    if(!hide_only) {
+                        showElement(row);
+                    }
                 }
             }
         });
+        if(!hide_only) {
+            try {
+                table_search_cb[id]();
+            } catch(e) {
+                debug(e);
+            }
+        }
     });
 }
 

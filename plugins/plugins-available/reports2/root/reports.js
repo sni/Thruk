@@ -74,7 +74,17 @@ function update_reports_type_step2() {
 }
 
 /* show hide specific types of reports */
+var last_reports_typ;
 function reports_view(typ) {
+    var need_filter = true;
+    var hide_only   = false;
+    if(typ == undefined) {
+        typ = last_reports_typ;
+        need_filter = false;
+        hide_only   = true;
+    } else {
+        last_reports_typ = typ;
+    }
     // show owner column?
     if(typ == 'all' || typ == 'public') {
         jQuery('#reports_table .usercol').each(function(nr, el) {
@@ -87,18 +97,26 @@ function reports_view(typ) {
     }
 
     if(typ == 'all') {
-        jQuery('#reports_table TR').each(function(nr, el) {
-            showElement(el);
-        });
+        if(!hide_only) {
+            jQuery('#reports_table TR').each(function(nr, el) {
+                showElement(el);
+            });
+        }
     } else {
         jQuery('#reports_table TR').each(function(nr, el) {
             if(nr > 0) {
-                hideElement(el);
+                if(jQuery(el).hasClass(typ)) {
+                    if(!hide_only) {
+                        showElement(el);
+                    }
+                } else {
+                    hideElement(el);
+                }
             }
-        });
-        jQuery('#reports_table TR.'+typ).each(function(nr, el) {
-            showElement(el);
         });
     }
     set_hash(typ);
+    if(need_filter) {
+        do_table_search(true);
+    }
 }
