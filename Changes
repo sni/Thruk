@@ -9,6 +9,7 @@ next:
             - added experimental IE support
           - Reports
             - added filter button to only show my/public/all reports
+            - admins can edit all reports now
             - fixed permission problem when using groups in cgi.cfg
           - Config Tool
             - fixed saving command lines with escaped semicolons

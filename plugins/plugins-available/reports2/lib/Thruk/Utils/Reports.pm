@@ -226,9 +226,10 @@ sub report_save {
         $old_report = _read_report_file($c, $nr);
         return unless defined $old_report;
     }
-    my $report       = _get_new_report($c, $data);
-    $report->{'var'} = $old_report->{'var'} if defined $old_report->{'var'};
-    my $fields       = _get_required_fields($c, $report);
+    my $report        = _get_new_report($c, $data);
+    $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
+    $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
+    my $fields        = _get_required_fields($c, $report);
     _verify_fields($c, $fields, $report);
     return _report_save($c, $nr, $report);
 }
@@ -792,8 +793,18 @@ sub _read_report_file {
 }
 
 ##########################################################
+# returns:
+#     undef    no access
+#     1        private report, readwrite access
+#     2        public report, readonly access
 sub _is_authorized_for_report {
     my($c, $report) = @_;
+
+    # super user have permission for all reports
+    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+        return 1;
+    }
+
     return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
     if(defined $report->{'user'} and defined $c->stash->{'remote_user'} and $report->{'user'} eq $c->stash->{'remote_user'}) {
         return 1;
