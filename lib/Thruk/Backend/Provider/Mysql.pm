@@ -10,7 +10,7 @@ use DBI;
 use File::Temp qw/tempfile/;
 use Thruk::Utils;
 use Encode qw/encode_utf8/;
-use Monitoring::Availability::Logs;
+use Monitoring::Availability::Logs 0.48;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
