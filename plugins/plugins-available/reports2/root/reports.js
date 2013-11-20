@@ -75,6 +75,17 @@ function update_reports_type_step2() {
 
 /* show hide specific types of reports */
 function reports_view(typ) {
+    // show owner column?
+    if(typ == 'all' || typ == 'public') {
+        jQuery('#reports_table .usercol').each(function(nr, el) {
+            showElement(el);
+        });
+    } else {
+        jQuery('#reports_table .usercol').each(function(nr, el) {
+            hideElement(el);
+        });
+    }
+
     if(typ == 'all') {
         jQuery('#reports_table TR').each(function(nr, el) {
             showElement(el);

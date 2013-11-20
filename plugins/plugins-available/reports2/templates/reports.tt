@@ -41,6 +41,7 @@
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap>Description</th>
     <th class="status" nowrap width="40">Public</th>
+    <th class="status usercol" nowrap width="60">Owner</th>
     <th class="status" nowrap width="40">Mail</th>
     <th class="status" nowrap width="100">Schedule</th>
     <th class="status" nowrap width="150">Last Time Run</th>
@@ -56,6 +57,7 @@
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
     <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
+    <td class="status [% rowclass %] usercol">[% r.user %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
     <td class="status [% rowclass %]">
