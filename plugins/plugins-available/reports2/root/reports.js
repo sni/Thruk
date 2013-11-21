@@ -119,4 +119,9 @@ function reports_view(typ) {
     if(need_filter) {
         do_table_search(true);
     }
+
+    jQuery('A.editlinks').each(function(nr, link) {
+        var tmp   = link.href.replace(/tab=.*/g, 'tab='+typ);
+        link.href = tmp;
+    });
 }

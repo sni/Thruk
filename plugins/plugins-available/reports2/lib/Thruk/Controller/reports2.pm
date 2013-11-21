@@ -149,6 +149,8 @@ sub report_edit {
         }
     }
 
+    $c->stash->{'prev_tab'} = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
+
     $c->stash->{templates} = Thruk::Utils::Reports::get_report_templates($c);
     $self->_set_report_data($c, $r);
 
@@ -213,7 +215,8 @@ sub report_save {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi?highlight=".$report_nr);
+    my $tab = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi?highlight=".$report_nr.'#'.$tab);
 }
 
 ##########################################################
