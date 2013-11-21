@@ -37,7 +37,7 @@ function init_report_tool_buttons() {
 function update_reports_status() {
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
-    jQuery('#reports_table').load('reports2.cgi?_=' + ts + ' #statusTable');
+    jQuery('#reports_table').load('reports2.cgi?tab='+last_reports_typ+'&_=' + ts + ' #statusTable');
 
     // now count is_running elements
     size = jQuery('.is_running').size();
