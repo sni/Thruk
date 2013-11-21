@@ -142,7 +142,7 @@
 
         /* auto load when url is set */
         this.addListener('afterrender', function() {
-            if(this.xdata.url == '') {
+            if(this.xdata.url == '' || this.xdata.url == 'about:blank') {
                 this.gearHandler();
             } else {
                 this.refreshHandler();

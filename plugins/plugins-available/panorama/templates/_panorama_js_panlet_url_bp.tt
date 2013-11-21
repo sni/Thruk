@@ -104,6 +104,8 @@
                 panel.body.mask('Loading...');
                 iframeObj.dom.src = newUrl;
             }
+            panel.xdata.url = newUrl;
+            panel.saveState();
         };
     }
 });
