@@ -711,7 +711,7 @@ sub _process_plugins_page {
 
     if($c->stash->{action} eq 'preview') {
         my $pic = $c->{'request'}->{'parameters'}->{'pic'} || die("missing pic");
-        if($pic !~ m/^[a-zA-Z0-9_\ ]+$/gmx) {
+        if($pic !~ m/^[a-zA-Z0-9_\ \-]+$/gmx) {
             die("unknown pic: ".$pic);
         }
         my $path = $plugin_available_dir.'/'.$pic.'/preview.png';
