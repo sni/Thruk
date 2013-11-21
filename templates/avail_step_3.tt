@@ -175,15 +175,13 @@
               </select>
             </td>
           </tr>
-          <!--
           <tr>
-            <td class='reportSelectSubTitle' align="right">Backtracked Archives (To Scan For Initial States):</td>
-            <td class='reportSelectItem'><input type='text' name='backtrack' size='2' maxlength='2' value='4'></td>
-          </tr>
-          -->
-          <tr>
-            <td valign="top" class='reportSelectSubTitle'>Output in CSV Format:</td>
-            <td valign="top" class='reportSelectItem'><input type='checkbox' name='csvoutput' value=''></td>
+            <td valign="top" class='reportSelectSubTitle'>Output Format:</td>
+            <td valign="top" class='reportSelectItem'>
+              <input type="radio" name="view_mode" value="html" checked>HTML
+              <input type="radio" name="view_mode" value="csv">CSV
+              <input type="radio" name="view_mode" value="json">JSON
+            </td>
           </tr>
           <tr>
             <td></td>

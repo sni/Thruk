@@ -44,6 +44,11 @@ sub calculate_availability {
 
     if(defined $host and $host eq 'null') { undef $host; }
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if($view_mode eq 'csv') {
+        $c->{'request'}->{'parameters'}->{'csvoutput'} = 1;
+    }
+
     my $csvoutput = 0;
     $csvoutput = 1 if exists $c->{'request'}->{'parameters'}->{'csvoutput'};
 
@@ -576,7 +581,6 @@ sub calculate_availability {
     };
 
     # json export
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if($view_mode eq 'json') {
         $c->stash->{'json'} = $return;
     }
