@@ -16,18 +16,20 @@ var default_view = '[% default_view %]';
 
 [%+ PROCESS _panorama_js_functions.tt +%]
 Ext.namespace("TP");
-TP.num_panels = 0;
-TP.cur_panels = 0;
+TP.initialized = false;
+TP.num_panels  = 0;
+TP.cur_panels  = 0;
 for(var key in ExtState) {
     if(key.match(/^panlet_/)) {
         TP.num_panels++;
     }
 }
-if(TP.num_panels > 0) {
-    TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
-    TP.initMask.show();
-}
-TP.initialized = false;
+Ext.onReady(function() {
+    if(TP.num_panels > 0) {
+        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
+        TP.initMask.show();
+    }
+});
 
 [%+ PROCESS _panorama_js_elements.tt +%]
 [%+ PROCESS _panorama_js_utils_base64.tt +%]
