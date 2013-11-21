@@ -144,6 +144,10 @@
   [%+ END +%]
   [% IF highlight %]
   jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
+  if(typ == 'my') {
+    // filter again, otherwise the owner cell would be displayed after hilighting
+    reports_view(typ);
+  }
   [%+ END +%]
   table_search_cb['statusTable'] = reports_view;
 -->
