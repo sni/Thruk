@@ -559,7 +559,7 @@ sub calculate_availability {
     }
 
     # csv output needs host list
-    if($csvoutput) {
+    if($csvoutput or $view_mode eq 'xls') {
         if(!defined $c->stash->{'hosts'}) {
             $c->stash->{'hosts'} = $c->stash->{'avail_data'}->{'hosts'};
         }
@@ -583,6 +583,13 @@ sub calculate_availability {
     # json export
     if($view_mode eq 'json') {
         $c->stash->{'json'} = $return;
+    }
+    if( $view_mode eq 'xls' ) {
+        my $filename = 'availability.xls';
+        $c->res->header( 'Content-Disposition', 'attachment; filename="availability.xls"' );
+        $c->stash->{'name'}     = 'Availability';
+        $c->stash->{'template'} = 'excel/availability.tt';
+        return $c->detach('View::Excel');
     }
 
     return $return;

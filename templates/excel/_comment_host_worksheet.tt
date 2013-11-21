@@ -16,9 +16,9 @@
     </row>
     [% FOREACH d = data %]
       <row>
-        [% IF columns.1  %]<cell>[% d.host_name %]</cell>[% END %]
+        [% IF columns.1  %]<cell>[% escape_xml(d.host_name) %]</cell>[% END %]
         [% IF columns.2  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
-        [% IF columns.3  %]<cell>[% d.author %]</cell>[% END %]
+        [% IF columns.3  %]<cell>[% escape_xml(d.author) %]</cell>[% END %]
         [% IF columns.4  %]<cell>[% escape_xml(d.comment) %]</cell>[% END %]
         [% IF columns.5  %]<cell>[% d.id %]</cell>[% END %]
         [% IF columns.6  %]<cell>[% IF d.persistent %]Yes[% ELSE %]No[% END %]</cell>[% END %]

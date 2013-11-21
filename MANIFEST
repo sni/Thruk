@@ -1347,6 +1347,7 @@ templates/excel/_downtime_host_worksheet.tt
 templates/excel/_downtime_service_worksheet.tt
 templates/excel/_status_detail_worksheet.tt
 templates/excel/_status_hostdetail_worksheet.tt
+templates/excel/availability.tt
 templates/excel/comments.tt
 templates/excel/downtimes.tt
 templates/excel/generic.tt

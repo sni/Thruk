@@ -1,0 +1,222 @@
+﻿[% USE date %]
+<workbook>
+[% IF hosts.keys.size > 0 %]
+  <worksheet name='hosts' autofilter='A1:AI[% hosts.keys.size + 1 %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        <cell width='40'>HOST_NAME</cell>
+        <cell width='40'>TIME_UP_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UP_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UP_SCHEDULED</cell>
+        <cell width='40'>TIME_UP_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UP_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UP_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_UP</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_UP</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UP</cell>
+        <cell width='40'>TIME_DOWN_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_DOWN_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_DOWN_SCHEDULED</cell>
+        <cell width='40'>TIME_DOWN_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_DOWN_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_DOWN_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_DOWN</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_DOWN</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_DOWN</cell>
+        <cell width='40'>TIME_UNREACHABLE_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UNREACHABLE_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNREACHABLE_SCHEDULED</cell>
+        <cell width='40'>TIME_UNREACHABLE_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UNREACHABLE_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNREACHABLE_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_UNREACHABLE</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_UNREACHABLE</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNREACHABLE</cell>
+        <cell width='40'>TIME_UNDETERMINED_NOT_RUNNING</cell>
+        <cell width='40'>PERCENT_TIME_UNDETERMINED_NOT_RUNNING</cell>
+        <cell width='40'>TIME_UNDETERMINED_NO_DATA</cell>
+        <cell width='40'>PERCENT_TIME_UNDETERMINED_NO_DATA</cell>
+        <cell width='40'>TOTAL_TIME_UNDETERMINED</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_UNDETERMINED</cell>
+      </format>
+    </row>
+    [% FOREACH host = hosts.keys.sort %]
+[% SET
+    total_time_unknown =
+          avail_data.hosts.$host.time_indeterminate_nodata
+        + avail_data.hosts.$host.time_indeterminate_notrunning
+%]
+[% SET
+    total_time =
+           avail_data.hosts.$host.time_up
+        + avail_data.hosts.$host.time_down
+        + avail_data.hosts.$host.time_unreachable
+        + avail_data.hosts.$host.time_indeterminate_nodata
+        + avail_data.hosts.$host.time_indeterminate_notrunning
+%]
+[% SET
+    total_time_known = total_time - total_time_unknown
+%]
+      <row>
+        <cell>[% escape_xml(host) %]</cell>
+        <cell>[% avail_data.hosts.$host.scheduled_time_up %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_up %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.scheduled_time_down %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_down %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.scheduled_time_unreachable %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_unreachable %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_indeterminate_notrunning %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.hosts.$host.time_indeterminate_nodata %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% total_time_unknown %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+      </row>
+    [% END %]
+  </worksheet>
+[% END %]
+
+[% num_services = 0 %]
+[% FOREACH host IN services.keys.sort %][% FOREACH service IN services.$host.keys.sort %][% num_services = num_services + 1 %][% END %][% END %]
+[% IF num_services > 0 %]
+  <worksheet name='services' autofilter='A1:AI[% num_services + 1 %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        <cell width='40'>HOST_NAME</cell>
+        <cell width='40'>SERVICE_DESCRIPTION</cell>
+        <cell width='40'>TIME_OK_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_OK_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_OK_SCHEDULED</cell>
+        <cell width='40'>TIME_OK_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_OK_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_OK_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_OK</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_OK</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_OK</cell>
+        <cell width='40'>TIME_WARNING_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_WARNING_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_WARNING_SCHEDULED</cell>
+        <cell width='40'>TIME_WARNING_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_WARNING_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_WARNING_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_WARNING</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_WARNING</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_WARNING</cell>
+        <cell width='40'>TIME_UNKNOWN_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UNKNOWN_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNKNOWN_SCHEDULED</cell>
+        <cell width='40'>TIME_UNKNOWN_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_UNKNOWN_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNKNOWN_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_UNKNOWN</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_UNKNOWN</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_UNKNOWN</cell>
+        <cell width='40'>TIME_CRITICAL_SCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_CRITICAL_SCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_CRITICAL_SCHEDULED</cell>
+        <cell width='40'>TIME_CRITICAL_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_TIME_CRITICAL_UNSCHEDULED</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_CRITICAL_UNSCHEDULED</cell>
+        <cell width='40'>TOTAL_TIME_CRITICAL</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_CRITICAL</cell>
+        <cell width='40'>PERCENT_KNOWN_TIME_CRITICAL</cell>
+        <cell width='40'>TIME_UNDETERMINED_NOT_RUNNING</cell>
+        <cell width='40'>PERCENT_TIME_UNDETERMINED_NOT_RUNNING</cell>
+        <cell width='40'>TIME_UNDETERMINED_NO_DATA</cell>
+        <cell width='40'>PERCENT_TIME_UNDETERMINED_NO_DATA</cell>
+        <cell width='40'>TOTAL_TIME_UNDETERMINED</cell>
+        <cell width='40'>PERCENT_TOTAL_TIME_UNDETERMINED</cell>
+      </format>
+    </row>
+    [% FOR host IN services.keys.sort %]
+    [% FOR service IN services.$host.keys.sort %]
+    [% SET
+        total_time_unknown =
+              avail_data.services.$host.$service.time_indeterminate_nodata
+            + avail_data.services.$host.$service.time_indeterminate_notrunning
+    %]
+    [% SET
+        total_time =
+               avail_data.services.$host.$service.time_ok
+            + avail_data.services.$host.$service.time_warning
+            + avail_data.services.$host.$service.time_unknown
+            + avail_data.services.$host.$service.time_critical
+            + avail_data.services.$host.$service.time_indeterminate_nodata
+            + avail_data.services.$host.$service.time_indeterminate_notrunning
+    %]
+    [% SET
+        total_time_known = total_time - total_time_unknown
+    %]
+
+      <row>
+        <cell>[% escape_xml(host) %]</cell>
+        <cell>[% escape_xml(service) %]</cell>
+        <cell>[% avail_data.services.$host.$service.scheduled_time_ok %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_ok %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.scheduled_time_warning %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_warning %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.scheduled_time_unknown %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_unknown %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.scheduled_time_critical %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_critical %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_indeterminate_notrunning %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% avail_data.services.$host.$service.time_indeterminate_nodata %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %]</cell>
+        <cell>[% total_time_unknown %]</cell>
+        <cell>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]</cell>
+      </row>
+    [% END %]
+    [% END %]
+  </worksheet>
+[% END %]
+</workbook>

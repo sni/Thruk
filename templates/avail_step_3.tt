@@ -179,6 +179,7 @@
             <td valign="top" class='reportSelectSubTitle'>Output Format:</td>
             <td valign="top" class='reportSelectItem'>
               <input type="radio" name="view_mode" value="html" checked>HTML
+              <input type="radio" name="view_mode" value="xls">XLS
               <input type="radio" name="view_mode" value="csv">CSV
               <input type="radio" name="view_mode" value="json">JSON
             </td>
