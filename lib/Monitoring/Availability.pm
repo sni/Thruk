@@ -1056,7 +1056,8 @@ sub _set_service_event {
         if(defined $service_hist->{'last_state'}) {
             my $diff = $data->{'time'} - $service_hist->{'last_state_time'};
             if($diff < 0) {
-                die("report failed, debug data is available in ".$self->_write_debug_file("added negative time"));
+                #die("report failed, debug data is available in ".$self->_write_debug_file("added negative time"));
+                $diff = 0;
             }
             # outside timeperiod
             if(defined $self->{'in_timeperiod'} and !$self->{'in_timeperiod'}) {
