@@ -25,7 +25,7 @@
         <td class="[% class %]" align="right">[% IF last_parent != p.parent %][% p.parent %][% last_parent = p.parent %][% ELSE %][% END %]</td>
         [% END %]
         <td class="[% class %]" align="left">[% p.name %]</td>
-        <td class="[% class %]" align="right" style="padding-right: 8px;">[% p.cur %]</td>
+        <td class="[% class %]" align="right" style="padding-right: 8px;">[% format_number(p.value) %][% p.unit %]</td>
         [% IF has_warn %]<td class="[% class %]">[% p.warn %]</td>[% END %]
         [% IF has_crit %]<td class="[% class %]">[% p.crit %]</td>[% END %]
         [% IF has_min  %]<td class="[% class %]">[% p.min %]</td>[% END %]

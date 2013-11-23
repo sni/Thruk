@@ -824,8 +824,8 @@ sub split_perfdata {
         push @{$data}, {
             'parent'    => $last_parent,
             'name'      => $key,
-            'cur'       => $var.$unit,
-            'raw_val'   => $var,
+            'value'     => $var,
+            'unit'      => $unit,
             'min'       => $min,
             'max'       => $max,
             'warn'      => $warn,
