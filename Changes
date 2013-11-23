@@ -7,6 +7,7 @@ next:
           - support ranges in performance data bar (awiddersheim)
           - added xls export for availability reports
           - show human readable performance data on extinfo page
+          - support standard macros in 'show_custom_vars' (awiddersheim)
           - Panorama
             - added experimental IE support
           - Reports
