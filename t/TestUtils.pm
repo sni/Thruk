@@ -217,7 +217,7 @@ sub test_page {
         $request = _request($location);
         $return->{'content'} = $request->content;
         if($request->is_error) {
-            fail('Request '.$location.' should succeed');
+            fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
             bail_out_req('request failed', $request);
         }
     }
@@ -241,7 +241,7 @@ sub test_page {
         $request = _request($location);
         $return->{'content'} = $request->content;
         if($request->is_error) {
-            fail('Request '.$location.' should succeed');
+            fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
             bail_out_req('request failed', $request);
         }
     } else {
