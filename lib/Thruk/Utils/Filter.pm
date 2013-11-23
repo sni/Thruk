@@ -729,8 +729,6 @@ sub has_business_process {
     return 0;
 }
 
-
-
 ########################################
 
 =head2 button
@@ -782,7 +780,65 @@ sub fullversion {
     return $str;
 }
 
+########################################
 
+=head2 split_perfdata
+
+  split_perfdata($string)
+
+return splitted performance data which can be used for tabular display
+
+=cut
+sub split_perfdata {
+    my($perfdata_str) = @_;
+
+    return([]) unless $perfdata_str;
+
+    my $data = [];
+    my @matches  = $perfdata_str =~ m/([^\s]+|'[^']+')=([^\s]*)/gmxoi;
+    my $last_parent = '';
+    my $has_parents = 0;
+    my $has_warn    = 0;
+    my $has_crit    = 0;
+    my $has_min     = 0;
+    my $has_max     = 0;
+    for(my $x = 0; $x < scalar @matches; $x=$x+2) {
+        my $key = $matches[$x];
+        my $val = $matches[$x+1];
+        my $orig = $key.'='.$val;
+        $key =~ s/^'//gmxo;
+        $key =~ s/'$//gmxo;
+        $val =~ s/,/./gmxo;
+        $val = $val.';;;;';
+        my($var, $unit, $warn, $crit, $min, $max);
+        if($val =~ m/^([\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
+            ($var, $unit, $warn, $crit, $min, $max) = ($1, $2, $3, $4, $5, $6);
+        }
+        if($key =~ m/^(.*)::(.*?)$/mx) {
+            $last_parent = $1;
+            $key = $2;
+            $has_parents = 1;
+        }
+        $warn =~ s/^([\d\.]+):([\d\.]+)$/$1-$2/mxo;
+        $crit =~ s/^([\d\.]+):([\d\.]+)$/$1-$2/mxo;
+        push @{$data}, {
+            'parent'    => $last_parent,
+            'name'      => $key,
+            'cur'       => $var.$unit,
+            'raw_val'   => $var,
+            'min'       => $min,
+            'max'       => $max,
+            'warn'      => $warn,
+            'crit'      => $crit,
+            'orig'      => $orig,
+        } if defined $var;
+        $has_warn = 1 if $warn ne '';
+        $has_crit = 1 if $crit ne '';
+        $has_min  = 1 if $min  ne '';
+        $has_max  = 1 if $max  ne '';
+    }
+    return($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max);
+}
 
 ########################################
 

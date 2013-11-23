@@ -86,6 +86,7 @@ our %config = ('name'                   => 'Thruk',
                                           'button'              => \&Thruk::Utils::Filter::button,
                                           'fullversion'         => \&Thruk::Utils::Filter::fullversion,
                                           'reduce_number'       => \&Thruk::Utils::reduce_number,
+                                          'split_perfdata'      => \&Thruk::Utils::Filter::split_perfdata,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

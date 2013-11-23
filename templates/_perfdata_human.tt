@@ -1,0 +1,52 @@
+﻿[% IF perfdata %]
+  [% orig_perfdata = perfdata %]
+  [% tmp = split_perfdata(perfdata) %]
+  [% IF tmp.size > 0 && tmp.0.size > 0 %]
+    [% splited = tmp.0; has_parents = tmp.1; has_warn = tmp.2; has_crit = tmp.3; has_min = tmp.4; has_max = tmp.5; %]
+    [% last_parent = '' %]
+    [% class = 'statusOdd' %]
+    <table class="perfdata_human" id="perfdata_human">
+      <tr>
+        [% IF has_parents %]<th class="[% class %]"></th>[% END %]
+        <th class="[% class %]">Name</th>
+        <th class="[% class %]">Value</th>
+        [% IF has_warn %]<th class="[% class %]">Warning</th>[% END %]
+        [% IF has_crit %]<th class="[% class %]">Critical</th>[% END %]
+        [% IF has_min  %]<th class="[% class %]">Minimum</th>[% END %]
+        [% IF has_max  %]<th class="[% class %]">Maximum</th>[% END %]
+        <th class="[% class %]"></th>
+      </tr>
+      [% FOREACH p = splited %]
+      <tr>
+        [% IF !has_parents || last_parent != p.parent %]
+        [% IF class == 'statusOdd' %][% class = 'statusEven' %][% ELSE %][% class = 'statusOdd' %][% END %]
+        [% END %]
+        [% IF has_parents %]
+        <td class="[% class %]" align="right">[% IF last_parent != p.parent %][% p.parent %][% last_parent = p.parent %][% ELSE %][% END %]</td>
+        [% END %]
+        <td class="[% class %]" align="left">[% p.name %]</td>
+        <td class="[% class %]" align="right" style="padding-right: 8px;">[% p.cur %]</td>
+        [% IF has_warn %]<td class="[% class %]">[% p.warn %]</td>[% END %]
+        [% IF has_crit %]<td class="[% class %]">[% p.crit %]</td>[% END %]
+        [% IF has_min  %]<td class="[% class %]">[% p.min %]</td>[% END %]
+        [% IF has_max  %]<td class="[% class %]">[% p.max %]</td>[% END %]
+        <td class="[% class %]">
+          [% PROCESS _perfdata_table.tt write="true" perfdata=p.orig state=0 %]
+        </td>
+      </tr>
+      [% END %]
+    </table>
+    <div id="perfdata_raw" style="display:none;">
+      [% perfdata = orig_perfdata %]
+      [% PROCESS _perfdata_table.tt write="true" %]
+      [% orig_perfdata %]
+    </div>
+  [% ELSE %]
+    <script type="text/javascript">
+    <!--
+    hideElement('raw_perf_switch');
+    -->
+    </script>
+    [% orig_perfdata %]
+  [% END %]
+[% END %]

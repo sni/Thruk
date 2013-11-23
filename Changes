@@ -6,6 +6,7 @@ next:
           - added performance data overview (kudos to adagios for the inspiration)
           - support ranges in performance data bar (awiddersheim)
           - added xls export for availability reports
+          - show human readable performance data on extinfo page
           - Panorama
             - added experimental IE support
           - Reports

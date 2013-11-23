@@ -176,10 +176,16 @@
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar' valign='top'>Performance Data:</td>
-                            <td class='dataVal'>
-                                [% PROCESS _perfdata_table.tt write="true" state=host.state plugin_output=host.plugin_output perfdata=host.perf_data check_command=host.check_command hst=host.name svc="_HOST_" %]
-                                [% host.perf_data %]
+                            <td class='dataVar' valign='top'>Performance Data:
+                              [% IF host.perf_data %]
+                              <div style="float: right; font-weight: normal;" id="raw_perf_switch">
+                                <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement(this); return false;">(show raw data)</a>
+                              </div>
+                              <br><br>
+                            [% END %]
+                            </td>
+                            <td class='dataVal' valign="top">
+                                [% PROCESS _perfdata_human.tt state=host.state plugin_output=host.plugin_output perfdata=host.perf_data check_command=host.check_command hst=host.name svc="_HOST_" %]
                             </td>
                           </tr>
                           <tr>

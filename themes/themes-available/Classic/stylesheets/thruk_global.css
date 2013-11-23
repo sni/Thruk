@@ -987,6 +987,7 @@ DIV.perf_bar_bg {
     border-right: 1px solid #999999;
     -webkit-border-radius: 3px;
             border-radius: 3px;
+    text-align: left;
 }
 
 IMG.perf_bar {
@@ -1047,4 +1048,25 @@ hr.sites_collapsed.last {
 /* fix issue with some themes and left aligned year/month in calendar popup */
 .DynarchCalendar TABLE {
   margin: auto;
+}
+
+TABLE.perfdata_human {
+  border-collapse:collapse;
+  border-spacing:0;
+  text-align: center;
+}
+TABLE.perfdata_human TH {
+  font-weight: bold;
+}
+TABLE.perfdata_human TH, TABLE.perfdata_human TD {
+  border-bottom: 1px solid #999999;
+  border-left: 1px solid #999999;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+TABLE.perfdata_human TH:first-child, TABLE.perfdata_human TD:first-child {
+  border-left: none;
+}
+TABLE.perfdata_human TR:last-child TD {
+  border-bottom: none;
 }

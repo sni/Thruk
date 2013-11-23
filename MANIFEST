@@ -1193,6 +1193,7 @@ templates/_message.tt
 templates/_notifications_log_line.tt
 templates/_overdiv.tt
 templates/_pager.tt
+templates/_perfdata_human.tt
 templates/_perfdata_table.tt
 templates/_pnp_graph.tt
 templates/_service_command_box.tt
