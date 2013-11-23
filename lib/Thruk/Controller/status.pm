@@ -380,8 +380,31 @@ sub _process_details_page {
        and defined $c->stash->{'host_stats'}
        and defined $c->stash->{'host_stats'}->{'up'}
        and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
+        # gather some necessary variables
+        my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
+        my $hostname = $c->{'request'}->{'parameters'}->{'host'};
+        my $host; 
+
+        my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
+        # we only got one host
+        $host = $hosts->[0];
+        # we have more and backend param is used
+        if( scalar @{$hosts} == 1 and defined $backend ) {
+            for my $h ( @{$hosts} ) {
+                if( $h->{'peer_key'} eq $backend ) {
+                    $host = $h;
+                    last;
+                }
+            }
+        }
+
         # set allowed custom vars into stash
-        Thruk::Utils::set_custom_vars($c, $c->{'stash'}->{'data'}->[0], 'host_');
+        Thruk::Utils::set_custom_vars($c, $host);
+
+        # expand macros in custom vars
+        for my $var (@{$c->stash->{'custom_vars'}}) {
+            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host});
+        }
     }
 
     return 1;

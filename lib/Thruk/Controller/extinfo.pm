@@ -636,6 +636,13 @@ sub _process_host_page {
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $host);
 
+    # expand macros in custom vars
+    if(defined $host) {
+        for my $var (@{$c->stash->{'custom_vars'}}) {
+            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host});
+        }
+    }
+
     return 1;
 }
 
@@ -720,11 +727,12 @@ sub _process_service_page {
     }
 
     # generate command line
+    my $host;	
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
         my $hosts               = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
         # we only got one host
-        my $host = $hosts->[0];
+        $host = $hosts->[0];
         # we have more and backend param is used
         if( scalar @{$hosts} == 1 and defined $backend ) {
             for my $h ( @{$hosts} ) {
@@ -758,6 +766,13 @@ sub _process_service_page {
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $service);
+
+    # expand macros in custom vars
+    if(defined $host and defined $service) {
+        for my $var (@{$c->stash->{'custom_vars'}}) {
+            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host, service => $service});
+        }
+    }
 
     return 1;
 }
