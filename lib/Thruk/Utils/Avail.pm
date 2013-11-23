@@ -585,11 +585,16 @@ sub calculate_availability {
         $c->stash->{'json'} = $return;
     }
     if( $view_mode eq 'xls' ) {
-        my $filename = 'availability.xls';
-        $c->res->header( 'Content-Disposition', 'attachment; filename="availability.xls"' );
-        $c->stash->{'name'}     = 'Availability';
-        $c->stash->{'template'} = 'excel/availability.tt';
-        return $c->detach('View::Excel');
+        $c->stash->{'file_name'} = 'availability.xls';
+        $c->stash->{'name'}      = 'Availability';
+        $c->stash->{'template'}  = 'excel/availability.tt';
+        if(defined $c->stash->{job_id}) {
+            # store resulting xls in file, forked reports cannot handle detaches
+            Thruk::Utils::savexls($c);
+        } else {
+            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$c->stash->{'file_name'}.'"' );
+            return $c->detach('View::Excel');
+        }
     }
 
     return $return;

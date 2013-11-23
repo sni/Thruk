@@ -133,7 +133,7 @@ sub _do_report {
     my $image_map = Thruk::Utils::Trends::_create_image($c, IMAGE_MAP_MODE);
 
     if(defined $c->stash->{job_id}) {
-        # store resulting image in stash
+        # store resulting image in file, forked reports cannot handle detaches
         my $gd_image = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
         my $dir = $c->config->{'var_path'}."/jobs/".$c->stash->{job_id};
         open(my $fh, '>', $dir."/graph.png");

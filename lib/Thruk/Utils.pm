@@ -1167,11 +1167,27 @@ save excel file by background job
 =cut
 
 sub logs2xls {
-    my $c = shift;
-    $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] . $c->stash->{'file_name'} . q["] ];
-    $c->stash->{'res_ctype'}  = 'application/x-msexcel';
+    my($c) = @_;
     Thruk::Utils::Status::set_selected_columns($c);
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
+    savexls($c);
+    return;
+}
+
+########################################
+
+=head2 savexls
+
+  savexls($c)
+
+save excel file by background job
+
+=cut
+
+sub savexls {
+    my($c) = @_;
+    $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] .  $c->stash->{'file_name'} . q["] ];
+    $c->stash->{'res_ctype'}  = 'application/x-msexcel';
 
     # Excel::Template::Plus pulls in Moose, so load this later
     require Excel::Template::Plus;
