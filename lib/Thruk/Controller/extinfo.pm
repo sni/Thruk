@@ -720,24 +720,10 @@ sub _process_service_page {
     }
 
     # generate command line
-    my $host;	
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
-        my $hosts               = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
-        # we only got one host
-        $host = $hosts->[0];
-        # we have more and backend param is used
-        if( scalar @{$hosts} == 1 and defined $backend ) {
-            for my $h ( @{$hosts} ) {
-                if( $h->{'peer_key'} eq $backend ) {
-                    $host = $h;
-                    last;
-                }
-            }
-        }
-        $c->stash->{'command'}  = '';
-        if(defined $host and defined $service) {
-            my $command            = $c->{'db'}->expand_command('host' => $host, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
+        if(defined $service) {
+            my $command            = $c->{'db'}->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
             $c->stash->{'command'} = $command;
         }
     }
@@ -758,7 +744,7 @@ sub _process_service_page {
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
-    Thruk::Utils::set_custom_vars($c, {'host' => $host, 'service' => $service});
+    Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service});
 
     return 1;
 }
