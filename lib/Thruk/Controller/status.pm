@@ -399,12 +399,7 @@ sub _process_details_page {
         }
 
         # set allowed custom vars into stash
-        Thruk::Utils::set_custom_vars($c, $host);
-
-        # expand macros in custom vars
-        for my $var (@{$c->stash->{'custom_vars'}}) {
-            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host});
-        }
+        Thruk::Utils::set_custom_vars($c, $host, undef, undef, undef, $host);
     }
 
     return 1;
