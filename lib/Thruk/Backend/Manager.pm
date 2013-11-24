@@ -921,21 +921,23 @@ sub _set_host_macros {
     my $c = $Thruk::Backend::Manager::c;
 
     # normal host macros
-    $macros->{'$HOSTADDRESS$'}       = $host->{'address'};
-    $macros->{'$HOSTNAME$'}          = $host->{'name'};
-    $macros->{'$HOSTALIAS$'}         = $host->{'alias'};
-    $macros->{'$HOSTSTATEID$'}       = $host->{'state'};
-    $macros->{'$HOSTSTATE$'}         = $c->config->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}};
-    $macros->{'$HOSTLATENCY$'}       = $host->{'latency'};
-    $macros->{'$HOSTOUTPUT$'}        = $host->{'plugin_output'};
-    $macros->{'$HOSTPERFDATA$'}      = $host->{'perf_data'};
-    $macros->{'$HOSTATTEMPT$'}       = $host->{'current_attempt'};
-    $macros->{'$HOSTCHECKCOMMAND$'}  = $host->{'check_command'};
+    $macros->{'$HOSTADDRESS$'}       = (defined $host->{'host_address'})         ? $host->{'host_address'}         : $host->{'address'};
+    $macros->{'$HOSTNAME$'}          = (defined $host->{'host_name'})            ? $host->{'host_name'}            : $host->{'name'};
+    $macros->{'$HOSTALIAS$'}         = (defined $host->{'host_alias'})           ? $host->{'host_alias'}           : $host->{'alias'};
+    $macros->{'$HOSTSTATEID$'}       = (defined $host->{'host_state'})           ? $host->{'host_state'}           : $host->{'state'};
+    $macros->{'$HOSTLATENCY$'}       = (defined $host->{'host_latency'})         ? $host->{'host_latency'}         : $host->{'latency'};
+    $macros->{'$HOSTOUTPUT$'}        = (defined $host->{'host_plugin_output'})   ? $host->{'host_plugin_output'}   : $host->{'plugin_output'};
+    $macros->{'$HOSTPERFDATA$'}      = (defined $host->{'host_perf_data'})       ? $host->{'host_perf_data'}       : $host->{'perf_data'};
+    $macros->{'$HOSTATTEMPT$'}       = (defined $host->{'host_current_attempt'}) ? $host->{'host_current_attempt'} : $host->{'current_attempt'};
+    $macros->{'$HOSTCHECKCOMMAND$'}  = (defined $host->{'host_check_command'})   ? $host->{'host_check_command'}   : $host->{'check_command'};
+    $macros->{'$HOSTSTATE$'}         = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
+    
+    my $prefix = (defined $host->{'host_custom_variable_names'}) ? 'host_' : '';
 
     # host user macros
     my $x = 0;
-    for my $key (@{$host->{'custom_variable_names'}}) {
-        $macros->{'$_HOST'.$key.'$'}  = $host->{'custom_variable_values'}->[$x];
+    for my $key (@{$host->{$prefix.'custom_variable_names'}}) {
+        $macros->{'$_HOST'.$key.'$'}  = $host->{$prefix.'custom_variable_values'}->[$x];
         $x++;
     }
 
