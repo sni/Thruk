@@ -927,16 +927,18 @@ set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my($c ,$data, $prefix) = @_;
-    $prefix = '' unless defined $prefix;
+    my($c, $data, $prefix, $search, $dest, $host, $service) = @_;
+    $prefix = ''                 unless defined $prefix;
+    $search = 'show_custom_vars' unless defined $search;
+    $dest   = 'custom_vars'      unless defined $dest;
 
-    $c->stash->{'custom_vars'} = [];
+    $c->stash->{$dest} = [];
 
     return unless defined $data;
     return unless defined $data->{$prefix.'custom_variable_names'};
-    return unless defined $c->config->{'show_custom_vars'};
+    return unless defined $c->config->{$search};
 
-    my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
+    my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
     my $custom_vars = get_custom_vars($data, $prefix);
 
@@ -958,7 +960,22 @@ sub set_custom_vars {
                 }
             }
             if($found) {
-                push @{$c->stash->{'custom_vars'}}, [ $cust_name, $cust_value ];
+                # expand macros in custom vars
+                if (defined $host and defined $service) {
+                        ($cust_value, my $rc) = $c->{'db'}->_replace_macros({
+                            string  => $cust_value,
+                            host    => $host,
+                            service => $service
+                        });
+                } elsif (defined $host) {
+                        ($cust_value, my $rc) = $c->{'db'}->_replace_macros({
+                            string  => $cust_value,
+                            host    => $host
+                        });
+                }
+
+                # add to dest
+                push @{$c->stash->{$dest}}, [ $cust_name, $cust_value ];
             }
         }
     }

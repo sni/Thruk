@@ -634,14 +634,7 @@ sub _process_host_page {
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
 
     # set allowed custom vars into stash
-    Thruk::Utils::set_custom_vars($c, $host);
-
-    # expand macros in custom vars
-    if(defined $host) {
-        for my $var (@{$c->stash->{'custom_vars'}}) {
-            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host});
-        }
-    }
+    Thruk::Utils::set_custom_vars($c, $host, undef, undef, undef, $host);
 
     return 1;
 }
@@ -765,14 +758,7 @@ sub _process_service_page {
     $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
-    Thruk::Utils::set_custom_vars($c, $service);
-
-    # expand macros in custom vars
-    if(defined $host and defined $service) {
-        for my $var (@{$c->stash->{'custom_vars'}}) {
-            ($var->[1], my $rc) = $c->{'db'}->_replace_macros({string => $var->[1], host => $host, service => $service});
-        }
-    }
+    Thruk::Utils::set_custom_vars($c, $service, undef, undef, undef, $host, $service);
 
     return 1;
 }
