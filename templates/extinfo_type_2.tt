@@ -178,7 +178,10 @@
                             <td class='dataVar' valign='top'>Performance Data:
                               [% IF service.perf_data %]
                               <div style="float: right; font-weight: normal;" id="raw_perf_switch">
-                                <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement(this); return false;">(show raw data)</a>
+                                <a href="#" onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch'); return false;">(show raw data)</a>
+                              </div>
+                              <div style="float: right; font-weight: normal; display: none;" id="human_perf_switch">
+                                <a href="#" onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch'); return false;">(show human data)</a>
                               </div>
                               <br><br>
                               [% END %]
