@@ -65,6 +65,7 @@
   <tr>
     <td>
     [% IF show_sitepanel == 'panel' || show_sitepanel == 'collapsed' %]
+      [% IF subsections.keys.size > 0 %]
       [% IF show_sitepanel == 'panel' %]
         [% PROCESS _header_sites_panel.tt %]
       [% ELSIF show_sitepanel == 'collapsed' %]
@@ -81,6 +82,7 @@
       [% END %]
 
       [% popup %]
+      [% END %]
     [% ELSIF show_sitepanel == 'list' %]
       [% section = '' %]
       [% FOREACH pd IN backends %]
