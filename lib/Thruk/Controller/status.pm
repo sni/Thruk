@@ -399,7 +399,7 @@ sub _process_details_page {
         }
 
         # set allowed custom vars into stash
-        Thruk::Utils::set_custom_vars($c, $host, undef, undef, undef, $host);
+        Thruk::Utils::set_custom_vars($c, {'host' => $host});
     }
 
     return 1;

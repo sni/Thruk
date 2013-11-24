@@ -927,10 +927,23 @@ set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my($c, $data, $prefix, $search, $dest, $host, $service) = @_;
-    $prefix = ''                 unless defined $prefix;
-    $search = 'show_custom_vars' unless defined $search;
-    $dest   = 'custom_vars'      unless defined $dest;
+    my $c      = shift;
+    my $args   = shift;
+
+    my $prefix  = $args->{'prefix'} || '';
+    my $search  = $args->{'search'} || 'show_custom_vars';
+    my $dest    = $args->{'dest'}   || 'custom_vars';
+    my $host    = $args->{'host'};
+    my $service = $args->{'service'};
+    my $data;
+
+    if (defined $host and defined $service) {
+        $data = $service;
+    } elsif (defined $host) {
+        $data = $host;
+    } else {
+        return;
+    }
 
     $c->stash->{$dest} = [];
 
