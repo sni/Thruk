@@ -488,6 +488,14 @@ sub calculate_availability {
         push @typefilter, { type => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }};
     }
 
+    # ensure reports won't wrack our server
+    my $total_nr = 0;
+    $total_nr += scalar @{$hosts}    if defined $hosts;
+    $total_nr += scalar @{$services} if defined $services;
+    if($total_nr > 500) {
+        die("too many objects: ".$total_nr.", maximum 500, please use more specific filter!");
+    }
+
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
     $c->stats->profile(begin => "avail.pm updatecache");
