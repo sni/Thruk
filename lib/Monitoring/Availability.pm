@@ -602,7 +602,7 @@ sub _compute_availability_line_by_line {
     # process all log lines we got
     # logs should be sorted already
     while(my $line = <$fh>) {
-        Thruk::Utils::decode_any($line);
+        &Monitoring::Availability::Logs::_decode_any($line);
         chomp($line);
         my $data = &Monitoring::Availability::Logs::parse_line($line);
         next unless $data;

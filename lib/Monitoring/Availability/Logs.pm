@@ -6,6 +6,7 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use POSIX qw(strftime);
+use Encode qw/decode/;
 
 use constant {
     STATE_UP            =>  0,
@@ -169,7 +170,7 @@ sub _store_logs_from_file {
     open(my $FH, '<', $file) or croak('cannot read file '.$file.': '.$!);
     binmode($FH);
     while(my $line = <$FH>) {
-        Thruk::Utils::decode_any($line);
+        &_decode_any($line);
         chomp($line);
         my $data = &parse_line($line);
         push @{$self->{'logs'}}, $data if defined $data;
@@ -327,6 +328,15 @@ sub _set_from_type {
     }
 
     return 1;
+}
+
+########################################
+sub _decode_any {
+    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
+    if ( $@ ) { # input was not utf8
+        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
+    }
+    return $_[0];
 }
 
 ########################################
