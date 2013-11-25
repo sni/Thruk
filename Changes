@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.80     Mon Nov 25 15:03:55 CET 2013
           - support csv output in availability reports for every reporttype and not only all hosts/services
           - support US date format in url querys
           - added performance data overview (kudos to adagios for the inspiration)

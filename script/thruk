@@ -33,8 +33,8 @@ use strict;
 use warnings;
 use Getopt::Long qw//;
 
-our $VERSION = '1.78';
-my $branch = '2';
+our $VERSION = '1.80';
+my $branch       = '';
 
 my $options = {
     'verbose'  => 1,
