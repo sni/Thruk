@@ -1803,16 +1803,19 @@ sub _check_references {
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
             # hostgroups are allowed to have a register 0
-            if($link ne 'hostgroup' or !defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
-                if($options{'hash'}) {
-                    push @parse_errors, { type  => $link,
-                                          state => 'nonexistant',
-                                          name  => $val,
-                                          src   => Thruk::Utils::Conf::_link_obj($obj),
-                                        };
-                } else {
-                    push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
-                }
+            return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+
+            # shinken defines this command by itself
+            return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
+
+            if($options{'hash'}) {
+                push @parse_errors, { type  => $link,
+                                      state => 'nonexistant',
+                                      name  => $val,
+                                      src   => Thruk::Utils::Conf::_link_obj($obj),
+                                    };
+            } else {
+                push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
             }
         }
     });
