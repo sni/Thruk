@@ -1,4 +1,5 @@
-﻿[% WRAPPER _conf_frame.tt %]
+﻿[% show_context_help = 1; c.stash.help_topic = 'http://www.thruk.org/documentation.html#_backend_configuration'; %]
+[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
 <form action="conf.cgi" method="POST">

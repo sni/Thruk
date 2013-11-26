@@ -1070,3 +1070,7 @@ TABLE.perfdata_human TH:first-child, TABLE.perfdata_human TD:first-child {
 TABLE.perfdata_human TR:last-child TD {
   border-bottom: none;
 }
+
+A.cxhlp {
+  margin-right: 7px;
+}
