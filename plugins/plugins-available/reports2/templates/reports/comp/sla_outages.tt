@@ -4,13 +4,6 @@
     [% loc("no outages during this timeperiod") %]
   [% END %]
 [% ELSE %]
-
-  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Latest Outages") %]
-    [% PROCESS 'reports/comp/sla_outages_latest.tt' %]
-  [% END %]
-
-  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Worst Outages") %]
-    [% PROCESS 'reports/comp/sla_outages_worst.tt' %]
-  [% END %]
-
+  [% PROCESS 'reports/comp/sla_outages_latest.tt' %]
+  [% PROCESS 'reports/comp/sla_outages_worst.tt' %]
 [% END %]

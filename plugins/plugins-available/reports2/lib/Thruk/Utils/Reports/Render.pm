@@ -576,6 +576,33 @@ sub html_all_inclusive {
 }
 
 ##########################################################
+
+=head2 page_splice
+
+  page_splice($data, $size_per_page, $max_pages)
+
+make html page include all remove css, js and images
+
+=cut
+sub page_splice {
+    my($data, $size_per_page, $max_pages) = @_;
+    $max_pages  = 1 unless $max_pages =~ m/^\d+$/;
+    my $paged   = [];
+    my $pages   = 0;
+    my $page    = 0;
+    my $entries = scalar @{$data};
+    while($page < $max_pages) {
+        my $start = $page * $size_per_page;
+        my $end   = $start + $size_per_page - 1;
+        $end = $entries-1 if $end > $entries - 1;
+        $paged->[$page] = [@{$data}[$start..$end]];
+        $page++;
+        last if $end >= $entries - 1;
+    }
+    return($paged);
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _replace_css_and_images {

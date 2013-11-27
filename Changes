@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Reports
+            - made number of latest/worst outages pages configurable
           - Bug Fixes
             - fixed show raw data link in IE
 

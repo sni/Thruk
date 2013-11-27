@@ -14,6 +14,8 @@
         { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'         ] },
         { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                         ] },
         { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']      ] },
+        { 'max_outages_pages'       => [ 'Latest Outages',        'int',             '1'          ,'max. # pages' ] },
+        { 'max_worst_pages'         => [ 'Worst Outages',         'int',             '1'          ,'max. # pages' ] },
     ];
   %]
 [% END %]
