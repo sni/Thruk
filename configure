@@ -14,7 +14,7 @@ my $options = {
   'httpd-conf'    => '',
   'thruk-user'    => 'thruk',
   'thruk-group'   => 'thruk',
-  'thruk-libs'    => 'thruk',
+  'thruk-libs'    => '',
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
@@ -27,7 +27,6 @@ Getopt::Long::GetOptions (
    "libdir=s"               => \$options->{'libdir'},
    "sysconfdir=s"           => \$options->{'sysconfdir'},
    "localstatedir=s"        => \$options->{'localstatedir'},
-   "datarootdir=s"          => \$options->{'datarootdir'},
    "datadir=s"              => \$options->{'datadir'},
    "mandir=s"               => \$options->{'mandir'},
    "with-temp-dir=s"        => \$options->{'tmpdir'},
@@ -55,9 +54,17 @@ $options->{'sysconfdir'}     = $options->{'prefix'}.'/etc'   unless $options->{'
 $options->{'tmpdir'}         = $options->{'prefix'}.'/tmp'   unless $options->{'tmpdir'};
 $options->{'localstatedir'}  = $options->{'prefix'}.'/var'   unless $options->{'localstatedir'};
 $options->{'libdir'}         = $options->{'prefix'}.'/lib'   unless $options->{'libdir'};
-$options->{'datarootdir'}    = $options->{'prefix'}.'/share' unless $options->{'datarootdir'};
 $options->{'datadir'}        = $options->{'prefix'}.'/share' unless $options->{'datadir'};
 $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'mandir'};
+
+# do some checks
+if($options->{'thruk-libs'}) {
+  if(!-d $options->{'thruk-libs'}.'/local-lib/dest/lib/perl5/.') {
+    print "invalid thruk-libs directory.\n";
+    exit 1;
+  }
+}
+
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
@@ -69,7 +76,6 @@ SYSCONFDIR       = $options->{'sysconfdir'}
 LIBDIR           = $options->{'libdir'}
 TMPDIR           = $options->{'tmpdir'}
 LOCALSTATEDIR    = $options->{'localstatedir'}
-DATAROOTDIR      = $options->{'datarootdir'}
 DATADIR          = $options->{'datadir'}
 MANDIR           = $options->{'mandir'}
 INITDIR          = $options->{'init-dir'}
@@ -97,7 +103,6 @@ print <<EOT;
   libdir           = $options->{'libdir'}
   tmpdir           = $options->{'tmpdir'}
   localstatedir    = $options->{'localstatedir'}
-  datarootdir      = $options->{'datarootdir'}
   datadir          = $options->{'datadir'}
   mandir           = $options->{'mandir'}
 
@@ -112,7 +117,6 @@ print <<EOT;
 
 now run
   perl Makefile.PL
-  make
   make install
 to install thruk with these settings.
 
@@ -153,9 +157,8 @@ __END__
     --sysconfdir=DIR             read-only single-machine data [PREFIX/etc]
     --localstatedir=DIR          modifiable single-machine data [PREFIX/var]
     --libdir=DIR                 object code libraries [EPREFIX/lib]
-    --datarootdir=DIR            read-only arch.-independent data root [PREFIX/share]
-    --datadir=DIR                read-only architecture-independent data [DATAROOTDIR]
-    --mandir=DIR                 man documentation [DATAROOTDIR/man]
+    --datadir=DIR                read-only architecture-independent data [PREFIX/share]
+    --mandir=DIR                 man documentation [DATADIR/man]
 
   Optional Settings:
 

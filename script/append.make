@@ -13,6 +13,8 @@ docs:
 	script/thruk_update_docs.sh
 
 local_all:
+
+local_build:
 	mkdir -p blib
 	cp -rp support/*.patch blib/
 	sed -i blib/*.patch -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
@@ -23,8 +25,9 @@ local_all:
 	sed -i blib/*.patch -e 's+@BINDIR@+${BINDIR}+g'
 	sed -i blib/*.patch -e 's+@INITDIR@+${INITDIR}+g'
 	sed -i blib/*.patch -e 's+@LIBDIR@+${LIBDIR}+g'
+	sed -i blib/*.patch -e 's+log4perl.conf.example+log4perl.conf+g'
 
-local_install:
+local_install: local_build
 	mkdir -p ${DESTDIR}${TMPDIR}
 	mkdir -p ${DESTDIR}${LOCALSTATEDIR}
 	############################################################################
@@ -42,21 +45,23 @@ local_install:
 	cp -p log4perl.conf.example ${DESTDIR}${SYSCONFDIR}/log4perl.conf
 	cp -p support/naglint.conf.example ${DESTDIR}${SYSCONFDIR}/naglint.conf
 	cp -p support/htpasswd ${DESTDIR}${SYSCONFDIR}/htpasswd
-	cp -p status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi
-	cp -p status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi
-	for file in $(ls -1 plugins/plugins-enabled); do ln -s "../plugins-available/$file" ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled/$file
-	for file in $(ls -1 plugins/plugins-available); do ln -s ${DESTDIR}${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$file
-	for file in $(ls -1 themes/themes-enabled); do ln -s "../themes-available/$file" ${DESTDIR}${SYSCONFDIR}/themes/themes-enabled/$file
-	for file in $(ls -1 themes/themes-available); do ln -s ${DESTDIR}${DATADIR}/themes/themes-available/$file ${DESTDIR}${SYSCONFDIR}/themes/themes-available/$file
+	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi
+	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi
+	for file in $$(ls -1 plugins/plugins-enabled); do ln -fs "../plugins-available/$file" ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled/$$file; done
+	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DESTDIR}${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
+	for file in $$(ls -1 themes/themes-enabled); do ln -fs "../themes-available/$file" ${DESTDIR}${SYSCONFDIR}/themes/themes-enabled/$$file; done
+	for file in $$(ls -1 themes/themes-available); do ln -fs ${DESTDIR}${DATADIR}/themes/themes-available/$file ${DESTDIR}${SYSCONFDIR}/themes/themes-available/$$file; done
 	############################################################################
 	# data files
 	mkdir -p ${DESTDIR}${DATADIR}
 	mkdir -p ${DESTDIR}${DATADIR}/plugins
 	mkdir -p ${DESTDIR}${DATADIR}/themes
+	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp {lib,root,templates} ${DESTDIR}${DATADIR}/
 	cp -rp {LICENSE,Changes} ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
+	cp -rp script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
 	############################################################################
 	# bin files
 	mkdir -p ${DESTDIR}${BINDIR}
@@ -77,15 +82,15 @@ local_install:
 	-[ ! -z "${LOGROTATEDIR}" ] && { mkdir -p ${DESTDIR}${LOGROTATEDIR}; cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk; }
 	############################################################################
 	# rc script
-	-[ ! -z "${INITDIR}" ] && { mkdir -p ${DESTDIR}${INITDIR}; cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk }
+	-[ ! -z "${INITDIR}" ] && { mkdir -p ${DESTDIR}${INITDIR}; cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
 	############################################################################
 	# thruk libs
-	-[ ! -z "${THRUKLIBS}" ] && { mkdir -p ${DESTDIR}${LIBDIR}; cp -rp ${THRUKLIBS}/local-lib/dest/lib/perl5 ${DESTDIR}${LIBDIR}/ }
+	-[ ! -z "${THRUKLIBS}" ] && { mkdir -p ${DESTDIR}${LIBDIR}; cp -rp ${THRUKLIBS}/local-lib/dest/lib/perl5 ${DESTDIR}${LIBDIR}/; }
 	############################################################################
 	# httpd config
-	-[ ! -z "${HTTPDCONF}" ] && { mkdir -p ${DESTDIR}${HTTPDCONF}; cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk }
+	-[ ! -z "${HTTPDCONF}" ] && { mkdir -p ${DESTDIR}${HTTPDCONF}; cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk; }
 	############################################################################
 	# some patches
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0001-thruk.conf.patch
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0002-log4perl.conf.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
