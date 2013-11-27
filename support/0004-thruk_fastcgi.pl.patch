@@ -4,8 +4,8 @@
  use strict;
  use warnings;
  
-+use lib '/usr/lib/thruk/perl5';
-+use lib '/usr/share/thruk/lib';
++use lib '@LIBDIR@/perl5';
++use lib '@DATADIR@/lib';
 +
  ###################################################
  # create connection pool

@@ -1,0 +1,172 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Getopt::Long qw//;
+
+my $options = {
+  'prefix'        => '/usr/local/thruk',
+  'with-htmlurl'  => '/thruk',
+  'init-dir'      => '',
+  'logrotate-dir' => '',
+  'log-dir'       => '/var/log/thruk',
+  'htmlurl'       => '/thruk',
+  'httpd-conf'    => '',
+  'thruk-user'    => 'thruk',
+  'thruk-group'   => 'thruk',
+  'thruk-libs'    => 'thruk',
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions (
+   "h|help"                 => \$options->{'help'},
+   "v|verbose"              => sub { $options->{'verbose'}++ },
+   "prefix=s"               => \$options->{'prefix'},
+   "exec-prefix=s"          => \$options->{'eprefix'},
+   "bindir=s"               => \$options->{'bindir'},
+   "libdir=s"               => \$options->{'libdir'},
+   "sysconfdir=s"           => \$options->{'sysconfdir'},
+   "localstatedir=s"        => \$options->{'localstatedir'},
+   "datarootdir=s"          => \$options->{'datarootdir'},
+   "datadir=s"              => \$options->{'datadir'},
+   "mandir=s"               => \$options->{'mandir'},
+   "with-temp-dir=s"        => \$options->{'tmpdir'},
+   "with-init-dir=s"        => \$options->{'init-dir'},
+   "with-logrotate-dir=s"   => \$options->{'logrotate-dir'},
+   "with-log-dir=s"         => \$options->{'log-dir'},
+   "with-htmlurl=s"         => \$options->{'htmlurl'},
+   "with-httpd-conf=s"      => \$options->{'httpd-conf'},
+   "with-thruk-user=s"      => \$options->{'thruk-user'},
+   "with-thruk-group=s"     => \$options->{'thruk-group'},
+   "with-thruk-libs=s"      => \$options->{'thruk-libs'},
+) or do {
+    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
+    exit 3;
+};
+
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+
+$options->{'eprefix'}        = $options->{'prefix'}          unless $options->{'eprefix'};
+$options->{'bindir'}         = $options->{'prefix'}.'/bin'   unless $options->{'bindir'};
+$options->{'sysconfdir'}     = $options->{'prefix'}.'/etc'   unless $options->{'sysconfdir'};
+$options->{'tmpdir'}         = $options->{'prefix'}.'/tmp'   unless $options->{'tmpdir'};
+$options->{'localstatedir'}  = $options->{'prefix'}.'/var'   unless $options->{'localstatedir'};
+$options->{'libdir'}         = $options->{'prefix'}.'/lib'   unless $options->{'libdir'};
+$options->{'datarootdir'}    = $options->{'prefix'}.'/share' unless $options->{'datarootdir'};
+$options->{'datadir'}        = $options->{'prefix'}.'/share' unless $options->{'datadir'};
+$options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'mandir'};
+
+open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
+print $fh <<EOT;
+### THRUK
+PREFIX           = $options->{'prefix'}
+EPREFIX          = $options->{'eprefix'}
+BINDIR           = $options->{'bindir'}
+SYSCONFDIR       = $options->{'sysconfdir'}
+LIBDIR           = $options->{'libdir'}
+TMPDIR           = $options->{'tmpdir'}
+LOCALSTATEDIR    = $options->{'localstatedir'}
+DATAROOTDIR      = $options->{'datarootdir'}
+DATADIR          = $options->{'datadir'}
+MANDIR           = $options->{'mandir'}
+INITDIR          = $options->{'init-dir'}
+LOGROTATEDIR     = $options->{'logrotate-dir'}
+LOGDIR           = $options->{'log-dir'}
+HTMLURL          = $options->{'htmlurl'}
+HTTPDCONF        = $options->{'httpd-conf'}
+THRUKUSER        = $options->{'thruk-user'}
+THRUKGROUP       = $options->{'thruk-group'}
+THRUKLIBS        = $options->{'thruk-libs'}
+
+EOT
+close($fh);
+print `./script/thruk_patch_makefile.pl`;
+
+print <<EOT;
+
+*************************************
+* THRUK - configuration
+*************************************
+
+  eprefix          = $options->{'eprefix'}
+  bindir           = $options->{'bindir'}
+  sysconfdir       = $options->{'sysconfdir'}
+  libdir           = $options->{'libdir'}
+  tmpdir           = $options->{'tmpdir'}
+  localstatedir    = $options->{'localstatedir'}
+  datarootdir      = $options->{'datarootdir'}
+  datadir          = $options->{'datadir'}
+  mandir           = $options->{'mandir'}
+
+  init-dir         = $options->{'init-dir'}
+  logrotate-dir    = $options->{'logrotate-dir'}
+  log-dir          = $options->{'log-dir'}
+  htmlurl          = $options->{'htmlurl'}
+  httpd-conf       = $options->{'httpd-conf'}
+  thruk-user       = $options->{'thruk-user'}
+  thruk-group      = $options->{'thruk-group'}
+  thruk-libs       = $options->{'thruk-libs'}
+
+now run
+  perl Makefile.PL
+  make
+  make install
+to install thruk with these settings.
+
+EOT
+
+exit;
+
+1;
+__END__
+##############################################
+
+=head1 SYNOPSIS
+
+  Usage: configure [options]
+
+  Options:
+
+    -h, --help                    Show this help message and exit
+    -v, --verbose                 Print verbose output
+
+  Installation directories:
+
+    --prefix=PREFIX               install architecture-independent files in PREFIX
+                                  [/usr/local/thruk]
+
+    --exec-prefix=EPREFIX         install architecture-dependent files in EPREFIX
+                                  [PREFIX]
+
+  By default, `make install' will install all the files in
+  `/usr/local/thruk/bin', `/usr/local/thruk/lib' etc.  You can specify
+  an installation prefix other than `/usr/local/thruk' using `--prefix',
+  for instance `--prefix=$HOME'.
+
+  For better control, use the options below.
+
+  Fine tuning of the installation directories:
+    --bindir=DIR                 user executables [EPREFIX/bin]
+    --sysconfdir=DIR             read-only single-machine data [PREFIX/etc]
+    --localstatedir=DIR          modifiable single-machine data [PREFIX/var]
+    --libdir=DIR                 object code libraries [EPREFIX/lib]
+    --datarootdir=DIR            read-only arch.-independent data root [PREFIX/share]
+    --datadir=DIR                read-only architecture-independent data [DATAROOTDIR]
+    --mandir=DIR                 man documentation [DATAROOTDIR/man]
+
+  Optional Settings:
+
+    --with-htmlurl=<local-url>   sets URL for public html [/thruk]
+
+    --with-temp-dir              sets the temp folder [PREFIX/tmp]
+    --with-init-dir              sets the folder for rc scripts
+    --with-httpd-conf            sets path to Apache conf.d directory
+    --with-logrotate-dir         sets path to logrotates.d directory
+    --with-log-dir               sets path to log files. [/var/log/thruk]
+    --with-thruk-user            sets user name to run thruk [thruk]
+    --with-thruk-group           sets group name to run thruk [thruk]
+
+=cut

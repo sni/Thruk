@@ -1,5 +1,6 @@
 cgi.cfg
 Changes
+configure
 debian/changelog
 debian/compat
 debian/control
