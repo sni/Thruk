@@ -586,7 +586,7 @@ make html page include all remove css, js and images
 =cut
 sub page_splice {
     my($data, $size_per_page, $max_pages) = @_;
-    $max_pages  = 1 unless $max_pages =~ m/^\d+$/;
+    $max_pages  = 1 unless $max_pages =~ m/^\d+$/mx;
     my $paged   = [];
     my $pages   = 0;
     my $page    = 0;
