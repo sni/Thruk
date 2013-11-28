@@ -129,10 +129,12 @@ var bp_context_menu = false;
 var bp_active_node;
 function bp_context_menu_open(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+    evt = jQuery.event.fix(evt);
 
     var rightclick;
-    if (evt.which) rightclick = (evt.which == 3);
+    if (evt.which) rightclick = (evt.which == 3);   // IE < 9 does not support e.which
     else if (evt.button) rightclick = (evt.button == 2);
+
     // clicking the wrench icon counts as right click too
     if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
     if(rightclick && node) {
