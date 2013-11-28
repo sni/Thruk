@@ -5,6 +5,7 @@ next:
             - made number of latest/worst outages pages configurable
           - Business Process
             - fixed context menu issues with IE
+            - fixed zooming in IE
           - Bug Fixes
             - fixed show raw data link in IE
 

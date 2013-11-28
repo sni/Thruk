@@ -809,7 +809,7 @@ function bp_get_node(id) {
 var bp_graph_layout;
 function bp_render(containerId, nodes, edges) {
     // first reset zoom
-    bp_zoom('inner_'+containerId, 1);
+    bp_zoom(1);
     var g = new dagre.Digraph();
     jQuery.each(nodes, function(nr, n) {
         g.addNode(n.id, { label: n.label, width: n.width, height: n.height });
@@ -847,24 +847,37 @@ function bp_render(containerId, nodes, edges) {
 
 /* zoom out */
 var last_zoom = 1;
-function bp_zoom_rel(containerId, zoom) {
-    bp_zoom(containerId, last_zoom + zoom);
+function bp_zoom_rel(zoom) {
+    bp_zoom(last_zoom + zoom);
     return false;
 }
 
-function bp_zoom_reset(containerId) {
-    bp_zoom(containerId, original_zoom);
+function bp_zoom_reset() {
+    bp_zoom(original_zoom);
     return false;
 }
 
 /* set zoom level */
-function bp_zoom(containerId, zoom) {
+function bp_zoom(zoom) {
     // round to 0.05
-    zoom = Math.floor(zoom * 20) / 20;
+    zoom = Math.floor((zoom * 20) + 0.05) / 20;
+    if(zoom < 0.1) { zoom = 0.1 }
     last_zoom = zoom;
-    jQuery('#'+containerId).css('zoom', zoom)
-                                 .css('-moz-transform', 'scale('+zoom+')')
-                                 .css('-moz-transform-origin', '0 0');
+    jQuery('#zoom'+bp_id).css('zoom', zoom)
+                           .css('-moz-transform', 'scale('+zoom+')')
+                           .css('-moz-transform-origin', '0 0')
+                           .css('-o-transform', 'scale('+zoom+')')
+                           .css('-o-transform-origin', '0 0')
+                           .css('-webkit-transform', 'scale('+zoom+')')
+                           .css('-webkit-transform-origin', '0 0');
+
+
+    // center align inner container
+    var zcontainer = document.getElementById('zoom'+bp_id);
+    var offset = ((graphW - maxX*zoom) / 2);
+    if(offset < 0) {offset = 0;}
+    zcontainer.style.left = offset+'px';
+    zcontainer.style.position = 'absolute';
 }
 
 /* draw connector between two nodes */
@@ -974,16 +987,16 @@ function bp_no_more_events(evt) {
 }
 
 /* redraw nodes and stuff */
+var maxX = 0, maxY = 0, minY = -1, graphW = 0, graphH = 0;
 function bp_redraw(evt) {
     var containerId;
     try {
         containerId = 'container'+bp_id;
     } catch(e) { return false; }
     if(!bp_graph_layout) { return false; }
-    var inner = document.getElementById('inner_'+containerId);
-    inner.style.left = '0px';
 
-    var maxX = 0, maxY = 0, minY = -1;
+    maxX = 0;
+    maxY = 0;
     bp_graph_layout.eachNode(function(u, value) {
         if(maxX < value.x) { maxX = value.x }
         if(maxY < value.y) { maxY = value.y }
@@ -994,30 +1007,41 @@ function bp_redraw(evt) {
     maxY = maxY + 30;
 
     // adjust size of container
-    var container = document.getElementById(containerId);
+    var container = document.getElementById('bp'+bp_id);
     if(!container) { return false; }
-    var w = jQuery(window).width() - container.parentNode.offsetLeft - 5;
-    var h = jQuery(window).height() - container.parentNode.offsetTop -10;
+    graphW = jQuery(window).width() - container.offsetLeft - 5;
+    graphH = jQuery(window).height() - container.offsetTop -10;
     if(!minimal) {
-        w = w - 315;
+        graphW = graphW - 315;
     }
-    container.style.width  = w+'px';
-    container.style.height = h+'px';
+    container.style.width  = graphW+'px';
+    container.style.height = graphH+'px';
+
+    var zcontainer = document.getElementById('zoom'+bp_id);
+    if(!zcontainer) { return false; }
+    zcontainer.style.width  = graphW+'px';
+    zcontainer.style.height = graphH+'px';
+    zcontainer.style.left   = '0px';
+
+    var icontainer = document.getElementById('container'+bp_id);
+    if(!icontainer) { return false; }
+    zcontainer.style.width  = maxX+'px';
+    zcontainer.style.height = maxY+'px';
 
     // do we need to zoom in?
     var zoomX = 1, zoomY = 1;
-    if(w < maxX) {
-        zoomX = w / maxX;
+    if(graphW < maxX) {
+        zoomX = graphW / maxX;
     }
-    if(h < maxY) {
-        zoomY = h / maxY;
+    if(graphH < maxY) {
+        zoomY = graphH / maxY;
     }
     var zoom = zoomY;
     if(zoomX < zoomY) { zoom = zoomX; }
     if(zoom < 1) {
-        // round to 0.05
-        zoom = Math.floor(zoom * 20) / 20;
-        bp_zoom('inner_'+containerId, zoom);
+        bp_zoom(zoom);
+    } else {
+        bp_zoom(1);
     }
     original_zoom = zoom;
 
@@ -1025,11 +1049,6 @@ function bp_redraw(evt) {
         bp_update_status(null, 'node1');
         current_node = 'node1';
     }
-
-    // center align inner container
-    var offset = ((w - maxX*zoom) / 2);
-    if(offset < 0) {offset = 0;}
-    inner.style.left = offset+'px';
 
     return true;
 }

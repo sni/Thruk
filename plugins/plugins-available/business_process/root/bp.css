@@ -128,8 +128,12 @@ TABLE.minimal .bp_container_zoom {
 
 .bp_container {
     position: relative;
+    overflow: hidden;
+}
+DIV.bp_zoom_container {
     border: 1px solid grey;
-    overflow: auto;
+    overflow: hidden;
+    position: relative;
 }
 TABLE.minimal .bp_container {
     border: 0;
