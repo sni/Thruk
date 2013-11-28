@@ -4,6 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>[% title_prefix %][% title %]</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     [% PROCESS _common_js.tt %]
     [% UNLESS all_in_one_css %]
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
