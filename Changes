@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.80-2   Thu Nov 28 12:21:18 CET 2013
           - Reports
             - made number of latest/worst outages pages configurable
           - Business Process

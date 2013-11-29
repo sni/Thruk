@@ -1,14 +1,19 @@
 Name:          thruk
 Version:       1.80
-Release: 1%{?dist}
+Release: 2
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
-Source0:       thruk-%{version}.tar.gz
+%if "%{release}" == "1"
+%define fullname %{name}-%{version}
+%else
+%define fullname %{name}-%{version}-%{release}
+%endif
+Source0:       %{fullname}.tar.gz
+BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Source1:       wkhtmltopdf
 Group:         Applications/Monitoring
-BuildRoot:     %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
@@ -36,8 +41,7 @@ large installations.
 %global __os_install_post %{nil}
 
 %prep
-rm -rf %{buildroot}
-%setup -q
+%setup -n %{fullname}
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
