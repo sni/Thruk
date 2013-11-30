@@ -48,9 +48,9 @@ local_install: local_build
 	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi
 	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi
 	for file in $$(ls -1 plugins/plugins-enabled); do ln -fs "../plugins-available/$file" ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled/$$file; done
-	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DESTDIR}${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
+	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
 	for file in $$(ls -1 themes/themes-enabled); do ln -fs "../themes-available/$file" ${DESTDIR}${SYSCONFDIR}/themes/themes-enabled/$$file; done
-	for file in $$(ls -1 themes/themes-available); do ln -fs ${DESTDIR}${DATADIR}/themes/themes-available/$file ${DESTDIR}${SYSCONFDIR}/themes/themes-available/$$file; done
+	for file in $$(ls -1 themes/themes-available); do ln -fs ${DATADIR}/themes/themes-available/$file ${DESTDIR}${SYSCONFDIR}/themes/themes-available/$$file; done
 	############################################################################
 	# data files
 	mkdir -p ${DESTDIR}${DATADIR}
@@ -58,10 +58,11 @@ local_install: local_build
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp {lib,root,templates} ${DESTDIR}${DATADIR}/
-	cp -rp {LICENSE,Changes} ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
-	cp -rp script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
+	cp -p {LICENSE,Changes} ${DESTDIR}${DATADIR}/
+	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/script/
 	############################################################################
 	# bin files
 	mkdir -p ${DESTDIR}${BINDIR}
@@ -94,3 +95,5 @@ local_install: local_build
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0001-thruk.conf.patch
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0002-log4perl.conf.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
+	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
+	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete

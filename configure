@@ -38,10 +38,7 @@ Getopt::Long::GetOptions (
    "with-thruk-user=s"      => \$options->{'thruk-user'},
    "with-thruk-group=s"     => \$options->{'thruk-group'},
    "with-thruk-libs=s"      => \$options->{'thruk-libs'},
-) or do {
-    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
-    exit 3;
-};
+) or warn "error in options";
 
 if($options->{'help'}) {
     require Pod::Usage;
@@ -56,15 +53,6 @@ $options->{'localstatedir'}  = $options->{'prefix'}.'/var'   unless $options->{'
 $options->{'libdir'}         = $options->{'prefix'}.'/lib'   unless $options->{'libdir'};
 $options->{'datadir'}        = $options->{'prefix'}.'/share' unless $options->{'datadir'};
 $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'mandir'};
-
-# do some checks
-if($options->{'thruk-libs'}) {
-  if(!-d $options->{'thruk-libs'}.'/local-lib/dest/lib/perl5/.') {
-    print "invalid thruk-libs directory.\n";
-    exit 1;
-  }
-}
-
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;

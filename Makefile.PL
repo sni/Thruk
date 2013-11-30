@@ -202,3 +202,4 @@ else {
 }
 
 print "finished\n";
+exit 0
