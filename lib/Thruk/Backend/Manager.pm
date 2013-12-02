@@ -931,7 +931,7 @@ sub _set_host_macros {
     $macros->{'$HOSTATTEMPT$'}       = (defined $host->{'host_current_attempt'}) ? $host->{'host_current_attempt'} : $host->{'current_attempt'};
     $macros->{'$HOSTCHECKCOMMAND$'}  = (defined $host->{'host_check_command'})   ? $host->{'host_check_command'}   : $host->{'check_command'};
     $macros->{'$HOSTSTATE$'}         = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
-    
+
     my $prefix = (defined $host->{'host_custom_variable_names'}) ? 'host_' : '';
 
     # host user macros
@@ -1852,13 +1852,13 @@ sub _sort {
     for my $key (@keys) {
 
         # sort numeric
-        if( defined $data->[0]->{$key} and $data->[0]->{$key} =~ m/^\d+$/xm ) {
-            push @compares, '$a->{' . $key . '} <=> $b->{' . $key . '}';
+        if( defined $data->[0]->{$key} and $data->[0]->{$key} =~ m/^[\d\.\-]+$/xm ) {
+            push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
         }
 
         # sort alphanumeric
         else {
-            push @compares, '$a->{' . $key . '} cmp $b->{' . $key . '}';
+            push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
         }
     }
     my $sortstring = join( ' || ', @compares );
@@ -1866,13 +1866,17 @@ sub _sort {
     ## no critic
     no warnings;    # sorting by undef values generates lots of errors
     if( uc $order eq 'ASC' ) {
-        eval '@sorted = sort { ' . $sortstring . ' } @{$data};';
+        eval '@sorted = sort {'.$sortstring.'} @{$data};';
     }
     else {
-        eval '@sorted = reverse sort { ' . $sortstring . ' } @{$data};';
+        eval '@sorted = reverse sort {'.$sortstring.'} @{$data};';
     }
     use warnings;
     ## use critic
+
+    if(scalar @sorted == 0 && $@) {
+        confess($@);
+    }
 
     $c->stats->profile( end => "_sort()" ) if $c;
 
