@@ -25,6 +25,7 @@ local_build:
 	sed -i blib/*.patch -e 's+@BINDIR@+${BINDIR}+g'
 	sed -i blib/*.patch -e 's+@INITDIR@+${INITDIR}+g'
 	sed -i blib/*.patch -e 's+@LIBDIR@+${LIBDIR}+g'
+	sed -i blib/*.patch -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
 	sed -i blib/*.patch -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_build
