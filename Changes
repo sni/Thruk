@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed sorting on keys with space in performance data table
+            - fixed using negative numbers in performance data table
+
 1.80-2   Thu Nov 28 12:21:18 CET 2013
           - Reports
             - made number of latest/worst outages pages configurable
