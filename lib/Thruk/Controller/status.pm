@@ -981,11 +981,13 @@ sub _process_perfmap_page {
             $key =~ s/'$//gmxo;
             $val =~ s/;.*$//gmxo;
             $val =~ s/,/./gmxo;
-            $val =~ m/^([\d\.]+)(.*?)$/mx;
-            $svc_data->{'perf'}->{$key} = 1;
-            $keys->{$key} = 1;
-            $svc_data->{$key} = $1.$2;
-            $svc_data->{$key.'_sort'} = $1;
+            $val =~ m/^([\d\.\-]+)(.*?)$/mx;
+            if(defined $1) {
+                $svc_data->{'perf'}->{$key} = 1;
+                $keys->{$key} = 1;
+                $svc_data->{$key} = $1.$2;
+                $svc_data->{$key.'_sort'} = $1;
+            }
         }
         push @{$data}, $svc_data;
     }
