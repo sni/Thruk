@@ -6,7 +6,7 @@ BEGIN {
     eval "use Test::Cmd";
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'Test::Cmd required' if $@;
-    plan tests => 34;
+    plan tests => 56;
 
     use lib('t');
     require TestUtils;
@@ -19,6 +19,8 @@ BEGIN {
 my $pages = [
     { url => '/thruk/cgi-bin/login.cgi',      like => ['Thruk Monitoring Webinterface', 'loginbutton' ] },
     { url => '/thruk/cgi-bin/restricted.cgi', like => ['OK:'] },
+    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi?test=blah', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
 ];
 
 for my $url (@{$pages}) {
