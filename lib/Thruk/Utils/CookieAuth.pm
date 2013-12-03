@@ -55,6 +55,8 @@ sub external_authentication {
 
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
     my $ua       = get_user_agent();
+    # unset proxy which eventually has been set from https backends
+    local $ENV{'HTTPS_PROXY'} = undef;
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     my $res      = $ua->post($authurl);
