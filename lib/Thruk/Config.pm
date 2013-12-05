@@ -3,6 +3,7 @@ package Thruk::Config;
 use strict;
 use warnings;
 use utf8;
+use Carp;
 use Config::Any;
 use Catalyst::Utils;
 use Catalyst::Plugin::Thruk::ConfigLoader;
@@ -25,6 +26,7 @@ my $project_root = Catalyst::Utils::home('Thruk::Config');
 my $branch       = '3';
 my $gitbranch    = get_git_name($project_root);
 $branch          = $gitbranch unless $branch ne '';
+confess('got no project_root') unless $project_root;
 
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',

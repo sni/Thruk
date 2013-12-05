@@ -1033,6 +1033,7 @@ script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
 script/thruk_link_images.sh
 script/thruk_optimize_images.sh
+script/thruk_patch_makefile.pl
 script/thruk_replace_doc_css.pl
 script/thruk_replace_doc_toc.pl
 script/thruk_server.pl
@@ -1046,6 +1047,7 @@ ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0004-thruk_fastcgi.pl.patch
+support/0005-naemon.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd

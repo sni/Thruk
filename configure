@@ -38,6 +38,8 @@ Getopt::Long::GetOptions (
    "with-thruk-user=s"      => \$options->{'thruk-user'},
    "with-thruk-group=s"     => \$options->{'thruk-group'},
    "with-thruk-libs=s"      => \$options->{'thruk-libs'},
+   "with-thruk-temp-dir=s"  => \$options->{'thruk-temp-dir'},
+   "with-thruk-var-dir=s"   => \$options->{'thruk-var-dir'},
 ) or warn "error in options";
 
 if($options->{'help'}) {
@@ -53,6 +55,9 @@ $options->{'localstatedir'}  = $options->{'prefix'}.'/var'   unless $options->{'
 $options->{'libdir'}         = $options->{'prefix'}.'/lib'   unless $options->{'libdir'};
 $options->{'datadir'}        = $options->{'prefix'}.'/share' unless $options->{'datadir'};
 $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'mandir'};
+
+$options->{'tmpdir'}         = $options->{'thruk-temp-dir'} if $options->{'thruk-temp-dir'};
+$options->{'localstatedir'}  = $options->{'thruk-var-dir'}  if $options->{'thruk-var-dir'};
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;

@@ -1,0 +1,16 @@
+--- a/thruk	2013-11-26 15:27:02.000000000 +0100
++++ b/thruk	2013-12-03 11:57:09.083098823 +0100
+@@ -17,10 +17,10 @@
+ 
+ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+ NAME=thruk
+-PIDFILE=/var/cache/thruk/thruk.pid
+-STARTURL="http://localhost/thruk/cgi-bin/remote.cgi?startup"
++PIDFILE=@TMPDIR@/thruk.pid
++STARTURL="http://localhost@HTMLURL@/thruk/cgi-bin/remote.cgi?startup"
+ STARTTIMEOUT=15
+-STARTLOG="/tmp/thrukstart.log"
++STARTLOG="@TMPDIR@/thrukstart.log"
+ WGET="/usr/bin/wget"
+ 
+ if [ ! -z $OMD_SITE ]; then

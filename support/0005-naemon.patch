@@ -1,0 +1,122 @@
+--- a/thruk.conf	2013-12-02 22:31:43.668051249 +0100
++++ b/thruk.conf	2013-12-02 22:31:32.469047156 +0100
+@@ -187,8 +187,8 @@
+ 
+ ######################################
+ # mode used when creating or saving files
+-#mode_file = 0660
+-#mode_dir  = 0770
++mode_file = 0660
++mode_dir  = 0770
+ 
+ ######################################
+ # server side includes
+@@ -208,7 +208,7 @@
+ 
+ ######################################
+ # custom templates
+-#user_template_path = ./my_templates
++user_template_path = @SYSCONFDIR@/user_templates/
+ 
+ ######################################
+ # log4perl config
+@@ -506,7 +506,7 @@
+ # bug reporting
+ # show link to bug reports when internal errors occur.
+ # set to 'server' to log js error server side
+-show_error_reports = 1
++show_error_reports = server
+ 
+ # don't report some known harmless javascript errors
+ skip_js_errors  = cluetip is not a function
+@@ -563,56 +563,19 @@
+ ######################################
+ # Backend Configuration, enter your backends here
+ <Component Thruk::Backend>
+-#    <peer>
+-#        name   = Core
+-#        type   = livestatus
+-#        <options>
+-#            peer          = /var/nagios/rw/live
+-#            resource_file = /etc/nagios/resource.cfg
+-#       </options>
+-#       <configtool>
+-#            core_conf      = /etc/nagios/nagios.cfg
+-#            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
+-#            obj_reload_cmd = /etc/init.d/nagios reload
+-#       </configtool>
+-#    </peer>
+-
+-#    <peer>
+-#        name   = Local Nagios
+-#        type   = livestatus
+-#        hidden = 1             # make this backend hidden by default
+-#        groups = admins        # make this backend only visible to the admin group
+-#        <options>
+-#            peer          = /tmp/livestatus.socket
+-#            resource_file = path_to_your/resource.cfg
+-#       </options>
+-#       <configtool>
+-#            core_conf      = /etc/nagios/nagios.cfg
+-#            obj_check_cmd  = /etc/init.d/nagios checkconfig
+-#            obj_reload_cmd = /etc/init.d/nagios reload
+-#       </configtool>
+-#    </peer>
+-#    <peer>
+-#        name   = External Nagios
+-#        type   = livestatus
+-#        <options>
+-#            peer    = 172.16.0.1:9999
+-#       </options>
+-#    </peer>
+-#    <peer>
+-#        name   = External Icinga
+-#        type   = livestatus
+-#        <options>
+-#            peer    = 172.16.0.2:9999
+-#       </options>
+-#    </peer>
+-#    <peer>
+-#        name   = External Shinken
+-#        type   = livestatus
+-#        <options>
+-#            peer    = 127.0.0.01:50000
+-#       </options>
+-#    </peer>
++    <peer>
++        name   = Naemon
++        type   = livestatus
++        <options>
++            peer          = /var/nagios/rw/live
++            resource_file = @SYSCONFDIR@/resource.cfg
++       </options>
++       <configtool>
++            core_conf      = @SYSCONFDIR@/naemon.cfg
++            obj_check_cmd  = @BINDIR@/naemon -v @SYSCONFDIR@/naemon.cfg
++            obj_reload_cmd = @INITDIR@/naemon reload
++       </configtool>
++    </peer>
+ </Component>
+ 
+ 
+@@ -697,16 +660,16 @@
+ <Component Thruk::Plugin::BP>
+     # Results will be send back by using the spool folder.
+     # This folder should point to the 'check_result_path' of your core.
+-    #spool_dir = /var/nagios/rw/check_results
++    spool_dir = @LOCALSTATEDIR@/naemon/spool/checkresults
+ 
+     # Save objects to this file. Content will be overwritten.
+-    #objects_save_file = /etc/nagios/conf.d/thruk_bp_generated.cfg
++    objects_save_file = @SYSCONFDIR@/conf.d/thruk_bp_generated.cfg
+ 
+     # User maintained file containing templates used for business process services.
+-    #objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
++    objects_templates_file = @SYSCONFDIR@/conf.d/thruk_bp_templates.cfg
+ 
+     # Command to apply changes to the objects_save_file
+-    #objects_reload_cmd = /etc/init.d/nagios reload
++    objects_reload_cmd = @INITDIR@/naemon reload
+ 
+     # hooks which will be executed before or after saving.
+     #pre_save_cmd   =

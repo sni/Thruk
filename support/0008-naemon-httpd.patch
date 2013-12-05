@@ -1,0 +1,76 @@
+--- a/thruk.conf	2013-12-04 11:09:27.392990379 +0100
++++ b/thruk.conf	2013-12-04 11:15:05.197003092 +0100
+@@ -2,7 +2,7 @@
+   AddHandler fcgid-script .sh
+   IPCCommTimeout 120
+ 
+-  <Directory /usr/share/thruk>
++  <Directory @DATADIR@>
+     Options FollowSymLinks
+     AllowOverride All
+     order allow,deny
+@@ -12,7 +12,7 @@
+       Require all granted
+     </IfModule>
+   </Directory>
+-  <Directory /etc/thruk/themes>
++  <Directory @SYSCONFDIR@/themes>
+     Options FollowSymLinks
+     allow from all
+     # required for apache 2.4
+@@ -20,7 +20,7 @@
+       Require all granted
+     </IfModule>
+   </Directory>
+-  <Directory /etc/thruk/plugins>
++  <Directory @SYSCONFDIR@/plugins>
+     Options FollowSymLinks
+     allow from all
+     # required for apache 2.4
+@@ -32,28 +32,31 @@
+   # redirect to a startup page when there is no pidfile yet
+   RewriteEngine On
+   RewriteCond %{REQUEST_METHOD} GET
+-  RewriteCond %{REQUEST_URI} !^/thruk/startup.html
+-  RewriteCond %{REQUEST_URI} !^/thruk/side.html
+-  RewriteCond %{REQUEST_URI} !^/thruk/.*\.(css|png|js)
+-  RewriteCond %{REQUEST_URI} ^/thruk
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/startup.html
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/side.html
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/.*\.(css|png|js)
++  RewriteCond %{REQUEST_URI} ^@HTMLURL@/thruk
+   RewriteCond /var/cache/thruk/thruk.pid !-f
+-  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
++  RewriteRule ^(.*)$ @HTMLURL@/thruk/startup.html?$1 [R=302,L,NE,QSA]
+ 
+-  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
+-  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
+-  AliasMatch ^/thruk/(.*\.cgi|.*\.html)  /usr/share/thruk/fcgid_env.sh/thruk/$1
+-  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
+-  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
+-  Alias /thruk /usr/share/thruk/root/thruk
++  Alias @HTMLURL@/thruk/documentation.html @DATADIR@/root/thruk/documentation.html
++  Alias @HTMLURL@/thruk/startup.html @DATADIR@/root/thruk/startup.html
++  AliasMatch ^@HTMLURL@/thruk/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh/thruk/$1
++  AliasMatch ^@HTMLURL@/thruk/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
++  Alias @HTMLURL@/thruk/themes/  @SYSCONFDIR@/themes/themes-enabled/
++  Alias @HTMLURL@/thruk @DATADIR@/root/thruk
+ 
+-  <Location /thruk>
++  RewriteRule ^@HTMLURL@$  @HTMLURL@/thruk  [R]
++  RewriteRule ^@HTMLURL@/$ @HTMLURL@/thruk/ [R]
++
++  <Location @HTMLURL@/thruk>
+     Options ExecCGI
+-    AuthName "Thruk Monitoring"
++    AuthName "Naemon Monitoring"
+     AuthType Basic
+-    AuthUserFile /etc/thruk/htpasswd
++    AuthUserFile @SYSCONFDIR@/htpasswd
+     Require valid-user
+   </Location>
+-  <Location /thruk/cgi-bin/remote.cgi>
++  <Location @HTMLURL@/thruk/cgi-bin/remote.cgi>
+     Order Deny,Allow
+     Allow from all
+     Satisfy any
