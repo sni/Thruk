@@ -70,6 +70,9 @@ Ext.define('TP.PanletPNP', {
                 return;
             }
             var imgPanel = this.items.getAt(1);
+            if(!imgPanel || !imgPanel.el) { // not yet initialized
+                return;
+            }
             var size     = imgPanel.getSize();
             var url      = this.xdata.graph + '&view=1&source='+this.xdata.source;
             var now      = new Date();
@@ -218,6 +221,9 @@ Ext.define('TP.PanletPNP', {
         /* adjust size of image */
         this.adjustImgSize = function() {
             var imgPanel = this.items.getAt(1);
+            if(!imgPanel || !imgPanel.el) { // not yet initialized
+                return;
+            }
             var size     = imgPanel.getSize();
             var naturalWidth  = imgPanel.getEl().dom.naturalWidth;
             var naturalHeight = imgPanel.getEl().dom.naturalHeight;
