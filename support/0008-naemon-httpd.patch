@@ -1,5 +1,5 @@
---- a/thruk.conf	2013-12-04 11:09:27.392990379 +0100
-+++ b/thruk.conf	2013-12-04 11:15:05.197003092 +0100
+--- a/thruk.conf	2013-12-06 13:10:18.169312282 +0100
++++ b/thruk.conf	2013-12-06 13:09:57.977292066 +0100
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -35,12 +35,13 @@
 -  RewriteCond %{REQUEST_URI} !^/thruk/side.html
 -  RewriteCond %{REQUEST_URI} !^/thruk/.*\.(css|png|js)
 -  RewriteCond %{REQUEST_URI} ^/thruk
+-  RewriteCond /var/cache/thruk/thruk.pid !-f
+-  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
 +  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/startup.html
 +  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/side.html
 +  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/.*\.(css|png|js)
 +  RewriteCond %{REQUEST_URI} ^@HTMLURL@/thruk
-   RewriteCond /var/cache/thruk/thruk.pid !-f
--  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
++  RewriteCond @TMPDIR@/thruk.pid !-f
 +  RewriteRule ^(.*)$ @HTMLURL@/thruk/startup.html?$1 [R=302,L,NE,QSA]
  
 -  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
