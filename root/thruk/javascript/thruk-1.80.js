@@ -3739,7 +3739,7 @@ var ajax_search = {
         if(backend_select) {
             var sel = document.getElementById(backend_select);
             // only if enabled
-            if(!sel.disabled) {
+            if(sel && !sel.disabled) {
                 var backends = jQuery('#'+backend_select).val();
                 if(backends != undefined) {
                     if(typeof(backends) == 'string') { backends = [backends]; }

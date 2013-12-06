@@ -6,6 +6,7 @@ next:
             - fixed sorting on keys with space in performance data table
             - fixed using negative numbers in performance data table
             - fixed cookie auth on https url when using https backend over proxy
+            - fixed js error on reports page
 
 1.80-2   Thu Nov 28 12:21:18 CET 2013
           - Reports
