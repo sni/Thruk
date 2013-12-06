@@ -492,8 +492,8 @@ sub calculate_availability {
     my $total_nr = 0;
     $total_nr += scalar @{$hosts}    if defined $hosts;
     $total_nr += scalar @{$services} if defined $services;
-    if($total_nr > 500) {
-        die("too many objects: ".$total_nr.", maximum 500, please use more specific filter!");
+    if($total_nr > $c->config->{'report_max_objects'}) {
+        die("too many objects: ".$total_nr.", maximum ".$c->config->{'report_max_objects'}.", please use more specific filter or raise limit (report_max_objects)!");
     }
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];

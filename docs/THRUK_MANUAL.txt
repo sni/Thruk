@@ -844,6 +844,17 @@ ex.:
   report_use_temp_files = 14
 
 
+==== report_max_objects
+Don't create reports with more hosts / services than this number.
+The purpose is to don't wrack the server due to extended memory
+usage. Increase this number if you hit that limit and have plenty
+of memory left.
+
+ex.:
+
+  report_max_objects = 1000
+
+
 ==== start_page
 
 This link is used as startpage and points usually to the main.html

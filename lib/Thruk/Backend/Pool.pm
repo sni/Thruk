@@ -168,6 +168,7 @@ sub set_default_config {
         'ssl_verify_hostnames'              => 1,
         'precompile_templates'              => 1,
         'report_use_temp_files'             => 14,
+        'report_max_objects'                => 1000,
         'perf_bar_pnp_popup'                => 1,
         'status_color_background'           => 0,
         'apache_status'                     => {},

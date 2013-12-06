@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - optional guest account with cookie authentication
+          - made report_max_objects configurable
           - Bug Fixes
             - fixed sorting on keys with space in performance data table
             - fixed using negative numbers in performance data table
