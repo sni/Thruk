@@ -14,7 +14,7 @@
  # this piece of text will be prepended to
  # all page titles.
 -#title_prefix = Prod
-+title_prefix = Naemon
++title_prefix = Naemon - 
  
  ######################################
  # uses bookmark names as page titles where possible
