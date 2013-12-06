@@ -46,13 +46,12 @@ local_install: local_patches
 	cp -p thruk.conf ${DESTDIR}${SYSCONFDIR}/thruk.conf
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
-	cp -p support/menu_local.conf ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
 	cp -p cgi.cfg ${DESTDIR}${SYSCONFDIR}/cgi.cfg
 	cp -p log4perl.conf.example ${DESTDIR}${SYSCONFDIR}/log4perl.conf
 	cp -p support/naglint.conf.example ${DESTDIR}${SYSCONFDIR}/naglint.conf
 	cp -p support/htpasswd ${DESTDIR}${SYSCONFDIR}/htpasswd
-	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi
-	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi
+	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi.example
+	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi.example
 	for file in $$(ls -1 plugins/plugins-enabled); do ln -fs "../plugins-available/$$file" ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled/$$file; done
 	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
 	for file in $$(ls -1 themes/themes-enabled); do ln -fs "../themes-available/$$file" ${DESTDIR}${SYSCONFDIR}/themes/themes-enabled/$$file; done

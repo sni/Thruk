@@ -1,5 +1,23 @@
---- a/thruk.conf	2013-12-02 22:31:43.668051249 +0100
-+++ b/thruk.conf	2013-12-02 22:31:32.469047156 +0100
+--- a/thruk.conf	2013-12-06 13:17:29.429292006 +0100
++++ b/thruk.conf	2013-12-06 13:19:34.533299226 +0100
+@@ -13,7 +13,7 @@
+ 
+ ######################################
+ # set the url prefix for all urls
+-url_prefix = /
++url_prefix = @HTMLURL@/
+ 
+ ######################################
+ # Changes the path to your logo images. Default is
+@@ -43,7 +43,7 @@
+ # set the title prefix for all urls
+ # this piece of text will be prepended to
+ # all page titles.
+-#title_prefix = Prod
++title_prefix = Naemon
+ 
+ ######################################
+ # uses bookmark names as page titles where possible
 @@ -187,8 +187,8 @@
  
  ######################################
@@ -87,7 +105,7 @@
 +        name   = Naemon
 +        type   = livestatus
 +        <options>
-+            peer          = /var/nagios/rw/live
++            peer          = /var/cache/naemon/live
 +            resource_file = @SYSCONFDIR@/resource.cfg
 +       </options>
 +       <configtool>
