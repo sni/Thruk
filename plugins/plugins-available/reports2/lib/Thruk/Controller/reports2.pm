@@ -59,6 +59,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{'prev_tab'}            = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
+    $c->stash->{'wkhtmltopdf'}         = 1;
 
     $Thruk::Utils::CLI::c              = $c;
 
@@ -102,6 +103,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($action eq 'remove') {
             return $self->report_remove($c, $report_nr);
         }
+    }
+
+    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} and !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
+        $c->stash->{'wkhtmltopdf'} = 0;
+        $c->stash->{'wkhtmltopdf_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'};
     }
 
     # show list of configured reports

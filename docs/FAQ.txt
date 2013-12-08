@@ -285,6 +285,17 @@ NFS, DRBD or similar ). There is usually not much traffic in this
 folder.
 
 
+=== wkhtmltopdf
+wkhtmltopdf is required to create PDF reports with the reports2 plugin. You can get
+wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/ or use this
+direct links:
+
+ - 64bit: http://code.google.com/p/wkhtmltopdf/downloads/detail?name=wkhtmltopdf-0.11.0_rc1-static-amd64.tar.bz2
+ - 32bit: http://code.google.com/p/wkhtmltopdf/downloads/detail?name=wkhtmltopdf-0.11.0_rc1-static-i386.tar.bz2
+
+These are statically linked binarys, so no installation required, just put the unpacked
+binary in the right location.
+
 === How can i enable the business process addon.
 It works out of the box with OMD. If not using OMD, some manual steps
 are required which are described in the
