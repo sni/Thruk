@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Getopt::Long qw//;
 
+alarm(180);
+
 my $options = {
   'prefix'        => '/usr/local/thruk',
   'with-htmlurl'  => '/thruk',
@@ -82,7 +84,7 @@ THRUKLIBS        = $options->{'thruk-libs'}
 
 EOT
 close($fh);
-print `./script/thruk_patch_makefile.pl`;
+print `yes n | $^X Makefile.PL`;
 
 print <<EOT;
 
@@ -109,7 +111,7 @@ print <<EOT;
   thruk-libs       = $options->{'thruk-libs'}
 
 now run
-  perl Makefile.PL
+  make
   make install
 to install thruk with these settings.
 

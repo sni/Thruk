@@ -53,7 +53,7 @@ local_install: local_patches
 	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/status-header.ssi.example
 	cp -p ssi/status-header.ssi-pnp ${DESTDIR}${SYSCONFDIR}/ssi/extinfo-header.ssi.example
 	for file in $$(ls -1 plugins/plugins-enabled); do ln -fs "../plugins-available/$$file" ${DESTDIR}${SYSCONFDIR}/plugins/plugins-enabled/$$file; done
-	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DATADIR}/plugins/plugins-available/$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
+	for file in $$(ls -1 plugins/plugins-available); do ln -fs ${DATADIR}/plugins/plugins-available/$$file ${DESTDIR}${SYSCONFDIR}/plugins/plugins-available/$$file; done
 	for file in $$(ls -1 themes/themes-enabled); do ln -fs "../themes-available/$$file" ${DESTDIR}${SYSCONFDIR}/themes/themes-enabled/$$file; done
 	for file in $$(ls -1 themes/themes-available); do ln -fs ${DATADIR}/themes/themes-available/$$file ${DESTDIR}${SYSCONFDIR}/themes/themes-available/$$file; done
 	############################################################################
@@ -62,19 +62,22 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/plugins
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
-	cp -rp {lib,root,templates} ${DESTDIR}${DATADIR}/
+	cp -rp lib root templates ${DESTDIR}${DATADIR}/
 	cp -rp support/fcgid_env.sh ${DESTDIR}${DATADIR}/
+	chmod 755 ${DESTDIR}${DATADIR}/fcgid_env.sh
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
-	cp -p {LICENSE,Changes} ${DESTDIR}${DATADIR}/
+	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
 	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/script/
-	touch ${DESTDIR}${DATADIR}/dist.ini
+	echo " " > ${DESTDIR}${DATADIR}/dist.ini
 	############################################################################
 	# bin files
 	mkdir -p ${DESTDIR}${BINDIR}
-	cp -p script/{thruk,naglint,nagexp} ${DESTDIR}${BINDIR}/
+	cp -p script/thruk   ${DESTDIR}${BINDIR}/
+	cp -p script/naglint ${DESTDIR}${BINDIR}/
+	cp -p script/nagexp  ${DESTDIR}${BINDIR}/
 	############################################################################
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
@@ -105,6 +108,8 @@ local_install: local_patches
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
+	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp ${DESTDIR}${LIBDIR}
+	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp ${DESTDIR}${LIBDIR}
 
 naemon-patch:
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0005-naemon.patch

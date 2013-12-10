@@ -69,6 +69,8 @@ case "$1" in
               fi
             fi
             echo -n "Starting $NAME..."
+            STARTLOGDIR=$(dirname $STARTLOG)
+            [ -d $STARTLOGDIR ] || mkdir -p $STARTLOGDIR
             $STARTCMD >$STARTLOG 2>&1 &
             WGETPID=$!
             for x in $(seq $STARTTIMEOUT); do
