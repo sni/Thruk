@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Business Process
+            - change service plugin output for first node
+
 1.80-3   Sat Dec  7 18:26:15 CET 2013
           - optional guest account when using cookie authentication
           - made report_max_objects configurable

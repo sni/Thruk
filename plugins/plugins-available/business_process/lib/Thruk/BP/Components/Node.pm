@@ -412,6 +412,8 @@ sub _result_to_string {
         if($status == 4) { $status = 0 };
         $string .= "### Nagios Service Check Result ###\n";
         $output = $self->{'status_text'} || $self->{'short_desc'};
+        # override status text of first node to be the bps status itself
+        $output = $bp->{'status_text'} if $self->{'id'} eq 'node1';
     }
     $string .= sprintf "# Time: %s\n",scalar localtime time();
     $string .= sprintf "host_name=%s\n", $bp->{'name'};
