@@ -21,6 +21,13 @@ BEGIN {
     import TestUtils;
 }
 
+END {
+    # restore default
+    `cd plugins/plugins-enabled && rm -f reports`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
+    unlink('root/thruk/plugins/reports');
+}
+
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
 $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
@@ -122,12 +129,5 @@ TestUtils::test_command({
     cmd  => $BIN.' "/thruk/cgi-bin/reports.cgi?action=remove&report=9999"',
     like => ['/^OK - report removed$/'],
 });
-
-# restore default
-END {
-    `cd plugins/plugins-enabled && rm -f reports`;
-    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
-    unlink('root/thruk/plugins/reports');
-};
 
 done_testing();

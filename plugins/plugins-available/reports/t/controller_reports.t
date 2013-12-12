@@ -17,6 +17,13 @@ BEGIN {
     import TestUtils;
 }
 
+END {
+    `cd plugins/plugins-enabled && rm -f reports`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
+    unlink('root/thruk/plugins/reports');
+    exit(0);
+}
+
 ###########################################################
 # test modules
 if(defined $ENV{'CATALYST_SERVER'}) {
@@ -47,7 +54,3 @@ for my $test (@{$pages}) {
     TestUtils::test_page(%{$test});
 }
 
-# restore default
-`cd plugins/plugins-enabled && rm -f reports`;
-`cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
-unlink('root/thruk/plugins/reports');

@@ -18,6 +18,13 @@ BEGIN {
     import TestUtils;
 }
 
+END {
+    # restore default
+    `cd plugins/plugins-enabled && rm -f reports`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
+    unlink('root/thruk/plugins/reports');
+}
+
 use_ok("Thruk::Utils::PDF");
 
 my($baseurl,$a,$b,$url,$d,$e) = ('http://test.local/thruk/cgi-bin/', '', '',  '', '', '');
@@ -30,10 +37,5 @@ is(Thruk::Utils::PDF::_replace_link($baseurl,$a,$b,$url,$d,$e), "http://test.loc
 
 $url = '/index.html';
 is(Thruk::Utils::PDF::_replace_link($baseurl,$a,$b,$url,$d,$e), "http://test.local/index.html", "_replace_link($url)");
-
-# restore default
-`cd plugins/plugins-enabled && rm -f reports`;
-`cd plugins/plugins-enabled && ln -s ../plugins-available/reports2 .`;
-unlink('root/thruk/plugins/reports');
 
 done_testing();
