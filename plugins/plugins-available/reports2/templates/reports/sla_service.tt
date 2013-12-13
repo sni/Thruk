@@ -2,21 +2,21 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'language'                    => [ 'Language',              'language',        'en'                  ,'', 1 ] },
-        { 'host'                        => [ 'Host',                  'hosts',           ''                    ,'', 1 ] },
-        { 'service'                     => [ 'Service',               'services',        ''                    ,'', 1 ] },
-        { 'timeperiod'                  => [ 'Timeperiod',            'rptimeperiod',    'last12months'               ] },
-        { 'breakdown'                   => [ 'Breakdown by',          'breakdowns',      'months'                     ] },
-        { 'rpttimeperiod'               => [ 'Report Timeperiod',     'rpttimeperiod',   ''                           ] },
-        { 'sla'                         => [ 'SLA %',                 'int',             '98'                  ,'', 1 ] },
-        { 'graph_min_sla'               => [ 'Graph SLA %',           'int',             '90'                  ,'', 1 ] },
-        { 'decimals'                    => [ 'Decimal Points',        'int',             '2'                   ,'', 1 ] },
-        { 'assumeinitialstates'         => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
-        { 'initialassumedservicestate'  => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
-        { 'includesoftstates'           => [ 'Include Soft States',   'yes_no',          'no'                         ] },
-        { 'unavailable'                 => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown']      ] },
-        { 'max_outages_pages'           => [ 'Latest Outages',        'int',             '1'          ,'max. # pages' ] },
-        { 'max_worst_pages'             => [ 'Worst Outages',         'int',             '1'          ,'max. # pages' ] },
+        { 'language'                    => [ 'Language',              'language',        'en'                  ,'', 1    ] },
+        { 'host'                        => [ 'Host',                  'hosts',           ''                    ,'', 1    ] },
+        { 'service'                     => [ 'Service',               'services',        ''                    ,'', 1    ] },
+        { 'timeperiod'                  => [ 'Timeperiod',            'rptimeperiod',    'last12months'                  ] },
+        { 'breakdown'                   => [ 'Breakdown by',          'breakdowns',      'months'                        ] },
+        { 'rpttimeperiod'               => [ 'Report Timeperiod',     'rpttimeperiod',   ''                              ] },
+        { 'sla'                         => [ 'SLA %',                 'int',             '98'                  ,'', 1    ] },
+        { 'graph_min_sla'               => [ 'Graph SLA %',           'int',             '90'                  ,'', 1    ] },
+        { 'decimals'                    => [ 'Decimal Points',        'int',             '2'                   ,'', 1    ] },
+        { 'assumeinitialstates'         => [ 'Assume Initial States', 'yes_no',          'yes'                           ] },
+        { 'initialassumedservicestate'  => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'            ] },
+        { 'includesoftstates'           => [ 'Include Soft States',   'yes_no',          'no'                            ] },
+        { 'unavailable'                 => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown']         ] },
+        { 'max_outages_pages'           => [ 'Latest Outages',        'int',             '1'          ,'max. # pages', 1 ] },
+        { 'max_worst_pages'             => [ 'Worst Outages',         'int',             '1'          ,'max. # pages', 1 ] },
     ];
   %]
 [% END %]
