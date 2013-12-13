@@ -121,15 +121,26 @@ my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         if($pidfile && -f $pidfile) {
-            my $pid = read_file($pidfile);
-            chomp($pid);
-            unlink($pidfile) if $pid == $$;
+            my $pids = [split(/\s/mx, read_file($pidfile))];
+            my $remaining = [];
+            for my $pid (@{$pids}) {
+                next if $pid == $$;
+                next if kill(0, $pid) == 0;
+                push @{$remaining}, $pid;
+            }
+            if(scalar @{$remaining} == 0) {
+                unlink($pidfile)
+            } else {
+                open(my $fh, '>', $pidfile);
+                print $fh join("\n", @{$remaining}),"\n";
+                CORE::close($fh);
+            }
         }
     }
     return;
 }
 if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-    open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
+    open(my $fh, '>>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
     Thruk::Utils::IO::close($fh, $pidfile);
     $SIG{INT}  = sub { _remove_pid(); exit; };

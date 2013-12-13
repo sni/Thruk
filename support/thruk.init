@@ -92,24 +92,28 @@ case "$1" in
     ;;
     stop)
         echo -n "Stopping $NAME..."
-        pid=`cat $PIDFILE 2>/dev/null`
+        pids=`cat $PIDFILE 2>/dev/null`
         if [ "$OMD_SITE" = "" ]; then
           rm -f /var/lock/subsys/thruk >/dev/null 2>&1
         fi
-        if [ "$pid" = "" ]; then
+        if [ "$pids" = "" ]; then
             echo ". Not running."
         else
-            kill $pid
+            kill $pids >/dev/null 2>&1
             if [ "$OMD_SITE" != "" ]; then
                 pkill -u $OMD_SITE -f thruk_fastcgi.pl
             fi
             for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
                 echo -n "."
-                ps -p $pid > /dev/null 2>&1 || break;
+                newpids=""
+                for pid in $pids; do
+                    ps -p $pid > /dev/null 2>&1 && newpids=" $pid"
+                done
+                pids="$newpids"
+                [ "$pids" = "" ] && break
                 sleep 1
             done
-            ps -p $pid > /dev/null 2>&1;
-            if [ $? -ne 0 ]; then
+            if [ "$pids" = "" ]; then
                 echo "OK"
                 exit 0;
             else
@@ -119,13 +123,16 @@ case "$1" in
         fi
     ;;
     status)
-        pid=`cat $PIDFILE 2>/dev/null`
-        if [ "$pid" != "" ]; then
-            ps -p $pid > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                echo "$NAME is running with pid $pid"
-                exit 0;
-            fi
+        pids=`cat $PIDFILE 2>/dev/null`
+        running=0
+        if [ "$pids" != "" ]; then
+            for pid in $pids; do
+                ps -p $pid > /dev/null 2>&1 && running=1
+            done
+        fi
+        if [ $running -eq 1 ]; then
+            echo "$NAME is running (pid "$pids")."
+            exit 0;
         fi
         echo "$NAME is not running"
         exit 1;
