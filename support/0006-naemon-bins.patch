@@ -15,7 +15,7 @@
 --- a/naglint	2013-11-29 22:09:23.165583119 +0100
 +++ b/naglint	2013-12-03 10:30:57.548100062 +0100
 @@ -11,8 +11,8 @@
-   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
    if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
  else
 -  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
