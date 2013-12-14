@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Panorama
+            - make tabs reorderable
           - Business Process
             - change service plugin output for first node
           - Bug Fixes

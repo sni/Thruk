@@ -31,6 +31,7 @@ Ext.onReady(function() {
     }
 });
 
+[%+ PROCESS _panorama_js_tab_reorder.tt +%]
 [%+ PROCESS _panorama_js_elements.tt +%]
 [%+ PROCESS _panorama_js_utils_base64.tt +%]
 [%+ PROCESS _panorama_js_slider.tt +%]

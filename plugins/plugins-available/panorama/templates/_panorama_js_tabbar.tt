@@ -1,6 +1,18 @@
 ﻿[% USE date %]
 Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
+    plugins: [
+        new Ext.ux.TabReorderer({
+            itemSelector: '.x-tab-closable', // only make real tabs draggable, not the menus
+            animate:       0,                // causes flickering server_time otherwise
+            listeners: {
+                Drop: function(This, container, dragCmp, idx, eOpts) {
+                    tabpan = Ext.getCmp('tabpan');
+                    tabpan.saveState();
+                }
+            }
+        })
+    ],
 
     id:             'tabpan',
     region:         'center',
@@ -216,7 +228,7 @@ Ext.define('TP.TabBar', {
             if(TP.initMask) { TP.initMask.destroy() }
         }
     },
-    getState:   function() {
+    getState: function() {
         var item_ids = [];
         this.items.each(function(item, idx, length) {
             var stateId = item.getStateId();
@@ -224,10 +236,26 @@ Ext.define('TP.TabBar', {
                 item_ids.push(stateId);
             }
         });
+        if(this.tabs_tr == undefined) {
+            this.tabs_tr = {};
+        }
+        var tabs = Ext.query('.x-tab-closable');
+        for(var nr=0; nr<tabs.length; nr++) {
+            if(this.tabs_tr[tabs[nr].id] == undefined) {
+                this.tabs_tr[tabs[nr].id] = item_ids[nr];
+            }
+        }
+        var ordered_items = [];
+        for(var nr=0; nr<tabs.length; nr++) {
+            ordered_items.push(this.tabs_tr[tabs[nr].id]);
+        }
+        if(item_ids.length == ordered_items.length) {
+            item_ids = ordered_items;
+        }
         return {
             item_ids:  item_ids,
             xdata:     this.xdata,
-            activeTab: this.items.indexOf(this.getActiveTab())
+            activeTab: this.getActiveTab().getStateId()
         }
     },
     applyState: function(state) {
@@ -240,8 +268,8 @@ Ext.define('TP.TabBar', {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 3000; // placement of inactive panlet starts delayed
             if(state) {
-                if(state.activeTab && state.item_ids.length >= state.activeTab-1) {
-                    TP.initial_active_tab = state.item_ids[state.activeTab - 1];
+                if(state.activeTab && TP.initial_active_tab == undefined) {
+                    TP.initial_active_tab = state.activeTab;
                 }
                 this.xdata = state.xdata;
                 for(var nr=0; nr<state.item_ids.length; nr++) {

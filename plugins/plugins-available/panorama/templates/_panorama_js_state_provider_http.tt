@@ -119,3 +119,8 @@ var cp = new Ext.state.HttpProvider({
     lastdata:  Ext.JSON.encode(ExtState)
 });
 Ext.state.Manager.setProvider(cp);
+
+// dump state in human readable way
+function dumpState() {
+    debug(cp.state);
+}
