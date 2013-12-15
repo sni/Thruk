@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -d .git ]; then
+if [ ! -e .git ]; then
   echo "not in an development environment, no .git directory found" >&2
   exit 1
 fi

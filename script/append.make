@@ -1,7 +1,7 @@
 ### THRUK
 
 newversion:
-	test -d .git
+	test -e .git
 	make NEWVERSION="`./get_version`" version
 
 version:
