@@ -22,22 +22,18 @@ URL:           http://thruk.org
 %endif
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
-Source1:       wkhtmltopdf
 Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
-Patch0:        0001-thruk.conf.patch
-Patch1:        0002-log4perl.conf.patch
-Patch2:        0004-thruk_fastcgi.pl.patch
 Requires(pre): shadow-utils
-Requires:      perl logrotate gd
+Requires:      perl logrotate gd wget cairo
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 %if %{defined suse_version}
-Requires: apache2 apache2-mod_fcgid cron cairo wget xorg-x11-server-extra
+Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
 %else
-Requires: httpd mod_fcgid cairo wget xorg-x11-server-Xvfb libXext dejavu-fonts-common
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-fonts-common
 %endif
 
 %description
@@ -52,11 +48,6 @@ large installations.
 
 %prep
 %setup -n %{fullname}
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-find . -name \*.orig -delete
-cp %{SOURCE1} script/
 
 %build
 %configure \
@@ -71,11 +62,10 @@ cp %{SOURCE1} script/
     --with-logrotate-dir="%{_sysconfdir}/logrotate.d" \
     --with-thruk-user="%{apacheuser}" \
     --with-thruk-group="%{apachegroup}" \
-    --with-thruk-libs="%{_datadir}/thruk/perl5" \
+    --with-thruk-libs="%{_libdir}/thruk/perl5" \
     --with-httpd-conf="%{_sysconfdir}/%{apachedir}/conf.d" \
     --with-htmlurl="/"
-# TODO: remove -j 1
-%{__make} %{?_smp_mflags} -j 1 all
+%{__make} %{?_smp_mflags} all
 
 %install
 %{__rm} -rf %{buildroot}
@@ -179,10 +169,11 @@ esac
 exit 0
 
 %files
-%attr(0755,root, root) %{_bindir}/thruk
-%attr(0755,root, root) %{_bindir}/naglint
-%attr(0755,root, root) %{_bindir}/nagexp
-%attr(0755,root, root) %{_initrddir}/thruk
+%defattr(-,root,root)
+%attr(0755,root,root) %{_bindir}/thruk
+%attr(0755,root,root) %{_bindir}/naglint
+%attr(0755,root,root) %{_bindir}/nagexp
+%attr(0755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/ssi
 %config %{_sysconfdir}/thruk/thruk.conf
 %attr(0644,%{apacheuser},%{apachegroup}) %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
@@ -196,8 +187,9 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/plugins
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
-%attr(0755,root, root) %{_datadir}/thruk/script/thruk_auth
-%attr(0755,root, root) %{_datadir}/thruk/script/thruk_fastcgi.pl
+%attr(0755,root,root) %{_datadir}/thruk/script/thruk_auth
+%attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
+%attr(0755,root,root) %{_datadir}/thruk/script/wkhtmltopdf
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates
 %{_datadir}/thruk/themes
@@ -208,13 +200,11 @@ exit 0
 %{_datadir}/thruk/menu.conf
 %{_datadir}/thruk/dist.ini
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
+%{_libdir}/thruk/perl5
 %doc %{_mandir}/man3/nagexp.3
 %doc %{_mandir}/man3/naglint.3
 %doc %{_mandir}/man3/thruk.3
 %doc %{_mandir}/man8/thruk.8
-%attr(0755,root,root) %{_datadir}/thruk/perl5
-
-%defattr(-,root,root)
 %docdir %{_defaultdocdir}
 
 

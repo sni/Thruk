@@ -1046,9 +1046,9 @@ ssi/README
 ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
+support/0003-thruk-scripts.patch
 support/0004-thruk_fastcgi.pl.patch
 support/0005-naemon.patch
-support/0006-naemon-bins.patch
 support/0007-naemon-init.patch
 support/0008-naemon-httpd.patch
 support/0009-naemon-fcgish.patch

@@ -71,6 +71,7 @@ local_install: local_patches
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
 	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/script/
+	[ ! -f script/wkhtmltopdf ] || cp -p script/wkhtmltopdf ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
 	############################################################################
 	# bin files
@@ -96,8 +97,8 @@ local_install: local_patches
 	# rc script
 	[ -z "${INITDIR}" ] || { mkdir -p ${DESTDIR}${INITDIR} && cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
 	############################################################################
-	# thruk libs - handled in seperate package
-	#[ -z "${THRUKLIBS}" ] || { mkdir -p ${DESTDIR}${THRUKLIBS} && cp -rp ${THRUKLIBS}/local-lib/dest/lib/perl5 ${DESTDIR}${LIBDIR}/; }
+	# embedded thruk libs - handled in seperate package for naemon
+	[ ! -d local-lib ] || { mkdir -p ${DESTDIR}${LIBDIR} && cp -rp local-lib ${DESTDIR}${LIBDIR}/perl5; }
 	############################################################################
 	# httpd config
 	[ -z "${HTTPDCONF}" ] || { mkdir -p ${DESTDIR}${HTTPDCONF} && cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk.conf; }
@@ -105,15 +106,15 @@ local_install: local_patches
 	# some patches
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0001-thruk.conf.patch
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0002-log4perl.conf.patch
+	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/0003-thruk-scripts.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
-	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp ${DESTDIR}${LIBDIR}
-	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp ${DESTDIR}${LIBDIR}
+	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
+	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
 
 naemon-patch:
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0005-naemon.patch
-	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/0006-naemon-bins.patch
 	cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/0007-naemon-init.patch
 	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/0008-naemon-httpd.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0009-naemon-fcgish.patch

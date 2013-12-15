@@ -1,156 +1,35 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-DESTDIR=$(CURDIR)/debian/thruk/
+export DH_VERBOSE=1
+DESTDIR=$(CURDIR)/debian/tmp/
 PERLARCH=$(shell perl -e 'use Config; print $$Config{archname}')
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	touch configure-stamp
+HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
 
-
-build: build-stamp
-
-build-stamp: configure-stamp
-	dh_testdir
-	patch -p1 < support/0001-thruk.conf.patch
-	patch -p1 < support/0002-log4perl.conf.patch
-	patch -p1 < support/0004-thruk_fastcgi.pl.patch
-	find . -name \*.orig -delete
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/usr \
+		--bindir="/usr/bin" \
+		--datadir="/usr/share/thruk" \
+		--libdir="/usr/lib/thruk" \
+		--localstatedir="/var/lib/thruk" \
+		--with-temp-dir="/var/cache/thruk" \
+		--sysconfdir="/etc/thruk" \
+		--mandir="/usr/share/man" \
+		--with-init-dir="/etc/init.d" \
+		--with-logrotate-dir="/etc/logrotate.d" \
+		--with-thruk-user="www-data" \
+		--with-thruk-group="www-data" \
+		--with-thruk-libs="/usr/lib/thruk/perl5" \
+		--with-httpd-conf="$(HTTPDCONF)" \
+		--with-htmlurl="/"
 	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so: zlib" >> debian/thruk.lintian-overrides
 	echo "thruk: embedded-zlib ./usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so"        >> debian/thruk.lintian-overrides
 
-	touch $@
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp $(CURDIR)/debian/thruk
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-	mkdir -p $(CURDIR)/debian/thruk/usr/bin
-	mkdir -p $(CURDIR)/debian/thruk/usr/lib/thruk
-	mkdir -p $(CURDIR)/debian/thruk/usr/share/thruk/
-	mkdir -p $(CURDIR)/debian/thruk/var/lib/thruk/
-	mkdir -p $(CURDIR)/debian/thruk/var/cache/thruk/
-	mkdir -p $(CURDIR)/debian/thruk/var/log/thruk/
-	mkdir -p $(CURDIR)/debian/thruk/etc/apache2/conf.d/
-	mkdir -p $(CURDIR)/debian/thruk/etc/apache2/conf-available/
-	mkdir -p $(CURDIR)/debian/thruk/etc/thruk
-	mkdir -p $(CURDIR)/debian/thruk/etc/init.d
-	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-available
-	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-enabled
-	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-available
-	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-enabled
-	rsync -a . $(CURDIR)/debian/thruk/usr/share/thruk/
-
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/var
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/blib
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/inc
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/get_version
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/pm_to_blib
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/script/append.make
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/MANIFEST
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/META.yml
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/MYMETA.json
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/MYMETA.yml
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/Makefile
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/Makefile.PL
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/docs/source
-
-	for file in $(CURDIR)/debian/thruk/usr/share/thruk/plugins/plugins-available/*; do \
-	    file=`basename $$file`; \
-	    ln -s /usr/share/thruk/plugins/plugins-available/$$file $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-available/$$file; \
-	done
-	for file in $(CURDIR)/debian/thruk/usr/share/thruk/plugins/plugins-enabled/*; do \
-	    file=`basename $$file`; \
-	    ln -s "../plugins-available/$$file" $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-enabled/$$file; \
-	done
-	for file in $(CURDIR)/debian/thruk/usr/share/thruk/themes/themes-available/*; do \
-	    file=`basename $$file`; \
-	    ln -s /usr/share/thruk/themes/themes-available/$$file $(CURDIR)/debian/thruk/etc/thruk/themes/themes-available/$$file; \
-	done
-	for file in $(CURDIR)/debian/thruk/usr/share/thruk/themes/themes-enabled/*; do \
-	    file=`basename $$file`; \
-	    ln -s "../themes-available/$$file" $(CURDIR)/debian/thruk/etc/thruk/themes/themes-enabled/$$file; \
-	done
-
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/plugins/plugins-enabled
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/themes/themes-enabled
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/t
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/root/thruk/themes
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/thruk.conf $(CURDIR)/debian/thruk/etc/thruk/thruk.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/log4perl.conf.example $(CURDIR)/debian/thruk/etc/thruk/log4perl.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/cgi.cfg $(CURDIR)/debian/thruk/etc/thruk/cgi.cfg
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/ssi $(CURDIR)/debian/thruk/etc/thruk/
-	mv $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi-pnp $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi
-	cp $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi     $(CURDIR)/debian/thruk/etc/thruk/ssi/extinfo-header.ssi
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk_local.conf.example $(CURDIR)/debian/thruk/etc/thruk/thruk_local.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/naglint.conf.example $(CURDIR)/debian/thruk/etc/thruk/naglint.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/fcgid_env.sh $(CURDIR)/debian/thruk/usr/share/thruk/fcgid_env.sh
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/apache_fcgid.conf $(CURDIR)/debian/thruk/etc/apache2/conf.d/thruk.conf
-	ln -s "../conf.d/thruk.conf" $(CURDIR)/debian/thruk/etc/apache2/conf-available/thruk.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/menu_local.conf $(CURDIR)/debian/thruk/etc/thruk/menu_local.conf
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/htpasswd $(CURDIR)/debian/thruk/etc/thruk/htpasswd
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk.init $(CURDIR)/debian/thruk/etc/init.d/thruk
-	mkdir -p $(CURDIR)/debian/thruk/usr/share/doc/thruk
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/debian/copyright $(CURDIR)/debian/thruk/usr/share/doc/thruk/copyright
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/local-lib $(CURDIR)/debian/thruk/usr/lib/thruk/perl5
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/thruk $(CURDIR)/debian/thruk/usr/bin/thruk
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/naglint $(CURDIR)/debian/thruk/usr/bin/naglint
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/nagexp $(CURDIR)/debian/thruk/usr/bin/nagexp
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/script/thruk_auth $(CURDIR)/debian/thruk/usr/lib/thruk/
-	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk_templates.cfg $(CURDIR)/debian/thruk/usr/share/thruk/
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/support
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/debian
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/LICENSE
-	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/root/thruk/plugins
-
-
-# Build architecture-independent files here.
-binary-indep: build install
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs Changes
-#	dh_installdocs
-#	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
+override_dh_strip:
 	dh_strip --exclude=wkhtmltopdf
-	dh_compress
-	dh_fixperms
-	chmod 755 $(CURDIR)/debian/thruk/usr/share/thruk/fcgid_env.sh
-	dh_perl
-#	dh_makeshlibs
-	dh_lintian
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
 
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+override_dh_auto_test:
+
+%:
+	dh $@
