@@ -47,7 +47,7 @@ large installations.
 %global __os_install_post %{nil}
 
 %prep
-%setup -n %{fullname}
+%setup -q -n %{fullname}
 
 %build
 %configure \
