@@ -61,6 +61,9 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
 requires 'Storable'                               => 0;     # required by Thruk::Utils::External
+requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
+requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
+requires 'Thread::Semaphore'                      => 0;     # required by Thruk::Pool::Simple
 
 # shinken features plugin
 feature     ('plugin_shinken',
