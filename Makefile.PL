@@ -76,17 +76,6 @@ feature     ('plugin_dashboard',
   'List::MoreUtils'                               => 0,
 );
 
-# reporting plugin
-feature     ('plugin_reports',
-  -default                                        => 0,
-  'PDF::Reuse'                                    => 0, # required by Thruk::View::PDF::Reuse
-  'Catalyst::View::PDF::Reuse'                    => 0, # required by Thruk::View::PDF::Reuse
-  'MIME::Lite'                                    => 0,
-  'Class::Inspector'                              => 0,
-  'Chart::Clicker'                                => 0,
-  'Graphics::Color::RGB'                          => 0,
-);
-
 # reporting2 plugin
 feature     ('plugin_reports2',
   -default                                        => 0,

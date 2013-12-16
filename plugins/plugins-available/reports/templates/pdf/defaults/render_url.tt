@@ -1,6 +1,0 @@
-﻿[%# RENDERING URL CONTENT #%]
-[% IF block == 'render' %]
-[%
-    get_url();
-%]
-[% END %]

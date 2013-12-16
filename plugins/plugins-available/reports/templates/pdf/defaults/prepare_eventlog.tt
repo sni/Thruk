@@ -1,6 +1,0 @@
-﻿[%# PREPERATION #%]
-[% IF block == 'prepare' %]
-  [%
-    get_events();
-  %]
-[% END %]
