@@ -6,7 +6,8 @@ use POSIX ":sys_wait_h";
 
 my $timeout = shift @ARGV;
 my $pid = fork();
-if($pid) {
+die("fork: $!") unless defined $pid;
+if(!$pid) {
     exec(@ARGV);
 } else {
     $SIG{'ALRM'} = sub {
