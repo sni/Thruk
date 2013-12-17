@@ -157,6 +157,12 @@ case "$*" in
     rm -rf %{_localstatedir}/cache/thruk
     rm -rf %{_datadir}/thruk/root/thruk/plugins
     %{insserv_cleanup}
+    rmdir /usr/share/thruk/script \
+          /usr/share/thruk \
+          /usr/lib/thruk \
+          /etc/thruk/ssi \
+          /etc/thruk \
+          2>/dev/null
     ;;
   1)
     # POSTUPDATE
