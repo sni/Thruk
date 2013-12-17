@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - removed old reporting plugin
+          - install ssi as examples
           - Panorama
             - make tabs reorderable
           - Business Process
