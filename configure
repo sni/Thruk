@@ -42,6 +42,7 @@ Getopt::Long::GetOptions (
    "with-thruk-libs=s"      => \$options->{'thruk-libs'},
    "with-thruk-temp-dir=s"  => \$options->{'thruk-temp-dir'},
    "with-thruk-var-dir=s"   => \$options->{'thruk-var-dir'},
+   "with-thruk-log-dir=s"   => \$options->{'thruk-log-dir'},
 ) or warn "error in options";
 
 if($options->{'help'}) {
@@ -60,6 +61,7 @@ $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'
 
 $options->{'tmpdir'}         = $options->{'thruk-temp-dir'} if $options->{'thruk-temp-dir'};
 $options->{'localstatedir'}  = $options->{'thruk-var-dir'}  if $options->{'thruk-var-dir'};
+$options->{'log-dir'}        = $options->{'thruk-log-dir'}  if $options->{'thruk-log-dir'};
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
