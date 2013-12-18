@@ -41,7 +41,7 @@ if [ "${PNPURL:0:5}" != "http:" -a "${PNPURL:0:6}" != "https:" ]; then
   php $PNP_INDEX "$REQUEST_URI" > $TEMPFILE 2>/dev/null
 else
   # try to fetch image with wget
-  $PNP_WGET -O $TEMPFILE $PNPURL/$REQUEST_URI
+  $PNP_WGET -O $TEMPFILE "$PNPURL/$REQUEST_URI"
 fi
 
 exit 0

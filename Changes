@@ -7,6 +7,8 @@ next:
             - make tabs reorderable
           - Business Process
             - change service plugin output for first node
+          - Reports
+            - fixed pnp graphs in reports when using remote instances and services containing spaces
           - Bug Fixes
             - fixed init script which did not stop/restart are fcgi processes
 
