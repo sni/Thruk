@@ -44,6 +44,16 @@ case "$1" in
 
         # enable thruk itself
         if [ -x '/usr/sbin/a2enconf' ]; then
+            # clean up old conf.d mess
+            set +e
+            if [ -e /etc/apache2/conf.d/thruk.conf -a -e /etc/apache2/conf-available/thruk.conf.dpkg-new -a -h /etc/apache2/conf-available/thruk.conf ]; then
+                diff /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf.dpkg-new >/dev/null && {
+                    rm -f /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf
+                    rmdir /etc/apache2/conf.d 2>/dev/null
+                    mv /etc/apache2/conf-available/thruk.conf.dpkg-new /etc/apache2/conf-available/thruk.conf
+                }
+            fi
+            set -e
             [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
         fi
 
