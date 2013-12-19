@@ -73,6 +73,20 @@ calculate availability from stash data
 sub calculate_availability {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     Thruk::Utils::Avail::calculate_availability($c);
+
+    my $total_hosts    = 0;
+    my $total_services = 0;
+    if($c->stash->{'avail_data'}->{'hosts'}) {
+        $total_hosts += scalar keys %{$c->stash->{'avail_data'}->{'hosts'}};
+    }
+    $c->stash->{'total_hosts'} = $total_hosts;
+
+    if($c->stash->{'avail_data'}->{'services'}) {
+        for my $hst (keys %{$c->stash->{'avail_data'}->{'services'}}) {
+            $total_services += scalar keys %{$c->stash->{'avail_data'}->{'services'}->{$hst}};
+        }
+    }
+    $c->stash->{'total_services'} = $total_services;
     return 1;
 }
 

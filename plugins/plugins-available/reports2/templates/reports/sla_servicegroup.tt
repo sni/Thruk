@@ -43,7 +43,7 @@
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
 
-    [% IF avail_data.services.size > 1 %]
+    [% IF total_services > 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("SLA Overview Graph") %]
         [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
       [% END %]
@@ -58,6 +58,7 @@
         [% WRAPPER 'reports/comp/page_standard.tt' %]
           [% PROCESS 'reports/comp/sla_graph_page.tt' %]
         [% END %]
+        [% PROCESS 'reports/comp/sla_outages.tt' %]
       [% END %]
     [% END %]
   [% END %][%# report wrapper #%]

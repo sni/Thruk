@@ -635,7 +635,7 @@ sub add_report_defaults {
         my $f   = $d->{$key};
 
         # fill in default
-        if(defined $f->[4] and $f->[2] and !$report->{'params'}->{$key}) {
+        if(defined $f->[4] and $f->[2] ne '' and !$report->{'params'}->{$key}) {
             $report->{'params'}->{$key} = $f->[2];
         }
 
@@ -895,7 +895,7 @@ sub _verify_fields {
         my $f   = $d->{$key};
 
         # required fields
-        if(defined $f->[4] and !$f->[2] and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
+        if(defined $f->[4] and $f->[2] eq '' and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
             push @errors, $f->[0].': required field';
         }
 
