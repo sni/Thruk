@@ -1,4 +1,4 @@
-﻿[% page_data = page_splice(outages, 12, param.max_outages_pages)  %]
+﻿[% page_data = page_splice(out, 12, param.max_outages_pages)  %]
 [% FOREACH datablock = page_data %]
   [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Latest Outages") %]
     [% FOREACH o = datablock %]

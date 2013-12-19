@@ -1,6 +1,6 @@
 ﻿[% IF param.max_outages_pages > 0 || param.max_worst_pages > 0 %]
-  [% outages = outages(logs, start, end) %]
-  [% IF outages.size == 0 %]
+  [% out = outages(logs, start, end) %]
+  [% IF out.size == 0 %]
     [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Outages") %]
       [% loc("no outages during this timeperiod") %]
     [% END %]

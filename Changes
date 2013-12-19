@@ -8,6 +8,7 @@ next:
           - Business Process
             - change service plugin output for first node
           - Reports
+            - support outages pages for multiple host/service reports
             - fill in defaults for host/service unavailable states when switching report templates
             - fixed pnp graphs in reports when using remote instances and services containing spaces
           - Bug Fixes

@@ -1,4 +1,4 @@
-﻿[% worst = sort_by_key(outages, 'duration').reverse %]
+﻿[% worst = sort_by_key(out, 'duration').reverse %]
 [% page_data = page_splice(worst, 12, param.max_worst_pages)  %]
 [% FOREACH datablock = page_data %]
   [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Worst Outages") %]

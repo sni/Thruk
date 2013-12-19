@@ -102,14 +102,22 @@ print outages from log entries
 sub outages {
     my($logs, $start, $end) = @_;
 
-    my $c   = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    my $u   = $c->stash->{'unavailable_states'};
+    my $c       = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $u       = $c->stash->{'unavailable_states'};
+    my $host    = $c->{'request'}->{'parameters'}->{'host'};
+    my $service = $c->{'request'}->{'parameters'}->{'service'};
 
     # combine outages
     my @reduced_logs;
     my($combined, $last);
     my $downtime = 0;
     for my $l (@{$logs}) {
+        if($service) {
+            next if(defined $l->{'service'} and $l->{'service'} ne $service);
+            next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+        } else {
+            next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+        }
         $l->{'class'} = lc $l->{'class'};
         $downtime = $l->{'in_downtime'} if defined $l->{'in_downtime'};
         if(!defined $combined) {

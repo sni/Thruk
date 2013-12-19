@@ -354,14 +354,12 @@ sub calculate {
     }
 
     # if we have more than one host or service, we dont build up a log
+    $self->{'report_options'}->{'build_log'} = TRUE;
     if(scalar @{$self->{'report_options'}->{'hosts'}} == 1) {
         $self->{'report_options'}->{'build_log'} = HOST_ONLY;
     }
     elsif(scalar @{$self->{'report_options'}->{'services'}} == 1) {
         $self->{'report_options'}->{'build_log'} = SERVICE_ONLY;
-    }
-    else {
-        $self->{'report_options'}->{'build_log'} = FALSE;
     }
 
     $self->{'report_options'}->{'calc_all'} = FALSE;
@@ -919,6 +917,8 @@ sub _process_log_line {
                                 'plugin_output' => $data->{'plugin_output'},
                                 'class'         => $state_text,
                                 'in_downtime'   => $service_hist->{'in_downtime'},
+                                'host'          => $data->{'host_name'},
+                                'service'       => $data->{'service_description'},
                             },
                 ) unless $self->{'report_options'}->{'build_log'} == HOST_ONLY;
             }
@@ -950,6 +950,8 @@ sub _process_log_line {
                                 'plugin_output' => $plugin_output,
                                 'class'         => 'INDETERMINATE',
                                 'in_downtime'   => $service_hist->{'in_downtime'},
+                                'host'          => $data->{'host_name'},
+                                'service'       => $data->{'service_description'},
                             },
             ) unless $self->{'report_options'}->{'build_log'} == HOST_ONLY;
         }
@@ -983,6 +985,7 @@ sub _process_log_line {
                                 'plugin_output' => $data->{'plugin_output'},
                                 'class'         => $state_text,
                                 'in_downtime'   => $host_hist->{'in_downtime'},
+                                'host'          => $data->{'host_name'},
                             },
                 );
             }
@@ -1025,6 +1028,7 @@ sub _process_log_line {
                                 'plugin_output' => $plugin_output,
                                 'class'         => 'INDETERMINATE',
                                 'in_downtime'   => $host_hist->{'in_downtime'},
+                                'host'          => $data->{'host_name'},
                             },
             );
         }
@@ -1540,7 +1544,7 @@ sub _calculate_log {
         }
 
         # convert time format
-       if($self->{'report_options'}->{'timeformat'} ne '%s') {
+        if($self->{'report_options'}->{'timeformat'} ne '%s') {
             $log->{'end'}   = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
             $log->{'start'} = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
         }
