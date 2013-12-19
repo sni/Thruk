@@ -2879,6 +2879,15 @@ Description: Show/Hide the status totals header.
 Example: /thruk/cgi-bin/status.cgi?hidetop=1
 
 
+==== hidesearch
+
+Pages: status pages
+
+Description: Show/Hide the status filters
+
+Example: /thruk/cgi-bin/status.cgi?host=localhost&hidesearch=1
+
+
 ==== minimal
 
 Pages: status page
