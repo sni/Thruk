@@ -14,8 +14,10 @@
         { 'initialassumedhoststate' => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
         { 'initialassumedservicestate'  => [ 'Initial Assumed State',  'svc_initialassumedstate',          '0'            ] },
         { 'includesoftstates'       => [ 'Include Soft States',        'yes_no',          'no'                            ] },
-        { 'unavailable'             => [ 'Host Unavailable States',    'hst_unavailable', ['down', 'unreachable']         ] },
-        { 'unavailable'             => [ 'Service Unavailable States', 'svc_unavailable', ['critical', 'unknown']         ] },
+        { 'unavailable'             => [ 'Host Unavailable States',    'hst_unavailable', ['down', 'unreachable'], '', 1  ] },
+        { 'unavailable'             => [ 'Service Unavailable States', 'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
+        { 'max_outages_pages'       => [ 'Latest Outages',              'int',            '0'          ,'max. # pages', 1 ] },
+        { 'max_worst_pages'         => [ 'Worst Outages',               'int',            '0'          ,'max. # pages', 1 ] },
     ];
   %]
 [% END %]

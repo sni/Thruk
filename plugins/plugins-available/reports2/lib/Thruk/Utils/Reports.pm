@@ -352,15 +352,7 @@ sub generate_report {
     $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 0; # Unspecified
 
     # add default params
-    my $fields = _get_required_fields($c, $options);
-    for my $f (@{$fields}) {
-        my @keys = keys %{$f};
-        my $d = $f->{$keys[0]};
-        next unless $d->[4];
-        next unless $d->[2];
-        next if exists $options->{'params'}->{$keys[0]};
-        $options->{'params'}->{$keys[0]} = $d->[2];
-    }
+    add_report_defaults($c, undef, $options);
 
     $c->stash->{'param'} = $options->{'params'};
     $c->stash->{'r'}     = $options;
@@ -627,6 +619,39 @@ sub get_report_languages {
 }
 
 ##########################################################
+
+=head2 add_report_defaults
+
+  add_report_defaults($c, [$fields], $report)
+
+add report defaults
+
+=cut
+sub add_report_defaults {
+    my($c, $fields, $report) = @_;
+    $fields = _get_required_fields($c, $report) unless defined $fields;
+    for my $d (@{$fields}) {
+        my $key = (keys %{$d})[0];
+        my $f   = $d->{$key};
+
+        # fill in default
+        if(defined $f->[4] and $f->[2] and !$report->{'params'}->{$key}) {
+            $report->{'params'}->{$key} = $f->[2];
+        }
+
+        # unavailable states may be empty when switching from hosts to services templates
+        if($f->[1] eq 'hst_unavailable' or $f->[1] eq 'svc_unavailable') {
+            my %default = map {$_ => 1} @{$f->[2]};
+            my @used    = grep {$default{$_}} @{$report->{'params'}->{$key}};
+            if(scalar @used == 0) {
+                push @{$report->{'params'}->{$key}}, @{$f->[2]};
+            }
+        }
+    }
+    return;
+}
+
+##########################################################
 sub _get_locale_name {
     my($c, $template) = @_;
     return Thruk::Utils::get_template_variable($c, 'reports/locale/'.$template, 'locale_name');
@@ -710,8 +735,9 @@ sub _read_report_file {
 
     my $report = Thruk::Utils::read_data_file($file);
     $report->{'nr'} = $nr;
-    # add defaults
     $report = _get_new_report($c, $report);
+    # add defaults
+    add_report_defaults($c, undef, $report);
 
     unless($noauth) {
         $report->{'readonly'}   = 1;
@@ -861,14 +887,12 @@ sub _verify_fields {
     delete $report->{'var'}->{'opt_errors'};
     my @errors;
 
+    # add defaults first
+    add_report_defaults($c, $fields, $report);
+
     for my $d (@{$fields}) {
         my $key = (keys %{$d})[0];
         my $f   = $d->{$key};
-
-        # fill in default
-        if(defined $f->[4] and $f->[2] and !$report->{'params'}->{$key}) {
-            $report->{'params'}->{$key} = $f->[2];
-        }
 
         # required fields
         if(defined $f->[4] and !$f->[2] and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {

@@ -276,6 +276,9 @@ sub _set_report_data {
     $c->stash->{r}           = $r;
     $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
     $c->stash->{languages}   = Thruk::Utils::Reports::get_report_languages($c);
+
+    Thruk::Utils::Reports::add_report_defaults($c, undef, $r);
+
     return;
 }
 

@@ -8,6 +8,7 @@ next:
           - Business Process
             - change service plugin output for first node
           - Reports
+            - fill in defaults for host/service unavailable states when switching report templates
             - fixed pnp graphs in reports when using remote instances and services containing spaces
           - Bug Fixes
             - fixed init script which did not stop/restart are fcgi processes

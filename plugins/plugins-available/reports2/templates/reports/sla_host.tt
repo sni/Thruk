@@ -13,7 +13,7 @@
         { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                           ] },
         { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'            ] },
         { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                            ] },
-        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']         ] },
+        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable'], '', 1  ] },
         { 'max_outages_pages'       => [ 'Latest Outages',        'int',             '1'          ,'max. # pages', 1 ] },
         { 'max_worst_pages'         => [ 'Worst Outages',         'int',             '1'          ,'max. # pages', 1 ] },
     ];
