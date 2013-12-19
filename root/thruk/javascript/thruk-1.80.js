@@ -3356,7 +3356,8 @@ function verify_op(event) {
          && selValue != 'timeperiod'
          && selValue != 'contact'
          && selValue != 'custom variable'
-         && selValue != 'comment') {
+         && selValue != 'comment'
+         && selValue != 'plugin output') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches

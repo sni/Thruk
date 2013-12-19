@@ -785,6 +785,10 @@ sub single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
+        elsif ( $filter->{'type'} eq 'plugin output' ) {
+            push @hostfilter,    { -or => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @servicefilter, { -or => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+        }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
