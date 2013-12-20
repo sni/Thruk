@@ -254,12 +254,14 @@ Ext.define('TP.TabBar', {
         }
         var activeTab = this.getActiveTab();
         if(!activeTab) {
+            debug("forced setting activeTab");
             activeTab = this.setActiveTab(0);
         }
+        activeTab = activeTab.getStateId();
         return {
             item_ids:  item_ids,
             xdata:     this.xdata,
-            activeTab: activeTab.getStateId()
+            activeTab: activeTab
         }
     },
     applyState: function(state) {

@@ -29,7 +29,9 @@
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
-                    panlet.show(false);
+                    try {    // so allow it to fail
+                        panlet.show(false);
+                    } catch(e) { debug(e) }
                 }
             }
             // save current active tab unless we are in tab rotation mode

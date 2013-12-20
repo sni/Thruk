@@ -50,7 +50,9 @@
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
                     if(this.chart.isVisible()) {
-                        this.chart.redraw();
+                        try { // this may fail when redrawing for the first time
+                            this.chart.redraw();
+                        } catch(e) { debug(e) }
                     }
                 }
             }

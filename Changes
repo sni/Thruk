@@ -6,6 +6,7 @@ next:
           - add plugin_output and long_plugin_output filter (awiddersheim)
           - Panorama
             - make tabs reorderable
+            - fixed problem on initializing pie charts
           - Business Process
             - change service plugin output for first node
           - Reports
