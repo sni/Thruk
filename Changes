@@ -7,6 +7,7 @@ next:
           - Panorama
             - make tabs reorderable
             - fixed problem on initializing pie charts
+            - fixed import problem not showing initial panels
           - Business Process
             - change service plugin output for first node
           - Reports
