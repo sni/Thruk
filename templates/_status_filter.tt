@@ -389,6 +389,7 @@
               <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
               <option value="number of services"[% IF s.type == 'number of services' %] selected[% END %]>Number of Services</option>
               <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
+              <option value="plugin output"[% IF s.type == 'plugin output' %] selected[% END %]>Plugin Output</option>
               <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
               <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
               <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
