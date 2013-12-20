@@ -252,10 +252,14 @@ Ext.define('TP.TabBar', {
         if(item_ids.length == ordered_items.length) {
             item_ids = ordered_items;
         }
+        var activeTab = this.getActiveTab();
+        if(!activeTab) {
+            activeTab = this.setActiveTab(0);
+        }
         return {
             item_ids:  item_ids,
             xdata:     this.xdata,
-            activeTab: this.getActiveTab().getStateId()
+            activeTab: activeTab.getStateId()
         }
     },
     applyState: function(state) {
