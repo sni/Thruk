@@ -379,6 +379,21 @@ var TP = {
             }
         }
         TP.initialized = true;
+
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        // ensure panels from the active tab are displayed
+        if(TP.initial_active_tab != activeTab.getStateId()) {
+            debug("active tab changed...");
+            for(var nr=0; nr<activeTab.window_ids.length; nr++) {
+                var panlet = Ext.getCmp(activeTab.window_ids[nr]);
+                if(panlet) { // may not yet exists due to delayed rendering
+                    try {    // so allow it to fail
+                        panlet.show(false);
+                    } catch(e) { debug(e) }
+                }
+            }
+        }
         if(TP.initMask) { TP.initMask.destroy() }
     },
     stopAllPanelRefresh: function() {
