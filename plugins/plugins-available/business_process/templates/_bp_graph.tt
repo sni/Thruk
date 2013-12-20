@@ -89,11 +89,12 @@
       [%+ END %]
     ];
 
-    var bp_id      = [% bp.id %];
-    var editmode   = [% editmode %];
-    var testmode   = [% testmode %];
-    var bp_no_menu = [% no_menu %];
-    var testmodes  = [% json_encode(testmodes) %];
+    var bp_id       = [% bp.id %];
+    var bp_template = '[% bp.template %]';
+    var editmode    = [% editmode %];
+    var testmode    = [% testmode %];
+    var bp_no_menu  = [% no_menu %];
+    var testmodes   = [% json_encode(testmodes) %];
 
     var bp_graph_options = {
         'bp_rankDir': '[% bp.rankDir %]',

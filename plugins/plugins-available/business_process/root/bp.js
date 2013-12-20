@@ -547,14 +547,15 @@ function bp_show_edit_node(id, refreshType) {
     }
 
     // update object creation status
+    jQuery("INPUT[name=bp_host_template]").val(bp_template);
     if(node && node.func.toLowerCase() != 'status') {
         jQuery("INPUT[name=bp_host]").val(node.host);
         jQuery("INPUT[name=bp_service]").val(node.service);
-        jQuery("INPUT[name=bp_service_template]").val(node.template);
+        jQuery("INPUT[name=bp_template]").val(node.template);
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
-        jQuery("INPUT[name=bp_service_template]").val('');
+        jQuery("INPUT[name=bp_template]").val('');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {

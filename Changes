@@ -10,6 +10,7 @@ next:
             - fixed import problem not showing initial panels
           - Business Process
             - change service plugin output for first node
+            - fixed displaying/using wrong host template
           - Reports
             - support outages pages for multiple host/service reports
             - fill in defaults for host/service unavailable states when switching report templates

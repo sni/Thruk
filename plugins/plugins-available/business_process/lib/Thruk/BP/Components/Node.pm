@@ -238,7 +238,7 @@ sub get_objects_conf {
         $obj->{'hosts'}->{$bp->{'name'}} = {
             'host_name'      => $bp->{'name'},
             'alias'          => 'Business Process: '.$self->{'label'},
-            'use'            => $self->{'template'} || 'thruk-bp-template',
+            'use'            => $bp->{'template'} || 'thruk-bp-template',
             '_THRUK_BP_ID'   => $bp->{'id'},
             '_THRUK_NODE_ID' => $self->{'id'},
         };
