@@ -44,7 +44,7 @@ sub new {
         'id'                => undef,
         'editmode'          => $editmode,
         'name'              => undef,
-        'template'          => $bpdata->{'template'},
+        'template'          => $bpdata->{'template'} || '',
         'nodes'             => [],
         'nodes_by_id'       => {},
         'nodes_by_name'     => {},
