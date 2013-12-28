@@ -1338,12 +1338,12 @@ sub get_action_url {
     if ($action_url =~ m|/render/|mx) {
         my $new_host = $host;
         $new_host =~ s/[^\w\-]/_/gmx;
-        $new_action_url =~ s/$host/$new_host/gmx;
+        $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
         if ($svc) {
             my $new_svc = $svc;
             $new_svc =~ s/[^\w\-]/_/gmx;
-            $new_action_url =~ s/$svc/$new_svc/gmx;
+            $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
         }
     }
 
