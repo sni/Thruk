@@ -172,8 +172,9 @@ sub init {
         $self->{'config'}->{'obj_exclude'} = [
                     '^cgi.cfg$',
                     '^resource.cfg$',
+                    '^naemon.cfg$',
                     '^nagios.cfg$',
-                    '^icinga.cfg$'
+                    '^icinga.cfg$',
         ];
     }
 
@@ -1230,6 +1231,7 @@ sub _set_config {
            and scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
            and scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
             my $newest = $self->_newest_file(
+                                             $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/icinga.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/nagios.cfg',
@@ -1240,6 +1242,9 @@ sub _set_config {
 
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
+        }
+        elsif($core_conf =~ m|/omd/sites/(.*?)/etc/naemon/naemon.cfg|mx) {
+            $core_conf = '/omd/sites/'.$1.'/tmp/naemon/naemon.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg';
@@ -1331,6 +1336,11 @@ sub _set_coretype {
     # try to determine core type from main config
     if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
         $self->{'coretype'} = 'icinga';
+        return;
+    }
+
+    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'naemon_user'}) {
+        $self->{'coretype'} = 'naemon';
         return;
     }
 
