@@ -1,5 +1,7 @@
-# put this line outside your virtual hosts
-RewriteLock "/var/cache/thruk/apache_rewrite.lock"
+# put the RewriteLock outside your virtual hosts (only required for apache < 2.4)
+<IfModule !mod_authz_core.c>
+  RewriteLock "/var/cache/thruk/apache_rewrite.lock"
+</IfModule>
 
 # put everything else inside your vhost
 RewriteMap  users prg:/usr/lib/thruk/thruk_auth
