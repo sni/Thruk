@@ -1,5 +1,4 @@
 package Catalyst::Plugin::Thruk::ConfigLoader;
-use parent 'Catalyst::Plugin::ConfigLoader';
 
 use strict;
 use Thruk::Backend::Pool;
@@ -197,11 +196,177 @@ sub switch_user {
     return;
 }
 
+
+
+
+
+
+
+######################################
+# demoosified version of Catalyst::Plugin::ConfigLoader
+## no critic
 ######################################
 
-1;
+=head2 setup( )
+=cut
 
-__END__
+sub setup {
+    my $c     = shift;
+    my @files = $c->find_files;
+    my $cfg   = Config::Any->load_files(
+        {   files       => \@files,
+            filter      => \&_fix_syntax,
+            use_ext     => 1,
+            driver_args => $c->config->{ 'Plugin::ConfigLoader' }->{ driver }
+                || {},
+        }
+    );
+    # map the array of hashrefs to a simple hash
+    my %configs = map { %$_ } @$cfg;
+
+    # split the responses into normal and local cfg
+    my $local_suffix = $c->get_config_local_suffix;
+    my ( @main, @locals );
+    for ( sort keys %configs ) {
+        if ( m{$local_suffix\.}ms ) {
+            push @locals, $_;
+        }
+        else {
+            push @main, $_;
+        }
+    }
+
+    # load all the normal cfgs, then the local cfgs last so they can override
+    # normal cfgs
+    $c->load_config( { $_ => $configs{ $_ } } ) for @main, @locals;
+
+    $c->finalize_config;
+    $c->next::method( @_ );
+}
+
+=head2 load_config
+=cut
+
+sub load_config {
+    my $c   = shift;
+    my $ref = shift;
+
+    my ( $file, $config ) = %$ref;
+
+    $c->config( $config );
+    $c->log->debug( qq(Loaded Config "$file") )
+        if $c->debug;
+
+    return;
+}
+
+=head2 find_files
+=cut
+
+sub find_files {
+    my $c = shift;
+    my ( $path, $extension ) = $c->get_config_path;
+    my $suffix     = $c->get_config_local_suffix;
+    my @extensions = @{ Config::Any->extensions };
+
+    my @files;
+    if ( $extension ) {
+        die "Unable to handle files with the extension '${extension}'"
+            unless grep { $_ eq $extension } @extensions;
+        ( my $local = $path ) =~ s{\.$extension}{_$suffix.$extension};
+        push @files, $path, $local;
+    }
+    else {
+        @files = map { ( "$path.$_", "${path}_${suffix}.$_" ) } @extensions;
+    }
+    @files;
+}
+
+=head2 get_config_path
+=cut
+
+sub get_config_path {
+    my $c = shift;
+
+
+    my $appname = ref $c || $c;
+    my $prefix  = Catalyst::Utils::appprefix( $appname );
+    my $path    = Catalyst::Utils::env_value( $appname, 'CONFIG' )
+        || $c->config->{ 'Plugin::ConfigLoader' }->{ file }
+        || $c->path_to( $prefix );
+
+    my ( $extension ) = ( $path =~ m{\.([^\/\\.]{1,4})$} );
+
+    if ( -d $path ) {
+        $path =~ s{[\/\\]$}{};
+        $path .= "/$prefix";
+    }
+
+    return ( $path, $extension );
+}
+
+=head2 get_config_local_suffix
+=cut
+
+sub get_config_local_suffix {
+    my $c = shift;
+
+    my $appname = ref $c || $c;
+    my $suffix = Catalyst::Utils::env_value( $appname, 'CONFIG_LOCAL_SUFFIX' )
+        || $c->config->{ 'Plugin::ConfigLoader' }->{ config_local_suffix }
+        || 'local';
+
+    return $suffix;
+}
+
+sub _fix_syntax {
+    my $config     = shift;
+    my @components = (
+        map +{
+            prefix => $_ eq 'Component' ? '' : $_ . '::',
+            values => delete $config->{ lc $_ } || delete $config->{ $_ }
+        },
+        grep { ref $config->{ lc $_ } || ref $config->{ $_ } }
+            qw( Component Model M View V Controller C Plugin )
+    );
+
+    foreach my $comp ( @components ) {
+        my $prefix = $comp->{ prefix };
+        foreach my $element ( keys %{ $comp->{ values } } ) {
+            $config->{ "$prefix$element" } = $comp->{ values }->{ $element };
+        }
+    }
+}
+
+=head2 config_substitutions( $value )
+=cut
+sub config_substitutions {
+    my $c    = shift;
+    my $subs = $c->config->{ 'Plugin::ConfigLoader' }->{ substitutions }
+        || {};
+    $subs->{ HOME }    ||= sub { shift->path_to( '' ); };
+    $subs->{ ENV }    ||=
+        sub {
+            my ( $c, $v ) = @_;
+            if (! defined($ENV{$v})) {
+                Catalyst::Exception->throw( message =>
+                    "Missing environment variable: $v" );
+                return "";
+            } else {
+                return $ENV{ $v };
+            }
+        };
+    $subs->{ path_to } ||= sub { shift->path_to( @_ ); };
+    $subs->{ literal } ||= sub { return $_[ 1 ]; };
+    my $subsre = join( '|', keys %$subs );
+
+    for ( @_ ) {
+        s{__($subsre)(?:\((.+?)\))?__}{ $subs->{ $1 }->( $c, $2 ? split( /,/, $2 ) : () ) }eg;
+    }
+}
+
+## use critic
+
 
 =head1 NAME
 
@@ -241,7 +406,5 @@ This library is free software . You can redistribute it and/or modify
 it under the same terms as perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

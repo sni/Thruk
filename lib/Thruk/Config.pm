@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 use Carp;
 use Config::Any;
-use Catalyst::Utils;
+use Cwd 'abs_path';
 use Catalyst::Plugin::Thruk::ConfigLoader;
 
 =head1 NAME
@@ -22,7 +22,7 @@ Generic Access to Thruks Config
 
 our $VERSION = '1.80';
 
-my $project_root = Catalyst::Utils::home('Thruk::Config');
+my $project_root = home('Thruk::Config');
 my $branch       = '3';
 my $gitbranch    = get_git_name($project_root);
 $branch          = $gitbranch unless $branch ne '';
@@ -270,7 +270,7 @@ sub _load_any {
     my ($files) = @_;
     my $cfg   = Config::Any->load_files({
             files       => $files,
-            filter      => \&Catalyst::Plugin::ConfigLoader::_fix_syntax,
+            filter      => \&Catalyst::Plugin::Thruk::ConfigLoader::_fix_syntax,
             use_ext     => 1,
             driver_args => $Thruk::Config::config{'Plugin::ConfigLoader'}->{'driver'},
         }
@@ -340,6 +340,29 @@ uname:      $uname
 release:    $release
 EOT
     return $details;
+}
+
+######################################
+
+=head2 home
+
+  home()
+
+faster variant of Catalyst::Utils::home
+
+=cut
+sub home {
+    my($class) = @_;
+    (my $file = "$class.pm") =~ s{::}{/}gmx;
+    if ( my $inc_entry = $INC{$file} ) {
+        $inc_entry = abs_path($inc_entry);
+        $inc_entry =~ s/\Q\/$file\E$//mx;
+        $inc_entry =~ s/\/b?lib//gmx;
+        return $inc_entry;
+    }
+
+    # we found nothing
+    return 0;
 }
 
 ######################################
