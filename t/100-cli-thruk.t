@@ -113,10 +113,10 @@ TestUtils::test_command({
 
 # Excel export
 TestUtils::test_command({
-    cmd  => '/bin/sh -c \''.$BIN.' -A thrukadmin -a "url=status.cgi?view_mode=xls&host=all" > /tmp/allservices.xls\'',
+    cmd  => '/bin/sh -c \''.$BIN.' -A thrukadmin -a "url=status.cgi?view_mode=xls&host='.$host.'" > /tmp/services.xls\'',
 });
 TestUtils::test_command({
-    cmd  => '/usr/bin/file /tmp/allservices.xls',
+    cmd  => '/usr/bin/file /tmp/services.xls',
     like => ['/(Microsoft Office|CDF V2|Composite Document File V2) Document/' ],
 });
 unlink('/tmp/allservices.xls');
