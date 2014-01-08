@@ -1332,6 +1332,8 @@ sub get_action_url {
         if($action_url !~ m/theme=/mx) {
             $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
         }
+        $action_url =~ s/&amp;/&/gmx;
+        $action_url =~ s/&/&amp;/gmx;
         return($action_url);
     }
 
