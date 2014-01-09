@@ -636,6 +636,8 @@ sub _get_filter {
                 $having =~ s/\)$//mx;
                 $filter = $filter.' HAVING ('.$having.')';
             }
+        } else {
+            $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
         }
     }
 

@@ -485,7 +485,11 @@ sub calculate_availability {
     }
     push @typefilter, { class => 2 }; # programm messages
     if($rpttimeperiod) {
-        push @typefilter, { type => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }};
+        push @typefilter, { '-or' => [
+                                      { message => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }},                               # livestatus
+                                      { -and => [ {'type' => 'TIMEPERIOD TRANSITION' }, { 'message' => { '~~' => $rpttimeperiod }} ] }, # logcache
+                                    ]
+                          };
     }
 
     # ensure reports won't wrack our server
