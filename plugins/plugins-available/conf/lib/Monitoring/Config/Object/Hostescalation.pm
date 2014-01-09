@@ -21,7 +21,7 @@ $Monitoring::Config::Object::Hostescalation::Defaults = {
     'use'                   => { type => 'LIST', link => 'hostescalation', cat => 'Basic' },
     'register'              => { type => 'BOOL', cat => 'Extended' },
 
-    'host_name'              => { type => 'STRING', 'link' => 'host' },
+    'host_name'              => { type => 'LIST',   'link' => 'host' },
     'hostgroup_name'         => { type => 'LIST',   'link' => 'hostgroup' },
     'contacts'               => { type => 'LIST',   'link' => 'contact' },
     'contact_groups'         => { type => 'LIST',   'link' => 'contactgroup' },

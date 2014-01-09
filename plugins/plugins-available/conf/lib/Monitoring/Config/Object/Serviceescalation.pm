@@ -21,7 +21,7 @@ $Monitoring::Config::Object::Serviceescalation::Defaults = {
     'use'                    => { type => 'LIST', link => 'serviceescalation', cat => 'Basic' },
     'register'               => { type => 'BOOL', cat => 'Extended' },
 
-    'host_name'              => { type => 'STRING', 'link' => 'host' },
+    'host_name'              => { type => 'LIST', 'link' => 'host' },
     'hostgroup_name'         => { type => 'LIST', 'link' => 'hostgroup' },
     'service_description'    => { type => 'STRING' },
     'servicegroup_name'      => { type => 'LIST', 'link' => 'servicegroup' },
