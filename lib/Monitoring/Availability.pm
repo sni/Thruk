@@ -866,7 +866,6 @@ sub _process_log_line {
                 $start         = 'START';
             }
             $self->_add_log_entry(
-                            'full_only'   => 1,
                             'log'         => {
                                 'start'         => $data->{'time'},
                                 'type'          => 'TIMEPERIOD '.$start,

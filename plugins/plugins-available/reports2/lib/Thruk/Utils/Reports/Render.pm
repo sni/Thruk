@@ -118,6 +118,7 @@ sub outages {
         } else {
             next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
         }
+
         $l->{'class'} = lc $l->{'class'};
         $downtime = $l->{'in_downtime'} if defined $l->{'in_downtime'};
         if(!defined $combined) {
@@ -133,7 +134,7 @@ sub outages {
         }
         if($combined->{'class'} ne $l->{'class'}) {
             $combined->{'real_end'} = $l->{'start'};
-            push @reduced_logs, $combined;
+            push @reduced_logs, $combined if $combined->{'class'} ne 'indeterminate';
             undef $combined;
             $combined = $l;
         }
@@ -141,7 +142,7 @@ sub outages {
     }
     if(defined $last) {
         $combined->{'real_end'} = $last->{'end'};
-        push @reduced_logs, $combined;
+        push @reduced_logs, $combined if $combined->{'class'} ne 'indeterminate';
     }
 
     my $outages = [];
