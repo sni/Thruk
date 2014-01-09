@@ -85,7 +85,7 @@ sub report_show {
         elsif($report->{'var'}->{'attachment'}) {
             my $name = $report->{'var'}->{'attachment'};
             $name    =~ s/\s+/_/gmx;
-            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
+            $name    =~ s/[^a-zA-Z0-9-_\.]+//gmx;
             $c->res->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
             open(my $fh, '<', $report_file);
