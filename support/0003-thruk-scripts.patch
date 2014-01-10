@@ -8,7 +8,7 @@
 -  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
 +  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
 +  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='@SYSCONFDIR@'; fi
-+  if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/thruk/cgi-bin/remote.cgi'; fi
++  if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
  fi
  
  eval 'exec perl -x $0 ${1+"$@"} ;'

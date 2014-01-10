@@ -16,7 +16,7 @@
     }, {
         xtype:     'button',
         text:      'Change Filter',
-        icon:      '[% url_prefix %]thruk/plugins/panorama/images/image_edit.png',
+        icon:      '[% url_prefix %]plugins/panorama/images/image_edit.png',
         handler:   function() { TP.filterWindow(this.up('panel').ftype, this.up('panel').items.getAt(0)); }
     }],
 
@@ -161,7 +161,7 @@ Ext.define('TP.formFilterSelect', {
         xtype:      'panel',
         border:     false,
         width:      14,
-        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
+        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
         listeners:  {
             afterrender: function(This, eOpts) { This.body.on('click', function() {
                 var row = This.up('panel');
@@ -307,7 +307,7 @@ TP.filterWindow = function(ftype, base_el) {
                 }, {
                     xtype:      'panel',
                     border:     false,
-                    html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]thruk/plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div><\/div>',
+                    html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div><\/div>',
                     listeners:  {
                         afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
                             var form = This.up('form');

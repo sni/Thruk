@@ -7,7 +7,7 @@
 -PIDFILE=/var/cache/thruk/thruk.pid
 -STARTURL="http://localhost/thruk/cgi-bin/remote.cgi?startup"
 +PIDFILE=@TMPDIR@/thruk.pid
-+STARTURL="http://localhost@HTMLURL@/thruk/cgi-bin/remote.cgi?startup"
++STARTURL="http://localhost@HTMLURL@/cgi-bin/remote.cgi?startup"
  STARTTIMEOUT=15
 -STARTLOG="/tmp/thrukstart.log"
 +STARTLOG="@TMPDIR@/thrukstart.log"

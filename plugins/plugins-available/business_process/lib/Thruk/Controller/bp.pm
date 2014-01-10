@@ -126,7 +126,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         if($action eq 'commit') {
             if($c->config->{'demo_mode'}) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'save is disabled in demo mode.' });
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
             }
             $bp->commit($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
@@ -138,15 +138,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process updated sucessfully' }) unless $rc != 0;
             my $bps = Thruk::BP::Utils::load_bp_data($c, $id); # load new process, otherwise we would update in edit mode
             $bps->[0]->update_status($c);
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
             unlink($bp->{'editfile'});
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
             if(-e $bp->{'file'}) {
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&bp=".$id);
+                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
             } else {
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
             }
         }
         elsif($action eq 'remove') {
@@ -158,7 +158,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' }) unless $rc != 0;
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         elsif($action eq 'clone') {
             my($new_file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
@@ -168,7 +168,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $bp->set_file($c, $new_file);
             $bp->save($c);
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
         }
         elsif($action eq 'rename_node' and $nodeid) {
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
@@ -283,7 +283,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $bp->set_label($c, $label);
         die("internal error") unless $bp;
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
+        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
     }
 
     # readonly actions

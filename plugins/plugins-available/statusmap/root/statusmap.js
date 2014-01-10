@@ -179,7 +179,7 @@ function show_tree_map(id_to_show) {
             }
 
             if( node.data.alias != undefined ) {
-              domElement.innerHTML = '<a href="'+ url_prefix +'thruk\/cgi-bin\/extinfo.cgi?type=1&amp;host=' + domElement.innerHTML + '">' + domElement.innerHTML + '<\/a>';
+              domElement.innerHTML = '<a href="'+ url_prefix +'cgi-bin\/extinfo.cgi?type=1&amp;host=' + domElement.innerHTML + '">' + domElement.innerHTML + '<\/a>';
             }
 
             // calculate colour of node

@@ -37,7 +37,14 @@ sub set_default_config {
     my( $config ) = @_;
 
     # defaults
-    $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '/';
+    $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '';
+    $config->{'url_prefix'} =~ s|/+$||mx;
+    $config->{'url_prefix'} =~ s|^/+||mx;
+    $config->{'product_prefix'} = $config->{'product_prefix'} || 'thruk';
+    $config->{'product_prefix'} =~ s|^/+||mx;
+    $config->{'product_prefix'} =~ s|/+$||mx;
+    $config->{'url_prefix'} = '/'.$config->{'url_prefix'}.'/'.$config->{'product_prefix'}.'/';
+    $config->{'url_prefix'} =~ s|/+|/|gmx;
     my $defaults = {
         'cgi.cfg'                       => 'cgi.cfg',
         bug_email_rcpt                  => 'bugs@thruk.org',
@@ -72,8 +79,8 @@ sub set_default_config {
         datetime_format_trends          => '%a %b %e %H:%M:%S %Y',
         title_prefix                    => '',
         use_pager                       => 1,
-        start_page                      => $config->{'url_prefix'}.'thruk/main.html',
-        documentation_link              => $config->{'url_prefix'}.'thruk/docs/index.html',
+        start_page                      => $config->{'url_prefix'}.'main.html',
+        documentation_link              => $config->{'url_prefix'}.'docs/index.html',
         show_notification_number        => 1,
         strict_passive_mode             => 1,
         hide_passive_icon               => 0,
@@ -94,7 +101,7 @@ sub set_default_config {
         use_dynamic_titles              => 1,
         use_new_search                  => 1,
         use_new_command_box             => 1,
-        all_problems_link               => $config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
+        all_problems_link               => $config->{'url_prefix'}."cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
         show_long_plugin_output         => 'popup',
         info_popup_event_type           => 'onclick',
         info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
@@ -141,7 +148,7 @@ sub set_default_config {
         no_external_job_forks               => 0,
         host_action_icon                    => 'action.gif',
         service_action_icon                 => 'action.gif',
-        cookie_path                         => $config->{'url_prefix'}.'thruk',
+        cookie_path                         => $config->{'url_prefix'},
         thruk_bin                           => '/usr/bin/thruk',
         thruk_init                          => '/etc/init.d/thruk',
         thruk_shell                         => '/bin/bash -l -c',

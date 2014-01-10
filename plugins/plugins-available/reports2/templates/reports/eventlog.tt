@@ -42,15 +42,15 @@
           <th></th><th>[% loc('Host Alert') %]</th><th class="totals">[% loc('Totals') %]</th>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/recovery.png"></td><td>[% loc('Up') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/recovery.png"></td><td>[% loc('Up') %]</td>
           <td class="totals">[% totals.host.up %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>[% loc('Down') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Down') %]</td>
           <td class="totals">[% totals.host.down %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>[% loc('Unreachable') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Unreachable') %]</td>
           <td class="totals">[% totals.host.unreachable %]</td>
         </tr>
       </table>
@@ -60,19 +60,19 @@
           <th></th><th>[% loc('Service Alert') %]</th><th class="totals">[% loc('Totals') %]</th>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/recovery.png"></td><td>[% loc('Ok') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/recovery.png"></td><td>[% loc('Ok') %]</td>
           <td class="totals">[% totals.service.ok %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/warning.png"></td><td>[% loc('Warning') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/warning.png"></td><td>[% loc('Warning') %]</td>
           <td class="totals">[% totals.service.warning %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/unknown.png"></td><td>[% loc('Unknown') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/unknown.png"></td><td>[% loc('Unknown') %]</td>
           <td class="totals">[% totals.service.unknown %]</td>
         </tr>
         <tr>
-          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>[% loc('Critical') %]</td>
+          <td class="img"><img src="[% url_prefix %]themes/Thruk/images/critical.png"></td><td>[% loc('Critical') %]</td>
           <td class="totals">[% totals.service.critical %]</td>
         </tr>
       </table>
@@ -90,7 +90,7 @@
             [% FOREACH l = logblock %]
               [% PROCESS _logs_line.tt %]
               <div class="logdate">
-                <img src="[% url_prefix %]thruk/themes/Thruk/images/[% pic %]">
+                <img src="[% url_prefix %]themes/Thruk/images/[% pic %]">
                 [% format_date(l.time, reportDateTimeFormat) %]
                 <span class="logtype">[% IF has_type %][% l.type %][% END %]</span>
               </div>

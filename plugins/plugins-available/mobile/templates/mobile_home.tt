@@ -40,7 +40,7 @@
       <form method="post">
       <div style="position:relative">
       <input type="text" name="name" id="search" value=""  />
-      <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]thruk/plugins/mobile/img/06-search.png" alt="search"></a>
+      <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]plugins/mobile/img/06-search.png" alt="search"></a>
       </div>
       </form>
       -->
@@ -53,7 +53,7 @@
 
       <h4>Links</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="[% url_prefix %]thruk/index.html" rel="external" id="full_client_link">Access as Full Client</a></li>
+        <li><a href="[% url_prefix %]index.html" rel="external" id="full_client_link">Access as Full Client</a></li>
       </ul>
     </div>
     <div data-role="footer" style="text-align:center" id="fullscreenteaser">

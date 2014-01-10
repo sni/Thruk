@@ -37,7 +37,7 @@
           <td class='hostDOWN'>DOWN</td>
           <td class='[% class %]'>
             [% IF host.comment_count > 0 %]
-            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
+            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
             [% ELSE %]
             N/A
             [% END %]
@@ -46,14 +46,14 @@
           <td class='[% class %]'>[% host.affected_hosts %]</td>
           <td class='[% class %]'>[% host.affected_services %]</td>
           <td class='[% class %]'>
-            <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
-            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
             [% END %]
-            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
-            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href='history.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href='notifications.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href='history.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href='notifications.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
         </tr>
         [% END %]
       </table>

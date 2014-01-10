@@ -60,18 +60,18 @@ Ext.define('TP.TabBar', {
             menu: {
                 items: [/*{
                         text: 'Switch User',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
+                        icon: '[% url_prefix %]plugins/panorama/images/cup_key.png',
                         handler: function() {}
                 }*/
                {
                         text: 'About',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
+                        icon: '[% url_prefix %]plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
                     },
                     [%+ UNLESS readonly +%]
                     {
                         text: 'Settings',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
+                        icon: '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.settingsWindow() }
                     },
                     [%+ END +%]
@@ -80,7 +80,7 @@ Ext.define('TP.TabBar', {
                     [% IF cookie_auth %]
                     {
                         text:   'Logout',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/door_in.png',
                         handler: function() {
                             window.location = 'login.cgi?logout';
                         }
@@ -88,7 +88,7 @@ Ext.define('TP.TabBar', {
                     [% END %]
                     {
                         text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/exit.png',
                         handler: function() {
                             window.location = '../';
                         }
@@ -109,88 +109,88 @@ Ext.define('TP.TabBar', {
                 items: [{
                     /* Server */
                         text:   'Site Status',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
                     }, {
                         text:   'Server Status',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/bricks.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/bricks.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServerStats'}) }
                     }, {
                         text:   'Core Performance Metrics',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/table_lightning.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }
                     }, {
                         text:   'Host / Service Performance',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/table_gear.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCheckMetrics'}) }
                     },
                     /* Hosts */
                     '-', {
                         text:   'Hosts',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHosts'}) }
                     }, {
                         text:   'Hosts Totals',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/application_view_columns.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
                     }, {
                         text:   'Hosts Graph',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
                     },
                     /* Services */
                     '-', {
                         text:   'Services',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/computer.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServices'}) }
                     }, {
                         text:   'Services Totals',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/application_view_columns.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
                     }, {
                         text:   'Services Graph',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
                     }, {
                         text:   'Mine Map',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/minemap.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/minemap.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServiceMineMap'}) }
                     },
                     /* Misc */
                     '-', {
                         text:   'Logfile',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/text_align_left.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
                     }, {
                         text:   'PNP Graph',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_curve.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_curve.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
                     }, {
                         text:   'Nagvis Map',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/world.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/world.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
                     }
                     [% IF use_feature_bp %]
                     , {
                         text:   'Business Process Map',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_organisation.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_organisation.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletBP'}) }
                     }
                     [% END %]
                     /* Mod-Gearman */
                     ,'-', {
                         text:   'Mod-Gearman Metrics',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/modgearman.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
                     }, {
                         text:   'Mod-Gearman Charts',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/modgearman.png',
+                        icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
                     },
                     /* Generics */
                     '-', {
                         text:    'Generic Url Panlet',
-                        icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
+                        icon:    '[% url_prefix %]plugins/panorama/images/html_add.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
                     }
                 ]

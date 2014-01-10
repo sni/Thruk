@@ -312,6 +312,19 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
+    my $product = $c->config->{'product_prefix'};
+    if($product ne 'thruk') {
+        # make it look like a thruk url, ex.: .../thruk/cgi-bin/tac.cgi
+        my $path = $c->request->path;
+        my $product_prefix = $c->config->{'product_prefix'};
+        $path =~ s|^\Q$product_prefix\E||mxo;
+        $path = $path ? "thruk/".$path : 'thruk';
+        $path =~ s|thruk/+|thruk/|gmxo;
+        $c->request->path($path);
+        return;
+    }
+
+    # for OMD
     my @path_chunks = split m[/]mxo, $c->request->path, -1;
     return unless($path_chunks[1] and $path_chunks[1] eq 'thruk');
 

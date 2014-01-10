@@ -5,7 +5,7 @@
     <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;" placeholder="connection name">
   </td>
   <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
-    <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">
+    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete">
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">
@@ -26,14 +26,14 @@
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
     <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
-    <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
+    <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_auth">
   <td class='dataVar' align="left">Auth-Key</td>
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="auth[% x %]" value="[% b.auth %]" style="width: 200px;" placeholder="authkey">
-    <a href="#" onclick="overlib('The authorization key must provided for security reasons.<br>It is located on the remote host in<br><ul><li>/var/lib/thruk/secret.key<\/li><\/ul>or<ul><li>var/thruk/secret.key (for OMD)<\/li><\/ul>',CAPTION,'Authorization Key',WIDTH,600,[% c.config.info_popup_options %]); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]thruk/themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
+    <a href="#" onclick="overlib('The authorization key must provided for security reasons.<br>It is located on the remote host in<br><ul><li>/var/lib/thruk/secret.key<\/li><\/ul>or<ul><li>var/thruk/secret.key (for OMD)<\/li><\/ul>',CAPTION,'Authorization Key',WIDTH,600,[% c.config.info_popup_options %]); return false;"><img id="authinfoimg[% x %]" src="[% url_prefix %]themes/[% theme %]/images/help.png" alt="help" style="vertical-align: text-bottom;" width=16 height=16></a>
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_proxy">

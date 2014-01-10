@@ -7,6 +7,6 @@ var perf_bar_mode  = '[% perf_bar_mode %]';
 var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
 var theme          = '[% theme %]';
 var cookie_path    = '[% cookie_path %]';
-var base           = '[% url_prefix %]thruk/plugins/panorama';
+var base           = '[% url_prefix %]plugins/panorama';
 
 [%+ PROCESS _header_initial_states.tt +%]

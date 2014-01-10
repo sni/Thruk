@@ -6,7 +6,7 @@
 <table border="0" class='comment blockHeadBorder' width='500'>
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
     </th>
     <th id="pnp_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours</th>
     <th id="pnp_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id)">day</th>
@@ -14,15 +14,15 @@
     <th id="pnp_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id)">month</th>
     <th id="pnp_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id)">year</th>
     <th class='comment' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
     </th>
   </tr>
   <tr>
     <td colspan=7 align="center">
       <div id="pnp_graph_pane" style="position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&theme=smoothness">
-          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
-          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
+          <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
+          <img id="pnpimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
           <div id="pnperr" style="display:none">Could not retrieve graph data</div>
         </a>
       </div>

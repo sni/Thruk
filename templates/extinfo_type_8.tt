@@ -27,7 +27,7 @@
           [% IF servicegroup.action_url %]
             <tr>
               <td align='right'>
-                <a href='[% servicegroup.action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Servicegroup' title='Perform Additional Actions On This Servicegroup' width="40" height="40"></a><br clear="all">
+                <a href='[% servicegroup.action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Servicegroup' title='Perform Additional Actions On This Servicegroup' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Actions</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -36,7 +36,7 @@
           [% IF servicegroup.notes_url %]
             <tr>
               <td align='right'>
-                <a href='[% servicegroup.notes_url %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Servicegroup' title='View Additional Notes For This Servicegroup' width="40" height="40"></a><br clear="all">
+                <a href='[% servicegroup.notes_url %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Servicegroup' title='View Additional Notes For This Servicegroup' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Notes</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -56,49 +56,49 @@
             <table border="0" cellspacing="0" cellpadding="0" class='command'>
               [% UNLESS c.config.command_disabled.exists('121') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup.name | uri %]'>Schedule downtime for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('122') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup.name | uri %]'>Schedule downtime for all services in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('111') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup.name | uri %]'>Enable notifications for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('112') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup.name | uri %]'>Disable notifications for all hosts in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('109') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup.name | uri %]'>Enable notifications for all services in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('110') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup.name | uri %]'>Disable notifications for all services in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('113') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup.name | uri %]'>Enable active checks of all services in this servicegroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('114') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup.name | uri %]'>Disable active checks of all services in this servicegroup</a></td>
               </tr>
               [% END %]

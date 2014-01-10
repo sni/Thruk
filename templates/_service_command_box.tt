@@ -11,7 +11,7 @@
             <table border="0" cellspacing="0" cellpadding="0">
               [% UNLESS c.config.command_disabled.exists('7') %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
                 <td class='command'>
                   <a href='cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Re-schedule next check of this service</a>
                   (<a href='cmd.cgi?cmd_typ=7&amp;cmd_mod=2&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'> Now </a>)
@@ -21,7 +21,7 @@
               [% IF service.accept_passive_checks %]
               [% UNLESS c.config.command_disabled.exists('30') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=30&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Submit passive check result for this service</a></td>
               </tr>
               [% END %]
@@ -30,10 +30,10 @@
               [% UNLESS c.config.command_disabled.exists('34') || c.config.command_disabled.exists('52') %]
               <tr class='command'>
                 [% IF service.acknowledged %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=52&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Remove problem acknowledgement</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=34&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Acknowledge this service problem</a></td>
                 [% END %]
               </tr>
@@ -42,27 +42,27 @@
               [% IF service.state >= 1 %]
               [% UNLESS c.config.command_disabled.exists('9') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=9&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Delay next service notification</a></td>
               </tr>
               [% END %]
               [% END %]
               [% UNLESS c.config.command_disabled.exists('160') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=160&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Send custom service notification</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('56') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Schedule downtime for this service</a></td>
               </tr>
               [% END %]
               [% IF service.modified_attributes_list.size > 0 %]
               [% UNLESS c.config.command_disabled.exists('155') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Service' title='Reset Modified Attributes Of This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Service' title='Reset Modified Attributes Of This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=155&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Reset Modified Attributes</a></td>
               </tr>
               [% END %]
@@ -91,10 +91,10 @@
               [% UNLESS c.config.command_disabled.exists('5') || c.config.command_disabled.exists('6') %]
               <tr class='command'>
                 [% IF service.checks_enabled %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Disable active checks of this service</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=5&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Enable active checks of this service</a></td>
                 [% END %]
               </tr>
@@ -102,12 +102,12 @@
               [% UNLESS c.config.command_disabled.exists('39') || c.config.command_disabled.exists('40') %]
               [% IF service.accept_passive_checks %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service' width="20" height="20"></td>
                 <td class='command' nowrap><a href='cmd.cgi?cmd_typ=40&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Stop accepting passive checks for this service</a></td>
               </tr>
               [% ELSE %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Service' title='Start Accepting Passive Checks For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Service' title='Start Accepting Passive Checks For This Service' width="20" height="20"></td>
                 <td class='command' nowrap><a href='cmd.cgi?cmd_typ=39&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Start accepting passive checks for this service</a></td>
               </tr>
               [% END %]
@@ -115,10 +115,10 @@
               [% UNLESS c.config.command_disabled.exists('99') || c.config.command_disabled.exists('100') %]
               <tr class='command'>
                 [% IF service.obsess_over_service %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=100&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Stop obsessing over this service</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over This Service' title='Start Obsessing Over This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over This Service' title='Start Obsessing Over This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=99&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Start obsessing over this service</a></td>
                 [% END %]
               </tr>
@@ -126,10 +126,10 @@
               [% UNLESS c.config.command_disabled.exists('22') || c.config.command_disabled.exists('23') %]
               <tr class='command'>
                 [% IF service.notifications_enabled %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=23&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Disable notifications for this service</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For This Service' title='Enable Notifications For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For This Service' title='Enable Notifications For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=22&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Enable notifications for this service</a></td>
                 [% END %]
               </tr>
@@ -137,10 +137,10 @@
               [% UNLESS c.config.command_disabled.exists('45') || c.config.command_disabled.exists('46') %]
               <tr class='command'>
                 [% IF service.event_handler_enabled %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=46&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Disable event handler for this service</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handler For This Service' title='Enable Event Handler For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handler For This Service' title='Enable Event Handler For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=45&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Enable event handler for this service</a></td>
                 [% END %]
               </tr>
@@ -148,7 +148,7 @@
               [% IF enable_shinken_features %]
               [% UNLESS c.config.command_disabled.exists('200') %]
               <tr class='command'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=200&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Launch event handler</a></td>
               </tr>
               [% END %]
@@ -156,10 +156,10 @@
               [% UNLESS c.config.command_disabled.exists('59') || c.config.command_disabled.exists('60') %]
               <tr class='command'>
                 [% IF service.flap_detection_enabled %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=60&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Disable flap detection for this service</a></td>
                 [% ELSE %]
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Service' title='Enable Flap Detection For This Service' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Service' title='Enable Flap Detection For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=59&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Enable flap detection for this service</a></td>
                 [% END %]
               </tr>

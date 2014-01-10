@@ -37,12 +37,12 @@
 -  RewriteCond %{REQUEST_URI} ^/thruk
 -  RewriteCond /var/cache/thruk/thruk.pid !-f
 -  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/startup.html
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/side.html
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/thruk/.*\.(css|png|js)
-+  RewriteCond %{REQUEST_URI} ^@HTMLURL@/thruk
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/startup.html
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/side.html
++  RewriteCond %{REQUEST_URI} !^@HTMLURL@/.*\.(css|png|js)
++  RewriteCond %{REQUEST_URI} ^@HTMLURL@/
 +  RewriteCond @TMPDIR@/thruk.pid !-f
-+  RewriteRule ^(.*)$ @HTMLURL@/thruk/startup.html?$1 [R=302,L,NE,QSA]
++  RewriteRule ^(.*)$ @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
  
 -  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
 -  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
@@ -50,18 +50,18 @@
 -  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
 -  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
 -  Alias /thruk /usr/share/thruk/root/thruk
-+  Alias @HTMLURL@/thruk/documentation.html @DATADIR@/root/thruk/documentation.html
-+  Alias @HTMLURL@/thruk/startup.html @DATADIR@/root/thruk/startup.html
-+  AliasMatch ^@HTMLURL@/thruk/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh/thruk/$1
-+  AliasMatch ^@HTMLURL@/thruk/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
-+  Alias @HTMLURL@/thruk/themes/  @SYSCONFDIR@/themes/themes-enabled/
-+  Alias @HTMLURL@/thruk @DATADIR@/root/thruk
++  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
++  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
++  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh/thruk/$1
++  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
++  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
++  Alias @HTMLURL@ @DATADIR@/root/thruk
  
 -  <Location /thruk>
-+  RewriteRule ^@HTMLURL@$  @HTMLURL@/thruk  [R]
-+  RewriteRule ^@HTMLURL@/$ @HTMLURL@/thruk/ [R]
++  #RewriteRule ^@HTMLURL@$  @HTMLURL@/thruk  [R]
++  #RewriteRule ^@HTMLURL@/$ @HTMLURL@/thruk/ [R]
 +
-+  <Location @HTMLURL@/thruk>
++  <Location @HTMLURL@>
      Options ExecCGI
 -    AuthName "Thruk Monitoring"
 +    AuthName "Naemon Monitoring"
@@ -71,7 +71,7 @@
      Require valid-user
    </Location>
 -  <Location /thruk/cgi-bin/remote.cgi>
-+  <Location @HTMLURL@/thruk/cgi-bin/remote.cgi>
++  <Location @HTMLURL@/cgi-bin/remote.cgi>
      Order Deny,Allow
      Allow from all
      Satisfy any

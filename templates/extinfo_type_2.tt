@@ -73,7 +73,7 @@
             <td align='right'>
               [% prio = service.criticity %]
               <div class='dataTitle'>Priority [% prio %]/5
-                <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
+                <img class="crit_icon" src="[% url_prefix %]themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
               </div>
             </td>
           </tr>
@@ -82,7 +82,7 @@
           [% action_url = get_action_url(2, 1, service.action_url_expanded, service.host_name, service.description) %]
           <tr>
             <td align='right'>
-              <a href='[% action_url %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
+              <a href='[% action_url %]' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
               <font size="-1"><i>Extra Actions</i></font><br clear="all">
               <br clear="all">
             </td>
@@ -91,7 +91,7 @@
           [% IF service.notes_url_expanded %]
           <tr>
             <td align='right'>
-              <a href='[% service.notes_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40"></a><br clear="all">
+              <a href='[% service.notes_url_expanded %]' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40"></a><br clear="all">
               <font size="-1"><i>Extra Notes</i></font><br clear="all">
               <br clear="all">
             </td>
@@ -101,7 +101,7 @@
           [% IF has_bp %]
             <tr>
               <td align='right'>
-                <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
+                <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Business<br>Process</i></font>
                 <br clear="all">
               </td>
@@ -218,7 +218,7 @@
                             <td class='dataVar'>Next Scheduled Check:&nbsp;&nbsp;</td>
                             <td class='dataVal'>
                               [% IF service.next_check %][% date_format(c, service.next_check) %][% ELSE %]N/A[% END %]
-                              [% IF service.is_executing > 0 %]<img src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
+                              [% IF service.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
                             </td>
                           </tr>
                           <tr>
@@ -421,12 +421,12 @@
             <table border="0">
               <tr>
                 [% UNLESS c.config.command_disabled.exists('3') %]
-                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new comment</a></td>
                 [% END %]
                 [% IF comments %]
                 [% UNLESS c.config.command_disabled.exists('21') %]
-                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all comments</a></td>
                 [% END %]
                 [% END %]
@@ -448,7 +448,7 @@
             <table border="0">
               <tr>
                 [% UNLESS c.config.command_disabled.exists('56') %]
-                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'>
                   <a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a>
                   [% IF use_feature_recurring_downtime %]
@@ -458,7 +458,7 @@
                 [% END %]
                 [% IF downtimes %]
                 [% UNLESS c.config.command_disabled.exists('5') %]
-                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
                 [% END %]
@@ -485,7 +485,7 @@
             <div class='commentTitle'>Configuration Information</div>
             <table border="0">
               <tr>
-                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
+                <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
                 [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
                 <td valign="middle"><a href='conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Configure This Service</a></td>
                 [% ELSE %]

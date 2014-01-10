@@ -1,7 +1,7 @@
 ﻿[% PROCESS _header.tt
-        js           => [ "thruk/plugins/statusmap/jit-yc.js", "thruk/plugins/statusmap/statusmap.js" ]
-        css          => "thruk/plugins/statusmap/Treemap.css",
-        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "thruk/javascript/excanvas.js'></script><![endif]-->"
+        js           => [ "plugins/statusmap/jit-yc.js", "plugins/statusmap/statusmap.js" ]
+        css          => "plugins/statusmap/Treemap.css",
+        extra_header => "<!--[if IE]><script language='javascript' type='text/javascript' src='" _ url_prefix _ "javascript/excanvas.js'></script><![endif]-->"
 %]
 
 <form method="get" action="statusmap.cgi">
@@ -73,7 +73,7 @@
       [% END %]
     </td>
     <td valign="top" align="center" width="33%" nowrap>
-      <img src="[% url_prefix %]thruk/themes/[% theme %]/images/empty.gif" width=1 height=10 border=0 alt=''>
+      <img src="[% url_prefix %]themes/[% theme %]/images/empty.gif" width=1 height=10 border=0 alt=''>
     </td>
   </tr>
 </table>

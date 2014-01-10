@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt css="thruk/plugins/reports2/reports.css" js="thruk/plugins/reports2/reports.js" %]
+﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
@@ -84,14 +84,14 @@
     <td class="status [% rowclass %]">
       [% IF r.var.is_running != 0 %]
         [% running = running + 1 %]
-        <a href="#" class="is_running"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
+        <a href="#" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
       [% ELSE %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit&amp;tab=my" class="editlinks"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit&amp;tab=my" class="editlinks"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
@@ -104,9 +104,9 @@
         [% ELSIF r.var.ctype != ''                      %][% icon = 'page_white_text.png' %]
         [% END %]
         [% IF r.var.ctype == 'html2pdf' %]
-          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
       [% END %]
     </td>
   </tr>
@@ -115,7 +115,7 @@
     <td class="status [% rowclass %]"></td>
     <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
       [% IF r.exists('long_error') %]
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
       [% END %]
       [% r.error | nl2br %]
       [% IF r.exists('long_error') %]

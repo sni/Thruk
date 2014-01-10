@@ -23,7 +23,7 @@
             <h3><a href="#">Plugin Help</a></h3>
             <div style="max-width:1000px;">
                 <span id="[% id %]_plugin_help" style="text-align: left;"></span>
-                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
+                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
             </div>
         </div>
       </td>

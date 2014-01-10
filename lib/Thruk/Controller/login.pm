@@ -41,7 +41,7 @@ sub index :Path :Args(0) {
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'theme'}          = $c->config->{'default_theme'} unless defined $c->stash->{'theme'};
     $c->stash->{'page'}           = 'splashpage';
-    $c->stash->{'loginurl'}       = $c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi";
+    $c->stash->{'loginurl'}       = $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
     $c->stash->{'template'}       = 'login.tt';
 
     # auth cookie is not for thruk only
@@ -79,7 +79,7 @@ sub index :Path :Args(0) {
 
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
             return $c->response->redirect($logoutref) if $logoutref;
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
 
         if($keywords eq 'nocookie') {
@@ -102,7 +102,7 @@ sub index :Path :Args(0) {
     my $referer = $c->request->parameters->{'referer'}  || '';
     $referer    =~ s#^//#/#gmx;         # strip double slashes
     $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
-    $referer    = $c->stash->{'url_prefix'}.'thruk/' unless $referer;
+    $referer    = $c->stash->{'url_prefix'} unless $referer;
 
     # make lowercase username
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
@@ -116,13 +116,13 @@ sub index :Path :Args(0) {
             domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
         };
         if(!defined $testcookie or !$testcookie->value) {
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?nocookie");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");
             my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'});
             $c->stats->profile(end => "login::external_authentication");
             if($success eq '-1') {
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?problem&".$referer);
+                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
             }
             elsif($success) {
                 $c->res->cookies->{'thruk_auth'} = {
@@ -139,7 +139,7 @@ sub index :Path :Args(0) {
             } else {
                 $c->log->info("login failed for $login on $referer");
                 Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
-                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?".$referer);
+                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
             }
         }
     }

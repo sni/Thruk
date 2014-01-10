@@ -284,7 +284,7 @@ sub _process_recurring_downtimes_page {
         Thruk::Utils::write_data_file($file, $rd);
         $self->_update_cron_file($c);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
     if($task eq 'add' or $task eq 'edit') {
         return if _process_recurring_downtimes_page_edit($self, $c, $src, $default_rd);
@@ -306,7 +306,7 @@ sub _process_recurring_downtimes_page {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
         }
         $self->_update_cron_file($c);
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
 
     $c->stash->{'downtimes'} = $self->_get_downtimes_list($c);
@@ -556,7 +556,7 @@ sub _process_host_page {
     my $backend = $c->{'request'}->{'parameters'}->{'backend'} || '';
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi#host?host=".$hostname);
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#host?host=".$hostname);
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
@@ -667,7 +667,7 @@ sub _process_service_page {
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     return $c->detach('/error/index/15') unless defined $servicename;
 
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
 

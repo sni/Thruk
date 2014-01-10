@@ -101,7 +101,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
        or ref($c->config->{'Thruk::Plugin::ConfigTool'}) ne 'HASH'
        or scalar keys %{$c->config->{'Thruk::Plugin::ConfigTool'}} == 0
     ) {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
+        Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
     }
 
     my $subcat                = $c->{'request'}->{'parameters'}->{'sub'} || '';
@@ -514,7 +514,7 @@ sub _process_thruk_page {
 
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         $self->_store_changes($c, $file, $data, $defaults, $c);
-        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=thruk');
+        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=thruk');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -747,7 +747,7 @@ sub _process_plugins_page {
                 }
             }
             Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully.' );
-            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=plugins');
+            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=plugins');
         }
     }
 
@@ -843,7 +843,7 @@ sub _process_backends_page {
         my $string    = Thruk::Utils::Conf::get_component_as_string($backends);
         Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
         Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully.' );
-        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=backends');
+        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
         my $peer        = $c->request->parameters->{'peer'};

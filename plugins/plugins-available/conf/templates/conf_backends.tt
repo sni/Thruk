@@ -23,7 +23,7 @@ Note: some options are not accessible here for security reasons.
   <tr class="backend_conf_0_add">
     <td colspan=3 style="text-align:left;">
       <a href="#" onclick="conf_sites_add(); return false;">
-        <img src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
+        <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
         add new connection
       </a>
     </td>
@@ -100,15 +100,15 @@ Note: some options are not accessible here for security reasons.
         cache: false,
         success: function(data) {
           if(data.ok == 1) {
-            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/accept.png';
+            img.src = '[% url_prefix %]themes/[% theme %]/images/accept.png';
             img.title = 'connection test successful';
           } else {
-            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+            img.src = '[% url_prefix %]themes/[% theme %]/images/error.png';
             img.title = data.error;
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+          img.src = '[% url_prefix %]themes/[% theme %]/images/error.png';
         }
     });
   }

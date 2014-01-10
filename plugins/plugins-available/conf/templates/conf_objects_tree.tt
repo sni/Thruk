@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div class="dataTitle" style="padding-top: 4px; padding-bottom: 4px;">
-  <a href="conf.cgi?sub=objects" style="float:left;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='go back' title='go back' width="16" height="16" style="vertical-align: middle;"> back</a>
+  <a href="conf.cgi?sub=objects" style="float:left;"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='go back' title='go back' width="16" height="16" style="vertical-align: middle;"> back</a>
   Objects Browser
 </div>
 

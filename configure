@@ -63,6 +63,10 @@ $options->{'tmpdir'}         = $options->{'thruk-temp-dir'} if $options->{'thruk
 $options->{'localstatedir'}  = $options->{'thruk-var-dir'}  if $options->{'thruk-var-dir'};
 $options->{'log-dir'}        = $options->{'thruk-log-dir'}  if $options->{'thruk-log-dir'};
 
+$options->{'htmlurl'} =~ s|/+$||mx;
+$options->{'htmlurl'} =~ s|^/+||mx;
+$options->{'htmlurl'} = '/'.$options->{'htmlurl'};
+
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
 ### THRUK

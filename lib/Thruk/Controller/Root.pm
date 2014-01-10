@@ -48,7 +48,7 @@ sub begin : Private {
     }
 
     # make some configs available in stash
-    for my $key (qw/url_prefix title_prefix use_pager start_page documentation_link
+    for my $key (qw/url_prefix product_prefix title_prefix use_pager start_page documentation_link
                   use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
                   use_new_search ajax_search show_notification_number strict_passive_mode hide_passive_icon
@@ -135,7 +135,7 @@ sub begin : Private {
         }
     }
     # needed for the autoload methods
-    $Thruk::Backend::Manager::c     = $c;
+    $Thruk::Backend::Manager::c = $c;
 
     # menu cookie set?
     my $menu_states = {};
@@ -206,11 +206,11 @@ sub begin : Private {
             and $c->config->{'use_frames'} == 1 ) {
         my $path = $c->request->uri->path_query;
         $path =~ s/nav=1//gmx;
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
+        return $c->response->redirect($c->stash->{'url_prefix'}."frame.html?link=".uri_escape($path));
     }
 
     # icon image path
-    $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/logos/';
+    $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/logos/';
     $c->stash->{'logo_path_prefix'}  = $c->config->{'logo_path_prefix'};
 
     # additional views on status pages
@@ -275,7 +275,7 @@ sub index : Path('/') {
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/");
+    return $c->response->redirect($c->stash->{'url_prefix'});
 }
 
 ######################################
@@ -291,7 +291,7 @@ because we dont want index.html in the url
 sub index_html : Path('/index.html') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
     if( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_index_html");
     }
@@ -312,14 +312,14 @@ but if used not via fastcgi/apache, there is no way around
 sub thruk_index : Path('/thruk/') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
 
     # redirect from /thruk to /thruk/
     if($c->request->path eq 'thruk') {
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/");
+        return $c->response->redirect($c->stash->{'url_prefix'});
     }
 
     if( $c->stash->{'use_frames'} and !$c->stash->{'show_nav_button'} ) {
@@ -327,15 +327,15 @@ sub thruk_index : Path('/thruk/') {
     }
 
     # custom start page?
-    $c->stash->{'start_page'} = $c->stash->{'url_prefix'}.'thruk/main.html' unless defined $c->stash->{'start_page'};
-    if( CORE::index($c->stash->{'start_page'}, $c->stash->{'url_prefix'}.'thruk/') != 0 ) {
+    $c->stash->{'start_page'} = $c->stash->{'url_prefix'}.'main.html' unless defined $c->stash->{'start_page'};
+    if( CORE::index($c->stash->{'start_page'}, $c->stash->{'url_prefix'}) != 0 ) {
 
         # external link, put in frames
         my $start_page = uri_escape( $c->stash->{'start_page'} );
-        $c->log->debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page . "'" );
-        return $c->response->redirect( $c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page );
+        $c->log->debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."frame.html?link=" . $start_page . "'" );
+        return $c->response->redirect( $c->stash->{'url_prefix'}."frame.html?link=" . $start_page );
     }
-    elsif ( $c->stash->{'start_page'} ne $c->stash->{'url_prefix'}.'thruk/main.html' ) {
+    elsif ( $c->stash->{'start_page'} ne $c->stash->{'url_prefix'}.'main.html' ) {
 
         # internal link, no need to put in frames
         $c->log->debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
@@ -356,7 +356,7 @@ page: /thruk/index.html
 sub thruk_index_html : Path('/thruk/index.html') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
-    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
     unless ( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_main_html");
     }
@@ -405,7 +405,7 @@ sub thruk_frame_html : Path('/thruk/frame.html') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     # allowed links to be framed
-    my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."thruk/cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
+    my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = $c->config->{'allowed_frame_links'};
     if( defined $additional_links ) {
         if( ref $additional_links eq 'ARRAY' ) {
@@ -422,7 +422,7 @@ sub thruk_frame_html : Path('/thruk/frame.html') {
         for my $pattern ( @{$valid_links} ) {
             if( $link =~ m/$pattern/mx ) {
                 if($c->stash->{'use_frames'}) {
-                    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/#".$link);
+                    return $c->response->redirect($c->stash->{'url_prefix'}.'#'.$link);
                 }
                 $c->stash->{'target'}   = '_parent';
                 $c->stash->{'main'}     = $link;

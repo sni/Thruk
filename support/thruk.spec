@@ -64,7 +64,7 @@ large installations.
     --with-thruk-group="%{apachegroup}" \
     --with-thruk-libs="%{_libdir}/thruk/perl5" \
     --with-httpd-conf="%{_sysconfdir}/%{apachedir}/conf.d" \
-    --with-htmlurl="/"
+    --with-htmlurl="/thruk"
 %{__make} %{?_smp_mflags} all
 
 %install

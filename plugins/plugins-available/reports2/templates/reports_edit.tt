@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt css="thruk/plugins/reports2/reports.css" js="thruk/plugins/reports2/reports.js" %]
+﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
@@ -27,7 +27,7 @@
 <input type="hidden" name="tab" value="[% prev_tab %]">
 <table border="1" class='data reports'>
   <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
     <th class='data' style="width:125px;"></th>
   </tr>
@@ -81,7 +81,7 @@
           [% END %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add">
                 add more
             </td>
           </tr>

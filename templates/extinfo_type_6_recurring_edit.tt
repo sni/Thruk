@@ -22,7 +22,7 @@
 <input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
-    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>Recurring Downtime</th>
     <th class='data' style="width:125px;"></th>
   </tr>
@@ -94,7 +94,7 @@
           [% IF can_edit %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add">
                 add more
             </td>
           </tr>

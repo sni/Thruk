@@ -22,7 +22,7 @@ override_dh_auto_configure:
 		--with-thruk-group="www-data" \
 		--with-thruk-libs="/usr/lib/thruk/perl5" \
 		--with-httpd-conf="$(HTTPDCONF)" \
-		--with-htmlurl="/"
+		--with-htmlurl="/thruk"
 	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so: zlib" >> debian/thruk.lintian-overrides
 	echo "thruk: embedded-zlib ./usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so"        >> debian/thruk.lintian-overrides
 

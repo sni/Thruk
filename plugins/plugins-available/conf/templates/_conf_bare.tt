@@ -4,13 +4,13 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <title>[% title_prefix %][% title %]</title>
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
 
     <!-- stylesheets -->
     [%+ PROCESS _common_css.tt use_frames=1 %]
     [%+ PROCESS _common_js.tt %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/conf/conf.css' />
-    <script type="text/javascript" src="[% url_prefix %]thruk/plugins/conf/conf.js"></script>
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/conf/conf.css' />
+    <script type="text/javascript" src="[% url_prefix %]plugins/conf/conf.js"></script>
     <script type="text/javascript">
     <!--
     init_page();

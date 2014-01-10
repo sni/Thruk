@@ -32,7 +32,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Previous Day<br>
-                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
@@ -45,7 +45,7 @@
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 [% IF end < date.now %]
                 Next Day<br>
-                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
                 [% END %]
               </td>
             </tr>

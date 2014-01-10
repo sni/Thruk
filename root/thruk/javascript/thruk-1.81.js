@@ -1048,7 +1048,7 @@ function verify_time_do(id) {
     debug(obj.value);
 
     jQuery.ajax({
-        url: url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value,
+        url: url_prefix + 'cgi-bin/status.cgi?verify=time&time='+obj.value,
         type: 'POST',
         success: function(data) {
             var next = jQuery(obj).next();
@@ -1099,7 +1099,7 @@ function reset_table_row_classes(table, c1, c2) {
 
 /* set icon src and refresh page */
 function refresh_button(btn) {
-    btn.src = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+    btn.src = url_prefix + 'themes/' + theme + '/images/waiting.gif';
     reloadPage();
 }
 
@@ -1454,12 +1454,12 @@ function thruk_message(rc, message) {
         +'        <span class="' + cls + '">' + message + '<\/span>';
     if(rc != 0) {
         html += ''
-        +'          <img src="' + url_prefix + 'thruk/themes/'+ theme +'/images/error.png" alt="Errors detected" title="Errors detected" width="16" height="16" style="vertical-align: text-bottom">'
+        +'          <img src="' + url_prefix + 'themes/'+ theme +'/images/error.png" alt="Errors detected" title="Errors detected" width="16" height="16" style="vertical-align: text-bottom">'
     }
     html += ''
         +'      <\/td>'
         +'      <td valign="top" align="right" width="50">'
-        +'        <a href="#" onclick="fade(\'thruk_message\', 500);return false;"><img src="' + url_prefix + 'thruk/themes/' + theme + '/images/icon_close.gif" border="0" alt="Hide Message" title="Hide Message" width="13" height="12" class="close_button" style="margin-right: 4px;"><\/a>'
+        +'        <a href="#" onclick="fade(\'thruk_message\', 500);return false;"><img src="' + url_prefix + 'themes/' + theme + '/images/icon_close.gif" border="0" alt="Hide Message" title="Hide Message" width="13" height="12" class="close_button" style="margin-right: 4px;"><\/a>'
         +'      <\/td>'
         +'    <\/tr>'
         +'  <\/table>'
@@ -1560,7 +1560,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
                 if(graph.crit_width_max != null) {
                     result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width_max+'px;">&nbsp;<\/div>';
                 }
-                result += '<img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
+                result += '<img class="perf_bar" src="' + url_prefix + 'themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
                 result += '<\/div>';
             }
         }
@@ -2634,7 +2634,7 @@ function check_quick_command() {
             if(cell) {
                 cell.innerHTML = '';
                 img            = document.createElement('img');
-                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.src        = url_prefix + 'themes/' + theme + '/images/waiting.gif';
                 img.height     = 20;
                 img.width      = 20;
                 img.title      = "This service is currently executing its servicecheck";
@@ -2647,7 +2647,7 @@ function check_quick_command() {
             if(cell) {
                 cell.innerHTML = '';
                 img            = document.createElement('img');
-                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.src        = url_prefix + 'themes/' + theme + '/images/waiting.gif';
                 img.height     = 20;
                 img.width      = 20;
                 img.title      = "This host is currently executing its hostcheck";
@@ -3093,7 +3093,7 @@ function add_new_filter(search_prefix, table) {
   }
 
   var calImg = document.createElement('img');
-  calImg.src = url_prefix + "thruk/themes/"+theme+"/images/calendar.png";
+  calImg.src = url_prefix + "themes/"+theme+"/images/calendar.png";
   calImg.className = "cal_icon";
   calImg.alt = "choose date";
   var link   = document.createElement('a');
@@ -3107,7 +3107,7 @@ function add_new_filter(search_prefix, table) {
   // add second cell
   var img            = document.createElement('input');
   img.type           = 'image';
-  img.src            = url_prefix + "thruk/themes/"+theme+"/images/remove.png";
+  img.src            = url_prefix + "themes/"+theme+"/images/remove.png";
   img.className      = 'filter_button';
   var newCell1       = newRow.insertCell(1);
   newCell1.onclick   = delete_filter_row;
@@ -3431,11 +3431,11 @@ function toggleTopPane() {
   if(toggleElement('top_pane')) {
     additionalParams['hidetop'] = 0;
     formInput.value = 0;
-    document.getElementById('btn_toggle_top_pane').src = url_prefix + "thruk/themes/" + theme + "/images/icon_minimize.gif";
+    document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_minimize.gif";
   } else {
     additionalParams['hidetop'] = 1;
     formInput.value = 1;
-    document.getElementById('btn_toggle_top_pane').src = url_prefix + "thruk/themes/" + theme + "/images/icon_maximize.gif";
+    document.getElementById('btn_toggle_top_pane').src = url_prefix + "themes/" + theme + "/images/icon_maximize.gif";
   }
 }
 
@@ -3528,7 +3528,7 @@ Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
 var ajax_search = {
-    url             : url_prefix + 'thruk/cgi-bin/status.cgi?format=search',
+    url             : url_prefix + 'cgi-bin/status.cgi?format=search',
     max_results     : 12,
     input_field     : 'NavBarSearchItem',
     result_pan      : 'search-results',
@@ -4128,7 +4128,7 @@ var ajax_search = {
                 resultHTML += '<a href="#"><span style="color:red;">error: '+ajax_search.error+'</span></a>';
             }
             else if(ajax_search.updating) {
-                resultHTML += '<a href="#"><img src="'+ url_prefix + 'thruk/themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
+                resultHTML += '<a href="#"><img src="'+ url_prefix + 'themes/' + theme + '/images/loading-icon.gif" width=16 height=16 style="vertical-align: text-bottom;"> loading...</a>';
             } else {
                 resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
             }
@@ -4589,7 +4589,7 @@ function init_buttons() {
 *******************************************************************************/
 /* see https://github.com/antyrat/stackoverflow-favicon-counter for original source */
 function updateFaviconCounter(value, color, fill, font, fontColor) {
-    var faviconURL = url_prefix + 'thruk/themes/' + theme + '/images/favicon.ico';
+    var faviconURL = url_prefix + 'themes/' + theme + '/images/favicon.ico';
     var context    = window.parent.frames ? window.parent.document : window.document;
     if(fill == undefined) { fill = true; }
     if(!font)      { font      = "10px Normal Tahoma"; }

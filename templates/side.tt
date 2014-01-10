@@ -7,11 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     [% PROCESS _common_js.tt %]
     [% UNLESS all_in_one_css %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     [% END %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
     <style type="text/css">
     <!--
     HTML {
@@ -23,7 +23,7 @@
   </head>
   <body class='navbar'>
 [% END %]
-    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
+    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 
     [% FOREACH section = navigation %]
     [% cookie_section_name = section.name.replace(' ', '_') | lower %]
@@ -49,7 +49,7 @@
           [%+ ELSIF link.search %]
           <li class="navbarsearch">
           <div class="navbarsearch">
-            <form method="get" action="[% url_prefix %]thruk/cgi-bin/status.cgi" target="[% link.target %]">
+            <form method="get" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
                 <legend>[% link.name %]</legend>
                 [% IF use_new_search%]
@@ -73,8 +73,8 @@
     </div>
     [% END %]
 
-    <img src="[% url_prefix %]thruk/themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
-    <img src="[% url_prefix %]thruk/themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
+    <img src="[% url_prefix %]themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
+    <img src="[% url_prefix %]themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
 
 [% PROCESS _ajax_search.tt %]
 

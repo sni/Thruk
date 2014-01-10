@@ -7,7 +7,7 @@
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/package_go.png' border="0" alt='Create a new [% type %]' title='Create a new [% type %]' width="16" height="16"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='Create a new [% type %]' title='Create a new [% type %]' width="16" height="16"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;tools=check_object_references'>Check Object References</a></td>
               </tr>
             </table>

@@ -22,7 +22,7 @@
   </table>
 [% END %]
 
-<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
+<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
 <div class="shadow"><div class="shadowcontent">
 [% IF style != 'combined' %]
@@ -36,7 +36,7 @@
       <table border="0" cellspacing="2" cellpadding="0">
         <tr>
           <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-          <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
+          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
         </tr>
         <tr>
           [% IF columns != '' %]

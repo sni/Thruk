@@ -75,13 +75,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         } else {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to update crontab' });
         }
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
     }
 
     if(defined $report_nr) {
         if($report_nr !~ m/^\d+$/mx and $report_nr ne 'new') {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'invalid report number: '.$report_nr });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
         if($action eq 'show') {
             if(!Thruk::Utils::Reports::report_show($c, $report_nr, $refresh)) {
@@ -152,7 +152,7 @@ sub report_edit {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
         if(!defined $r or $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
     }
 
@@ -181,7 +181,7 @@ sub report_edit_step2 {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
         if(!defined $r or $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
     }
 
@@ -223,7 +223,7 @@ sub report_save {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     my $tab = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi?highlight=".$report_nr.'#'.$tab);
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr.'#'.$tab);
 }
 
 ##########################################################
@@ -245,7 +245,7 @@ sub report_update {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################
@@ -261,7 +261,7 @@ sub report_remove {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################

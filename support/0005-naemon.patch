@@ -5,7 +5,7 @@
  ######################################
  # set the url prefix for all urls
 -url_prefix = /
-+url_prefix = @HTMLURL@/
++url_prefix = @HTMLURL@
  
  ######################################
  # Changes the path to your logo images. Default is

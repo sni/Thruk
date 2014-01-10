@@ -18,7 +18,7 @@ window.onerror = function(msg, url, line) {
     [% END +%]
     var text = getErrorText("[% debug_details.replace('\n', '\\n') %]\n");
     [%+ IF show_error_reports == "server" %]
-    sendJSError("[% url_prefix %]thruk/cgi-bin/remote.cgi?log", text);
+    sendJSError("[% url_prefix %]cgi-bin/remote.cgi?log", text);
     [% ELSE %]
     showBugReport('bug_report', text);
     [% END +%]

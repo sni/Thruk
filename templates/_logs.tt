@@ -24,7 +24,7 @@
 
 [% END %]
 [% PROCESS _logs_line.tt %]
-<img align='middle' src='[% url_prefix %]thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
+<img align='middle' src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
 
 [% END %]
 

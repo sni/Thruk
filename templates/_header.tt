@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <title>[% title_prefix %][% title %]</title>
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
 
     [% SET page = 'status' IF page == '' %]
 
@@ -74,7 +74,7 @@
 
   <div class="pref_pane" id="pref_pane" style="display:none;">
     <div>
-    <a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
+    <a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="" method="GET">
     <table class="pref_pane" border=1 width="490">
       <tr>
@@ -86,7 +86,7 @@
             <tr>
               <th width="100">Theme:</th>
               <td>
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:top;">
                 <select name="theme" id="pref_theme">
                   [% FOR t = themes %]
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
@@ -100,10 +100,10 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
                 [% END %]
               </td>
@@ -112,7 +112,7 @@
             <tr>
               <th>Favicon:</th>
               <td>
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter('[% escape_html(full_uri(c)) %]', '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
                 <script type="text/javascript">
                 <!--
@@ -144,7 +144,7 @@
             <tr>
               <th>Report:</th>
               <td>
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% c.config.use_feature_reports %]?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
               </td>
             </tr>
@@ -152,7 +152,7 @@
             <tr>
               <th>Page Refresh:</th>
               <td nowrap>
-              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
+              <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
               [% IF refresh_rate %]
               <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
               [% ELSE %]
@@ -198,7 +198,7 @@
     <td width="100%" valign="top">[% PROCESS _header_sites.tt %]</td>
     <td class="hidden noprint" id="bug_report">
       [% IF show_error_reports%]
-      <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
+      <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
       [% END %]
     </td>
     [% IF 0 %]
@@ -209,14 +209,14 @@
     -->
     [% END %]
     <td>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
     <td class="top_nav_pref">
       <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('pref_pane', undefined, true); return false;">
     </td>
     [% IF cookie_auth && show_logout_button %]
     <td class="top_nav_pref">
-      <form action="[% url_prefix %]thruk/cgi-bin/login.cgi?logout" method='POST' target='_top'>
+      <form action="[% url_prefix %]cgi-bin/login.cgi?logout" method='POST' target='_top'>
       <button class="top_nav_pref_button noprint" title="logout" onMouseOver="button_over(this)" onMouseOut="button_out(this)">logout</button>
       </form>
     </td>
@@ -224,6 +224,6 @@
   </tr>
 </table>
 [% IF show_top_pane %]
-<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
 [% END %]
 [% END %]

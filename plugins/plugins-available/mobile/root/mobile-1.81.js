@@ -36,7 +36,7 @@ jQuery(document).ready(function(e){
     /* bind full client button */
     jQuery("A#full_client_link").bind("vclick", function(event, ui) {
         document.cookie = "thruk_mobile=0; path="+cookie_path+";";
-        window.location.assign(url_prefix + 'thruk/');
+        window.location.assign(url_prefix);
     });
 
     /* set selected backends for options page */
@@ -693,7 +693,7 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
         jQuery(comments).each(function(nr, com) {
             if(com.entry_type == 4) {
                 txt += '<li>';
-                txt += '<a href="#" onclick="alert(&quot;'+ format_time(com.entry_time) + '\\n' + com.author + '\\n' + com.comment+'&quot;);"><img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" class="ui-li-icon">';
+                txt += '<a href="#" onclick="alert(&quot;'+ format_time(com.entry_time) + '\\n' + com.author + '\\n' + com.comment+'&quot;);"><img src="' + url_prefix + 'plugins/mobile/img/ack.gif" class="ui-li-icon">';
                 txt += '' + com.author + ': ' + com.comment + '<\/a>';
                 txt += '<a href="cmd.cgi?cmd_mod=2';
                 if(typ == 'host') {
@@ -725,7 +725,7 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
                 txt = com.author + ': ('+format_time(com.start_time)+' - '+format_time(com.end_time)+')<br>' + com.comment;
             }
         });
-        jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt+'<hr>');
+        jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt+'<hr>');
     }
 }
 
@@ -733,31 +733,31 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
 function get_list_icons(obj) {
     var icons = '';
     if(obj.acknowledged == 1) {
-        icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif"> ';
+        icons += ' <img src="' + url_prefix + 'plugins/mobile/img/ack.gif"> ';
     }
     if(obj.notifications_enabled == 0) {
-        icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/ndisabled.gif"> ';
+        icons += ' <img src="' + url_prefix + 'plugins/mobile/img/ndisabled.gif"> ';
     }
     if(strict_passive_mode) {
         if(obj.check_type == 0 && obj.active_checks_enabled == 0) {
-            icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/disabled.gif"> ';
+            icons += ' <img src="' + url_prefix + 'plugins/mobile/img/disabled.gif"> ';
         }
         if(obj.check_type == 1 && obj.accept_passive_checks == 0) {
-            icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/disabled.gif"> ';
+            icons += ' <img src="' + url_prefix + 'plugins/mobile/img/disabled.gif"> ';
         }
         if(obj.check_type == 1 && obj.accept_passive_checks == 1) {
-            icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/passiveonly.gif"> ';
+            icons += ' <img src="' + url_prefix + 'plugins/mobile/img/passiveonly.gif"> ';
         }
     } else {
         if(obj.active_checks_enabled == 0 && obj.accept_passive_checks == 0) {
-            icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/disabled.gif"> ';
+            icons += ' <img src="' + url_prefix + 'plugins/mobile/img/disabled.gif"> ';
         }
         else if(obj.active_checks_enabled == 0) {
-            icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/passiveonly.gif"> ';
+            icons += ' <img src="' + url_prefix + 'plugins/mobile/img/passiveonly.gif"> ';
         }
     }
     if(obj.scheduled_downtime_depth > 0) {
-        icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif"> ';
+        icons += ' <img src="' + url_prefix + 'plugins/mobile/img/downtime.gif"> ';
     }
     if(icons != '') {
         icons = '<span class="ui-li-count ui-btn-up-c ui-btn-corner-all"> '+icons+' </span>';

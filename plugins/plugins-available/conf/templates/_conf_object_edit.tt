@@ -2,9 +2,9 @@
 
   <tr style="display: none" id="el_0">
     <td class='dataVar dataOdd conf_attr_unused conf_row' align="left" width="170" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"></td>
-    <td class='dataVar dataOdd conf_row clickable' align="left" width="16" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none" tabindex='13'></td>
+    <td class='dataVar dataOdd conf_row clickable' align="left" width="16" abbr="" onmouseover="jQuery('#d'+this.parentNode.id).css('display', '')" onmouseout="jQuery('#d'+this.parentNode.id).css('display', 'none')"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" title="remove this attribute" id="del_0" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_0'); return false;" style="display: none" tabindex='13'></td>
     <td class='dataVal dataOdd conf_row' colspan=2></td>
-    <td class='dataVal dataOdd clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr=''><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
+    <td class='dataVal dataOdd clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr=''><img src='[% url_prefix %]themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
   </tr>
 
   [% SET loopclass="dataEven" %]
@@ -21,8 +21,8 @@
         [% SET loopclass="dataOdd" %]
     [% END %]
     <tr class="[% loopclass %]">
-      <td class='dataVar [% loopclass +%] [%+ class %] conf_row' align="left" width="170" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src' ,'[% url_prefix %]thruk/images/spacer.png')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</td>
-      <td class='dataVar [% loopclass +%] [%+ class %] conf_row clickable' width="16" align="left" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]thruk/images/spacer.png')"><input type="image" src="[% url_prefix %]thruk/images/spacer.png" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="height:16px; width: 16px;" tabindex='13'></td>
+      <td class='dataVar [% loopclass +%] [%+ class %] conf_row' align="left" width="170" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src' ,'[% url_prefix %]images/spacer.png')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="jQuery('.obj_[% key %]').attr('name', 'obj.'+this.value)">[% ELSE %][% key %][% END %]</td>
+      <td class='dataVar [% loopclass +%] [%+ class %] conf_row clickable' width="16" align="left" abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]themes/[% theme %]/images/minus.gif')" onmouseout="jQuery('#del_[% loop.count %]').attr('src', '[% url_prefix %]images/spacer.png')"><input type="image" src="[% url_prefix %]images/spacer.png" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="height:16px; width: 16px;" tabindex='13'></td>
       <td class='dataVal [% loopclass %] conf_row' colspan=2>
         [% PROCESS _conf_object_row.tt nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
       </td>
@@ -36,7 +36,7 @@
       [% ELSIF obj.default.$key.exists('help') %]
         [% SET helpkey = obj.default.$key.help %]
       [% END %]
-      <td class='dataVal [% loopclass %] clickable conf_row'  width="18" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr='&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
+      <td class='dataVal [% loopclass %] clickable conf_row'  width="18" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr='&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]'><img src='[% url_prefix %]themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
     </tr>
 
     [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || (obj_conf.$key.size > 0 && obj.conf.$key.0.substr(0,1) != '+') %]

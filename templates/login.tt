@@ -3,7 +3,7 @@
 <html>
   <head>
     <title>Thruk Monitoring Webinterface</title>
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     [%+ PROCESS _common_css.tt use_frames=1 +%]
     [%+ PROCESS _common_js.tt +%]
   </head>
@@ -14,7 +14,7 @@
   <br><br>
   [% PROCESS _message.tt %]
   <div align="center">
-    <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+    <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     <div class="loginmask">
       <form method="POST" action="login.cgi">
           <input type="hidden" name="referer" value="" id="referer">
@@ -66,7 +66,7 @@
     [%+ IF c.config.precompile_templates +%]
     jQuery(document).ready(function() {
         jQuery.ajax({
-            url: '[% url_prefix %]thruk/cgi-bin/remote.cgi?compile',
+            url: '[% url_prefix %]cgi-bin/remote.cgi?compile',
             type: 'GET',
             success: function() {}
         });

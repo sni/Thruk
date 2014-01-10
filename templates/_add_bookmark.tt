@@ -1,4 +1,4 @@
-﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page' width=16 height=16></a>&nbsp;
+﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark', undefined, true); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page' width=16 height=16></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
   <div class="shadow"><div class="shadowcontent">
 
@@ -14,7 +14,7 @@
     <th class='data' id="sub_1" onclick="set_sub(1)"><a href="#remove">Remove Bookmarks</a></th>
     <th class='data dataSelected' width=100 id="sub_2" onclick="set_sub(2)"><a href="#add">Add New</a></th>
     <th class='data' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); resetRefresh(); return false;" style="height:14px; width:14px; position: absolute; top: 4px; right: 7px;">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); resetRefresh(); return false;" style="height:14px; width:14px; position: absolute; top: 4px; right: 7px;">
     </th>
   </tr>
   <tr class="sub_2">
@@ -73,7 +73,7 @@
             [% FOREACH link = user_data.bookmarks.$section %]
             <div id="bm[% nr %]">
               <div onClick="removeBookmark([% nr %]); return false;" class="clickable">
-                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
                 <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarks">
                 [% section %]: [% link.0 %]<br>
               </div>
@@ -95,7 +95,7 @@
             [% FOREACH link = global_user_data.bookmarks.$section %]
             <div id="bmp[% nr %]">
               <div onClick="removeBookmark('p'+[% nr %]); return false;" class="clickable">
-                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: middle;">
                 <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarksp">
                 [% section %]: [% link.0 %]<br>
               </div>

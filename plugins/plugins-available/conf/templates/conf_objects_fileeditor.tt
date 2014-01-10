@@ -1,5 +1,5 @@
 ﻿[% WRAPPER _conf_frame.tt %]
-<script src="[% url_prefix %]thruk/plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
+<script src="[% url_prefix %]plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="action" value="savefile">
@@ -12,9 +12,9 @@
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
 <table border="0" class='data conftoolobj'>
   <tr>
-    <th class='data' width="5%" align="left"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' width="5%" align="left"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
     <th class='data' width="90%"><span  style="font-size: larger;">/[% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
-    <th class='data' width="5%" align="right">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
+    <th class='data' width="5%" align="right">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>
   <tr>
     <td class="dataVar" colspan=3>

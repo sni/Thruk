@@ -3,9 +3,9 @@
   <head>
     <title>[% title_prefix %]Mobile Thruk</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].css' />
-    <link rel="stylesheet" href="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.1.0.min.css" />
-    <script src="[% url_prefix %]thruk/javascript/jquery-1.7.2.min.js"></script>
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% version %].css' />
+    <link rel="stylesheet" href="[% url_prefix %]plugins/mobile/jqm/jquery.mobile-1.1.0.min.css" />
+    <script src="[% url_prefix %]javascript/jquery-1.7.2.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix             = '[% url_prefix %]';
       var cookie_path            = '[% cookie_path %]';
@@ -15,11 +15,11 @@
       document.cookie            = "thruk_mobile=1; path="+cookie_path+";";
       var strict_passive_mode    = [% strict_passive_mode %];
     </script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/jquery.mobile.router-0.6.js"></script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.1.0.min.js"></script>
-    <link rel="apple-touch-icon" href="[% url_prefix %]thruk/plugins/mobile/img/thruk.png" />
-    <link rel="apple-touch-startup-image" href="[% url_prefix %]thruk/plugins/mobile/img/startup.png" />
+    <script src="[% url_prefix %]plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]plugins/mobile/jquery.mobile.router-0.6.js"></script>
+    <script src="[% url_prefix %]plugins/mobile/jqm/jquery.mobile-1.1.0.min.js"></script>
+    <link rel="apple-touch-icon" href="[% url_prefix %]plugins/mobile/img/thruk.png" />
+    <link rel="apple-touch-startup-image" href="[% url_prefix %]plugins/mobile/img/startup.png" />
     <meta name="viewport" content="user-scalable=no, width=device-width" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
