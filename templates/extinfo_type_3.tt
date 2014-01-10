@@ -33,7 +33,7 @@
       <tr>
         <td width="220"></td>
         <td align="center">
-          <div class="hint">mark host comments with leftclick. Select multiple with shift + mouse.</div>
+          <div class="hint">Mark host comments with leftclick. Select multiple with shift + mouse.</div>
         </td>
         <td width="220" align="right" class="toolbar">
           [% style="comments" %]
