@@ -860,6 +860,7 @@ sub _sum_availability {
         'unavailable'  => 0,
         'undetermined' => 0,
     };
+
     for my $s ( keys %{$t} ) {
         for my $state (qw/ok warning critical unknown up down unreachable/) {
             if($s eq 'time_'.$state) {
@@ -877,10 +878,10 @@ sub _sum_availability {
                 }
             }
         }
-        $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
-        $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
-        $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
     }
+    $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
+    $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
+    $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
 
     my $percent = -1;
     if($time->{'available'} + $time->{'unavailable'} > 0) {

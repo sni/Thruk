@@ -12,6 +12,7 @@ next:
             - change service plugin output for first node
             - fixed displaying/using wrong host template
           - Reports
+            - show out of scope totals
             - added report description on cover page
             - support outages pages for multiple host/service reports
             - fill in defaults for host/service unavailable states when switching report templates

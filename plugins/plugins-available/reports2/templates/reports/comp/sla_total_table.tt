@@ -13,4 +13,10 @@
     <th>[% loc("Total Downtime") %]</th>
     <td>[% duration(data.time.unavailable) %]</td>
   </tr>
+  [% IF data.time.undetermined > 0 %]
+  <tr>
+    <th>[% loc("Out of Scope") %]</th>
+    <td>[% duration(data.time.undetermined) %]</td>
+  </tr>
+  [% END %]
 </table>
