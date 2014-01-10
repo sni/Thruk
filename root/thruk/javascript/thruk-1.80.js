@@ -4077,10 +4077,11 @@ var ajax_search = {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
                     jQuery.each(pattern, function(index, sub_pattern) {
-                        name   = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                         if(ajax_search.regex_matching) {
                             var re = new RegExp('('+sub_pattern+')', "gi");
                             name = name.replace(re, "<b>$1<\/b>");
+                        } else {
+                            name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                         }
                     });
                     var classname = "item";
