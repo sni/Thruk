@@ -37,7 +37,7 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Description</b></td>
-    <td class="dataOdd" align="left" colspan=2><textarea name="desc">[% r.desc %]</textarea></td>
+    <td class="dataOdd" align="left" colspan=2><textarea name="desc" wrap="hard" cols=74>[% r.desc %]</textarea></td>
   </tr>
   <tr>
     <td class="dataEven" align="center"><b>Public</b></td>

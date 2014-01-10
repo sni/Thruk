@@ -89,6 +89,10 @@ DIV.cover DIV.content DIV.details TH {
 DIV.cover DIV.content DIV.details TD {
   padding-left: 10px;
 }
+DIV.cover DIV.description {
+  padding-top: 30px;
+  white-space: pre;
+}
 
 
 /* Event Report */

@@ -28,6 +28,9 @@
               [% END %]
               </table>
             </div>
+            <div class="description">
+              [% r.desc %]
+            </div>
           </div>
         </div>
       </td>

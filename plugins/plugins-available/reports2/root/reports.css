@@ -13,8 +13,6 @@ body.status TABLE.reports INPUT.date_input[type=text] {
   width: 140px;
 }
 body.status TABLE.reports TEXTAREA {
-  white-space: nowrap;
-  word-wrap: normal;
   width: 520px;
   height: 80px;
 }
