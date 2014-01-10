@@ -43,6 +43,6 @@
     'Report:'                               => 'Rapport:',
     'Description:'                          => 'Description:',
     'Your report is attached.'              => 'Vous trouverez ci-joint votre rapport.',
-    'Out of Scope'                          => '',
+    'Out of Scope'                          => 'Hors périmètre',
   }
 %]
