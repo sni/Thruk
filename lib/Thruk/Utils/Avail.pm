@@ -15,6 +15,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
+use POSIX qw(floor);
 
 ##############################################
 
@@ -516,15 +517,39 @@ sub calculate_availability {
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    if($file and ref $logs eq 'HASH') {
-        my($fh,$tempfile) = tempfile();
-        $c->stats->profile(begin => "avail.pm sort logs");
-        my $cmd = 'sort -k 1,12 -o '.$tempfile.' '.join(' ', values %{$logs});
-        `$cmd > $tempfile`;
-        unlink(values %{$logs});
-        $c->stats->profile(end   => "avail.pm sort logs");
-        $file = $tempfile;
+    $c->stats->profile(begin => "avail.pm fix timeperiod transitions timestamps");
+    # fix timestamps of timeperiod transitions
+    if($logs and ref $logs eq 'ARRAY') {
+        for my $l (@{$logs}) {
+            if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
+                $l->{'time'} = floor(($l->{'time'}+30)/120) * 120;
+            }
+        }
     }
+    elsif($file and ref $logs eq 'HASH') {
+        my($fh,$tempfile) = tempfile();
+        for my $fname (values %{$logs}) {
+            open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
+            while(my $line = <$fh2>) {
+                if($line =~ m/^[(\d+)]\ TRANSITION\ TRANSITION: (.*)/mx) {
+                    my $t = floor(($1+30)/120) * 120;
+                    print $fh '['.$t.'] TIMEPERIOD TRANSITION: '.$2;
+                } else {
+                    print $fh $line;
+                }
+            }
+            CORE::close($fh2);
+        }
+        CORE::close($fh);
+        unlink(values %{$logs});
+        $c->stats->profile(begin => "avail.pm sort logs");
+        my $cmd = 'sort -k 1,12 -o '.$tempfile.'2 '.$tempfile;
+        `$cmd > $tempfile`;
+        $c->stats->profile(end   => "avail.pm sort logs");
+        unlink($tempfile);
+        $file = $tempfile.'2';
+    }
+    $c->stats->profile(end => "avail.pm fix timeperiod transitions timestamps");
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new();
