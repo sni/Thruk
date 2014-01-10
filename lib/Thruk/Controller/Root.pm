@@ -62,6 +62,7 @@ sub begin : Private {
                   force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
                 /) {
         $c->stash->{$key} = $c->config->{$key};
+        Thruk::Utils::decode_any($c->stash->{$key}) if ref $c->stash->{$key} eq '';
     }
 
     # user data

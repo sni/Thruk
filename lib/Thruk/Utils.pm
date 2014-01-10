@@ -1771,7 +1771,7 @@ sub read_data_file {
     if($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
 
     # ensure right encoding
-    $cont = decode_any($cont);
+    decode_any($cont);
 
     $cont =~ s/^\$VAR1\ =\ //mx;
 
