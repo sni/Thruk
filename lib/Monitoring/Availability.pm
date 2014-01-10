@@ -550,6 +550,25 @@ sub _compute_for_data {
     # if we reach the start date of our report, insert a fake entry
     if($last_time < $report_options_start and $data->{'time'} >= $report_options_start) {
         $self->_insert_fake_event($result, $report_options_start);
+
+        # insert another fake event with current timeperiod state
+        if($self->{'report_options'}->{'rpttimeperiod'} and defined $self->{'in_timeperiod'}) {
+            # set a log entry
+            my $start         = 'STOP';
+            my $plugin_output = 'leaving timeperiod: '.$self->{'report_options'}->{'rpttimeperiod'};
+            if($self->{'in_timeperiod'}) {
+                $plugin_output = 'entering timeperiod: '.$self->{'report_options'}->{'rpttimeperiod'};
+                $start         = 'START';
+            }
+            $self->_add_log_entry(
+                            'log'         => {
+                                'start'         => $report_options_start,
+                                'type'          => 'TIMEPERIOD '.$start,
+                                'plugin_output' => $plugin_output,
+                                'class'         => 'INDETERMINATE',
+                            },
+            );
+        }
     }
 
     # if we passed a breakdown point, insert fake event

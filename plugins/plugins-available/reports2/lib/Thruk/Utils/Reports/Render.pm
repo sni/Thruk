@@ -111,7 +111,10 @@ sub outages {
     my @reduced_logs;
     my($combined, $last);
     my $downtime = 0;
+    my $in_time  = 1;
     for my $l (@{$logs}) {
+        next if $l->{'type'} eq 'TIMEPERIOD START' and $in_time == 1; # skip repeating timeperiod starts
+        next if $l->{'type'} eq 'TIMEPERIOD STOP'  and $in_time == 0; # skip repeating timeperiod stops
         if($service) {
             next if(defined $l->{'service'} and $l->{'service'} ne $service);
             next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
@@ -134,15 +137,18 @@ sub outages {
         }
         if($combined->{'class'} ne $l->{'class'}) {
             $combined->{'real_end'} = $l->{'start'};
-            push @reduced_logs, $combined if $combined->{'class'} ne 'indeterminate';
+            push @reduced_logs, $combined if $in_time and $combined->{'class'} ne 'indeterminate';
             undef $combined;
             $combined = $l;
         }
+        $in_time = 1 if $l->{'type'} eq 'TIMEPERIOD START';
+        $in_time = 0 if $l->{'type'} eq 'TIMEPERIOD STOP';
         $last = $l;
     }
     if(defined $last) {
         $combined->{'real_end'} = $last->{'end'};
-        push @reduced_logs, $combined if $combined->{'class'} ne 'indeterminate';
+        $in_time = 1 if $last->{'type'} eq 'TIMEPERIOD STOP'; # if the last log entry is a stop, it must have been _in_ before
+        push @reduced_logs, $combined if $in_time and $combined->{'class'} ne 'indeterminate';
     }
 
     my $outages = [];
@@ -152,7 +158,7 @@ sub outages {
         $l->{'start'}    = $start if $start > $l->{'start'};
         $l->{'real_end'} = $end   if $end   < $l->{'real_end'};
         $l->{'duration'} = $l->{'real_end'} - $l->{'start'};
-        if(defined $u->{$l->{'class'}}) {
+        if(defined $u->{$l->{'class'}} and $l->{'duration'} > 0) {
             push @{$outages}, $l;
         }
     }
