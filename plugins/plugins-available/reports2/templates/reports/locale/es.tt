@@ -43,5 +43,6 @@
     'Report:'                               => 'Informe:',
     'Description:'                          => 'Descripcion:',
     'Your report is attached.'              => 'Su informe se ha adjuntado.',
+    'Out of Scope'                          => '',
   }
 %]

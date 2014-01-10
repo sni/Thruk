@@ -5,7 +5,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 178;
+    plan tests => 182;
 }
 BEGIN {
     use lib('t');
