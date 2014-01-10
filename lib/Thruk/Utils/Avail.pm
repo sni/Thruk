@@ -531,9 +531,9 @@ sub calculate_availability {
         for my $fname (values %{$logs}) {
             open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
             while(my $line = <$fh2>) {
-                if($line =~ m/^[(\d+)]\ TRANSITION\ TRANSITION: (.*)/mx) {
+                if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mx) {
                     my $t = floor(($1+30)/120) * 120;
-                    print $fh '['.$t.'] TIMEPERIOD TRANSITION: '.$2;
+                    print $fh '['.$t.'] TIMEPERIOD TRANSITION:'.$2."\n";
                 } else {
                     print $fh $line;
                 }
@@ -544,7 +544,7 @@ sub calculate_availability {
         unlink(values %{$logs});
         $c->stats->profile(begin => "avail.pm sort logs");
         my $cmd = 'sort -k 1,12 -o '.$tempfile.'2 '.$tempfile;
-        `$cmd > $tempfile`;
+        `$cmd`;
         $c->stats->profile(end   => "avail.pm sort logs");
         unlink($tempfile);
         $file = $tempfile.'2';
@@ -581,11 +581,11 @@ sub calculate_availability {
     $c->stash->{avail_data} = $ma->calculate(%{$ma_options});
     $c->stats->profile(end => "calculate availability");
 
-    unlink($file) if $file;
-
     if($c->{'request'}->{'parameters'}->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";
         $c->stash->{'debug_info'} .= Dumper($ma_options);
+    } else {
+        unlink($file) if $file;
     }
 
     if($full_log_entries) {
