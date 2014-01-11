@@ -158,6 +158,11 @@ sub test_page {
     my $start = time();
     my $opts = _set_test_page_defaults(\%opts);
 
+    # make tests with http://localhost/naemon possible
+    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)|mx) {
+        $opts->{'url'} =~ s|/thruk|/$1|gmx;
+    }
+
     ok($opts->{'url'}, $opts->{'url'});
 
     my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'});
