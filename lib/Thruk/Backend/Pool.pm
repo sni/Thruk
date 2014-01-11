@@ -37,14 +37,17 @@ sub set_default_config {
     my( $config ) = @_;
 
     # defaults
-    $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '';
-    $config->{'url_prefix'} =~ s|/+$||mx;
-    $config->{'url_prefix'} =~ s|^/+||mx;
-    $config->{'product_prefix'} = $config->{'product_prefix'} || 'thruk';
-    $config->{'product_prefix'} =~ s|^/+||mx;
-    $config->{'product_prefix'} =~ s|/+$||mx;
-    $config->{'url_prefix'} = '/'.$config->{'url_prefix'}.'/'.$config->{'product_prefix'}.'/';
-    $config->{'url_prefix'} =~ s|/+|/|gmx;
+    unless($config->{'url_prefix_fixed'}) {
+        $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '';
+        $config->{'url_prefix'} =~ s|/+$||mx;
+        $config->{'url_prefix'} =~ s|^/+||mx;
+        $config->{'product_prefix'} = $config->{'product_prefix'} || 'thruk';
+        $config->{'product_prefix'} =~ s|^/+||mx;
+        $config->{'product_prefix'} =~ s|/+$||mx;
+        $config->{'url_prefix'} = '/'.$config->{'url_prefix'}.'/'.$config->{'product_prefix'}.'/';
+        $config->{'url_prefix'} =~ s|/+|/|gmx;
+        $config->{'url_prefix_fixed'} = 1;
+    }
     my $defaults = {
         'cgi.cfg'                       => 'cgi.cfg',
         bug_email_rcpt                  => 'bugs@thruk.org',
