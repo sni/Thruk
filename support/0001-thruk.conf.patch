@@ -1,5 +1,5 @@
---- a/thruk.conf	2013-11-26 15:27:02.000000000 +0100
-+++ b/thruk.conf	2013-12-02 22:22:17.532049834 +0100
+--- a/thruk.conf	2013-12-15 17:30:02.543400690 +0100
++++ b/thruk.conf	2014-01-11 19:28:52.431964164 +0100
 @@ -77,11 +77,11 @@
  
  ######################################
@@ -89,7 +89,7 @@
  
  # Set first day of week. Used in reports.
  # Sunday: 0
-@@ -564,6 +564,20 @@
+@@ -570,6 +570,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
  #    <peer>
@@ -110,7 +110,7 @@
  #        name   = Local Nagios
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -615,9 +629,9 @@
+@@ -621,9 +635,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
@@ -123,7 +123,7 @@
  
      #pre_obj_save_cmd   =
      #post_obj_save_cmd  =
-@@ -650,7 +664,7 @@
+@@ -656,7 +670,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
      # wkhtmltopdf is used to convert html pages into pdf

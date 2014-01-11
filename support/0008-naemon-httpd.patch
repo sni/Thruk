@@ -1,5 +1,5 @@
---- a/thruk.conf	2013-12-06 13:10:18.169312282 +0100
-+++ b/thruk.conf	2013-12-06 13:09:57.977292066 +0100
+--- a/thruk.conf	2014-01-11 18:24:36.784961810 +0100
++++ b/thruk.conf	2014-01-11 19:26:21.955957648 +0100
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -27,7 +27,7 @@
      Options FollowSymLinks
      allow from all
      # required for apache 2.4
-@@ -32,28 +32,31 @@
+@@ -32,28 +32,28 @@
    # redirect to a startup page when there is no pidfile yet
    RewriteEngine On
    RewriteCond %{REQUEST_METHOD} GET
@@ -52,15 +52,12 @@
 -  Alias /thruk /usr/share/thruk/root/thruk
 +  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
 +  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
-+  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh/thruk/$1
++  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh/@HTMLURL@/$1
 +  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
 +  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
 +  Alias @HTMLURL@ @DATADIR@/root/thruk
  
 -  <Location /thruk>
-+  #RewriteRule ^@HTMLURL@$  @HTMLURL@/thruk  [R]
-+  #RewriteRule ^@HTMLURL@/$ @HTMLURL@/thruk/ [R]
-+
 +  <Location @HTMLURL@>
      Options ExecCGI
 -    AuthName "Thruk Monitoring"

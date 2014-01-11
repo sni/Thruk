@@ -1,15 +1,16 @@
---- a/thruk.conf	2013-12-06 13:17:29.429292006 +0100
-+++ b/thruk.conf	2013-12-06 13:19:34.533299226 +0100
-@@ -13,7 +13,7 @@
- 
- ######################################
+--- a/thruk.conf	2014-01-11 19:28:52.431964164 +0100
++++ b/thruk.conf	2014-01-11 19:32:29.539971990 +0100
+@@ -15,6 +15,9 @@
  # set the url prefix for all urls
--url_prefix = /
-+url_prefix = @HTMLURL@
+ url_prefix = /
  
++# product prefix must be used if thruk is not deployed under /thruk/...
++product_prefix = @HTMLURL@
++
  ######################################
  # Changes the path to your logo images. Default is
-@@ -43,7 +43,7 @@
+ # $url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
+@@ -43,7 +46,7 @@
  # set the title prefix for all urls
  # this piece of text will be prepended to
  # all page titles.
@@ -18,7 +19,7 @@
  
  ######################################
  # uses bookmark names as page titles where possible
-@@ -187,8 +187,8 @@
+@@ -187,8 +190,8 @@
  
  ######################################
  # mode used when creating or saving files
@@ -29,7 +30,7 @@
  
  ######################################
  # server side includes
-@@ -208,7 +208,7 @@
+@@ -208,7 +211,7 @@
  
  ######################################
  # custom templates
@@ -38,7 +39,7 @@
  
  ######################################
  # log4perl config
-@@ -506,7 +506,7 @@
+@@ -512,7 +515,7 @@
  # bug reporting
  # show link to bug reports when internal errors occur.
  # set to 'server' to log js error server side
@@ -47,7 +48,7 @@
  
  # don't report some known harmless javascript errors
  skip_js_errors  = cluetip is not a function
-@@ -563,56 +563,19 @@
+@@ -569,56 +572,19 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -117,7 +118,7 @@
  </Component>
  
  
-@@ -697,16 +660,16 @@
+@@ -703,16 +669,16 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
