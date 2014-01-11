@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 20;
+use Test::More tests => 21;
 $Data::Dumper::Sortkeys = 1;
 
 $ENV{'THRUK_SRC'} = 'TEST';
@@ -154,6 +154,26 @@ test_filter(
     'auth hash',
     [ '-or',   [ { '-and' => [   'current_service_contacts',      { '>=' => 'thrukadmin' },       'service_description', { '!=' => undef } ] },   { 'current_host_contacts' => { '>='    => 'thrukadmin' } } ] ],
     { '$or' => [ { '$and' => [ { 'current_service_contacts' => { '$in' => [ 'thrukadmin' ] } }, { 'service_description' => { '$ne' => '' } } ] }, { 'current_host_contacts' => { '$in' => [ 'thrukadmin' ] } } ] }
+);
+
+#####################################################################
+test_filter(
+    'undefined list entry',
+    [
+          undef,
+          {
+            '-or' => [
+                       { 'peer_key' => '78bcd' },
+                       { 'peer_key' => '17b32' }
+                     ]
+          }
+    ],
+    {
+       '$or' => [
+                  { 'peer_key' => '78bcd' },
+                  { 'peer_key' => '17b32' }
+                ]
+    }
 );
 
 #####################################################################

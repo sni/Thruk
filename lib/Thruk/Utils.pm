@@ -269,7 +269,7 @@ computes a combined status for process infos
 
 =cut
 sub calculate_overall_processinfo {
-    my $pi = shift;
+    my($pi) = @_;
     my $return = {};
 
     # if no backend is available

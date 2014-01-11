@@ -1074,3 +1074,12 @@ TABLE.perfdata_human TR:last-child TD {
 A.cxhlp {
   margin-right: 7px;
 }
+
+DIV.alert.floating {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  margin: 0 0 0 -25%;
+  -webkit-box-shadow: 3px 3px 5px 5px #888888;
+  box-shadow: 3px 3px 5px 5px #888888;
+}

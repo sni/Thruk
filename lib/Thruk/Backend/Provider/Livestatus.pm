@@ -124,16 +124,23 @@ return the process info
 
 =cut
 sub get_processinfo {
-    my $self  = shift;
-    my $data  =  $self->{'live'}
-                  ->table('status')
-                  ->columns(qw/
+    my($self, %options) = @_;
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
                       accept_passive_host_checks accept_passive_service_checks check_external_commands
                       check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
                       enable_notifications execute_host_checks execute_service_checks last_command_check
                       last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
                       process_performance_data program_start program_version interval_length
-                  /)
+        /];
+    }
+    if(defined $options{'extra_columns'}) {
+        push @{$options{'columns'}}, @{$options{'extra_columns'}};
+    }
+
+    my $data  =  $self->{'live'}
+                  ->table('status')
+                  ->columns(@{$options{'columns'}})
                   ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
                   ->hashref_pk('peer_key');
 

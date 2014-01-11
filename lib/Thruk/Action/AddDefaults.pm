@@ -140,6 +140,7 @@ sub add_defaults {
     if($@) {
         # side.html and some other pages should not be redirect to the error page on backend errors
         _set_possible_backends($c, $disabled_backends);
+        print STDERR $@ if $c->config->{'thruk_debug'};
         return if $safe;
         $c->log->debug("data source error: $@");
         return $c->detach('/error/index/9');
@@ -422,6 +423,7 @@ sub _set_processinfo {
     # set last programm restart
     if(ref $processinfo eq 'HASH') {
         for my $backend (keys %{$processinfo}) {
+            next if !defined $processinfo->{$backend}->{'program_start'};
             $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
         }
     }

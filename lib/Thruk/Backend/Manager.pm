@@ -1003,10 +1003,10 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    if(Thruk->debug) {
-        $c->log->debug($function);
-        $c->log->debug(Dumper($get_results_for));
-    }
+    #if(Thruk->debug) {
+    #    $c->log->debug($function);
+    #    $c->log->debug(Dumper($get_results_for));
+    #}
 
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
@@ -1053,6 +1053,7 @@ sub _do_on_peers {
         }
     }
     $type = '' unless defined $type;
+    $type = lc $type;
 
     # extract some extra data
     if($function eq 'get_processinfo') {
@@ -1071,19 +1072,19 @@ sub _do_on_peers {
 
     # howto merge the answers?
     my $data;
-    if( lc $type eq 'file' ) {
+    if( $type eq 'file' ) {
         $data = $result;
     }
-    elsif( lc $type eq 'uniq' ) {
+    elsif( $type eq 'uniq' ) {
         $data = $self->_merge_answer( $result, $type );
         my %seen = ();
         my @uniq = sort( grep { !$seen{$_}++ } @{$data} );
         $data = \@uniq;
     }
-    elsif ( lc $type eq 'stats' ) {
+    elsif ( $type eq 'stats' ) {
         $data = $self->_merge_stats_answer($result);
     }
-    elsif ( lc $type eq 'sum' ) {
+    elsif ( $type eq 'sum' ) {
         $data = $self->_sum_answer($result);
     }
     elsif ( $function eq 'get_hostgroups' ) {
@@ -1195,16 +1196,16 @@ sub _select_backends {
     for my $peer ( @{ $self->get_peers() } ) {
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
-                $c->log->debug("skipped peer (undef): ".$peer->{'name'});
+                #$c->log->debug("skipped peer (undef): ".$peer->{'name'});
                 next;
             }
         }
         if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-            $c->log->debug("skipped peer (down): ".$peer->{'name'});
+            #$c->log->debug("skipped peer (down): ".$peer->{'name'});
             next;
         }
         unless($peer->{'enabled'} == 1) {
-            $c->log->debug("skipped peer (disabled): ".$peer->{'name'});
+            #$c->log->debug("skipped peer (disabled): ".$peer->{'name'});
             next;
         }
         push @{$get_results_for}, $peer->{'key'};
@@ -1562,7 +1563,7 @@ sub _merge_answer {
     my($self, $data, $type) = @_;
     my $c      = $Thruk::Backend::Manager::c;
     my $return = [];
-    if( defined $type and lc $type eq 'hash' ) {
+    if( defined $type and $type eq 'hash' ) {
         $return = {};
     }
 
@@ -1571,6 +1572,7 @@ sub _merge_answer {
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
+        confess("not a hash") unless ref $data eq 'HASH';
         next if !defined $data->{$key};
 
         if( ref $data->{$key} eq 'ARRAY' ) {
@@ -1602,10 +1604,7 @@ sub _merge_hostgroup_answer {
 
     $c->stats->profile( begin => "_merge_hostgroup_answer()" );
 
-    for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
-        next if !defined $data->{$key};
-
+    for my $key ( keys %{$data} ) {
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
@@ -1638,16 +1637,12 @@ sub _merge_hostgroup_answer {
 ##########################################################
 # merge servicegroups and merge 'members' of matching groups
 sub _merge_servicegroup_answer {
-    my $self   = shift;
-    my $data   = shift;
+    my($self, $data) = @_;
     my $c      = $Thruk::Backend::Manager::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_servicegroup_answer()" );
-    for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
-        next if !defined $data->{$key};
-
+    for my $key ( keys %{ $data } ) {
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
@@ -1759,8 +1754,7 @@ sub _merge_stats_answer {
 
 ##########################################################
 sub _sum_answer {
-    my $self = shift;
-    my $data = shift;
+    my($self, $data) = @_;
     my $c    = $Thruk::Backend::Manager::c;
     my $return;
 
@@ -1817,6 +1811,8 @@ sub _sort {
     my $c = $Thruk::Backend::Manager::c;
     my( @sorted, $key, $order );
 
+    $c->stats->profile( begin => "_sort()" ) if $c;
+
     $key = $sortby;
     if( ref $sortby eq 'HASH' ) {
         if(defined $sortby->{'ASC'} and defined $sortby->{'DESC'}) {
@@ -1833,12 +1829,12 @@ sub _sort {
 
     if( !defined $key ) { confess('missing options in sort()'); }
 
-    $c->stats->profile( begin => "_sort()" ) if $c;
-
     $order = "ASC" if !defined $order;
 
-    return \@sorted if !defined $data;
-    return \@sorted if scalar @{$data} == 0;
+    if(!defined $data or scalar @{$data} == 0) {
+        $c->stats->profile( end => "_sort()" ) if $c;
+        return \@sorted
+    }
 
     my @keys;
     if( ref($key) eq 'ARRAY' ) {

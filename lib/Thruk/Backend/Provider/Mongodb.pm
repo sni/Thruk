@@ -49,11 +49,12 @@ sub new {
     }
 
     my $self = {
-        'dbhost'      => $dbhost,
-        'dbname'      => $dbname,
-        'config'      => $config,
-        'peer_config' => $peer_config,
-        'verbose'     => 0,
+        'dbhost'             => $dbhost,
+        'dbname'             => $dbname,
+        'config'             => $config,
+        'peer_config'        => $peer_config,
+        'verbose'            => 0,
+        'last_program_start' => {},
     };
     bless $self, $class;
 
@@ -176,12 +177,16 @@ return the process info
 
 =cut
 sub get_processinfo {
-    my $self  = shift;
-    my $data = {
-        $self->peer_key() => $self->_db->status
-                                       ->find_one()
-    };
-    $self->{'last_program_start'}  = $data->{$self->peer_key()}->{'program_start'};
+    my($self, %options) = @_;
+    my @data = $self->_db->get_collection('status')
+                         ->find($self->_get_filter($options{'filter'}))
+                         ->all();
+    my $data = {};
+    for my $d (@data) {
+        my $key = $d->{'peer_key'};
+        $data->{$key}                          = $d;
+        $self->{'last_program_start'}->{$key}  = $d->{'program_start'};
+    }
     return($data, 'HASH');
 }
 
@@ -193,11 +198,10 @@ returns if this user is allowed to submit commands
 
 =cut
 sub get_can_submit_commands {
-    my $self = shift;
-    my $user = shift;
+    my($self, $user) = @_;
     confess("no user") unless defined $user;
 
-    my @data = $self->_db->contacts
+    my @data = $self->_db->get_collection('contacts')
                          ->find({ name => $user })
                          ->fields({can_submit_commands => 1, alias => 1})
                          ->all;
@@ -227,7 +231,7 @@ sub get_contactgroups_by_contact {
     my($self,$username) = @_;
     confess("no user") unless defined $username;
 
-    my @data = $self->_db->contactgroups
+    my @data = $self->_db->get_collection('contactgroups')
                          ->find({ members => $username })
                          ->fields({name => 1})
                          ->all;
@@ -250,34 +254,12 @@ sub get_hosts {
         confess("get_hosts() should not be called in scalar context");
     }
 
-    my @data = $self->_db->hosts
+    my @data = $self->_db->get_collection('hosts')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     my $size = scalar @data;
-    $self->_add_peer_data(\@data);
+    $self->_add_peer_data(\@data) unless $options{'no_add_peer'};
     return(\@data, undef, $size);
-
-#    # try to reduce the amount of transfered data
-#    my($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
-#    if(defined $size) {
-#        # then set the limit for the real query
-#        $options{'options'}->{'limit'} = $limit + 50;
-#    }
-#
-#        if($self->{'stash'}->{'enable_shinken_features'}) {
-#            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
-#                                             got_business_rule parent_dependencies/;
-#        }
-#        if(defined $options{'extra_columns'}) {
-#            push @{$options{'columns'}}, @{$options{'extra_columns'}};
-#        }
-#    }
-#
-#    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
-#    my $data = $self->_get_table('hosts', \%options);
-#
-#
-#    return($data, undef, $size);
 }
 
 ##########################################################
@@ -296,15 +278,8 @@ sub get_hosts_by_servicequery {
         confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
 
-    my @data = $self->_db->services
+    my @data = $self->_db->get_collection('services')
                          ->find($self->_get_filter($options{'filter'}))
-                         ->fields({
-                               host_has_been_checked         => 1,
-                               host_name                     => 1,
-                               host_state                    => 1,
-                               host_scheduled_downtime_depth => 1,
-                               host_acknowledged             => 1,
-                           })
                          ->all;
 
     return(\@data, undef);
@@ -319,14 +294,14 @@ sub get_hosts_by_servicequery {
 returns a list of host names
 
 =cut
-sub get_host_names{
+sub get_host_names {
     my($self, %options) = @_;
 
     unless(wantarray) {
         confess("get_host_names () should not be called in scalar context");
     }
 
-    my @data = $self->_db->hosts
+    my @data = $self->_db->get_collection('hosts')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({'name' => 1})
                          ->all;
@@ -347,11 +322,10 @@ returns a list of hostgroups
 sub get_hostgroups {
     my($self, %options) = @_;
 
-    my @data = $self->_db->hostgroups
+    my @data = $self->_db->get_collection('hostgroups')
                          ->find($self->_get_filter($options{'filter'}))
-                         ->fields({name =>1 , alias => 1, members => 1, action_url => 1, notes => 1, notes_url => 1})
                          ->all;
-    $self->_add_peer_data(\@data);
+    $self->_add_peer_data(\@data) unless $options{'no_add_peer'};
     return \@data;
 }
 
@@ -371,7 +345,7 @@ sub get_hostgroup_names {
         confess("get_hostgroup_names() should not be called in scalar context");
     }
 
-    my @data = $self->_db->hostgroups
+    my @data = $self->_db->get_collection('hostgroups')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({name =>1})
                          ->all;
@@ -397,65 +371,12 @@ sub get_services {
         confess("get_services() should not be called in scalar context");
     }
 
-    my @data = $self->_db->services
+    my @data = $self->_db->get_collection('services')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     my $size = scalar @data;
-    $self->_add_peer_data(\@data);
+    $self->_add_peer_data(\@data) unless $options{'no_add_peer'};
     return(\@data, undef, $size);
-
-    ## try to reduce the amount of transfered data
-    #my($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
-    #if(defined $size) {
-    #    # then set the limit for the real query
-    #    $options{'options'}->{'limit'} = $limit + 50;
-    #}
-
-    #unless(defined $options{'columns'}) {
-    #    $options{'columns'} = [qw/
-    #        accept_passive_checks acknowledged action_url action_url_expanded
-    #        active_checks_enabled check_command check_interval check_options
-    #        check_period check_type checks_enabled comments current_attempt
-    #        current_notification_number description event_handler event_handler_enabled
-    #        custom_variable_names custom_variable_values
-    #        execution_time first_notification_delay flap_detection_enabled groups
-    #        has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
-    #        host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
-    #        host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
-    #        host_is_executing host_is_flapping host_name host_notes_url_expanded
-    #        host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
-    #        icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-    #        last_check last_notification last_state_change latency long_plugin_output
-    #        low_flap_threshold max_check_attempts next_check notes notes_expanded
-    #        notes_url notes_url_expanded notification_interval notification_period
-    #        notifications_enabled obsess_over_service percent_state_change perf_data
-    #        plugin_output process_performance_data retry_interval scheduled_downtime_depth
-    #        state state_type modified_attributes_list
-    #        last_time_critical last_time_ok last_time_unknown last_time_warning
-    #        display_name host_display_name host_custom_variable_names host_custom_variable_values
-    #    /];
-
-    #    if($self->{'stash'}->{'enable_shinken_features'}) {
-    #        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
-    #                                         got_business_rule parent_dependencies/;
-    #    }
-    #    if(defined $options{'extra_columns'}) {
-    #        push @{$options{'columns'}}, @{$options{'extra_columns'}};
-    #    }
-    #}
-
-
-    #$options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
-    # make it possible to order by state
-    #if(grep {/^state$/mx} @{$options{'columns'}}) {
-    #    $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
-    #}
-    #my $data = $self->_get_table('services', \%options);
-    #unless(wantarray) {
-    #    confess("get_services() should not be called in scalar context");
-    #}
-
-    #return($data, undef, $size);
 }
 
 ##########################################################
@@ -474,7 +395,7 @@ sub get_service_names {
         confess("get_service_names() should not be called in scalar context");
     }
 
-    my @data = $self->_db->services
+    my @data = $self->_db->get_collection('services')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({description =>1})
                          ->all;
@@ -496,11 +417,10 @@ returns a list of servicegroups
 sub get_servicegroups {
     my($self, %options) = @_;
 
-    my @data = $self->_db->servicegroups
+    my @data = $self->_db->get_collection('servicegroups')
                          ->find($self->_get_filter($options{'filter'}))
-                         ->fields({name =>1 , alias => 1, members => 1, action_url => 1, notes => 1, notes_url => 1})
                          ->all;
-    $self->_add_peer_data(\@data);
+    $self->_add_peer_data(\@data) unless $options{'no_add_peer'};
     return \@data;
 }
 
@@ -519,7 +439,7 @@ sub get_servicegroup_names {
         confess("get_servicegroup_names() should not be called in scalar context");
     }
 
-    my @data = $self->_db->servicegroups
+    my @data = $self->_db->get_collection('servicegroups')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({name =>1})
                          ->all;
@@ -541,7 +461,7 @@ returns a list of comments
 sub get_comments {
     my($self, %options) = @_;
 
-    my @data = $self->_db->comments
+    my @data = $self->_db->get_collection('comments')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -559,7 +479,7 @@ returns a list of downtimes
 sub get_downtimes {
     my($self, %options) = @_;
 
-    my @data = $self->_db->comments
+    my @data = $self->_db->get_collection('downtimes')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -576,7 +496,7 @@ returns a list of contactgroups
 =cut
 sub get_contactgroups {
     my($self, %options) = @_;
-    my @data = $self->_db->contactgroups
+    my @data = $self->_db->get_collection('contactgroups')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -630,7 +550,7 @@ returns a list of timeperiods
 =cut
 sub get_timeperiods {
     my($self, %options) = @_;
-    my @data = $self->_db->timeperiods
+    my @data = $self->_db->get_collection('timeperiods')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -652,7 +572,7 @@ sub get_timeperiod_names {
         confess("get_timeperiods_names() should not be called in scalar context");
     }
 
-    my @data = $self->_db->timeperiods
+    my @data = $self->_db->get_collection('timeperiods')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({'name' => 1})
                          ->all;
@@ -672,7 +592,7 @@ returns a list of commands
 =cut
 sub get_commands {
     my($self, %options) = @_;
-    my @data = $self->_db->commands
+    my @data = $self->_db->get_collection('commands')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -689,7 +609,7 @@ returns a list of contacts
 =cut
 sub get_contacts {
     my($self, %options) = @_;
-    my @data = $self->_db->contacts
+    my @data = $self->_db->get_collection('contacts')
                          ->find($self->_get_filter($options{'filter'}))
                          ->all;
     return(\@data);
@@ -711,7 +631,7 @@ sub get_contact_names {
         confess("get_contact_names() should not be called in scalar context");
     }
 
-    my @data = $self->_db->contacts
+    my @data = $self->_db->get_collection('contacts')
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({'name' => 1})
                          ->all;
@@ -883,6 +803,7 @@ sub get_host_stats {
         'reduce'    => $reduce,
         'out'       => { inline => 1},
     );
+    $cmd->Push('query' => $self->_get_filter($options{'filter'})) if defined $options{'filter'};
     my $result = $self->_db->run_command($cmd);
     if(ref $result eq 'HASH') {
         return($result->{'results'}->[0]->{'value'}, 'SUM');
@@ -1089,11 +1010,12 @@ sub get_service_stats {
 
 
     my $cmd    = Tie::IxHash->new(
-        'mapreduce' => 'hosts',
+        'mapreduce' => 'services',
         'map'       => $map,
         'reduce'    => $reduce,
         'out'       => { inline => 1},
     );
+    $cmd->Push('query' => $self->_get_filter($options{'filter'})) if defined $options{'filter'};
     my $result = $self->_db->run_command($cmd);
     if(ref $result eq 'HASH') {
         return($result->{'results'}->[0]->{'value'}, 'SUM');
@@ -1121,7 +1043,6 @@ sub get_performance_stats {
     my $min5   = $now - 300;
     my $min15  = $now - 900;
     my $min60  = $now - 3600;
-    my $minall = $self->{'last_program_start'};
 
     my $map = "function() {
     var state = {
@@ -1145,6 +1066,9 @@ sub get_performance_stats {
         passive_state_change: undefined
     };
 
+    var program_starts = ".Thruk::Utils::Filter::encode_json_obj($self->{'last_program_start'})."
+    minall = program_starts[this.peer_key];
+
     if(this.check_type == 0) {
         state.active_sum++;
         if(this.has_been_checked == 1) {
@@ -1152,7 +1076,7 @@ sub get_performance_stats {
             if(this.last_check >= $min5) { state.active_5_sum++ }
             if(this.last_check >= $min15) { state.active_15_sum++ }
             if(this.last_check >= $min60) { state.active_60_sum++ }
-            if(this.last_check >= $minall) { state.active_all_sum++ }
+            if(this.last_check >= minall) { state.active_all_sum++ }
         }
     }
 
@@ -1163,7 +1087,7 @@ sub get_performance_stats {
             if(this.last_check >= $min5) { state.passive_5_sum++ }
             if(this.last_check >= $min15) { state.passive_15_sum++ }
             if(this.last_check >= $min60) { state.passive_60_sum++ }
-            if(this.last_check >= $minall) { state.passive_all_sum++ }
+            if(this.last_check >= minall) { state.passive_all_sum++ }
         }
     }
 
@@ -1263,6 +1187,7 @@ sub get_performance_stats {
             'reduce'    => $reduce,
             'out'       => { inline => 1},
         );
+        $cmd->Push('query' => $self->_get_filter($options{'filter'})) if defined $options{'filter'};
         my $result = $self->_db->run_command($cmd);
         if(ref $result eq 'HASH') {
             for my $key (keys %{$result->{'results'}->[0]->{'value'}}) {
@@ -1297,8 +1222,14 @@ sub get_extra_perf_stats {
     unless(wantarray) {
         confess("get_extra_perf_stats() should not be called in scalar context");
     }
-    my $data = $self->_db->status
-                         ->find_one();
+    my @data = $self->_db->get_collection('status')
+                         ->find($self->_get_filter($options{'filter'}))
+                         ->all();
+    my $data = {};
+    for my $d (@data) {
+        my $key       = $d->{'peer_key'};
+        $data->{$key} = $d;
+    }
     return($data, 'SUM');
 }
 
@@ -1450,6 +1381,10 @@ sub _get_subfilter {
     if(ref $inp eq 'HASH' and scalar keys %{$inp} == 1) {
         my $op = [keys   %{$inp}]->[0];
         my $v  = [values %{$inp}]->[0];
+        if($op eq '$in' or $op eq '$nin') {
+            # already mongodb filter
+            return($inp);
+        }
         if($op eq '-or' or $op eq '-and') {
             if(ref $v eq 'ARRAY' and scalar @{$v} == 1) {
                 return $self->_get_subfilter($v, $op);
@@ -1466,6 +1401,7 @@ sub _get_subfilter {
         my $x   = 0;
         my $num = scalar @{$inp};
         while($x < $num) {
+            if(!defined $inp->[$x]) { $x++; next; }
             # [ '-or', { 'key' => 'value' } ]
             if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'HASH') {
                 my $key = $inp->[$x];
@@ -1519,12 +1455,12 @@ sub _get_subfilter {
 
                 # { key => { '~~' => 'val' }}
                 if($op eq '~~') {
-                    $filter->{$key} = qr/$v/imx;
+                    $filter->{$key} = _make_regex($v);
                     next;
                 }
                 # { key => { '~' => 'val' }}
                 if($op eq '~') {
-                    $filter->{$key} = qr/$v/mx;
+                    $filter->{$key} = _make_regex($v);
                     next;
                 }
                 # { key => { '=' => 'val' }}
@@ -1561,10 +1497,10 @@ sub _get_subfilter {
                 $filter->{'$nin'} = [ $val ];
             }
             elsif($key eq '!~~') {
-                $filter->{'$not'} = qr/$val/imx;
+                $filter->{'$not'} = _make_regex($val);
             }
             elsif($key eq '!~') {
-                $filter->{'$not'} = qr/$val/mx;
+                $filter->{'$not'} = _make_regex($val);
             }
             else {
                 $filter->{$key} = $self->_get_subfilter($val);
@@ -1874,6 +1810,15 @@ sub _ensure_index {
     $col->ensure_index(Tie::IxHash->new('time' => 1));
     $col->ensure_index(Tie::IxHash->new('host_name' => 1, 'service_description' => 1));
     return;
+}
+
+##########################################################
+sub _make_regex {
+    my($val) = @_;
+    use bytes; # mongodb cannot use /u modifier
+    my $regex = qr/$val/imx;
+    use locale;
+    return $regex;
 }
 
 ##########################################################

@@ -22,8 +22,9 @@ use Encode qw(encode_utf8);
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
-$Thruk::Utils::CLI::verbose  = 0;
+$Thruk::Utils::CLI::verbose  = 0 unless defined $Thruk::Utils::CLI::verbose;
 $Thruk::Utils::CLI::c        = undef;
 
 ##############################################
@@ -330,7 +331,7 @@ sub _run {
         binmode STDERR;
         print STDERR $result->{'output'};
     }
-    _trace("".$c->stats->report) if defined $c;
+    _trace("".$c->stats->report) if defined $c and $Thruk::Utils::CLI::verbose >= 3;
     return $result->{'rc'};
 }
 
@@ -643,47 +644,6 @@ sub _cmd_listbackends {
     }
     $output .= sprintf("-------------------------------------------------\n");
     return $output;
-}
-
-##############################################
-sub _error {
-    return _debug($_[0],'error');
-}
-
-##############################################
-sub _info {
-    return _debug($_[0],'info');
-}
-
-##############################################
-sub _trace {
-    return _debug($_[0],'trace');
-}
-
-##############################################
-sub _debug {
-    my($data, $lvl) = @_;
-    return unless defined $data;
-    $lvl = 'DEBUG' unless defined $lvl;
-    return if($Thruk::Utils::CLI::verbose < 3 and uc($lvl) eq 'TRACE');
-    return if($Thruk::Utils::CLI::verbose < 2 and uc($lvl) eq 'DEBUG');
-    return if($Thruk::Utils::CLI::verbose < 1 and uc($lvl) eq 'INFO');
-    if(ref $data) {
-        return _debug(Dumper($data), $lvl);
-    }
-    my $time = scalar localtime();
-    for my $line (split/\n/mx, $data) {
-        if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-            print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
-        } else {
-            my $c = $Thruk::Utils::CLI::c;
-            confess('no c') unless defined $c;
-            if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
-            if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
-            if(uc($lvl) eq 'DEBUG') { $c->log->debug($line) }
-        }
-    }
-    return;
 }
 
 ##############################################
