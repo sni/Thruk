@@ -1572,8 +1572,8 @@ sub _merge_answer {
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
-        confess("not a hash") unless ref $data eq 'HASH';
         next if !defined $data->{$key};
+        confess("not a hash") unless ref $data eq 'HASH';
 
         if( ref $data->{$key} eq 'ARRAY' ) {
             $return = [] unless defined $return;
@@ -1597,14 +1597,15 @@ sub _merge_answer {
 ##########################################################
 # merge hostgroups and merge 'members' of matching groups
 sub _merge_hostgroup_answer {
-    my $self   = shift;
-    my $data   = shift;
+    my($self, $data) = @_;
     my $c      = $Thruk::Backend::Manager::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_hostgroup_answer()" );
 
-    for my $key ( keys %{$data} ) {
+    # iterate over original peers to retain order
+    for my $peer ( @{ $self->get_peers() } ) {
+        my $key = $peer->{'key'};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
@@ -1642,7 +1643,10 @@ sub _merge_servicegroup_answer {
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_servicegroup_answer()" );
-    for my $key ( keys %{ $data } ) {
+
+    # iterate over original peers to retain order
+    for my $peer ( @{ $self->get_peers() } ) {
+        my $key = $peer->{'key'};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
@@ -1674,9 +1678,8 @@ sub _merge_servicegroup_answer {
 
 ##########################################################
 sub _merge_stats_answer {
-    my $self = shift;
-    my $data = shift;
-    my $c    = $Thruk::Backend::Manager::c;
+    my($self, $data) = @_;
+    my $c = $Thruk::Backend::Manager::c;
     my $return;
 
     $c->stats->profile( begin => "_merge_stats_answer()" );
