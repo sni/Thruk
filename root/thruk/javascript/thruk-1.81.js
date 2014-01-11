@@ -1599,8 +1599,8 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
         if(d.max  == '' && d.unit == '%')     { d.max = 100;        }
         if(d.max  == '' && d.crit_max != '')  { d.max = d.crit_max; }
         if(d.max  == '' && d.warn_max != '')  { d.max = d.warn_max; }
-        if(d.val !== '' && d.max  != '')  {
-            var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
+        if(d.val !== '' && d.max  !== '')  {
+            var perc       = (Math.abs(d.val) / (d.max-d.min) * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }
             if(perc > 100) { perc = 100; }
             var pic = 'thermok.png';

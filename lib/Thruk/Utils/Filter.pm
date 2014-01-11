@@ -811,7 +811,7 @@ sub split_perfdata {
         $val =~ s/,/./gmxo;
         $val = $val.';;;;';
         my($var, $unit, $warn, $crit, $min, $max);
-        if($val =~ m/^([\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
+        if($val =~ m/^(\-?[\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
             ($var, $unit, $warn, $crit, $min, $max) = ($1, $2, $3, $4, $5, $6);
         }
         if($key =~ m/^(.*)::(.*?)$/mx) {
@@ -819,8 +819,8 @@ sub split_perfdata {
             $key = $2;
             $has_parents = 1;
         }
-        $warn =~ s/^([\d\.]+):([\d\.]+)$/$1-$2/mxo;
-        $crit =~ s/^([\d\.]+):([\d\.]+)$/$1-$2/mxo;
+        $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
+        $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo;
         push @{$data}, {
             'parent'    => $last_parent,
             'name'      => $key,
