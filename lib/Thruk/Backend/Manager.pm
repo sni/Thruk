@@ -1606,6 +1606,7 @@ sub _merge_hostgroup_answer {
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
+        next if !defined $data->{$key};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
@@ -1647,6 +1648,7 @@ sub _merge_servicegroup_answer {
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
         my $key = $peer->{'key'};
+        next if !defined $data->{$key};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
         for my $row ( @{ $data->{$key} } ) {
