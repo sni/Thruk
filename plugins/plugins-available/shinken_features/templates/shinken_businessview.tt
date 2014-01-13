@@ -7,8 +7,8 @@
 [% END %]
 [% PROCESS _header.tt
     extra_header => statusmap_header
-    js           => "thruk/plugins/shinken_features/businessview.js"
-    css          => "thruk/plugins/shinken_features/businessview.css"
+    js           => "plugins/shinken_features/businessview.js"
+    css          => "plugins/shinken_features/businessview.css"
 %]
 
 
