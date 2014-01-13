@@ -63,15 +63,6 @@
       ref = ref.replace(/^\?/, '/');
       jQuery('#referer').val(ref);
     }
-    [%+ IF c.config.precompile_templates +%]
-    jQuery(document).ready(function() {
-        jQuery.ajax({
-            url: '[% url_prefix %]cgi-bin/remote.cgi?compile',
-            type: 'GET',
-            success: function() {}
-        });
-    });
-  [%+ END +%]
   -->
   </script>
   [% ssi_footer %]
