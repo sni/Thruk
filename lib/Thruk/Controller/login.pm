@@ -48,7 +48,7 @@ sub index :Path :Args(0) {
     my $cookie_path = $c->stash->{'cookie_path'};
     $cookie_path =~ s/\/thruk$//mx;
 
-    my $sdir = $c->config->{'tmp_path'}.'/sessions';
+    my $sdir = $c->config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
     my $keywords = $c->req->query_keywords;
@@ -144,7 +144,8 @@ sub index :Path :Args(0) {
         }
     }
     else {
-        Thruk::Utils::CookieAuth::clean_session_files($c->config);
+        # clean up in background
+        $c->run_after_request('Thruk::Utils::CookieAuth::clean_session_files($c->config)');
     }
 
     Thruk::Utils::ssi_include($c, 'login');

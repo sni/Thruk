@@ -51,7 +51,8 @@ return:
 sub external_authentication {
     my($config, $login, $pass, $address) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
-    my $sdir     = $config->{'tmp_path'}.'/sessions';
+    my $sdir     = $config->{'var_path'}.'/sessions';
+    Thruk::Utils::IO::mkdir($sdir);
 
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
     my $ua       = get_user_agent();
@@ -146,8 +147,9 @@ clean up session files
 =cut
 sub clean_session_files {
     my($config) = @_;
-    my $sdir    = $config->{'tmp_path'}.'/sessions';
+    my $sdir    = $config->{'var_path'}.'/sessions';
     my $timeout = time() - $config->{'cookie_auth_session_timeout'};
+    Thruk::Utils::IO::mkdir($sdir);
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';

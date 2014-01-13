@@ -44,7 +44,7 @@ $guest = $ENV{'THRUK_COOKIE_AUTH_GUEST_USER'} if $ENV{'THRUK_COOKIE_AUTH_GUEST_U
 
 ##########################################################
 my $config              = Thruk::Config::get_config();
-my $spath               = $config->{'tmp_path'}."/sessions";
+my $spath               = $config->{'var_path'}."/sessions";
 my $loginurl            = $config->{'cookie_auth_login_url'}             || $prefix."thruk/cgi-bin/login.cgi";
 my $sessiontimeout      = $config->{'cookie_auth_session_timeout'}       || 86400;
 my $sessioncachetimeout = $config->{'cookie_auth_session_cache_timeout'} || 5;
