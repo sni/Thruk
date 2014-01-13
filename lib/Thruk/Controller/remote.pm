@@ -58,9 +58,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
             $c->stash->{'text'} = 'startup done';
             if($c->config->{'precompile_templates'}) {
                 # compile templates in background
-                my $url = "".$c->request->uri;
-                $url    =~ s/\?startup$/?compile/gmx;
-                `bash -l -c "echo \$(nohup wget -q -O - '$url' > /dev/null 2>&1 &)"`;
+                $c->run_after_request('Thruk::Utils::precompile_templates($c)');
             }
         }
         return;

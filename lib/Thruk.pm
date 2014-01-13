@@ -337,6 +337,33 @@ sub prepare_path {
     return;
 }
 
+###################################################
+
+=head2 run_after_request
+
+run callbacks after the request had been send to the client
+
+=cut
+sub run_after_request {
+    my ($c, $sub) = @_;
+    $c->stash->{'run_after_request_cb'} = [] unless defined $c->stash->{'run_after_request_cb'};
+    push @{$c->stash->{'run_after_request_cb'}}, $sub;
+    return;
+}
+
+after finalize => sub {
+    my($c) = @_;
+    return unless defined $c->stash->{'run_after_request_cb'};
+    while(my $sub = shift @{$c->stash->{'run_after_request_cb'}}) {
+        ## no critic
+        eval($sub);
+        ## use critic
+        $c->log->info($@) if $@;
+    }
+    return;
+};
+
+
 =head1 SEE ALSO
 
 L<Thruk::Controller::Root>, L<Catalyst>

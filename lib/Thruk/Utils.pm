@@ -1931,7 +1931,6 @@ precompile and load templates into memory
 sub precompile_templates {
     my($c) = @_;
     my $t0 = [gettimeofday];
-    my $num      = 0;
     my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
     my $uniq     = {};
     for my $path (@includes) {
@@ -1939,9 +1938,12 @@ sub precompile_templates {
         for my $file (@{$files}) {
             $file =~ s|^$path/||gmx;
             $uniq->{$file} = 1;
-            $num++;
         }
     }
+
+    # no backends required
+    $c->{'db'}->disable_backends();
+
     my $stderr_output;
     # First, save away STDERR
     open my $savestderr, ">&STDERR";
@@ -1950,12 +1952,16 @@ sub precompile_templates {
         close STDERR;
         open(STDERR, ">", \$stderr_output);
     };
+    $c->log->error($@) if $@;
 
+    my $num = 0;
     for my $file (keys %{$uniq}) {
         next if $file eq 'error.tt';
+        next if $file =~ m|^cmd/cmd_typ_|mx;
         eval {
             $c->view("TT")->render($c, $file);
         };
+        $num++;
     }
     # Now close and restore STDERR to original condition.
     eval {
@@ -1963,10 +1969,13 @@ sub precompile_templates {
         close STDERR;
         open STDERR, ">&".$savestderr;
     };
+    $c->log->error($@) if $@;
 
     $c->config->{'precompile_templates'} = 0;
     my $elapsed = tv_interval ( $t0 );
-    return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
+    my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
+    $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));
+    return $result;
 }
 
 ##########################################################
