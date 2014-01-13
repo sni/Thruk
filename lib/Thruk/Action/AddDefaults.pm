@@ -74,10 +74,10 @@ sub add_defaults {
     ###############################
     # Authentication
     $c->log->debug("checking auth");
-    if($c->request->uri->path_query =~ m~^(/thruk|/\w+/thruk)/cgi-bin/remote\.cgi~mx) {
+    if($c->request->uri->path_query =~ m~cgi-bin/remote\.cgi~mx) {
         $c->log->debug("remote.cgi does not use authentication");
     }
-    elsif($c->request->uri->path_query =~ m~^(/thruk|/\w+/thruk)/cgi-bin/login\.cgi~mx) {
+    elsif($c->request->uri->path_query =~ m~cgi-bin/login\.cgi~mx) {
         $c->log->debug("login.cgi does not use authentication");
     } else {
         unless ($c->user_exists) {

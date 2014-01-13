@@ -40,7 +40,7 @@ sub remote_cgi : Path('/thruk/cgi-bin/remote.cgi') {
 }
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
+sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash->{'text'} = 'OK';
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
