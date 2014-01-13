@@ -312,7 +312,7 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
-    my $product = $c->config->{'product_prefix'};
+    my $product = $c->config->{'product_prefix'} || 'thruk';
     if($product ne 'thruk') {
         # make it look like a thruk url, ex.: .../thruk/cgi-bin/tac.cgi
         my $path = $c->request->path;

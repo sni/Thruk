@@ -56,6 +56,7 @@ sub set_default_config {
         mode_dir                        => '0770',
         backend_debug                   => 0,
         connection_pool_size            => undef,
+        product_prefix                  => 'thruk',
         use_ajax_search                 => 1,
         ajax_search_hosts               => 1,
         ajax_search_hostgroups          => 1,
