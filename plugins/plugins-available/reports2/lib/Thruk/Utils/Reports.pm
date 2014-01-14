@@ -802,6 +802,10 @@ sub _read_report_file {
             $report->{'error'} =~ s/^'//mx;
             $report->{'error'} =~ s/\\'/'/gmx;
         }
+        elsif($report->{'error'} =~ m/\[ERROR\]\s+(internal\s+server\s+error)/gmx) {
+            $report->{'long_error'} = $report->{'error'};
+            $report->{'error'} = $1;
+        }
         $needs_save = 1;
     }
 

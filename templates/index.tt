@@ -26,7 +26,7 @@
 
     /* save url part in parents hash */
     var nohashchange = 0;
-    function save_url_in_parents_hash(e) {
+    function save_url_in_parents_hash() {
         if(nohashchange == 1) {
           nohashchange = 0;
           return;
@@ -115,7 +115,7 @@
     [% END +%]
     document.write('<frameset cols="172,*" frameborder="0" framespacing="0" border="0">');
     document.write('<frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />');
-    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash(this.name)" />');
+    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash()" />');
     [%+ FOR line = index_content.split("\n") %]
     document.write('[% line.replace('/', '\\/') %]');
     [%+ END +%]

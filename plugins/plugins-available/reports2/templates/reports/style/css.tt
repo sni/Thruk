@@ -12,7 +12,7 @@ TABLE.page > tbody > tr > td {
 TD.header {
   height: 10px;
 }
-TD.footer {
+DIV.footer {
   height: 10px;
   border-top: 1px solid grey;
   padding-top: 5px;
@@ -63,7 +63,7 @@ DIV.cover TD.header DIV.title_bar {
 DIV.cover TD.header {
   border-bottom: 0;
 }
-DIV.cover TD.footer SPAN {
+DIV.cover DIV.footer {
   display: none;
 }
 DIV.cover DIV.content DIV.date {

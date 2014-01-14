@@ -10,6 +10,13 @@
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]javascript/strftime-min.js"></script>
   <!--[if IE]><script language='javascript' type='text/javascript' src='[% url_prefix %]javascript/excanvas.js'></script><![endif]-->
+  <script type="text/javascript">
+  <!--
+  var url_prefix     = '[% url_prefix %]';
+  var product_prefix = '[% product_prefix %]';
+  var theme          = '[% theme %]';
+  -->
+  </script>
   [% PROCESS 'reports/style/custom.tt' %]
 </head>
 <body>

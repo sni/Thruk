@@ -1473,6 +1473,50 @@ function thruk_message(rc, message) {
     thruk_message_fade_timer = window.setTimeout("fade('thruk_message', 500)", fade_away_in);
 }
 
+/* return absolute host part of current url */
+function get_host() {
+    var host = window.location.protocol + '//' + window.location.host;
+    if(window.location.port != "" && host.indexOf(':' + window.location.port) == -1) {
+        host += ':' + window.location.port;
+    }
+    return(host);
+}
+
+var nohashchange = 0;
+function save_url_in_parents_hash() {
+    if(nohashchange == 1) {
+      nohashchange = 0;
+      return;
+    }
+    var oldloc = new String(window.parent.location);
+    oldloc     = oldloc.replace(/#+.*$/, '');
+    oldloc     = oldloc.replace(/\?.*$/, '');
+    var patt   = new RegExp('\/'+product_prefix+'\/$', 'g');
+    if(!oldloc.match(patt)) {
+        return;
+    }
+    var newloc = new String(window.location);
+    newloc     = newloc.replace(oldloc, '');
+    newloc     = newloc.replace(/\?_=\d+/, '');
+    newloc     = newloc.replace(/\&_=\d+/, '');
+    newloc     = newloc.replace(/\&reload_nav=\d+/, '');
+    newloc     = newloc.replace(/\?reload_nav=\d+/, '');
+    newloc     = newloc.replace(/\&theme=\w*/, '');
+    newloc     = newloc.replace(/\?theme=\w*/, '');
+    var patt   = new RegExp('^' + get_host(), 'gi');
+    newloc     = newloc.replace(patt, '');
+    if('#'+newloc != window.parent.location.hash) {
+        if(window.parent.history.replaceState) {
+            window.parent.history.replaceState({}, "", '#'+newloc);
+        } else {
+            nohashchange = 1;
+            window.parent.location.replace('#'+newloc);
+        }
+        window.setTimeout("nohashchange=0", 100);
+    }
+    return;
+}
+
 /* set hash of url */
 function set_hash(value) {
     // replace history otherwise we have to press back twice
@@ -1480,6 +1524,11 @@ function set_hash(value) {
         history.replaceState({}, "", '#'+value);
     } else {
         window.location.replace('#'+value);
+    }
+    if(window.parent) {
+        try {
+            save_url_in_parents_hash();
+        } catch(e) { debug(e); }
     }
 }
 

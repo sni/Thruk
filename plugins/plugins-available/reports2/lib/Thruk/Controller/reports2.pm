@@ -245,7 +245,8 @@ sub report_update {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    my $tab = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi#".$tab);
 }
 
 ##########################################################

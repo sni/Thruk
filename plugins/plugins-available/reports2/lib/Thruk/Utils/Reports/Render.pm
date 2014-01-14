@@ -610,17 +610,18 @@ sub html_all_inclusive {
 
   page_splice($data, $size_per_page, $max_pages)
 
-make html page include all remove css, js and images
+cut data in chunks of $size_per_page size. $max_pages is the maximum number of
+pages or -1 for all.
 
 =cut
 sub page_splice {
     my($data, $size_per_page, $max_pages) = @_;
-    $max_pages  = 1 unless $max_pages =~ m/^\d+$/mx;
+    $max_pages  = 1 unless $max_pages =~ m/^\-?\d+$/mx;
     my $paged   = [];
     my $pages   = 0;
     my $page    = 0;
     my $entries = scalar @{$data};
-    while($page < $max_pages) {
+    while($page < $max_pages || $max_pages == -1) {
         my $start = $page * $size_per_page;
         my $end   = $start + $size_per_page - 1;
         $end = $entries-1 if $end > $entries - 1;

@@ -16,7 +16,7 @@
       </td>
     </tr>
     <tr>
-      <td class="footer"><span>[% current_page %]</span></td>
+      <td class="footer"><div class="footer">[% current_page %]</div></td>
     </tr>
   </table>
 </div>

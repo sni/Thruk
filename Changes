@@ -21,6 +21,7 @@ next:
             - fixed livestatus timestamp for timeperiod transitions
             - fixed pnp graphs in reports when using remote instances and services containing spaces
             - fixed problem with daylight saving times
+            - fixed selecting wrong tab on rescheduling report
           - Config Tool
             - fixed parsing lists in host/serviceescalations
           - Bug Fixes
