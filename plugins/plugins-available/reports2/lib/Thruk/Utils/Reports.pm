@@ -354,8 +354,9 @@ sub generate_report {
     # add default params
     add_report_defaults($c, undef, $options);
 
-    $c->stash->{'param'} = $options->{'params'};
-    $c->stash->{'r'}     = $options;
+    $c->stash->{'param'}              = $options->{'params'};
+    $c->stash->{'r'}                  = $options;
+    $c->stash->{'show_empty_outages'} = 1;
     for my $p (keys %{$options->{'params'}}) {
         $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
     }
