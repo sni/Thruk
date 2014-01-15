@@ -229,7 +229,15 @@ sub report_save {
     my $report        = _get_new_report($c, $data);
     $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
     $report->{'user'} = $old_report->{'user'} if defined $old_report->{'user'};
-    my $fields        = _get_required_fields($c, $report);
+    my $fields;
+    eval {
+        $fields       = _get_required_fields($c, $report);
+    }
+    if($@) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'report template had errors or does not exist');
+        $c->log->error($@);
+        $report->{'var'}->{'opt_errors'} = ['report template had errors or does not exist'];
+    }
     _verify_fields($c, $fields, $report);
     return _report_save($c, $nr, $report);
 }
