@@ -40,7 +40,7 @@ sub get_report_list {
     my $reports = [];
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
-            my $r = _read_report_file($c, $1, undef, $noauth);
+            my $r = _read_report_file($c, $1, undef, $noauth, 1);
             push @{$reports}, $r if defined $r;
         }
     }
@@ -717,7 +717,7 @@ sub _report_save {
 
 ##########################################################
 sub _read_report_file {
-    my($c, $nr, $rdata, $noauth) = @_;
+    my($c, $nr, $rdata, $noauth, $simple) = @_;
     $Thruk::Utils::CLI::c = $c;
 
     unless($nr =~ m/^\d+$/mx) {
@@ -738,7 +738,7 @@ sub _read_report_file {
     $report->{'nr'} = $nr;
     $report = _get_new_report($c, $report);
     # add defaults
-    add_report_defaults($c, undef, $report);
+    add_report_defaults($c, undef, $report) unless $simple;
 
     unless($noauth) {
         $report->{'readonly'}   = 1;
