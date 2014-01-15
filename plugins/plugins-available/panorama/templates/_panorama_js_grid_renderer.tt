@@ -319,10 +319,24 @@ TP.render_clickable_service = function(v, td, item, row, col, store, view) {
     return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+host_name+"', service: '"+description+"'}}})\">"+v+"<\/div>";
 }
 
-/* render url */
-TP.render_url = function(v, td, item, row, col, store, view) {
-    return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>";
+/* render action url */
+TP.render_action_url = function(v, td, item, row, col, store, view) {
+    if (v) {
+        return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/action.gif' border='0' width='20' height='20' alt='Perform Extra Actions' title='Perform Extra Actions'><\/a>";
+    } else {
+        return "";
+    }
 }
+
+/* render notes url */
+TP.render_notes_url = function(v, td, item, row, col, store, view) {
+    if (v) {
+        return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border='0' width='20' height='20' alt='View Extra Notes' title='View Extra Notes'><\/a>";
+    } else {
+        return "";
+    }
+}
+
 
 /* render gearman queues */
 TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
