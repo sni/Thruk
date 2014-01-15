@@ -145,6 +145,11 @@ script has the following arguments
     used. Specify the key of the backend. Use <-l> to get a list
     of backends.
 
+    All default backends (backends without the 'hidden' flag) will be used unless
+    backend(s) are specified with this option.
+
+    Use 'ALL' to use all backends, regardless of the hidden flag.
+
 =item B<-l> , B<--list-backends>
 
     get list of available backends

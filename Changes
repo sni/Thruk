@@ -5,6 +5,8 @@ next:
           - removed old reporting plugin
           - install ssi examples
           - add plugin_output and long_plugin_output filter (awiddersheim)
+          - CLI
+            - added -a ALL option to send commands to all backends
           - Panorama
             - make tabs reorderable
             - fixed problem on initializing pie charts

@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2014-01-05" "perl v5.14.2" "User Contributed Perl Documentation"
+.TH thruk 3 "2014-01-15" "perl v5.14.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -195,6 +195,11 @@ script has the following arguments
 \&    specify backend(s), otherwise the default backends will be
 \&    used. Specify the key of the backend. Use <\-l> to get a list
 \&    of backends.
+\&
+\&    All default backends (backends without the \*(Aqhidden\*(Aq flag) will be used unless
+\&    backend(s) are specified with this option.
+\&
+\&    Use \*(AqALL\*(Aq to use all backends, regardless of the hidden flag.
 .Ve
 .IP "\fB\-l\fR , \fB\-\-list\-backends\fR" 4
 .IX Item "-l , --list-backends"
