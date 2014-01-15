@@ -1836,6 +1836,7 @@ sub _sort {
 
     $order = "ASC" if !defined $order;
 
+    if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
     if(!defined $data or scalar @{$data} == 0) {
         $c->stats->profile( end => "_sort()" ) if $c;
         return \@sorted
