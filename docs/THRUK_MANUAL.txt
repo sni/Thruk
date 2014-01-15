@@ -2279,6 +2279,7 @@ ex.:
     wkhtmltopdf       = /usr/bin/wkhtmltopdf
     pnp_export        = plugins/plugins-enabled/reports2/script/pnp_export.sh
     report_from_email = User Name <example@mail.com>
+    default_template  = host_sla.tt
   </Component>
 
 ==== report_nice_level
@@ -2321,6 +2322,13 @@ ex.:
 
 Set the from address used in e-mail reports.
 Format is "User Name <example@mail.com>"
+
+
+==== default_template
+
+Set the default template used for new reports.
+
+
 
 === Component Thruk::Plugin::Statusmap
 
