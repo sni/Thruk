@@ -7,6 +7,8 @@ next:
           - add plugin_output and long_plugin_output filter (awiddersheim)
           - CLI
             - added -a ALL option to send commands to all backends
+          - Logcache
+            - added 'logcacheremoveunused' command to remove old no longer used tables
           - Panorama
             - make tabs reorderable
             - fixed problem on initializing pie charts

@@ -577,6 +577,9 @@ sub _run_command_action {
     elsif($action =~ /logcacheclean($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2, $opt);
     }
+    elsif($action =~ /logcacheremoveunused/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'removeunused', $src, $2, $opt);
+    }
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
         $data->{'rc'}     = 1;
@@ -972,6 +975,17 @@ sub _cmd_import_logs {
         $c->stats->profile(end => "_cmd_import_logs()");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats."\n", 0);
+    }
+    elsif($mode eq 'removeunused') {
+        if($type eq 'mysql') {
+            my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
+            Thruk::Backend::Manager::close_logcache_connections($c);
+            $c->stats->profile(end => "_cmd_import_logs()");
+            return($stats."\n", 0);
+        }
+        Thruk::Backend::Manager::close_logcache_connections($c);
+        $c->stats->profile(end => "_cmd_import_logs()");
+        return($type." logcache does not support this operation\n", 1);
     } else {
         my $t0 = [gettimeofday];
         my($backend_count, $log_count);

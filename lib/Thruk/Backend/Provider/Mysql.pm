@@ -882,6 +882,63 @@ sub _log_stats {
 
 ##########################################################
 
+=head2 _log_removeunused
+
+  _log_removeunused
+
+remove logcache tables from backends which do no longer exist
+
+=cut
+
+sub _log_removeunused {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "Mysql::_log_removeunused");
+
+    # use first peers logcache
+    my $peer;
+    for my $key (@{$c->stash->{'backends'}}) {
+        $peer = $c->{'db'}->get_peer_by_key($key);
+        last if $peer->{'logcache'};
+    }
+    return "no logcache configured?" unless(defined $peer and defined $peer->{'logcache'});
+
+    $peer->{'logcache'}->reconnect();
+    my $dbh  = $peer->{'logcache'}->_dbh();
+    my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS", 'Name');
+
+    # gather backend ids
+    my $backends = {};
+    for my $tbl (keys %{$res}) {
+        if($tbl =~ m/^(.*?)_(status|plugin_output|log)/mx) {
+            $backends->{$1} = 1;
+        }
+    }
+
+    # do not remove the ones still existing
+    for my $key (@{$c->stash->{'backends'}}) {
+        delete $backends->{$key};
+    }
+
+    my $removed = 0;
+    my $tables  = 0;
+    for my $key (keys %{$backends}) {
+        for my $tbl (keys %{$res}) {
+            next unless $tbl =~ m/^${key}_/mx;
+            $tables++;
+            $dbh->do("DROP TABLE `".$tbl."`");
+        }
+        $removed++;
+    }
+    $dbh->commit or die $dbh->errstr;
+
+    return "no old tables found in logcache" if $removed == 0;
+
+    $c->stats->profile(end => "Mysql::_log_removeunused");
+    return $removed." old backends removed (".$tables." tables) from logcache";
+}
+
+##########################################################
+
 =head2 _import_logs
 
   _import_logs
