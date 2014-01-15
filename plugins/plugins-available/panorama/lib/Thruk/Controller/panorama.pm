@@ -877,7 +877,13 @@ sub _task_servicesminemap {
     }
     for my $name (sort keys %{$hosts}) {
         my $hst  = $hosts->{$name};
-        my $data = { 'host_display_name' => $hst->{'host_display_name'} };
+        my $data;
+        if ($hst->{'host_action_url_expanded'}) {
+            $data = { 'host_display_name' => $hst->{'host_display_name'} . '&nbsp;<a target="_blank" href="'.$hst->{'host_action_url_expanded'}.'"><img src="'.$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/action.gif" border="0" width="20" height="20" alt="Perform Extra Host Actions" title="Perform Extra Host Actions"></a>' };
+        } else {
+            $data = { 'host_display_name' => $hst->{'host_display_name'} };
+        }
+
         for my $svc (keys %{$uniq_services}) {
             my $service = $matrix->{$name}->{$svc};
             next unless defined $service->{state};
