@@ -79,7 +79,7 @@ L<Catalyst>.
 
 =head1 AUTHORS
 
-Sven Nierlein, 2010, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

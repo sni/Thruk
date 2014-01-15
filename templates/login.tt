@@ -9,7 +9,11 @@
   </head>
   <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
   [% ssi_header %]
-  <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2009-2013 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
+  <!-- Produced by Thruk (http://www.thruk.org). 
+       Copyright (c) 2009-2014 Thruk Developer Team. 
+       Copyright (c) 2009 Nagios Core Development Team and Community Contributors. 
+       Copyright (c) 1999-2009 Ethan Galstad. 
+  -->
   <br><br>
   <br><br>
   [% PROCESS _message.tt %]

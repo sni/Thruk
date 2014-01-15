@@ -198,7 +198,7 @@ sub get_macros {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

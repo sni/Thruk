@@ -45,7 +45,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2013, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

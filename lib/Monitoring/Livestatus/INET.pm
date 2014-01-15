@@ -107,7 +107,7 @@ sub _close {
 
 =head1 AUTHOR
 
-Sven Nierlein, E<lt>nierlein@cpan.orgE<gt>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 COPYRIGHT AND LICENSE
 

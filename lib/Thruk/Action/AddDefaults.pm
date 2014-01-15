@@ -590,7 +590,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

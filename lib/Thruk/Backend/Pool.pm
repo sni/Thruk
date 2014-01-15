@@ -532,7 +532,7 @@ sub array2hash {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2013, <sven.nierlein@consol.de>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

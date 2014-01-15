@@ -287,7 +287,7 @@ sub _set_report_data {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2012, <sven.nierlein@consol.de>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

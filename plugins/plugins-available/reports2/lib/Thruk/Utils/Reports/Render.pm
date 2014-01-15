@@ -908,7 +908,7 @@ See the shipped reports for some examples. Shipped reports are in the
 
 =head1 AUTHOR
 
-Sven Nierlein, 2012, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 

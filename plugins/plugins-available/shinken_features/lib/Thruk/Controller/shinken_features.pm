@@ -443,7 +443,7 @@ sub _link_parent_hosts_and_services {
 =head1 AUTHOR
 
 Jean Gabes, 2010, <naparuba@gmail.com>
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 LICENSE
 
