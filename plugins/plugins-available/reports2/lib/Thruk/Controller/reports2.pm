@@ -144,7 +144,7 @@ sub report_edit {
                 $r->{$key} = $c->{'request'}->{'parameters'}->{$key} if defined $c->{'request'}->{'parameters'}->{$key};
             }
         }
-        $r->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || 'sla_host.tt';
+        $r->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
         if($c->{'request'}->{'parameters'}->{'params.url'}) {
             $r->{'params'}->{'url'} = $c->{'request'}->{'parameters'}->{'params.url'};
         }
