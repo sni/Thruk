@@ -29,7 +29,7 @@ calculates the availability
 
 =cut
 sub calculate_availability {
-    my $c          = shift;
+    my($c)         = @_;
     my $start_time = time();
 
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
@@ -517,39 +517,7 @@ sub calculate_availability {
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    $c->stats->profile(begin => "avail.pm fix timeperiod transitions timestamps");
-    # fix timestamps of timeperiod transitions
-    if($logs and ref $logs eq 'ARRAY') {
-        for my $l (@{$logs}) {
-            if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
-                $l->{'time'} = floor(($l->{'time'}+30)/120) * 120;
-            }
-        }
-    }
-    elsif($file and ref $logs eq 'HASH') {
-        my($fh,$tempfile) = tempfile();
-        for my $fname (values %{$logs}) {
-            open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
-            while(my $line = <$fh2>) {
-                if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mx) {
-                    my $t = floor(($1+30)/120) * 120;
-                    print $fh '['.$t.'] TIMEPERIOD TRANSITION:'.$2."\n";
-                } else {
-                    print $fh $line;
-                }
-            }
-            CORE::close($fh2);
-        }
-        CORE::close($fh);
-        unlink(values %{$logs});
-        $c->stats->profile(begin => "avail.pm sort logs");
-        my $cmd = 'sort -k 1,12 -o '.$tempfile.'2 '.$tempfile;
-        `$cmd`;
-        $c->stats->profile(end   => "avail.pm sort logs");
-        unlink($tempfile);
-        $file = $tempfile.'2';
-    }
-    $c->stats->profile(end => "avail.pm fix timeperiod transitions timestamps");
+    $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new();
@@ -637,6 +605,75 @@ sub calculate_availability {
     return $return;
 }
 
+##############################################
+
+=head2 fix_and_sort_logs
+
+  fix_and_sort_logs($c, $logs, $file, $rpttimeperiod, $sort)
+
+fixes livestatus timeperiod change timestamps which can differ up to a minute
+from the real date
+
+=cut
+sub fix_and_sort_logs {
+    my($c, $logs, $file, $rpttimeperiod, $sort) = @_;
+
+    $sort = 'asc' unless $sort;
+    $sort = lc $sort;
+    $sort = 'asc' unless $sort eq 'desc';
+
+    # fix timestamps of timeperiod transitions
+    if($logs and ref $logs eq 'ARRAY') {
+        @{$logs} = reverse @{$logs} if $sort eq 'desc';
+        return($file) unless $rpttimeperiod;
+        $c->stats->profile(begin => "avail.pm fix timeperiod transitions timestamps");
+        for my $l (@{$logs}) {
+            if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
+                $l->{'time'} = floor(($l->{'time'}+30)/120) * 120;
+            }
+        }
+        $c->stats->profile(end => "avail.pm fix timeperiod transitions timestamps");
+        return($file);
+    }
+    elsif($file and ref $logs eq 'HASH') {
+        my($fh,$tempfile) = tempfile();
+        my $sort_add = '';
+        $sort_add = '-r' if $sort eq 'desc';
+        if($rpttimeperiod) {
+            $c->stats->profile(begin => "avail.pm sort fix logs");
+            for my $fname (values %{$logs}) {
+                open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
+                while(my $line = <$fh2>) {
+                    if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mx) {
+                        my $t = floor(($1+30)/120) * 120;
+                        print $fh '['.$t.'] TIMEPERIOD TRANSITION:'.$2."\n";
+                    } else {
+                        print $fh $line;
+                    }
+                }
+                CORE::close($fh2);
+            }
+            CORE::close($fh);
+            unlink(values %{$logs});
+            my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.'2 '.$tempfile;
+            `$cmd`;
+            unlink($tempfile);
+            $file = $tempfile.'2';
+            $c->stats->profile(end   => "avail.pm sort fix logs");
+        } else {
+            # use short file handling if no timeperiods have to be altered
+            $c->stats->profile(begin => "avail.pm sort logs");
+            my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.' '.join(' ', values %{$logs});
+            `$cmd`;
+            unlink(values %{$logs});
+            $file = $tempfile;
+            $c->stats->profile(end   => "avail.pm sort logs");
+        }
+    }
+    return($file);
+}
+
+##############################################
 
 1;
 
