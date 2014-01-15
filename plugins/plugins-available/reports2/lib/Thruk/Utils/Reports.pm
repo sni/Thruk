@@ -232,7 +232,7 @@ sub report_save {
     my $fields;
     eval {
         $fields       = _get_required_fields($c, $report);
-    }
+    };
     if($@) {
         Thruk::Utils::set_message( $c, 'fail_message', 'report template had errors or does not exist');
         $c->log->error($@);
