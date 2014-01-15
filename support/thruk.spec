@@ -33,7 +33,7 @@ Requires:      perl logrotate gd wget
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
 %else
-Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-fonts-common
+Requires: httpd mod_fcgid cronie xorg-x11-server-Xvfb libXext dejavu-fonts-common
 %endif
 
 %description
