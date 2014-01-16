@@ -43,10 +43,11 @@ sub index :Path :Args(0) {
     $c->stash->{'page'}           = 'splashpage';
     $c->stash->{'loginurl'}       = $c->stash->{'url_prefix'}."cgi-bin/login.cgi";
     $c->stash->{'template'}       = 'login.tt';
+    my $product_prefix            = $c->config->{'product_prefix'};
 
     # auth cookie is not for thruk only
     my $cookie_path = $c->stash->{'cookie_path'};
-    $cookie_path =~ s/\/thruk$//mx;
+    $cookie_path =~ s/\/\Q$product_prefix\E\/*$//mx;
 
     my $sdir = $c->config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
@@ -57,7 +58,7 @@ sub index :Path :Args(0) {
         $keywords = 'logout';
         $logoutref = $1;
     }
-    if($c->req->uri =~ m/\/thruk\/cgi\-bin\/login\.cgi\?logout(\/.*)/mx) {
+    if($c->req->uri =~ m/\/\Q$product_prefix\E\/cgi\-bin\/login\.cgi\?logout(\/.*)/mx) {
         $keywords = 'logout';
         $logoutref = $1;
     }
