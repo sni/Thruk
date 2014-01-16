@@ -105,6 +105,10 @@
 
         this.pagingToolbar = new TP.PagingToolbar();
 
+        if(this.grid_sort == undefined) {
+            this.grid_sort = true;
+        }
+
         this.grid = Ext.create('Ext.grid.Panel', {
             store:        this.gridStore,
             features:    [groupingFeature],
@@ -112,6 +116,10 @@
             cls:          this.$className.replace('.', '_'),
             stateful:     true,
             stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],
+            sortableColumns:    this.grid_sort,
+            enableColumnResize: this.grid_sort,
+            enableColumnHide:   this.grid_sort,
+            enableColumnMove:   this.grid_sort,
             listeners: {
                 beforestatesave: function(This, state, eOpts) {
                     /* only save filled grids state */
