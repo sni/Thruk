@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # read rc files if exist
-[ -e ~/.thruk   ] && . ~/.thruk
 [ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
 
 if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ "$OMD_ROOT" != "" -a "$CATALYST_CONFIG" = "" ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
 elif [ ! -z $OMD_ROOT ]; then
   export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
