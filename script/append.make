@@ -108,6 +108,7 @@ local_install: local_patches
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0002-log4perl.conf.patch
 	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/0003-thruk-scripts.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
+	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp

@@ -30,10 +30,16 @@ Requires(pre): shadow-utils
 Requires:      perl logrotate gd wget
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
+# sles specific requirements
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
 %else
-Requires: httpd mod_fcgid cronie xorg-x11-server-Xvfb libXext dejavu-fonts-common
+# rhel specific requirements
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-fonts-common
+# rhel6 specific requirements
+%if 0%{?el6}
+Requires: cronie
+%endif
 %endif
 
 %description
@@ -140,17 +146,19 @@ fi
 rm -rf /tmp/thruk_update
 
 %preun
+set -x
 if [ $1 = 0 ]; then
     # last version will be deinstalled
     /usr/bin/thruk -a uninstallcron --local
 fi
 /etc/init.d/thruk stop
-chkconfig --del thruk >/dev/null 2>&1
+chkconfig --del thruk 2>/dev/null
 rmdir /etc/thruk/bp 2>/dev/null
 rmdir /etc/thruk 2>/dev/null
 exit 0
 
 %postun
+set -x
 case "$*" in
   0)
     # POSTUN
