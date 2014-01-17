@@ -130,8 +130,8 @@
 +    objects_save_file = @SYSCONFDIR@/conf.d/thruk_bp_generated.cfg
  
      # User maintained file containing templates used for business process services.
--    #objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
-+    objects_templates_file = @SYSCONFDIR@/conf.d/thruk_bp_templates.cfg
+-    #objects_templates_file = /etc/nagios/conf.d/thruk_templates.cfg
++    objects_templates_file = @SYSCONFDIR@/conf.d/thruk_templates.cfg
  
      # Command to apply changes to the objects_save_file
 -    #objects_reload_cmd = /etc/init.d/nagios reload
