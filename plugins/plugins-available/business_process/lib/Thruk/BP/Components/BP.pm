@@ -538,6 +538,8 @@ sub bulk_fetch_live_data {
             }
         }
     }
+    # enable all backends for now till configuration is possible for each BP
+    $c->{'db'}->enable_backends();
     if(scalar keys %{$hostfilter} > 0) {
         my @filter;
         for my $hostname (keys %{$hostfilter}) {
