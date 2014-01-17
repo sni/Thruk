@@ -398,6 +398,7 @@ sub _do_child_stuff {
     POSIX::setsid() or die "Can't start a new session: $!";
 
     delete $ENV{'THRUK_SRC'};
+    delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
     # don't use connection pool after forking
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
