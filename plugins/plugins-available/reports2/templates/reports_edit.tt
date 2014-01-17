@@ -27,7 +27,7 @@
 <input type="hidden" name="tab" value="[% prev_tab %]">
 <table border="1" class='data reports'>
   <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='reports2.cgi#[% prev_tab %]'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
     <th class='data' style="width:125px;"></th>
   </tr>
