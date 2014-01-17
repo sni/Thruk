@@ -1432,7 +1432,7 @@ sub set_selected_columns {
 
   set_custom_title($c)
 
-set selected columns for the excel export
+sets page title based on http parameters
 
 =cut
 sub set_custom_title {
