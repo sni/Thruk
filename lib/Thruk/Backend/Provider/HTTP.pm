@@ -469,18 +469,16 @@ returns logfile entries
 sub get_logs {
     my($self, @options) = @_;
     my %options = @options;
+    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'logcache'}->get_logs(%options);
+    }
+
     my $use_file = 0;
     if($options{'file'}) {
         # remote backends should not save to files
         $use_file = delete $options{'file'};
         @options = %options;
-    }
-
-    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
-        push @options, 'collection', 'logs_'.$self->peer_key();
-        my($data) = $self->{'logcache'}->get_logs(@options);
-        return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
-        return $data;
     }
     # increased timeout for logs
     $self->{'ua'}->timeout($self->{'logs_timeout'});
