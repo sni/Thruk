@@ -800,6 +800,9 @@ sub _cmd_bpd {
     local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown')) };
     alarm($timeout);
 
+    # enable all backends for now till configuration is possible for each BP
+    $c->{'db'}->enable_backends();
+
     my $t0 = [gettimeofday];
     my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
     for my $bp (@{$bps}) {
