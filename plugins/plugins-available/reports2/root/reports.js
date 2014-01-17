@@ -37,13 +37,15 @@ function init_report_tool_buttons() {
 function update_reports_status() {
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
-    jQuery('#reports_table').load('reports2.cgi?tab='+last_reports_typ+'&_=' + ts + ' #statusTable');
-
-    // now count is_running elements
-    size = jQuery('.is_running').size();
-    if(size == 0) {
-        window.clearInterval(update_reports_status_int);
-    }
+    jQuery('#reports_table').load('reports2.cgi?tab='+last_reports_typ+'&_=' + ts + ' #statusTable', {},
+                                  function(responseText, textStatus, XMLHttpRequest) {
+        // now count is_running elements
+        size = jQuery('.is_running').size();
+        if(size == 0) {
+            window.clearInterval(update_reports_status_int);
+            reports_view(last_reports_typ);
+        }
+    });
 }
 
 /* update reports edit step2 */
