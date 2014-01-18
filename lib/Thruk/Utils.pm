@@ -1139,6 +1139,12 @@ store global user data for section
 sub store_global_user_data {
     my($c, $data) = @_;
 
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'saving global settings disabled in demo mode');
+        return 1;
+    }
+
     my $dir = $c->config->{'var_path'};
     if(! -d $dir) {
         Thruk::Utils::IO::mkdir($dir) or do {
