@@ -48,7 +48,7 @@ sub reports2_cgi : Path('/thruk/cgi-bin/reports2.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
+sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my ( $self, $c ) = @_;
 
     $c->stash->{'no_auto_reload'}      = 1;

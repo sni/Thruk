@@ -83,6 +83,7 @@ lib/Monitoring/Livestatus/INET.pm
 lib/Monitoring/Livestatus/UNIX.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
+lib/Thruk/Action/AddCachedDefaults.pm
 lib/Thruk/Action/AddDefaults.pm
 lib/Thruk/Action/AddSafeDefaults.pm
 lib/Thruk/Backend/Manager.pm

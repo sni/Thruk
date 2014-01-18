@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - naemon adjustments
+          - performance improvments on pages not using any backends (reports, bp, conf,...)
           - removed old reporting plugin
           - install ssi examples
           - add plugin_output and long_plugin_output filter (awiddersheim)

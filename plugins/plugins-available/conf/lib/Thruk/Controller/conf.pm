@@ -64,7 +64,7 @@ sub conf_cgi : Path('/thruk/cgi-bin/conf.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
+sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my ( $self, $c ) = @_;
 
     # check permissions

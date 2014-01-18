@@ -569,7 +569,8 @@ enables/disables remote backends based on a state from local instances
 =cut
 
 sub set_backend_state_from_local_connections {
-    my( $self, $disabled, $safe ) = @_;
+    my( $self, $disabled, $safe, $cached_data ) = @_;
+    $safe = 0 unless defined $safe;
 
     my $c = $Thruk::Backend::Manager::c;
 
@@ -592,12 +593,17 @@ sub set_backend_state_from_local_connections {
     }
     push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
 
+
     for(1..3) {
         # reset failed states, otherwise retry would be useless
         $self->reset_failed_backends();
 
         eval {
-            my $data = $self->_do_on_peers( "get_hosts", $options );
+            my $data;
+            if($safe == 2) {
+                $data = $cached_data->{'local_states'};
+            }
+            $data = $self->_do_on_peers( "get_hosts", $options ) unless defined $data;
             for my $host (@{$data}) {
                 # find matching keys
                 my $key;
@@ -629,6 +635,7 @@ sub set_backend_state_from_local_connections {
                     }
                 }
             }
+            $cached_data->{'local_states'} = $data;
         };
         if($@) {
             sleep(1);
@@ -731,7 +738,7 @@ sub _renew_logcache {
 
     # check if this is the first import at all
     # and do a external import in that case
-    my($get_results_for, $arg_array, $arg_hash) = $self->_select_backends('renew_logcache', \@_);
+    my($get_results_for, $arg_array, $arg_hash) = $self->select_backends('renew_logcache', \@_);
     my $check = 0;
     $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
     for my $key (@{$get_results_for}) {
@@ -999,7 +1006,7 @@ sub _do_on_peers {
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
-    my($get_results_for, $arg_array, $arg_hash) = $self->_select_backends($function, $arg);
+    my($get_results_for, $arg_array, $arg_hash) = $self->select_backends($function, $arg);
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
@@ -1128,15 +1135,15 @@ sub _do_on_peers {
 
 ########################################
 
-=head2 _select_backends
+=head2 select_backends
 
-  _select_backends($function, $args)
+  select_backends($function, [$args])
 
 select backends we want to run functions on
 
 =cut
 
-sub _select_backends {
+sub select_backends {
     my( $self, $function, $arg) = @_;
     my $c = $Thruk::Backend::Manager::c;
 

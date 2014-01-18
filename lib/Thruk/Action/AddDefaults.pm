@@ -100,10 +100,11 @@ sub add_defaults {
 
     ###############################
     # read cached data
-    my $cached_data = {};
+    my $cached_user_data = {};
     if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
-        $cached_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
+        $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}};
     }
+    my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
     # no db access before here, so check if all pool worker are up already
@@ -113,7 +114,7 @@ sub add_defaults {
     }
 
     ###############################
-    my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe);
+    my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
 
     ###############################
     # add program status
@@ -130,7 +131,7 @@ sub add_defaults {
         $c->{'db'}->reset_failed_backends();
 
         eval {
-            $last_program_restart = _set_processinfo($c, $cached_data);
+            $last_program_restart = _set_processinfo($c, $cached_user_data, $safe, $cached_data);
         };
         last unless $@;
         $c->log->debug("retry $x, data source error: $@");
@@ -149,12 +150,12 @@ sub add_defaults {
 
     ###############################
     # read cached data again, groups could have changed
-    $cached_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
+    $cached_user_data = $c->cache->get->{'users'}->{$c->stash->{'remote_user'}} if defined $c->stash->{'remote_user'};
 
     ###############################
     # disable backends by groups
     if(!defined $ENV{'THRUK_BACKENDS'} and $has_groups and defined $c->{'db'}) {
-        $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_data);
+        $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
     }
     _set_possible_backends($c, $disabled_backends);
 
@@ -368,9 +369,9 @@ sub _set_possible_backends {
 
 ########################################
 sub _disable_backends_by_group {
-    my ($c,$disabled_backends, $cached_data) = @_;
+    my ($c,$disabled_backends, $cached_user_data) = @_;
 
-    my $contactgroups = $cached_data->{'contactgroups'};
+    my $contactgroups = $cached_user_data->{'contactgroups'};
     for my $peer (@{$c->{'db'}->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
@@ -410,9 +411,36 @@ sub _any_backend_enabled {
 
 ########################################
 sub _set_processinfo {
-    my($c, $cached_data) = @_;
+    my($c, $cached_user_data, $safe, $cached_data) = @_;
     my $last_program_restart     = 0;
-    my $processinfo              = $c->{'db'}->get_processinfo();
+
+    # cached process info?
+    my $processinfo;
+    $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
+    my $fetch = 0;
+    if($safe == 2) {
+        my($selected) = $c->{'db'}->select_backends('get_status');
+        $processinfo = $cached_data->{'processinfo'};
+        for my $key (@{$selected}) {
+            if(!defined $processinfo->{$key} or !defined $processinfo->{$key}->{'program_start'}) {
+                $fetch = 1;
+                last;
+            }
+        }
+    } else {
+        $fetch = 1;
+    }
+    if($fetch) {
+        $processinfo = $c->{'db'}->get_processinfo();
+        if(ref $processinfo eq 'HASH') {
+            for my $peer (@{$c->{'db'}->get_peers()}) {
+                my $key = $peer->peer_key();
+                $cached_data->{'processinfo'}->{$key} = $processinfo->{$key} if scalar keys %{$processinfo->{$key}} > 0;
+            }
+        }
+        $c->cache->set('global', $cached_data);
+    }
+
     $processinfo                 = {} unless defined $processinfo;
     $processinfo                 = {} if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0);
     my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
@@ -429,18 +457,18 @@ sub _set_processinfo {
     }
 
     # check if we have to build / clean our per user cache
-    if(   !defined $cached_data
-       or !defined $cached_data->{'prev_last_program_restart'}
-       or $cached_data->{'prev_last_program_restart'} < $last_program_restart
+    if(   !defined $cached_user_data
+       or !defined $cached_user_data->{'prev_last_program_restart'}
+       or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
       ) {
         if(defined $c->stash->{'remote_user'}) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
-            $cached_data = {
+            $cached_user_data = {
                 'prev_last_program_restart' => $last_program_restart,
                 'contactgroups'             => $contactgroups,
             };
-            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
+            $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data) if defined $c->stash->{'remote_user'};
             $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
         }
     }
@@ -461,7 +489,7 @@ sub _set_processinfo {
 
 ########################################
 sub _set_enabled_backends {
-    my($c, $backends, $safe) = @_;
+    my($c, $backends, $safe, $cached_data) = @_;
 
     # first all backends are enabled
     if(defined $c->{'db'}) {
@@ -561,7 +589,7 @@ sub _set_enabled_backends {
 
     # renew state of connections
     if($num_backends > 1 and $c->config->{'check_local_states'}) {
-        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe);
+        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($disabled_backends, $safe, $cached_data);
     }
 
     # when set by args, update
