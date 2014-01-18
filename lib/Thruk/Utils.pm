@@ -1073,7 +1073,8 @@ sub store_user_data {
 
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
-        return 1;
+        Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings disabled in demo mode');
+        return;
     }
 
     if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
@@ -1142,7 +1143,7 @@ sub store_global_user_data {
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
         Thruk::Utils::set_message( $c, 'fail_message', 'saving global settings disabled in demo mode');
-        return 1;
+        return;
     }
 
     my $dir = $c->config->{'var_path'};
