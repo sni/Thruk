@@ -55,7 +55,7 @@ sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
+sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my ( $self, $c ) = @_;
 
     $c->stash->{'no_totals'}   = 1;
@@ -486,6 +486,8 @@ sub _task_show_logs {
 ##########################################################
 sub _task_site_status {
     my($self, $c) = @_;
+
+    Thruk::Action::AddDefaults::set_processinfo($c);
 
     my $json = {
         columns => [

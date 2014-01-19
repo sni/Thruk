@@ -131,7 +131,7 @@ sub add_defaults {
         $c->{'db'}->reset_failed_backends();
 
         eval {
-            $last_program_restart = _set_processinfo($c, $cached_user_data, $safe, $cached_data);
+            $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
         };
         last unless $@;
         $c->log->debug("retry $x, data source error: $@");
@@ -410,9 +410,20 @@ sub _any_backend_enabled {
 }
 
 ########################################
-sub _set_processinfo {
+
+=head2 set_processinfo
+
+  set_processinfo($c, [$cached_user_data, $safe, $cached_data])
+
+set process info into stash
+
+=cut
+sub set_processinfo {
     my($c, $cached_user_data, $safe, $cached_data) = @_;
     my $last_program_restart     = 0;
+    $safe = 0 unless defined $safe;
+
+    $c->stats->profile(begin => "AddDefaults::set_processinfo");
 
     # cached process info?
     my $processinfo;
@@ -431,6 +442,7 @@ sub _set_processinfo {
         $fetch = 1;
     }
     if($fetch) {
+        $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();
         if(ref $processinfo eq 'HASH') {
             for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -439,6 +451,7 @@ sub _set_processinfo {
             }
         }
         $c->cache->set('global', $cached_data);
+        $c->stats->profile(end => "AddDefaults::set_processinfo fetch");
     }
 
     $processinfo                 = {} unless defined $processinfo;
@@ -484,6 +497,9 @@ sub _set_processinfo {
             }
         }
     }
+
+    $c->stats->profile(end => "AddDefaults::set_processinfo");
+
     return($last_program_restart);
 }
 
