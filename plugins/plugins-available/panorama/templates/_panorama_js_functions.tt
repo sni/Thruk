@@ -63,6 +63,11 @@ var TP = {
 
     /* add given panlet */
     add_panlet: function(config, smartPlacement) {
+        [%+ IF readonly +%]
+        if(TP.initialized) {
+            return false;
+        }
+        [%+ END +%]
         if(config == undefined) {
             throw new Error("TP.add_panlet(): no config! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
