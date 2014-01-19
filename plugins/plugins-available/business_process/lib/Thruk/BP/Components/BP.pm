@@ -160,7 +160,7 @@ sub update_status {
         $livedata = $self->bulk_fetch_live_data($c);
         for my $n (@{$self->{'nodes'}}) {
             my $r = $n->update_status($c, $self, $livedata);
-            push @{$results}, $r if $r;
+            push @{$results}, $n->{'id'} if $r;
         }
     }
 
@@ -169,7 +169,7 @@ sub update_status {
         $iterations++;
         for my $id (keys %{$self->{'need_update'}}) {
             my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $livedata, $type);
-            push @{$results}, $r if $r;
+            push @{$results}, $id if $r;
         }
         die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
@@ -595,6 +595,52 @@ sub _submit_results_to_core {
     my($self, $c, $results) = @_;
     return unless scalar @{$results} > 0;
 
+    if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
+        return $self->_submit_results_to_core_backend($c, $results);
+    }
+    elsif($c->config->{'Thruk::Plugin::BP'}->{'spool_dir'}) {
+        return $self->_submit_results_to_core_spool($c, $results);
+    }
+    else {
+        # if there is only on backend, use that
+        my $peers = $c->{'db'}->get_peers();
+        if(scalar @{$peers} == 1) {
+            $c->config->{'Thruk::Plugin::BP'}->{'result_backend'} = $peers->[0]->peer_key();
+            return $self->_submit_results_to_core_backend($c, $results);
+        }
+    }
+}
+
+##########################################################
+sub _submit_results_to_core_backend {
+    my($self, $c, $results) = @_;
+
+    my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $pkey = $peer->peer_key();
+    die("no backend found by name ".$name) unless $peer;
+
+    for my $id (@{$results}) {
+        my $cmds = $self->{'nodes_by_id'}->{$id}->result_to_cmd($self);
+        my $options = {
+            'command' => 'COMMAND '.join("\n\nCOMMAND ", @{$cmds}),
+            'backend' => [ $pkey ],
+        };
+        $c->{'db'}->send_command( %{$options} );
+    }
+
+    return;
+}
+
+##########################################################
+sub _submit_results_to_core_spool {
+    my($self, $c, $results) = @_;
+
+    my $results_str = [];
+    for my $id (@{$results}) {
+        push @{$results_str}, $self->{'nodes_by_id'}->{$id}->result_to_string($self);
+    }
+
     my $spool = $c->config->{'Thruk::Plugin::BP'}->{'spool_dir'};
     if($spool) {
         die("spool folder does not exist ".$spool.": ".$!) unless -d $spool;
@@ -606,7 +652,7 @@ sub _submit_results_to_core {
         binmode($fh, ":encoding(UTF-8)");
         print $fh "### Active Check Result File ###\n";
         print $fh sprintf("file_time=%d\n\n",time);
-        for my $r (@{$results}) {
+        for my $r (@{$results_str}) {
             print $fh $r,"\n";
         }
         Thruk::Utils::IO::close($fh, $fh->filename);

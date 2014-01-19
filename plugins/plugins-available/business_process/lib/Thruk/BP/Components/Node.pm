@@ -292,13 +292,10 @@ sub update_status {
         $self->set_status(3, 'Internal Error: '.$@, $bp);
     }
 
-    # create result if we are linked to an object
-    my $result;
-    if($self->{'create_obj'}) {
-        $result = $self->_result_to_string($bp);
-    }
+    # indicate a new result if we are linked to an object
+    return 1 if $self->{'create_obj'};
 
-    return $result;
+    return;
 }
 
 ##########################################################
@@ -397,10 +394,104 @@ sub _set_function {
 }
 
 ##########################################################
-sub _result_to_string {
+
+=head2 result_to_cmd
+
+    result_to_cmd($bp, [$force_service])
+
+returns command represention of result. Useful for transmitting result by
+livestatus command.
+
+=cut
+sub result_to_cmd {
     my($self, $bp, $force_service) = @_;
-    my $string = "";
     my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
+
+    my $cmds = [];
+    my($output, $status, $string) = $self->_get_status($bp, $firstnode);
+
+    if($firstnode) {
+        my $cmd = sprintf("[%d] PROCESS_HOST_CHECK_RESULT;%s;%d;%s",
+                                    time(),
+                                    $bp->{'name'},
+                                    $status,
+                                    $output,
+                        );
+        push @{$cmds}, $cmd;
+
+        # submit result for host & service
+        push @{$cmds}, @{$self->result_to_cmd($bp, 1)};
+    }
+    else {
+        my $cmd = sprintf("[%d] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s",
+                                    time(),
+                                    $bp->{'name'},
+                                    $self->{'label'},
+                                    $status,
+                                    $output,
+                        );
+        return([$cmd]);
+    }
+    return($cmds);
+}
+
+##########################################################
+
+=head2 result_to_string
+
+    result_to_string($bp, [$force_service])
+
+returns string represention of result. Useful for transmitting into a checkresults
+spool folder.
+
+=cut
+sub result_to_string {
+    my($self, $bp, $force_service) = @_;
+    my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
+
+    my($output, $status, $string) = $self->_get_status($bp, $firstnode);
+
+    $string .= sprintf "check_type=%d\n",       1; # passive
+    $string .= sprintf "check_options=%d\n",    0; # no options
+    $string .= sprintf "scheduled_check=%d\n",  0; # not scheduled
+    $string .= sprintf "latency=%f\n",          0;
+    $string .= sprintf "start_time=%f\n",       $self->{'last_check'};
+    $string .= sprintf "finish_time=%f\n",      $self->{'last_check'};
+    $string .= sprintf "early_timeout=%d\n",    0;
+    $string .= sprintf "exited_ok=%d\n",        1;
+    $string .= sprintf "return_code=%d\n",      $status;
+    $string .= sprintf "output=%s\n",           $output;
+
+    if($firstnode) {
+        # submit result for host & service
+        $string .= "\n\n".$self->result_to_string($bp, 1);
+    }
+    return $string;
+}
+
+##########################################################
+
+=head2 TO_JSON
+
+    TO_JSON()
+
+returns data needed to represent this module in json
+
+=cut
+sub TO_JSON {
+    my($self) = @_;
+    my $data = $self->get_save_obj();
+    for my $key (@stateful_keys) {
+        $data->{$key} = $self->{$key};
+    }
+    return $data;
+}
+
+
+##########################################################
+sub _get_status {
+    my($self, $bp, $firstnode) = @_;
+    my $string = "";
     my $status    = $self->{'status'};
     my $output    = '';
     if($firstnode) {
@@ -424,40 +515,7 @@ sub _result_to_string {
     $output =~ s/[\r\n]*$//mxo;
     $output =~ s/\n/\\n/gmxo;
 
-    $string .= sprintf "check_type=%d\n",       1; # passive
-    $string .= sprintf "check_options=%d\n",    0; # no options
-    $string .= sprintf "scheduled_check=%d\n",  0; # not scheduled
-    $string .= sprintf "latency=%f\n",          0;
-    $string .= sprintf "start_time=%f\n",       $self->{'last_check'};
-    $string .= sprintf "finish_time=%f\n",      $self->{'last_check'};
-    $string .= sprintf "early_timeout=%d\n",    0;
-    $string .= sprintf "exited_ok=%d\n",        1;
-    $string .= sprintf "return_code=%d\n",      $status;
-    $string .= sprintf "output=%s\n",           $output;
-
-    if($firstnode) {
-        # submit result for host & service
-        $string .= "\n\n".$self->_result_to_string($bp, 1);
-    }
-    return $string;
-}
-
-##########################################################
-
-=head2 TO_JSON
-
-    TO_JSON()
-
-returns data needed to represent this module in json
-
-=cut
-sub TO_JSON {
-    my($self) = @_;
-    my $data = $self->get_save_obj();
-    for my $key (@stateful_keys) {
-        $data->{$key} = $self->{$key};
-    }
-    return $data;
+    return($output, $status, $string);
 }
 
 ##########################################################

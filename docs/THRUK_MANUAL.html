@@ -713,7 +713,7 @@ h4#_peer + div > ul tt {
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Thruk is a multibackend monitoring webinterface which currently
-supports Nagios, Icinga and Shinken as backend using the Livestatus
+supports Naemon, Nagios, Icinga and Shinken as backend using the Livestatus
 API. It is designed to be a <em>dropin</em> replacement and covers almost
 100% of the original features plus adds additional enhancements for
 large installations and increased usability.</p></div>
@@ -1770,7 +1770,7 @@ here.</p></div>
 <div class="sect3">
 <h4 id="_multi_site_support">Multi Site Support</h4>
 <div class="paragraph"><p>Thruk connects to as many cores as you want. You could even combine
-Nagios, Icinga and Shinken instances into one big combined view. That
+Naemon, Nagios, Icinga and Shinken instances into one big combined view. That
 way you get the advantage of several independent locations and still
 have an overview about all your installations. Sites can be put into
 groups for better arrangement.</p></div>
@@ -15786,9 +15786,9 @@ make sure the /home/thruk/Thruk/logs/ directory exists
 multiple <em>peer</em> items.</p></div>
 <div class="sect2">
 <h3 id="_livestatus">Livestatus</h3>
-<div class="paragraph"><p>Livestatus is a addon for Nagios or Icinga which provides real time
+<div class="paragraph"><p>Livestatus is a addon for Naemon, Nagios or Icinga which provides real time
 status data. Contrary to database addons it adds very little overhead to the
-Nagios core which makes livestatus based gui fast and real time.</p></div>
+Naemon core which makes livestatus based gui fast and real time.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -15850,7 +15850,8 @@ on how to install livestatus onto your monitoring box. The
 <a href="#_labs_consol_repository">Lab Consol Repository</a> has livestatus rpm
 packages. For debian based Linux systems just use the provided
 packages of your distribution.</p></div>
-<div class="paragraph"><p>Basically you have to build the NEB module and add it to your nagios/icinga.cfg.</p></div>
+<div class="paragraph"><p>Basically you have to build the NEB module and add it to your naemon.cfg,
+nagios.cfg or icinga.cfg.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt> broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock</tt></pre>
@@ -19011,7 +19012,7 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 <div class="content">
 <pre><tt>  * thruk.conf          # shipped default Thruk config
   * thruk_local.conf    # local override of Thruks settings
-  * cgi.cfg             # Nagios cgi.cfg
+  * cgi.cfg             # Naemon/Nagios cgi.cfg
   * log4perl.conf       # Logging configuration
   * menu.conf           # Thruks default side navigation
   * menu_local.conf     # local override for the navigation</tt></pre>
@@ -19335,6 +19336,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 <div class='toclevel3'><a href='#_component_thruk_plugin_bp'>Component Thruk::Plugin::BP</a></div>
 
 <div class='toclevel4'><a href='#_spool_dir'>spool_dir</a></div>
+
+<div class='toclevel4'><a href='#_result_backend'>result_backend</a></div>
 
 <div class='toclevel4'><a href='#_objects_save_file'>objects_save_file</a></div>
 
@@ -20382,10 +20385,10 @@ Disabled when set to 0, number of concurrent connections otherwise.</p></div>
 <div class="sect3">
 <h4 id="_logcache">logcache</h4>
 <div class="paragraph"><p>Enables caching logfiles for faster access and less memory usage for
-the nagios process. Cache supports MongoDB and Mysql only. Prefered
+the naemon process. Cache supports MongoDB and Mysql only. Prefered
 type is Mysql. Format is a Mysql/MongoDB connection string like
 <em>mysql://hostname:port/db</em>. Using a cache dramatically decreases cpu and
-memory usage of Thruk and Nagios when accessing logfiles, for example when
+memory usage of Thruk and Naemon when accessing logfiles, for example when
 creating reports.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -20899,13 +20902,13 @@ for details.</p></div>
 <li>
 <p>
 <tt>core_type</tt>       Give the config parser a hint about
-                              your config. Can be <em>nagios</em>, <em>icinga</em>
+                              your config. Can be <em>naemon</em>, <em>nagios</em>, <em>icinga</em>
                               or <em>shinken</em>.
 </p>
 </li>
 <li>
 <p>
-<tt>core_conf</tt>       Path to your nagios.cfg / icinga.cfg. Read all
+<tt>core_conf</tt>       Path to your naemon.cfg / nagios.cfg / icinga.cfg. Read all
                               object directories and files from this config
                               file.
 </p>
@@ -20963,7 +20966,7 @@ for details.</p></div>
 <div class="content">
 <pre><tt>&lt;Component Thruk::Backend&gt;
   &lt;peer&gt;
-      name   = Local Nagios
+      name   = Local Naemon
       type   = livestatus
       hidden = 1             # makes this backend hidden by default
       groups = admins,locals # makes this backend only visible to the
@@ -20972,9 +20975,9 @@ for details.</p></div>
           peer       = /tmp/livestatus.socket
       &lt;/options&gt;
       &lt;configtool&gt;
-          core_conf  = /etc/nagios/nagios.cfg
-          obj_check  = /etc/init.d/nagios checkconfig
-          obj_reload = /etc/init.d/nagios reload
+          core_conf  = /etc/naemon/naemon.cfg
+          obj_check  = /etc/init.d/naemon checkconfig
+          obj_reload = /etc/init.d/naemon reload
       &lt;/configtool&gt;
   &lt;/peer&gt;
   &lt;peer&gt;
@@ -21016,7 +21019,7 @@ config tool.</p></div>
 <div class="content">
 <pre><tt>  pre_obj_save_cmd          = .../hook.sh
   post_obj_save_cmd         = .../hook.sh
-  git_base_dir              = /etc/nagios/conf.d/custom/
+  git_base_dir              = /etc/naemon/conf.d/custom/
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <div class="sect3">
@@ -21212,10 +21215,11 @@ authorized_for_system_commands
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::BP&gt;
-  spool_dir              = /var/nagios/rw/check_results
-  objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
-  objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
-  objects_reload_cmd     = /etc/init.d/nagios reload
+  #spool_dir             = /var/naemon/rw/check_results
+  result_backend         = naemon
+  objects_save_file      = /etc/naemon/conf.d/bp_generated.cfg
+  objects_templates_file = /etc/naemon/conf.d/thruk_bp_templates.cfg
+  objects_reload_cmd     = /etc/init.d/naemon reload
   #pre_obj_save_cmd      =
   #post_obj_save_cmd     =
   refresh_interval       = 1
@@ -21225,6 +21229,11 @@ authorized_for_system_commands
 <h4 id="_spool_dir">spool_dir</h4>
 <div class="paragraph"><p>Results will be send back by using the spool folder.
 This folder should point to the <em>check_result_path</em> of your core.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_result_backend">result_backend</h4>
+<div class="paragraph"><p>As alternative to the spool_dir, a livestatus connection can be used
+to send results to the core.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_objects_save_file">objects_save_file</h4>
@@ -21546,7 +21555,7 @@ gAAjPsXPpABEh6evxaekSs3pTaXqYf2zx6N6T6x6/N8qj/j6H2ll/uhtrRpgAAAAAElFTkSuQmCC" />
 <div class="sectionbody">
 <div class="paragraph"><p>Accessing logfiles can be time and memory consuming, especially when having
 remote sites connected to Thruk. Livestatus caches logfile data used for
-queries. This increases the size of the nagios process, slows down the
+queries. This increases the size of the naemon process, slows down the
 monitoring and increases the overall load on your monitoring host. Therefor
 Thruk may use a logfile cache to increase performance of logfile access and
 reports.</p></div>
@@ -22141,7 +22150,7 @@ to update the logcache periodically by a cronjob.</p></div>
 twice, so you can do that safely as often as you like.</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>    %&gt; thruk -a logcacheupdate --local /var/log/nagios/archive/nagios-09-07-2012-00.log
+<pre><tt>    %&gt; thruk -a logcacheupdate --local /var/log/naemon/archive/naemon-09-07-2012-00.log
     OK - imported 2 log items from 1 site successfully in 0.01s (247/s)</tt></pre>
 </div></div>
 </div>
@@ -23369,7 +23378,7 @@ YII=" />
 </li>
 <li>
 <p>
-Results are submited to Nagios by using the check_results folder.
+Results are submited to Naemon by using the check_results folder or by livestatus.
 </p>
 </li>
 <li>
@@ -23393,8 +23402,8 @@ copy the &lt;Component Thruk::Plugin::BP&gt; block from your
 <p>
 copy the Thruk BP Templates from either
    <a href="https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg">github</a>
-   or /usr/share/thruk/thruk_templates.cfg into your nagios conf.d
-   folder, ex .:/etc/nagios/conf.d/thruk_bp_templates.cfg
+   or /usr/share/thruk/thruk_templates.cfg into your naemon conf.d
+   folder, ex .:/etc/naemon/conf.d/thruk_bp_templates.cfg
 </p>
 </li>
 <li>
@@ -23405,7 +23414,7 @@ change the <em>objects_templates_file</em> to that location.
 <li>
 <p>
 create an empty file thruk_bp_generated.cfg, ex.:
-   /etc/nagios/conf.d/thruk_bp_generated.cfg
+   /etc/naemon/conf.d/thruk_bp_generated.cfg
 </p>
 </li>
 <li>
@@ -23416,37 +23425,38 @@ change <em>objects_save_file</em> to that location.
 <li>
 <p>
 make that file editable for the webserver/thruk user. ex.: <em>chown
-   www-data: /etc/nagios/conf.d/thruk_bp_generated.cfg</em>
+   www-data: /etc/naemon/conf.d/thruk_bp_generated.cfg</em>
 </p>
 </li>
 <li>
 <p>
-change the <em>spool_dir</em> to ex.: /var/nagios/rw/check_results or
-   whatever your nagios <em>check_result_path</em> points too.
+change the <em>spool_dir</em> to ex.: /var/naemon/rw/check_results or
+   whatever your naemon <em>check_result_path</em> points too. You could also
+   reuse an existing backend by specifying <em>result_backend</em>.
 </p>
 </li>
 <li>
 <p>
 make sure your webserver/thruk user is allowed to write to that
-   folder, ex.: <em>chgrp www-data /var/nagios/rw/check_results &amp;&amp; chmod
-   g+rwx /var/nagios/rw/check_results</em>
+   folder, ex.: <em>chgrp www-data /var/naemon/rw/check_results &amp;&amp; chmod
+   g+rwx /var/naemon/rw/check_results</em>
 </p>
 </li>
 <li>
 <p>
-set <em>objects_reload_cmd</em> to  "sudo -u nagios /etc/init.d/nagios
+set <em>objects_reload_cmd</em> to  "sudo -u naemon /etc/init.d/naemon
    reload". You will need to add sudo permissions to get this working.
-   ex.: put "thruk ALL=(ALL) NOPASSWD: /etc/init.d/nagios" in your
+   ex.: put "thruk ALL=(ALL) NOPASSWD: /etc/init.d/naemon" in your
    /etc/sudoers.
 </p>
 </li>
 </ul></div>
 </div>
 <div class="sect3">
-<h4 id="_integration_in_nagios">Integration in Nagios</h4>
+<h4 id="_integration_in_naemon">Integration in Naemon</h4>
 <div class="paragraph"><p>Thruk will create Hosts and Services for selected nodes of your business model.
 That way it is possible to send notifications, even for sub steps of the business
-process. The business process itself will be created as Nagios Host object and
+process. The business process itself will be created as Naemon Host object and
 all selected nodes will be created as Service objects.</p></div>
 <div class="paragraph"><p>To make that work, you will need 2 files:</p></div>
 <div class="ulist"><ul>
@@ -23570,7 +23580,7 @@ of your monitoring core configuration.</p></div>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_configuration_generators">Configuration Generators</h3>
-<div class="paragraph"><p>If your Nagios configuration is generated by a 3rd party config
+<div class="paragraph"><p>If your Naemon configuration is generated by a 3rd party config
 generator, you can export some additional information which is then
 displayed in the configuration section of each host or service.
 Just export the special custom variables: <em>_SRC</em>, <em>_SRC2</em> or <em>_SRC3</em>.
@@ -24878,7 +24888,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-01-15 18:23:56 CET
+Last updated 2014-01-19 13:47:00 CET
 </div>
 </div>
 </body>

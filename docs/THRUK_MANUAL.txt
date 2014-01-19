@@ -4,7 +4,7 @@ Thruk Users Guide
 == Introduction
 
 Thruk is a multibackend monitoring webinterface which currently
-supports Nagios, Icinga and Shinken as backend using the Livestatus
+supports Naemon, Nagios, Icinga and Shinken as backend using the Livestatus
 API. It is designed to be a 'dropin' replacement and covers almost
 100% of the original features plus adds additional enhancements for
 large installations and increased usability.
@@ -62,7 +62,7 @@ here.
 ==== Multi Site Support
 
 Thruk connects to as many cores as you want. You could even combine
-Nagios, Icinga and Shinken instances into one big combined view. That
+Naemon, Nagios, Icinga and Shinken instances into one big combined view. That
 way you get the advantage of several independent locations and still
 have an overview about all your installations. Sites can be put into
 groups for better arrangement.
@@ -624,9 +624,9 @@ multiple 'peer' items.
 
 === Livestatus
 
-Livestatus is a addon for Nagios or Icinga which provides real time
+Livestatus is a addon for Naemon, Nagios or Icinga which provides real time
 status data. Contrary to database addons it adds very little overhead to the
-Nagios core which makes livestatus based gui fast and real time.
+Naemon core which makes livestatus based gui fast and real time.
 
 [TIP]
 .Shinken
@@ -641,7 +641,8 @@ on how to install livestatus onto your monitoring box. The
 packages. For debian based Linux systems just use the provided
 packages of your distribution.
 
-Basically you have to build the NEB module and add it to your nagios/icinga.cfg.
+Basically you have to build the NEB module and add it to your naemon.cfg,
+nagios.cfg or icinga.cfg.
 
 -------
  broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock
@@ -718,7 +719,7 @@ Configuration is managed mainly in these configuration files.
 -------
   * thruk.conf          # shipped default Thruk config
   * thruk_local.conf    # local override of Thruks settings
-  * cgi.cfg             # Nagios cgi.cfg
+  * cgi.cfg             # Naemon/Nagios cgi.cfg
   * log4perl.conf       # Logging configuration
   * menu.conf           # Thruks default side navigation
   * menu_local.conf     # local override for the navigation
@@ -1679,10 +1680,10 @@ ex.:
 
 ==== logcache
 Enables caching logfiles for faster access and less memory usage for
-the nagios process. Cache supports MongoDB and Mysql only. Prefered
+the naemon process. Cache supports MongoDB and Mysql only. Prefered
 type is Mysql. Format is a Mysql/MongoDB connection string like
 'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
-memory usage of Thruk and Nagios when accessing logfiles, for example when
+memory usage of Thruk and Naemon when accessing logfiles, for example when
 creating reports.
 
 ex.:
@@ -2115,9 +2116,9 @@ for details.
         *** `resource_file`   resource_file for this peer (used for macro replacement)
      ** `configtool`
         *** `core_type`       Give the config parser a hint about
-                              your config. Can be 'nagios', 'icinga'
+                              your config. Can be 'naemon', 'nagios', 'icinga'
                               or 'shinken'.
-        *** `core_conf`       Path to your nagios.cfg / icinga.cfg. Read all
+        *** `core_conf`       Path to your naemon.cfg / nagios.cfg / icinga.cfg. Read all
                               object directories and files from this config
                               file.
         *** `obj_check_cmd`   Commandline to verify the config.
@@ -2143,7 +2144,7 @@ ex.:
 
   <Component Thruk::Backend>
     <peer>
-        name   = Local Nagios
+        name   = Local Naemon
         type   = livestatus
         hidden = 1             # makes this backend hidden by default
         groups = admins,locals # makes this backend only visible to the
@@ -2152,9 +2153,9 @@ ex.:
             peer       = /tmp/livestatus.socket
         </options>
         <configtool>
-            core_conf  = /etc/nagios/nagios.cfg
-            obj_check  = /etc/init.d/nagios checkconfig
-            obj_reload = /etc/init.d/nagios reload
+            core_conf  = /etc/naemon/naemon.cfg
+            obj_check  = /etc/init.d/naemon checkconfig
+            obj_reload = /etc/init.d/naemon reload
         </configtool>
     </peer>
     <peer>
@@ -2196,7 +2197,7 @@ ex.:
 
     pre_obj_save_cmd          = .../hook.sh
     post_obj_save_cmd         = .../hook.sh
-    git_base_dir              = /etc/nagios/conf.d/custom/
+    git_base_dir              = /etc/naemon/conf.d/custom/
   </Component>
 
 
@@ -2380,10 +2381,11 @@ need the roles:
 Configuration Example:
 
   <Component Thruk::Plugin::BP>
-    spool_dir              = /var/nagios/rw/check_results
-    objects_save_file      = /etc/nagios/conf.d/bp_generated.cfg
-    objects_templates_file = /etc/nagios/conf.d/thruk_bp_templates.cfg
-    objects_reload_cmd     = /etc/init.d/nagios reload
+    #spool_dir             = /var/naemon/rw/check_results
+    result_backend         = naemon
+    objects_save_file      = /etc/naemon/conf.d/bp_generated.cfg
+    objects_templates_file = /etc/naemon/conf.d/thruk_bp_templates.cfg
+    objects_reload_cmd     = /etc/init.d/naemon reload
     #pre_obj_save_cmd      =
     #post_obj_save_cmd     =
     refresh_interval       = 1
@@ -2393,6 +2395,10 @@ Configuration Example:
 ==== spool_dir
 Results will be send back by using the spool folder.
 This folder should point to the 'check_result_path' of your core.
+
+==== result_backend
+As alternative to the spool_dir, a livestatus connection can be used
+to send results to the core.
 
 ==== objects_save_file
 Save objects to this file. Content will be overwritten.
@@ -2648,7 +2654,7 @@ ex.: log4perl.appender.ErrorLog.Threshold=INFO
 == Logfile Cache
 Accessing logfiles can be time and memory consuming, especially when having
 remote sites connected to Thruk. Livestatus caches logfile data used for
-queries. This increases the size of the nagios process, slows down the
+queries. This increases the size of the naemon process, slows down the
 monitoring and increases the overall load on your monitoring host. Therefor
 Thruk may use a logfile cache to increase performance of logfile access and
 reports.
@@ -2720,7 +2726,7 @@ The MySQL logcache supports import from files too. Duplicates are not imported
 twice, so you can do that safely as often as you like.
 
 -------
-    %> thruk -a logcacheupdate --local /var/log/nagios/archive/nagios-09-07-2012-00.log
+    %> thruk -a logcacheupdate --local /var/log/naemon/archive/naemon-09-07-2012-00.log
     OK - imported 2 log items from 1 site successfully in 0.01s (247/s)
 -------
 
@@ -3224,7 +3230,7 @@ image:source/bp_arch.png[Business Process Architecture]
    added if you create your first business process.
  - 'Business Process Config' and 'Runtime Status' are JSON files which are used to
    store objects and status
- - Results are submited to Nagios by using the check_results folder.
+ - Results are submited to Naemon by using the check_results folder or by livestatus.
  - 'Livestatus' will be used to fetch input data for the calculation itself.
 
 ==== Setup
@@ -3235,29 +3241,30 @@ If you are not using OMD, you will have to do some manual steps:
    some local adjustments.
  - copy the Thruk BP Templates from either
    https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[github]
-   or /usr/share/thruk/thruk_templates.cfg into your nagios conf.d
-   folder, ex .:/etc/nagios/conf.d/thruk_bp_templates.cfg
+   or /usr/share/thruk/thruk_templates.cfg into your naemon conf.d
+   folder, ex .:/etc/naemon/conf.d/thruk_bp_templates.cfg
  - change the 'objects_templates_file' to that location.
  - create an empty file thruk_bp_generated.cfg, ex.:
-   /etc/nagios/conf.d/thruk_bp_generated.cfg
+   /etc/naemon/conf.d/thruk_bp_generated.cfg
  - change 'objects_save_file' to that location.
  - make that file editable for the webserver/thruk user. ex.: 'chown
-   www-data: /etc/nagios/conf.d/thruk_bp_generated.cfg'
- - change the 'spool_dir' to ex.: /var/nagios/rw/check_results or
-   whatever your nagios 'check_result_path' points too.
+   www-data: /etc/naemon/conf.d/thruk_bp_generated.cfg'
+ - change the 'spool_dir' to ex.: /var/naemon/rw/check_results or
+   whatever your naemon 'check_result_path' points too. You could also
+   reuse an existing backend by specifying 'result_backend'.
  - make sure your webserver/thruk user is allowed to write to that
-   folder, ex.: 'chgrp www-data /var/nagios/rw/check_results && chmod
-   g+rwx /var/nagios/rw/check_results'
- - set 'objects_reload_cmd' to  "sudo -u nagios /etc/init.d/nagios
+   folder, ex.: 'chgrp www-data /var/naemon/rw/check_results && chmod
+   g+rwx /var/naemon/rw/check_results'
+ - set 'objects_reload_cmd' to  "sudo -u naemon /etc/init.d/naemon
    reload". You will need to add sudo permissions to get this working.
-   ex.: put "thruk ALL=(ALL) NOPASSWD: /etc/init.d/nagios" in your
+   ex.: put "thruk ALL=(ALL) NOPASSWD: /etc/init.d/naemon" in your
    /etc/sudoers.
 
 
-==== Integration in Nagios
+==== Integration in Naemon
 Thruk will create Hosts and Services for selected nodes of your business model.
 That way it is possible to send notifications, even for sub steps of the business
-process. The business process itself will be created as Nagios Host object and
+process. The business process itself will be created as Naemon Host object and
 all selected nodes will be created as Service objects.
 
 To make that work, you will need 2 files:
@@ -3320,7 +3327,7 @@ There are also some scripting examples in the examples folder.
 == Integration With 3rd Party Software
 
 === Configuration Generators
-If your Nagios configuration is generated by a 3rd party config
+If your Naemon configuration is generated by a 3rd party config
 generator, you can export some additional information which is then
 displayed in the configuration section of each host or service.
 Just export the special custom variables: '_SRC', '_SRC2' or '_SRC3'.
