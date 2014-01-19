@@ -6,6 +6,7 @@
     width:  800,
     //maximizable: true, // does not work stateful
     has_search_button: 'host',
+    grid_sort:          false,
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=hosts';

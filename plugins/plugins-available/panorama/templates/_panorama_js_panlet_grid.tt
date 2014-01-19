@@ -108,6 +108,9 @@
         if(this.grid_sort == undefined) {
             this.grid_sort = true;
         }
+        if(this.grid_columns == undefined) {
+            this.grid_columns = true;
+        }
 
         this.grid = Ext.create('Ext.grid.Panel', {
             store:        this.gridStore,
@@ -117,9 +120,9 @@
             stateful:     true,
             stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],
             sortableColumns:    this.grid_sort,
-            enableColumnResize: this.grid_sort,
-            enableColumnHide:   this.grid_sort,
-            enableColumnMove:   this.grid_sort,
+            enableColumnResize: this.grid_columns,
+            enableColumnHide:   this.grid_columns,
+            enableColumnMove:   this.grid_columns,
             listeners: {
                 beforestatesave: function(This, state, eOpts) {
                     /* only save filled grids state */
