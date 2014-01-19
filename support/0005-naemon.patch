@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-11 19:28:52.431964164 +0100
-+++ b/thruk.conf	2014-01-11 19:32:29.539971990 +0100
+--- a/thruk.conf	2014-01-19 16:25:30.000000000 +0100
++++ b/thruk.conf	2014-01-19 16:24:45.000000000 +0100
 @@ -15,6 +15,9 @@
  # set the url prefix for all urls
  url_prefix = /
@@ -118,12 +118,16 @@
  </Component>
  
  
-@@ -703,16 +669,16 @@
+@@ -706,20 +672,20 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
 -    #spool_dir = /var/nagios/rw/check_results
 +    spool_dir = @LOCALSTATEDIR@/naemon/spool/checkresults
+ 
+     # as alternative to the spool_dir, a livestatus connection can be used
+     # to send results to the core.
+     #result_backend = sitename
  
      # Save objects to this file. Content will be overwritten.
 -    #objects_save_file = /etc/nagios/conf.d/thruk_bp_generated.cfg
