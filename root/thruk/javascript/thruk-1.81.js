@@ -953,6 +953,10 @@ function reset_original_options(id) {
 function set_select_options(id, options, uniq) {
     var select  = document.getElementById(id);
     var uniqs   = {};
+    if(select == undefined || select.options == undefined) {
+       if(thruk_debug_js) { alert("ERROR: no select found in set_select_options: " + id ); }
+       return;
+    }
     select.options.length = 0;
     jQuery.each(options, function(i, o) {
         if(!uniq || uniqs[o.text] == undefined) {

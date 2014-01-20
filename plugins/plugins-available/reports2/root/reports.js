@@ -127,3 +127,8 @@ function reports_view(typ) {
         link.href = tmp;
     });
 }
+
+function report_edit_form_submit() {
+    // add selected nodes
+    jQuery('#report_backends OPTION').attr('selected',true);
+}
