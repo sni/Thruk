@@ -63,8 +63,8 @@ sub _do_finalize_config {
     if($> != 0 and !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
     my ($uid, $groups) = get_user($var_path);
-    $ENV{'THRUK_USER_ID'}  = $uid;
-    $ENV{'THRUK_GROUP_ID'} = $groups->[0];
+    $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
+    $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
     $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         if(defined $uid and $> == 0) {

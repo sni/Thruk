@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-19 16:25:30.000000000 +0100
-+++ b/thruk.conf	2014-01-19 16:24:45.000000000 +0100
+--- a/thruk.conf	2014-01-20 23:16:33.988909283 +0100
++++ b/thruk.conf	2014-01-20 23:16:59.168900533 +0100
 @@ -15,6 +15,9 @@
  # set the url prefix for all urls
  url_prefix = /
@@ -29,8 +29,8 @@
 +mode_dir  = 0770
  
  ######################################
- # server side includes
-@@ -208,7 +211,7 @@
+ # files owners for new / changed files
+@@ -213,7 +216,7 @@
  
  ######################################
  # custom templates
@@ -39,7 +39,7 @@
  
  ######################################
  # log4perl config
-@@ -512,7 +515,7 @@
+@@ -517,7 +520,7 @@
  # bug reporting
  # show link to bug reports when internal errors occur.
  # set to 'server' to log js error server side
@@ -48,7 +48,7 @@
  
  # don't report some known harmless javascript errors
  skip_js_errors  = cluetip is not a function
-@@ -569,56 +572,19 @@
+@@ -574,56 +577,19 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -118,7 +118,7 @@
  </Component>
  
  
-@@ -706,20 +672,20 @@
+@@ -711,20 +677,20 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.

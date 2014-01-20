@@ -1,5 +1,5 @@
---- a/thruk.conf	2013-12-15 17:30:02.543400690 +0100
-+++ b/thruk.conf	2014-01-11 19:28:52.431964164 +0100
+--- a/thruk.conf	2014-01-20 23:13:12.172897289 +0100
++++ b/thruk.conf	2014-01-20 23:14:14.344911589 +0100
 @@ -77,11 +77,11 @@
  
  ######################################
@@ -28,7 +28,14 @@
  
  ######################################
  # mode used when creating or saving files
-@@ -192,19 +192,19 @@
+@@ -192,24 +192,24 @@
+ 
+ ######################################
+ # files owners for new / changed files
+-#thruk_user=thruk
+-#thruk_group=thruk
++thruk_user=@THRUKUSER@
++thruk_group=@THRUKGROUP@
  
  ######################################
  # server side includes
@@ -51,7 +58,7 @@
  
  ######################################
  # custom templates
-@@ -212,7 +212,7 @@
+@@ -217,7 +217,7 @@
  
  ######################################
  # log4perl config
@@ -60,7 +67,7 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -445,23 +445,23 @@
+@@ -450,23 +450,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
@@ -89,7 +96,7 @@
  
  # Set first day of week. Used in reports.
  # Sunday: 0
-@@ -570,6 +570,20 @@
+@@ -575,6 +575,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
  #    <peer>
@@ -110,7 +117,7 @@
  #        name   = Local Nagios
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -621,9 +635,9 @@
+@@ -626,9 +640,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
@@ -123,7 +130,7 @@
  
      #pre_obj_save_cmd   =
      #post_obj_save_cmd  =
-@@ -656,7 +670,7 @@
+@@ -661,7 +675,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
      # wkhtmltopdf is used to convert html pages into pdf

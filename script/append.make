@@ -29,6 +29,8 @@ local_patches:
 	sed -i blib/*.patch -e 's+@INITDIR@+${INITDIR}+g'
 	sed -i blib/*.patch -e 's+@LIBDIR@+${LIBDIR}+g'
 	sed -i blib/*.patch -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
+	sed -i blib/*.patch -e 's+@THRUKUSER@+${THRUKUSER}+g'
+	sed -i blib/*.patch -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
 	sed -i blib/*.patch -e 's+@HTMLURL@+${HTMLURL}+g'
 	sed -i blib/*.patch -e 's+log4perl.conf.example+log4perl.conf+g'
 
