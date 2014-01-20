@@ -51,7 +51,7 @@
       [% IF r.backends.size < backends.size && r.backends.size > 0 %][% backends_selected=1 %][% END %]
       <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" class="clickable"> Select Backends</span><br>
 
-          <table style="width:100%; height: 100%;" class="filter">
+          <table style="height: 100%;" class="filter">
             <tr>
               <td class="attrName"><b>Available</b></td>
               <td>&nbsp;</td>
@@ -59,8 +59,8 @@
             </tr>
             <tr>
               <td class="attrName">
-                <input type="text" id="filter_available" class="filter_available" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('available_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
-                <select multiple id="available_backends" name="available_backends" style="width:100%; height:85%; border:0;" ondblclick="data_select_move('available_backends', 'report_backends', true)"[% IF !backends_selected %] disabled[% END %]>
+                <input type="text" id="filter_available" class="filter_available" style="width:220px; padding:0;" onkeyup="data_filter_select('available_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
+                <select multiple id="available_backends" name="available_backends" style="width:225px; height:85%;" ondblclick="data_select_move('available_backends', 'report_backends', true)"[% IF !backends_selected %] disabled[% END %]>
                     <option disabled>loading...</option>
                 </select>
               </td>
@@ -69,8 +69,8 @@
                 <button class="report_button btn_small" onclick="data_select_move('report_backends', 'available_backends'); return false;">&lt;&lt;</button>
               </td>
               <td class="attrName" style="height: 100%;">
-                <input type="text" id="filter_selected" class="filter_selected" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('report_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
-                <select multiple id="report_backends" name="report_backends" style="width:100%; height:85%; border:0;" ondblclick="data_select_move('report_backends', 'available_backends')"[% IF !backends_selected %] disabled[% END %]>
+                <input type="text" id="filter_selected" class="filter_selected" style="width:220px; padding:0;" onkeyup="data_filter_select('report_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
+                <select multiple id="report_backends" name="report_backends" style="width:225px; height:85%;" ondblclick="data_select_move('report_backends', 'available_backends')"[% IF !backends_selected %] disabled[% END %]>
                     <option disabled>loading...</option>
                 </select>
               </td>
