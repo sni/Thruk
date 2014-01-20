@@ -355,7 +355,7 @@ page: /thruk/index.html
 
 =cut
 
-sub thruk_index_html : Path('/thruk/index.html') :MyAction('AddCachedDefaults') {
+sub thruk_index_html : Path('/thruk/index.html') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
