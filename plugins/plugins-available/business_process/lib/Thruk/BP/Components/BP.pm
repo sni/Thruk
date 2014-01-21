@@ -91,8 +91,9 @@ sub new {
     $self->_resolve_nodes();
 
     if($self->{'editmode'}) {
-        die("no context") unless $c;
-        $self->update_status($c);
+        # updating the BP here unnecessarily slows down responsive editing
+        #die("no context") unless $c;
+        #$self->update_status($c);
     } else {
         $self->load_runtime_data();
     }
