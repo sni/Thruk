@@ -128,6 +128,16 @@ sub authenticate {
     $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
     $username = uc($username) if $c->config->{'make_auth_user_uppercase'};
 
+    # regex replace?
+    if($c->config->{'make_auth_replace_regex'}) {
+        $c->log->debug("authentication regex replace before: ".$username);
+        ## no critic
+        eval('$username =~ '.$c->config->{'make_auth_replace_regex'});
+        ## use critic
+        $c->log->error("authentication regex replace error: ".$@) if $@;
+        $c->log->debug("authentication regex replace after : ".$username);
+    }
+
     $authinfo->{ username } = $username;
     my $user_obj = $realm->find_user( $authinfo, $c );
 
