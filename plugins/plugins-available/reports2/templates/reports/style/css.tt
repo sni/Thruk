@@ -12,6 +12,9 @@ TABLE.page > tbody > tr > td {
 TD.header {
   height: 10px;
 }
+TD.footer {
+  height: 10px;
+}
 DIV.footer {
   height: 10px;
   border-top: 1px solid grey;
@@ -252,5 +255,27 @@ BODY.preview DIV.page {
   -webkit-box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.5);
   box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.5);
 }
+
+/* debug styles */
+/*
+HTML BODY DIV.page {
+    border-collapse:collapse !important;
+    border:1px solid red !important;
+}
+HTML BODY TABLE.page {
+    border-collapse:collapse;
+    border:1px solid green;
+}
+
+HTML BODY TD.footer {
+    border-collapse:collapse;
+    border:1px solid blue;
+}
+
+HTML BODY DIV.footer {
+    border-collapse:collapse;
+    border:1px solid orange;
+}
+*/
 
 </style>
