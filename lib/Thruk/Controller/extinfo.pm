@@ -232,6 +232,10 @@ sub _process_recurring_downtimes_page {
     $src           =~ s/[^\w_\-\.]/_/gmx;
 
     if($task eq 'save') {
+        my $backends = [];
+        if($c->{'request'}->{'parameters'}->{'d_backends'}) {
+            $backends = ref $c->{'request'}->{'parameters'}->{'d_backends'} eq 'ARRAY' ? $c->{'request'}->{'parameters'}->{'d_backends'} : [$c->{'request'}->{'parameters'}->{'d_backends'}];
+        }
         my $rd = {
             'target'        => $target,
             'host'          => $host,
@@ -241,7 +245,7 @@ sub _process_recurring_downtimes_page {
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
             'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || 5,
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || 'automatic downtime',
-            'backends'      => $c->{'request'}->{'parameters'}->{'d_backends'}      || '',
+            'backends'      => $backends,
             'childoptions'  => $c->{'request'}->{'parameters'}->{'childoptions'}    || 0,
             'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
             'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,

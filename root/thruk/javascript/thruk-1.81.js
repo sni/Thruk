@@ -778,6 +778,7 @@ function toggleCheckBox(id) {
 /* toogle disabled status */
 function toggleDisabled(id) {
   var thing = document.getElementById(id);
+  if(thruk_debug_js && thing == undefined) { alert("ERROR: no element in toggleDisabled() for: " + id ); }
   if(thing.disabled) {
     thing.disabled = false;
   } else {
@@ -964,6 +965,12 @@ function set_select_options(id, options, uniq) {
             uniqs[o.text] = true;
         }
     });
+}
+
+/* select all options for given select form field */
+function select_all_options(select_id) {
+    // add selected nodes
+    jQuery('#'+select_id+' OPTION').attr('selected',true);
 }
 
 /* return array of trimmed pattern */
@@ -4607,6 +4614,8 @@ function move_png_img(factor) {
 
 /* initialize all buttons */
 function init_buttons() {
+    jQuery('BUTTON.button').button();
+
     jQuery('A.report_button').button();
     jQuery('BUTTON.report_button').button();
 

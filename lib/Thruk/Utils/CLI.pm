@@ -850,21 +850,43 @@ sub _cmd_downtimetask {
     require URI::Escape;
     my $output     = '';
     my $cmd_typ;
+    my $backends   = ref $downtime->{'backends'} eq 'ARRAY' ? $downtime->{'backends'} : [$downtime->{'backends'}];
+    my $choose_backends = 0;
+    if(scalar @{$backends} == 0 and @{$c->{'db'}->get_peers()} > 1) {
+        $choose_backends = 1;
+        $c->{'db'}->enable_backends();
+    }
     if(!$downtime->{'target'}) {
         $downtime->{'target'} = 'host';
         $downtime->{'target'} = 'service' if $downtime->{'service'};
     }
     if($downtime->{'target'} eq 'host') {
         $cmd_typ = 55;
+        if($choose_backends) {
+            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $downtime->{'host'} } ], columns => [qw/name/] );
+            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+        }
     }
     elsif($downtime->{'target'} eq 'service') {
         $cmd_typ = 56;
+        if($choose_backends) {
+            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $downtime->{'host'}, 'description' => $downtime->{'service'} } ], columns => [qw/description/] );
+            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+        }
     }
     elsif($downtime->{'target'} eq 'hostgroup') {
         $cmd_typ = 84;
+        if($choose_backends) {
+            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'groups' => { '>=' => $downtime->{'hostgroup'} }} ], columns => [qw/name/] );
+            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+        }
     }
     elsif($downtime->{'target'} eq 'servicegroup') {
         $cmd_typ = 122;
+        if($choose_backends) {
+            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/name/] );
+            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
+        }
     }
     # convert to normal url request
     my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
@@ -876,7 +898,7 @@ sub _cmd_downtimetask {
                       $downtime->{'fixed'},
                       $hours,
                       $minutes,
-                      ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
+                      join(',', @{$backends}),
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
                       $downtime->{'host'} ? '&host='.URI::Escape::uri_escape($downtime->{'host'}) : '',
                       $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',

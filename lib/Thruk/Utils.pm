@@ -688,12 +688,12 @@ reads a ssi file or executes it if its executable
 sub read_ssi {
     my $c    = shift;
     my $file = shift;
-    # retun if file is execitabel
+    # retun if file is executable
     if( -x $c->config->{'ssi_path'}."/".$file ){
        open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
-       local $/=undef;
-       my $output = <$ph>;
-       Thruk::Utils::IO::close($ph, undef, 1);
+       my $output = '';
+       while(my $line = <$ph>) { $output .= $line; }
+       CORE::close($ph);
        return $output;
     }
     elsif( -r $c->config->{'ssi_path'}."/".$file ){
@@ -823,9 +823,7 @@ create a hash by key
 
 =cut
 sub array2hash {
-    my $data = shift;
-    my $key  = shift;
-    my $key2 = shift;
+    my($data, $key, $key2) = @_;
 
     return {} unless defined $data;
     confess("not an array") unless ref $data eq 'ARRAY';

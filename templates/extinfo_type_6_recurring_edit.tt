@@ -42,11 +42,18 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backend</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <select name="d_backends" id="d_backends" style="min-width: 180px;"[% IF !can_edit %] disabled[% END %]>
+      [% IF backends.size > 10 %]
+        [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit %]
+      [% ELSIF backends.size > 1 %]
+      [% backends_selected=0 %]
+      [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
+      <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
+      <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
         [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
       </select>
+      [% END %]
     </td>
   </tr>
   [% END %]

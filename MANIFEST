@@ -1139,6 +1139,7 @@ t/TestUtils.pm
 t/timed_test.sh
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
+templates/_backends_select_multi.tt
 templates/_comments_table.tt
 templates/_common_css.tt
 templates/_common_js.tt

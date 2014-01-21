@@ -20,7 +20,7 @@
 </table>
 <br><br>
 
-<form action="reports2.cgi" method="POST" onsubmit="report_edit_form_submit()">
+<form action="reports2.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="report" value="[% r.nr %]">
@@ -47,84 +47,7 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2 style="height:150px;">
-      [% backends_selected=0 %]
-      [% IF r.backends.size < backends.size && r.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends'); toggleDisabled('available_backends'); toggleDisabled('filter_available'); toggleDisabled('filter_selected');" class="clickable"> Select Backends</span><br>
-
-          <table style="height: 100%;" class="filter">
-            <tr>
-              <td class="attrName"><b>Available</b></td>
-              <td>&nbsp;</td>
-              <td class="attrName"><b>Selected</b></td>
-            </tr>
-            <tr>
-              <td class="attrName">
-                <input type="text" id="filter_available" class="filter_available" style="width:220px; padding:0;" onkeyup="data_filter_select('available_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
-                <select multiple id="available_backends" name="available_backends" style="width:225px; height:85%;" ondblclick="data_select_move('available_backends', 'report_backends', true)"[% IF !backends_selected %] disabled[% END %]>
-                    <option disabled>loading...</option>
-                </select>
-              </td>
-              <td align="center" valign="middle" style="width: 42px;">
-                <button class="report_button btn_small" onclick="data_select_move('available_backends', 'report_backends', true); return false;">&gt;&gt;</button><br>
-                <button class="report_button btn_small" onclick="data_select_move('report_backends', 'available_backends'); return false;">&lt;&lt;</button>
-              </td>
-              <td class="attrName" style="height: 100%;">
-                <input type="text" id="filter_selected" class="filter_selected" style="width:220px; padding:0;" onkeyup="data_filter_select('report_backends', this.value)"[% IF !backends_selected %] disabled[% END %]><br>
-                <select multiple id="report_backends" name="report_backends" style="width:225px; height:85%;" ondblclick="data_select_move('report_backends', 'available_backends')"[% IF !backends_selected %] disabled[% END %]>
-                    <option disabled>loading...</option>
-                </select>
-              </td>
-            </tr>
-          </table>
-
-    <script type="text/javascript">
-    <!--
-    selected_backends   = new Array();
-    selected_backends_h = new Object();
-    var options = [];
-    [% FOREACH b = backends %]
-      [% FOREACH rb = r.backends %]
-        [% IF rb == b %]
-          selected_backends.push('[% b %]');
-          selected_backends_h['[% b %]'] = 1;
-          options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
-        [% END %]
-      [% END %]
-    [% END %]
-
-    set_select_options('report_backends', options);
-    reset_original_options('report_backends');
-
-    // initialize available backends
-    available_backends   = new Array();
-    available_backends_h = new Object();
-    var options = [];
-
-    [% FOREACH b = backends %]
-      [% found = 0 %]
-      [% FOREACH rb = r.backends %]
-        [% IF rb == b %]
-          [% found = 1 %]
-        [% END %]
-      [% END %]
-      [% IF found == 0 %]
-        available_backends.push('[% b %]');
-        available_backends_h['[% b %]'] = 1;
-        options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
-      [% END %]
-    [% END %]
-
-    set_select_options('available_backends', options);
-    reset_original_options('available_backends');
-    sortlist('available_backends');
-
-    jQuery('INPUT.filter_available').val('');
-    jQuery('INPUT.filter_selected').val('');
-    data_filter_select('available_backends', '');
-    data_filter_select('report_backends', '');
-    -->
-    </script>
-
+    [% PROCESS _backends_select_multi.tt param_name='report_backends' selected_backends=r.backends can_edit=1 %]
     </td>
   </tr>
   [% ELSIF backends.size > 1 %]
@@ -136,7 +59,7 @@
       <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends');" class="clickable"> Select Backends:</span><br>
       <select id="report_backends" name="report_backends" multiple style="min-width: 180px;"[% IF !backends_selected %] disabled[% END %]>
         [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = r.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        <option value="[% b %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
       </select>
     </td>
