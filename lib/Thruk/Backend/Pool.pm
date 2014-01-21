@@ -8,6 +8,7 @@ use Carp qw/confess/;
 use Thruk::Pool::Simple ();
 use Thruk::Backend::Peer ();
 use Config::General ();
+use File::Slurp qw/read_file/;
 
 =head1 NAME
 
@@ -212,12 +213,18 @@ sub set_default_config {
         $config->{'no_external_job_forks'} = 1;
     }
 
-    $config->{'omd_version'} = "";
+    $config->{'extra_version'}      = '' unless defined $config->{'extra_version'};
+    $config->{'extra_version_link'} = '' unless defined $config->{'extra_version_link'};
     if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
         my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
         $omdlink    =~ s/.*?\///gmx;
         $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
-        $config->{'omd_version'} = $omdlink;
+        $config->{'extra_version'}      = 'OMD '.$omdlink;
+        $config->{'extra_version_link'} = 'http://www.omdistro.org';
+    }
+    elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
+        $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
+        $config->{'extra_version_link'} = 'http://www.naemon.org';
     }
 
     # set apache status url

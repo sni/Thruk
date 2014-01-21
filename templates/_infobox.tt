@@ -5,7 +5,7 @@
       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
       Last Updated: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span><br />
       [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
-      Thruk [% version %][% IF branch %]~[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.omd_version %] - <a href='http://www.omdistro.org' target='_blank' class='homepageURL'>OMD [% c.config.omd_version %]</a>[% END %]</span><br />
+      Thruk [% version %][% IF branch %]~[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
       Logged in as <i>[% remote_user %]</i><br />
       [% IF has_proc_info %]
       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]

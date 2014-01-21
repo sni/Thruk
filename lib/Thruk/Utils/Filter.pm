@@ -773,8 +773,8 @@ sub fullversion {
     if($c->config->{'branch'}) {
         $str .= '~'.$c->config->{'branch'};
     }
-    if($c->config->{'omd_version'}) {
-        $str .= '/ OMD '.$c->config->{'omd_version'};
+    if($c->config->{'extra_version'}) {
+        $str .= '/ '.$c->config->{'extra_version'};
     }
     $str = '' unless defined $str;
     return $str;

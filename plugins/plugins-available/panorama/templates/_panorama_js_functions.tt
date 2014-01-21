@@ -150,7 +150,7 @@ var TP = {
             title:      'About Thruks Panorama',
             buttonAlign: 'center',
             items: [{
-                html: 'Thruk Panorama<br><br>Copyright 2012 Sven Nierlein, sven@consol.de<br>License: GPL v3<br>Version: [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] <font size="-3">(OMD [% c.config.omd_version %])<\/font>[% END %]'
+                html: 'Thruk Panorama<br><br>Copyright 2012 Sven Nierlein, sven@consol.de<br>License: GPL v3<br>Version: [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %] <font size="-3">([% c.config.extra_version %])<\/font>[% END %]'
             }],
             fbar: [{
                 text:'OK',
