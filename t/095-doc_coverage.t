@@ -34,7 +34,7 @@ sub get_thruk_conf {
     }
     close($ph);
 
-    $conf = new Config::General(-String => $conf_string);
+    $conf = new Config::General(-String => $conf_string, -CComments => 0);
     my %config = $conf->getall;
     return \%config;
 }

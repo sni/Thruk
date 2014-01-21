@@ -19065,6 +19065,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_make_auth_user_uppercase'>make_auth_user_uppercase</a></div>
 
+<div class='toclevel4'><a href='#_make_auth_replace_regex'>make_auth_replace_regex</a></div>
+
 <div class='toclevel4'><a href='#_use_strict_host_authorization'>use_strict_host_authorization</a></div>
 
 <div class='toclevel3'><a href='#_path_settings'>Path Settings</a></div>
@@ -19619,6 +19621,17 @@ command_disabled = 17-34,50-65</tt></pre>
 <div class="literalblock">
 <div class="content">
 <pre><tt>make_auth_user_uppercase = 1</tt></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_make_auth_replace_regex">make_auth_replace_regex</h4>
+<div class="paragraph"><p>Convert authenticated username by regular expression. The following
+example removes everything after an @ from the authenticated username
+and <em>user@domain</em> becomes just <em>user</em>.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>make_auth_replace_regex = s/^(.*?)@.*/$1/gmx</tt></pre>
 </div></div>
 </div>
 <div class="sect3">
@@ -24888,7 +24901,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-01-19 13:47:00 CET
+Last updated 2014-01-21 17:50:03 CET
 </div>
 </div>
 </body>

@@ -959,6 +959,16 @@ ex.:
   make_auth_user_uppercase = 1
 
 
+==== make_auth_replace_regex
+
+Convert authenticated username by regular expression. The following
+example removes everything after an @ from the authenticated username
+and 'user@domain' becomes just 'user'.
+
+ex.:
+
+  make_auth_replace_regex = s/^(.*?)@.*/$1/gmx
+
 ==== use_strict_host_authorization
 
 When set to a true value, every contact will only see the hosts where
