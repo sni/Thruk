@@ -65,6 +65,14 @@ sub _do_finalize_config {
     my ($uid, $groups) = get_user($var_path);
     $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
     $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
+
+    if($ENV{'THRUK_USER_ID'} !~ m/^\d+$/mx) {
+        $ENV{'THRUK_USER_ID'}  = (getpwnam($ENV{'THRUK_USER_ID'}))[2]  || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into numerical uid. Does this user really exist?");
+    }
+    if($ENV{'THRUK_GROUP_ID'} !~ m/^\d+$/mx) {
+        $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
+    }
+
     $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         if(defined $uid and $> == 0) {
