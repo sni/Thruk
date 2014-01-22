@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-22 23:16:18.000000000 +0100
-+++ b/thruk.conf	2014-01-22 23:18:38.000000000 +0100
+--- a/thruk.conf	2014-01-23 00:00:21.000000000 +0100
++++ b/thruk.conf	2014-01-23 00:04:19.000000000 +0100
 @@ -15,6 +15,9 @@
  # set the url prefix for all urls
  url_prefix = /
@@ -122,7 +122,6 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
-
 -    #spool_dir = /var/naemon/rw/check_results
 +    spool_dir = @CHECKRESULTDIR@
  
