@@ -1014,7 +1014,7 @@ static content from plugins is not accessible.
 Example redirect rule for apache:
 
 +++++
- AliasMatch /thruk/plugins/(.*?)/(.*)$ <your-plugin-dir>/plugins/plugins-enabled/$1/root/$2
+ AliasMatch /thruk/plugins/(.*?)/(.*)$ YOUR-PLUGIN-DIR/plugins/plugins-enabled/$1/root/$2
 +++++
 
 ex.:
@@ -1030,7 +1030,7 @@ alias or rewrite rules when changing the themes path. Otherwise the
 static content from your themes may not accessible.
 
 +++++
- Alias /thruk/themes/ <your-themes-dir>/themes/themes-enabled/
+ Alias /thruk/themes/ YOUR-THEMES-DIR/themes/themes-enabled/
 +++++
 
 ex.:
@@ -3099,7 +3099,7 @@ BODY {
 <script language="javascript" type="text/javascript">
 /* add complete new elements by javascript */
   jQuery(document).ready(function() {
-    jQuery('<img src="[% url_prefix %]thruk/themes/Thruk/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+    jQuery('<img src="' + url_prefix + 'themes/Thruk/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
   });
 </script>
 ------

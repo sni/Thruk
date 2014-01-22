@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 85;
+    plan tests => 96;
 }
 
 BEGIN {
@@ -22,6 +22,7 @@ my $redirects = [
 my $pages = [
     '/thruk/',
     '/thruk/docs/index.html',
+    '/thruk/documentation.html',
     '/thruk/index.html',
     '/thruk/main.html',
     '/thruk/side.html',
