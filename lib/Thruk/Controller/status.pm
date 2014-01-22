@@ -1064,54 +1064,9 @@ sub _process_bookmarks {
     my $global = Thruk::Utils::get_global_user_data($c);
     my $done   = 0;
 
-    # remove existing bookmarks
-    if(    ( defined $button and $button eq 'add bookmark' )
-        or ( defined $save   and $save   eq 'save changes' )) {
-        my $keep = {};
-        for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
-            next unless defined $bookmark;
-            my($section, $name) = split(/::/mx, $bookmark ,2);
-            $keep->{$section}->{$name} = 1;
-        }
-
-        my $new = {};
-        for my $section (keys %{$data->{'bookmarks'}}) {
-            for my $link ( @{$data->{'bookmarks'}->{$section}} ) {
-                next unless exists $keep->{$section}->{$link->[0]};
-                push @{$new->{$section}}, $link;
-            }
-        }
-
-        $data->{'bookmarks'} = $new;
-        if(Thruk::Utils::store_user_data($c, $data)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'Bookmarks updated' );
-        }
-        $done++;
-
-        if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
-            $keep = {};
-            for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
-                next unless defined $bookmark;
-                my($section, $name) = split(/::/mx, $bookmark ,2);
-                $keep->{$section}->{$name} = 1;
-            }
-
-            $new = {};
-            for my $section (keys %{$global->{'bookmarks'}}) {
-                for my $link ( @{$global->{'bookmarks'}->{$section}} ) {
-                    next unless exists $keep->{$section}->{$link->[0]};
-                    push @{$new->{$section}}, $link;
-                }
-            }
-
-            $global->{'bookmarks'} = $new;
-            Thruk::Utils::store_global_user_data($c, $global);
-            $done++;
-        }
-
-    }
-
     # add new bookmark
+    my $keep  = {};
+    my $keepp = {};
     if(    defined $newname   and $newname  ne ''
        and defined $bookmark  and $bookmark ne ''
        and defined $section   and $section  ne ''
@@ -1125,14 +1080,69 @@ sub _process_bookmarks {
             if(Thruk::Utils::store_global_user_data($c, $global)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
             }
+            $keepp->{$section}->{$newname} = 1;
         } else {
             $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
             push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
             if(Thruk::Utils::store_user_data($c, $data)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
             }
+            $keep->{$section}->{$newname} = 1;
         }
         $done++;
+    }
+
+    # remove existing bookmarks
+    if(    ( defined $button and $button eq 'add bookmark' )
+        or ( defined $save   and $save   eq 'save changes' )) {
+        for my $bookmark (@{Thruk::Utils::list($bookmarks)}) {
+            next unless defined $bookmark;
+            my($section, $name) = split(/::/mx, $bookmark ,2);
+            $keep->{$section}->{$name} = 1;
+        }
+
+        my $new  = {};
+        my $dups = {};
+        for my $section (keys %{$data->{'bookmarks'}}) {
+            for my $link ( reverse @{$data->{'bookmarks'}->{$section}} ) {
+                next unless exists $keep->{$section}->{$link->[0]};
+                next if     exists $dups->{$section}->{$link->[0]};
+                push @{$new->{$section}}, $link;
+                $dups->{$section}->{$link->[0]} = 1;
+            }
+            @{$new->{$section}} = reverse @{$new->{$section}} if defined $new->{$section}; # ensures the last bookmark with same name superseeds
+        }
+
+        $data->{'bookmarks'} = $new;
+        if(Thruk::Utils::store_user_data($c, $data)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Bookmarks updated' );
+        }
+        $done++;
+
+        if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+            for my $bookmark (@{Thruk::Utils::list($bookmarksp)}) {
+                next unless defined $bookmark;
+                my($section, $name) = split(/::/mx, $bookmark ,2);
+                $keepp->{$section}->{$name} = 1;
+            }
+
+            $new  = {};
+            $dups = {};
+            for my $section (keys %{$global->{'bookmarks'}}) {
+                for my $link ( reverse @{$global->{'bookmarks'}->{$section}} ) {
+                    next unless exists $keepp->{$section}->{$link->[0]};
+                    next if     exists $dups->{$section}->{$link->[0]};
+                    push @{$new->{$section}}, $link;
+                    $dups->{$section}->{$link->[0]} = 1;
+                }
+                @{$new->{$section}} = reverse @{$new->{$section}} if defined $new->{$section}; # ensures the last bookmark with same name superseeds
+            }
+
+            $global->{'bookmarks'} = $new;
+            Thruk::Utils::store_global_user_data($c, $global);
+            $done++;
+        }
+
     }
 
     unless($done) {
