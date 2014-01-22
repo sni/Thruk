@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-20 23:16:33.988909283 +0100
-+++ b/thruk.conf	2014-01-20 23:16:59.168900533 +0100
+--- a/thruk.conf	2014-01-22 23:16:18.000000000 +0100
++++ b/thruk.conf	2014-01-22 23:18:38.000000000 +0100
 @@ -15,6 +15,9 @@
  # set the url prefix for all urls
  url_prefix = /
@@ -19,7 +19,7 @@
  
  ######################################
  # uses bookmark names as page titles where possible
-@@ -187,8 +190,8 @@
+@@ -190,8 +193,8 @@
  
  ######################################
  # mode used when creating or saving files
@@ -30,7 +30,7 @@
  
  ######################################
  # files owners for new / changed files
-@@ -213,7 +216,7 @@
+@@ -216,7 +219,7 @@
  
  ######################################
  # custom templates
@@ -39,7 +39,7 @@
  
  ######################################
  # log4perl config
-@@ -517,7 +520,7 @@
+@@ -520,7 +523,7 @@
  # bug reporting
  # show link to bug reports when internal errors occur.
  # set to 'server' to log js error server side
@@ -48,7 +48,7 @@
  
  # don't report some known harmless javascript errors
  skip_js_errors  = cluetip is not a function
-@@ -574,56 +577,19 @@
+@@ -577,56 +580,19 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -56,18 +56,18 @@
 -#        name   = Core
 -#        type   = livestatus
 -#        <options>
--#            peer          = /var/nagios/rw/live
--#            resource_file = /etc/nagios/resource.cfg
+-#            peer          = /var/naemon/rw/live
+-#            resource_file = /etc/naemon/resource.cfg
 -#       </options>
 -#       <configtool>
--#            core_conf      = /etc/nagios/nagios.cfg
--#            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
--#            obj_reload_cmd = /etc/init.d/nagios reload
+-#            core_conf      = /etc/naemon/naemon.cfg
+-#            obj_check_cmd  = /usr/bin/naemon -v /etc/naemon/naemon.cfg
+-#            obj_reload_cmd = /etc/init.d/naemon reload
 -#       </configtool>
 -#    </peer>
 -
 -#    <peer>
--#        name   = Local Nagios
+-#        name   = Local Naemon
 -#        type   = livestatus
 -#        hidden = 1             # make this backend hidden by default
 -#        groups = admins        # make this backend only visible to the admin group
@@ -76,13 +76,13 @@
 -#            resource_file = path_to_your/resource.cfg
 -#       </options>
 -#       <configtool>
--#            core_conf      = /etc/nagios/nagios.cfg
--#            obj_check_cmd  = /etc/init.d/nagios checkconfig
--#            obj_reload_cmd = /etc/init.d/nagios reload
+-#            core_conf      = /etc/naemon/naemon.cfg
+-#            obj_check_cmd  = /etc/init.d/naemon checkconfig
+-#            obj_reload_cmd = /etc/init.d/naemon reload
 -#       </configtool>
 -#    </peer>
 -#    <peer>
--#        name   = External Nagios
+-#        name   = External Naemon
 -#        type   = livestatus
 -#        <options>
 -#            peer    = 172.16.0.1:9999
@@ -118,28 +118,31 @@
  </Component>
  
  
-@@ -711,20 +677,20 @@
+@@ -714,21 +680,21 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
--    #spool_dir = /var/nagios/rw/check_results
+
+-    #spool_dir = /var/naemon/rw/check_results
 +    spool_dir = @CHECKRESULTDIR@
  
      # as alternative to the spool_dir, a livestatus connection can be used
      # to send results to the core.
-     #result_backend = sitename
+-    #result_backend = sitename
++    result_backend = Naemon
  
      # Save objects to this file. Content will be overwritten.
--    #objects_save_file = /etc/nagios/conf.d/thruk_bp_generated.cfg
+-    #objects_save_file = /etc/naemon/conf.d/thruk_bp_generated.cfg
 +    objects_save_file = @SYSCONFDIR@/conf.d/thruk_bp_generated.cfg
  
      # User maintained file containing templates used for business process services.
--    #objects_templates_file = /etc/nagios/conf.d/thruk_templates.cfg
+-    #objects_templates_file = /etc/naemon/conf.d/thruk_templates.cfg
 +    objects_templates_file = @SYSCONFDIR@/conf.d/thruk_templates.cfg
  
-     # Command to apply changes to the objects_save_file
--    #objects_reload_cmd = /etc/init.d/nagios reload
-+    objects_reload_cmd = @INITDIR@/naemon reload
+     # Command to apply changes to the objects_save_file. If no set and
+     # and result_backend is used, the restart will be triggered as external command.
+-    #objects_reload_cmd = /etc/init.d/naemon reload
++    #objects_reload_cmd = @INITDIR@/naemon reload
  
      # hooks which will be executed before or after saving.
      #pre_save_cmd   =
