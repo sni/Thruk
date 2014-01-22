@@ -438,6 +438,7 @@ sub set_processinfo {
                 last;
             }
         }
+        $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'};
     } else {
         $fetch = 1;
     }
@@ -450,6 +451,8 @@ sub set_processinfo {
                 $cached_data->{'processinfo'}->{$key} = $processinfo->{$key} if scalar keys %{$processinfo->{$key}} > 0;
             }
         }
+        $cached_data->{'processinfo_time'} = time();
+        $c->stash->{'processinfo_time'}    = $cached_data->{'processinfo_time'};
         $c->cache->set('global', $cached_data);
         $c->stats->profile(end => "AddDefaults::set_processinfo fetch");
     }

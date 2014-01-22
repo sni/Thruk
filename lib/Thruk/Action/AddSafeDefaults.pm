@@ -25,6 +25,11 @@ before 'execute' => sub {
 };
 
 ########################################
+after 'execute' => sub {
+    Thruk::Action::AddDefaults::after_execute(@_);
+};
+
+########################################
 __PACKAGE__->meta->make_immutable;
 
 ########################################

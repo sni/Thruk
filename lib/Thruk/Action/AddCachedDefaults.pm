@@ -22,6 +22,17 @@ extends 'Catalyst::Action';
 ########################################
 before 'execute' => sub {
     Thruk::Action::AddDefaults::add_defaults(2, @_);
+
+    # make sure process info is not getting too old
+    my $c = $_[2];
+    if(!$c->stash->{'processinfo_time'} or $c->stash->{'processinfo_time'} < time() - 90) {
+        $c->run_after_request('Thruk::Action::AddDefaults::set_processinfo($c);');
+    }
+};
+
+########################################
+after 'execute' => sub {
+    Thruk::Action::AddDefaults::after_execute(@_);
 };
 
 ########################################

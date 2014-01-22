@@ -23,7 +23,7 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
+sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my ( $self, $c ) = @_;
 
     my($start,$end);
