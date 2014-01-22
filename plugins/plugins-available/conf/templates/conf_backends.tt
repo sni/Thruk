@@ -38,6 +38,7 @@ Note: some options are not accessible here for security reasons.
 </form>
 </div>
 
+<img src="[% url_prefix %]themes/[% theme %]/images/error.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 <script type="text/javascript">
 <!--
   function conf_sites_add_hide() {
@@ -84,6 +85,7 @@ Note: some options are not accessible here for security reasons.
     }
     img.title = 'checking connection...';
     showElement(img);
+    jQuery('#thruk_message').remove();
 
     jQuery.ajax({
         url:  'conf.cgi',
@@ -100,15 +102,18 @@ Note: some options are not accessible here for security reasons.
         cache: false,
         success: function(data) {
           if(data.ok == 1) {
-            img.src = '[% url_prefix %]themes/[% theme %]/images/accept.png';
+            img.src   = '[% url_prefix %]themes/[% theme %]/images/accept.png';
             img.title = 'connection test successful';
           } else {
-            img.src = '[% url_prefix %]themes/[% theme %]/images/error.png';
+            img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
             img.title = data.error;
+            thruk_message(1, data.error + ' ('+peer+')');
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          img.src = '[% url_prefix %]themes/[% theme %]/images/error.png';
+          img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
+          img.title = 'connection test unknown';
+          thruk_message(1, 'connection test unknown: - ' + jqXHR.status + ' ' + errorThrown);
         }
     });
   }
