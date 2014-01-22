@@ -7,16 +7,17 @@ use Getopt::Long qw//;
 alarm(180);
 
 my $options = {
-  'prefix'        => '/usr/local/thruk',
-  'with-htmlurl'  => '/thruk',
-  'init-dir'      => '',
-  'logrotate-dir' => '',
-  'log-dir'       => '/var/log/thruk',
-  'htmlurl'       => '/thruk',
-  'httpd-conf'    => '',
-  'thruk-user'    => 'thruk',
-  'thruk-group'   => 'thruk',
-  'thruk-libs'    => '',
+  'prefix'          => '/usr/local/thruk',
+  'with-htmlurl'    => '/thruk',
+  'init-dir'        => '',
+  'logrotate-dir'   => '',
+  'log-dir'         => '/var/log/thruk',
+  'htmlurl'         => '/thruk',
+  'httpd-conf'      => '',
+  'thruk-user'      => 'thruk',
+  'thruk-group'     => 'thruk',
+  'thruk-libs'      => '',
+  'checkresult-dir' => '/var/spool/naemon/checkresults',
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
@@ -37,6 +38,7 @@ Getopt::Long::GetOptions (
    "with-log-dir=s"         => \$options->{'log-dir'},
    "with-htmlurl=s"         => \$options->{'htmlurl'},
    "with-httpd-conf=s"      => \$options->{'httpd-conf'},
+   "with-checkresult-dir=s" => \$options->{'with-checkresult-dir'},
    "with-thruk-user=s"      => \$options->{'thruk-user'},
    "with-thruk-group=s"     => \$options->{'thruk-group'},
    "with-thruk-libs=s"      => \$options->{'thruk-libs'},
@@ -87,6 +89,7 @@ HTTPDCONF        = $options->{'httpd-conf'}
 THRUKUSER        = $options->{'thruk-user'}
 THRUKGROUP       = $options->{'thruk-group'}
 THRUKLIBS        = $options->{'thruk-libs'}
+CHECKRESULTDIR   = $options->{'checkresult-dir'}
 
 EOT
 close($fh);

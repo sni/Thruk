@@ -28,6 +28,7 @@ local_patches:
 	sed -i blib/*.patch -e 's+@BINDIR@+${BINDIR}+g'
 	sed -i blib/*.patch -e 's+@INITDIR@+${INITDIR}+g'
 	sed -i blib/*.patch -e 's+@LIBDIR@+${LIBDIR}+g'
+	sed -i blib/*.patch -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
 	sed -i blib/*.patch -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
 	sed -i blib/*.patch -e 's+@THRUKUSER@+${THRUKUSER}+g'
 	sed -i blib/*.patch -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
@@ -125,3 +126,7 @@ naemon-patch:
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
+	cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
+	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg
+	echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
+	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg

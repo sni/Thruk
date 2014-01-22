@@ -225,6 +225,7 @@ sub set_default_config {
     elsif($config->{'project_root'} && -s $config->{'project_root'}.'/naemon-version') {
         $config->{'extra_version'}      = read_file($config->{'project_root'}.'/naemon-version');
         $config->{'extra_version_link'} = 'http://www.naemon.org';
+        chomp($config->{'extra_version'});
     }
 
     # set apache status url

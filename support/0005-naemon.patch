@@ -123,7 +123,7 @@
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
 -    #spool_dir = /var/nagios/rw/check_results
-+    spool_dir = @LOCALSTATEDIR@/naemon/spool/checkresults
++    spool_dir = @CHECKRESULTDIR@
  
      # as alternative to the spool_dir, a livestatus connection can be used
      # to send results to the core.
