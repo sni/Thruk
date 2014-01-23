@@ -144,11 +144,9 @@
   else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }
   else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
   else                     { jQuery('#view1').attr('checked', 'checked') }
-  var update_reports_status_int;
   init_report_tool_buttons();
   [% IF running > 0 %]
-  window.clearInterval(update_reports_status_int);
-  update_reports_status_int = window.setInterval("update_reports_status()", 1000);
+  update_reports_status();
   [%+ END +%]
   [% IF highlight %]
   jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);

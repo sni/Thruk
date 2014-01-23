@@ -41,10 +41,10 @@ function update_reports_status() {
                                   function(responseText, textStatus, XMLHttpRequest) {
         // now count is_running elements
         size = jQuery('.is_running').size();
-        if(size == 0) {
-            window.clearInterval(update_reports_status_int);
-            reports_view(last_reports_typ);
+        if(size > 0) {
+            window.setTimeout('update_reports_status()', 1500);
         }
+        reports_view(last_reports_typ);
     });
 }
 
