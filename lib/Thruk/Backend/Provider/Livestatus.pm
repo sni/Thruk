@@ -125,6 +125,7 @@ return the process info
 =cut
 sub get_processinfo {
     my($self, %options) = @_;
+    my $key = $self->peer_key();
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
                       accept_passive_host_checks accept_passive_service_checks check_external_commands
@@ -144,9 +145,12 @@ sub get_processinfo {
                   ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
                   ->hashref_pk('peer_key');
 
-    $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
+    $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
 
-    $self->{'last_program_start'} = $data->{$self->peer_key()}->{'program_start'};
+    # naemon checks external commands on arrival
+    $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
+
+    $self->{'last_program_start'} = $data->{$key}->{'program_start'};
 
     return($data, 'HASH');
 }
