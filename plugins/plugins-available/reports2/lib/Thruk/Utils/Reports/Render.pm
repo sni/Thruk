@@ -857,9 +857,11 @@ sub _read_static_content_file {
 sub _sum_availability {
     my($t, $u) = @_;
     my $time = {
-        'available'    => 0,
-        'unavailable'  => 0,
-        'undetermined' => 0,
+        'available'                             => 0,
+        'unavailable'                           => 0,
+        'time_indeterminate_notrunning'         => $t->{'time_indeterminate_notrunning'}         || 0,
+        'time_indeterminate_nodata'             => $t->{'time_indeterminate_nodata'}             || 0,
+        'time_indeterminate_outside_timeperiod' => $t->{'time_indeterminate_outside_timeperiod'} || 0,
     };
 
     for my $s ( keys %{$t} ) {
@@ -880,9 +882,6 @@ sub _sum_availability {
             }
         }
     }
-    $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
-    $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
-    $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
 
     my $percent = -1;
     if($time->{'available'} + $time->{'unavailable'} > 0) {
