@@ -32,7 +32,7 @@ put objects model into stash
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
 
-    Thruk::Action::AddDefaults::set_processinfo($c);
+    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2);
 
     $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
 

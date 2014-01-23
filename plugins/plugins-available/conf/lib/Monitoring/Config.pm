@@ -2069,6 +2069,7 @@ sub remote_file_sync {
     return unless $self->is_remote();
     my $files = {};
     for my $f (@{$self->{'files'}}) {
+        next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
             'mtime'        => $f->{'mtime'},
             'md5'          => $f->{'md5'},
