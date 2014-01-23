@@ -213,8 +213,7 @@ exit 0
 %{_datadir}/thruk/LICENSE
 %{_datadir}/thruk/menu.conf
 %{_datadir}/thruk/dist.ini
-%{_datadir}/thruk/docs/THRUK_MANUAL.html
-%{_datadir}/thruk/docs/FAQ.html
+%{_datadir}/thruk/docs
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
 %{_libdir}/thruk/perl5
 %doc %{_mandir}/man3/nagexp.3
