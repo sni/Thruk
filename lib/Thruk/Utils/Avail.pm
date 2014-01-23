@@ -281,7 +281,7 @@ sub calculate_availability {
             }
         }
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);
-        die('no such host') unless scalar @{$host_data} > 0;
+        die('no such host: '.$host) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
@@ -295,7 +295,7 @@ sub calculate_availability {
     # all hosts
     elsif(defined $host and $host eq 'all') {
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
-        die('no such host') unless scalar @{$host_data} > 0;
+        die('no hosts found for all') unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
@@ -323,7 +323,7 @@ sub calculate_availability {
         }
 
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host') unless scalar @{$host_data} > 0;
+        die('no host found for hostgroup: '.$hostgroup) unless scalar @{$host_data} > 0;
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
             $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
