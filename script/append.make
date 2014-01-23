@@ -94,7 +94,7 @@ local_install: local_patches
 	# docs
 	mkdir -p                     ${DESTDIR}${DATADIR}/docs
 	cp -p docs/FAQ.html          ${DESTDIR}${DATADIR}/docs/FAQ.html
-	cp -p docs/THRUK_MANUAL.html ${DESTDIR}${DATADIR}/THRUK_MANUAL.html
+	cp -p docs/THRUK_MANUAL.html ${DESTDIR}${DATADIR}/docs/THRUK_MANUAL.html
 	############################################################################
 	# logfiles
 	mkdir -p ${DESTDIR}${LOGDIR}
