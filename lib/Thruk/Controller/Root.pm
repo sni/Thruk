@@ -380,7 +380,7 @@ page: /thruk/side.html
 
 =cut
 
-sub thruk_side_html : Path('/thruk/side.html') :MyAction('AddCachedDefaults') {
+sub thruk_side_html : Path('/thruk/side.html') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     Thruk::Utils::check_pid_file($c);
@@ -477,7 +477,7 @@ page: /thruk/changes.html
 
 =cut
 
-sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddCachedDefaults') {
+sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     $c->stash->{infoBoxTitle}            = 'Change Log';
@@ -498,7 +498,7 @@ page: /thruk/docs/
 
 =cut
 
-sub thruk_docs : Path('/thruk/docs/') :MyAction('AddCachedDefaults') {
+sub thruk_docs : Path('/thruk/docs/') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
@@ -706,7 +706,7 @@ page: /thruk/cgi-bin/job.cgi
 
 =cut
 
-sub job_cgi : Path('/thruk/cgi-bin/job.cgi') :MyAction('AddCachedDefaults') {
+sub job_cgi : Path('/thruk/cgi-bin/job.cgi') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
 

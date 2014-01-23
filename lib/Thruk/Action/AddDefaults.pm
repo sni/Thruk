@@ -125,6 +125,7 @@ sub add_defaults {
     my $retrys = 1;
     # try 3 times if all cores are local
     $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
+    $retrys = 1 if $safe; # but only once on safe pages
 
     for my $x (1..$retrys) {
         # reset failed states, otherwise retry would be useless
@@ -142,7 +143,7 @@ sub add_defaults {
         # side.html and some other pages should not be redirect to the error page on backend errors
         _set_possible_backends($c, $disabled_backends);
         print STDERR $@ if $c->config->{'thruk_debug'};
-        return if $safe;
+        return if $safe == 1;
         $c->log->debug("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -429,7 +430,7 @@ sub set_processinfo {
     my $processinfo;
     $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
     my $fetch = 0;
-    if($safe == 2) {
+    if($safe) {
         my($selected) = $c->{'db'}->select_backends('get_status');
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
