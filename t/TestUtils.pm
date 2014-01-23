@@ -159,8 +159,10 @@ sub test_page {
     my $opts = _set_test_page_defaults(\%opts);
 
     # make tests with http://localhost/naemon possible
-    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)|mx) {
-        $opts->{'url'} =~ s|/thruk|/$1|gmx;
+    my $product = 'thruk';
+    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+        $product = $1;
+        $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
 
     ok($opts->{'url'}, $opts->{'url'});
@@ -242,7 +244,7 @@ sub test_page {
     elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/mxo) {
         # is it a background job page?
         wait_for_job($1);
-        my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
+        my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
         $request = _request($location);
         $return->{'content'} = $request->content;
         if($request->is_error) {
@@ -324,11 +326,11 @@ sub test_page {
             next if $match =~ m/^ssh/mxo;
             next if $match =~ m/^mailto:/mxo;
             next if $match =~ m/^(\#|'|")/mxo;
-            next if $match =~ m/^\/thruk\/cgi\-bin/mxo;
+            next if $match =~ m/^\/$product\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
             next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'CATALYST_SERVER'};
-            next if $match =~ m|^/thruk/frame\.html|mxo and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'CATALYST_SERVER'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -339,7 +341,7 @@ sub test_page {
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mxo;
-            next if $test_url =~ m|/thruk/themes/.*?/images/logos/|mxo;
+            next if $test_url =~ m|/$product/themes/.*?/images/logos/|mxo;
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
             my $request = _request($test_url);
 
