@@ -878,7 +878,10 @@ sub _process_backends_page {
     }
     if(!defined $conf{'Component'}->{'Thruk::Backend'}) {
         $file =~ s/thruk_local\.conf/thruk.conf/mx;
-        %conf = ParseConfig($file) if -f $file;
+        %conf = Config::General::ParseConfig(-ConfigFile => $file,
+                                             -UTF8       => 1,
+                                             -CComments  => 0,
+        ) if $file;
     }
 
     if(keys %conf > 0) {
