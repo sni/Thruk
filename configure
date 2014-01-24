@@ -21,6 +21,7 @@ my $options = {
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
+Getopt::Long::Configure('pass_through');
 Getopt::Long::GetOptions (
    "h|help"                 => \$options->{'help'},
    "v|verbose"              => sub { $options->{'verbose'}++ },
@@ -45,6 +46,7 @@ Getopt::Long::GetOptions (
    "with-thruk-temp-dir=s"  => \$options->{'thruk-temp-dir'},
    "with-thruk-var-dir=s"   => \$options->{'thruk-var-dir'},
    "with-thruk-log-dir=s"   => \$options->{'thruk-log-dir'},
+   ""   => \$options->{'thruk-log-dir'},
 ) or warn "error in options";
 
 if($options->{'help'}) {
@@ -93,7 +95,7 @@ CHECKRESULTDIR   = $options->{'checkresult-dir'}
 
 EOT
 close($fh);
-print `yes n | $^X Makefile.PL`;
+print `yes n | $^X Makefile.PL >/dev/null 2>&1`;
 
 print <<EOT;
 
@@ -120,6 +122,7 @@ print <<EOT;
   thruk-libs       = $options->{'thruk-libs'}
 
 now run
+  perl Makefile.PL
   make
   make install
 to install thruk with these settings.
