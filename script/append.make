@@ -100,7 +100,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${LOGDIR}
 	############################################################################
 	# logrotation
-	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk; }
+	[ -z "${LOGROTATEDIR}" ] || { mkdir -p ${DESTDIR}${LOGROTATEDIR} && cp -p support/thruk.logrotate ${DESTDIR}${LOGROTATEDIR}/thruk; sed '1 s#^.*$$#${LOGDIR}/*.log ${TMPDIR}/*.log#g' ${DESTDIR}${LOGROTATEDIR}/thruk; }
 	############################################################################
 	# rc script
 	[ -z "${INITDIR}" ] || { mkdir -p ${DESTDIR}${INITDIR} && cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
