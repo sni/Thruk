@@ -128,6 +128,7 @@ naemon-patch:
 	cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/0007-naemon-init.patch
 	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/0008-naemon-httpd.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0009-naemon-fcgish.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0010-naemon-thruk_auth.patch
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
