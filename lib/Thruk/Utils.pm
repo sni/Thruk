@@ -1939,6 +1939,7 @@ sub precompile_templates {
     my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
     my $uniq     = {};
     for my $path (@includes) {
+        next unless -d $path;
         my $files = find_files($path, '\.tt$');
         for my $file (@{$files}) {
             $file =~ s|^$path/||gmx;

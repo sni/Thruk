@@ -30,7 +30,7 @@ use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::CookieAuth;
 
-$|           = 1;
+$|          = 1;
 my $verbose = 0;
 $verbose    = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} if $ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
 
