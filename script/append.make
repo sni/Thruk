@@ -18,22 +18,22 @@ staticfiles:
 local_all:
 
 local_patches:
-	mkdir -p blib
-	cp -rp support/*.patch blib/
-	sed -i blib/*.patch -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
-	sed -i blib/*.patch -e 's+@DATADIR@+${DATADIR}+g'
-	sed -i blib/*.patch -e 's+@LOGDIR@+${LOGDIR}+g'
-	sed -i blib/*.patch -e 's+@TMPDIR@+${TMPDIR}+g'
-	sed -i blib/*.patch -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
-	sed -i blib/*.patch -e 's+@BINDIR@+${BINDIR}+g'
-	sed -i blib/*.patch -e 's+@INITDIR@+${INITDIR}+g'
-	sed -i blib/*.patch -e 's+@LIBDIR@+${LIBDIR}+g'
-	sed -i blib/*.patch -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
-	sed -i blib/*.patch -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
-	sed -i blib/*.patch -e 's+@THRUKUSER@+${THRUKUSER}+g'
-	sed -i blib/*.patch -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
-	sed -i blib/*.patch -e 's+@HTMLURL@+${HTMLURL}+g'
-	sed -i blib/*.patch -e 's+log4perl.conf.example+log4perl.conf+g'
+	mkdir -p blib/replace
+	cp -rp support/*.patch blib/replace
+	sed -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
+	sed -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
+	sed -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
+	sed -i blib/replace/* -e 's+@TMPDIR@+${TMPDIR}+g'
+	sed -i blib/replace/* -e 's+@LOCALSTATEDIR@+${LOCALSTATEDIR}+g'
+	sed -i blib/replace/* -e 's+@BINDIR@+${BINDIR}+g'
+	sed -i blib/replace/* -e 's+@INITDIR@+${INITDIR}+g'
+	sed -i blib/replace/* -e 's+@LIBDIR@+${LIBDIR}+g'
+	sed -i blib/replace/* -e 's+@CHECKRESULTDIR@+${CHECKRESULTDIR}+g'
+	sed -i blib/replace/* -e 's+@THRUKLIBS@+${THRUKLIBS}+g'
+	sed -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
+	sed -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
+	sed -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
+	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
 	mkdir -p ${DESTDIR}${TMPDIR}
@@ -50,6 +50,7 @@ local_install: local_patches
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
 	cp -p cgi.cfg ${DESTDIR}${SYSCONFDIR}/cgi.cfg
+	sed -e 's/^default_user_name=.*$$/default_user_name=/' -i ${DESTDIR}${SYSCONFDIR}/cgi.cfg
 	cp -p log4perl.conf.example ${DESTDIR}${SYSCONFDIR}/log4perl.conf
 	cp -p support/naglint.conf.example ${DESTDIR}${SYSCONFDIR}/naglint.conf
 	cp -p support/htpasswd ${DESTDIR}${SYSCONFDIR}/htpasswd
@@ -113,10 +114,10 @@ local_install: local_patches
 	[ -z "${HTTPDCONF}" ] || { mkdir -p ${DESTDIR}${HTTPDCONF} && cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk.conf; }
 	############################################################################
 	# some patches
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0001-thruk.conf.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0002-log4perl.conf.patch
-	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/0003-thruk-scripts.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0004-thruk_fastcgi.pl.patch
+	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0001-thruk.conf.patch
+	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0002-log4perl.conf.patch
+	cd ${DESTDIR}${BINDIR}/     && patch -p1 < $(shell pwd)/blib/replace/0003-thruk-scripts.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0004-thruk_fastcgi.pl.patch
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
@@ -124,11 +125,11 @@ local_install: local_patches
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
 
 naemon-patch:
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/0005-naemon.patch
-	cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/0007-naemon-init.patch
-	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/0008-naemon-httpd.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0009-naemon-fcgish.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/0010-naemon-thruk_auth.patch
+	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
+	cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch
+	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0009-naemon-fcgish.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0010-naemon-thruk_auth.patch
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
