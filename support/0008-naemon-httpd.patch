@@ -59,7 +59,7 @@
  
 -  <Location /thruk>
 +  <Location @HTMLURL@>
-     Options ExecCGI
+     Options ExecCGI FollowSymLinks
 -    AuthName "Thruk Monitoring"
 +    AuthName "Naemon Monitoring"
      AuthType Basic
