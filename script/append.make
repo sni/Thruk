@@ -66,6 +66,7 @@ local_install: local_patches
 	mkdir -p ${DESTDIR}${DATADIR}/themes
 	mkdir -p ${DESTDIR}${DATADIR}/script
 	cp -rp lib root templates ${DESTDIR}${DATADIR}/
+	rm -f ${DESTDIR}${DATADIR}/root/thruk/themes
 	cp -rp support/fcgid_env.sh ${DESTDIR}${DATADIR}/
 	chmod 755 ${DESTDIR}${DATADIR}/fcgid_env.sh
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
@@ -73,7 +74,7 @@ local_install: local_patches
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
 	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
-	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
 	[ ! -f script/wkhtmltopdf ] || cp -p script/wkhtmltopdf ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini
 	############################################################################
