@@ -174,7 +174,10 @@ for my $rootlink (glob("./root/thruk/plugins/*")) {
 
 tests_recursive;
 install_script glob('script/*.pl');
-auto_install;
+eval {
+    require CPAN;
+};
+auto_install unless $@;
 WriteAll;
 
 ##################################

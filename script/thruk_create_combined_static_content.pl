@@ -15,9 +15,12 @@ for my $p (reverse split/:/, $ENV{'PATH'}) {
     $yuicompr = $p.'/yuicompressor'  if -x $p.'/yuicompressor';
 }
 
+my $skip_compress = defined $ENV{THRUK_SKIP_COMPRESS} ? $ENV{THRUK_SKIP_COMPRESS} : 0;
 unless($ENV{THRUK_SKIP_COMPRESS}) {
-    die("dos2unix is required!")      unless $dos2unix;
-    die("yuicompressor is required!") unless $yuicompr;
+    if(!$yuicompr) {
+        warn("E: yuicompressor not installed, cannot compress js and css!") ;
+        $skip_compress = 1;
+    }
 }
 
 #################################################
@@ -29,17 +32,17 @@ die('no config') unless $Thruk::Config::VERSION;
 #################################################
 my $cmds = [
     'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.js',
-    'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'.js',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$Thruk::Config::VERSION.'.css',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.css',
 ];
+push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'.js' if $dos2unix;
 for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
 }
 
-if($ENV{THRUK_SKIP_COMPRESS}) {
-    print STDERR "skipping compression upon request\n";
+if($skip_compress) {
+    print STDERR "skipping compression\n";
     exit;
 }
 
