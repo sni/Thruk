@@ -1703,7 +1703,7 @@ sub restart_later {
 
   wait_after_reload($c)
 
-wait up to 30 seconds till the core responds
+wait up to 60 seconds till the core responds
 
 =cut
 
@@ -1711,16 +1711,20 @@ sub wait_after_reload {
     my($c) = @_;
 
     # wait until core responds again
-    for(1..30) {
+    my $start = time();
+    while($start > time() - 60) {
         sleep(1);
         eval {
-            local $SIG{'PIPE'}='IGNORE'; # exits sometimes on reload
+            local $SIG{ALRM}   = sub { die "alarm\n" };
+            local $SIG{'PIPE'} = 'IGNORE'; # exits sometimes on reload
+            alarm 10;
             $c->{'db'}->reset_failed_backends();
             $c->{'db'}->get_processinfo();
         };
         if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
             last;
         }
+        $c->log->debug('waiting for core reload for '.($start-time()).'s: '.$@);
     }
     return;
 }
