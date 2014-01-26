@@ -595,8 +595,8 @@ sub _external_request {
         my $product = 'thruk';
         if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
             $product = $1;
-            $url =~ s|/$product|/|gmx;
-            $url =~ s|/thruk|/$product|gmx;
+            $url =~ s|/$product/|/|gmx;
+            $url =~ s|/thruk/|/$product/|gmx;
         }
         $url =~ s#//#/#gmx;
         $url = $ENV{'CATALYST_SERVER'}.$url;
