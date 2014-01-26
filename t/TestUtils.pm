@@ -7,6 +7,8 @@ package TestUtils;
 #########################
 BEGIN {
   $ENV{'THRUK_SRC'} = 'TEST';
+
+  $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
 }
 
 use strict;
@@ -596,7 +598,7 @@ sub _external_request {
         if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
             $product = $1;
             $url =~ s|/$product/|/|gmx;
-            $url =~ s|/thruk/|/$product/|gmx;
+            $url =~ s|/thruk/|/|gmx;
         }
         $url =~ s#//#/#gmx;
         $url = $ENV{'CATALYST_SERVER'}.$url;
