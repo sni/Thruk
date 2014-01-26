@@ -1,5 +1,5 @@
 --- a/thruk.conf	2014-01-25 18:39:13.510437546 +0100
-+++ b/thruk.conf	2014-01-26 11:21:39.510288232 +0100
++++ b/thruk.conf	2014-01-26 12:23:07.782286588 +0100
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -27,7 +27,7 @@
      Options FollowSymLinks
      allow from all
      # required for apache 2.4
-@@ -29,33 +29,51 @@
+@@ -29,33 +29,50 @@
      </IfModule>
    </Directory>
  
@@ -83,7 +83,6 @@
 +
 +  # redirect to a startup page when there is no pidfile yet
 +  RewriteCond %{REQUEST_METHOD}        GET
-+  RewriteRule ^(.*)$                   /thruk/startup.html?$1 [R=302,L,NE,QSA]
 +  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/startup.html
 +  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/side.html
 +  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/.*\.(css|png|js)
