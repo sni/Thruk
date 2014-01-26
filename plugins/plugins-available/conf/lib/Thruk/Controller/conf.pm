@@ -513,8 +513,11 @@ sub _process_thruk_page {
         }
 
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
-        $self->_store_changes($c, $file, $data, $defaults, $c);
-        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=thruk');
+        if($self->_store_changes($c, $file, $data, $defaults, $c)) {
+            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=thruk');
+        } else {
+            return $c->response->redirect('conf.cgi?sub=thruk');
+        }
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -1267,20 +1270,25 @@ sub _update_password {
 # store changes to a file
 sub _store_changes {
     my ( $self, $c, $file, $data, $defaults, $update_in_conf ) = @_;
-    my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'} || '';
+    my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'};
+    if(!defined $old_md5 or $old_md5 eq '') {
+        Thruk::Utils::set_message( $c, 'success_message', "no changes made." );
+        return;
+    };
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
-        Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+        Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode." );
         return;
     }
     $c->log->debug("saving config changes to ".$file);
-    my $res     = Thruk::Utils::Conf::update_conf($file, $data, $old_md5, $defaults, $update_in_conf);
+    my $res = Thruk::Utils::Conf::update_conf($file, $data, $old_md5, $defaults, $update_in_conf);
     if(defined $res) {
         Thruk::Utils::set_message( $c, 'fail_message', $res );
+        return;
     } else {
-        Thruk::Utils::set_message( $c, 'success_message', 'Saved successfully' );
+        Thruk::Utils::set_message( $c, 'success_message', 'Saved successfully.' );
     }
-    return;
+    return 1;
 }
 
 ##########################################################

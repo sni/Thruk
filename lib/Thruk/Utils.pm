@@ -1687,10 +1687,10 @@ sub restart_later {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         my $pid = $$;
         system("sleep 1 && kill -HUP $pid &");
-        Thruk::Utils::append_message($c, 'Thruk has been restarted.');
+        Thruk::Utils::append_message($c, ' Thruk has been restarted.');
         return $c->response->redirect($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
     } else {
-        Thruk::Utils::append_message($c, 'Changes take effect after Restart.');
+        Thruk::Utils::append_message($c, ' Changes take effect after Restart.');
         return $c->response->redirect($redirect);
     }
     return;

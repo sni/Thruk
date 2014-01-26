@@ -194,7 +194,7 @@ sub update_conf {
     my $new_content = merge_conf($old_content, $data);
 
     if($new_content eq $old_content) {
-        return("no changes made");
+        return("no changes made.");
     }
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
