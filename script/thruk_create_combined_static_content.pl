@@ -16,18 +16,49 @@ for my $p (reverse split/:/, $ENV{'PATH'}) {
 }
 
 my $skip_compress = defined $ENV{THRUK_SKIP_COMPRESS} ? $ENV{THRUK_SKIP_COMPRESS} : 0;
-unless($ENV{THRUK_SKIP_COMPRESS}) {
-    if(!$yuicompr) {
-        warn("E: yuicompressor not installed, cannot compress js and css!") ;
-        $skip_compress = 1;
-    }
-}
 
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
 my $config   = \%Thruk::Config::config;
 die('no config') unless $config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'};
 die('no config') unless $Thruk::Config::VERSION;
+
+#################################################
+# check if update is required
+my $newest = 0;
+for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}) {
+    my @s   = stat('root/thruk/javascript/'.$file);
+    $newest = $s[9] if $newest < $s[9];
+}
+my @s = stat('root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js');
+my $js_required = 0;
+if($s[9] < $newest) {
+    $js_required = 1;
+}
+
+$newest = 0;
+for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}) {
+    my @s   = stat('themes/themes-available/Thruk/stylesheets/'.$file);
+    $newest = $s[9] if $newest < $s[9];
+}
+my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
+my $css_required = 0;
+if($s[9] < $newest) {
+    $css_required = 1;
+}
+
+if(!$js_required and !$css_required) {
+    exit;
+}
+
+#################################################
+# required tools available?
+unless($ENV{THRUK_SKIP_COMPRESS}) {
+    if(!$yuicompr) {
+        warn("E: yuicompressor not installed, won't compress javascript and stylesheets!") ;
+        $skip_compress = 1;
+    }
+}
 
 #################################################
 my $cmds = [
