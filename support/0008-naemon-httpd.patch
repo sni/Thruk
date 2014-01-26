@@ -1,5 +1,5 @@
 --- a/thruk.conf	2014-01-25 18:39:13.510437546 +0100
-+++ b/thruk.conf	2014-01-26 00:43:05.182430661 +0100
++++ b/thruk.conf	2014-01-26 11:21:39.510288232 +0100
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -27,7 +27,7 @@
      Options FollowSymLinks
      allow from all
      # required for apache 2.4
-@@ -29,33 +29,49 @@
+@@ -29,33 +29,51 @@
      </IfModule>
    </Directory>
  
@@ -40,6 +40,13 @@
 -  RewriteCond %{REQUEST_URI} ^/thruk
 -  RewriteCond /var/cache/thruk/thruk.pid !-f
 -  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
+-
+-  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
+-  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
+-  AliasMatch ^/thruk/(.*\.cgi|.*\.html)  /usr/share/thruk/fcgid_env.sh/thruk/$1
+-  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
+-  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
+-  Alias /thruk /usr/share/thruk/root/thruk
 +  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
 +  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
 +  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh@HTMLURL@/$1
@@ -47,13 +54,6 @@
 +  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
 +  Alias @HTMLURL@ @DATADIR@/root/thruk
  
--  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
--  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
--  AliasMatch ^/thruk/(.*\.cgi|.*\.html)  /usr/share/thruk/fcgid_env.sh/thruk/$1
--  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
--  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
--  Alias /thruk /usr/share/thruk/root/thruk
--
 -  <Location /thruk>
 +  <Location @HTMLURL@>
      Options ExecCGI FollowSymLinks
@@ -79,6 +79,18 @@
 +</IfModule>
 +
 +<VirtualHost *:80>
++  # extend default virtual host. put/include these rewrite rules in ssl virtual host if you use ssl
++
++  # redirect to a startup page when there is no pidfile yet
++  RewriteCond %{REQUEST_METHOD}        GET
++  RewriteRule ^(.*)$                   /thruk/startup.html?$1 [R=302,L,NE,QSA]
++  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/startup.html
++  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/side.html
++  RewriteCond %{REQUEST_URI}           !^@HTMLURL@/.*\.(css|png|js)
++  RewriteCond %{REQUEST_URI}           ^@HTMLURL@
++  RewriteCond @TMPDIR@/thruk.pid       !-f
++  RewriteRule ^(.*)$                   @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
++
 +  # cookie based authentication
 +  RewriteEngine On
 +  RewriteMap  thruk_users              prg:@DATADIR@/thruk_auth
@@ -90,14 +102,4 @@
 +  RewriteRule ^/pass/(.*)$             /$1 [NS,PT,L,E=!REMOTE_USER]
 +  RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]
 +  RewriteRule ^/loginok/([^/]+)/(.*)$  /$2 [NS,PT,L,E=REMOTE_USER:$1]
-+
-+  # redirect to a startup page when there is no pidfile yet
-+  RewriteCond %{REQUEST_METHOD} GET
-+  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/startup.html
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/side.html
-+  RewriteCond %{REQUEST_URI} !^@HTMLURL@/.*\.(css|png|js)
-+  RewriteCond %{REQUEST_URI} ^@HTMLURL@/
-+  RewriteCond @TMPDIR@/thruk.pid !-f
-+  RewriteRule ^(.*)$ @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
 +</VirtualHost>
