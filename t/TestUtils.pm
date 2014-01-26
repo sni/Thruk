@@ -16,6 +16,9 @@ use URI::Escape;
 use Encode qw/decode_utf8/;
 use File::Slurp;
 use HTTP::Request::Common;
+use HTTP::Cookies::Netscape;
+use LWP::UserAgent;
+use File::Temp qw/ tempfile /;
 use Thruk::Utils;
 use Thruk::Utils::External;
 
@@ -566,29 +569,97 @@ sub _relative_url {
 #########################
 sub _request {
     my($url, $start_to, $post) = @_;
+
+    if(defined $ENV{'CATALYST_SERVER'}) {
+        return(_external_request(@_));
+    }
+
     my $request;
     if($post) {
         $request = request POST $url, $post;
     } else {
         $request = request($url);
     }
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/mxo) {
-        my $link = $1;
+    $request = _check_startup_redirect($request, $start_to);
+
+    return $request;
+}
+
+#########################
+sub _external_request {
+    my($url, $start_to, $post, $retry) = @_;
+    $retry = 1 unless defined $retry;
+
+    # make tests with http://localhost/naemon possible
+    unless($url =~ m/^http/) {
+        my $product = 'thruk';
+        if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+            $product = $1;
+            $url =~ s|/$product|/|gmx;
+            $url =~ s|/thruk|/$product|gmx;
+        }
+        $url =~ s#//#/#gmx;
+        $url = $ENV{'CATALYST_SERVER'}.$url;
+    }
+
+    our($cookie_jar, $cookie_file);
+    if(!defined $cookie_jar) {
+        my $fh;
+        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
+        unlink ($cookie_file);
+        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
+    }
+
+    my $ua = LWP::UserAgent->new(
+        keep_alive   => 1,
+        max_redirect => 0,
+        timeout      => 30,
+        requests_redirectable => [],
+    );
+    $ua->env_proxy;
+    $ua->cookie_jar($cookie_jar);
+
+    my $request;
+    if($post) {
+        $request = $ua->post($url, $post);
+    } else {
+        $request = $ua->get($url);
+    }
+
+    $request = _check_startup_redirect($request, $start_to);
+
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
+        die("login failed: ".Dumper($request)) unless $retry;
+        my $product = $1;
+        my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
+        my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, 0);
+           $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, 0);
+        $request = _external_request($url, $start_to, $post, 0);
+    }
+    return $request;
+}
+
+#########################
+sub _check_startup_redirect {
+    my($request, $start_to) = @_;
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/startup\.html\?(.*)$/mxo) {
+        my $product = $1;
+        my $link    = $2;
         $link    =~ s/^wait\#//mxo;
         #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = request('/thruk/cgi-bin/remote.cgi');
+        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, []);
         #diag("startup request:");
         #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
-        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
+        fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
         sleep(3);
-        $request = request($link);
+        $request = _request($link);
         #diag("original request:");
         #diag(Dumper($request));
     }
-    return $request;
+    return($request);
 }
 
 #########################
@@ -704,6 +775,14 @@ sub _check_marker {
         $x++;
     }
 }
+
+#################################################
+END {
+    our $cookie_file;
+    unlink($cookie_file) if defined $cookie_file;
+}
+
+#################################################
 
 1;
 
