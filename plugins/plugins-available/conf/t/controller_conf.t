@@ -7,10 +7,8 @@ use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
-    my $tests = 1232;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => $tests     if !defined $ENV{'CATALYST_SERVER'};
-    plan tests => ($tests+1) if  defined $ENV{'CATALYST_SERVER'};
+    plan tests => 1232;
 }
 
 BEGIN {
