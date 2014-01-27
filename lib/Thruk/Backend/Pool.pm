@@ -1,13 +1,13 @@
 package Thruk::Backend::Pool;
 
-use strict ();
-use warnings ();
-use threads ();
+use strict;
+use warnings;
+use threads;
 use Carp qw/confess/;
 
-use Thruk::Pool::Simple ();
-use Thruk::Backend::Peer ();
-use Config::General ();
+use Thruk::Pool::Simple;
+use Thruk::Backend::Peer;
+use Config::General;
 use File::Slurp qw/read_file/;
 
 =head1 NAME
@@ -153,7 +153,6 @@ sub set_default_config {
         no_external_job_forks               => 0,
         host_action_icon                    => 'action.gif',
         service_action_icon                 => 'action.gif',
-        cookie_path                         => $config->{'url_prefix'},
         thruk_bin                           => '/usr/bin/thruk',
         thruk_init                          => '/etc/init.d/thruk',
         thruk_shell                         => '/bin/bash -l -c',
@@ -185,7 +184,12 @@ sub set_default_config {
         'status_color_background'           => 0,
         'apache_status'                     => {},
     };
-    $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
+    $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
+    $defaults->{'cookie_path'} = $config->{'url_prefix'};
+    my $product_prefix = $config->{'product_prefix'};
+    $defaults->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
+    $defaults->{'cookie_path'} = '/'.$product_prefix.'/' if $defaults->{'cookie_path'} eq '';
+
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
     }
@@ -445,6 +449,7 @@ return small thruks config. Needed for the backends only.
 =cut
 
 sub get_config {
+    my @files;
     for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
         next unless defined $path;
         push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';

@@ -45,11 +45,8 @@ sub index :Path :Args(0) {
     $c->stash->{'template'}       = 'login.tt';
     my $product_prefix            = $c->config->{'product_prefix'};
 
-    # auth cookie is not for thruk only
     my $cookie_path = $c->stash->{'cookie_path'};
-    $cookie_path =~ s/\/\Q$product_prefix\E\/*$//mx;
-
-    my $sdir = $c->config->{'var_path'}.'/sessions';
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
     my $keywords = $c->req->query_keywords;
