@@ -19,7 +19,9 @@ local_all:
 
 local_patches:
 	mkdir -p blib/replace
-	cp -rp support/*.patch blib/replace
+	cp -rp support/*.patch                      blib/replace
+	cp -rp support/thruk_cookie_auth_vhost.conf blib/replace
+	cp -rp support/thruk_cookie_auth.include    blib/replace
 	sed -i blib/replace/* -e 's+@SYSCONFDIR@+${SYSCONFDIR}+g'
 	sed -i blib/replace/* -e 's+@DATADIR@+${DATADIR}+g'
 	sed -i blib/replace/* -e 's+@LOGDIR@+${LOGDIR}+g'
@@ -33,6 +35,7 @@ local_patches:
 	sed -i blib/replace/* -e 's+@THRUKUSER@+${THRUKUSER}+g'
 	sed -i blib/replace/* -e 's+@THRUKGROUP@+${THRUKGROUP}+g'
 	sed -i blib/replace/* -e 's+@HTMLURL@+${HTMLURL}+g'
+	sed -i blib/replace/* -e 's+@HTTPDCONF@+${HTTPDCONF}+g'
 	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
@@ -139,3 +142,5 @@ naemon-patch:
 	echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	rm -f ${DESTDIR}${DATADIR}/root/index.html
+	cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
+	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
