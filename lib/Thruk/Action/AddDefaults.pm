@@ -470,6 +470,7 @@ sub set_processinfo {
         for my $backend (keys %{$processinfo}) {
             next if !defined $processinfo->{$backend}->{'program_start'};
             $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
+            $c->{'db'}->{'last_program_starts'}->{$backend} = $processinfo->{$backend}->{'program_start'};
         }
     }
 

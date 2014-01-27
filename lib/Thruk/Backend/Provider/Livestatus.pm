@@ -150,8 +150,6 @@ sub get_processinfo {
     # naemon checks external commands on arrival
     $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
 
-    $self->{'last_program_start'} = $data->{$key}->{'program_start'};
-
     return($data, 'HASH');
 }
 
@@ -262,7 +260,8 @@ sub get_hosts {
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
-        $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
+        my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
+        $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     }
 
     my $data = $self->_get_table('hosts', \%options);
@@ -419,7 +418,8 @@ sub get_services {
     }
 
 
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
+    my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
+    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     # make it possible to order by state
     if(grep {/^state$/mx} @{$options{'columns'}}) {
         $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
@@ -808,7 +808,7 @@ sub get_performance_stats {
     my $min5   = $now - 300;
     my $min15  = $now - 900;
     my $min60  = $now - 3600;
-    my $minall = $self->{'last_program_start'};
+    my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
     my $data = {};
     for my $type (qw{hosts services}) {

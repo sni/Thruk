@@ -49,6 +49,7 @@ sub new {
         'failed_backends'     => {},
         'by_key'              => {},
         'by_name'             => {},
+        'last_program_starts' => {},
     };
     bless $self, $class;
     return $self;
@@ -381,6 +382,59 @@ sub get_scheduling_queue {
     return $queue;
 }
 
+########################################
+
+=head2 get_performance_stats
+
+  get_performance_stats
+
+wrapper around get_performance_stats
+
+=cut
+
+sub get_performance_stats {
+    my $self = shift;
+    # inject last_program_starts
+    my $args = \@_;
+    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_performance_stats', \@_ );
+}
+
+########################################
+
+=head2 get_hosts
+
+  get_hosts
+
+wrapper around get_hosts
+
+=cut
+
+sub get_hosts {
+    my $self = shift;
+    # inject last_program_starts
+    my $args = \@_;
+    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_hosts', \@_ );
+}
+
+########################################
+
+=head2 get_services
+
+  get_services
+
+wrapper around get_services
+
+=cut
+
+sub get_services {
+    my $self = shift;
+    # inject last_program_starts
+    my $args = \@_;
+    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_services', \@_ );
+}
 
 ########################################
 
@@ -1065,6 +1119,7 @@ sub _do_on_peers {
     # extract some extra data
     if($function eq 'get_processinfo') {
         # update configtool settings
+        # and update last_program_starts
         for my $key (keys %{$result}) {
             my $res = $result->{$key}->{$key};
             next unless defined $res;
