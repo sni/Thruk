@@ -140,6 +140,7 @@ sub _remove_pid {
     return;
 }
 if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+    -s $pidfile || unlink(__PACKAGE__->config->{'tmp_path'}.'/thruk.cache');
     open(my $fh, '>>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
     Thruk::Utils::IO::close($fh, $pidfile);
