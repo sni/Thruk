@@ -137,9 +137,10 @@ naemon-patch:
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
-	cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
+	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
+	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg
-	echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
+	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	rm -f ${DESTDIR}${DATADIR}/root/index.html
 	cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
