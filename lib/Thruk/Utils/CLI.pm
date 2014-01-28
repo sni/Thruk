@@ -594,7 +594,7 @@ sub _run_command_action {
 sub _cmd_listhosts {
     my($c) = @_;
     my $output = '';
-    for my $host (@{$c->{'db'}->get_hosts(sort => {'ASC' => 'name'})}) {
+    for my $host (@{$c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n";
     }
 
@@ -608,7 +608,7 @@ sub _cmd_listhosts {
 sub _cmd_listhostgroups {
     my($c) = @_;
     my $output = '';
-    for my $group (@{$c->{'db'}->get_hostgroups(sort => {'ASC' => 'name'})}) {
+    for my $group (@{$c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' )], sort => {'ASC' => 'name'})}) {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(',', @{$group->{'members'}}));
     }
 
