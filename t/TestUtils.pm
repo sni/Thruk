@@ -76,18 +76,25 @@ sub get_test_user {
 #########################
 sub get_test_service {
     my $backend = shift;
-    my $request = _request('/thruk/cgi-bin/status.cgi?host=all'.(defined $backend ? '&backend='.$backend : ''));
+    my $request = _request('/thruk/cgi-bin/status.cgi?style=hostdetail&dfl_s0_type=number+of+services&dfl_s0_val_pre=&dfl_s0_op=>%3D&dfl_s0_value=1'.(defined $backend ? '&backend='.$backend : ''));
     ok( $request->is_success, 'get_test_service() needs a proper status page' ) or diag(Dumper($request));
     my $page = $request->content;
     my($host,$service);
+    if($page =~ m/extinfo\.cgi\?type=1&amp;host=(.*?)&amp;backend/mxo) {
+        $host = $1;
+    }
+    isnt($host, undef, "got a host from status.cgi") or bail_out_req('got no test host, cannot test.', $request);
+
+    $request = _request('/thruk/cgi-bin/status.cgi?host='.$host.(defined $backend ? '&backend='.$backend : ''));
+    $page = $request->content;
     if($page =~ m/extinfo\.cgi\?type=2&amp;host=(.*?)&amp;service=(.*?)&/mxo) {
         $host    = $1;
         $service = $2;
     }
-    isnt($host, undef, "got a host from status.cgi") or bail_out_req('got no test host, cannot test.', $request);
     isnt($service, undef, "got a service from status.cgi") or bail_out_req('got no test service, cannot test.', $request);
     $service = uri_unescape($service);
     $host    = uri_unescape($host);
+
     return($host, $service);
 }
 
