@@ -199,7 +199,7 @@ __PACKAGE__->config->{'ssi_path'}     = $ssi_dir;
 
 ###################################################
 # load and parse cgi.cfg into $c->config
-unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log)) {
+unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config)) {
     die("\n\n*****\nfailed to load cgi config: ".__PACKAGE__->config->{'cgi.cfg'}."\n*****\n\n");
 }
 

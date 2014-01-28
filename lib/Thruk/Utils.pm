@@ -173,8 +173,7 @@ parse the cgi.cfg and put it into $c->config
 
 =cut
 sub read_cgi_cfg {
-    my $c      = shift;
-    my $config = shift;
+    my($c, $config) = @_;
     if(defined $c) {
         $config = $c->config;
     }
@@ -1752,10 +1751,10 @@ sub get_cron_entries_from_param {
             my $cust = $params->{'send_cust_'.$x} || '';
             push @{$cron_entries}, {
                 'type'      => $type,
-                'hour'      => $params->{'send_hour_'.$x}   || '',
-                'minute'    => $params->{'send_minute_'.$x} || '',
+                'hour'      => $params->{'send_hour_'.$x},
+                'minute'    => $params->{'send_minute_'.$x},
                 'week_day'  => join(',', @weekdays),
-                'day'       => $params->{'send_day_'.$x}    || '',
+                'day'       => $params->{'send_day_'.$x},
                 'cust'      => $cust,
             };
         }

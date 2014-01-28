@@ -23,10 +23,7 @@ my $cronuser = '';
 $cronuser = ' -u '.$ENV{'THRUK_USER'} if defined $ENV{'THRUK_USER'};
 
 # get test host
-my $test = { cmd  => $BIN.' -a listhosts' };
-TestUtils::test_command($test);
-my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host");
+my $host = TestUtils::get_test_host_cli($BIN);
 
 # show help
 TestUtils::test_command({

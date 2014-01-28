@@ -107,7 +107,12 @@ sub get_test_timeperiod {
 #########################
 sub get_test_host_cli {
     my($binary) = @_;
-    my $test = { cmd  => $binary.' -a listhosts' };
+    my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+    my $auth = '';
+    if($user and $user ne 'thrukadmin') {
+        $auth = ' -A "'.$user.'"';
+    }
+    my $test = { cmd  => $binary.' -a listhosts'.$auth };
     test_command($test);
     my $host = (split(/\n/mx, $test->{'stdout'}))[0];
     isnt($host, undef, 'got test hosts') or BAIL_OUT($0.": need test host:\n".Dumper($test));
@@ -117,7 +122,12 @@ sub get_test_host_cli {
 #########################
 sub get_test_hostgroup_cli {
     my($binary) = @_;
-    my $test = { cmd  => $binary.' -a listhostgroups' };
+    my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+    my $auth = '';
+    if($user and $user ne 'thrukadmin') {
+        $auth = ' -A "'.$user.'"';
+    }
+    my $test = { cmd  => $binary.' -a listhostgroups'.$auth };
     TestUtils::test_command($test);
     my @groups = split(/\n/mx, $test->{'stdout'});
     my $hostgroup;
