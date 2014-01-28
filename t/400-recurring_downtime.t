@@ -19,10 +19,7 @@ $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
 $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
 # get test host
-my $test = { cmd  => $BIN.' -a listhosts' };
-TestUtils::test_command($test);
-my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host:\n".Dumper($test));
+my $host = TestUtils::get_test_host_cli($BIN);
 
 my $rand    = int(rand(1000000));
 my $comment = 'test downtime '.$rand;
