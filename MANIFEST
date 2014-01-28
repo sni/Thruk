@@ -1031,6 +1031,8 @@ support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
 support/thruk_cookie_auth.example
+support/thruk_cookie_auth.include
+support/thruk_cookie_auth_vhost.conf
 support/thruk_local.conf.example
 support/thruk_templates.cfg
 t/001-app.t
