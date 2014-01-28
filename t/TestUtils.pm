@@ -114,10 +114,10 @@ sub get_test_timeperiod {
 #########################
 sub get_test_host_cli {
     my($binary) = @_;
-    my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
     my $auth = '';
-    if($user and $user ne 'thrukadmin') {
-        $auth = ' -A "'.$user.'"';
+    if(!$ENV{'CATALYST_SERVER'}) {
+        my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+        $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhosts'.$auth };
     test_command($test);
@@ -129,10 +129,10 @@ sub get_test_host_cli {
 #########################
 sub get_test_hostgroup_cli {
     my($binary) = @_;
-    my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
     my $auth = '';
-    if($user and $user ne 'thrukadmin') {
-        $auth = ' -A "'.$user.'"';
+    if(!$ENV{'CATALYST_SERVER'}) {
+        my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
+        $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
     my $test = { cmd  => $binary.' -a listhostgroups'.$auth };
     TestUtils::test_command($test);
