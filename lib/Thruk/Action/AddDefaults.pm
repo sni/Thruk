@@ -174,9 +174,11 @@ sub add_defaults {
     unless(exists $c->config->{'enable_shinken_features'}) {
         if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH' and scalar keys %{$c->stash->{'pi_detail'}} > 0) {
             $c->stash->{'enable_shinken_features'} = 1;
-            for my $b (values %{$c->stash->{'pi_detail'}}) {
-                next unless defined $b->{'peer_key'};
-                next unless defined $c->stash->{'backend_detail'}->{$b->{'peer_key'}};
+            my($selected) = $c->{'db'}->select_backends('get_status');
+            for my $key (@{$selected}) {
+                my $b   = $c->stash->{'pi_detail'}->{$key};
+                next unless defined $b;
+                next unless defined $c->stash->{'backend_detail'}->{$key};
                 if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
                     $c->stash->{'enable_shinken_features'} = 0;
                     last;
