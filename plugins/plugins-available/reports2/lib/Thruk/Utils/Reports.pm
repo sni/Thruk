@@ -585,11 +585,8 @@ sub get_report_templates {
     my $templates = {};
     for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
         for my $file (glob($path.'/reports/*.tt')) {
-            $file =~ s/^.*\/(.*)$/$1/mx;
-            my $name = $file;
-            $name    =~ s/\.tt$//gmx;
-            $name    = join(' ', map(ucfirst, split(/_/mx, $name)));
-            $name    =~ s/Sla/SLA/gmx;
+            my $name;
+            ($file, $name) = _get_report_tt_name($file);
             $templates->{$file} = {
                 file => $file,
                 name => $name,
@@ -597,6 +594,17 @@ sub get_report_templates {
         }
     }
     return($templates);
+}
+
+##########################################################
+sub _get_report_tt_name {
+    my($file) = @_;
+    $file =~ s/^.*\/(.*)$/$1/mx;
+    my $name = $file;
+    $name    =~ s/\.tt$//gmx;
+    $name    = join(' ', map(ucfirst, split(/_/mx, $name)));
+    $name    =~ s/Sla/SLA/gmx;
+    return($file, $name);
 }
 
 ##########################################################
@@ -745,6 +753,15 @@ sub _read_report_file {
     my $report = Thruk::Utils::read_data_file($file);
     $report->{'nr'} = $nr;
     $report = _get_new_report($c, $report);
+
+    my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
+    if($report->{'template'} and !defined $available_templates->{$report->{'template'}}) {
+        my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
+        $report->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available, using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
+    }
+    $c->stash->{'available_templates'} = $available_templates;
+
     # add defaults
     add_report_defaults($c, undef, $report) unless $simple;
 

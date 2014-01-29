@@ -28,6 +28,7 @@ next:
             - fixed pnp graphs in reports when using remote instances and services containing spaces
             - fixed problem with daylight saving times
             - fixed selecting wrong tab on rescheduling report
+            - fixed removing reports from non-existing templates
           - Config Tool
             - fixed parsing lists in host/serviceescalations
           - Bug Fixes
