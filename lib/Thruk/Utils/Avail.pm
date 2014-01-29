@@ -236,12 +236,10 @@ sub calculate_availability {
             for my $s (split(/\s*,\s*/mx, $service)) {
                 push @servicefilter, { 'description' => $s };
             }
-            $servicefilter = {
-                '-and' => [
-                    Thruk::Utils::combine_filter('-or', \@hostfilter),
-                    Thruk::Utils::combine_filter('-or', \@servicefilter)
-                ]
-            };
+            $servicefilter = Thruk::Utils::combine_filter('-and', [
+                Thruk::Utils::combine_filter('-or', \@hostfilter),
+                Thruk::Utils::combine_filter('-or', \@servicefilter)
+            ]);
         }
         $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         die('no such service') unless scalar @{$all_services} > 0;
