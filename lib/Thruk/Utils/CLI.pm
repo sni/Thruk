@@ -544,8 +544,8 @@ sub _run_command_action {
     }
 
     # business process daemon
-    elsif($action eq 'bpd' or $action eq 'bp') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
+    elsif($action eq 'bpd' or $action eq 'bp' or $action eq 'bpcommit') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt, $action);
     }
 
     # cache actions
@@ -771,16 +771,11 @@ sub _cmd_report {
 
 ##############################################
 sub _cmd_bpd {
-    my($c, $src, $opt) = @_;
-    $c->stats->profile(begin => "_cmd_bpd()");
+    my($c, $src, $opt, $action) = @_;
+    $c->stats->profile(begin => "_cmd_bpd($action)");
 
     if(!$c->config->{'use_feature_bp'}) {
         return("ERROR - business process addon is disabled\n", 1);
-    }
-
-    my $id;
-    if($opt->{'url'} and $opt->{'url'}->[0]) {
-        $id = $opt->{'url'}->[0];
     }
 
     my($output, $rc);
@@ -790,6 +785,24 @@ sub _cmd_bpd {
     if($@) {
         _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
         return("business process plugin is disabled.\n", 1);
+    }
+
+    if($action eq 'bpcommit') {
+        my $bps = Thruk::BP::Utils::load_bp_data($c);
+        my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
+        if($rc != 0) {
+            $c->stats->profile(end => "_cmd_bpd($action)");
+            return($msg, $rc);
+        }
+        Thruk::BP::Utils::update_cron_file($c); # check cronjob
+        $c->stats->profile(end => "_cmd_bpd($action)");
+        return('OK - wrote '.(scalar @{$bps})." business process(es)\n", 0);
+    }
+
+    # calculate bps
+    my $id;
+    if($opt->{'url'} and $opt->{'url'}->[0]) {
+        $id = $opt->{'url'}->[0];
     }
 
     my $last_bp;
@@ -816,7 +829,7 @@ sub _cmd_bpd {
     my $elapsed = tv_interval($t0);
     $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
 
-    $c->stats->profile(end => "_cmd_bpd()");
+    $c->stats->profile(end => "_cmd_bpd($action)");
     return($output, 0);
 }
 

@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2014-01-15" "perl v5.14.2" "User Contributed Perl Documentation"
+.TH thruk 3 "2014-01-29" "perl v5.14.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -230,7 +230,8 @@ script has the following arguments
 \&      \- uninstallcron               remove all thruk cronjobs
 \&                                    (only needed during package deinstallation)
 \&      \- compile                     compile templates for faster access
-\&      \- bpd                         start business process daemon
+\&      \- bp/bpd(=nr)                 calculate all/specified business process(es)
+\&      \- bpcommit                    write objects for business processes and reloads core
 \&
 \&    Testing Commands
 \&      \- listbackends                list all backends

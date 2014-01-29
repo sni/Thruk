@@ -17,6 +17,7 @@ next:
           - Business Process
             - change service plugin output for first node
             - add livestatus result transport
+            - added cli command "bpcommit" to save manually create BPs
             - fixed displaying/using wrong host template
           - Reports
             - show out of scope totals
