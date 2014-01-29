@@ -25,6 +25,7 @@ next:
             - support outages pages for multiple host/service reports
             - fill in defaults for host/service unavailable states when switching report templates
             - use timeperiods when calculation outage logs
+            - allow service reports over the same service on all hosts
             - fixed livestatus timestamp for timeperiod transitions
             - fixed pnp graphs in reports when using remote instances and services containing spaces
             - fixed problem with daylight saving times

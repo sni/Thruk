@@ -3,7 +3,7 @@
   [%
     required_fields = [
         { 'language'                    => [ 'Language',              'language',        'en'                  ,'', 1    ] },
-        { 'host'                        => [ 'Host',                  'hosts',           ''                    ,'', 1    ] },
+        { 'host'                        => [ 'Host',                  'hosts',           ''                              ] },
         { 'service'                     => [ 'Service',               'services',        ''                              ] },
         { 'timeperiod'                  => [ 'Timeperiod',            'rptimeperiod',    'last12months'                  ] },
         { 'breakdown'                   => [ 'Breakdown by',          'breakdowns',      'months'                        ] },
@@ -34,10 +34,9 @@
   [%
     title        = loc('SLA Report')
     subtitle     = r.name
-    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat),
-                     loc('Host:'),              param.host,
-                     loc('Service:'),           param.service,
-                   ]
+    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat) ];
+    IF param.host;    coverdetails.push(loc('Host:'),    param.host);    END;
+    IF param.service; coverdetails.push(loc('Service:'), param.service); END;
   %]
 
   [% WRAPPER 'reports/comp/report.tt' %]
