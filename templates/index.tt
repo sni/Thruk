@@ -39,12 +39,25 @@
         }
         var newloc = new String(window.frames['main'].location);
         newloc     = newloc.replace(oldloc, '');
-        newloc     = newloc.replace(/\?_=\d+/, '');
-        newloc     = newloc.replace(/\&_=\d+/, '');
-        newloc     = newloc.replace(/\&reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\?reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\&theme=\w*/, '');
-        newloc     = newloc.replace(/\?theme=\w*/, '');
+        newloc     = newloc.replace(/\?_=\d+/g, '');
+        newloc     = newloc.replace(/\&_=\d+/g, '');
+        newloc     = newloc.replace(/\&reload_nav=\d+/g, '');
+        newloc     = newloc.replace(/\?reload_nav=\d+/g, '');
+        newloc     = newloc.replace(/\&theme=\w*/g, '');
+        newloc     = newloc.replace(/\?theme=\w*/g, '');
+        newloc     = newloc.replace(/nav=\&/g, '');
+        newloc     = newloc.replace(/\&service_columns=\d+/g, '');
+        newloc     = newloc.replace(/\&host_columns=\d+/g, '');
+        newloc     = newloc.replace(/\&bookmarks=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&bookmarksp=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&section=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&update\.x=\d+/g, '');
+        newloc     = newloc.replace(/\&update\.y=\d+/g, '');
+        newloc     = newloc.replace(/\&newname=\&/g, '&');
+        newloc     = newloc.replace(/\&view_mode=html\&/g, '&');
+        newloc     = newloc.replace(/\&all_col=\&/g, '&');
+        newloc     = newloc.replace(/\&bookmark=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&referer=.*?\&/g, '&');
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
