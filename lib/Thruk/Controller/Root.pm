@@ -247,7 +247,7 @@ sub begin : Private {
     for my $key (qw/view_mode hidesearch hidetop style/) {
         if($c->{'request'}->{'parameters'}->{$key}) {
             if(ref $c->{'request'}->{'parameters'}->{$key} eq 'ARRAY') {
-                $c->{'request'}->{'parameters'}->{$key} = pop($c->{'request'}->{'parameters'}->{$key});
+                $c->{'request'}->{'parameters'}->{$key} = pop(@{$c->{'request'}->{'parameters'}->{$key}});
             }
         }
     }
