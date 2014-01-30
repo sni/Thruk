@@ -2602,7 +2602,7 @@ function getPageScroll() {
     } else if (document.body) {
         yScroll = document.body.scrollTop;
     }
-    return yScroll
+    return yScroll;
 }
 
 /* submit a form by id */
@@ -3569,10 +3569,6 @@ function show_cal(id) {
   });
   cal.selection.set(Calendar.dateToInt(dateObj));
   var pos    = ajax_search.get_coordinates(jQuery('#'+id)[0]);
-  var scroll = getPageScroll();
-  if(scroll > 0) {
-    pos[1] = pos[1] - scroll;
-  }
   cal.popup(id, "Br/ / /T/r");
   jQuery('.DynarchCalendar-topCont').css('top', (pos[1]+20)+"px");
 }
