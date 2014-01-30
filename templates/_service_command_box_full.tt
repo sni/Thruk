@@ -21,7 +21,7 @@
                 [% END %]
               </tr>
               [% END %]
-
+              [% IF service.checks_enabled %]
               [% UNLESS c.config.command_disabled.exists('7') %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
@@ -31,7 +31,7 @@
                 </td>
               </tr>
               [% END %]
-
+              [% END %]
               [% IF service.accept_passive_checks %]
               [% END %]
               [% UNLESS c.config.command_disabled.exists('30') %]
