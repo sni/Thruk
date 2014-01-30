@@ -9,6 +9,7 @@
             <div align=center class='infoMessage'>Your account does not have permissions to execute commands.</div><br>
             [% ELSE %]
             <table border="0" cellspacing="0" cellpadding="0">
+              [% IF service.checks_enabled %]
               [% UNLESS c.config.command_disabled.exists('7') %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
@@ -17,6 +18,7 @@
                   (<a href='cmd.cgi?cmd_typ=7&amp;cmd_mod=2&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check=1&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'> Now </a>)
                 </td>
               </tr>
+              [% END %]
               [% END %]
               [% IF service.accept_passive_checks %]
               [% UNLESS c.config.command_disabled.exists('30') %]
