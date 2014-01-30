@@ -1,5 +1,17 @@
---- a/thruk_auth	2014-01-25 18:31:56.006425880 +0100
-+++ b/thruk_auth	2014-01-25 18:32:00.819512777 +0100
+--- a/script/thruk_fastcgi.pl	2012-03-05 11:14:09.710307837 +0100
++++ b/script/thruk_fastcgi.pl	2012-03-05 11:17:30.835302404 +0100
+@@ -3,6 +3,9 @@
+ use strict;
+ use warnings;
+ 
++use lib '@THRUKLIBS@';
++use lib '@DATADIR@/lib';
++
+ ###################################################
+ # create connection pool
+ # has to be done really early to save memory
+--- a/thruk_auth	2014-01-30 11:36:54.000000000 +0100
++++ b/thruk_auth	2014-01-30 11:37:01.000000000 +0100
 @@ -12,8 +12,9 @@
    export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
    if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
