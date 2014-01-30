@@ -243,6 +243,16 @@ sub begin : Private {
         $c->stash->{'cookie_auth'} = 1;
     }
 
+    # view mode must be a scalar
+    for my $key (qw/view_mode/) {
+        if($c->{'request'}->{'parameters'}->{$key}) {
+            if(ref $c->{'request'}->{'parameters'}->{$key} eq 'ARRAY') {
+                $c->{'request'}->{'parameters'}->{$key} = pop($c->{'request'}->{'parameters'}->{$key});
+            }
+        }
+    }
+
+
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
 
