@@ -699,7 +699,7 @@ sub set_backend_state_from_local_connections {
     }
     # log errors only once
     if($@) {
-        return if $safe;
+        return $disabled if $safe;
         $c->log->error("failed setting states by local check");
         $c->log->debug($@);
     }
