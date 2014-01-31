@@ -1,0 +1,13 @@
+--- a/thruk	2014-01-24 21:48:23.520144890 +0100
++++ b/thruk	2014-01-31 21:24:17.371157644 +0100
+@@ -1,8 +1,9 @@
+-/var/log/thruk/*.log /var/lib/thruk/*.log {
++@LOGDIR@/thruk.log @TMPDIR@/*.log {
+     weekly
+     missingok
+     rotate 10
+     compress
+     delaycompress
+     notifempty
++    create 0644 @THRUKUSER@ @THRUKGROUP@
+ }

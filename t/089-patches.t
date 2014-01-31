@@ -21,6 +21,7 @@ chdir('tmppatches') or die("chdir failed: $!");
 my $precmds = {
   'support/0003-thruk-scripts.patch'      => 'cp script/thruk script/naglint .',
   'support/0004-thruk_data_scripts.patch' => 'cp script/thruk_auth .',
+  'support/0006-logrotate.patch'          => 'cp support/thruk.logrotate thruk',
   'support/0007-naemon-init.patch'        => 'cp support/thruk.init thruk',
   'support/0008-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
   'support/0009-naemon-fcgish.patch'      => 'cp support/fcgid_env.sh .',
