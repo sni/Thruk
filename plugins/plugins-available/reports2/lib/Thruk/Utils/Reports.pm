@@ -481,7 +481,7 @@ sub get_report_data_from_param {
     }
 
     # only save backends if checkbox checked
-    if(!$params->{'report_backends_toggle'}) {
+    if(!$params->{'backends_toggle'}) {
         $params->{'report_backends'} = [];
     }
 

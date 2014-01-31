@@ -29,6 +29,8 @@
 
 <script type="text/javascript">
 <!--
+  jQuery('button').button();
+
   selected_backends   = new Array();
   selected_backends_h = new Object();
   var options = [];
@@ -50,7 +52,6 @@
   available_backends_h = new Object();
   var options = [];
 
-  [% IF backends_selected %]
   [% FOREACH b = backends %]
     [% found = 0 %]
     [% FOREACH rb = selected_backends %]
@@ -63,7 +64,6 @@
       available_backends_h['[% b %]'] = 1;
       options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
     [% END %]
-  [% END %]
   [% END %]
 
   set_select_options('available_backends', options);
