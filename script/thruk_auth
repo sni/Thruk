@@ -46,6 +46,7 @@ my $sessiontimeout      = $config->{'cookie_auth_session_timeout'}       || 8640
 my $sessioncachetimeout = $config->{'cookie_auth_session_cache_timeout'} || 5;
 my $sessioncache        = {};
 $loginurl               = "/redirect/".$loginurl;
+$loginurl               =~ s|//|/|gmx;
 my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
 my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
