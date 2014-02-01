@@ -128,13 +128,13 @@ local_install: local_patches
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
 
 naemon-patch:
+	[ -z "${INITDIR}" ] || cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch
+	[ -z "${INITDIR}" ] || find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
-	cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch
 	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0009-naemon-fcgish.patch
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
-	find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
