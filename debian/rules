@@ -13,11 +13,11 @@ override_dh_auto_configure:
 		--datadir="/usr/share/thruk" \
 		--libdir="/usr/lib/thruk" \
 		--localstatedir="/var/lib/thruk" \
-		--with-temp-dir="/var/cache/thruk" \
+		--with-tempdir="/var/cache/thruk" \
 		--sysconfdir="/etc/thruk" \
 		--mandir="/usr/share/man" \
-		--with-init-dir="/etc/init.d" \
-		--with-logrotate-dir="/etc/logrotate.d" \
+		--with-initdir="/etc/init.d" \
+		--with-logrotatedir="/etc/logrotate.d" \
 		--with-thruk-user="www-data" \
 		--with-thruk-group="www-data" \
 		--with-thruk-libs="/usr/lib/thruk/perl5" \

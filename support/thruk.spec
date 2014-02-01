@@ -61,11 +61,11 @@ large installations.
     --datadir="%{_datadir}/thruk" \
     --libdir="%{_libdir}/thruk" \
     --localstatedir="%{_localstatedir}/lib/thruk" \
-    --with-temp-dir="%{_localstatedir}/cache/thruk" \
+    --with-tempdir="%{_localstatedir}/cache/thruk" \
     --sysconfdir="%{_sysconfdir}/thruk" \
     --mandir="%{_mandir}" \
-    --with-init-dir="%{_initrddir}" \
-    --with-logrotate-dir="%{_sysconfdir}/logrotate.d" \
+    --with-initdir="%{_initrddir}" \
+    --with-logrotatedir="%{_sysconfdir}/logrotate.d" \
     --with-thruk-user="%{apacheuser}" \
     --with-thruk-group="%{apachegroup}" \
     --with-thruk-libs="%{_libdir}/thruk/perl5" \
