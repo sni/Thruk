@@ -128,7 +128,7 @@ local_install: local_patches
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
 
 naemon-patch:
-	[ -z "${INITDIR}" ] || cd ${DESTDIR}${INITDIR}/    && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch
+	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch }
 	[ -z "${INITDIR}" ] || find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
 	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch
