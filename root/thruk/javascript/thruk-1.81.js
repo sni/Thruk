@@ -1508,12 +1508,26 @@ function save_url_in_parents_hash() {
     }
     var newloc = new String(window.location);
     newloc     = newloc.replace(oldloc, '');
-    newloc     = newloc.replace(/\?_=\d+/, '');
-    newloc     = newloc.replace(/\&_=\d+/, '');
-    newloc     = newloc.replace(/\&reload_nav=\d+/, '');
-    newloc     = newloc.replace(/\?reload_nav=\d+/, '');
-    newloc     = newloc.replace(/\&theme=\w*/, '');
-    newloc     = newloc.replace(/\?theme=\w*/, '');
+    // changes have to be put in the index.tt too
+    newloc     = newloc.replace(/\?_=\d+/g, '');
+    newloc     = newloc.replace(/\&_=\d+/g, '');
+    newloc     = newloc.replace(/\&reload_nav=\d+/g, '');
+    newloc     = newloc.replace(/\?reload_nav=\d+/g, '');
+    newloc     = newloc.replace(/\&theme=\w*/g, '');
+    newloc     = newloc.replace(/\?theme=\w*/g, '');
+    newloc     = newloc.replace(/nav=\&/g, '');
+    newloc     = newloc.replace(/\&service_columns=\d+/g, '');
+    newloc     = newloc.replace(/\&host_columns=\d+/g, '');
+    newloc     = newloc.replace(/\&bookmarks=.*?\&/g, '&');
+    newloc     = newloc.replace(/\&bookmarksp=.*?\&/g, '&');
+    newloc     = newloc.replace(/\&section=.*?\&/g, '&');
+    newloc     = newloc.replace(/\&update\.x=\d+/g, '');
+    newloc     = newloc.replace(/\&update\.y=\d+/g, '');
+    newloc     = newloc.replace(/\&newname=\&/g, '&');
+    newloc     = newloc.replace(/\&view_mode=html\&/g, '&');
+    newloc     = newloc.replace(/\&all_col=\&/g, '&');
+    newloc     = newloc.replace(/\&bookmark=.*?\&/g, '&');
+    newloc     = newloc.replace(/\&referer=.*?\&/g, '&');
     var patt   = new RegExp('^' + get_host(), 'gi');
     newloc     = newloc.replace(patt, '');
     if('#'+newloc != window.parent.location.hash) {
@@ -1521,7 +1535,9 @@ function save_url_in_parents_hash() {
             window.parent.history.replaceState({}, "", '#'+newloc);
         } else {
             nohashchange = 1;
-            window.parent.location.replace('#'+newloc);
+            // do not use window.parent.location.replace, as this causes
+            // IE to reload the frame page and then the navigation disapears
+            window.parent.location.hash = '#'+newloc;
         }
         window.setTimeout("nohashchange=0", 100);
     }
@@ -2067,7 +2083,10 @@ function removeStyle(elems, styles) {
 
 /* save current style and change it*/
 function styleElements(elems, style, force) {
-    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
+    if (elems == null ) {
+        return;
+    }
+    if (( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
 

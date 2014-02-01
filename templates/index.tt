@@ -39,6 +39,7 @@
         }
         var newloc = new String(window.frames['main'].location);
         newloc     = newloc.replace(oldloc, '');
+        // changes have to be put in the thruk.js too
         newloc     = newloc.replace(/\?_=\d+/g, '');
         newloc     = newloc.replace(/\&_=\d+/g, '');
         newloc     = newloc.replace(/\&reload_nav=\d+/g, '');
@@ -95,6 +96,9 @@
 
     /* we have to change frame location on hash changes caused by history changes */
     window.onhashchange = function(e) {
+      if(e == null || e.newURL == null) {
+        return;
+      }
       if(nohashchange == 0) {
         nohashchange = 1;
         var newurl = e.newURL;
