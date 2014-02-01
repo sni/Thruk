@@ -52,12 +52,13 @@ if(ref $config->{'Thruk::Backend'}->{'peer'} eq 'HASH') { $config->{'Thruk::Back
 for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
     if(!$p->{'hidden'} and lc($p->{'type'}) ne 'configonly') { $firstbackend = $p; last }
 }
-my $options = "";
-for my $opt (keys %{$firstbackend->{'options'}}) {
-    $options .= '&'.$opt.'='.$firstbackend->{'options'}->{$opt};
-}
+my $options = $firstbackend->{'options'};
+$options->{'action'} = 'check_con';
+$options->{'sub'}    = 'backends';
+$options->{'type'}   = $firstbackend->{'type'};
 TestUtils::test_page(
-    'url'     => '/thruk/cgi-bin/conf.cgi?action=check_con&sub=backends&type='.$firstbackend->{'type'}.$options,
+    'url'     => '/thruk/cgi-bin/conf.cgi',
+    'post'    => $options,
     'like'    => '"ok" : 1',
 );
 
@@ -135,10 +136,12 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 
     $data->[0]->{'data'}->[0] = "none" unless defined $data->[0]->{'data'}->[0];
     $data->[0]->{'data'}->[0] = encode_utf8($data->[0]->{'data'}->[0]);
+    my $testname = $data->[0]->{'data'}->[0];
+    $testname =~ s|\\|\\\\|gmx;
 
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
-        'like'    => [ 'Config Tool', $type, $data->[0]->{'data'}->[0]],
+        'like'    => [ 'Config Tool', $type, "\Q".$testname."\E"],
     );
 
     # new object
