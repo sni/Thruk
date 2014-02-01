@@ -212,7 +212,11 @@ sub full_uri {
     my $c    = shift;
     my $amps = shift || 0;
     carp("no c") unless defined $c;
-    my $uri = $c->request->uri_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
+    my $uri = ''.$c->request->uri_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
+
+    # uri always contains /thruk/, so replace it with our product prefix
+    my $url_prefix = $c->stash->{'url_prefix'};
+    $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     if($amps) {
         $uri    =~ s/&amp;/&/gmx;
         $uri    =~ s/&/&amp;/gmx;
