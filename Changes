@@ -32,6 +32,7 @@ next:
             - fixed selecting wrong tab on rescheduling report
             - fixed removing reports from non-existing templates
           - Config Tool
+            - allow reloading by external commands
             - fixed parsing lists in host/serviceescalations
           - Bug Fixes
             - fixed init script which did not stop/restart are fcgi processes

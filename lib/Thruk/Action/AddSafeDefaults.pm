@@ -21,7 +21,11 @@ extends 'Catalyst::Action';
 
 ########################################
 before 'execute' => sub {
-    Thruk::Action::AddDefaults::add_defaults(1, @_);
+    my $c = $_[2];
+    eval {
+        Thruk::Action::AddDefaults::add_defaults(1, @_);
+    };
+    print STDERR $@ if($@ and $c->config->{'thruk_debug'});
 };
 
 ########################################

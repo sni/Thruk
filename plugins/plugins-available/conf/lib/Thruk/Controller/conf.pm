@@ -1149,7 +1149,7 @@ sub _apply_config_changes {
             Thruk::Utils::set_message( $c, 'fail_message', "reload is disabled in demo mode" );
             return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
         }
-        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
+        if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
                                                message => 'please stand by while configuration is beeing reloaded...',
@@ -2172,20 +2172,34 @@ sub _config_check {
 sub _config_reload {
     my($c) = @_;
 
-    if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-        $c->stash->{'last_changed'} = 0;
-        $c->stash->{'needs_commit'} = 0;
-    }
-    elsif(!$c->{'obj_db'}->is_remote() and _cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
-        $c->stash->{'last_changed'} = 0;
-        $c->stash->{'needs_commit'} = 0;
-    } else {
-        Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
-    }
+    if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
+        if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
+            $c->stash->{'last_changed'} = 0;
+            $c->stash->{'needs_commit'} = 0;
+        }
+        elsif(!$c->{'obj_db'}->is_remote() and _cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
+            Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
+            $c->stash->{'last_changed'} = 0;
+            $c->stash->{'needs_commit'} = 0;
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
+        }
 
-    _nice_check_output($c);
+        _nice_check_output($c);
+    } else {
+        # restart by livestatus
+        my $name = $c->stash->{'param_backend'};
+        my $peer = $c->{'db'}->get_peer_by_key($name);
+        my $pkey = $peer->peer_key();
+        die("no backend found by name ".$name) unless $peer;
+        my $options = {
+            'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
+            'backend' => [ $pkey ],
+        };
+        $c->{'db'}->send_command( %{$options} );
+        $c->{'stash'}->{'output'} = 'config reloaded by external command.';
+    }
 
     # wait until core responds again
     Thruk::Utils::wait_after_reload($c);
