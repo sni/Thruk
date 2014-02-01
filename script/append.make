@@ -125,7 +125,6 @@ local_install: local_patches
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	mkdir -p                          ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
-	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
 
 naemon-patch:
 	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch; }
@@ -139,8 +138,6 @@ naemon-patch:
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
-	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
-	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	rm -f ${DESTDIR}${DATADIR}/root/index.html
 	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
