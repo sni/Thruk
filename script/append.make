@@ -130,17 +130,17 @@ local_install: local_patches
 naemon-patch:
 	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0007-naemon-init.patch; }
 	[ -z "${INITDIR}" ] || find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
+	[ -z "${HTTPDCONF}" ] || { cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch; }
+	[ -z "${HTTPDCONF}" ] || find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
+	[ -z "${HTTPDCONF}" ] || cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
-	cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0008-naemon-httpd.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0009-naemon-fcgish.patch
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
-	find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	-chown ${THRUKUSER}:${THRUKGROUP} ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	rm -f ${DESTDIR}${DATADIR}/root/index.html
-	cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
 	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
