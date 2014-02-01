@@ -121,7 +121,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '9'  => {
             'mess'    => 'No Backend available',
-            'dscr'    => 'None of the configured Backends could be reached, please have a look at the logfile for detailed information.',
+            'dscr'    => 'None of the configured Backends could be reached, please have a look at the logfile for detailed information and make sure the core is up and running.',
             'details' => _get_connection_details($c),
             'code'    => 500, # internal server error
         },
