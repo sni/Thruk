@@ -45,7 +45,7 @@
 +  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh@HTMLURL@/$1
 +  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
 +  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
-+  Alias @HTMLURL@/ @DATADIR@/root/thruk/
++  Alias @HTMLURL@ @DATADIR@/root/thruk
  
 -  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
 -  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
