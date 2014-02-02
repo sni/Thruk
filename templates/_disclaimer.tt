@@ -3,12 +3,12 @@
     Copyright &copy; 2009-2014 Thruk Developer Team.<br>
     Copyright &copy; 2009 Nagios Core Development Team and Community Contributors.<br>
     Copyright &copy; 1999-2009 Ethan Galstad.
+    <br>
   </div>
   <div class="disclaimer">
     Thruk Monitoring Webinterface is licensed under the GNU General Public License and is provided AS IS with NO WARRANTY OF ANY<br>
     KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.<br>
-    Nagios, Nagios Core and the Nagios logo are trademarks, servicemarks, registered trademarks or registered servicemarks owned by Nagios<br>
-    Enterprises, LLC. Usage of the Nagios marks are governed by their <a href="http://www.nagios.org/legal/trademarkpolicy/">trademark policy</a>.
+    <br>
   </div>
   <div class="logos">
     <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_mid.png" width="139" height="50" border="0" style="padding: 0 20px 0 0;" title="Thruk" alt="Thruk"></a>
