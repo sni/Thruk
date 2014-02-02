@@ -16,7 +16,7 @@ my $options = {
   'httpd-conf'      => '',
   'thruk-user'      => 'thruk',
   'thruk-group'     => 'thruk',
-  'thruk-libs'      => '',
+  'thruk-libs'      => '/usr/local/thruk/perl5',
   'checkresult-dir' => '/var/spool/naemon/checkresults',
 };
 Getopt::Long::Configure('no_ignore_case');
