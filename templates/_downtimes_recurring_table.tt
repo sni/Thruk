@@ -40,7 +40,7 @@
     [% END %]
     [% IF count == 0 %]
     <tr class='downtimeOdd'>
-      <td class='downtimeOdd' colspan="8">There are no recurring [% type %] downtimes</td>
+      <td class='downtimeOdd' colspan="8">There are no recurring [% IF type != 'all'; type; END %] downtimes</td>
     </tr>
     [% END %]
   </table>
