@@ -7,17 +7,13 @@ use Getopt::Long qw//;
 alarm(180);
 
 my $options = {
-  'prefix'          => '/usr/local/thruk',
-  'with-htmlurl'    => '/thruk',
-  'init-dir'        => '',
-  'logrotate-dir'   => '',
-  'log-dir'         => '/var/log/thruk',
+  'prefix'          => '/usr/local',
   'htmlurl'         => '/thruk',
+  'thruk-user'      => `id -un`,
+  'thruk-group'     => `id -gn`,
   'httpd-conf'      => '',
-  'thruk-user'      => 'thruk',
-  'thruk-group'     => 'thruk',
-  'thruk-libs'      => '/usr/local/thruk/perl5',
-  'checkresult-dir' => '/var/spool/naemon/checkresults',
+  'logrotate-dir'   => '',
+  'quiet'           => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
@@ -46,12 +42,18 @@ Getopt::Long::GetOptions (
    "with-thruk-tempdir=s"   => \$options->{'thruk-temp-dir'},
    "with-thruk-vardir=s"    => \$options->{'thruk-var-dir'},
    "with-thruk-logdir=s"    => \$options->{'thruk-log-dir'},
+   "quiet|q"                => \$options->{'quiet'},
 ) or warn "error in options";
 
 if($options->{'help'}) {
     require Pod::Usage;
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
 }
+
+$options->{'init-dir'}        = $options->{'init-dir'} || $options->{'prefix'}.'/etc/init.d';
+$options->{'log-dir'}         = $options->{'log-dir'} || $options->{'prefix'}.'/var/log/thruk';
+$options->{'thruk-libs'}      = $options->{'thruk-libs'} || $options->{'prefix'}.'/lib/thruk/perl5';
+$options->{'checkresult-dir'} = $options->{'checkresult-dir'} || $options->{'prefix'}.'/var/cache/naemon/checkresults';
 
 $options->{'eprefix'}        = $options->{'prefix'}          unless $options->{'eprefix'};
 $options->{'bindir'}         = $options->{'prefix'}.'/bin'   unless $options->{'bindir'};
@@ -65,6 +67,9 @@ $options->{'mandir'}         = $options->{'prefix'}.'/man'   unless $options->{'
 $options->{'tmpdir'}         = $options->{'thruk-temp-dir'} if $options->{'thruk-temp-dir'};
 $options->{'localstatedir'}  = $options->{'thruk-var-dir'}  if $options->{'thruk-var-dir'};
 $options->{'log-dir'}        = $options->{'thruk-log-dir'}  if $options->{'thruk-log-dir'};
+
+chomp($options->{'thruk-user'});
+chomp($options->{'thruk-group'});
 
 $options->{'htmlurl'} =~ s|/+$||mx;
 $options->{'htmlurl'} =~ s|^/+||mx;
@@ -93,9 +98,14 @@ THRUKLIBS        = $options->{'thruk-libs'}
 CHECKRESULTDIR   = $options->{'checkresult-dir'}
 
 EOT
+
 close($fh);
 `yes n | $^X Makefile.PL >/dev/null 2>&1`;
 
+exit if $options->{'quiet'};
+
+$options->{'httpd-conf'}    = '** not installed **' unless $options->{'httpd-conf'};
+$options->{'logrotate-dir'} = '** not installed **' unless $options->{'logrotate-dir'};
 print <<EOT;
 
 *************************************
