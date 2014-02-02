@@ -919,6 +919,8 @@ root/index.html
 root/robots.txt
 root/thruk/documentation.html
 root/thruk/faq.html
+root/thruk/images/logo_naemon_small.png
+root/thruk/images/naemon_logo.png
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
@@ -1022,6 +1024,7 @@ support/0006-logrotate.patch
 support/0007-naemon-init.patch
 support/0008-naemon-httpd.patch
 support/0009-naemon-fcgish.patch
+support/0010-naemon-branding.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd

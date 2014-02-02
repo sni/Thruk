@@ -134,6 +134,7 @@ naemon-patch:
 	[ -z "${HTTPDCONF}" ] || cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
 	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0005-naemon.patch
 	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0009-naemon-fcgish.patch
+	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0010-naemon-branding.patch
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/

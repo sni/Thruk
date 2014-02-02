@@ -1,0 +1,65 @@
+From 8f0358905d339dea173e53a5c41d8ccf3f7ff320 Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Sun, 2 Feb 2014 18:27:12 +0100
+Subject: [PATCH] naemon branding
+
+---
+ templates/_infobox.tt |    7 ++++++-
+ templates/main.tt     |    8 +++++---
+ templates/side.tt     |    2 +-
+ 3 files changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/templates/_infobox.tt b/templates/_infobox.tt
+index 1416574..236ad49 100644
+--- a/templates/_infobox.tt
++++ b/templates/_infobox.tt
+@@ -5,7 +5,12 @@
+       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
+       Last Updated: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span><br />
+       [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
+-      Thruk [% version %][% IF branch %]~[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
++      <span class="infoboxlinks">
++      [% IF c.config.extra_version %]<a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]
++      - <a href='http://www.naemon.org' target='_blank' class='homepageURL'>www.naemon.org</a>
++      - Thruk [% version %][% IF branch %]~[% branch %][% END %]
++      <br />
++      </span>
+       Logged in as <i>[% remote_user %]</i><br />
+       [% IF has_proc_info %]
+       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
+diff --git a/templates/main.tt b/templates/main.tt
+index c942754..2daeee1 100644
+--- a/templates/main.tt
++++ b/templates/main.tt
+@@ -1,10 +1,12 @@
+ ﻿[% PROCESS _header.tt %]
+     <div id="mainbrandsplash">
+-      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
++      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="347" height="89"></a></div>
+     </div>
+     <div id="currentversioninfo">
+-      <div class="product">Thruk Monitoring Webinterface</div>
+-      <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
++      <div class="product">Network and Event Monitoring</div>
++      <div class="version">[% IF c.config.extra_version %][% c.config.extra_version %][% END %]
++      <br><font size="-3">Thruk [% version %][% IF branch %]~[% branch %][% END %]</font>
++      </div>
+       <div class="releasedate">[% released %]</div>
+       <div class="checkforupdates">
+         <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
+diff --git a/templates/side.tt b/templates/side.tt
+index 563abc6..7fa9900 100644
+--- a/templates/side.tt
++++ b/templates/side.tt
+@@ -23,7 +23,7 @@
+   </head>
+   <body class='navbar'>
+ [% END %]
+-    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
++    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="156" height="40" class="nav_small_logo" /></a>
+ 
+     [% FOREACH section = navigation %]
+     [% cookie_section_name = section.name.replace(' ', '_') | lower %]
+-- 
+1.7.9.5
+
