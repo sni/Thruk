@@ -1,6 +1,6 @@
-From 8f0358905d339dea173e53a5c41d8ccf3f7ff320 Mon Sep 17 00:00:00 2001
+From e82580403b40d6bc05031eada1f15af9dfdea2dc Mon Sep 17 00:00:00 2001
 From: Sven Nierlein <sven@nierlein.de>
-Date: Sun, 2 Feb 2014 18:27:12 +0100
+Date: Sun, 2 Feb 2014 21:27:56 +0100
 Subject: [PATCH] naemon branding
 
 ---
@@ -28,14 +28,14 @@ index 1416574..236ad49 100644
        [% IF has_proc_info %]
        [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
 diff --git a/templates/main.tt b/templates/main.tt
-index c942754..2daeee1 100644
+index c942754..29f9569 100644
 --- a/templates/main.tt
 +++ b/templates/main.tt
 @@ -1,10 +1,12 @@
  ﻿[% PROCESS _header.tt %]
      <div id="mainbrandsplash">
 -      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
-+      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="347" height="89"></a></div>
++      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="399" height="86"></a></div>
      </div>
      <div id="currentversioninfo">
 -      <div class="product">Thruk Monitoring Webinterface</div>
@@ -48,7 +48,7 @@ index c942754..2daeee1 100644
        <div class="checkforupdates">
          <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
 diff --git a/templates/side.tt b/templates/side.tt
-index 563abc6..7fa9900 100644
+index 563abc6..1d64830 100644
 --- a/templates/side.tt
 +++ b/templates/side.tt
 @@ -23,7 +23,7 @@
@@ -56,7 +56,7 @@ index 563abc6..7fa9900 100644
    <body class='navbar'>
  [% END %]
 -    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
-+    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="156" height="40" class="nav_small_logo" /></a>
++    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="163" height="35" class="nav_small_logo" /></a>
  
      [% FOREACH section = navigation %]
      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
