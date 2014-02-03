@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+`touch Makefile`;
+
 ##################################
 # patch our makefile
 my $new_makefile = '';
@@ -48,3 +50,4 @@ close($fh);
 print "patched Makefile\n";
 
 exit;
+
