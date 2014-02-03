@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-26 00:55:26.678428359 +0100
-+++ b/thruk.conf	2014-01-26 00:56:26.822442697 +0100
+--- a/thruk.conf	2014-02-03 23:58:47.000000000 +0100
++++ b/thruk.conf	2014-02-03 23:59:30.000000000 +0100
 @@ -15,6 +15,9 @@
  # set the url prefix for all urls
  url_prefix = /
@@ -59,7 +59,7 @@
  cookie_auth_session_timeout       = 604800
  cookie_auth_session_cache_timeout = 5
  #cookie_auth_domain               = .domain.com
-@@ -577,56 +580,19 @@
+@@ -577,56 +580,18 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -123,13 +123,12 @@
 +       <configtool>
 +            core_conf      = @SYSCONFDIR@/naemon.cfg
 +            obj_check_cmd  = @BINDIR@/naemon -v @SYSCONFDIR@/naemon.cfg
-+            obj_reload_cmd = @INITDIR@/naemon reload
 +       </configtool>
 +    </peer>
  </Component>
  
  
-@@ -714,21 +680,21 @@
+@@ -714,21 +679,21 @@
  <Component Thruk::Plugin::BP>
      # Results will be send back by using the spool folder.
      # This folder should point to the 'check_result_path' of your core.
