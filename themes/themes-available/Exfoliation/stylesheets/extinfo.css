@@ -32,20 +32,20 @@ TABLE.command { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
 DIV.commentNav { font-size: 10pt; text-align: center; }
 A.commentNav   { font-size: 10pt; }
 
-TABLE.comment { font-size: 10pt; background-color: white; padding: 2; }
-TH.comment    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
-.commentOdd   { font-size: 9pt; background-color: #e7e7e7; }
-.commentEven  { font-size: 9pt; background-color: #f4f2f2; }
+TABLE.comment { font-size: 10pt; background-color: white; padding: 2; max-width: 900px; }
+TH.comment    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; white-space: nowrap; }
+.commentOdd   { font-size: 9pt; background-color: #e7e7e7; vertical-align: top; }
+.commentEven  { font-size: 9pt; background-color: #f4f2f2; vertical-align: top; }
 DIV.comment,A.comment { font-size: 10pt; background-color: white; text-align: center; }
 
 .downtimeTitle  { font-size: 12pt; text-align: center; font-weight: bold; }
 DIV.downtimeNav { font-size: 10pt; text-align: center; }
 A.downtimeNav   { font-size: 10pt; }
 
-TABLE.downtime { font-size: 10pt; background-color: white; padding: 2; }
-TH.downtime    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
-.downtimeOdd   { font-size: 9pt; background-color: #e7e7e7; }
-.downtimeEven  { font-size: 9pt; background-color: #f4f2f2; }
+TABLE.downtime { font-size: 10pt; background-color: white; padding: 2; max-width: 900px; }
+TH.downtime    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; white-space: nowrap; }
+.downtimeOdd   { font-size: 9pt; background-color: #e7e7e7; vertical-align: top; }
+.downtimeEven  { font-size: 9pt; background-color: #f4f2f2; vertical-align: top; }
 
 .notflapping           { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
 .flapping              { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
