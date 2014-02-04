@@ -34,7 +34,7 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
-        'procinfo_timeout'     => 10,
+        'fast_query_timeout'   => 10,
         'timeout'              => 100,
         'logs_timeout'         => 100,
         'config'               => $config,
@@ -217,7 +217,7 @@ return the process info
 =cut
 sub get_processinfo {
     my $self = shift;
-    $self->{'ua'}->timeout($self->{'procinfo_timeout'});
+    $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_processinfo');
     $self->{'ua'}->timeout($self->{'timeout'});
     my($typ, $size, $data) = @{$res};
@@ -243,6 +243,7 @@ returns if this user is allowed to submit commands
 =cut
 sub get_can_submit_commands {
     my($self,$user) = @_;
+    $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_can_submit_commands', [$user]);
     my($typ, $size, $data) = @{$res};
     return $data;
@@ -259,6 +260,7 @@ returns a list of contactgroups by contact
 =cut
 sub get_contactgroups_by_contact {
     my($self,$user) = @_;
+    $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     confess("no user") unless defined $user;
     my $res = $self->_req('get_contactgroups_by_contact', [$user]);
     my($typ, $size, $data) = @{$res};
@@ -741,11 +743,11 @@ return http response but ensure timeout on request.
 
 sub _ua_post_with_timeout {
     my($ua, $url, $data) = @_;
-    my  $timeout_for_client = $ua->timeout();
-
+    my $timeout_for_client = $ua->timeout();
     # set alarm
     local $SIG{ALRM} = sub { die("hit ".$timeout_for_client."s timeout on ".$url) };
     alarm($timeout_for_client);
+    $ua->ssl_opts(timeout => $timeout_for_client, Timeout => $timeout_for_client);
 
     # make sure nobody else calls alarm in between
     {
