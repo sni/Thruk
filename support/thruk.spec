@@ -65,6 +65,7 @@ large installations.
     --sysconfdir="%{_sysconfdir}/thruk" \
     --mandir="%{_mandir}" \
     --with-initdir="%{_initrddir}" \
+    --with-logdir="%{_localstatedir}/log/thruk" \
     --with-logrotatedir="%{_sysconfdir}/logrotate.d" \
     --with-thruk-user="%{apacheuser}" \
     --with-thruk-group="%{apachegroup}" \

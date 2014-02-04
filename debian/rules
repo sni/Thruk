@@ -17,6 +17,7 @@ override_dh_auto_configure:
 		--sysconfdir="/etc/thruk" \
 		--mandir="/usr/share/man" \
 		--with-initdir="/etc/init.d" \
+		--with-logdir="/var/log/thruk" \
 		--with-logrotatedir="/etc/logrotate.d" \
 		--with-thruk-user="www-data" \
 		--with-thruk-group="www-data" \
