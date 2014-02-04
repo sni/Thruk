@@ -80,7 +80,7 @@ case "$1" in
             done
             test -f $PIDFILE
             if [ $? -eq 0 ]; then
-                pid=`cat $PIDFILE 2>/dev/null`
+                pid=`cat $PIDFILE 2>/dev/null | tr '\n' ' '`
                 echo "($pid) OK"
                 rm -f $STARTLOG
                 exit 0;
