@@ -56,6 +56,18 @@ if [ -z "$STARTCMD" ]; then
   STARTCMD="$WGET --no-proxy --no-check-certificate --post-data='' -t 1 --debug --timeout=$STARTTIMEOUT -O - $STARTURL"
 fi
 
+get_pids() {
+    pids=`cat $PIDFILE 2>/dev/null`
+    if [ "$pids" != "" ]; then
+        newpids=""
+        for pid in $pids; do
+            ps -p $pid > /dev/null 2>&1 && newpids=" $pid"
+        done
+        pids="$newpids"
+    fi
+    echo "$newpids"
+}
+
 case "$1" in
     start)
         if [ "$STARTCMD" = "" ]; then
@@ -79,9 +91,9 @@ case "$1" in
                 sleep 1
             done
             test -f $PIDFILE
-            if [ $? -eq 0 ]; then
-                pid=`cat $PIDFILE 2>/dev/null | tr '\n' ' '`
-                echo "($pid) OK"
+            pids=`get_pids`
+            if [ "$pids" != "" ]; then
+                echo "($pids) OK"
                 rm -f $STARTLOG
                 exit 0;
             else
@@ -94,7 +106,7 @@ case "$1" in
     ;;
     stop)
         echo -n "Stopping $NAME..."
-        pids=`cat $PIDFILE 2>/dev/null`
+        pids=`get_pids`
         if [ "$OMD_SITE" = "" ]; then
           rm -f /var/lock/subsys/thruk >/dev/null 2>&1
         fi
@@ -117,27 +129,21 @@ case "$1" in
             done
             if [ "$pids" = "" ]; then
                 echo "OK"
-                exit 0;
+                exit 0
             else
                 echo "failed"
-                exit 1;
+                exit 1
             fi
         fi
     ;;
     status)
-        pids=`cat $PIDFILE 2>/dev/null`
-        running=0
+        pids=`get_pids`
         if [ "$pids" != "" ]; then
-            for pid in $pids; do
-                ps -p $pid > /dev/null 2>&1 && running=1
-            done
-        fi
-        if [ $running -eq 1 ]; then
-            echo "$NAME is running (pid "$pids")."
-            exit 0;
+            echo "$NAME is running (pid $pids)."
+            exit 0
         fi
         echo "$NAME is not running"
-        exit 1;
+        exit 1
     ;;
     reload|force-reload|restart)
         $0 stop && $0 start
