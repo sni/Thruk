@@ -188,7 +188,8 @@ sub set_default_config {
     $defaults->{'cookie_path'} = $config->{'url_prefix'};
     my $product_prefix = $config->{'product_prefix'};
     $defaults->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
-    $defaults->{'cookie_path'} = '/'.$product_prefix.'/' if $defaults->{'cookie_path'} eq '';
+    $defaults->{'cookie_path'} = '/'.$product_prefix if $defaults->{'cookie_path'} eq '';
+    $defaults->{'cookie_path'} =~ s|/*$|/|mx;
 
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};

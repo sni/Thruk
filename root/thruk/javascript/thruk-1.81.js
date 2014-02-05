@@ -306,6 +306,11 @@ function cookieSave(name, value, expires) {
   document.cookie = name+"="+value+"; path="+cookie_path+";"+expirestr;
 }
 
+/* remove existing cookie */
+function cookieRemove(name, path) {
+    document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+}
+
 /* page refresh rate */
 function setRefreshRate(rate) {
   curRefreshVal = rate;

@@ -30,5 +30,13 @@
 <script type="text/javascript">
 <!--
     jQuery.noConflict();
+
+    [% FOREACH name = fix_cookies %]
+      [% FOREACH path = get_cookie_remove_paths(c) %]
+        [% IF path != cookie_path %]
+          cookieRemove("[% name %]", "[% path %]");
+        [% END %]
+      [% END %]
+    [%+ END +%]
 -->
 </script>
