@@ -1043,6 +1043,7 @@ t/002-config.t
 t/010-Thruk-Utils.t
 t/011-Thruk-Backend.t
 t/020-Log-Log4perl.t
+t/088-remove_after.t
 t/089-patches.t
 t/090-io.t
 t/091-moose.t
