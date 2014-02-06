@@ -149,8 +149,11 @@ case "$1" in
         $0 stop && $0 start
         exit $?
         ;;
+    condrestart)
+        $0 status && $0 restart
+        ;;
     *)
-        echo "Usage: $NAME {start|stop|status|reload|restart|force-reload}"
+        echo "Usage: $NAME {start|stop|status|reload|restart|force-reload|condrestart}"
         exit 1
         ;;
 esac
