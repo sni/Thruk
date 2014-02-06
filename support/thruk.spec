@@ -125,7 +125,8 @@ if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
 fi
 %endif
 /usr/bin/thruk -a clearcache,installcron --local > /dev/null
-echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
+echo "Thruk have been configured for http://$(hostname)/thruk/."
+echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
 exit 0
 
 

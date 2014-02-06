@@ -81,7 +81,8 @@ case "$1" in
         # update cron entries
         /usr/bin/thruk -a clearcache,installcron --local > /dev/null
 
-        echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
+        echo "Thruk have been configured for http://$(hostname)/thruk/."
+        echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
