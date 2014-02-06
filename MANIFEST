@@ -843,6 +843,7 @@ plugins/plugins-available/reports2/root/flot-d7c58b5/jquery.flot.time.js
 plugins/plugins-available/reports2/root/flot-d7c58b5/LICENSE.txt
 plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
+plugins/plugins-available/reports2/root/reports_render.js
 plugins/plugins-available/reports2/script/html2pdf.sh
 plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
