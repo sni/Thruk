@@ -5,7 +5,7 @@ use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
-plan tests => 34;
+plan tests => 40;
 
 alarm(120);
 
@@ -25,6 +25,7 @@ my $precmds = {
   'support/0007-naemon-init.patch'        => 'cp support/thruk.init thruk',
   'support/0008-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
   'support/0009-naemon-fcgish.patch'      => 'cp support/fcgid_env.sh .',
+  'support/0012-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
 };
 
 my @patches = glob('support/*.patch');

@@ -1026,6 +1026,8 @@ support/0007-naemon-init.patch
 support/0008-naemon-httpd.patch
 support/0009-naemon-fcgish.patch
 support/0010-naemon-branding.patch
+support/0011-naemon-cgicfg.patch
+support/0012-naemon-htpasswd.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
