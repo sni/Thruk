@@ -6,6 +6,12 @@
   <title>[% r.name %]</title>
   [% PROCESS 'reports/style/css.tt' %]
   [% PROCESS _common_js.tt %]
+  <script type="text/javascript">
+  <!--
+  [%+ PROCESS _header_initial_states.tt +%]
+  $=jQuery;
+  -->
+  </script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/flot-d7c58b5/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
   <!--[if IE]><script language='javascript' type='text/javascript' src='[% url_prefix %]javascript/excanvas.js'></script><![endif]-->
