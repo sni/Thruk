@@ -32,7 +32,7 @@ TR.report_type_affected_sla_objects SPAN.name {
   padding-right: 5px;
 }
 TR.report_type_affected_sla_objects SPAN.value, TR.report_type_affected_sla_objects SPAN.wait {
-  width: 150px;
+  width: 170px;
 }
 
 TABLE.unavailable_states {
