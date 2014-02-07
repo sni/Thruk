@@ -165,6 +165,7 @@ sub _show_step_3 {
 ##########################################################
 sub _create_report {
     my ( $self, $c ) = @_;
+    $c->{'request'}->{'parameters'}->{'include_host_services'} = 1;
     return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
 }
 
