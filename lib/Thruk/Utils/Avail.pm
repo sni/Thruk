@@ -255,6 +255,12 @@ sub calculate_availability {
             return $c->detach('/error/index/15');
         }
         $c->stash->{'services'} = $services_data;
+        if(scalar @hostfilter == 0) {
+            my $tmphosts = $c->{'db'}->get_hosts_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            for my $host (@{$tmphosts}) {
+                push @hostfilter, { 'host_name' => $host->{'host_name'} };
+            }
+        }
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
     }
 
