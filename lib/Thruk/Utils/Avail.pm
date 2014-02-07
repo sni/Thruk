@@ -231,7 +231,13 @@ sub calculate_availability {
         my @hostfilter;
         if($service ne 'all') {
             for my $h (split(/\s*,\s*/mx, $host)) {
-                push @hostfilter, { 'host_name' => $h };
+                if($host =~ m/\*/mx) {
+                    $h   =~ s/\.\*/\*/gmx;
+                    $h   =~ s/\*/.*/gmx;
+                    push @hostfilter, { 'host_name' => { '~~' => $h }};
+                } else {
+                    push @hostfilter, { 'host_name' => $h };
+                }
             }
             for my $s (split(/\s*,\s*/mx, $service)) {
                 push @servicefilter, { 'description' => $s };
