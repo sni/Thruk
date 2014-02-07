@@ -12,6 +12,7 @@ next:
             - added 'logcacheremoveunused' command to remove old no longer used tables
           - Panorama
             - make tabs reorderable
+            - autohiding headers don't change panel size
             - fixed problem on initializing pie charts
             - fixed import problem not showing initial panels
           - Business Process

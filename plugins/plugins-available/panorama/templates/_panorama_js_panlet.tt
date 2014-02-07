@@ -39,8 +39,13 @@
                 if(this.gearInitCallback) {
                     this.gearInitCallback(this);
                 }
+                this.header.show();
                 this.gearitem.show();
             } else {
+                var global = Ext.getCmp('tabpan');
+                if(global.xdata.autohideheader) {
+                    this.header.hide();
+                }
                 this.items.getAt(0).show();
                 this.gearitem.hide();
             }
@@ -154,7 +159,11 @@
                 }]
         }],
         buttonAlign: 'center',
-        fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').gearitem.hide() } },
+        fbar: [/* panlet setting cancel button */
+               { xtype:  'button',
+                 text:   'cancel',
+                 handler: function() { this.up('window').gearHandler() }
+               },
                /* panlet setting save button */
                { xtype : 'button',
                  text:   'save',
@@ -264,8 +273,8 @@
             /* make header show on mouseover only */
             var div    = This.getEl();
             var global = Ext.getCmp('tabpan');
-            div.on("mouseout", function()  { if(global.xdata.autohideheader) { This.header.hide() }});
-            div.on("mouseover", function() { This.header.show() });
+            div.on("mouseout", function()  { This.hideHeader(global); });
+            div.on("mouseover", function() { This.showHeader(global); });
         },
         afterrender: function(This, eOpts) {
             /* set initial form values */
@@ -330,5 +339,31 @@
             }
         }
         return null;
-    }
+    },
+    showHeader: function(global) {
+a = this;
+        if(global.xdata.autohideheader) {
+            var style = this.header.getEl().dom.style;
+            if(style.width == '' || style.width != this.getEl().dom.style.width) {
+                // not yet rendered
+                var refresh = this.xdata.refresh;
+                this.xdata.refresh = -2;
+                this.header.show();
+                this.header.hide();
+                this.xdata.refresh = refresh;
+            }
+            style.display  = 'inherit';
+            style.opacity  = 0.9;
+            style.zIndex   = 20;
+        }
+    },
+    hideHeader: function(global) {
+        if(global.xdata.autohideheader && this.gearitem.isHidden()) {
+            var style = this.header.getEl().dom.style;
+            style.display  = 'none';
+            style.opacity  = '';
+            style.zIndex   = '';
+        }
+    },
 });
+var a;
