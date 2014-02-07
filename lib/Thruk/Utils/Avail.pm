@@ -231,7 +231,7 @@ sub calculate_availability {
         my @hostfilter;
         if($service ne 'all') {
             for my $h (split(/\s*,\s*/mx, $host)) {
-                if($host =~ m/\*/mx) {
+                if($h =~ m/\*/mx) {
                     $h   =~ s/\.\*/\*/gmx;
                     $h   =~ s/\*/.*/gmx;
                     push @hostfilter, { 'host_name' => { '~~' => $h }};
@@ -275,9 +275,17 @@ sub calculate_availability {
         my @servicefilter;
         my @hostfilter;
         for my $h (split(/\s*,\s*/mx, $host)) {
-            push @hostfilter,    { 'name' => $h };
-            push @servicefilter, { 'host_name' => $h };
+            if($h =~ m/\*/mx) {
+                $h   =~ s/\.\*/\*/gmx;
+                $h   =~ s/\*/.*/gmx;
+                push @hostfilter,    { 'name'      => { '~~' => $h }};
+                push @servicefilter, { 'host_name' => { '~~' => $h }};
+            } else {
+                push @hostfilter,    { 'name'      => $h };
+                push @servicefilter, { 'host_name' => $h };
+            }
         }
+        # calculate service availability for services on these hosts too
         my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
         for my $service (@{$service_data}) {
             $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
@@ -290,6 +298,7 @@ sub calculate_availability {
                 $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
             }
         }
+
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);
         die('no such host: '.$host) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
@@ -507,6 +516,7 @@ sub calculate_availability {
     my $total_nr = 0;
     $total_nr += scalar @{$hosts}    if defined $hosts;
     $total_nr += scalar @{$services} if defined $services;
+    return(scalar @{$hosts}, scalar @{$services}) if $c->{'request'}->{'parameters'}->{'get_total_numbers_only'};
     if($total_nr > $c->config->{'report_max_objects'}) {
         die("too many objects: ".$total_nr.", maximum ".$c->config->{'report_max_objects'}.", please use more specific filter or raise limit (report_max_objects)!");
     }

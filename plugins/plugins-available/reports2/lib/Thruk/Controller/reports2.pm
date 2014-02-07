@@ -6,6 +6,7 @@ use Thruk 1.60;
 use Carp;
 use parent 'Catalyst::Controller';
 use File::Slurp;
+use JSON::XS;
 use Thruk::Utils::Reports;
 
 =head1 NAME
@@ -76,6 +77,27 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to update crontab' });
         }
         return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+
+    if($action eq 'check_affected_objects') {
+        $c->{'request'}->{'parameters'}->{'get_total_numbers_only'} = 1;
+        my @res;
+        my $backends = $c->{'request'}->{'parameters'}->{'backends'} || $c->{'request'}->{'parameters'}->{'backends[]'};
+        if($backends and ($c->{'request'}->{'parameters'}->{'backends_toggle'} or $c->{'request'}->{'parameters'}->{'report_backends_toggle'})) {
+            $c->{'db'}->disable_backends();
+            $c->{'db'}->enable_backends($backends);
+        }
+        eval {
+            @res = Thruk::Utils::Avail::calculate_availability($c);
+        };
+        if($@ or scalar @res == 0) {
+            $c->stash->{'json'}   = { 'hosts' => 0, 'services' => 0, 'error' => $@ };
+        } else {
+            my $total    = $res[0] + $res[1];
+            my $too_many = $total > $c->config->{'report_max_objects'} ? 1 : 0;
+            $c->stash->{'json'}   = { 'hosts' => $res[0], 'services' => $res[1], 'too_many' => $too_many };
+        }
+        return $c->forward('Thruk::View::JSON');
     }
 
     if(defined $report_nr) {

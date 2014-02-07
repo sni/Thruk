@@ -4325,7 +4325,7 @@ var ajax_search = {
         window.setTimeout('ajax_search.hide_results(null, 1, 1);', 100);
 
         if(ajax_search.onselect != undefined) {
-            return ajax_search.onselect();
+            return ajax_search.onselect(input);
         }
 
         if(( ajax_search.autosubmit == undefined

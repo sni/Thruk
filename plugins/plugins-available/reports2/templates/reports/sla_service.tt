@@ -3,6 +3,7 @@
   [%
     required_fields = [
         { 'language'                    => [ 'Language',              'language',        'en'                  ,'', 1    ] },
+        { 'affected_sla_objects'        => [ '',                      'affected_sla_objects', ''                         ] },
         { 'host'                        => [ 'Host',                  'hosts',           ''                              ] },
         { 'service'                     => [ 'Service',               'services',        ''                              ] },
         { 'timeperiod'                  => [ 'Timeperiod',            'rptimeperiod',    'last12months'                  ] },

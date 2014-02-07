@@ -43,7 +43,7 @@
     <td class="dataEven" align="center" valign="top"><b>Backend</b></td>
     <td class="dataOdd" align="left" colspan=2>
       [% IF backends.size > 10 %]
-        [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit %]
+        [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
       [% ELSIF backends.size > 1 %]
       [% backends_selected=0 %]
       [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
