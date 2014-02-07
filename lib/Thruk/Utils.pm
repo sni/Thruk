@@ -1939,7 +1939,9 @@ precompile and load templates into memory
 sub precompile_templates {
     my($c) = @_;
     my $t0 = [gettimeofday];
-    my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
+    my @includes;
+    push @includes, @{$c->config->{templates_paths}} if $c->config->{templates_paths};
+    push @includes, $c->config->{'View::TT'}->{'INCLUDE_PATH'} if $c->config->{'View::TT'}->{'INCLUDE_PATH'};
     my $uniq     = {};
     for my $path (@includes) {
         next unless -d $path;
