@@ -460,11 +460,21 @@ sub get_user {
 #########################
 sub wait_for_job {
     my $job = shift;
+    my $jobdir = './var/jobs/'.$job;
+    if(defined $ENV{'CATALYST_SERVER'}) {
+        my $config = Thruk::Backend::Pool::get_config();
+        $jobdir = $config->{'var_path'}.'/jobs/'.$job;
+    }
     alarm(60);
-    while(Thruk::Utils::External::_is_running('./var/jobs/'.$job)) {
+    if(!-e $jobdir) {
+        fail("job folder ".$jobdir.": ".$!);
+        alarm(0);
+        return;
+    }
+    while(Thruk::Utils::External::_is_running($jobdir)) {
         sleep(1);
     }
-    is(Thruk::Utils::External::_is_running('./var/jobs/'.$job), 0, 'job is finished');
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished');
     alarm(0);
     return;
 }
