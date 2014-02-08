@@ -364,6 +364,6 @@ a = this;
             style.opacity  = '';
             style.zIndex   = '';
         }
-    },
+    }
 });
 var a;
