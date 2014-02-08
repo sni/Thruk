@@ -106,7 +106,7 @@ THRUKUSER        = $options->{'thruk-user'}
 THRUKGROUP       = $options->{'thruk-group'}
 THRUKLIBS        = $options->{'thruk-libs'}
 CHECKRESULTDIR   = $options->{'checkresult-dir'}
-COMPRESS         = $options->{'compress'}
+THRUKCOMPRESS    = $options->{'compress'}
 
 EOT
 

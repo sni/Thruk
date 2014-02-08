@@ -6,7 +6,7 @@ BEGIN {
 
     # do we want compression at all?
     if(-e 'script/append.make.options') {
-        chomp(my $compress = `grep COMPRESS script/append.make.options | awk '{print \$3}'`);
+        chomp(my $compress = `grep THRUKCOMPRESS Makefile | awk '{print \$3}'`);
         exit if $compress eq 'disabled';
     }
 };
