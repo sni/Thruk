@@ -38,10 +38,12 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}
     my @s   = stat('root/thruk/javascript/'.$file);
     $newest = $s[9] if $newest < $s[9];
 }
-my @s = stat('root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js');
-my $js_required = 0;
-if($s[9] < $newest) {
-    $js_required = 1;
+my $js_required = 1;
+if(-e 'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js') {
+    my @s = stat('root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js');
+    if($s[9] >= $newest) {
+        $js_required = 0;
+    }
 }
 
 $newest = 0;
@@ -49,10 +51,12 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}
     my @s   = stat('themes/themes-available/Thruk/stylesheets/'.$file);
     $newest = $s[9] if $newest < $s[9];
 }
-@s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
-my $css_required = 0;
-if($s[9] < $newest) {
-    $css_required = 1;
+my $css_required = 1;
+if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css') {
+    my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
+    if($s[9] >= $newest) {
+        $css_required = 0;
+    }
 }
 
 if(!$js_required and !$css_required) {
