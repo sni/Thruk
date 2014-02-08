@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long qw//;
 
 eval "use inc::Module::Install";
-if($@) {
+if($@ && !-e 'Makefile') {
     print STDERR "Module::Install is required to build Thruk from source.\n\n";
     print STDERR $@;
     exit 1;
