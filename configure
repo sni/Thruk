@@ -6,7 +6,7 @@ use Getopt::Long qw//;
 
 eval "use inc::Module::Install";
 if($@) {
-    print STDERR "Module::Install is required to build Thruk from source.\n\n"
+    print STDERR "Module::Install is required to build Thruk from source.\n\n";
     print STDERR $@;
     exit 1;
 }
