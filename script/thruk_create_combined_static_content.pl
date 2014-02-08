@@ -10,6 +10,8 @@ BEGIN {
         $ENV{THRUK_SKIP_COMPRESS} = 1 if $compress eq 'disabled';
     }
 };
+use warnings;
+use strict;
 use lib 'lib';
 use Thruk::Config;
 
@@ -47,7 +49,7 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}
     my @s   = stat('themes/themes-available/Thruk/stylesheets/'.$file);
     $newest = $s[9] if $newest < $s[9];
 }
-my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
+@s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
 my $css_required = 0;
 if($s[9] < $newest) {
     $css_required = 1;
@@ -101,10 +103,10 @@ unlink('tmp.css');
 
 #################################################
 # try to minify js
-my $files = [
+my $jsfiles = [
     'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js',
 ];
-for my $file (@{$files}) {
+for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
     print `$cmd`;
     if($? != 0) {
