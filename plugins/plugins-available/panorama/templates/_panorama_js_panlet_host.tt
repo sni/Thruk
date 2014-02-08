@@ -115,7 +115,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
         panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
         if(d.flap_detection_enabled) {
-            panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'<\/div> ('+d.percent_state_change.toFixed(3)+'% state change)');
+            panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'<\/div> ('+Number(d.percent_state_change).toFixed(3)+'% state change)');
         } else {
             panel.getComponent('is_flapping').update('N/A');
         }
