@@ -20,6 +20,7 @@ my $options = {
   'thruk-group'     => `id -gn`,
   'httpd-conf'      => '',
   'logrotate-dir'   => '',
+  'nocompress'      => 0,
   'quiet'           => 0,
 };
 Getopt::Long::Configure('no_ignore_case');
@@ -49,6 +50,7 @@ Getopt::Long::GetOptions (
    "with-thruk-tempdir=s"   => \$options->{'thruk-temp-dir'},
    "with-thruk-vardir=s"    => \$options->{'thruk-var-dir'},
    "with-thruk-logdir=s"    => \$options->{'thruk-log-dir'},
+   "without-compress"       => \$options->{'nocompress'},
    "quiet|q"                => \$options->{'quiet'},
 ) or warn "error in options";
 
@@ -78,9 +80,10 @@ $options->{'log-dir'}        = $options->{'thruk-log-dir'}  if $options->{'thruk
 chomp($options->{'thruk-user'});
 chomp($options->{'thruk-group'});
 
-$options->{'htmlurl'} =~ s|/+$||mx;
-$options->{'htmlurl'} =~ s|^/+||mx;
-$options->{'htmlurl'} = '/'.$options->{'htmlurl'};
+$options->{'htmlurl'}  =~ s|/+$||mx;
+$options->{'htmlurl'}  =~ s|^/+||mx;
+$options->{'htmlurl'}  = '/'.$options->{'htmlurl'};
+$options->{'compress'} = $options->{'nocompress'} ? 'disabled' : 'enabled';
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
@@ -103,6 +106,7 @@ THRUKUSER        = $options->{'thruk-user'}
 THRUKGROUP       = $options->{'thruk-group'}
 THRUKLIBS        = $options->{'thruk-libs'}
 CHECKRESULTDIR   = $options->{'checkresult-dir'}
+COMPRESS         = $options->{'compress'}
 
 EOT
 
@@ -124,23 +128,24 @@ print <<EOT;
 * THRUK - configuration
 *************************************
 
-  eprefix          = $options->{'eprefix'}
-  bindir           = $options->{'bindir'}
-  sysconfdir       = $options->{'sysconfdir'}
-  libdir           = $options->{'libdir'}
-  tmpdir           = $options->{'tmpdir'}
-  localstatedir    = $options->{'localstatedir'}
-  datadir          = $options->{'datadir'}
-  mandir           = $options->{'mandir'}
+  eprefix            = $options->{'eprefix'}
+  bindir             = $options->{'bindir'}
+  sysconfdir         = $options->{'sysconfdir'}
+  libdir             = $options->{'libdir'}
+  tmpdir             = $options->{'tmpdir'}
+  localstatedir      = $options->{'localstatedir'}
+  datadir            = $options->{'datadir'}
+  mandir             = $options->{'mandir'}
 
-  init-dir         = $options->{'init-dir'}
-  logrotate-dir    = $options->{'logrotate-dir'}
-  log-dir          = $options->{'log-dir'}
-  htmlurl          = $options->{'htmlurl'}
-  httpd-conf       = $options->{'httpd-conf'}
-  thruk-user       = $options->{'thruk-user'}
-  thruk-group      = $options->{'thruk-group'}
-  thruk-libs       = $options->{'thruk-libs'}
+  init-dir           = $options->{'init-dir'}
+  logrotate-dir      = $options->{'logrotate-dir'}
+  log-dir            = $options->{'log-dir'}
+  htmlurl            = $options->{'htmlurl'}
+  httpd-conf         = $options->{'httpd-conf'}
+  thruk-user         = $options->{'thruk-user'}
+  thruk-group        = $options->{'thruk-group'}
+  thruk-libs         = $options->{'thruk-libs'}
+  css/js compression = $options->{'compress'}
 
 now run
   perl Makefile.PL
@@ -199,5 +204,6 @@ __END__
     --with-log-dir               sets path to log files. [/var/log/thruk]
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
+    --without-compress           skip compression of css and javascript files. Requires yui-compressor.
 
 =cut
