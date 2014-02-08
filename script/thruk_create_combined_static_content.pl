@@ -5,9 +5,9 @@ BEGIN {
     $ENV{'THRUK_SRC'} = 'SCRIPTS';
 
     # do we want compression at all?
-    if(-e 'script/append.make.options') {
+    if(-e 'Makefile') {
         chomp(my $compress = `grep THRUKCOMPRESS Makefile | awk '{print \$3}'`);
-        exit if $compress eq 'disabled';
+        $ENV{THRUK_SKIP_COMPRESS} = 1 if $compress eq 'disabled';
     }
 };
 use lib 'lib';
