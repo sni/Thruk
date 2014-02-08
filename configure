@@ -4,6 +4,13 @@ use strict;
 use warnings;
 use Getopt::Long qw//;
 
+eval "use inc::Module::Install";
+if($@) {
+    print STDERR "Module::Install is required to build Thruk from source.\n\n"
+    print STDERR $@;
+    exit 1;
+}
+
 alarm(180);
 
 my $options = {
@@ -100,7 +107,12 @@ CHECKRESULTDIR   = $options->{'checkresult-dir'}
 EOT
 
 close($fh);
-`yes n | $^X Makefile.PL >/dev/null 2>&1`;
+my $out = `yes n | $^X Makefile.PL 2>&1`;
+if(!-e "Makefile") {
+    print "configure failed:\n\n";
+    print $out;
+    exit 1;
+}
 
 exit if $options->{'quiet'};
 
