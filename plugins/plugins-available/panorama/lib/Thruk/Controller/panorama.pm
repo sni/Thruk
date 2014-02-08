@@ -510,11 +510,11 @@ sub _task_site_status {
         my $d = {};
         $d = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
         my $icon            = 'exclamation.png';
-        if($b->{'running'})          { $icon = 'accept.png'; }
+        if($b->{'running'} && $d->{'program_start'}) { $icon = 'accept.png'; }
         elsif($b->{'disabled'} == 2) { $icon = 'sport_golf.png'; }
         my $runtime = "";
         my $program_version = $b->{'last_error'};
-        if($b->{'running'}) {
+        if($b->{'running'} && $d->{'program_start'}) {
             $runtime = Thruk::Utils::Filter::duration(time() - $d->{'program_start'});
             $program_version = $d->{'program_version'};
         }
