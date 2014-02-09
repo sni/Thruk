@@ -1,11 +1,10 @@
 #!/bin/bash
 
-set -e
 
 VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
 
-test -e .git
-which dch
+test -e .git         || exit 1
+which dch >/dev/null || exit 1
 if [ ! -e "root/thruk/javascript/thruk-$VERSION.js" ]; then
     yes 'n' | perl Makefile.PL >/dev/null 2>&1
 fi
@@ -19,6 +18,7 @@ if [ "x$DEBFULLNAME" = "x" ]; then
     export DEBFULLNAME="Thruk Development Team"
 fi
 
+set -e
 set -u
 
 if [ -n "$newversion" ]; then
