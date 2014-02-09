@@ -460,11 +460,8 @@ sub get_user {
 #########################
 sub wait_for_job {
     my $job = shift;
-    my $jobdir = './var/jobs/'.$job;
-    if(defined $ENV{'CATALYST_SERVER'}) {
-        my $config = Thruk::Backend::Pool::get_config();
-        $jobdir = $config->{'var_path'}.'/jobs/'.$job;
-    }
+    my $config = Thruk::Backend::Pool::get_config();
+    my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     alarm(60);
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);
