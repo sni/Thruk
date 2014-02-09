@@ -35,7 +35,7 @@ index c942754..29f9569 100644
  ﻿[% PROCESS _header.tt %]
      <div id="mainbrandsplash">
 -      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
-+      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="399" height="86"></a></div>
++      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="352" height="89"></a></div>
      </div>
      <div id="currentversioninfo">
 -      <div class="product">Thruk Monitoring Webinterface</div>
@@ -56,7 +56,7 @@ index 563abc6..1d64830 100644
    <body class='navbar'>
  [% END %]
 -    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
-+    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="163" height="35" class="nav_small_logo" /></a>
++    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="158" height="40" class="nav_small_logo" /></a>
  
      [% FOREACH section = navigation %]
      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
