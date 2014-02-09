@@ -6,6 +6,9 @@ VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
 
 test -e .git
 which dch
+if [ ! -e "root/thruk/javascript/thruk-$VERSION.js" ]; then
+    yes 'n' | perl Makefile.PL >/dev/null 2>&1
+fi
 if [ ! -e "root/thruk/javascript/thruk-$VERSION.js" ]; then echo "Makefile is out of date, please run 'perl Makefile.PL'"; exit 1; fi
 if [ "$NEWVERSION" = "" ]; then newversion=$(dialog --stdout --inputbox "New Version:" 0 0 "$VERSION"); else newversion="$NEWVERSION"; fi
 
