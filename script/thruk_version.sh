@@ -102,5 +102,5 @@ git add                     \
     script/nagexp           \
     script/nagimp           \
     .gitignore
-git co docs/FAQ.html
+git checkout docs/FAQ.html
 git status
