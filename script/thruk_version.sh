@@ -1,10 +1,10 @@
 #!/bin/bash
 
-
+set -x
 VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
 
-test -e .git         || exit 1
-which dch >/dev/null || exit 1
+test -e .git         || { echo "not in a git directory"; exit 1; }
+which dch >/dev/null || { echo "dch not found"; exit 1; }
 if [ ! -e "root/thruk/javascript/thruk-$VERSION.js" ]; then
     yes 'n' | perl Makefile.PL >/dev/null 2>&1
 fi
