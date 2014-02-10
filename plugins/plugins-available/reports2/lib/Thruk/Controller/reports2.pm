@@ -212,7 +212,7 @@ sub report_edit_step2 {
 
     $self->_set_report_data($c, $r);
 
-    $c->stash->{template}    = 'reports_edit_step2.tt';
+    $c->stash->{template} = 'reports_edit_step2.tt';
     return;
 }
 

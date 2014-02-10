@@ -230,6 +230,7 @@ sub calculate_availability {
         my @servicefilter;
         my @hostfilter;
         if($service ne 'all') {
+            $host = '*' if $host =~ m/^\s*$/mx;
             for my $h (split(/\s*,\s*/mx, $host)) {
                 if($h =~ m/\*/mx) {
                     $h   =~ s/\.\*/\*/gmx;
@@ -239,8 +240,15 @@ sub calculate_availability {
                     push @hostfilter, { 'host_name' => $h };
                 }
             }
+            $service = '*' if $service =~ m/^\s*$/mx;
             for my $s (split(/\s*,\s*/mx, $service)) {
-                push @servicefilter, { 'description' => $s };
+                if($s =~ m/\*/mx) {
+                    $s   =~ s/\.\*/\*/gmx;
+                    $s   =~ s/\*/.*/gmx;
+                    push @servicefilter, { 'description' => { '~~' => $s }};
+                } else {
+                    push @servicefilter, { 'description' => $s };
+                }
             }
             $servicefilter = Thruk::Utils::combine_filter('-and', [
                 Thruk::Utils::combine_filter('-or', \@hostfilter),
@@ -263,8 +271,13 @@ sub calculate_availability {
         $c->stash->{'services'} = $services_data;
         if(scalar @hostfilter == 0) {
             my $tmphosts = $c->{'db'}->get_hosts_by_servicequery(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
+            # make uniq
+            my %tmp;
             for my $host (@{$tmphosts}) {
-                push @hostfilter, { 'host_name' => $host->{'host_name'} };
+                $tmp{$host->{'host_name'}} = 1;
+            }
+            for my $host (keys %tmp) {
+                push @hostfilter, { 'host_name' => $host };
             }
         }
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);

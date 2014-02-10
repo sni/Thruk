@@ -2,9 +2,24 @@
  * place after the first html rendering.
  * ex.: page wrapping tables
  */
-jQuery(document).ready(function() {
+
+var page_renumber_required = 0;
+function reports_body_end() {
     split_paged_tables();
-});
+
+    // reorder page numbers
+    if(page_renumber_required) {
+        var page = 0;
+        jQuery('DIV.page').each(function(nr, el) {
+            jQuery(el).find("DIV.footer").html(page++);
+        });
+    }
+
+    // insert anchors for easy testing on html pages
+    jQuery('DIV.page').each(function(nr, el) {
+        jQuery('<a name="page'+(nr+1)+'">').insertBefore(el);
+    });
+}
 
 /* split too height tables in several pages */
 function split_paged_tables() {
@@ -14,12 +29,7 @@ function split_paged_tables() {
         var matches = table.attr('class').match(/max_height_(\d+)/);
         if(matches && matches[1] < table_height) {
             split_table(table, parseInt(matches[1]));
-
-            // reorder page numbers
-            var page = 0;
-            jQuery("DIV.footer").each(function(nr, div) {
-                div.innerHTML = page++;
-            });
+            page_renumber_required = 1;
         }
     });
 }
@@ -59,4 +69,96 @@ function split_table(table, max_height) {
     if(new_table_height > max_height) {
         split_table(cloned_table, max_height);
     }
+}
+
+/* render the total sla graph */
+function render_total_sla_graph(nr, title, data, sla, graph_min_sla, type, label, max_entries_per_page) {
+    // split on multiple pages?
+    if(data.length > max_entries_per_page) {
+        render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, type, label, max_entries_per_page);
+        return;
+    }
+
+    var ticks = [];
+    jQuery(data).each(function(x, val) {
+        ticks.push([x+1, " "]);
+    });
+
+    var d1 = {
+        label: title,
+        color: "rgb(82, 167, 82)",
+        bars: { show: true, horizontal: true },
+        data: data
+    }
+    var d2 = {
+        color: "rgb(236, 193, 77)",
+        lines: { show: true },
+        data: [[sla,0], [sla, 9999]]
+    }
+    jQuery.plot(jQuery("#flotgraph"+nr), [d1,d2], {
+        series: {
+            bars: {
+                show: false,
+                barWidth: 0.9,
+                align: 'center',
+                fillColor: { colors: [ { opacity: 1.0 }, { opacity: 0.6 } ] }
+            },
+            lines: { show: false, fill: false }
+        },
+        yaxis: {
+            min:   0.5,
+            max:   data.length + 0.5,
+            ticks: ticks
+        },
+        xaxis: {
+            min:   graph_min_sla,
+            max:   100
+        },
+        legend: { position: 'se' },
+        hooks: {
+            bindEvents: [
+                function(plot, eventHolder) {
+                    /* now replace empty lables with offset span */
+                    var labelHTML = jQuery('#flotgraph'+nr+' DIV.axis_y DIV');
+                    jQuery(label).each(function(x, val) {
+                        labelHTML[x].innerHTML = val;
+                    });
+                }
+            ]
+        }
+    });
+    return;
+}
+
+/* render graph in multiple chunks / pages */
+function render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, type, label, max_entries_per_page) {
+    page_renumber_required = 1;
+    var pages  = Math.ceil(data.length / max_entries_per_page);
+    var fpage  = jQuery("#flotgraph"+nr).closest('DIV.page');
+    fpage.find("#flotgraph"+nr).attr('id', 'flotgraph'+nr+'_0');
+    var lastpage = fpage;
+    for(var x = 1; x < pages; x++) {
+        var cloned = fpage.clone();
+        cloned.find("#flotgraph"+nr+'_0').attr('id', 'flotgraph'+nr+'_'+x);
+        cloned.find('SCRIPT').remove();
+        lastpage.after(cloned);
+        lastpage = cloned;
+    };
+
+    var el_per_page = Math.ceil(data.length / pages);
+    data  = data.reverse();
+    label = label.reverse();
+    for(var x = 0; x < pages; x++) {
+        var data_chunk  = data.splice(0, el_per_page);
+        var label_chunk = label.splice(0, el_per_page);
+        data_chunk  = data_chunk.reverse();
+        label_chunk = label_chunk.reverse();
+        // label & data has to be renumbered
+        var new_data = [];
+        jQuery(data_chunk).each(function(nr, d) {
+            new_data.push([d[0], (nr+1)]);
+        });
+        render_total_sla_graph(nr+'_'+x, title, new_data, sla, graph_min_sla, type, label_chunk, max_entries_per_page);
+    }
+    return;
 }

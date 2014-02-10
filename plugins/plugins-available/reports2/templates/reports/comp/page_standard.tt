@@ -1,5 +1,4 @@
 ﻿[% current_page = current_page() %]
-<a name="page[% current_page %]"></a>
 <div class="page content_page">
   <table class="page">
     <tr>

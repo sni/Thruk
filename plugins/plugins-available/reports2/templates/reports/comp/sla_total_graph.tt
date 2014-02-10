@@ -22,77 +22,34 @@
 [% IF height > 650 %][% height = 650 %][% END %]
 <div id="flotgraph[% nr %]" class="flotgraph" style="height:[% height %]px"></div>
 <script type="text/javascript">
-  var d1 = {
-      label: "[% loc("Availability") %]",
-      color: "rgb(82, 167, 82)",
-      bars: { show: true, horizontal: true },
-      data: [% encode_json_obj(values) %]
-  }
-  var d2 = {
-      color: "rgb(236, 193, 77)",
-      lines: { show: true },
-      data: [[[% param.sla %],0], [[% param.sla %], 9999]]
-  }
-  $.plot($("#flotgraph[% nr %]"), [d1,d2], {
-      series: {
-          bars: {
-            show: false,
-            barWidth: 0.9,
-            align: 'center',
-            fillColor: { colors: [ { opacity: 1.0 }, { opacity: 0.6 } ] }
-          },
-          lines: { show: false, fill: false }
-      },
-      yaxis: {
-        min:   0.5,
-        max:   [% values.size + 0.5 %],
-        [% IF type == 'host' %]
-          ticks: [ [% FOREACH hst = avail_data.hosts.keys.sort.reverse %]
-                   [ [% loop.count %], " "],
-                   [% END %]
-                 ]
-        [% ELSE %]
-          ticks: [ [% x=1; FOREACH hst = avail_data.services.keys.sort.reverse %]
-                     [% FOREACH svc = avail_data.services.$hst.keys.sort.reverse %]
-                     [ [% x; x = x + 1 %], " "],
-                     [% END %]
-                   [% END %]
-                 ]
+<!--
+jQuery(document).ready(function() {
+    var graph_data = [% encode_json_obj(values) %];
+    var label = [];
+    [%+ IF type == 'host' +%]
+      [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
+        [% format = '%0.' _ param.decimals _ 'f' %]
+        [% val  = sprintf(format, values.$x.0) %]
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+      [% END %]
+    [% ELSE %]
+      [% x=0; FOREACH hst = avail_data.services.keys.sort.reverse %]
+        [% FOREACH svc = avail_data.services.$hst.keys.sort.reverse %]
+          label[[% x %]] = "";
+          [% format = '%0.' _ param.decimals _ 'f' %]
+          [% val  = sprintf(format, values.$x.0) %]
+          [% IF loop.last %]
+          label[[% x %]] += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
           [% END %]
-      },
-      xaxis: {
-        min:   [% param.graph_min_sla %],
-        max:   100
-      },
-      legend: { position: 'se' },
-      hooks: {
-        bindEvents: [
-          function(plot, eventHolder) {
-            /* now replace empty lables with offset span */
-            var label = jQuery('#flotgraph[% nr %] DIV.axis_y DIV');
-            [% IF type == 'host' %]
-              [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
-                [% format = '%0.' _ param.decimals _ 'f' %]
-                [% val  = sprintf(format, values.$x.0) %]
-                label[[% x; x = x + 1 %]].innerHTML = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
-              [% END %]
-            [% ELSE %]
-              [% x=0; FOREACH hst = avail_data.services.keys.sort.reverse %]
-                [% FOREACH svc = avail_data.services.$hst.keys.sort.reverse %]
-                  label[[% x %]].innerHTML = "";
-                  [% format = '%0.' _ param.decimals _ 'f' %]
-                  [% val  = sprintf(format, values.$x.0) %]
-                  [% IF loop.last %]
-                  label[[% x %]].innerHTML += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
-                  [% END %]
-                  label[[% x %]].innerHTML += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
-                  label[[% x %]].innerHTML += "<span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
-                  [% x = x + 1 %]
-                [% END %]
-              [% END %]
-            [% END %]
-          }
-        ]
-      }
-  });
+          label[[% x %]] += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
+          label[[% x %]] += "<span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+          [% x = x + 1 %]
+        [% END %]
+      [% END %]
+    [%+ END +%]
+
+    var max_entries_per_page = 40;
+    render_total_sla_graph([% nr %], "[% loc("Availability") %]", graph_data, [% param.sla %], [% param.graph_min_sla %], "[% type %]", label, max_entries_per_page);
+});
+-->
 </script>

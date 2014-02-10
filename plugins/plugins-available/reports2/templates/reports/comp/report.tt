@@ -20,5 +20,12 @@
 </head>
 <body>
 [% content %]
+<script type="text/javascript">
+<!--
+jQuery(document).ready(function() {
+  reports_body_end();
+});
+-->
+</script>
 </body>
 </html>

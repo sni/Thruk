@@ -56,7 +56,7 @@
     <td class="dataOdd" align="left" colspan=2>
       [% backends_selected=0 %]
       [% IF r.backends.size > 0 %][% backends_selected=1 %][% END %]
-      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends');" class="clickable"> Select Backends:</span><br>
+      <input type="checkbox" id="report_backends_toggle" name="report_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" style="vertical-align: top;"><span onclick="toggleCheckBox('report_backends_toggle'); toggleDisabled('report_backends'); reports_update_affected_sla_objects(this);" class="clickable"> Select Backends:</span><br>
       <select id="report_backends" name="report_backends" multiple style="min-width: 180px;"[% IF !backends_selected %] disabled[% END %] onchange="reports_update_affected_sla_objects(this)">
         [% FOREACH b = backends %]
         <option value="[% b %]"[% FOREACH rb = r.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
@@ -132,5 +132,10 @@
 <script type="text/javascript">
 <!--
   init_report_tool_buttons();
+
+  var inp = jQuery('SELECT[name=template]');
+  if(inp && inp.length > 0) {
+    reports_update_affected_sla_objects(inp[0]);
+  }
 -->
 </script>
