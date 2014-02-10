@@ -255,7 +255,9 @@ sub begin : Private {
     # clean up changes in cookie paths
     # REMOVE AFTER: 01.01.2016
     if($c->request->{'headers'}->{'cookie'}) {
-        for my $cookiename (qw/thruk_backends thruk_side thruk_auth thruk_theme thruk_sounds thruk_favicon thruk_mobile/) {
+        for my $cookiename (qw/thruk_backends thruk_side thruk_auth thruk_theme
+                               thruk_sounds thruk_favicon thruk_mobile thruk_obj_layout
+                              /) {
             if(scalar @{[$c->request->{'headers'}->{'cookie'} =~ m/($cookiename=[^;]+;)/gmx]} > 1) {
                 push @{$c->stash->{'fix_cookies'}}, $cookiename;
             }
