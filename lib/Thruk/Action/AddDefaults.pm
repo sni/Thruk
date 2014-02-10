@@ -450,7 +450,9 @@ sub set_processinfo {
         $processinfo = $c->{'db'}->get_processinfo();
         if(ref $processinfo eq 'HASH') {
             for my $peer (@{$c->{'db'}->get_peers()}) {
-                my $key = $peer->peer_key();
+                my $key  = $peer->peer_key();
+                my $name = $peer->peer_name();
+                $processinfo->{$key}->{'peer_name'} = $name;
                 $cached_data->{'processinfo'}->{$key} = $processinfo->{$key} if scalar keys %{$processinfo->{$key}} > 0;
             }
         }

@@ -300,7 +300,7 @@
                           [% IF backends && backends.size > 1 %]
                           <tr>
                             <td class='dataVar'>Monitored by:</td>
-                            <td class='dataVal'>[% service.peer_name %]</td>
+                            <td class='dataVal'>[% pi_detail.$peer_key.peer_name %]</td>
                           </tr>
                           [% END %]
                         </table>

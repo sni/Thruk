@@ -105,7 +105,7 @@ for my $report (@{$test_pdf_reports}) {
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local',
         like => $like,
-    }) or BAIL_OUT("failed");
+    }) or BAIL_OUT("report failed in ".$0);
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999',
         like => $like,

@@ -188,10 +188,11 @@ return result as hash ref by key
 sub hashref_pk {
     my($self, $key) = @_;
 
-    croak("no key!") unless $key;
+    confess("no key!") unless $key;
 
     my %indexed;
     my @data = $self->hashref_array();
+    confess('undefined index: '.$key) if(defined $data[0] and !defined $data[0]->{$key});
     for my $row (@data) {
         $indexed{$row->{$key}} = $row;
     }

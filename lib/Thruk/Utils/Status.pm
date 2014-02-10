@@ -1808,13 +1808,13 @@ sub get_service_matrix {
 
     if(defined $servicefilter) {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'], AddPeer => 0 );
+        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
         for my $svc (@{$hostnames}) {
             $uniq_hosts->{$svc->{'host_name'}} = 1;
         }
     } else {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'], AddPeer => 0 );
+        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'] );
 
         # get pages hosts
         for my $hst (@{$hostnames}) {

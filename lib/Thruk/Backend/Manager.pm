@@ -1405,11 +1405,9 @@ sub _remove_duplicates {
     for my $dat ( @{$data} ) {
         my $peer_key = $dat->{'peer_key'};
         delete $dat->{'peer_key'};
-        my $peer_name = $dat->{'peer_name'};
-        delete $dat->{'peer_name'};
-        my $peer_addr = $dat->{'peer_addr'};
-        delete $dat->{'peer_addr'};
-        my $md5 = md5_hex( encode_utf8( join( ';', grep(defined, values %{$dat})) ) );
+        my $peer_name = $c->{'stash'}->{'pi_detail'}->{$peer_key}->{'peer_name'};
+        my $peer_addr = $c->{'stash'}->{'pi_detail'}->{$peer_key}->{'peer_addr'};
+        my $md5       = md5_hex( encode_utf8( join( ';', grep(defined, values %{$dat})) ) );
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
@@ -1639,12 +1637,17 @@ sub _merge_answer {
 
         if( ref $data->{$key} eq 'ARRAY' ) {
             $return = [] unless defined $return;
-            $return = [ @{$return}, @{ $data->{$key} } ];
+            if(defined $data->{$key}->[0] && ref $data->{$key}->[0] eq 'HASH') {
+                map { $_->{'peer_key'} = $key } @{$data->{$key}};
+            }
+            $return = [ @{$return}, @{$data->{$key}} ];
         }
         elsif ( ref $data->{$key} eq 'HASH' ) {
             $return = {} unless defined $return;
             $return = {} unless ref $return eq 'HASH';
-            $return = { %{$return}, %{ $data->{$key} } };
+            my $tmp = $data->{$key};
+            map { $tmp->{$_}->{'peer_key'} = $key } keys %{$data->{$key}};
+            $return = { %{$return}, %{$data->{$key} } };
         }
         else {
             push @{$return}, $data->{$key};
@@ -1667,7 +1670,8 @@ sub _merge_hostgroup_answer {
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
+        my $key  = $peer->peer_key();
+        my $name = $peer->peer_name();
         next if !defined $data->{$key};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
@@ -1681,7 +1685,7 @@ sub _merge_hostgroup_answer {
             }
 
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{ $row->{'name'} }->{'backends_hash'}->{ $row->{'peer_name'} } = 1;
+            $groups->{ $row->{'name'} }->{'backends_hash'}->{$name} = 1;
         }
     }
 
@@ -1709,7 +1713,8 @@ sub _merge_servicegroup_answer {
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
-        my $key = $peer->{'key'};
+        my $key  = $peer->peer_key();
+        my $name = $peer->peer_name();
         next if !defined $data->{$key};
         confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
 
@@ -1722,7 +1727,7 @@ sub _merge_servicegroup_answer {
                 $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
             }
             if( !defined $groups->{ $row->{'name'} }->{'backends_hash'} ) { $groups->{ $row->{'name'} }->{'backends_hash'} = {} }
-            $groups->{ $row->{'name'} }->{'backends_hash'}->{ $row->{'peer_name'} } = 1;
+            $groups->{$row->{'name'}}->{'backends_hash'}->{$name} = 1;
         }
     }
 

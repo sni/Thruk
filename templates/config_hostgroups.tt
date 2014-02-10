@@ -16,7 +16,6 @@
   </tr>
 
   [% FOREACH d = data %]
-  [% SET pd = d.peer_key %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.name %]

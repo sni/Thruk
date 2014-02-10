@@ -76,7 +76,7 @@
         </td>
         [% END %]
         [% IF show_backends_in_table == 2 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% s.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
@@ -93,7 +93,7 @@
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% s.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
             <td class='[% serviceclass %]' align="left">

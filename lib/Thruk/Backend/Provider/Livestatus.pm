@@ -945,7 +945,7 @@ sub _get_class {
         }
     }
 
-    $options->{'options'}->{'AddPeer'} = 1 if(!defined $options->{'AddPeer'} or $options->{'AddPeer'} == 1);
+    $options->{'options'}->{'AddPeer'} = 0 if(!defined $options->{'AddPeer'} or $options->{'AddPeer'} == 0);
     $class = $class->options($options->{'options'});
 
     return $class;
