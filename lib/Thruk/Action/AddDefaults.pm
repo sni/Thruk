@@ -654,6 +654,7 @@ sub delayed_proc_info_update {
     my $disabled_backends = $c->{'db'}->disable_hidden_backends();
     _set_possible_backends($c, $disabled_backends);
     set_processinfo($c);
+    return;
 }
 
 
