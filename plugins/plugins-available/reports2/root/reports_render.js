@@ -79,6 +79,11 @@ function render_total_sla_graph(nr, title, data, sla, graph_min_sla, type, label
         return;
     }
 
+    var height = data.length * 20;
+    if(height < 300) { height = 300; }
+    if(height > 650) { height = 650; }
+    jQuery("#flotgraph"+nr).css('height', height+"px");
+
     var ticks = [];
     jQuery(data).each(function(x, val) {
         ticks.push([x+1, " "]);
@@ -145,12 +150,11 @@ function render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, typ
         lastpage = cloned;
     };
 
-    var el_per_page = Math.ceil(data.length / pages);
     data  = data.reverse();
     label = label.reverse();
     for(var x = 0; x < pages; x++) {
-        var data_chunk  = data.splice(0, el_per_page);
-        var label_chunk = label.splice(0, el_per_page);
+        var data_chunk  = data.splice(0, max_entries_per_page);
+        var label_chunk = label.splice(0, max_entries_per_page);
         data_chunk  = data_chunk.reverse();
         label_chunk = label_chunk.reverse();
         // label & data has to be renumbered
