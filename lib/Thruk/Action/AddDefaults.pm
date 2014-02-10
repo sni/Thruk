@@ -482,12 +482,13 @@ sub set_processinfo {
     if(   !defined $cached_user_data
        or !defined $cached_user_data->{'prev_last_program_restart'}
        or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
+       or $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
       ) {
         if(defined $c->stash->{'remote_user'}) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
             $cached_user_data = {
-                'prev_last_program_restart' => $last_program_restart,
+                'prev_last_program_restart' => time(),
                 'contactgroups'             => $contactgroups,
             };
             $c->cache->set('users', $c->stash->{'remote_user'}, $cached_user_data) if defined $c->stash->{'remote_user'};
@@ -639,6 +640,20 @@ sub die_when_no_backends {
         return $c->detach('/error/index/9');
     }
     return;
+}
+
+########################################
+
+=head2 delayed_proc_info_update
+
+    run process info update after the main page has been served
+
+=cut
+sub delayed_proc_info_update {
+    my($c) = @_;
+    my $disabled_backends = $c->{'db'}->disable_hidden_backends();
+    _set_possible_backends($c, $disabled_backends);
+    set_processinfo($c);
 }
 
 

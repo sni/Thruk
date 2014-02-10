@@ -26,7 +26,7 @@ before 'execute' => sub {
     # make sure process info is not getting too old
     my $c = $_[2];
     if(!$c->stash->{'processinfo_time'} or $c->stash->{'processinfo_time'} < time() - 90) {
-        $c->run_after_request('Thruk::Action::AddDefaults::set_processinfo($c);');
+        $c->run_after_request('Thruk::Action::AddDefaults::delayed_proc_info_update($c);');
     }
 };
 
