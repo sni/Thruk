@@ -211,10 +211,8 @@ sub set_default_config {
 
     $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
     # external jobs can be disabled by env
-    if(defined $ENV{'NO_EXTERNAL_JOBS'}
-       or $ENV{'THRUK_SRC'} eq 'SCRIPTS'
-       or $ENV{'THRUK_SRC'} eq 'CLI')
-    {
+    # don't disable for CLI, breaks config reload over http somehow
+    if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
         $config->{'no_external_job_forks'} = 1;
     }
 
