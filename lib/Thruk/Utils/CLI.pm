@@ -1098,13 +1098,13 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
-        return("starting configcheck failed, check your logfiles", 1) unless $jobid;
+        die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
-        return("starting configreload failed, check your logfiles", 1) unless $jobid;
+        die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # save incoming config changes
