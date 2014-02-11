@@ -47,14 +47,15 @@ sub set_object_model {
     $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
 
     # already parsed?
+    my $jobid = $model->currently_parsing($c->stash->{'param_backend'});
     if(    Thruk::Utils::Conf::get_model_retention($c)
        and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
     ) {
         # objects initialized
     }
     # currently parsing
-    elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
-        $c->response->redirect("job.cgi?job=".$id);
+    elsif($jobid && Thruk::Utils::External::is_running($c, $jobid, 1)) {
+        $c->response->redirect("job.cgi?job=".$jobid);
         return 0;
     }
     else {

@@ -1227,10 +1227,12 @@ sub _cmd_raw {
 
         # add config tool settings
         if($Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}) {
+            my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'};
             $res->[2]->{$key}->{'configtool'} = {
-                'obj_readonly'   => $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
-                'obj_check_cmd'  => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
-                'obj_reload_cmd' => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
+                'core_type'      => $tmp->{'core_type'},
+                'obj_readonly'   => $tmp->{'obj_readonly'},
+                'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
             };
         }
     }
