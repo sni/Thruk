@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.82     Thu Feb 13 00:01:36 CET 2014
           - naemon adjustments
           - performance improvments on pages not using any backends (reports, bp, conf,...)
           - removed old reporting plugin

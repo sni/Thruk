@@ -322,8 +322,8 @@ plugins/plugins-available/mobile/root/jqm/images/icons-36-white.png
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router-0.6.js
-plugins/plugins-available/mobile/root/mobile-1.81.css
-plugins/plugins-available/mobile/root/mobile-1.81.js
+plugins/plugins-available/mobile/root/mobile-1.82.css
+plugins/plugins-available/mobile/root/mobile-1.82.js
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
@@ -784,7 +784,7 @@ plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
-plugins/plugins-available/panorama/root/panorama-1.81.css
+plugins/plugins-available/panorama/root/panorama-1.82.css
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/templates/_panorama_js_elements.tt
@@ -925,7 +925,7 @@ root/thruk/images/naemon_logo.png
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-1.81.js
+root/thruk/javascript/all_in_one-1.82.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png
@@ -983,7 +983,7 @@ root/thruk/javascript/jstree/themes/default/style.css
 root/thruk/javascript/jstree/themes/default/throbber.gif
 root/thruk/javascript/overlib.js
 root/thruk/javascript/strftime-min.js
-root/thruk/javascript/thruk-1.81.js
+root/thruk/javascript/thruk-1.82.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav
@@ -2103,8 +2103,8 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-1.81.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.81.css
+themes/themes-available/Thruk/stylesheets/all_in_one-1.82.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.82.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css

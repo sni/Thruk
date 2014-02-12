@@ -20,7 +20,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.81';
+our $VERSION = '1.82';
 
 my $project_root = home('Thruk::Config');
 my $branch       = '';
@@ -32,7 +32,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'January 05, 2014',
+              'released'               => 'February 13, 2014',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
