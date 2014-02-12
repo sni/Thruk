@@ -198,13 +198,14 @@ sub save_bp_objects {
             my $peer = $c->{'db'}->get_peer_by_key($name);
             my $pkey = $peer->peer_key();
             die("no backend found by name ".$name) unless $peer;
+            my $time = time();
             my $options = {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
             };
             $c->{'db'}->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
-            Thruk::Utils::wait_after_reload($c);
+            Thruk::Utils::wait_after_reload($c, $pkey, $time);
         }
     } else {
         # discard file

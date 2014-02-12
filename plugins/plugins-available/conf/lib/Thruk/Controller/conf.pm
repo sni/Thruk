@@ -2172,6 +2172,8 @@ sub _config_check {
 sub _config_reload {
     my($c) = @_;
 
+    my $time = time();
+    my $pkey;
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
@@ -2191,7 +2193,7 @@ sub _config_reload {
         # restart by livestatus
         my $name = $c->stash->{'param_backend'};
         my $peer = $c->{'db'}->get_peer_by_key($name);
-        my $pkey = $peer->peer_key();
+        $pkey = $peer->peer_key();
         die("no backend found by name ".$name) unless $peer;
         my $options = {
             'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
@@ -2202,7 +2204,7 @@ sub _config_reload {
     }
 
     # wait until core responds again
-    Thruk::Utils::wait_after_reload($c);
+    Thruk::Utils::wait_after_reload($c, $pkey, $time);
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
