@@ -404,7 +404,7 @@ sub _do_child_stuff {
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
 
     # make remote user available
-    $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+    $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c->stash->{'remote_user'};
 
     $|=1; # autoflush
 
