@@ -5,6 +5,7 @@
 
 var page_renumber_required = 0;
 function reports_body_end() {
+    set_vertical_header();
     split_paged_tables();
 
     // reorder page numbers
@@ -18,6 +19,29 @@ function reports_body_end() {
     // insert anchors for easy testing on html pages
     jQuery('DIV.page').each(function(nr, el) {
         jQuery('<a name="page'+(nr+1)+'">').insertBefore(el);
+    });
+}
+
+/* split too height tables in several pages */
+function set_vertical_header() {
+    jQuery('TABLE.vertical_header').each(function(x, table) {
+        var firstrow = jQuery(table).find('TR')[0];
+
+        // wrap cell content in divs and extract max-width
+        var max_width = 20;
+        jQuery(firstrow).find('TD, TH').each(function(y, cell) {
+            jQuery(cell).html('<div style="white-space:nowrap;">'+cell.innerHTML+'</div>');
+            var div = jQuery(jQuery(cell).find('DIV')[0]);
+            var width = div.width();
+            if(max_width < width) { max_width = width; }
+            div.css('width', '18px');
+            div.addClass('vertical');
+        });
+        max_width = max_width + 5;
+
+        jQuery(firstrow).find('TD, TH').each(function(y, cell) {
+            jQuery(cell).css('height', max_width+'px');
+        });
     });
 }
 
@@ -59,8 +83,10 @@ function split_table(table, max_height) {
 
     // find rows on the cloned table and remove all from the page above
     // except first row
+    var headers = 0;
+    if(table.hasClass('headers2')) { headers = 1; }
     cloned.find('TABLE.paged_table > TBODY > TR').each(function(nr, tr) {
-        if(nr > 0 && nr < lastrow ) {
+        if(nr > headers && nr < lastrow ) {
             jQuery(tr).remove();
         }
     });
