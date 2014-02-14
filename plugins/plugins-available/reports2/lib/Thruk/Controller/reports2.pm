@@ -83,12 +83,31 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         $c->{'request'}->{'parameters'}->{'get_total_numbers_only'} = 1;
         my @res;
         my $backends = $c->{'request'}->{'parameters'}->{'backends'} || $c->{'request'}->{'parameters'}->{'backends[]'};
+        my $template = $c->{'request'}->{'parameters'}->{'template'};
+        my $sub = 'Thruk::Utils::Avail::calculate_availability';
+        if($template) {
+            eval {
+                $sub = Thruk::Utils::get_template_variable($c, 'reports/'.$template, 'affected_sla_objects', { block => 'edit' });
+            };
+        }
         if($backends and ($c->{'request'}->{'parameters'}->{'backends_toggle'} or $c->{'request'}->{'parameters'}->{'report_backends_toggle'})) {
             $c->{'db'}->disable_backends();
             $c->{'db'}->enable_backends($backends);
         }
+        if($c->{'request'}->{'parameters'}->{'param'}) {
+            for my $str (split/&/mx, $c->{'request'}->{'parameters'}->{'param'}) {
+                my($key,$val) = split(/=/mx, $str, 2);
+                if($key =~ s/^params\.//mx) {
+                    $c->{'request'}->{'parameters'}->{$key} = $val unless exists $c->{'request'}->{'parameters'}->{$key};
+                }
+            }
+        }
         eval {
-            @res = Thruk::Utils::Avail::calculate_availability($c);
+            $Thruk::Utils::Reports::Render::c = $c;
+            eval {
+                require Thruk::Utils::Reports::CustomRender;
+            };
+            @res = &{\&{$sub}}($c);
         };
         if($@ or scalar @res == 0) {
             $c->stash->{'json'}   = { 'hosts' => 0, 'services' => 0, 'error' => $@ };

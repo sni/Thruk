@@ -151,7 +151,8 @@ function reports_update_affected_sla_objects(input) {
                 servicegroup:    form.find('INPUT[name="params.servicegroup"]').val(),
                 template:        form.find('SELECT[name=template]').val(),
                 backends:        form.find('SELECT[name=report_backends]').val(),
-                backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val())
+                backends_toggle: (form.find('INPUT[name=backends_toggle]').val() || form.find('INPUT[name=report_backends_toggle]').val()),
+                param:           form.serialize()
         },
         type: 'POST',
         cache: false,
