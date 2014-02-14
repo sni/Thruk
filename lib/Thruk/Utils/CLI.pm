@@ -55,10 +55,11 @@ sub new {
     bless $self, $class;
 
     # set some env defaults
-    $ENV{'THRUK_SRC'}       = 'CLI';
-    $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
-    $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
-    $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'} >= 3;
+    $ENV{'THRUK_SRC'}        = 'CLI';
+    $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
+    $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
         $options->{'remoteurl_specified'} = 0;

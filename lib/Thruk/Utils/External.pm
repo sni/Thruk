@@ -192,7 +192,7 @@ sub is_running {
     if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
-        carp('no remote_user') unless defined $c->stash->{'remote_user'};
+        confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
     }
 
@@ -301,7 +301,7 @@ sub get_result {
     if(!$nouser && -f $dir."/user") {
         my $user = read_file($dir."/user");
         chomp($user);
-        carp('no remote_user') unless defined $c->stash->{'remote_user'};
+        confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
     }
 
@@ -404,7 +404,8 @@ sub _do_child_stuff {
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
 
     # make remote user available
-    $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c->stash->{'remote_user'};
+    confess('no remote_user') unless defined $c->stash->{'remote_user'};
+    $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
     $|=1; # autoflush
 
@@ -434,7 +435,7 @@ sub _do_parent_stuff {
 
     # write user file
     if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
-        carp("no remote_user") unless defined $c->stash->{'remote_user'};
+        confess("no remote_user") unless defined $c->stash->{'remote_user'};
         open($fh, '>', $dir."/user") or die("cannot write user: $!");
         print $fh $c->stash->{'remote_user'};
         print $fh "\n";
