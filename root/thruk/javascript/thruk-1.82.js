@@ -61,6 +61,15 @@ function init_page() {
         jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
             jQuery(this).prev('input').val('').focus();
         }));
+
+        // init some buttons
+        jQuery('BUTTON.thruk_button').button();
+        jQuery('A.thruk_button').button();
+
+        jQuery('.thruk_button_refresh').button({
+            icons: {primary: 'ui-refresh-button'}
+        });
+
     });
 
     var newUrl   = window.location.href;

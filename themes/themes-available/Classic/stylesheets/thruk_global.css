@@ -881,6 +881,9 @@ SPAN.deleteicon INPUT {
 .ui-delete-button {
   background-image: url(../images/delete.gif) !important;
 }
+.ui-refresh-button {
+  background-image: url(../images/arrow_refresh.png) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }
