@@ -227,7 +227,7 @@ sub get_status {
 
     my $is_running = _is_running($dir);
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start      = stat($dir.'/user');
+    my @start      = stat($dir);
     my $time       = time() - $start[9];
     my $percent    = 0;
     if($is_running == 0) {
