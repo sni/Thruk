@@ -173,14 +173,14 @@ __END__
   Installation directories:
 
     --prefix=PREFIX               install architecture-independent files in PREFIX
-                                  [/usr/local/thruk]
+                                  [/usr/local]
 
     --exec-prefix=EPREFIX         install architecture-dependent files in EPREFIX
                                   [PREFIX]
 
   By default, `make install' will install all the files in
-  `/usr/local/thruk/bin', `/usr/local/thruk/lib' etc.  You can specify
-  an installation prefix other than `/usr/local/thruk' using `--prefix',
+  `/usr/local/bin', `/usr/local/lib' etc.  You can specify
+  an installation prefix other than `/usr/local/' using `--prefix',
   for instance `--prefix=$HOME'.
 
   For better control, use the options below.
