@@ -197,11 +197,11 @@ __END__
 
     --with-htmlurl=<local-url>   sets URL for public html [/thruk]
 
-    --with-temp-dir              sets the temp folder [PREFIX/tmp]
-    --with-init-dir              sets the folder for rc scripts
+    --with-tempdir               sets the temp folder [PREFIX/tmp]
+    --with-initdir               sets the folder for rc scripts
     --with-httpd-conf            sets path to Apache conf.d directory
-    --with-logrotate-dir         sets path to logrotates.d directory
-    --with-log-dir               sets path to log files. [/var/log/thruk]
+    --with-logrotatedir          sets path to logrotates.d directory
+    --with-logdir                sets path to log files. [/var/log/thruk]
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
     --without-compress           skip compression of css and javascript files. Requires yui-compressor.
