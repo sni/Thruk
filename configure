@@ -137,15 +137,15 @@ print <<EOT;
   datadir            = $options->{'datadir'}
   mandir             = $options->{'mandir'}
 
-  init-dir           = $options->{'init-dir'}
-  logrotate-dir      = $options->{'logrotate-dir'}
-  log-dir            = $options->{'log-dir'}
+  initdir            = $options->{'init-dir'}
+  logrotatedir       = $options->{'logrotate-dir'}
+  logdir             = $options->{'log-dir'}
   htmlurl            = $options->{'htmlurl'}
   httpd-conf         = $options->{'httpd-conf'}
   thruk-user         = $options->{'thruk-user'}
   thruk-group        = $options->{'thruk-group'}
   thruk-libs         = $options->{'thruk-libs'}
-  checkresult-dir    = $options->{'checkresult-dir'}
+  checkresultdir     = $options->{'checkresult-dir'}
   css/js compression = $options->{'compress'}
 
 now run
@@ -206,7 +206,7 @@ __END__
     --with-thruk-libs            sets path to thruk libs directory [PREFIX/lib/thruk/perl5]
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
-    --with-checkresult-dir       sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
+    --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
     --without-compress           skip compression of css and javascript files. Requires yui-compressor.
 
 =cut
