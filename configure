@@ -201,7 +201,7 @@ __END__
     --with-initdir               sets the folder for rc scripts
     --with-httpd-conf            sets path to Apache conf.d directory
     --with-logrotatedir          sets path to logrotates.d directory
-    --with-logdir                sets path to log files. [/var/log/thruk]
+    --with-logdir                sets path to log files. [PREFIX/var/log/thruk]
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
     --without-compress           skip compression of css and javascript files. Requires yui-compressor.
