@@ -227,7 +227,7 @@ sub get_status {
 
     my $is_running = _is_running($dir);
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start      = stat($dir);
+    my @start      = stat($dir.'/start');
     my $time       = time() - $start[9];
     my $percent    = 0;
     if($is_running == 0) {
@@ -310,7 +310,7 @@ sub get_result {
     $err = read_file($dir."/stderr") if -f $dir."/stderr";
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir);
+    my @start = stat($dir.'/start');
     my @end;
     if(-f $dir."/stdout") {
         @end = stat($dir."/stdout")
@@ -432,6 +432,12 @@ sub _do_parent_stuff {
     print $fh $pid;
     print $fh "\n";
     Thruk::Utils::IO::close($fh, $pidfile);
+
+    # write start file
+    my $startfile = $dir."/start";
+    open($fh, '>', $startfile) or die("cannot write start $startfile: $!");
+    print $fh time();
+    print $fh "\n";
 
     # write user file
     if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
