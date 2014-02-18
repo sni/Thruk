@@ -22,7 +22,11 @@
             jQuery.ajax({
                 url: 'cgi-bin/remote.cgi?startup',
                 type: 'POST',
-                success: function() {
+                success: function(data, textStatus, jqXHR) {
+                    if(data == undefined || data != 'startup done') {
+                        jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
+                        return false;
+                    }
                     jQuery('#msg').html(' <font color="green"><b>done.<\/b><\/font><br>You will be redirected...');
 
                     // reload navigation too
