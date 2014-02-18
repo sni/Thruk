@@ -310,7 +310,7 @@ sub get_result {
     $err = read_file($dir."/stderr") if -f $dir."/stderr";
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir."/user");
+    my @start = stat($dir);
     my @end;
     if(-f $dir."/stdout") {
         @end = stat($dir."/stdout")
@@ -331,7 +331,7 @@ sub get_result {
     $rc = read_file($dir."/rc") if -f $dir."/rc";
     chomp($rc) if defined $rc;
 
-    return($out,$err,$time, $dir,$stash,$rc);
+    return($out,$err,$time,$dir,$stash,$rc);
 }
 
 ##############################################
