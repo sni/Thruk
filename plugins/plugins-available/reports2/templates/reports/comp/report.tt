@@ -5,7 +5,9 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>[% r.name %]</title>
   [% PROCESS 'reports/style/css.tt' %]
-  [% PROCESS _common_js.tt %]
+  [% thruk_debug_orig=thruk_debug %][%# seems to break jquery  #%]
+  [% PROCESS _common_js.tt show_error_reports=0 thruk_debug=1 %]
+  [% thruk_debug=thruk_debug_orig %]
   <script type="text/javascript">
   <!--
   [%+ PROCESS _header_initial_states.tt +%]
