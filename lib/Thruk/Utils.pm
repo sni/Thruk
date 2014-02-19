@@ -1886,7 +1886,7 @@ return variable defined from template
 =cut
 
 sub get_template_variable {
-    my($c, $template, $var, $stash) = @_;
+    my($c, $template, $var, $stash, $noerror) = @_;
 
     # more stash variables to set?
     $stash = {} unless defined $stash;
@@ -1901,6 +1901,7 @@ sub get_template_variable {
         $data = $c->view('TT')->render($c, 'get_variable.tt');
     };
     if($@) {
+        return "" if $noerror;
         Thruk::Utils::CLI::_error($@);
         return $c->detach('/error/index/13');
     }

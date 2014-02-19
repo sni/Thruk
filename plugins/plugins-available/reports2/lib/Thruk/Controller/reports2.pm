@@ -84,12 +84,13 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         my @res;
         my $backends = $c->{'request'}->{'parameters'}->{'backends'} || $c->{'request'}->{'parameters'}->{'backends[]'};
         my $template = $c->{'request'}->{'parameters'}->{'template'};
-        my $sub = 'Thruk::Utils::Avail::calculate_availability';
+        my $sub;
         if($template) {
             eval {
-                $sub = Thruk::Utils::get_template_variable($c, 'reports/'.$template, 'affected_sla_objects', { block => 'edit' });
+                $sub = Thruk::Utils::get_template_variable($c, 'reports/'.$template, 'affected_sla_objects', { block => 'edit' }, 1);
             };
         }
+        $sub = 'Thruk::Utils::Avail::calculate_availability' unless $sub;
         if($backends and ($c->{'request'}->{'parameters'}->{'backends_toggle'} or $c->{'request'}->{'parameters'}->{'report_backends_toggle'})) {
             $c->{'db'}->disable_backends();
             $c->{'db'}->enable_backends($backends);

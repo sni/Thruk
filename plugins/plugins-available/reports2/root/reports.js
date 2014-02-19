@@ -141,6 +141,11 @@ function reports_update_affected_sla_objects(input) {
     var span2 = form.find('TR.report_type_affected_sla_objects SPAN.value');
     showElement('reports_waiting');
     hideElement(span2[0].id);
+    try {
+        select_all_options('report_backends');
+    } catch(e) {
+        debug(e);
+    }
     jQuery.ajax({
         url:  'reports2.cgi',
         data: {
