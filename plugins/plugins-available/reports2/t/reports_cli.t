@@ -101,6 +101,12 @@ for my $report (@{$test_pdf_reports}) {
         $like = [ '/<html/' ];
     }
 
+    # make sure sla reports contain the graph
+    if($report->{'template'} =~ m/^sla_/mx) {
+        push @{$like}, '/Width 530/';
+        push @{$like}, '/Height 640/';
+    }
+
     # generate report
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local',
