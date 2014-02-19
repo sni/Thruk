@@ -131,9 +131,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    $self->{'addr'} =~ s|thruk$||mx;
-    $self->{'addr'} =~ s|/$||mx;
-    $self->{'addr'} .= '/thruk/cgi-bin/remote.cgi';
+    $self->{'addr'} .= '/cgi-bin/remote.cgi';
 
     $self->{'ua'} = LWP::UserAgent->new;
     $self->{'ua'}->timeout($self->{'timeout'});
