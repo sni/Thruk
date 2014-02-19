@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - Bug Fixes
             - fixed missing graphs in reports
+            - fixed js error in panorama url panel
 
 1.82     Thu Feb 13 00:01:36 CET 2014
           - naemon adjustments

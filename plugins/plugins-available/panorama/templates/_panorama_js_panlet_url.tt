@@ -52,17 +52,24 @@
                 }
 
                 /* replace iframe content */
-                var iframe = this.items.getAt(1).getEl().dom;
-
-                var ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+                var iframe;
                 try {
-                    ifrm.document.open();
-                    ifrm.document.write(html);
-                    ifrm.document.close();
+                    iframe = this.items.getAt(1).getEl().dom;
                 } catch(e) {
-                    /* first reload after changing from external to internal url does not work*/
-                    iframe.src = 'about:blank';
-                    window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+                    debug(e);
+                }
+
+                if(iframe) {
+                    var ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+                    try {
+                        ifrm.document.open();
+                        ifrm.document.write(html);
+                        ifrm.document.close();
+                    } catch(e) {
+                        /* first reload after changing from external to internal url does not work*/
+                        iframe.src = 'about:blank';
+                        window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+                    }
                 }
             }
         };
