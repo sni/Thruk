@@ -387,6 +387,10 @@ var TP = {
 
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
+        if(!activeTab) {
+            debug("forced setting activeTab");
+            activeTab = tabpan.setActiveTab(0);
+        }
         // ensure panels from the active tab are displayed
         if(TP.initial_active_tab != activeTab.getStateId()) {
             debug("active tab changed...");
