@@ -63,14 +63,14 @@ function init_page() {
         }));
 
         // init some buttons
-        jQuery('BUTTON.thruk_button').button();
-        jQuery('A.thruk_button').button();
-        jQuery('INPUT.thruk_button').button();
+        if(has_jquery_ui) {
+            jQuery('BUTTON.thruk_button').button();
+            jQuery('A.thruk_button').button();
 
-        jQuery('.thruk_button_refresh').button({
-            icons: {primary: 'ui-refresh-button'}
-        });
-
+            jQuery('.thruk_button_refresh').button({
+                icons: {primary: 'ui-refresh-button'}
+            });
+        }
     });
 
     var newUrl   = window.location.href;
