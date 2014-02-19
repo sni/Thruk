@@ -310,7 +310,7 @@ sub init_backend_thread_pool {
         $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
-            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys );
+            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys, $config->{'product_prefix'} );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};

@@ -29,7 +29,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $options, $peerconfig, $config ) = @_;
+    my( $class, $options, $peerconfig, $config, $product_prefix ) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
@@ -39,6 +39,7 @@ sub new {
         'logs_timeout'         => 100,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
+        'product_prefix'       => $product_prefix,
         'key'                  => '',
         'name'                 => $options->{'name'},
         'addr'                 => $options->{'peer'},
@@ -131,7 +132,10 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    $self->{'addr'} .= '/cgi-bin/remote.cgi';
+    my $pp = $self->{'product_prefix'};
+    $self->{'addr'} =~ s|\Q$pp\E$||mx;
+    $self->{'addr'} =~ s|/$||mx;
+    $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
 
     $self->{'ua'} = LWP::UserAgent->new;
     $self->{'ua'}->timeout($self->{'timeout'});
