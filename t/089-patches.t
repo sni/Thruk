@@ -22,11 +22,11 @@ my $precmds = {
   'support/0003-thruk-scripts.patch'      => 'cp script/thruk script/naglint .',
   'support/0004-thruk_data_scripts.patch' => 'cp script/thruk_auth .',
   'support/0006-logrotate.patch'          => 'cp support/thruk.logrotate thruk',
-  'support/0007-naemon-init.patch'        => 'cp support/thruk.init thruk',
-  'support/0008-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
-  'support/0009-naemon-fcgish.patch'      => 'cp support/fcgid_env.sh .',
-  'support/0012-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
-  'support/0011-naemon-cgicfg.patch'      => 'cd .. && cp cgi.cfg cgi.cfg.testbak && git checkout cgi.cfg; cp cgi.cfg tmppatches/ && mv cgi.cfg.testbak cgi.cfg',
+  'support/0007-fcgish.patch'             => 'cp support/fcgid_env.sh .',
+  'support/0031-naemon-init.patch'        => 'cp support/thruk.init thruk',
+  'support/0032-naemon-httpd.patch'       => 'cp support/apache_fcgid.conf thruk.conf',
+  'support/0035-naemon-cgicfg.patch'      => 'cd .. && cp cgi.cfg cgi.cfg.testbak && git checkout cgi.cfg; cp cgi.cfg tmppatches/ && mv cgi.cfg.testbak cgi.cfg',
+  'support/0036-naemon-htpasswd.patch'    => 'cp support/htpasswd .',
 };
 
 my @patches = glob('support/*.patch');
