@@ -24,6 +24,9 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi',
     { url => '/thruk/cgi-bin/status.cgi', like => '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">' },  # test bookmarks
 
+# Found 0 matching services, but there are x matching hosts
+    { url => '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_type=host&dfl_s0_val_pre=&dfl_s0_op=%3D&dfl_s0_value='.$host.'&dfl_s0_value_sel=5&dfl_s0_type=service&dfl_s0_val_pre=&dfl_s0_op=~&dfl_s0_value=noserviceswiththisname', unlike => 'Found 0 matching services, but there\s+is \d matching host' },
+
 # Host / Hostgroups
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=detail',

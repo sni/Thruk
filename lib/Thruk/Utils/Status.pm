@@ -50,6 +50,7 @@ sub set_default_stash {
     $c->stash->{show_substyle_selector} = 1;
     $c->stash->{imgsize}                = 20;
     $c->stash->{'audiofile'}            = '';
+    $c->stash->{'has_service_filter'}   = 0;
 
     return;
 }
@@ -187,6 +188,9 @@ sub do_filter {
     my $servicegroupfilter;
     my $searches;
 
+    # flag whether there are service only filters or not
+    $c->stash->{'has_service_filter'} = 0;
+
     $prefix = 'dfl_' unless defined $prefix;
 
     unless ( exists $c->{'request'}->{'parameters'}->{$prefix.'s0_hoststatustypes'}
@@ -275,6 +279,7 @@ sub classic_filter {
     if ( $servicegroup ne 'all' and $servicegroup ne '' ) {
         push @servicefilter,       [ { 'groups' => { '>=' => $servicegroup } } ];
         push @servicegroupfilter,  [ { 'name' => $servicegroup } ];
+        $c->stash->{'has_service_filter'} = 1;
     }
 
     my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
@@ -337,6 +342,7 @@ sub classic_filter {
             'value'   => $servicegroup,
             'op'      => '=',
             };
+        $c->stash->{'has_service_filter'} = 1;
     }
 
     if($errors) {
@@ -536,7 +542,7 @@ sub extend_filter {
     # service statustype filter (ok,warning,...)
     my( $service_statustype_filtername, $service_statustype_filter_service );
     ( $servicestatustypes, $service_statustype_filtername, $service_statustype_filter_service )
-        = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes);
+        = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes, $c);
     push @servicefilter, $service_statustype_filter_service if defined $service_statustype_filter_service;
 
     $c->stash->{'show_filter_table'} = 1 if defined $service_statustype_filter_service and  defined $c->{'stash'};
@@ -544,7 +550,7 @@ sub extend_filter {
     # service props filter (downtime, acknowledged...)
     my( $service_prop_filtername, $service_prop_filter_service );
     ( $serviceprops, $service_prop_filtername, $service_prop_filter_service )
-        = Thruk::Utils::Status::get_service_prop_filter($serviceprops);
+        = Thruk::Utils::Status::get_service_prop_filter($serviceprops, $c);
     push @servicefilter, $service_prop_filter_service if defined $service_prop_filter_service;
 
     $c->stash->{'show_filter_table'} = 1 if defined $service_prop_filter_service and  defined $c->{'stash'};
@@ -637,6 +643,7 @@ sub single_search {
             }
             elsif ( $filter->{'type'} eq 'servicegroup' ) {
                 push @servicegroupfilter, { name => { '!=' => undef } };
+                $c->stash->{'has_service_filter'} = 1;
                 next;
             }
         }
@@ -693,6 +700,7 @@ sub single_search {
         elsif ( $filter->{'type'} eq 'service' ) {
             push @servicefilter,       { description => { $op => $value } };
             push @servicetotalsfilter, { description => { $op => $value } };
+            $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
             if($op eq '~~' or $op eq '!~~') {
@@ -719,6 +727,7 @@ sub single_search {
                 push @servicetotalsfilter, { groups => { $listop => $value } };
             }
             push @servicegroupfilter,  { name   => { $op     => $value } };
+            $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
             if($op eq '~~' or $op eq '!~~') {
@@ -1122,7 +1131,7 @@ returns filter for number
 
 =cut
 sub get_service_statustype_filter {
-    my( $number ) = @_;
+    my( $number, $c ) = @_;
 
     my @servicestatusfilter;
     my @servicestatusfiltername;
@@ -1130,6 +1139,7 @@ sub get_service_statustype_filter {
     $number = 31 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 31;
     my $servicestatusfiltername = 'All';
     if( $number and $number != 31 ) {
+        $c->stash->{'has_service_filter'} = 1 if $c;
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "n", int($number) ) ) );
 
         if( $bits[0] ) {    # 1 - pending
@@ -1172,7 +1182,7 @@ returns filter for number
 
 =cut
 sub get_service_prop_filter {
-    my( $number ) = @_;
+    my( $number, $c ) = @_;
 
     my @service_prop_filter;
     my @service_prop_filtername;
@@ -1180,6 +1190,7 @@ sub get_service_prop_filter {
     $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
     my $service_prop_filtername = 'Any';
     if( $number > 0 ) {
+        $c->stash->{'has_service_filter'} = 1 if $c;
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "N", int($number) ) ) );
 
         if( $bits[0] ) {    # 1 - In Scheduled Downtime

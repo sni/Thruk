@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - redirect to host details page if no services found and no service filter was set
           - Bug Fixes
             - fixed missing graphs in reports
             - fixed js error in panorama url panel
