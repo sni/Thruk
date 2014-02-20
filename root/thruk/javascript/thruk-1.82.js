@@ -66,6 +66,7 @@ function init_page() {
         if(has_jquery_ui) {
             jQuery('BUTTON.thruk_button').button();
             jQuery('A.thruk_button').button();
+            jQuery('INPUT.thruk_button').button();
 
             jQuery('.thruk_button_refresh').button({
                 icons: {primary: 'ui-refresh-button'}
