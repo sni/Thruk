@@ -6,7 +6,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1087;
+    plan tests => 1098;
 }
 
 BEGIN {
