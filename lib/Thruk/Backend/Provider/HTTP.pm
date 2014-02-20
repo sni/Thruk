@@ -132,7 +132,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} =~ s|cgi-bin$||mx;
     $self->{'addr'} =~ s|/$||mx;
-    my $pp = $self->{'product_prefix'};
+    my $pp = $self->{'product_prefix'} || 'thruk';
     $self->{'addr'} =~ s|\Q$pp\E$||mx;
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
