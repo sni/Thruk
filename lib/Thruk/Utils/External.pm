@@ -68,6 +68,9 @@ sub cmd {
     } else {
         _do_child_stuff($c, $dir);
 
+        $SIG{CHLD} = 'DEFAULT';
+
+
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
 
