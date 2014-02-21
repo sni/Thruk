@@ -71,6 +71,8 @@ function init_page() {
             jQuery('.thruk_button_refresh').button({
                 icons: {primary: 'ui-refresh-button'}
             });
+
+            jQuery('.thruk_radioset').buttonset();
         }
     });
 
@@ -1104,6 +1106,10 @@ function unescapeHTML(html) {
 function reset_table_row_classes(table, c1, c2) {
     var x = 1;
     jQuery('TABLE#'+table+' TR').each(function(i, row) {
+        if(jQuery(row).css('display') == 'none') {
+            // skip hidden rows
+            return true;
+        }
         jQuery(row).removeClass(c1);
         jQuery(row).removeClass(c2);
         x++;
