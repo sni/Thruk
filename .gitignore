@@ -46,6 +46,7 @@ themes/themes-available/Thruk/stylesheets/all_in_one-1.82.css
 themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.82.css
 test_hook.sh
 bp/*.tbp
+bp/*.tbp.edit
 bp/*.tbp-*
 root/tests/
 script/append.make.options
