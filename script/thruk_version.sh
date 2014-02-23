@@ -81,9 +81,15 @@ if [ -n "$newversion" -a "$newversion" != "$VERSION" ]; then
     git mv plugins/plugins-available/mobile/root/mobile-$VERSION.js plugins/plugins-available/mobile/root/mobile-$newversion.js
     git mv plugins/plugins-available/panorama/root/panorama-$VERSION.css plugins/plugins-available/panorama/root/panorama-$newversion.css
     git mv root/thruk/javascript/thruk-$VERSION.js root/thruk/javascript/thruk-$newversion.js
-    mv root/thruk/javascript/all_in_one-$VERSION.js root/thruk/javascript/all_in_one-$newversion.js
-    mv themes/themes-available/Thruk/stylesheets/all_in_one-$VERSION.css themes/themes-available/Thruk/stylesheets/all_in_one-$newversion.css
-    mv themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$VERSION.css themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$newversion.css
+    if [ -e root/thruk/javascript/all_in_one-$VERSION.js ]; then
+        mv root/thruk/javascript/all_in_one-$VERSION.js root/thruk/javascript/all_in_one-$newversion.js
+    fi
+    if [ -e themes/themes-available/Thruk/stylesheets/all_in_one-$VERSION.css ]; then
+        mv themes/themes-available/Thruk/stylesheets/all_in_one-$VERSION.css themes/themes-available/Thruk/stylesheets/all_in_one-$newversion.css
+    fi
+    if [ -e themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$VERSION.css ]; then
+        mv themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$VERSION.css themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$newversion.css
+    fi
 fi
 ./script/thruk_update_docs.sh > /dev/null
 yes n | perl Makefile.PL > /dev/null
