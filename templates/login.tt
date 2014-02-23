@@ -46,7 +46,7 @@
     <br>
     <br>
     <div id="currentversioninfo">
-    <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+    <div class="version">Version [% version %][% IF branch %]-[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
     <div class="releasedate">[% released %]</div>
     </div>
     [% PROCESS _disclaimer.tt %]
