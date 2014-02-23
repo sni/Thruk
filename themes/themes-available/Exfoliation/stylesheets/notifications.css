@@ -7,8 +7,8 @@
 
 .notifications { }
 
-TABLE.notifications { padding: 0; margin: 0; }
-TH.notifications    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; color: #333333; }
+table.notifications { padding: 0; margin: 0; }
+th.notifications    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; color: #333333; }
 .notificationsOdd   { font-size: 8pt; background-color: #e7e7e7; padding: 0 4 0 4; }
 .notificationsEven  { font-size: 8pt; background-color: #f4f2f2; padding: 0 4 0 4; }
 
@@ -26,4 +26,3 @@ TH.notifications    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; 
 .notificationsHOSTUNREACHABLE     { background-color: #ffbb55; border: 1px solid #777777; padding: 0 4 0 4; }
 .notificationsHOSTACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4 0 4; }
 .notificationsHOSTCUSTOM          { background-color: #778899; border: 1px solid #777777; padding: 0 4 0 4; }
-

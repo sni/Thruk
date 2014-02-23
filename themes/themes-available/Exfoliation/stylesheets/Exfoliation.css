@@ -14,18 +14,17 @@
   line-height: 150%;
   border:1px none;
 }
+
 .tableRowSelected {
   line-height: 150%;
   border:1px none;
 }
-
 
 /* show log filter */
 body.showlog .filter { background-color: white; }
 body.showlog .filterTitle { background-color: white; }
 body.showlog .filterValue { background-color: white; }
 body.showlog .filterName { background-color: white; }
-
 
 td.filter { background-color: white; }
 
