@@ -39,13 +39,13 @@ thruk_local.conf
 
 == Usage
 
-=== How do i select hosts/services on the status page?
+=== How do I select hosts/services on the status page?
 
 Just click on the empty table row when the row is highlighted. This only works
 if you do not click on a link.
 
 
-== Where can i see the full command line for a host or servicecheck?
+== Where can I see the full command line for a host or servicecheck?
 
 You have to enable the option 'set show_full_commandline'. It's
 disabled for security reasons by default. So be careful to not display
@@ -159,7 +159,7 @@ if(has_role($c, 'authorized_for_configuration_information')) {
 
 
 
-=== How can i integrate Nagvis Maps
+=== How can I integrate Nagvis Maps
 Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set
 ....
@@ -185,7 +185,7 @@ add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index
 Thruk has to be restarted.
 
 
-=== How can i integrate Nagvis Maps in the Panorama Dashboard
+=== How can I integrate Nagvis Maps in the Panorama Dashboard
 
 Choose 'Generic Url Panlet' from the 'New Panlet' list. Then enter
 the following url:
@@ -202,20 +202,20 @@ There is a dedicated nagvis panel since Thruk release 1.78.
 =======
 
 
-=== How can i add more themes?
+=== How can I add more themes?
 
 Themes are located under 'themes'. Just copy and modify the one you
 like. See the http://thruk.org/themes.html[themes page] for details.
 
 
-=== How can i disable themes?
+=== How can I disable themes?
 
 Themes can be disabled by removing the symlink from your
 'themes/themes-enabled' directory.
 See the http://thruk.org/themes.html[themes page] for details.
 
 
-=== How can i customize reports?
+=== How can I customize reports?
 Customizing reports is coverd in the http://thruk.org/documentation.html#_customized_reports[official documenation].
 
 === Why are the PNP graphs missing in my reports?
@@ -235,7 +235,7 @@ set -x
 Then regenerate a report and investigate that new logfile.
 
 
-=== How can i create a readonly Panorama dashboard for my boss
+=== How can I create a readonly Panorama dashboard for my boss
 In combination with the user specific settings, this can easily be achieved in
 your thruk_local.conf:
 
@@ -253,7 +253,7 @@ dashboard.
 
 
 
-=== How can i set custom page titles
+=== How can I set custom page titles
 There are few ways to do this. The first way is you can turn on the
 use_bookmark_titles in your thruk_local.conf:
 
@@ -267,7 +267,7 @@ The second option is on most pages adding 'title=your title here' to
 the url will set a custom title
 
 
-==== How can i enable form based authentication
+==== How can I enable form based authentication
 In order to use the form or cookie based authentication like demo.thruk.org does,
 you have to do two small changes in your apache configuration.
 Get https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
@@ -296,7 +296,7 @@ direct links:
 These are statically linked binarys, so no installation required, just put the unpacked
 binary in the right location.
 
-=== How can i enable the business process addon.
+=== How can I enable the business process addon.
 It works out of the box with OMD. If not using OMD, some manual steps
 are required which are described in the
 http://thruk.org/documentation.html#_business_process[official documenation].
