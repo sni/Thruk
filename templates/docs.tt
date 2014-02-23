@@ -27,7 +27,7 @@
       <br>
       <br>
       <br>
-      <font size="+1"><a href="[% url_prefix %]documentation.html">continue to the Thruk Documentation</a></font>
+      <font size="+1"><a href="[% url_prefix %]documentation.html">Continue to the Thruk Documentation</a></font>
     </td>
   </tr>
 </table>
