@@ -470,6 +470,7 @@
               [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
             [% END %]
             [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
+              <br>
               <div class='commentTitle'>Recurring Host Downtime</div>
               [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' %]
             [% END %]
