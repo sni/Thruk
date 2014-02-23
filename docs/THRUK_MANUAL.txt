@@ -13,7 +13,7 @@ Main Features / Advantages
 
   * Multiple backends
   * Faster, no need to parse status.dat for every request
-  * Less cpu usage
+  * Less CPU usage
   * Display live data, no delay between core and GUI
   * Independant from monitoring core, can be installed on remote host
   * Clusterable, can be clustered over hosts
