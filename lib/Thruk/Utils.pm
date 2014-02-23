@@ -90,9 +90,9 @@ return number with thousands seperator
 sub format_number {
     my($number) = @_;
     for ($number) {
-        /\./
-        ? s/(?<=\d)(?=(\d{3})+(?:\.))/,/g
-        : s/(?<=\d)(?=(\d{3})+(?!\d))/,/g;
+        /\./mx
+        ? s/(?<=\d)(?=(\d{3})+(?:\.))/,/gmx
+        : s/(?<=\d)(?=(\d{3})+(?!\d))/,/gmx;
     }
     return $number;
 }
