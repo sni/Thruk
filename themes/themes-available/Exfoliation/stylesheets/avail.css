@@ -19,7 +19,7 @@
 .serviceCRITICAL { background-color: #ffdddd; padding: 0 4 0 4; }
 
 table.logEntries { font-size: 9pt; padding: 5 0 0 0; }
-th.logEntries    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+th.logEntries    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; color: #333333; }
 .logEntriesOdd   { background-color: #e7e7e7; padding: 0 4 0 4; }
 .logEntriesEven  { background-color: #f4f2f2; padding: 0 4 0 4; }
 
