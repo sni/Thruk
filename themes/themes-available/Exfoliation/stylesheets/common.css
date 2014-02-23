@@ -248,11 +248,13 @@ table.linkBox td { white-space: nowrap; }
 .statusSort  { font-size: 8pt; }
 
 table.data    { padding: 0; }
-th.data       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+th.data       { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; color: #333333; }
 .dataOdd      { font-size: 8pt; background-color: #e7e7e7; padding: 0 4 0 4; }
 .dataEven     { font-size: 8pt; background-color: #f4f2f2; padding: 0 4 0 4; }
 .dataTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
 .dataSubTitle { font-size: 10pt; text-align: center; font-weight: bold; }
+
+table.stateInfoTable1 th,th.data { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border: none; border-bottom: 1px solid #777777; color: #333333; }
 
 .optBox             { font-size:  9pt; white-space: nowrap; padding: 2 0 0 0; }
 .optBoxTitle        { font-size: 10pt; font-weight: bold; text-align: center; }
@@ -289,11 +291,11 @@ th.data       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-b
 
 .popupText { font-size: 8pt; background-color: #eeeeaa; border: 1px solid #777777; padding: 10 10 10 10; }
 
-.hostImportantProblem      { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.hostUnimportantProblem    { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.hostImportantProblem      { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.hostUnimportantProblem    { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
 
-.serviceImportantProblem   { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.serviceUnimportantProblem { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.serviceImportantProblem   { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.serviceUnimportantProblem { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
 
-.outageImportantProblem    { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.outageUnimportantProblem  { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.outageImportantProblem    { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.outageUnimportantProblem  { font-size: 8pt; text-align: center; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
