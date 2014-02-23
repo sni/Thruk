@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - general design fixes (awiddersheim)
+          - Exfoliation theme fixes (awiddersheim)
+          - fixed number format in performance data (awiddersheim)
+
 1.82-2   Fri Feb 21 17:20:55 CET 2014
           - redirect to host details page if no services found and no service filter was set
           - Bug Fixes
