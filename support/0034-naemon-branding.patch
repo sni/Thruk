@@ -18,11 +18,11 @@ index 1416574..236ad49 100644
        <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
        Last Updated: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span><br />
        [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
--      Thruk [% version %][% IF branch %]~[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
+-      Thruk [% version %][% IF branch %]-[% branch %][% END %]<span class="infoboxlinks"> - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a>[% IF c.config.extra_version %] - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]</span><br />
 +      <span class="infoboxlinks">
 +      [% IF c.config.extra_version %]<a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a>[% END %]
 +      - <a href='http://www.naemon.org' target='_blank' class='homepageURL'>www.naemon.org</a>
-+      - Thruk [% version %][% IF branch %]~[% branch %][% END %]
++      - Thruk [% version %][% IF branch %]-[% branch %][% END %]
 +      <br />
 +      </span>
        Logged in as <i>[% remote_user %]</i><br />
@@ -52,9 +52,9 @@ index dc6cbeb..3afb44d 100644
      <br>
      <br>
      <div id="currentversioninfo">
--    <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+-    <div class="version">Version [% version %][% IF branch %]-[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
 +    <div class="version">[% IF c.config.extra_version %][% c.config.extra_version %][% END %]
-+    <br><font size="-3">Thruk [% version %][% IF branch %]~[% branch %][% END %]</font>
++    <br><font size="-3">Thruk [% version %][% IF branch %]-[% branch %][% END %]</font>
 +    </div>
      <div class="releasedate">[% released %]</div>
      </div>
@@ -71,10 +71,10 @@ index c942754..093f57e 100644
      </div>
      <div id="currentversioninfo">
 -      <div class="product">Thruk Monitoring Webinterface</div>
--      <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
+-      <div class="version">Version [% version %][% IF branch %]-[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
 +      <div class="product">Network and Event Monitoring</div>
 +      <div class="version">[% IF c.config.extra_version %][% c.config.extra_version %][% END %]
-+      <br><font size="-3">Thruk [% version %][% IF branch %]~[% branch %][% END %]</font>
++      <br><font size="-3">Thruk [% version %][% IF branch %]-[% branch %][% END %]</font>
 +      </div>
        <div class="releasedate">[% released %]</div>
        <div class="checkforupdates">
