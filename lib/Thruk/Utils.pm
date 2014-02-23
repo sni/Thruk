@@ -89,7 +89,11 @@ return number with thousands seperator
 =cut
 sub format_number {
     my($number) = @_;
-    $number =~ s/(\d{1,3}?)(?=(\d{3})+$)/$1,/gmx;
+    for ($number) {
+        /\./
+        ? s/(?<=\d)(?=(\d{3})+(?:\.))/,/g
+        : s/(?<=\d)(?=(\d{3})+(?!\d))/,/g;
+    }
     return $number;
 }
 
