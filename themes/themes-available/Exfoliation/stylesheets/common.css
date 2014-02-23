@@ -254,6 +254,8 @@ th.data       { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; backgr
 .dataTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
 .dataSubTitle { font-size: 10pt; text-align: center; font-weight: bold; }
 
+table.stateInfoTable1 th,th.data { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border: none; border-bottom: 1px solid #777777; color: #333333; }
+
 .optBox             { font-size:  9pt; white-space: nowrap; padding: 2 0 0 0; }
 .optBoxTitle        { font-size: 10pt; font-weight: bold; text-align: center; }
 .optBoxRequiredItem { font-size:  9pt; text-align: right; padding: 0 5 0 5; color: red; }
