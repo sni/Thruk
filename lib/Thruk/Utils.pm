@@ -272,13 +272,13 @@ computes a combined status for process infos
 
 =cut
 sub calculate_overall_processinfo {
-    my($pi) = @_;
+    my($pi, $selected) = @_;
     my $return = {};
 
     # if no backend is available
     return($return) if ref $pi ne 'HASH';
 
-    for my $peer (keys %{$pi}) {
+    for my $peer (@{$selected}) {
         for my $key (keys %{$pi->{$peer}}) {
             my $value = $pi->{$peer}->{$key};
             if(defined $value and ($value eq "0" or $value eq "1")) {

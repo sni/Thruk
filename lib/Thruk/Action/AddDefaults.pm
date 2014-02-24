@@ -432,8 +432,8 @@ sub set_processinfo {
     my $processinfo;
     $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
     my $fetch = 0;
+    my($selected) = $c->{'db'}->select_backends('get_status');
     if($safe) {
-        my($selected) = $c->{'db'}->select_backends('get_status');
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
             if(!defined $processinfo->{$key} or !defined $processinfo->{$key}->{'program_start'}) {
@@ -464,7 +464,7 @@ sub set_processinfo {
 
     $processinfo                 = {} unless defined $processinfo;
     $processinfo                 = {} if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0);
-    my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
+    my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo, $selected);
     $c->stash->{'pi'}            = $overall_processinfo;
     $c->stash->{'pi_detail'}     = $processinfo;
     $c->stash->{'has_proc_info'} = 1;
