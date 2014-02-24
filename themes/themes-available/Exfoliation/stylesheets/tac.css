@@ -18,19 +18,19 @@ td.perfTitle { font-size: 10pt; font-weight: bold; background-color: #d0d0d0; bo
 .healthTitle { font-weight: bold; font-size: 10pt; background-color: #d0d0d0; border: 1px solid #aaaaaa; }
 .healthBox   { }
 .healthItem  { font-size: 10pt; font-weight: bold; }
-.healthBar   { background-color: grey; padding: 2 4 2 4; }
+.healthBar   { background-color: grey; padding: 2px 4px 2px 4px; }
 
 .outageTitle     { font-weight: bold; background-color: #d0d0d0; border: 1px solid #aaaaaa; }
-td.outageHeader  { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; }
+td.outageHeader  { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; }
 
 .hostTitle       { font-weight: bold; background-color: #d0d0d0; border: 1px solid #aaaaaa; }
-td.hostHeader    { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; }
+td.hostHeader    { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; }
 
 .serviceTitle    { font-weight: bold; background-color: #d0d0d0; border: 1px solid #aaaaaa; }
-td.serviceHeader { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; }
+td.serviceHeader { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; }
 
 .featureTitle    { font-weight: bold; background-color: #d0d0d0; border: 1px solid #aaaaaa; }
-td.featureHeader { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; }
+td.featureHeader { font-weight: bold; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; }
 
 .featureEnabled  { text-align: center; background-color: #ccffcc; }
 .featureDisabled { text-align: center; background-color: #ffcccc; }

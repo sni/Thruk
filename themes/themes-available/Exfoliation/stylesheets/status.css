@@ -9,27 +9,27 @@
 
 .itemTotalsTitle { font-size: 8pt; font-style: italic; }
 
-table.status { font-size: 8pt; padding: 0 0 10 0; }
-th.status    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border:1px #e2decd outset; color: #333333; }
+table.status { font-size: 8pt; padding: 0 0 10px 0; }
+th.status    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
 div.status   { font-size: 10pt; text-align: center; }
-.statusOdd   { font-size: 8pt; background-color: #e7e7e7; line-height: 150%; padding: 0 4 0 4; }
-.statusEven  { font-size: 8pt; background-color: #f4f2f2; line-height: 150%; padding: 0 4 0 4; }
+.statusOdd   { font-size: 8pt; background-color: #e7e7e7; line-height: 150%; padding: 0 4px 0 4px; }
+.statusEven  { font-size: 8pt; background-color: #f4f2f2; line-height: 150%; padding: 0 4px 0 4px; }
 
-.statusPENDING  { font-size: 8pt; background-color: #acacac; border: 1px solid #777777; padding: 0 5 0 5; }
-.statusOK       { font-size: 8pt; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
-.statusRECOVERY { font-size: 8pt; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
-.statusUNKNOWN  { font-size: 8pt; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5 0 5; }
-.statusWARNING  { font-size: 8pt; background-color: #ffff00; border: 1px solid #777777; padding: 0 5 0 5; }
-.statusCRITICAL { font-size: 8pt; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }
+.statusPENDING  { font-size: 8pt; background-color: #acacac; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusOK       { font-size: 8pt; background-color: #88d066; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusRECOVERY { font-size: 8pt; background-color: #88d066; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusUNKNOWN  { font-size: 8pt; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusWARNING  { font-size: 8pt; background-color: #ffff00; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusCRITICAL { font-size: 8pt; background-color: #f88888; border: 1px solid #777777; padding: 0 5px 0 5px; }
 
-.statusHOSTPENDING          { font-size: 8pt; background-color: #acacac; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTUP               { font-size: 8pt; background-color: #cce8cc; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTDOWN             { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTDOWNACK          { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTDOWNSCHED        { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTUNREACHABLE      { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTUNREACHABLEACK   { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4 0 4; }
-.statusHOSTUNREACHABLESCHED { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4 0 4; }
+.statusHOSTPENDING          { font-size: 8pt; background-color: #acacac; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTUP               { font-size: 8pt; background-color: #cce8cc; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTDOWN             { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTDOWNACK          { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTDOWNSCHED        { font-size: 8pt; background-color: #ffdddd; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTUNREACHABLE      { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTUNREACHABLEACK   { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4px 0 4px; }
+.statusHOSTUNREACHABLESCHED { font-size: 8pt; background-color: #ffddaa; line-height: 150%; padding: 0 4px 0 4px; }
 
 .statusBGUNKNOWN          { font-size: 8pt; background-color: #ffddaa; }
 .statusBGUNKNOWNACK       { font-size: 8pt; background-color: #ffddaa; }
@@ -50,30 +50,30 @@ div.status   { font-size: 10pt; text-align: center; }
 div.serviceTotals      { font-size: 10pt; text-align: center; font-weight: bold; }
 table.serviceTotals    { font-size: 10pt; font-weight: bold; }
 th.serviceTotals,a.serviceTotals { font-size: 8pt; }
-th.serviceTotals       { font-size: 8pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsOK       { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsWARNING  { font-size: 8pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsUNKNOWN  { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsCRITICAL { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsPENDING  { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 2 4 2 4; }
-.serviceTotalsPROBLEMS { font-size: 8pt; text-align: center; background-color: #aaccff; border: 1px solid #777777; padding: 2 4 2 4; }
+th.serviceTotals       { font-size: 8pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsOK       { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsWARNING  { font-size: 8pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsUNKNOWN  { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsCRITICAL { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsPENDING  { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsPROBLEMS { font-size: 8pt; text-align: center; background-color: #aaccff; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 
 div.hostTotals         { font-size: 10pt; text-align: center; font-weight: bold; }
 table.hostTotals       { font-size: 10pt; font-weight: bold; }
 th.hostTotals,a.hostTotals { font-size: 8pt; }
-td.hostTotals          { font-size: 8pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; padding: 2 4 2 4; }
-.hostTotalsUP          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 2 4 2 4; }
-.hostTotalsDOWN        { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 2 4 2 4; }
-.hostTotalsUNREACHABLE { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 2 4 2 4; }
-.hostTotalsPENDING     { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 2 4 2 4; }
-.hostTotalsPROBLEMS    { font-size: 8pt; text-align: center; background-color: #aaccff; border: 1px solid #777777; padding: 2 4 2 4; }
+td.hostTotals          { font-size: 8pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.hostTotalsUP          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.hostTotalsDOWN        { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.hostTotalsUNREACHABLE { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.hostTotalsPENDING     { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.hostTotalsPROBLEMS    { font-size: 8pt; text-align: center; background-color: #aaccff; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 
-.miniStatusPENDING     { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusOK          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusUNKNOWN     { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusWARNING     { font-size: 8pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusCRITICAL    { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusPENDING     { font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusOK          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusUNKNOWN     { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusWARNING     { font-size: 8pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusCRITICAL    { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5px 0 5px; }
 
-.miniStatusUP          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusDOWN        { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }
-.miniStatusUNREACHABLE { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusUP          { font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusDOWN        { font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusUNREACHABLE { font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5px 0 5px; }

@@ -1,3 +1,10 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
+
 .servicePENDING  { background-color: #acacac; }
 .serviceOK       { background-color: #88d066; }
 .serviceUNKNOWN  { background-color: #ffbb55; }
@@ -34,7 +41,7 @@ td.filter { background-color: white; }
   left: -8px;
 }
 
-.ui-button SPAN.ui-button-text {
+.ui-button span.ui-button-text {
   white-space: nowrap;
   line-height: 1.1;
   font-size: 0.85em;
