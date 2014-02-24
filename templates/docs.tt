@@ -19,11 +19,11 @@
       Thruks documentation itself is located in your project root under the <a href="[% url_prefix %]documentation.html">/docs/</a> folder.<br>
       <br>
       To replace this link with the documentation of your monitoring tool<br>
-      add a <i>documentation_link</i> config item to your thruk_local.conf<br>
+      add a <i>documentation_link</i> config item to your thruk_local.conf.<br>
       <br>
       If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
       <br>
-      For installation information and general Thruk help look at the <a href="[% url_prefix %]documentation.html">Documentation</a>
+      For installation information and general Thruk help look at the <a href="[% url_prefix %]documentation.html">Documentation</a>.
       <br>
       <br>
       <br>
