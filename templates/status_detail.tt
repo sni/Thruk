@@ -103,7 +103,7 @@
         <td valign="top" align="left" width="10%" nowrap></td>
         <td valign="top" align="center" width="80%">
           [% UNLESS authorized_for_read_only %]
-          <div class="hint">Select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+          <div class="hint">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
               <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');return false;">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
             - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">unselect all</a>
