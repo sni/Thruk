@@ -261,3 +261,11 @@ SPAN.bp_label {
 .ui-tabs .ui-tabs-panel {
     padding: 5px;
 }
+
+/* additional styles when frames in panorama view */
+BODY.iframed {
+    background: white;
+}
+BODY.iframed DIV.bp_zoom_container {
+    border: 0;
+}

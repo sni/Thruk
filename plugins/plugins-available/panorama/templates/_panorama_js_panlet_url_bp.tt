@@ -75,7 +75,7 @@
                     var tab = Ext.getCmp('tabpan');
                     refresh = tab.xdata.refresh;
                 }
-                var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&minimal=1&nav=0&refresh='+refresh;
+                var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&iframed=1&minimal=1&nav=0&refresh='+refresh;
                 if(!panel.xdata.graph) {
                     newUrl = 'about:blank';
                 }
@@ -95,7 +95,7 @@
         /* manual refresh update business process */
         panel.manualRefresh = function() {
             panel.last_url = '';
-            var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&readonly=1&minimal=1&nav=0&update=1';
+            var newUrl = 'bp.cgi?action=details&bp='+panel.xdata.graph+'&no_menu=1&iframed=1&readonly=1&minimal=1&nav=0&update=1';
             if(!panel.xdata.graph) {
                 newUrl = 'about:blank';
             }

@@ -165,6 +165,8 @@ sub begin : Private {
         $c->stash->{'target'} = '_parent';
     }
 
+    $c->stash->{'iframed'} = $c->{'request'}->{'parameters'}->{'iframed'} || 0;
+
     # redirect to error page unless we have a connection
     if(    !defined $c->{'db'}
         or !defined $c->{'db'}->{'backends'}
