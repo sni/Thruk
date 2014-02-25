@@ -32,6 +32,7 @@ use Monitoring::Config::Object::Receiver;
 use Monitoring::Config::Object::Scheduler;
 
 use Monitoring::Config::Object::Notificationway;
+use Monitoring::Config::Object::Realm;
 
 =head1 NAME
 
@@ -64,6 +65,7 @@ $Monitoring::Config::Object::Types = [
     'escalation',
     # Shinken:
     'notificationway',
+    'realm',
 ];
 
 ##########################################################
