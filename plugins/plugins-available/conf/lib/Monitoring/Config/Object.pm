@@ -18,8 +18,18 @@ use Monitoring::Config::Object::Command;
 use Monitoring::Config::Object::Timeperiod;
 use Monitoring::Config::Object::Contact;
 use Monitoring::Config::Object::Contactgroup;
-use Monitoring::Config::Object::Module;
 use Monitoring::Config::Object::Escalation;
+
+# Icinga and Shinken:
+use Monitoring::Config::Object::Module;
+
+# Shinken:
+use Monitoring::Config::Object::Arbiter;
+use Monitoring::Config::Object::Broker;
+use Monitoring::Config::Object::Poller;
+use Monitoring::Config::Object::Reactionner;
+use Monitoring::Config::Object::Receiver;
+use Monitoring::Config::Object::Scheduler;
 
 =head1 NAME
 
