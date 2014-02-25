@@ -31,6 +31,8 @@ use Monitoring::Config::Object::Reactionner;
 use Monitoring::Config::Object::Receiver;
 use Monitoring::Config::Object::Scheduler;
 
+use Monitoring::Config::Object::Notificationway;
+
 =head1 NAME
 
 Monitoring::Conf::Object - Object Prototype
@@ -60,6 +62,8 @@ $Monitoring::Config::Object::Types = [
     'contactgroup',
     'module',
     'escalation',
+    # Shinken:
+    'notificationway',
 ];
 
 ##########################################################
