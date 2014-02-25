@@ -7,7 +7,7 @@
   <th class='data[% IF type == 'servicegroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=servicegroup">Servicegroups</a></th>
   <th class='data[% IF type == 'contact'      %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contact">Contacts</a></th>
   <th class='data[% IF type == 'contactgroup' %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroups</a></th>
-  [% IF coretype == 'icinga' %]
+  [% IF coretype == 'icinga' or coretype == 'shinken' %]
   <th class='data[% IF type == 'module'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=module">Modules</a></th>
   [% END %]
   <th class='data'>&nbsp;</th>

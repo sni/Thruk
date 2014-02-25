@@ -310,9 +310,10 @@ __DATA__
     },
     'module' => {
         'module_name' => 'This directive identifies the unique name of the module so you cannot have two modules with the same module name. It is mandatory, otherwise the config will not be accepted and the module will not be loaded.',
-        'module_type' => 'This optional directive defines the type of the module, e.g. &#39;neb&#39; for event broker modules. This directive is intended to allow further filtering on the module loading.',
+        'module_type' => '<p><b>Icinga:</b> This optional directive defines the type of the module, e.g. &#39;neb&#39; for event broker modules. This directive is intended to allow further filtering on the module loading.</p><p><b>Shinken:</b> This mandatory directive defines the type of the module.</p>',
         'path' => 'mandatory directive specifies the path to the module binary to be loaded. For event broker modules like idomod the user running the core must be allowed to read and load the module.',
-        'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.'
+        'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.',
+        'modules' => 'List of submodules.'
     },
     'escalation' => {
         'escalation_name' => 'This directive identifies the unique name of the escalation so you reference this escalation by your hosts and services.',
