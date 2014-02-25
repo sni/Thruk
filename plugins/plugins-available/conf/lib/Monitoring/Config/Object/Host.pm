@@ -82,7 +82,7 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'business_impact'             => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
     'criticity'                   => { type => 'ALIAS', 'name' => 'business_impact' },
     'maintenance_period'          => { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' },
-    'realm'                       => { type => 'STRING', cat => 'Extended' },
+    'realm'                       => { type => 'LIST', 'link' => 'realm', cat => 'Extended' },
     'poller_tag'                  => { type => 'STRING', cat => 'Extended' },
     'reactionner_tag'             => { type => 'STRING', cat => 'Extended' },
     'resultmodulations'           => { type => 'STRING', cat => 'Extended' },

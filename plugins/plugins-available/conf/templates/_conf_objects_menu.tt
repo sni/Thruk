@@ -10,6 +10,9 @@
   [% IF coretype == 'shinken' %]
   <th class='data[% IF type == 'notificationway'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=notificationway">Notificationways</a></th>
   [% END %]
+  [% IF coretype == 'shinken' %]
+  <th class='data[% IF type == 'realm'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=realm">Realms</a></th>
+  [% END %]
   [% IF coretype == 'icinga' or coretype == 'shinken' %]
   <th class='data[% IF type == 'module'       %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;type=module">Modules</a></th>
   [% END %]

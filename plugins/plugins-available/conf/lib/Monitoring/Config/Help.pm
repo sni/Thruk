@@ -464,7 +464,11 @@ __DATA__
         'host_notification_commands' => 'This directive is used to define a list of the <i>short names</i> of the commands used to notify the contact of a <i>host</i> problem or recovery.  Multiple notification commands should be separated by commas.  Allnotification commands are executed when the contact needs to be notified.  The maximum amount of time that a notification command can run is controlled by the notification_timeout option.',
         'service_notification_commands' => 'This directive is used to define a list of the <i>short names</i> of the commands used to notify the contact of a <i>service</i> problem or recovery.  Multiple notification commands should be separated by commas.  Allnotification commands are executed when the contact needs to be notified.  The maximum amount of time that a notification command can run is controlled by the notification_timeout option.',
         'min_business_impact' => 'Minimum business criticity level',
-
-
+    },
+    'realm' => {
+        'realm_name' => 'This directive identifies the unique name of the realm so you reference it by your objects.',
+        'realm_members' => 'This directive is used to define the sub-realms of this realms.',
+        'default' => 'This directive is used to define if this realm is the default one (untagged host and satellites wil be put into it). The default value is 0.',
+        'broker_complete_links' => 'Enable multi-brokers features',
     },
 };

@@ -33,7 +33,7 @@ $Monitoring::Config::Object::Reactionner::Defaults = {
     'modules'                         => { type => 'STRING', cat => 'Basic' },
     'polling_interval'                => { type => 'INT', cat => 'Extended' },
     'use_timezone'                    => { type => 'STRING', cat => 'Extended' },
-    'realm'                           => { type => 'STRING', cat => 'Extended' },
+    'realm'                           => { type => 'LIST', 'link' => 'realm', cat => 'Extended' },
     'satellitemap'                    => { type => 'STRING', cat => 'Extended' },
     'use_ssl'                         => { type => 'BOOL', cat => 'Extended' },
 
