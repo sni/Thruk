@@ -26,6 +26,11 @@ sub get_config_help {
     my ( $type, $key ) = @_;
     our($helpdata);
 
+    if ($type eq 'discoveryrule') {
+        # discoveryrule attributes can be prefixed by '+', '-' or '!'
+        my $c = substr($key,0,1);
+        $key = substr($key, 1) if $c eq '!' or $c eq '+' or $c eq '-';
+    }
     if($key eq 'use') {
         return "This directive specifies the name of the template object that you want to inherit properties/variables from. The name you specify for this variable must be defined as another object's template named (using the <i>name</i> variable).";
     }
@@ -452,6 +457,24 @@ __DATA__
         'port' => 'TCP port.',
         'weight' => 'Some schedulers can manage more hosts than others',
         'skip_initial_broks' => 'Skip initial broks creation for faster boot time <i>(experimental feature)</i>.',
+    },
+    'discoveryrule' => {
+        'discoveryrule_name' => 'This directive identifies the unique name of the discoveryrule so you reference it by your objects.',
+        'creation_type' => 'What type of object to create.',
+        'discoveryrule_order' => 'The smallest number is applied first',
+        'isup' => 'Match if host is alive.',
+        'os' => 'Match against operating system name.',
+        'osversion' => 'Match against operating system version.',
+        'macvendor' => 'Match against vendor from MAC address.',
+        'openports' => 'Match against opened TCP ports.',
+        'parents' => 'Match against parent hosts.',
+        'fqdn' => 'Match against DNS name.',
+        'ip' => 'Match against IP address.',
+        'fs' => 'Match against filesystem.',
+    },
+    'discoveryrun' => {
+        'discoveryrun_name' => 'This directive identifies the unique name of the discoveryrun so you reference it by your objects.',
+        'discoveryrun_command' => 'Discovery command to run.',
     },
     'notificationway' => {
         'notificationway_name' => 'This directive identifies the unique name of the notificationway so you reference it by your contacts.n',

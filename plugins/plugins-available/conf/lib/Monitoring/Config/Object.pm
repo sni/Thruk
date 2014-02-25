@@ -31,6 +31,8 @@ use Monitoring::Config::Object::Reactionner;
 use Monitoring::Config::Object::Receiver;
 use Monitoring::Config::Object::Scheduler;
 
+use Monitoring::Config::Object::Discoveryrule;
+use Monitoring::Config::Object::Discoveryrun;
 use Monitoring::Config::Object::Notificationway;
 use Monitoring::Config::Object::Realm;
 
@@ -64,6 +66,8 @@ $Monitoring::Config::Object::Types = [
     'module',
     'escalation',
     # Shinken:
+    'discoveryrule',
+    'discoveryrun',
     'notificationway',
     'realm',
 ];
