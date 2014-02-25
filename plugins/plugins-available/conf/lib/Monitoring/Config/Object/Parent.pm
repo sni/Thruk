@@ -74,7 +74,7 @@ sub parse {
                 if($self->{'disabled'}) {
                     push @{$self->{'comments'}}, $attr.' '.$value;
                 } else {
-                    push @{$parse_errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
+                    push @{$parse_errors}, "unknown attribute: $attr for object type ".$self->{'type'}." in ".Thruk::Utils::Conf::_link_obj($self);
                 }
             }
         }
