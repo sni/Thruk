@@ -20,11 +20,19 @@ $Monitoring::Config::Object::Module::Defaults = {
     'name'                            => { type => 'STRING', cat => 'Extended' },
     'use'                             => { type => 'LIST', link => 'host', cat => 'Basic' },
     'register'                        => { type => 'BOOL', cat => 'Extended' },
+};
 
-    'module_name'                    => { type => 'STRING', cat => 'Basic' },
-    'path'                           => { type => 'STRING', cat => 'Basic' },
-    'args'                           => { type => 'STRING', cat => 'Basic' },
-    'module_type'                    => { type => 'CHOOSE', values => ['neb'], keys => [ 'neb' ], cat => 'Basic' },
+$Monitoring::Config::Object::Module::IcingaSpecific = {
+    'module_name'                     => { type => 'STRING', cat => 'Basic' },
+    'path'                            => { type => 'STRING', cat => 'Basic' },
+    'args'                            => { type => 'STRING', cat => 'Basic' },
+    'module_type'                     => { type => 'CHOOSE', values => ['neb'], keys => [ 'neb' ], cat => 'Basic' },
+};
+
+$Monitoring::Config::Object::Module::ShinkenSpecific = {
+    'module_name'                     => { type => 'STRING', cat => 'Basic' },
+    'module_type'                     => { type => 'STRING', cat => 'Basic' },
+    'modules'                         => { type => 'STRING', cat => 'Basic' },
 };
 
 ##########################################################
@@ -40,13 +48,36 @@ sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
 
-    return unless($coretype eq 'any' or $coretype eq 'icinga');
+    return unless($coretype eq 'any' or $coretype eq 'icinga' or $coretype eq 'shinken');
+
+    my $standard = [];
+    if($coretype eq 'any' or $coretype eq 'icinga') {
+        @standard = [ 'module_name', 'path', 'args', 'module_type' ];
+        for my $key (keys %{$Monitoring::Config::Object::Module::IcingaSpecific}) {
+            $Monitoring::Config::Object::Module::Defaults->{$key} = $Monitoring::Config::Object::Module::IcingaSpecific->{$key};
+        }
+    } else {
+        for my $key (keys %{$Monitoring::Config::Object::Module::IcingaSpecific}) {
+            delete $Monitoring::Config::Object::Module::Defaults->{$key};
+        }
+    }
+
+    if($coretype eq 'any' or $coretype eq 'shinken') {
+        @standard = [ 'module_name', 'module_type', 'modules' ];
+        for my $key (keys %{$Monitoring::Config::Object::Module::ShinkenSpecific}) {
+            $Monitoring::Config::Object::Module::Defaults->{$key} = $Monitoring::Config::Object::Module::ShinkenSpecific->{$key};
+        }
+    } else {
+        for my $key (keys %{$Monitoring::Config::Object::Module::ShinkenSpecific}) {
+            delete $Monitoring::Config::Object::Module::Defaults->{$key};
+        }
+    }
 
     my $self = {
         'type'        => 'module',
         'primary_key' => 'module_name',
         'default'     => $Monitoring::Config::Object::Module::Defaults,
-        'standard'    => [ 'module_name', 'path', 'args', 'module_type' ],
+        'standard'    => @standard,
     };
     bless $self, $class;
     return $self;
