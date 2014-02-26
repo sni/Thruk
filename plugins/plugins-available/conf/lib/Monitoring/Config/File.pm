@@ -386,9 +386,23 @@ sub _parse_line {
         }
     }
 
-    # something totally unknown
     else {
-        push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+        my($key,$value) = split/\s*=\s*/mx, $line, 2;
+        # shinken macros can be anywhere
+        if(defined $value and $self->{'coretype'} eq 'shinken') {
+            $key   =~ s/^\s*(.*?)\s*$/$1/mx;
+            $value =~ s/^\s*(.*?)\s*$/$1/mx;
+            if (substr($key, 0, 1) eq '$' and substr($key, -1, 1) eq '$') {
+                # Ignore macros
+            } elsif($key =~ /^[a-z0-9_]+$/) {
+                # Ignore cfg_dir, cfg_file, ...
+            } else {
+                push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+            }
+        # something totally unknown
+        } else {
+            push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+        }
     }
 
     return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
