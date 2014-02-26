@@ -539,7 +539,7 @@ A string will be returned if no PNP graph can be exported.
 
 =cut
 sub get_pnp_image {
-    my($hst, $svc, $start, $end, $width, $height) = @_;
+    my($hst, $svc, $start, $end, $width, $height, $source) = @_;
     my $c        = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} || $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
     my $pnpurl   = "";
@@ -554,12 +554,15 @@ sub get_pnp_image {
     }
 
     my($fh, $filename) = tempfile();
-    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$pnpurl.'" "'.$filename.'"';
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$pnpurl.'" "'.$filename.'" "'.$source.'"';
     `$cmd`;
     if(-s $filename) {
         my $imgdata  = read_file($filename);
+        my @lines = read_file($filename);
         unlink($filename);
+        my $nb_lines = scalar @lines;
         return '' if substr($imgdata, 0, 10) !~ m/PNG/mx; # check if this is a real image
+        return '' if $nb_lines < 5; # check if this is a real image
         return 'data:image/png;base64,'.encode_base64($imgdata, '');
     }
     unlink($filename);
