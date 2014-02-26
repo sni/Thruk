@@ -321,7 +321,10 @@ __DATA__
         'module_type' => '<p><b>Icinga:</b> This optional directive defines the type of the module, e.g. &#39;neb&#39; for event broker modules. This directive is intended to allow further filtering on the module loading.</p><p><b>Shinken:</b> This mandatory directive defines the type of the module.</p>',
         'path' => 'mandatory directive specifies the path to the module binary to be loaded. For event broker modules like idomod the user running the core must be allowed to read and load the module.',
         'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.',
-        'modules' => 'List of submodules.'
+        'modules' => 'List of submodules.',
+
+        'host' => 'Host name or IP address to connect or listen to (depending on the module).',
+        'port' => 'TCP port to connect or listen to (depending on the module).'
     },
     'escalation' => {
         'escalation_name' => 'This directive identifies the unique name of the escalation so you reference this escalation by your hosts and services.',

@@ -33,6 +33,9 @@ $Monitoring::Config::Object::Module::ShinkenSpecific = {
     'module_name'                     => { type => 'STRING', cat => 'Basic' },
     'module_type'                     => { type => 'STRING', cat => 'Basic' },
     'modules'                         => { type => 'STRING', cat => 'Basic' },
+    # Parameters used by various modules:
+    'host'                            => { type => 'STRING', cat => 'Basic' },
+    'port'                            => { type => 'INT', cat => 'Basic' },
 };
 
 ##########################################################
