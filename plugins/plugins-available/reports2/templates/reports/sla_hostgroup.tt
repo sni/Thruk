@@ -2,21 +2,23 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'language'                => [ 'Language',              'language',        'en'                  ,'', 1   ] },
-        { 'affected_sla_objects'    => [ '',                      'affected_sla_objects', ''                        ] },
-        { 'hostgroup'               => [ 'Hostgroup',             'hostgroups',      ''                    ,'', 1   ] },
-        { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'                 ] },
-        { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                       ] },
-        { 'rpttimeperiod'           => [ 'Report Timeperiod',     'rpttimeperiod',   ''                             ] },
-        { 'sla'                     => [ 'SLA %',                 'int',             '98'                  ,'', 1   ] },
-        { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  ,'', 1   ] },
-        { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   ,'', 1   ] },
-        { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                          ] },
-        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'           ] },
-        { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                           ] },
-        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable'], '', 1 ] },
-        { 'max_outages_pages'       => [ 'Latest Outages',        'int',             '0'         ,'max. # pages', 1 ] },
-        { 'max_worst_pages'         => [ 'Worst Outages',         'int',             '0'         ,'max. # pages', 1 ] },
+        { 'language'                     => [ 'Language',                   'language',        'en'                  ,'', 1   ] },
+        { 'affected_sla_objects'         => [ '',                           'affected_sla_objects', ''                        ] },
+        { 'hostgroup'                    => [ 'Hostgroup',                  'hostgroups',      ''                    ,'', 1   ] },
+        { 'timeperiod'                   => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                 ] },
+        { 'breakdown'                    => [ 'Breakdown by',               'breakdowns',      'months'                       ] },
+        { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                             ] },
+        { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1   ] },
+        { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1   ] },
+        { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1   ] },
+        { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                          ] },
+        { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'           ] },
+        { 'includesoftstates'            => [ 'Include Soft States',        'yes_no',          'no'                           ] },
+        { 'unavailable'                  => [ 'Unavailable States',         'hst_unavailable', ['down', 'unreachable'], '', 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '0'         ,'max. # pages', 1 ] },
+        { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '0'         ,'max. # pages', 1 ] },
+        { 'include_multiple_pnp_graph'   => [ 'Include Multiple PNP Graph', 'yes_no',          'no'                           ] },
+        { 'max_pnp_sources'              => [ 'Maximum PNP sources',        'int',             '2'          ,'Max source if Multiple PNP Graph is YES', 1 ] },
     ];
   %]
 [% END %]
@@ -56,6 +58,7 @@
       [% WRAPPER 'reports/comp/page_standard.tt' %]
         [% PROCESS 'reports/comp/sla_graph_page.tt' %]
       [% END %]
+      [% PROCESS 'reports/comp/pnp_multiple_graph_page.tt' %]
       [% PROCESS 'reports/comp/sla_outages.tt' %]
     [% END %]
   [% END %][%# report wrapper #%]
