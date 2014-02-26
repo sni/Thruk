@@ -107,6 +107,7 @@ __DATA__
         'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
         'is_admin' => ' This directive is used to determine whether or not the contact can see all object in Shinken WebUI. Values: 0 = normal user, can see all objects he is in contact, 1 = allow contact to see all objects',
         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
+        'password' => 'Contact password (used by SHinken UI).',
     },
     'contactgroup' => {
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
