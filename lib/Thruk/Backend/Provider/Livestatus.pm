@@ -134,9 +134,9 @@ sub get_processinfo {
                       last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
                       process_performance_data program_start program_version interval_length
         /];
-    }
-    if(defined $options{'extra_columns'}) {
-        push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
     }
 
     my $data  =  $self->{'live'}
@@ -288,7 +288,10 @@ sub get_hosts_by_servicequery {
         $options{'columns'} = [qw/
             host_has_been_checked host_name host_state host_scheduled_downtime_depth host_acknowledged
             has_been_checked state scheduled_downtime_depth acknowledged
-            /];
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
     }
 
     my $data = $self->_get_table('services', \%options);
@@ -334,7 +337,10 @@ sub get_hostgroups {
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
-            /];
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
     }
     return $self->_get_table('hostgroups', \%options);
 }
@@ -466,7 +472,10 @@ sub get_servicegroups {
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
-            /];
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
     }
     return $self->_get_table('servicegroups', \%options);
 }
@@ -502,11 +511,16 @@ returns a list of comments
 =cut
 sub get_comments {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        author comment entry_time entry_type expires
-        expire_time host_name id persistent service_description
-        source type
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            author comment entry_time entry_type expires
+            expire_time host_name id persistent service_description
+            source type
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
     return $self->_get_table('comments', \%options);
 }
 
@@ -521,10 +535,15 @@ returns a list of downtimes
 =cut
 sub get_downtimes {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        author comment end_time entry_time fixed host_name
-        id start_time service_description triggered_by duration
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            author comment end_time entry_time fixed host_name
+            id start_time service_description triggered_by duration
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
     my $data = $self->_get_table('downtimes', \%options);
 
     return $data;
@@ -541,9 +560,14 @@ returns a list of contactgroups
 =cut
 sub get_contactgroups {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name alias members
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name alias members
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
     return $self->_get_table('contactgroups', \%options);
 }
 
@@ -562,9 +586,14 @@ sub get_logs {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'logcache'}->get_logs(%options);
     }
-    $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message options state_type contact_name
-        /] unless defined $options{'columns'};
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            class time type state host_name service_description plugin_output message options state_type contact_name
+        /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
     return(Thruk::Utils::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
@@ -583,9 +612,14 @@ returns a list of timeperiods
 =cut
 sub get_timeperiods {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name alias
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name alias
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
 
     # fill in values not provided by livestatus
     $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ''; };
@@ -631,9 +665,14 @@ returns a list of commands
 =cut
 sub get_commands {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name line
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name line
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
     return $self->_get_table('commands', \%options);
 }
 
@@ -648,9 +687,14 @@ returns a list of contacts
 =cut
 sub get_contacts {
     my($self, %options) = @_;
-    $options{'columns'} = [qw/
-        name alias email pager service_notification_period host_notification_period
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            name alias email pager service_notification_period host_notification_period
         /];
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
+    }
     return $self->_get_table('contacts', \%options);
 }
 
