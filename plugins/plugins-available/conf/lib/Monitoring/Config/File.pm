@@ -376,7 +376,7 @@ sub _parse_line {
             }
         }
         else {
-            if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value) {
+            if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value and substr($key, 0, 1) ne '#') {
                 push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
             $current_object->{'conf'}->{$key} = $value;
