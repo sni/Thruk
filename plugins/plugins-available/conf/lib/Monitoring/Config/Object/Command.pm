@@ -27,6 +27,10 @@ $Monitoring::Config::Object::Command::Defaults = {
     'command_line' => { type => 'STRING', cat => 'Basic' },
 };
 
+$Monitoring::Config::Object::Command::ShinkenSpecific = {
+    'module_type'      => { type => 'STRING', cat => 'Extended' },
+    'reactionner_tag'  => { type => 'STRING', cat => 'Extended' },
+};
 ##########################################################
 
 =head2 BUILD
@@ -36,6 +40,18 @@ return new object
 =cut
 sub BUILD {
     my $class = shift || __PACKAGE__;
+    my $coretype = shift;
+
+    if($coretype eq 'any' or $coretype eq 'shinken') {
+        for my $key (keys %{$Monitoring::Config::Object::Command::ShinkenSpecific}) {
+            $Monitoring::Config::Object::Command::Defaults->{$key} = $Monitoring::Config::Object::Command::ShinkenSpecific->{$key};
+        }
+    } else {
+        for my $key (keys %{$Monitoring::Config::Object::Command::ShinkenSpecific}) {
+            delete $Monitoring::Config::Object::Command::Defaults->{$key};
+        }
+    }
+
     my $self = {
         'type'        => 'command',
         'primary_key' => 'command_name',
