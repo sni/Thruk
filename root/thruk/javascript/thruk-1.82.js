@@ -1290,10 +1290,14 @@ function do_table_search(hide_only) {
     value        = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
-        /* make tables fixed witdh to avoid flickering */
+        /* make tables fixed width to avoid flickering */
         table.width = table.offsetWidth;
+        var startWith = 1;
+        if(jQuery(table).hasClass('header2')) {
+            startWith = 2;
+        }
         jQuery.each(table.rows, function(nr, row) {
-            if(nr > 0) {
+            if(nr >= startWith) {
                 var found = 0;
                 jQuery.each(row.cells, function(nr, cell) {
                     /* if regex matching fails, use normal matching */
