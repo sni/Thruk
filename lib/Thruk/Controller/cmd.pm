@@ -420,37 +420,32 @@ sub _redirect_or_success {
            and defined $c->stash->{'start_time_unix'}
            and $c->stash->{'start_time_unix'} <= $c->stash->{'now'}
         ) {
-            my($waittrigger, $waitcondition);
+            my($waitcondition);
             # reschedules
             if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 7 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96) {
-                $waittrigger   = 'check';
                 $waitcondition = 'last_check >= '.$c->stash->{'now'};
             }
             # add downtime
             if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 55 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 56) {
-                $waittrigger   = 'downtime';
                 $waitcondition = 'scheduled_downtime_depth > 0';
             }
             # remove downtime
             if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 78 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 79) {
-                $waittrigger   = 'downtime';
                 $waitcondition = 'scheduled_downtime_depth = 0';
             }
             # add acknowledged
             if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 33 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 34) {
-                $waittrigger   = 'command';
                 $waitcondition = 'acknowledged = 1';
             }
             # remove acknowledged
             if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 51 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 52) {
-                $waittrigger   = 'command';
                 $waitcondition = 'acknowledged = 0';
             }
-            if($waittrigger and $c->stash->{'lasthost'}) {
+            if($waitcondition and $c->stash->{'lasthost'}) {
                 my $options = {
                             'header' => {
                                 'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
-                                'WaitTrigger'   => $waittrigger,
+                                'WaitTrigger'   => 'all', # using something else seems not to work all the time
                                 'WaitCondition' => $waitcondition,
                             }
                 };

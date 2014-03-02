@@ -7,6 +7,7 @@ next:
           - fixed number format in performance data (awiddersheim)
           - Bug Fixes
             - fixed displaying partially active attributes
+            - fixed wait trigger not working all the time
 
 1.82-2   Fri Feb 21 17:20:55 CET 2014
           - redirect to host details page if no services found and no service filter was set
