@@ -9,6 +9,7 @@ use Thruk::Pool::Simple;
 use Thruk::Backend::Peer;
 use Config::General;
 use File::Slurp qw/read_file/;
+use File::Copy qw/move/;
 
 =head1 NAME
 
@@ -290,6 +291,13 @@ sub init_backend_thread_pool {
         }
     }
 
+    my $use_shadow_naemon;
+    if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
+        if($config->{'use_shadow_naemon'}) {
+            $use_shadow_naemon = $config->{'shadow_naemon_dir'};
+        }
+    }
+
     if($https_count > 2 and $pool_size > 1) {
         eval {
             require IO::Socket::SSL;
@@ -310,7 +318,7 @@ sub init_backend_thread_pool {
         $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
-            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys, $config->{'product_prefix'} );
+            my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys, $config->{'product_prefix'}, $use_shadow_naemon );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};
@@ -330,6 +338,7 @@ sub init_backend_thread_pool {
             );
             printf(STDERR "mem:% 7s MB  after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
+            printf(STDERR "mem:% 7s MB  without pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
     }
@@ -401,7 +410,26 @@ sub do_on_peer {
     my $errors = 0;
     while($errors < 3) {
         eval {
-            ($data,$type,$size) = $peer->{'class'}->$function( @{$arg} );
+            if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
+                ($data,$type,$size) = $peer->{'cacheproxy'}->$function(@{$arg});
+            } else {
+                if($peer->{'cacheproxy'} and $function eq 'send_command') {
+                    # duplicate command to cache, otherwise we would have to wait
+                    # for a full sync of this host/service
+                    my $filename = $peer->{'cacheproxy'}->{'live'}->{'peer'};
+                    $filename    =~ s/live$//mx;
+                    my $tmpfile  = $filename.'/tmp/'.time().'.tmp';
+                    $filename    = $filename.'/tmp/'.time().'.cmds';
+                    my %arg      = @{$arg};
+                    open(my $fh, '>>', $tmpfile);
+                    my $commands = $arg{'command'};
+                    $commands    =~ s/^COMMAND\s+//gmx;
+                    print $fh $commands,"\n";
+                    Thruk::Utils::IO::close($fh, $filename);
+                    move($tmpfile, $filename);
+                }
+                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
+            }
             if(defined $data and !defined $size) {
                 if(ref $data eq 'ARRAY') {
                     $size = scalar @{$data};

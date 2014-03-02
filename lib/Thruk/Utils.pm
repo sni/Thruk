@@ -1742,27 +1742,34 @@ wait up to 60 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
+    $pkey = $c->stash->{'param_backend'} unless $pkey;
 
     # wait until core responds again
     my $start = time();
+    my $procinfo = {};
     while($start > time() - 60) {
         sleep(1);
-        my $procinfo = {};
+        $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
             local $SIG{'PIPE'} = 'IGNORE'; # exits sometimes on reload
             alarm 10;
             $c->{'db'}->reset_failed_backends();
-            $procinfo = $c->{'db'}->get_processinfo();
+            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
-            if($pkey and $time and $procinfo->{$pkey}->{'program_start'} < $time) {
+        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$pkey}) {
+            if($pkey and $time and $procinfo->{$pkey}->{'program_start'} and  $procinfo->{$pkey}->{'program_start'} < $time) {
                 # not yet restarted
             } else {
                 last;
             }
         }
         $c->log->debug('waiting for core reload for '.($start-time()).'s: '.$@);
+    }
+    if(scalar keys %{$procinfo->{$pkey}} > 0) {
+        my $cached_data = $c->cache->get->{'global'} || {};
+        $cached_data->{'processinfo'}->{$pkey} = $procinfo->{$pkey};
+        $c->cache->set('global', $cached_data);
     }
     return;
 }
@@ -2140,6 +2147,64 @@ sub get_memory_usage {
     return($rsize);
 }
 
+
+##########################################################
+
+=head2 check_shadow_naemon_procs
+
+  check_shadow_naemon_procs($config)
+
+makes sure all shadownaemon processes are running
+
+=cut
+
+sub check_shadow_naemon_procs {
+    my($config) = @_;
+    local $SIG{CHLD} = 'DEFAULT';
+    for my $key (keys %{$Thruk::Backend::Pool::peers}) {
+        my $peer    = $Thruk::Backend::Pool::peers->{$key};
+        my $pidfile = $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.pid';
+        my $started = 0;
+        if(-s $pidfile) {
+            my $pid = read_file($pidfile);
+            if(kill(0, $pid)) {
+                $started = 1;
+            }
+        }
+        if(!$started) {
+            my $cmd = sprintf("%s -d -i %s -o %s%s",
+                              $config->{'shadow_naemon_bin'},
+                              $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},
+                              $config->{'shadow_naemon_dir'}.'/'.$key,
+                              $config->{'shadow_naemon_ls'} ? " -l ".$config->{'shadow_naemon_ls'} : '',
+                            );
+            `$cmd`;
+        }
+    }
+    return;
+}
+
+########################################
+
+=head2 shutdown_shadow_naemon_procs
+
+  shutdown_shadow_naemon_procs($config)
+
+stop all shadownaemon processes
+
+=cut
+sub shutdown_shadow_naemon_procs {
+    my($config) = @_;
+    for my $key (keys %{$Thruk::Backend::Pool::peers}) {
+        my $peer    = $Thruk::Backend::Pool::peers->{$key};
+        my $pidfile = $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.pid';
+        if(-s $pidfile) {
+            my $pid = read_file($pidfile);
+            kill(15, $pid);
+        }
+    }
+    return;
+}
 
 ########################################
 sub _initialassumedservicestate_to_state {

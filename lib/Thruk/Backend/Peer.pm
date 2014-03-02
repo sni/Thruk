@@ -38,13 +38,13 @@ create new peer
 =cut
 
 sub new {
-    my( $class, $config, $logcache, $existing_keys, $product_prefix ) = @_;
+    my( $class, $config, $logcache, $existing_keys, $product_prefix, $use_shadow_naemon ) = @_;
     my $self = {
         'config'        => $config,
         'existing_keys' => $existing_keys,
     };
     bless $self, $class;
-    $self->_initialise_peer( $config, $logcache, $product_prefix );
+    $self->_initialise_peer( $config, $logcache, $product_prefix, $use_shadow_naemon );
     return $self;
 }
 
@@ -114,7 +114,7 @@ sub _create_backend {
 
 ##########################################################
 sub _initialise_peer {
-    my($self, $config, $logcache, $product_prefix) = @_;
+    my($self, $config, $logcache, $product_prefix, $use_shadow_naemon) = @_;
 
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
@@ -169,6 +169,17 @@ sub _initialise_peer {
                                                 });
         }
         $self->{'class'}->{'logcache'} = $self->{'logcache'};
+    }
+
+    # livestatus booster
+    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
+        require Thruk::Backend::Provider::Livestatus;
+        Thruk::Backend::Provider::Livestatus->import;
+        $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
+                                                peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
+                                                peer_key  => $self->{'key'},
+                                            });
+        $self->{'cacheproxy'}->peer_key($self->{'key'});
     }
 
     return;

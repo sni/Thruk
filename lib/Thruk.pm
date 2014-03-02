@@ -129,13 +129,18 @@ sub _remove_pid {
                 push @{$remaining}, $pid;
             }
             if(scalar @{$remaining} == 0) {
-                unlink($pidfile)
+                unlink($pidfile);
+                Thruk::Utils::shutdown_shadow_naemon_procs(__PACKAGE__->config);
             } else {
                 open(my $fh, '>', $pidfile);
                 print $fh join("\n", @{$remaining}),"\n";
                 CORE::close($fh);
             }
         }
+    }
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'DebugServer') {
+        # debug server has no pid file, so just kill our shadows
+        Thruk::Utils::shutdown_shadow_naemon_procs(__PACKAGE__->config);
     }
     return;
 }
@@ -220,6 +225,14 @@ if(defined $log4perl_conf and -s $log4perl_conf) {
 }
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
+}
+
+###################################################
+# check shadownaemons processes
+if(__PACKAGE__->config->{'use_shadow_naemon'}) {
+    if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
+        Thruk::Utils::check_shadow_naemon_procs(__PACKAGE__->config);
+    }
 }
 
 ###################################################

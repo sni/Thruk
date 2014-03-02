@@ -263,14 +263,13 @@ column aliases can be defined with a rename hash
 sub selectall_arrayref {
     my($self, $statement, $opt, $limit) = @_;
     $limit = 0 unless defined $limit;
-    my $result;
 
     # make opt hash keys lowercase
     $opt = $self->_lowercase_and_verify_options($opt);
 
     $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
 
-    $result = $self->_send($statement, $opt);
+    my $result = $self->_send($statement, $opt);
 
     if(!defined $result) {
         return unless $self->{'errors_are_fatal'};
@@ -682,11 +681,6 @@ sub _send {
     my $header     = "";
     my $keys;
 
-    my $with_peers = 0;
-    if(defined $opt->{'addpeer'} and $opt->{'addpeer'}) {
-        $with_peers = 1;
-    }
-
     $Monitoring::Livestatus::ErrorCode = 0;
     undef $Monitoring::Livestatus::ErrorMessage;
 
@@ -805,10 +799,6 @@ sub _send {
     my $line_seperator = chr($self->{'line_seperator'});
     my $col_seperator  = chr($self->{'column_seperator'});
 
-    my $peer_name = $self->peer_name;
-    my $peer_addr = $self->peer_addr;
-    my $peer_key  = $self->peer_key;
-
     my $limit_start = 0;
     if(defined $opt->{'limit_start'}) { $limit_start = $opt->{'limit_start'}; }
     # body is already parsed
@@ -858,7 +848,23 @@ sub _send {
         $keys = shift @{$result};
     }
 
+    return($self->_post_processing($result, $opt, $keys));
+}
+
+########################################
+sub _post_processing {
+    my($self, $result, $opt, $keys) = @_;
+
     # add peer information?
+    my $with_peers = 0;
+    if(defined $opt->{'addpeer'} and $opt->{'addpeer'}) {
+        $with_peers = 1;
+    }
+
+    my $peer_name = $self->peer_name;
+    my $peer_addr = $self->peer_addr;
+    my $peer_key  = $self->peer_key;
+
     if(defined $with_peers and $with_peers == 1) {
         unshift @{$keys}, 'peer_name';
         unshift @{$keys}, 'peer_addr';
@@ -1011,7 +1017,7 @@ sub _send_socket {
     my($self, $statement) = @_;
 
     my $retries = 0;
-    my($status, $msg, $recv);
+    my($status, $msg, $recv, $sock);
 
     # try to avoid connection errors
     eval {
@@ -1020,13 +1026,17 @@ sub _send_socket {
         };
 
         if($self->{'retries_on_connection_error'} <= 0) {
-            ($status, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            return($sock, $msg, $recv) if $msg;
+            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
             return($status, $msg, $recv);
         }
 
         while((!defined $status or ($status == 491 or $status == 497 or $status == 500)) and $retries < $self->{'retries_on_connection_error'}) {
             $retries++;
-            ($status, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            return($status, $msg, $recv) if $msg;
+            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
                 $self->{'logger'}->debug('got status '.$status.' retrying in '.$self->{'retry_interval'}.' seconds') if $self->{'verbose'};
@@ -1038,11 +1048,14 @@ sub _send_socket {
     if($@) {
         $self->{'logger'}->debug("try 1 failed: $@") if $self->{'verbose'};
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
-            return($self->_send_socket_do($statement));
+            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            return($status, $msg, $recv) if $msg;
+            return($self->_read_socket_do($sock, $statement));
         }
         croak($@) if $self->{'errors_are_fatal'};
     }
 
+    $status = $sock unless $status;
     croak($msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
@@ -1051,16 +1064,20 @@ sub _send_socket {
 ########################################
 sub _send_socket_do {
     my($self, $statement) = @_;
-    my($recv,$header);
-
     my $sock = $self->_open() or return(491, $self->_get_error(491), $!);
     utf8::decode($statement);
     print $sock encode('utf-8' => $statement) or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
-
     print $sock "\n";
+    return $sock;
+}
+
+########################################
+sub _read_socket_do {
+    my($self, $sock, $statement) = @_;
+    my($recv,$header);
 
     # COMMAND statements never return something
-    if($statement =~ m/^COMMAND/mx) {
+    if($statement && $statement =~ m/^COMMAND/mx) {
         return('201', $self->_get_error(201), undef);
     }
 

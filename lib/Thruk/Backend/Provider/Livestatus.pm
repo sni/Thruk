@@ -139,11 +139,11 @@ sub get_processinfo {
         }
     }
 
-    my $data  =  $self->{'live'}
-                  ->table('status')
-                  ->columns(@{$options{'columns'}})
-                  ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
-                  ->hashref_pk('peer_key');
+    my $data = $self->{'live'}
+                    ->table('status')
+                    ->columns(@{$options{'columns'}})
+                    ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
+                    ->hashref_pk('peer_key');
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
 
@@ -164,12 +164,12 @@ sub get_can_submit_commands {
     my($self, $user) = @_;
     confess("no user") unless defined $user;
     my $data = $self->{'live'}
-                 ->table('contacts')
-                 ->columns(qw/can_submit_commands
-                              alias/)
-                 ->filter({ name => $user })
-                 ->options({AddPeer => 1})
-                 ->hashref_array();
+                    ->table('contacts')
+                    ->columns(qw/can_submit_commands
+                                 alias/)
+                    ->filter({ name => $user })
+                    ->options({AddPeer => 1})
+                    ->hashref_array();
     return($data);
 }
 
@@ -198,11 +198,11 @@ sub get_contactgroups_by_contact {
 
     my $contactgroups = {};
     my $data = $self->{'live'}
-                ->table('contactgroups')
-                ->columns(qw/name/)
-                ->filter({ members => { '>=' => $username }})
-                ->options({AddPeer => 1})
-                ->hashref_array();
+                    ->table('contactgroups')
+                    ->columns(qw/name/)
+                    ->filter({ members => { '>=' => $username }})
+                    ->options({AddPeer => 1})
+                    ->hashref_array();
 
     return $data;
 }
@@ -764,8 +764,7 @@ sub get_host_stats {
         'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
     ];
     my $class = $self->_get_class('hosts', \%options);
-
-    my $rows = $class->stats($stats)->hashref_array();
+    my $rows  = $class->stats($stats)->hashref_array();
 
     unless(wantarray) {
         confess("get_host_stats() should not be called in scalar context");
@@ -827,7 +826,7 @@ sub get_service_stats {
     ];
 
     my $class = $self->_get_class('services', \%options);
-    my $rows = $class->stats($stats)->hashref_array();
+    my $rows  = $class->stats($stats)->hashref_array();
 
     unless(wantarray) {
         confess("get_service_stats() should not be called in scalar context");
@@ -901,10 +900,9 @@ sub get_performance_stats {
             $type.'_passive_state_change_max' => { -isa => [ -max => 'percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
-        $rows = $class
-                    ->filter([ has_been_checked => 1, check_type => 1 ])
-                    ->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        $rows  = $class->filter([ has_been_checked => 1, check_type => 1 ])
+                       ->stats($stats)->hashref_array();
+        $data  = { %{$data}, %{$rows->[0]} };
     }
 
     unless(wantarray) {

@@ -90,6 +90,7 @@ sub new {
         name      => $self->{'name'},
         peer      => $self->{'peer'},
         verbose   => $self->{'verbose'},
+        keepalive => $self->{'keepalive'},
     );
     bless($self, $class);
 

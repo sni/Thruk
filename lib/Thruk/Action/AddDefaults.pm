@@ -445,6 +445,7 @@ sub set_processinfo {
     } else {
         $fetch = 1;
     }
+
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();

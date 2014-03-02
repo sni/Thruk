@@ -1086,11 +1086,6 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
-    #if(Thruk->debug) {
-    #    $c->log->debug($function);
-    #    $c->log->debug(Dumper($get_results_for));
-    #}
-
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
     $c->stash->{'num_selected_backends'} = $selected_backends;
@@ -1333,6 +1328,7 @@ sub _get_result_serial {
     my($self,$peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
+
     for my $key (@{$peers}) {
         $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);

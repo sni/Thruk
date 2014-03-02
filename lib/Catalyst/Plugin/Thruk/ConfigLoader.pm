@@ -157,6 +157,12 @@ sub _do_finalize_config {
 
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
 
+    ###################################################
+    # when using shadow naemon, some settings don't make sense
+    if($config->{'use_shadow_naemon'}) {
+        $config->{'check_local_states'}   = 0; # local state checking not required
+    }
+
     # set default config
     Thruk::Backend::Pool::set_default_config($config);
 
