@@ -102,8 +102,8 @@
 
     [% PROCESS _status_hostdetail_table.tt %]
 
-    [% UNLESS authorized_for_read_only %]
     [% UNLESS minimal %]
+    [% UNLESS authorized_for_read_only %]
     <div class="hint">
         <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
@@ -111,11 +111,11 @@
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
     </div>
     [% END %]
-    [% END %]
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
+    [% END %]
 
 [% PROCESS _footer.tt %]
