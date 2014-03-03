@@ -548,8 +548,20 @@ var TP = {
     rotateTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
         var state  = tabpan.getState();
-        var at     = state.activeTab+1;
-        if(!tabpan.setActiveTab(at)) {
+        var at     = state.activeTab;
+        // find next tab
+        var found = false;
+        var next  = undefined;
+        tabpan.items.each(function(tab) {
+            if(found == true) {
+                next = tab.id;
+                return false;
+            }
+            if(tab.id == at) {
+                found = true;
+            }
+        });
+        if(next == undefined || !tabpan.setActiveTab(next)) {
             tabpan.setActiveTab(1);
         }
     },
