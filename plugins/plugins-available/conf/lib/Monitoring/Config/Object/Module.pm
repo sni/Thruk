@@ -55,7 +55,7 @@ sub BUILD {
 
     my $standard = [];
     if($coretype eq 'any' or $coretype eq 'icinga') {
-        @standard = [ 'module_name', 'path', 'args', 'module_type' ];
+        $standard = [ 'module_name', 'path', 'args', 'module_type' ];
         for my $key (keys %{$Monitoring::Config::Object::Module::IcingaSpecific}) {
             $Monitoring::Config::Object::Module::Defaults->{$key} = $Monitoring::Config::Object::Module::IcingaSpecific->{$key};
         }
@@ -66,7 +66,7 @@ sub BUILD {
     }
 
     if($coretype eq 'any' or $coretype eq 'shinken') {
-        @standard = [ 'module_name', 'module_type', 'modules' ];
+        $standard = [ 'module_name', 'module_type', 'modules' ];
         for my $key (keys %{$Monitoring::Config::Object::Module::ShinkenSpecific}) {
             $Monitoring::Config::Object::Module::Defaults->{$key} = $Monitoring::Config::Object::Module::ShinkenSpecific->{$key};
         }
@@ -80,7 +80,7 @@ sub BUILD {
         'type'        => 'module',
         'primary_key' => 'module_name',
         'default'     => $Monitoring::Config::Object::Module::Defaults,
-        'standard'    => @standard,
+        'standard'    => $standard,
     };
     bless $self, $class;
     return $self;

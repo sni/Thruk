@@ -23,14 +23,11 @@ return help for config directive
 
 =cut
 sub get_config_help {
-    my ( $type, $key ) = @_;
+    my($type, $key) = @_;
     our($helpdata);
 
-    if ($type eq 'discoveryrule') {
-        # discoveryrule attributes can be prefixed by '+', '-' or '!'
-        my $c = substr($key,0,1);
-        $key = substr($key, 1) if $c eq '!' or $c eq '+' or $c eq '-';
-    }
+    $key =~ s|^[\-\+\!]+||gmx;
+
     if($key eq 'use') {
         return "This directive specifies the name of the template object that you want to inherit properties/variables from. The name you specify for this variable must be defined as another object's template named (using the <i>name</i> variable).";
     }
@@ -56,6 +53,9 @@ sub get_config_help {
     }
 
     unless(defined $helpdata->{$type}->{$key}) {
+        if($type eq 'discoveryrule') {
+            return $helpdata->{'host'}->{$key} if $helpdata->{'host'}->{$key};
+        }
         return "topic does not exist!";
     }
     return $helpdata->{$type}->{$key};
@@ -107,7 +107,8 @@ __DATA__
         'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
         'is_admin' => ' This directive is used to determine whether or not the contact can see all object in Shinken WebUI. Values: 0 = normal user, can see all objects he is in contact, 1 = allow contact to see all objects',
         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
-        'password' => 'Contact password (used by SHinken UI).',
+        'password' => 'Contact password (used by Shinken UI).',
+        'notificationways' => '(Shinken Only).',
     },
     'contactgroup' => {
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',

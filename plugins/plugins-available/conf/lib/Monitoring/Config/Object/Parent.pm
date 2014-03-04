@@ -468,9 +468,7 @@ return the help for given attribute
 
 =cut
 sub get_help {
-    my $self = shift;
-    my $attr = shift;
-
+    my($self, $attr) = @_;
     return Monitoring::Config::Help::get_config_help($self->{'type'}, $attr);
 }
 

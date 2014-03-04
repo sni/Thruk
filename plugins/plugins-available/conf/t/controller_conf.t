@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1232;
+    plan tests => 1316;
 }
 
 BEGIN {
@@ -125,6 +125,10 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     is(ref $data, 'ARRAY', "json result is an array") or diag("got: ".Dumper($data));
     next if $type eq 'module';
     next if $type eq 'escalation';
+    next if $type eq 'discoveryrule';
+    next if $type eq 'discoveryrun';
+    next if $type eq 'notificationway';
+    next if $type eq 'realm';
     ok(scalar @{$data} == 2, "json result size is: ".(scalar @{$data}));
 
     is($data->[0]->{'name'}, $type."s", "json result has correct type");

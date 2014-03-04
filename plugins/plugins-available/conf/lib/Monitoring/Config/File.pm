@@ -394,7 +394,7 @@ sub _parse_line {
             $value =~ s/^\s*(.*?)\s*$/$1/mx;
             if (substr($key, 0, 1) eq '$' and substr($key, -1, 1) eq '$') {
                 # Ignore macros
-            } elsif($key =~ /^[a-z0-9_]+$/) {
+            } elsif($key =~ /^[a-z0-9_]+$/mx) {
                 # Ignore cfg_dir, cfg_file, ...
             } else {
                 push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
