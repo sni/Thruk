@@ -931,6 +931,7 @@ sub get_extra_perf_stats {
                         cached_log_messages connections connections_rate host_checks
                         host_checks_rate requests requests_rate service_checks
                         service_checks_rate neb_callbacks neb_callbacks_rate
+                        log_messages log_messages_rate forks forks_rate
                   /)
                   ->hashref_array();
 

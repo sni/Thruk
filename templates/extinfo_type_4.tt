@@ -300,36 +300,49 @@
                       <th class='data'>Type</th>
                       <th class='data'>Total</th>
                       <th class='data'>Rate</th>
+                      <th class='data'>Cached</th>
                     </tr>
-                    <tr>
+                    <tr title="The number of completed service checks since program start">
                       <td class='dataVar'>Servicechecks:</td>
-                      <td class='dataVal'>[% perf_stats.service_checks %]</td>
+                      <td class='dataVal'>[% format_number(perf_stats.service_checks) %]</td>
                       <td class='dataVal'>[% sprintf('%.2f',perf_stats.service_checks_rate) %] /sec</td>
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>Hostchecks:</td>
-                      <td class='dataVal'>[% perf_stats.host_checks %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.host_checks_rate) %] /sec</td>
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>Connections:</td>
-                      <td class='dataVal'>[% perf_stats.connections %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.connections_rate) %] /sec</td>
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>Requests:</td>
-                      <td class='dataVal'>[% perf_stats.requests %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.requests_rate) %] /sec</td>
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>NEB Callbacks:</td>
-                      <td class='dataVal'>[% perf_stats.neb_callbacks %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.neb_callbacks_rate) %] /sec</td>
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>Cached Log Messages:</td>
-                      <td class='dataVal'>[% perf_stats.cached_log_messages %]</td>
                       <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of host checks since program start">
+                      <td class='dataVar'>Hostchecks:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.host_checks) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.host_checks_rate) %] /sec</td>
+                      <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of process creations since program start">
+                      <td class='dataVar'>Forks:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.forks) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.forks_rate) %] /sec</td>
+                      <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of client connections to Livestatus since program start">
+                      <td class='dataVar'> Connections:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.connections) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.connections_rate) %] /sec</td>
+                      <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of requests to Livestatus since program start">
+                      <td class='dataVar'>Requests:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.requests) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.requests_rate) %] /sec</td>
+                      <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of NEB call backs since program start">
+                      <td class='dataVar' title="The number of NEB call backs since program start">NEB Callbacks:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.neb_callbacks) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.neb_callbacks_rate) %] /sec</td>
+                      <td class='dataVal'></td>
+                    </tr>
+                    <tr title="The number of new log messages since program start">
+                      <td class='dataVar'>Log Messages:</td>
+                      <td class='dataVal'>[% format_number(perf_stats.log_messages) %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.log_messages_rate) %] /sec</td>
+                      <td class='dataVal'>[% format_number(perf_stats.cached_log_messages) %]</td>
                     </tr>
                   </table>
                 </td>
