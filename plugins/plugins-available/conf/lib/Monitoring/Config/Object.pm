@@ -18,8 +18,23 @@ use Monitoring::Config::Object::Command;
 use Monitoring::Config::Object::Timeperiod;
 use Monitoring::Config::Object::Contact;
 use Monitoring::Config::Object::Contactgroup;
-use Monitoring::Config::Object::Module;
 use Monitoring::Config::Object::Escalation;
+
+# Icinga and Shinken:
+use Monitoring::Config::Object::Module;
+
+# Shinken:
+use Monitoring::Config::Object::Arbiter;
+use Monitoring::Config::Object::Broker;
+use Monitoring::Config::Object::Poller;
+use Monitoring::Config::Object::Reactionner;
+use Monitoring::Config::Object::Receiver;
+use Monitoring::Config::Object::Scheduler;
+
+use Monitoring::Config::Object::Discoveryrule;
+use Monitoring::Config::Object::Discoveryrun;
+use Monitoring::Config::Object::Notificationway;
+use Monitoring::Config::Object::Realm;
 
 =head1 NAME
 
@@ -50,6 +65,11 @@ $Monitoring::Config::Object::Types = [
     'contactgroup',
     'module',
     'escalation',
+    # Shinken:
+    'discoveryrule',
+    'discoveryrun',
+    'notificationway',
+    'realm',
 ];
 
 ##########################################################

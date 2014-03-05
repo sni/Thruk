@@ -26,6 +26,11 @@ sub get_config_help {
     my ( $type, $key ) = @_;
     our($helpdata);
 
+    if ($type eq 'discoveryrule') {
+        # discoveryrule attributes can be prefixed by '+', '-' or '!'
+        my $c = substr($key,0,1);
+        $key = substr($key, 1) if $c eq '!' or $c eq '+' or $c eq '-';
+    }
     if($key eq 'use') {
         return "This directive specifies the name of the template object that you want to inherit properties/variables from. The name you specify for this variable must be defined as another object's template named (using the <i>name</i> variable).";
     }
@@ -78,7 +83,9 @@ __DATA__
 {
     'command' => {
         'command_line' => '<p>This directive is used to define what is actually executed by Nagios when the command is used for service or host checks, notifications, or event handlers. Before the command line is executed, all valid macros are replaced with their respective values.  See the documentation on macros for determining when you can use different macros.  Note that the command line is <i>not</i> surrounded in quotes.  Also, if you want to pass a dollar sign ($) on the command line, you have to escape it with another dollar sign.</p><p><strong>NOTE</strong>: You may not include a <b>semicolon</b> (;) in the <i>command_line</i> directive, because everything after it will be ignored as a config file comment.  You can work around this limitation by setting one of the <b>$USER$</b> macros in your resource file to a semicolon and then referencing the appropriate $USER$ macro in the <i>command_line</i> directive in place of the semicolon.</p><p>If you want to pass arguments to commands during runtime, you can use <b>$ARGn$</b> macros in the <i>command_line</i> directive of the command definition and then separate individual arguments from the command name (and from each other) using bang (!) characters in the object definition directive (host check command, service event handler command, etc) that references the command.  More information on how arguments in command definitions are processed during runtime can be found in the documentation on macros.</p>',
-        'command_name' => 'This directive is the short name used to identify the command.  It is referenced in contact, host, and service definitions (in notification, check, and event handler directives), among other places.'
+        'command_name' => 'This directive is the short name used to identify the command.  It is referenced in contact, host, and service definitions (in notification, check, and event handler directives), among other places.',
+        'module_type' => 'This optional directive defines the type of the module <i>(Shinken-specific)</i>.',
+        'reactionner_tag' => 'This command will run on the reactionner with the specified tag <i>(Shinken-specific)</i>.',
     },
     'contact' => {
         'addressx' => 'Address directives are used to define additional "addresses" for the contact.  These addresses can be anything - cell phone numbers, instant messaging addresses, etc.  Depending on how you configure your notification commands, they can be used to send out an alert to the contact.  Up to six addresses can be defined using these directives (<i>address1</i> through <i>address6</i>). The $CONTACTADDRESS<i>x</i>$ macro will contain this value.',
@@ -100,6 +107,7 @@ __DATA__
         'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
         'is_admin' => ' This directive is used to determine whether or not the contact can see all object in Shinken WebUI. Values: 0 = normal user, can see all objects he is in contact, 1 = allow contact to see all objects',
         'min_business_impact' => 'This directive is use to define the minimum business criticity level of a service/host the contact will be notified',
+        'password' => 'Contact password (used by SHinken UI).',
     },
     'contactgroup' => {
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
@@ -310,9 +318,13 @@ __DATA__
     },
     'module' => {
         'module_name' => 'This directive identifies the unique name of the module so you cannot have two modules with the same module name. It is mandatory, otherwise the config will not be accepted and the module will not be loaded.',
-        'module_type' => 'This optional directive defines the type of the module, e.g. &#39;neb&#39; for event broker modules. This directive is intended to allow further filtering on the module loading.',
+        'module_type' => '<p><b>Icinga:</b> This optional directive defines the type of the module, e.g. &#39;neb&#39; for event broker modules. This directive is intended to allow further filtering on the module loading.</p><p><b>Shinken:</b> This mandatory directive defines the type of the module.</p>',
         'path' => 'mandatory directive specifies the path to the module binary to be loaded. For event broker modules like idomod the user running the core must be allowed to read and load the module.',
-        'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.'
+        'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.',
+        'modules' => 'List of submodules.',
+
+        'host' => 'Host name or IP address to connect or listen to (depending on the module).',
+        'port' => 'TCP port to connect or listen to (depending on the module).'
     },
     'escalation' => {
         'escalation_name' => 'This directive identifies the unique name of the escalation so you reference this escalation by your hosts and services.',
@@ -323,5 +335,169 @@ __DATA__
         'first_notification_time' => 'This directive is a number that identifies the <i>first</i> notification for which this escalation is effective.  For instance, if you set this value to 3, this escalation will only be used if the host is down or unreachable long enough for a third notification to go out.',
         'last_notification_time' => 'This directive is a number that identifies the <i>last</i> notification for which this escalation is effective.  For instance, if you set this value to 5, this escalation will not be used if more than five notifications are sent out for the host.  Setting this value to 0 means to keep using this escalation entry forever (no matter how many notifications go out).',
         'notification_interval' => 'This directive is used to determine the interval at which notifications should be made while this escalation is valid.  If you specify a value of 0 for the interval, Nagios will send the first notification when this escalation definition is valid, but will then prevent any more problem notifications from being sent out for the host.  Notifications are sent out again until the host recovers.  This is useful if you want to stop having notifications sent out after a certain amount of time.  Note:  If multiple escalation entries for a host overlap for one or more notification ranges, the smallest notification interval from all escalation entries is used.',
+    },
+    'arbiter' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        #'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        #'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        #'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'arbiter_name' => 'This directive identifies the unique name of the daemon.',
+        'host_name' => 'Host name.',
+        'port' => 'TCP port.',
+    },
+    'broker' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'broker_name' => 'This directive identifies the unique name of the daemon.',
+        'port' => 'TCP port.',
+    },
+    'poller' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        #'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'poller_name' => 'This directive identifies the unique name of the daemon.',
+        'port' => 'TCP port.',
+        'passive' => 'Is this daemon passive.',
+        'min_workers' => 'Starts with N processes (0 = 1 per CPU)',
+        'max_workers' => 'No more than N processes (0 = 1 per CPU)',
+        'processes_by_worker' => 'Each worker manages N checks',
+        'poller_tags' => 'This variable is used to define the checks the poller can take. If no poller_tags is defined, poller will take all untagued checks. If at least one tag is defined, it will take only the checks that are also taggued like it.',
+    },
+    'reactionner' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'reactionner_name' => 'This directive identifies the unique name of the daemon.',
+        'port' => 'TCP port.',
+        'passive' => 'Is this daemon passive.',
+        'min_workers' => 'Starts with N processes (0 = 1 per CPU)',
+        'max_workers' => 'No more than N processes (0 = 1 per CPU)',
+        'processes_by_worker' => 'Each worker manages N checks',
+        'poller_tags' => 'This variable is used to define the checks the poller can take. If no poller_tags is defined, poller will take all untagued checks. If at least one tag is defined, it will take only the checks that are also taggued like it.',
+    },
+    'receiver' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'receiver_name' => 'This directive identifies the unique name of the daemon.',
+        'port' => 'TCP port.',
+        'direct_routing' => 'Send commands directly to schedulers',
+    },
+    'scheduler' => {
+        'address' => 'DNS name of ip address',
+        'timeout' => 'Number of seconds to waint when pinging the daemon',
+        'data_timeout' => 'Number of seconds to wait when sending data',
+        'check_interval' => 'Number of seconds to wait before issuing a new ping check',
+        'max_check_attempts' => 'Number of failed pings before marking the node as dead',
+        'spare' => 'Is this daemon a failover slave',
+        'manage_sub_realms' => 'Does this daemon take jobs from the subdomains too <i>(default value is false for pollers, and true for reactionners and brokers)</i>',
+        'manage_arbiters' => 'Take data from Arbiter. There should be only one broker for the arbiter.',
+        'modules' => 'List of submodules.',
+        'polling_interval' => 'Get jobs from schedulers each N seconds.',
+        'use_timezone' => 'Override the default timezone that this instance of Shinken runs in.',
+        'realm' => 'Daemon realm',
+        'satellitemap' => '<p>In NATted environments, you declare each satellite ip[:port] as seen by <b>this</b> scheduler <i>(if port not set, the port declared by satellite itself is used)</i>.</p><p><b>Example:</b> <pre>poller-1=1.2.3.4:1772, reactionner-1=1.2.3.5:1773</pre></p>',
+        'use_ssl' => 'Use SSL',
+
+        'scheduler_name' => 'This directive identifies the unique name of the daemon.',
+        'port' => 'TCP port.',
+        'weight' => 'Some schedulers can manage more hosts than others',
+        'skip_initial_broks' => 'Skip initial broks creation for faster boot time <i>(experimental feature)</i>.',
+    },
+    'discoveryrule' => {
+        'discoveryrule_name' => 'This directive identifies the unique name of the discoveryrule so you reference it by your objects.',
+        'creation_type' => 'What type of object to create.',
+        'discoveryrule_order' => 'The smallest number is applied first',
+        'isup' => 'Match if host is alive.',
+        'os' => 'Match against operating system name.',
+        'osversion' => 'Match against operating system version.',
+        'macvendor' => 'Match against vendor from MAC address.',
+        'openports' => 'Match against opened TCP ports.',
+        'parents' => 'Match against parent hosts.',
+        'fqdn' => 'Match against DNS name.',
+        'ip' => 'Match against IP address.',
+        'fs' => 'Match against filesystem.',
+    },
+    'discoveryrun' => {
+        'discoveryrun_name' => 'This directive identifies the unique name of the discoveryrun so you reference it by your objects.',
+        'discoveryrun_command' => 'Discovery command to run.',
+    },
+    'notificationway' => {
+        'notificationway_name' => 'This directive identifies the unique name of the notificationway so you reference it by your contacts.n',
+        'host_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about host problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
+        'service_notifications_enabled' => 'This directive is used to determine whether or not the contact will receive notifications about service problems and recoveries.  Values: 0 = don\'t send notifications, 1 = send notifications.',
+        'host_notification_period' => 'This directive is used to specify the short name of the time period during which the contact can be notified about host problems or recoveries.  You can think of this as an "on call" time for host notifications for the contact.  Read the documentation on time periods for more information on how this works and potential problems that may result from improper use.',
+        'service_notification_period' => 'This directive is used to specify the short name of the time period during which the contact can be notified about service problems or recoveries.  You can think of this as an "on call" time for service notifications for the contact.  Read the documentation on time periods for more information on how this works and potential problems that may result from improper use.',
+        'host_notification_options' => 'This directive is used to define the host states for which notifications can be sent out to this contact.  Valid options are a combination of one or more of the following: <b>d</b> = notify on DOWN host states, <b>u</b> = notify on UNREACHABLE host states, <b>r</b> = notify on host recoveries (UP states), <b>f</b> = notify when the host starts and stops flapping, and <b>s</b> = send notifications when host or service scheduled downtime starts and ends.  If you specify <b>n</b> (none) as an option, the contact will not receive any type of host notifications.',
+        'service_notification_options' => 'This directive is used to define the service states for which notifications can be sent out to this contact.  Valid options are a combination of one or more of the following: <b>w</b> = notify on WARNING service states, <b>u</b> = notify on UNKNOWN service states, <b>c</b> = notify on CRITICAL service states, <b>r</b> = notify on service recoveries (OK states), and <b>f</b> = notify when the service starts and stops flapping.  If you specify <b>n</b> (none) as an option, the contact will not receive any type of service notifications.',
+        'host_notification_commands' => 'This directive is used to define a list of the <i>short names</i> of the commands used to notify the contact of a <i>host</i> problem or recovery.  Multiple notification commands should be separated by commas.  Allnotification commands are executed when the contact needs to be notified.  The maximum amount of time that a notification command can run is controlled by the notification_timeout option.',
+        'service_notification_commands' => 'This directive is used to define a list of the <i>short names</i> of the commands used to notify the contact of a <i>service</i> problem or recovery.  Multiple notification commands should be separated by commas.  Allnotification commands are executed when the contact needs to be notified.  The maximum amount of time that a notification command can run is controlled by the notification_timeout option.',
+        'min_business_impact' => 'Minimum business criticity level',
+    },
+    'realm' => {
+        'realm_name' => 'This directive identifies the unique name of the realm so you reference it by your objects.',
+        'realm_members' => 'This directive is used to define the sub-realms of this realms.',
+        'default' => 'This directive is used to define if this realm is the default one (untagged host and satellites wil be put into it). The default value is 0.',
+        'broker_complete_links' => 'Enable multi-brokers features',
     },
 };
