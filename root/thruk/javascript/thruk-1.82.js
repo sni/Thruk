@@ -1312,10 +1312,14 @@ function do_table_search(hide_only) {
                     }
                 });
                 if(found == 0) {
-                    hideElement(row);
+                    if(!jQuery(row).hasClass('table_search_skip')) {
+                        hideElement(row);
+                    }
                 } else {
                     if(!hide_only) {
-                        showElement(row);
+                        if(!jQuery(row).hasClass('table_search_skip')) {
+                            showElement(row);
+                        }
                     }
                 }
             }
