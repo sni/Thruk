@@ -1,4 +1,4 @@
-﻿[% IF param.include_multiple_pnp_graph == 'yes' && param.max_pnp_sources > 1 %]
+﻿[% IF param.max_pnp_sources > 1 %]
   [% modulus = (param.max_pnp_sources - 1) mod 3 %]
   [% IF modulus == 0 %]
     [% nb_page = (param.max_pnp_sources - 1) div 3 %]
@@ -12,7 +12,7 @@
     [% pnpdata = get_pnp_image(c.request.parameters.host, c.request.parameters.service, start, end, 400, 100, source) %]
     [% IF pnpdata %]
       [% nb_graph = nb_graph + 1 %]
-      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle=loc("") %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="" %]
         <div align="center">
           <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
         </div>

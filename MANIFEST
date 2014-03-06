@@ -870,6 +870,7 @@ plugins/plugins-available/reports2/templates/reports.tt
 plugins/plugins-available/reports2/templates/reports/comp/mail.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_cover.tt
 plugins/plugins-available/reports2/templates/reports/comp/page_standard.tt
+plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt
 plugins/plugins-available/reports2/templates/reports/comp/report.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_by_time.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_fixed.tt
