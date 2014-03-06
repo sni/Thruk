@@ -423,11 +423,7 @@ sub _do_child_stuff {
 
 ##############################################
 sub _do_parent_stuff {
-    my $c    = shift;
-    my $dir  = shift;
-    my $pid  = shift;
-    my $id   = shift;
-    my $conf = shift;
+    my($c, $dir, $pid, $id, $conf) = @_;
 
     # write pid file
     my $pidfile = $dir."/pid";
@@ -439,7 +435,8 @@ sub _do_parent_stuff {
     # write start file
     my $startfile = $dir."/start";
     open($fh, '>', $startfile) or die("cannot write start $startfile: $!");
-    print $fh time();
+    print $fh time(),"\n";
+    print $fh Dumper($conf);
     print $fh "\n";
 
     # write user file
