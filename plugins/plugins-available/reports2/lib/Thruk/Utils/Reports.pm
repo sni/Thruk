@@ -652,7 +652,7 @@ sub add_report_defaults {
         my $f   = $d->{$key};
 
         # fill in default
-        if(defined $f->[4] and $f->[2] ne '' and !$report->{'params'}->{$key}) {
+        if(defined $f->[4] and $f->[2] ne '' and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ /^\s*$/mx)) {
             $report->{'params'}->{$key} = $f->[2];
         }
 
