@@ -38,5 +38,11 @@
         [% END %]
       [% END %]
     [%+ END +%]
+
+    var saved_hash = readCookie('thruk_preserve_hash');
+    if(saved_hash != undefined) {
+        set_hash(saved_hash);
+        cookieRemove('thruk_preserve_hash');
+    }
 -->
 </script>

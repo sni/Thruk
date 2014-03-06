@@ -321,7 +321,26 @@ function cookieSave(name, value, expires) {
 
 /* remove existing cookie */
 function cookieRemove(name, path) {
+    if(path == undefined) {
+        path = cookie_path;
+    }
     document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+}
+
+/* return cookie value */
+var cookies;
+function readCookie(name,c,C,i){
+    if(cookies){ return cookies[name]; }
+
+    c = document.cookie.split('; ');
+    cookies = {};
+
+    for(i=c.length-1; i>=0; i--){
+       C = c[i].split('=');
+       cookies[C[0]] = C[1];
+    }
+
+    return cookies[name];
 }
 
 /* page refresh rate */
@@ -1271,23 +1290,25 @@ function add_cron_row(tbl_id) {
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
 var table_search_cb = {};
-function table_search(input_id, table_ids) {
+function table_search(input_id, table_ids, nodelay) {
     table_search_input_id  = input_id;
     table_search_table_ids = table_ids;
     clearTimeout(table_search_timer);
-    table_search_timer = window.setTimeout('do_table_search()', 300);
+    if(nodelay != undefined) {
+        do_table_search();
+    } else {
+        table_search_timer = window.setTimeout('do_table_search()', 300);
+    }
 }
 /* do the search work */
-function do_table_search(hide_only) {
+function do_table_search() {
     var ids      = table_search_table_ids;
     var value    = jQuery('#'+table_search_input_id).val();
     if(value == undefined) {
         return;
     }
-    if(hide_only == undefined) {
-        hide_only = false;
-    }
-    value        = value.toLowerCase();
+    value    = value.toLowerCase();
+    set_hash(value, 2);
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
         /* make tables fixed width to avoid flickering */
@@ -1313,18 +1334,16 @@ function do_table_search(hide_only) {
                 });
                 if(found == 0) {
                     if(!jQuery(row).hasClass('table_search_skip')) {
-                        hideElement(row);
+                        jQuery(row).addClass('filter_hidden');
                     }
                 } else {
-                    if(!hide_only) {
-                        if(!jQuery(row).hasClass('table_search_skip')) {
-                            showElement(row);
-                        }
+                    if(!jQuery(row).hasClass('table_search_skip')) {
+                        jQuery(row).removeClass('filter_hidden');
                     }
                 }
             }
         });
-        if(!hide_only) {
+        if(table_search_cb[id] != undefined) {
             try {
                 table_search_cb[id]();
             } catch(e) {
@@ -1575,7 +1594,16 @@ function save_url_in_parents_hash() {
 }
 
 /* set hash of url */
-function set_hash(value) {
+function set_hash(value, nr) {
+    if(nr != undefined) {
+        var current   = get_hash();
+        if(current == undefined) {
+            current = "";
+        }
+        var tmp   = current.split('|');
+        tmp[nr-1] = value;
+        value     = tmp.join('|');
+    }
     // replace history otherwise we have to press back twice
     if (history.replaceState) {
         history.replaceState({}, "", '#'+value);
@@ -1590,13 +1618,20 @@ function set_hash(value) {
 }
 
 /* get hash of url */
-function get_hash() {
+function get_hash(nr) {
     var hash;
     if(window.location.hash != '#') {
         var values = window.location.hash.split("/");
         if(values[0]) {
             hash = values[0].replace(/^#/, '');
         }
+    }
+    if(nr != undefined) {
+        if(hash == undefined) {
+            hash = "";
+        }
+        var tmp = hash.split('|');
+        return(tmp[nr-1]);
     }
     return(hash);
 }

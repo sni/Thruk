@@ -44,7 +44,7 @@
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap>Description</th>
     <th class="status" nowrap width="40">Public</th>
-    <th class="status usercol" nowrap width="60"[% IF prev_tab == 'my' %] style='display:none;'[% END %]>Owner</th>
+    <th class="status usercol" nowrap width="60">Owner</th>
     <th class="status" nowrap width="40">Mail</th>
     <th class="status" nowrap width="100">Schedule</th>
     <th class="status" nowrap width="150">Last Time Run</th>
@@ -56,16 +56,11 @@
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
-  [% visible = 1 %]
-  [% IF r.user == remote_user %][% IF prev_tab != 'my' %][% visible = 0 %][% END %]
-  [% ELSIF r.is_public %][% IF prev_tab != 'public' %][% visible = 0 %][% END %]
-  [% END %]
-  [% IF prev_tab == 'all' %][% visible = 1 %][% END %]
-  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]" [% IF visible == 0 %]style="display:none;"[% END %]>
+  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
     <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
-    <td class="status [% rowclass %] usercol"[% IF prev_tab == 'my' %] style='display:none;'[% END %]>[% r.user %]</td>
+    <td class="status [% rowclass %] usercol">[% r.user %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
     <td class="status [% rowclass %]">
@@ -111,7 +106,7 @@
     </td>
   </tr>
   [% IF r.failed %]
-  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]" [% IF visible == 0 %]style="display:none;"[% END %]>
+  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]"></td>
     <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
       [% IF r.exists('long_error') %]
@@ -137,24 +132,26 @@
 
 <script type="text/javascript">
 <!--
-  var typ = get_hash();
-  if(typ == undefined) { typ = 'my' }
-  reports_view(typ);
-  if(typ == 'my')          { jQuery('#view1').attr('checked', 'checked') }
-  else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }
-  else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
-  else                     { jQuery('#view1').attr('checked', 'checked') }
-  init_report_tool_buttons();
-  [% IF running > 0 %]
-  update_reports_status();
-  [%+ END +%]
-  [% IF highlight %]
-  jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
-  if(typ == 'my') {
-    // filter again, otherwise the owner cell would be displayed after hilighting
+  jQuery(document).ready(function() {
+    var typ = get_hash(1);
+    if(typ == undefined) { typ = 'my' }
     reports_view(typ);
-  }
-  [%+ END +%]
-  table_search_cb['statusTable'] = reports_view;
+    if(typ == 'my')          { jQuery('#view1').attr('checked', 'checked') }
+    else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }
+    else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
+    else                     { jQuery('#view1').attr('checked', 'checked') }
+    init_report_tool_buttons();
+    [% IF running > 0 %]
+    update_reports_status();
+    [%+ END +%]
+    [% IF highlight %]
+    jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
+    if(typ == 'my') {
+      // filter again, otherwise the owner cell would be displayed after hilighting
+      reports_view(typ);
+    }
+    [%+ END +%]
+    table_search("table_search_input", ["statusTable"], 1);
+  });
 -->
 </script>

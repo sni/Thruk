@@ -37,7 +37,7 @@ function init_report_tool_buttons() {
 function update_reports_status() {
     /* adding timestamp makes IE happy */
     var ts = new Date().getTime();
-    jQuery('#reports_table').load('reports2.cgi?tab='+last_reports_typ+'&_=' + ts + ' #statusTable', {},
+    jQuery('#reports_table').load('reports2.cgi?_=' + ts + ' #statusTable', {},
                                   function(responseText, textStatus, XMLHttpRequest) {
         // now count is_running elements
         size = jQuery('.is_running').size();
@@ -45,6 +45,7 @@ function update_reports_status() {
             window.setTimeout('update_reports_status()', 1500);
         }
         reports_view(last_reports_typ);
+        table_search("table_search_input", ["statusTable"], 1);
     });
 }
 
@@ -78,15 +79,11 @@ function update_reports_type_step2() {
 /* show hide specific types of reports */
 var last_reports_typ;
 function reports_view(typ) {
-    var need_filter = true;
-    var hide_only   = false;
     if(typ == undefined) {
         typ = last_reports_typ;
-        need_filter = false;
-        hide_only   = true;
-    } else {
-        last_reports_typ = typ;
     }
+    last_reports_typ = typ;
+
     // show owner column?
     if(typ == 'all' || typ == 'public') {
         jQuery('#reports_table .usercol').each(function(nr, el) {
@@ -99,33 +96,21 @@ function reports_view(typ) {
     }
 
     if(typ == 'all') {
-        if(!hide_only) {
-            jQuery('#reports_table TR').each(function(nr, el) {
-                showElement(el);
-            });
-        }
+        jQuery('#reports_table TR').each(function(nr, el) {
+            jQuery(el).removeClass('tab_hidden');
+        });
     } else {
         jQuery('#reports_table TR').each(function(nr, el) {
             if(nr > 0) {
                 if(jQuery(el).hasClass(typ)) {
-                    if(!hide_only) {
-                        showElement(el);
-                    }
+                    jQuery(el).removeClass('tab_hidden');
                 } else {
-                    hideElement(el);
+                    jQuery(el).addClass('tab_hidden');
                 }
             }
         });
     }
-    set_hash(typ);
-    if(need_filter) {
-        do_table_search(true);
-    }
-
-    jQuery('A.editlinks, A.updatelinks').each(function(nr, link) {
-        var tmp   = link.href.replace(/tab=.*/g, 'tab='+typ);
-        link.href = tmp;
-    });
+    set_hash(typ, 1);
 }
 
 /* collect total number of affected hosts and services */

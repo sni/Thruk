@@ -59,7 +59,6 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
-    $c->stash->{'prev_tab'}            = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
     $c->stash->{'wkhtmltopdf'}         = 1;
 
     $Thruk::Utils::CLI::c              = $c;
@@ -198,8 +197,6 @@ sub report_edit {
         }
     }
 
-    $c->stash->{'prev_tab'} = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
-
     $c->stash->{templates} = Thruk::Utils::Reports::get_report_templates($c);
     $self->_set_report_data($c, $r);
 
@@ -264,8 +261,7 @@ sub report_save {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    my $tab = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr.'#'.$tab);
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
 }
 
 ##########################################################
@@ -287,8 +283,7 @@ sub report_update {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    my $tab = $c->{'request'}->{'parameters'}->{'tab'} || 'my';
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi#".$tab);
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################
