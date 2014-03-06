@@ -17,7 +17,7 @@
         { 'unavailable'                  => [ 'Unavailable States',         'hst_unavailable', ['down', 'unreachable'], '', 1 ] },
         { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '0'         ,'max. # pages', 1 ] },
         { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '0'         ,'max. # pages', 1 ] },
-        { 'max_pnp_sources'              => [ 'Maximum PNP sources',        'int',             '1'         ,'Max PNP source to display', 1 ] },
+        { 'max_pnp_sources'              => [ 'Maximum PNP Sources',        'int',             '1'         ,'max. # pnp images', 1 ] },
     ];
   %]
 [% END %]
