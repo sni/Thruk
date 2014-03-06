@@ -24,10 +24,9 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="report" value="[% r.nr %]">
-<input type="hidden" name="tab" value="[% prev_tab %]">
 <table border="1" class='data reports'>
   <tr>
-    <th class='data' style="width:125px;"><a href='reports2.cgi#[% prev_tab %]'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
     <th class='data' style="width:125px;"></th>
   </tr>
@@ -137,5 +136,8 @@
   if(inp && inp.length > 0) {
     reports_update_affected_sla_objects(inp[0]);
   }
+  // preserve filter and tab on save
+  jQuery("FORM").on('submit', preserve_hash);
+  jQuery("FORM A").on('click', preserve_hash);
 -->
 </script>

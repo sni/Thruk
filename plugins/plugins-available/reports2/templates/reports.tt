@@ -81,12 +81,12 @@
         [% running = running + 1 %]
         <a href="#" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
       [% ELSE %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update;amp&tab=" class="updatelinks"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit&amp;tab=" class="editlinks"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]" nowrap align="left">

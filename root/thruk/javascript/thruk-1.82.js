@@ -1604,6 +1604,10 @@ function set_hash(value, nr) {
         tmp[nr-1] = value;
         value     = tmp.join('|');
     }
+    // make emtpy values nicer
+    if(value == '|') {
+        value = "";
+    }
     // replace history otherwise we have to press back twice
     if (history.replaceState) {
         history.replaceState({}, "", '#'+value);
@@ -1634,6 +1638,11 @@ function get_hash(nr) {
         return(tmp[nr-1]);
     }
     return(hash);
+}
+
+function preserve_hash() {
+    // save hash value for 30 seconds
+    cookieSave('thruk_preserve_hash', get_hash(), 60);
 }
 
 /*******************************************************************************
