@@ -18,8 +18,7 @@
         { 'unavailable'                  => [ 'Unavailable States',         'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
         { 'max_outages_pages'            => [ 'Latest Outages',             'int',             '1'          ,'max. # pages', 1 ] },
         { 'max_worst_pages'              => [ 'Worst Outages',              'int',             '1'          ,'max. # pages', 1 ] },
-        { 'include_multiple_pnp_graph'   => [ 'Include Multiple PNP Graph', 'yes_no',          'no'                           ] },
-        { 'max_pnp_sources'              => [ 'Maximum PNP sources',        'int',             '2'          ,'Max source if Multiple PNP Graph is YES', 1 ] },
+        { 'max_pnp_sources'              => [ 'Maximum PNP sources',        'int',             '1'         ,'Max PNP source to display', 1 ] },
     ];
   %]
 [% END %]
