@@ -82,8 +82,8 @@ use Catalyst::Test 'Thruk';
 # start test server
 my $httppid = fork();
 if(!$httppid) {
-    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1');
-    fail(read_file($http_dir.'/tmp/server.log'));
+    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1') or
+        fail(read_file($http_dir.'/tmp/server.log'));
     exit 1;
 }
 my $now = time();
