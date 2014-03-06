@@ -105,7 +105,7 @@ sub index :Path :Args(0) {
     # make lowercase username
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
 
-    if($submit ne '') {
+    if($submit ne '' || $login ne '') {
         my $testcookie = $c->request->cookie('thruk_test');
         $c->res->cookies->{'thruk_test'} = {
             value   => '',
@@ -113,7 +113,8 @@ sub index :Path :Args(0) {
             path    => $cookie_path,
             domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
         };
-        if(!defined $testcookie or !$testcookie->value) {
+        if(   (!defined $testcookie or !$testcookie->value)
+           && (!defined $c->{'request'}->{'headers'}->{'user-agent'} or $c->{'request'}->{'headers'}->{'user-agent'} !~ m/wget/mix)) {
             return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");
