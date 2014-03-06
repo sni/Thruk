@@ -8,6 +8,7 @@ use IO::Socket::UNIX;
 use IO::Socket::INET;
 use File::Temp qw/tempdir/;
 use File::Copy qw/copy/;
+use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 
 BEGIN {
@@ -16,6 +17,7 @@ BEGIN {
     plan tests => 28;
     $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
+    $ENV{'THRUK_TEST_NO_STDOUT_LOG'} = 1;
 }
 
 ###########################################################
@@ -80,8 +82,9 @@ use Catalyst::Test 'Thruk';
 # start test server
 my $httppid = fork();
 if(!$httppid) {
-    mkdir('/tmp/');
-    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport) or exit 1;
+    exec("CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1');
+    fail(read_file($http_dir.'/tmp/server.log'));
+    exit 1;
 }
 my $now = time();
 for my $x (1..15) {

@@ -121,6 +121,8 @@ Can be one of:
 ==== THRUK_TEST_CMD_NO_LOG
 Don't log sent test commands from cmd.cgi.
 
+==== THRUK_TEST_NO_STDOUT_LOG
+Don't log stdout messages during some tests
 
 ==== THRUK_USER_ID
 Contains thruks user id.

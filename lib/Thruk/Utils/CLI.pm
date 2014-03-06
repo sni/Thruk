@@ -1149,12 +1149,14 @@ sub _cmd_configtool {
                 }
             }
             # create log message
-            $c->log->info(sprintf("[config][%s][%s][ext] %s file '%s'",
-                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
-                                        $c->stash->{'remote_user'},
-                                        $saved,
-                                        $path,
-            )) if $saved;
+            if($saved && !$ENV{'THRUK_TEST_NO_STDOUT_LOG'}) {
+                $c->log->info(sprintf("[config][%s][%s][ext] %s file '%s'",
+                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->stash->{'remote_user'},
+                                            $saved,
+                                            $path,
+                ));
+            }
         }
         # deleted files
         my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
