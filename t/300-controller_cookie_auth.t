@@ -4,8 +4,8 @@ use Test::More;
 
 BEGIN {
     eval "use Test::Cmd";
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'Test::Cmd required' if $@;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan tests => 56;
 
     use lib('t');

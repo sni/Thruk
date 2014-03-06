@@ -5,6 +5,8 @@ use Test::More;
 use IO::Scalar;
 
 BEGIN {
+    `perldoc -l CatalystX::LeakChecker >/dev/null 2>&1`;
+    plan skip_all => 'CatalystX::LeakChecker required' if $? != 0;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
     plan tests => 27;

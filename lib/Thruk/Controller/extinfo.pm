@@ -250,6 +250,7 @@ sub _process_recurring_downtimes_page {
             'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
             'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,
         };
+        $rd->{'verbose'} = 1 if $c->{'request'}->{'parameters'}->{'verbose'};
         $c->stash->{rd} = $rd;
         my $failed = 0;
 
@@ -511,12 +512,15 @@ sub _get_downtime_cmd {
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
     Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
-    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=\"%s\"' >/dev/null 2>>%s/cron.log",
+    my $log = sprintf(">/dev/null 2>>%s/cron.log", $c->config->{'var_path'});
+    $log = sprintf(">>%s/cron.log 2>&1", $c->config->{'var_path'}) if $downtime->{'verbose'};
+    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=\"%s\"%s' %s",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
                             $downtime->{'file'},
-                            $c->config->{'var_path'},
+                            $downtime->{'verbose'} ? ' -vv ' : '',
+                            $log,
                     );
     return $cmd;
 }

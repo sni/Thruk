@@ -7,6 +7,8 @@ use Data::Dumper;
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
 plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+`ps -fu root | grep cron >/dev/null 2>&1`;
+plan skip_all => 'crond required' if $? != 0;
 
 BEGIN {
     use lib('t');
@@ -39,6 +41,7 @@ my $test_downtime = [{
     'flex_range'    => 720,
     'childoptions'  => 0,
     'nr'            => $rand,
+    'verbose'       => 1,
 }];
 
 for my $downtime (@{$test_downtime}) {
@@ -64,7 +67,7 @@ for my $downtime (@{$test_downtime}) {
     like($logfile, '/cron\.log$/', "got cron log: ".$logfile);
     `>$logfile`;
 
-    # wait 90 seconds for a downtime
+    # wait 150 seconds for a downtime
     my $now   = time();
     my $found = 0;
     while($now > time() - 150) {
@@ -78,8 +81,15 @@ for my $downtime (@{$test_downtime}) {
     }
     if(!$found) {
         fail("downtime did not occur in time");
-        diag("cat $logfile:");
-        diag(`cat $logfile`);
+        for my $cmd ("cat $logfile",
+                     "crontab -l",
+                     "ps -efl",
+                     "$BIN 'extinfo.cgi?type=6'",
+                     "$BIN 'showlog.cgi?pattern=EXTERNAL+COMMAND&start=yesterday&end=now'",
+                    ) {
+            diag("cmd: $cmd");
+            diag(`$cmd`);
+        }
     }
 }
 

@@ -391,6 +391,7 @@ sub _task_server_stats {
             $name =~ s/:$//gmx;
             $mem->{$name} = int($val / 1024);
         }
+        $mem->{'Buffers'} = 0; # can be empty on some machines
         push @{$json->{'data'}},
             { cat => 'Memory',  type => 'total',    value => $mem->{'MemTotal'},  graph => '', warn => $mem->{'MemTotal'}, crit => $mem->{'MemTotal'}, max => $mem->{'MemTotal'} },
             { cat => 'Memory',  type => 'free',     value => $mem->{'MemFree'},   'warn' => $mem->{'MemTotal'}*0.7, crit => $mem->{'MemTotal'}*0.8, max => $mem->{'MemTotal'}, graph => '' },

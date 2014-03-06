@@ -1,4 +1,5 @@
 .travis.yml
+t/travis
 error.log
 notes.txt
 .DS_Store
