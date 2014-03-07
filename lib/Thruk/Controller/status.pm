@@ -200,23 +200,28 @@ sub _process_raw_request {
         }
 
         my( $hostgroups, $servicegroups, $hosts, $services, $timeperiods );
+        my @json;
         if( $c->config->{ajax_search_hostgroups} ) {
             $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+            push @json, { 'name' => 'hostgroups', 'data' => $hostgroups };
         }
         if( $c->config->{ajax_search_servicegroups} ) {
             $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            push @json, { 'name' => 'servicegroups', 'data' => $servicegroups };
         }
         if( $c->config->{ajax_search_hosts} ) {
             $hosts = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+            push @json, { 'name' => 'hosts', 'data'=> $hosts };
         }
         if( $c->config->{ajax_search_services} ) {
             $services = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            push @json, { 'name' => 'services', 'data' => $services };
         }
         if( $c->config->{ajax_search_timeperiods} ) {
             $timeperiods = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
+            push @json, { 'name' => 'timeperiods', 'data' => $timeperiods };
         }
-        my $json = [ { 'name' => 'hostgroups', 'data' => $hostgroups }, { 'name' => 'servicegroups', 'data' => $servicegroups }, { 'name' => 'hosts', 'data' => $hosts }, { 'name' => 'services', 'data' => $services }, { 'name' => 'timeperiods', 'data' => $timeperiods } ];
-        $c->stash->{'json'} = $json;
+        $c->stash->{'json'} = \@json;
         $c->forward('Thruk::View::JSON');
         return;
     }
