@@ -127,7 +127,10 @@ function reports_update_affected_sla_objects(input) {
     showElement('reports_waiting');
     hideElement(span2[0].id);
     try {
-        select_all_options('report_backends');
+        // only select all backends if using the _backend_select_multi.tt
+        if(document.getElementById('available_backends') != undefined) {
+            select_all_options('report_backends');
+        }
     } catch(e) {
         debug(e);
     }
