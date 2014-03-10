@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - support time definitions like 1st monday, last friday for recurring downtimes and reports
           - support host/hostgroup/servicegroup lists for recurring downtimes
           - added quick filter to config pages
           - general design fixes (awiddersheim)

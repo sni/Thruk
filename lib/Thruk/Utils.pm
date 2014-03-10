@@ -156,6 +156,11 @@ sub format_cronentry {
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("daily at %02s:%02s", $cr->{'hour'}, $cr->{'minute'});
     }
+    elsif($cr->{'type'} eq 'monthday') {
+        my $month_day = lcfirst $cr->{'month_day'};
+        $month_day =~ s/_/ /gmx;
+        $cron = sprintf("every %s at %02s:%02s", $month_day, $cr->{'hour'}, $cr->{'minute'});
+    }
     elsif($cr->{'type'} eq 'cust') {
         my @tst = split/\s+/mx, $cr->{'cust'};
         if(scalar @tst == 5) {
@@ -1605,6 +1610,28 @@ sub get_cron_time_entry {
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
     }
+    elsif($cr->{'type'} eq 'monthday') {
+        my($t, $d) = split(/_/mx, $cr->{'month_day'}, 2);
+        my $weeks;
+        $weeks = 1 if $t eq '1st';
+        $weeks = 2 if $t eq '2nd';
+        $weeks = 3 if $t eq '3rd';
+        $weeks = 4 if $t eq '4th';
+        $weeks = 1 if $t eq 'Last';
+        my $daycheck = '[ $(date +"\%m") -ne $(date -d "-'.(7*$weeks).'days" +"\%m") ] && ';
+        if($t eq 'Last') {
+            $daycheck = '[ $(date +"\%m") -ne $(date -d "'.(7*$weeks).'days" +"\%m") ] && ';
+        }
+        my $day;
+        $day = 1 if $d eq 'Monday';
+        $day = 2 if $d eq 'Tuesday';
+        $day = 3 if $d eq 'Wednesday';
+        $day = 4 if $d eq 'Thursday';
+        $day = 5 if $d eq 'Friday';
+        $day = 6 if $d eq 'Saturday';
+        $day = 0 if $d eq 'Sunday';
+        $cron = sprintf("% 2s % 2s *  *  % 2s %s", $cr->{'minute'}, $cr->{'hour'}, $day, $daycheck);
+    }
     elsif($cr->{'type'} eq 'cust') {
         my @tst = split/\s+/mx, $cr->{'cust'};
         if(scalar @tst == 5) {
@@ -1767,6 +1794,7 @@ sub get_cron_entries_from_param {
                 'minute'    => $params->{'send_minute_'.$x},
                 'week_day'  => join(',', @weekdays),
                 'day'       => $params->{'send_day_'.$x},
+                'month_day' => $params->{'send_monthday_'.$x},
                 'cust'      => $cust,
             };
         }

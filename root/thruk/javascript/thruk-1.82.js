@@ -1231,6 +1231,7 @@ function cron_change_date(id) {
     var nr = type_sel.id.match(/_(\d+)$/)[1];
     type     = type_sel.options[type_sel.selectedIndex].value;
     hideElement('div_send_month_'+nr);
+    hideElement('div_send_monthday_'+nr);
     hideElement('div_send_week_'+nr);
     hideElement('div_send_day_'+nr);
     hideElement('div_send_cust_'+nr);
