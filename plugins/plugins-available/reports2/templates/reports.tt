@@ -135,6 +135,7 @@
   jQuery(document).ready(function() {
     var typ = get_hash(1);
     if(typ == undefined) { typ = 'my' }
+    if(typ == "")        { typ = 'my' }
     reports_view(typ);
     if(typ == 'my')          { jQuery('#view1').attr('checked', 'checked') }
     else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }

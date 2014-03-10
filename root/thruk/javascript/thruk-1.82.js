@@ -1595,6 +1595,8 @@ function save_url_in_parents_hash() {
 
 /* set hash of url */
 function set_hash(value, nr) {
+    if(value == undefined)   { value = ""; }
+    if(value == "undefined") { value = ""; }
     if(nr != undefined) {
         var current   = get_hash();
         if(current == undefined) {
@@ -1604,10 +1606,9 @@ function set_hash(value, nr) {
         tmp[nr-1] = value;
         value     = tmp.join('|');
     }
-    // make emtpy values nicer
-    if(value == '|') {
-        value = "";
-    }
+    // make emtpy values nicer, trim trailing pipes
+    value = value.replace(/\|$/, '');
+
     // replace history otherwise we have to press back twice
     if (history.replaceState) {
         history.replaceState({}, "", '#'+value);
