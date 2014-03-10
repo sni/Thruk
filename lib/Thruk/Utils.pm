@@ -142,8 +142,11 @@ sub format_cronentry {
                     }
                 }
             }
-            if(defined $lastconcated->[0]) {
+            if(defined $lastconcated->[1]) {
                 push @days, $lastconcated->[0].'-'.$lastconcated->[1];
+            }
+            elsif(defined $lastconcated->[0]) {
+                push @days, $lastconcated->[0];
             }
             $cron = sprintf("%s at %02s:%02s", join(', ', @days), $cr->{'hour'}, $cr->{'minute'});
         } else {
