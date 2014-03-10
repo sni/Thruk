@@ -2172,10 +2172,10 @@ sub _get_default_recurring_downtime {
     my($c, $host, $service, $hostgroup, $servicegroup) = @_;
     my $default_rd = {
             target       => 'service',
-            host         => $host,
+            host         => [$host],
             service      => $service,
-            servicegroup => $service,
-            hostgroup    => $hostgroup,
+            servicegroup => [$servicegroup],
+            hostgroup    => [$hostgroup],
             backends     => $c->request->parameters->{'backend'} || $c->{'db'}->peer_key(),
             schedule     => [],
             duration     => 120,

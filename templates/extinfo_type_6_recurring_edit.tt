@@ -18,7 +18,7 @@
 <form action="extinfo.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="recurring" value="save">
-<input type="hidden" name="src" value="[% rd.file %]">
+<input type="hidden" name="nr" value="[% rd.file %]">
 <input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
@@ -60,7 +60,7 @@
   <tr id="input_host">
     <td class="dataEven" align="center"><b>Host</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_service">
@@ -72,13 +72,13 @@
   <tr id="input_hostgroup">
     <td class="dataEven" align="center"><b>Hostgroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_servicegroup">
     <td class="dataEven" align="center"><b>Servicegroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
 

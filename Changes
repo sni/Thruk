@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - support host/hostgroup/servicegroup lists for recurring downtimes
           - added quick filter to config pages
           - general design fixes (awiddersheim)
           - Exfoliation theme fixes (awiddersheim)

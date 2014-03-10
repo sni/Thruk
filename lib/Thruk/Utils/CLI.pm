@@ -838,6 +838,7 @@ sub _cmd_bpd {
 sub _cmd_downtimetask {
     my($c, $file) = @_;
     $c->stats->profile(begin => "_cmd_downtimetask()");
+    require URI::Escape;
 
     # do auth stuff
     Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
@@ -861,9 +862,7 @@ sub _cmd_downtimetask {
         $minutes  = $downtime->{'duration'}%60;
     }
 
-    require URI::Escape;
     my $output     = '';
-    my $cmd_typ;
     my $backends   = ref $downtime->{'backends'} eq 'ARRAY' ? $downtime->{'backends'} : [$downtime->{'backends'}];
     my $choose_backends = 0;
     if(scalar @{$backends} == 0 and @{$c->{'db'}->get_peers()} > 1) {
@@ -874,6 +873,47 @@ sub _cmd_downtimetask {
         $downtime->{'target'} = 'host';
         $downtime->{'target'} = 'service' if $downtime->{'service'};
     }
+
+    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
+    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
+    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
+
+    my $errors = 0;
+    if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
+        my $hosts = $downtime->{'host'};
+        for my $hst (@{$hosts}) {
+            $downtime->{'host'} = $hst;
+            $errors++ if !_set_downtime($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes);
+        }
+        $downtime->{'host'} = $hosts;
+    }
+    elsif($downtime->{'target'} eq 'hostgroup' or $downtime->{'target'} eq 'servicegroup') {
+        my $grps = $downtime->{$downtime->{'target'}};
+        for my $grp (@{$grps}) {
+            $downtime->{$downtime->{'target'}} = $grp;
+            $errors++ if !_set_downtime($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes);
+        }
+        $downtime->{$downtime->{'target'}} = $grps;
+    }
+
+    return("failed\n", 1) if $errors; # error is already printed
+
+    if($downtime->{'service'}) {
+        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
+    } else {
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
+    }
+    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
+
+    $c->stats->profile(end => "_cmd_downtimetask()");
+    return($output, 0);
+}
+
+##############################################
+sub _set_downtime {
+    my($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes) = @_;
+
+    my $cmd_typ;
     if($downtime->{'target'} eq 'host') {
         $cmd_typ = 55;
         if($choose_backends) {
@@ -923,17 +963,8 @@ sub _cmd_downtimetask {
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
     my @res = request_url($c, $url);
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
-    return("failed\n", 1) unless $res[0] == 200; # error is already printed
-
-    if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host \''.$downtime->{'host'}.'\'';
-    } else {
-        $output = 'scheduled'.$flexible.' downtime for host \''.$downtime->{'host'}.'\'';
-    }
-    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
-
-    $c->stats->profile(end => "_cmd_downtimetask()");
-    return($output, 0);
+    return 0 if $res[0] != 200; # error is already printed
+    return 1;
 }
 
 ##############################################

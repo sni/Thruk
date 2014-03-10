@@ -40,7 +40,7 @@ my $test_downtime = [{
     'fixed'         => 1,
     'flex_range'    => 720,
     'childoptions'  => 0,
-    'nr'            => $rand,
+    'nr'            => 9999,
     'verbose'       => 1,
 }];
 
@@ -55,11 +55,9 @@ for my $downtime (@{$test_downtime}) {
         like => ['/^OK - recurring downtime saved$/'],
     });
 
-    my $host = $downtime->{'host'};
-    my $user = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
-    my $grephost = $host;
-    $grephost =~ s/["'\/\s;]+/_/gmx;
-    my $cronentry = `crontab -l $user | grep downtimetask | grep '$grephost'`;
+    my $host      = $downtime->{'host'};
+    my $user      = defined $ENV{THRUK_USER} ? ' -u '.$ENV{THRUK_USER} : '';
+    my $cronentry = `crontab -l $user | grep downtimetask | grep '9999'`;
     chomp($cronentry);
     like($cronentry, '/downtimetask=/', "got cron entry: ".$cronentry) or BAIL_OUT("$0: got no cron entry");
 
@@ -95,7 +93,7 @@ for my $downtime (@{$test_downtime}) {
 
 # remove downtime
 TestUtils::test_command({
-    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&target=host&nr='.$rand.'&host='.$host.'"',
+    cmd  => $BIN.' "extinfo.cgi?type=6&recurring=remove&nr=9999"',
     like => ['/^OK - recurring downtime removed$/'],
 });
 

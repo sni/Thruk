@@ -11,8 +11,6 @@
     </tr>
     [% count = 0 %]
     [%  FOREACH d = downtimes %]
-    [%# NEXT IF target == 'service' && ! d.service #%]
-    [%# NEXT IF target == 'host'    &&   d.service #%]
     [% count = count + 1 %]
     [% SET class = 'downtimeOdd' IF loop.even %]
     [% SET class = 'downtimeEven'  IF loop.odd %]
@@ -20,22 +18,39 @@
       <td class='[% class %]'>[% d.target | ucfirst %]</td>
       <td class='[% class %]'[% IF d.target != 'service' %] colspan=2[% END %]>
         [% IF d.target == 'host' %]
-        <a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a>
+            [% FOREACH hst = d.host %]
+                <a href='extinfo.cgi?type=1&amp;host=[% hst | uri %]'>[% hst %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
         [% ELSIF d.target == 'service' %]
-        <a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a>
-        </td><td class='[% class %]'>
-        <a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a>
+            [% FOREACH hst = d.host %]
+                <a href='extinfo.cgi?type=1&amp;host=[% hst | uri %]'>[% hst %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
+            </td><td class='[% class %]'>
+            [% IF d.host.size == 1 %]
+                [% hst = d.host.0 %]
+                [% FOREACH svc = d.service %]
+                    <a href='extinfo.cgi?type=2&amp;host=[% hst | uri %]&amp;service=[% svc | uri %]'>[% svc %]</a>[% UNLESS loop.last %], [% END %]
+                [% END %]
+            [% ELSE %]
+                [% FOREACH svc = d.service %]
+                    [% svc %][% UNLESS loop.last %], [% END %]
+                [% END %]
+            [% END %]
         [% ELSIF d.target == 'hostgroup' %]
-        <a href='status.cgi?hostgroup=[% d.hostgroup | uri %]&amp;style=overview'>[% d.hostgroup %]</a>
+            [% FOREACH grp = d.hostgroup %]
+                <a href='status.cgi?hostgroup=[% grp | uri %]&amp;style=overview'>[% grp %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
         [% ELSIF d.target == 'servicegroup' %]
-        <a href='status.cgi?servicegroup=[% d.servicegroup | uri %]&amp;style=overview'>[% d.servicegroup %]</a>
+            [% FOREACH grp = d.servicegroup %]
+                <a href='status.cgi?servicegroup=[% grp | uri %]&amp;style=overview'>[% grp %]</a>[% UNLESS loop.last %], [% END %]
+            [% END %]
         [% END %]
       </td>
       <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
       <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
       <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
       <td class='[% class %]' align='left'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-      <td class='[% class %]' align='center'><a href='extinfo.cgi?type=6&amp;nr=[% IF d.exists('nr'); d.nr; END %]&amp;recurring=edit&amp;src=[% d.file | uri %]'><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
+      <td class='[% class %]' align='center'><a href='extinfo.cgi?type=6&amp;nr=[% d.file %]&amp;recurring=edit'><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
     </tr>
     [% END %]
     [% IF count == 0 %]

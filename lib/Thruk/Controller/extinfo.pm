@@ -6,6 +6,7 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Page;
 use LWP::UserAgent;
+use File::Copy qw/move/;
 
 =head1 NAME
 
@@ -224,12 +225,10 @@ sub _process_recurring_downtimes_page {
     my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $service      = $c->{'request'}->{'parameters'}->{'service'}      || '';
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
-    my $src          = $c->{'request'}->{'parameters'}->{'src'}          || '';
     my $nr           = $c->{'request'}->{'parameters'}->{'nr'};
 
     my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service, $hostgroup, $servicegroup);
     $default_rd->{'target'} = $target;
-    $src           =~ s/[^\w_\-\.]/_/gmx;
 
     if($task eq 'save') {
         my $backends = [];
@@ -238,10 +237,10 @@ sub _process_recurring_downtimes_page {
         }
         my $rd = {
             'target'        => $target,
-            'host'          => $host,
-            'hostgroup'     => $hostgroup,
+            'host'          => [split/\s*,\s*/mx,$host],
+            'hostgroup'     => [split/\s*,\s*/mx,$hostgroup],
             'service'       => $service,
-            'servicegroup'  => $servicegroup,
+            'servicegroup'  => [split/\s*,\s*/mx,$servicegroup],
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
             'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || 5,
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || 'automatic downtime',
@@ -275,30 +274,28 @@ sub _process_recurring_downtimes_page {
         }
 
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
-        if($src and !$failed) {
-            my $old_file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
-            my $old_rd   = Thruk::Utils::read_data_file($old_file);
-            if($self->_check_downtime_permissions($c, $old_rd) == 2) {
-                unlink($old_file) if -f $old_file;
-            } else {
-                $failed = 1;
+        my $old_file;
+        if($nr and !$failed) {
+            $old_file  = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
+            if(-s $old_file) {
+                my $old_rd = Thruk::Utils::read_data_file($old_file);
+                if($self->_check_downtime_permissions($c, $old_rd) != 2) {
+                    $failed = 1;
+                }
             }
         }
-        return _process_recurring_downtimes_page_edit($self, $c, $src, $default_rd, $rd) if $failed;
-        my $file = $self->_get_data_file_name($c, $target, $host, $service, $hostgroup, $servicegroup, $nr);
+        return _process_recurring_downtimes_page_edit($self, $c, $nr, $default_rd, $rd) if $failed;
+        my $file = $old_file || $self->_get_data_file_name($c);
         Thruk::Utils::write_data_file($file, $rd);
         $self->_update_cron_file($c);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
         return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
     if($task eq 'add' or $task eq 'edit') {
-        return if _process_recurring_downtimes_page_edit($self, $c, $src, $default_rd);
+        return if _process_recurring_downtimes_page_edit($self, $c, $nr, $default_rd);
     }
     elsif($task eq 'remove') {
-        my $file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
-        if(!$src and $nr) {
-            $file = $self->_get_data_file_name($c, $target, $host, $service, $hostgroup, $servicegroup, $nr);
-        }
+        my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
         if(-s $file) {
             my $old_rd = Thruk::Utils::read_data_file($file);
             if($self->_check_downtime_permissions($c, $old_rd) != 2) {
@@ -314,31 +311,33 @@ sub _process_recurring_downtimes_page {
         return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=6&recurring");
     }
 
-    $c->stash->{'downtimes'} = $self->_get_downtimes_list($c);
+    $c->stash->{'downtimes'} = $self->_get_downtimes_list($c, 1, 1);
     $c->stash->{template}    = 'extinfo_type_6_recurring.tt';
     return 1;
 }
 
 ##########################################################
 sub _process_recurring_downtimes_page_edit {
-    my($self, $c, $src, $default_rd, $rd) = @_;
+    my($self, $c, $nr, $default_rd, $rd) = @_;
     $c->stash->{'has_jquery_ui'} = 1;
 
-    my $file = $c->config->{'var_path'}.'/downtimes/'.$src.'.tsk';
     $c->stash->{rd}->{'file'} = '';
     $c->stash->{can_edit}     = 1;
-    if(-s $file) {
-        $c->stash->{rd} = Thruk::Utils::read_data_file($file);
-        my $perms = $self->_check_downtime_permissions($c, $c->stash->{rd});
-        # check cmd permission for this downtime
-        if($perms == 1) {
-            $c->stash->{can_edit} = 0;
+    if($nr) {
+        my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
+        if(-s $file) {
+            $c->stash->{rd} = Thruk::Utils::read_data_file($file);
+            my $perms = $self->_check_downtime_permissions($c, $c->stash->{rd});
+            # check cmd permission for this downtime
+            if($perms == 1) {
+                $c->stash->{can_edit} = 0;
+            }
+            if($perms == 0) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
+                return;
+            }
+            $c->stash->{rd}->{'file'} = $nr;
         }
-        if($perms == 0) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such downtime!' });
-            return;
-        }
-        $c->stash->{rd}->{'file'} = $src;
     }
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{rd}               = $default_rd unless defined $c->stash->{rd};
@@ -362,7 +361,7 @@ sub _update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my $downtimes = $self->_get_downtimes_list($c, 2);
+    my $downtimes = $self->_get_downtimes_list($c, 0, 0);
     for my $d (@{$downtimes}) {
         next unless defined $d->{'schedule'};
         next unless scalar @{$d->{'schedule'}} > 0;
@@ -378,13 +377,17 @@ sub _update_cron_file {
 ##########################################################
 # return list of downtimes
 #
-# noauth)
-#   0)  use authentication
-#   1)  no authentication used, list all downtimes
-#   2)  list downtimes for all backends, not just the selected ones
+# auth)
+#   0)  no authentication used, list all downtimes
+#   1)  use authentication (default)
+# backendfilter)
+#   0)  list downtimes for selected backends only (default)
+#   1)  list downtimes for all backends
 #
 sub _get_downtimes_list {
-    my($self, $c, $noauth, $host, $service) = @_;
+    my($self, $c, $auth, $backendfilter, $host, $service) = @_;
+    $auth          = 1 unless defined $auth;
+    $backendfilter = 0 unless defined $backendfilter;
 
     return [] unless $c->config->{'use_feature_recurring_downtime'};
 
@@ -392,8 +395,8 @@ sub _get_downtimes_list {
     my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
 
     # skip further auth tests if this user has admins permission anyway
-    if(!$noauth) {
-        $noauth = 1 if(!$hostfilter[0] and !$servicefilter[0]);
+    if($auth) {
+        $auth = 0 if(!$hostfilter[0] and !$servicefilter[0]);
     }
 
     # host and service filter
@@ -401,10 +404,12 @@ sub _get_downtimes_list {
     push @hostfilter, { name => $host }                                                     if $host;
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
-    my $host_data    = $c->{'db'}->get_hosts(    filter => \@hostfilter,    columns => [qw/name groups/]);
-    my $service_data = $c->{'db'}->get_services( filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
+    my $host_data    = $c->{'db'}->get_hosts(filter => \@hostfilter,    columns => [qw/name groups/]);
     $hosts    = Thruk::Utils::array2hash($host_data, 'name');
+    undef $host_data;
+    my $service_data = $c->{'db'}->get_services(filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
     $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
+    undef $service_data;
 
     if($service) {
         $hostgroups    = Thruk::Utils::array2hash($services->{$host}->{$service}->{'host_groups'});
@@ -413,77 +418,41 @@ sub _get_downtimes_list {
     elsif($host) {
         $hostgroups    = Thruk::Utils::array2hash($hosts->{$host}->{'groups'});
     }
-    elsif(!$noauth) {
+
+    # which objects is the user allowed to see
+    my($authhosts, $authservices, $authhostgroups, $authservicegroups) = ({},{},{},{});
+    if($auth) {
+        my $host_data = $c->{'db'}->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], columns => [qw/name groups/]);
         for my $h (@{$host_data}) {
-            $hosts->{$h->{'name'}} = 1;
+            $authhosts->{$h->{'name'}} = 1;
             for my $g (@{$h->{'groups'}}) {
-                $hostgroups->{$g} = 1;
+                $authhostgroups->{$g} = 1;
             }
         }
+        undef $host_data;
+        my $service_data = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description host_groups groups/]);
         for my $s (@{$service_data}) {
-            $service->{$s->{'host_name'}}->{$s->{'description'}} = 1;
+            $authservices->{$s->{'host_name'}}->{$s->{'description'}} = 1;
             for my $g (@{$s->{'host_groups'}}) {
-                $hostgroups->{$g} = 1;
+                $authhostgroups->{$g} = 1;
             }
             for my $g (@{$s->{'groups'}}) {
-                $servicegroups->{$g} = 1;
+                $authservicegroups->{$g} = 1;
             }
         }
     }
 
-    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
-    my $downtimes = [];
+    my $default_rd         = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
+    my $downtimes          = [];
+    my $reinstall_required = 0;
     my @files = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
     for my $dfile (@files) {
         next unless -f $dfile;
-        my $d = Thruk::Utils::read_data_file($dfile);
-        $d->{'file'} = $dfile;
-        $d->{'file'} =~ s|^.*/||gmx;
-        $d->{'file'} =~ s|\.tsk$||gmx;
-
-        # set fallback target
-        if(!$d->{'target'}) {
-            $d->{'target'} = 'host';
-            $d->{'target'} = 'service' if $d->{'service'};
-        }
-
-        # apply filter
-        if($host or !$noauth) {
-            if($d->{'target'} eq 'host') {
-                next unless defined $hosts->{$d->{'host'}};
-            }
-            if($d->{'target'} eq 'service') {
-                next if !$service;
-                next unless defined $services->{$d->{'host'}}->{$d->{'service'}};
-            }
-            if($d->{'target'} eq 'servicegroup') {
-                next if !$service;
-                next unless defined $servicegroups->{$d->{'servicegroup'}};
-            }
-            if($d->{'target'} eq 'hostgroup') {
-                next unless defined $hostgroups->{$d->{'hostgroup'}};
-            }
-        }
-
-        # backend filter?
-        my $backends = Thruk::Utils::list($d->{'backends'});
-        if((!defined $noauth || $noauth != 2) and scalar @{$backends} > 0) {
-            my $found = 0;
-            $found = 1 if $backends->[0] eq ''; # no backends at all
-            for my $b (@{$backends}) {
-                next unless $c->{'stash'}->{'backend_detail'}->{$b};
-                $found = 1 if $c->{'stash'}->{'backend_detail'}->{$b}->{'disabled'} != 2;
-            }
-            next unless $found;
-        }
-
-        # set some defaults
-        for my $key (keys %{$default_rd}) {
-            $d->{$key} = $default_rd->{$key} unless defined $d->{$key};
-        }
-
-        push @{$downtimes}, $d;
+        $reinstall_required++ if $dfile !~ m/\/\d+\.tsk$/mx;
+        my $d = $self->_read_downtime($c, $dfile, $default_rd, $authhosts, $authservices, $authhostgroups, $authservicegroups, $host, $service, $auth, $backendfilter, $hosts, $services, $hostgroups, $servicegroups);
+        push @{$downtimes}, $d if $d;
     }
+    $self->_update_cron_file($c) if $reinstall_required;
 
     # sort by target & host & service
     @{$downtimes} = sort {    $a->{'target'}       cmp $b->{'target'}
@@ -494,6 +463,117 @@ sub _get_downtimes_list {
                          } @{$downtimes};
 
     return $downtimes;
+}
+
+##########################################################
+# return cmd line for downtime
+sub _read_downtime {
+    my($self, $c, $dfile, $default_rd, $authhosts, $authservices, $authhostgroups, $authservicegroups, $host, $service, $auth, $backendfilter, $hosts, $services, $hostgroups, $servicegroups) = @_;
+
+    # move file to new file layout
+    if($dfile !~ m/\/\d+\.tsk$/mx) {
+        my $newfile = $self->_get_data_file_name($c);
+        move($dfile, $newfile);
+        $dfile = $newfile;
+    }
+
+    my $d = Thruk::Utils::read_data_file($dfile);
+    $d->{'file'} = $dfile;
+    $d->{'file'} =~ s|^.*/||gmx;
+    $d->{'file'} =~ s|\.tsk$||gmx;
+
+    # set fallback target
+    if(!$d->{'target'}) {
+        $d->{'target'} = 'host';
+        $d->{'target'} = 'service' if $d->{'service'};
+    }
+
+    # convert attributes to array
+    for my $t (qw/host hostgroup servicegroup/) {
+        $d->{$t} = [split/\s*,\s*/mx,$d->{$t}] unless ref $d->{$t} eq 'ARRAY';
+    }
+
+    # apply auth filter
+    if($auth) {
+        if($d->{'target'} eq 'host') {
+            for my $hst (@{$d->{'host'}}) {
+                return unless defined $authhosts->{$hst};
+            }
+        }
+        elsif($d->{'target'} eq 'service') {
+            for my $hst (@{$d->{'host'}}) {
+                return unless defined $authservices->{$hst}->{$d->{'host'}};
+            }
+        }
+        elsif($d->{'target'} eq 'servicegroup') {
+            for my $grp (@{$d->{'servicegroup'}}) {
+                return unless defined $authservicegroups->{$grp};
+            }
+        }
+        elsif($d->{'target'} eq 'hostgroup') {
+            for my $grp (@{$d->{'hostgroup'}}) {
+                return unless defined $authhostgroups->{$grp};
+            }
+        }
+    }
+
+    # other filter?
+    if($host) {
+        my $found = 0;
+        if($d->{'target'} eq 'host') {
+            for my $hst (@{$d->{'host'}}) {
+                if(defined $hosts->{$hst}) {
+                    $found++;
+                    last;
+                }
+            }
+        }
+        elsif($d->{'target'} eq 'service') {
+            return if $host and !$service;
+            for my $hst (@{$d->{'host'}}) {
+                if(defined $services->{$hst}->{$d->{'service'}}) {
+                    $found++;
+                    last;
+                }
+            }
+        }
+        elsif($d->{'target'} eq 'servicegroup') {
+            return if $host and !$service;
+            for my $grp (@{$d->{'servicegroup'}}) {
+                if(defined $servicegroups->{$grp}) {
+                    $found++;
+                    last;
+                }
+            }
+        }
+        elsif($d->{'target'} eq 'hostgroup') {
+            for my $grp (@{$d->{'hostgroup'}}) {
+                if(defined $hostgroups->{$grp}) {
+                    $found++;
+                    last;
+                }
+            }
+        }
+        return unless $found;
+    }
+
+    # backend filter?
+    my $backends = Thruk::Utils::list($d->{'backends'});
+    if(!$backendfilter and scalar @{$backends} > 0) {
+        my $found = 0;
+        $found = 1 if $backends->[0] eq ''; # no backends at all
+        for my $b (@{$backends}) {
+            next unless $c->{'stash'}->{'backend_detail'}->{$b};
+            $found = 1 if $c->{'stash'}->{'backend_detail'}->{$b}->{'disabled'} != 2;
+        }
+        return unless $found;
+    }
+
+    # set some defaults
+    for my $key (keys %{$default_rd}) {
+        $d->{$key} = $default_rd->{$key} unless defined $d->{$key};
+    }
+    return $d;
 }
 
 ##########################################################
@@ -528,31 +608,16 @@ sub _get_downtime_cmd {
 ##########################################################
 # return filename for data file
 sub _get_data_file_name {
-    my($self, $c, $target, $host, $service, $hostgroup, $servicegroup, $nr) = @_;
-    my $name;
-    if($target eq 'host') {
-        $name = 'hst_'.$host;
-    }
-    elsif($target eq 'service') {
-        $name = 'svc_'.$host.'_'.$service;
-    }
-    elsif($target eq 'hostgroup') {
-        $name = 'hg_'.$hostgroup;
-    }
-    elsif($target eq 'servicegroup') {
-        $name = 'sg_'.$servicegroup;
-    }
-    confess("unknown type") unless $name;
-    $name =~ s/["'\/\s;]/_/gmx;
-
+    my($self, $c, $nr) = @_;
     if(!defined $nr or $nr !~ m/^\d+$/mx) {
         $nr = 1;
-        while(-f $c->config->{'var_path'}.'/downtimes/'.$name.'_'.$nr.'.tsk') {
-            $nr++;
-        }
     }
 
-    return $c->config->{'var_path'}.'/downtimes/'.$name.'_'.$nr.'.tsk';
+    while(-f $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk') {
+        $nr++;
+    }
+
+    return $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
 }
 
 ##########################################################
@@ -639,7 +704,7 @@ sub _process_host_page {
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
 
     # recurring downtimes
-    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
+    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 0, 1, $hostname);
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, {'host' => $host});
@@ -749,7 +814,7 @@ sub _process_service_page {
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $service);
 
     # recurring downtimes
-    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);
+    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 0, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, {'host' => $service, 'service' => $service});
@@ -882,21 +947,42 @@ sub _check_downtime_permissions {
         $d->{'target'} = 'host';
         $d->{'target'} = 'service' if $d->{'service'};
     }
+    $d->{'host'}         = [$d->{'host'}]         unless ref $d->{'host'}         eq 'ARRAY';
+    $d->{'hostgroup'}    = [$d->{'hostgroup'}]    unless ref $d->{'hostgroup'}    eq 'ARRAY';
+    $d->{'servicegroup'} = [$d->{'servicegroup'}] unless ref $d->{'servicegroup'} eq 'ARRAY';
+    my $write = 0;
+    my $read  = 0;
     if($d->{'target'} eq 'host') {
-       return 2 if $c->check_cmd_permissions('host', $d->{'host'});
-       return 1 if $c->check_permissions('host', $d->{'host'});
+        for my $hst (@{$d->{'host'}}) {
+            $write++ if $c->check_cmd_permissions('host', $hst);
+            $read++  if $c->check_permissions('host', $hst);
+        }
+        return 2 if $write == scalar @{$d->{'host'}};
+        return 1 if $read  == scalar @{$d->{'host'}};
     }
-    if($d->{'target'} eq 'hostgroup') {
-       return 2 if $c->check_cmd_permissions('hostgroup', $d->{'hostgroup'});
-       return 1 if $c->check_permissions('hostgroup', $d->{'hostgroup'});
+    elsif($d->{'target'} eq 'hostgroup') {
+        for my $grp (@{$d->{'hostgroup'}}) {
+            $write++ if $c->check_cmd_permissions('hostgroup', $grp);
+            $read++  if $c->check_permissions('hostgroup', $grp);
+        }
+        return 2 if $write == scalar @{$d->{'hostgroup'}};
+        return 1 if $read  == scalar @{$d->{'hostgroup'}};
     }
-    if($d->{'target'} eq 'service') {
-       return 2 if $c->check_cmd_permissions('service', $d->{'service'}, $d->{'host'});
-       return 1 if $c->check_permissions('service', $d->{'service'}, $d->{'host'});
+    elsif($d->{'target'} eq 'service') {
+        for my $hst (@{$d->{'host'}}) {
+            $write++ if $c->check_cmd_permissions('service', $d->{'service'}, $hst);
+            $read++  if $c->check_permissions('service', $d->{'service'}, $hst);
+        }
+        return 2 if $write == scalar @{$d->{'host'}}; # number must match of hosts, because for services only hosts are lists
+        return 1 if $read  == scalar @{$d->{'host'}};
     }
-    if($d->{'target'} eq 'servicegroup') {
-       return 2 if $c->check_cmd_permissions('servicegroup', $d->{'servicegroup'});
-       return 1 if $c->check_permissions('servicegroup', $d->{'servicegroup'});
+    elsif($d->{'target'} eq 'servicegroup') {
+        for my $grp (@{$d->{'servicegroup'}}) {
+            $write++ if $c->check_cmd_permissions('servicegroup', $grp);
+            $read++  if $c->check_permissions('servicegroup', $grp);
+        }
+        return 2 if $write == scalar @{$d->{'servicegroup'}};
+        return 1 if $read  == scalar @{$d->{'servicegroup'}};
     }
     return 0;
 }
