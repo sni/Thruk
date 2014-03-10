@@ -346,6 +346,27 @@ sub enable_backends {
 
 ##########################################################
 
+=head2 get_default_backends
+
+  get_default_backends()
+
+returns all default backends
+
+=cut
+
+sub get_default_backends {
+    my($self) = @_;
+    my $defaults = [];
+    for my $peer ( @{ $self->get_peers() } ) {
+        if(!$peer->{'hidden'}) {
+            push @{$defaults}, $peer->{'key'};
+        }
+    }
+    return($defaults);
+}
+
+##########################################################
+
 =head2 get_scheduling_queue
 
   get_scheduling_queue
@@ -455,7 +476,7 @@ sub get_contactgroups_by_contact {
         return $cached_data->{'contactgroups'};
     }
 
-    my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ]);
+    my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ], undef, $self->get_default_backends());
     my $contactgroups = {};
     for my $group (@{$data}) {
         $contactgroups->{$group->{'name'}} = 1;
@@ -1055,12 +1076,13 @@ returns a result for a sub called for all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $function, $arg, $force_serial) = @_;
+    my( $self, $function, $arg, $force_serial, $backends) = @_;
     my $c = $Thruk::Backend::Manager::c;
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
     my($get_results_for, $arg_array, $arg_hash) = $self->select_backends($function, $arg);
+    $get_results_for = $backends if $backends;
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
