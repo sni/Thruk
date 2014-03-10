@@ -1,4 +1,5 @@
-﻿[% available = get_availability_percents() %]
+﻿[% IF !param.exists("max_pnp_sources") %][% param.max_pnp_sources = 1 %][% END %]
+[% available = get_availability_percents() %]
 [% IF available.keys.size < 15 %]
   [% PROCESS 'reports/comp/sla_graph_fixed.tt' data = available %]
   [% PROCESS 'reports/comp/sla_table.tt' %]

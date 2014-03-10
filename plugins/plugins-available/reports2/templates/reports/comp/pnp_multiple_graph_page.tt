@@ -1,4 +1,5 @@
-﻿[% IF param.max_pnp_sources > 1 %]
+﻿[% IF !param.exists("max_pnp_sources") %][% param.max_pnp_sources = 1 %][% END %]
+[% IF param.max_pnp_sources > 1 %]
   [% modulus = (param.max_pnp_sources - 1) mod 3 %]
   [% IF modulus == 0 %]
     [% nb_page = (param.max_pnp_sources - 1) div 3 %]
