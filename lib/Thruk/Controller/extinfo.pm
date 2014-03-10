@@ -249,6 +249,9 @@ sub _process_recurring_downtimes_page {
             'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
             'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,
         };
+        for my $t (qw/host hostgroup servicegroup/) {
+            $rd->{$t} = [sort {lc $a cmp lc $b} @{$rd->{$t}}];
+        }
         $rd->{'verbose'} = 1 if $c->{'request'}->{'parameters'}->{'verbose'};
         $c->stash->{rd} = $rd;
         my $failed = 0;
@@ -455,11 +458,11 @@ sub _get_downtimes_list {
     $self->_update_cron_file($c) if $reinstall_required;
 
     # sort by target & host & service
-    @{$downtimes} = sort {    $a->{'target'}       cmp $b->{'target'}
-                           or $a->{'host'}         cmp $b->{'host'}
-                           or $a->{'service'}      cmp $b->{'service'}
-                           or $a->{'servicegroup'} cmp $b->{'servicegroup'}
-                           or $a->{'hostgroup'}    cmp $b->{'hostgroup'}
+    @{$downtimes} = sort {    $a->{'target'}               cmp $b->{'target'}
+                           or lc $a->{'host'}->[0]         cmp lc $b->{'host'}->[0]
+                           or lc $a->{'service'}->[0]      cmp lc $b->{'service'}->[0]
+                           or lc $a->{'servicegroup'}->[0] cmp lc $b->{'servicegroup'}->[0]
+                           or lc $a->{'hostgroup'}->[0]    cmp lc $b->{'hostgroup'}->[0]
                          } @{$downtimes};
 
     return $downtimes;
@@ -491,6 +494,7 @@ sub _read_downtime {
     # convert attributes to array
     for my $t (qw/host hostgroup servicegroup/) {
         $d->{$t} = [split/\s*,\s*/mx,$d->{$t}] unless ref $d->{$t} eq 'ARRAY';
+        $d->{$t} = [sort @{$d->{$t}}];
     }
 
     # apply auth filter
