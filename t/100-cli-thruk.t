@@ -148,4 +148,10 @@ TestUtils::test_command({
     like    => ['/Expaned Command:/'],
 });
 
+# self check
+TestUtils::test_command({
+    cmd  => $BIN.' -a selfcheck',
+    like => ['/^OK/'],
+});
+
 done_testing();

@@ -187,6 +187,14 @@ script has the following arguments
       - listhostgroups              list hostgroupnames
       - command <host> <service>    print used command line for this host/service
 
+    Selfcheck Commands
+      - selfcheck(=subtype)         run self check(s)
+                                    availabel subtypes:
+                                     - filesystem
+                                     - logfiles
+                                     - reports
+                                     - recurring_downtimes
+
 
 =item B<-A> I<authname>, B<--auth>=I<authname>
 

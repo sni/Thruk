@@ -216,6 +216,7 @@ if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC
 }
 if(defined $log4perl_conf and -s $log4perl_conf) {
     __PACKAGE__->log(Log::Log4perl::Catalyst->new($log4perl_conf));
+    __PACKAGE__->config->{'log4perl_conf_in_use'} = $log4perl_conf;
 }
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );

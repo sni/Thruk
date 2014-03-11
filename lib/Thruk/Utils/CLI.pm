@@ -581,6 +581,13 @@ sub _run_command_action {
     elsif($action =~ /logcacheremoveunused/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'removeunused', $src, $2, $opt);
     }
+
+    # self check
+    elsif($action eq 'selfcheck' or $action =~ /^selfcheck=(.*)$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_selfcheck($c, $1, $opt);
+    }
+
+    # nothing matched...
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
         $data->{'rc'}     = 1;
@@ -655,7 +662,7 @@ sub _cmd_installcron {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_installcron()");
     Thruk::Utils::switch_realuser($c);
-    Thruk::Controller::extinfo->_update_cron_file($c);
+    Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {
         Thruk::Utils::Reports::update_cron_file($c);
     }
@@ -845,7 +852,7 @@ sub _cmd_downtimetask {
 
     $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
-    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c);
+    my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
     for my $key (keys %{$default_rd}) {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
     }
@@ -863,12 +870,6 @@ sub _cmd_downtimetask {
     }
 
     my $output     = '';
-    my $backends   = ref $downtime->{'backends'} eq 'ARRAY' ? $downtime->{'backends'} : [$downtime->{'backends'}];
-    my $choose_backends = 0;
-    if(scalar @{$backends} == 0 and @{$c->{'db'}->get_peers()} > 1) {
-        $choose_backends = 1;
-        $c->{'db'}->enable_backends();
-    }
     if(!$downtime->{'target'}) {
         $downtime->{'target'} = 'host';
         $downtime->{'target'} = 'service' if $downtime->{'service'};
@@ -878,12 +879,13 @@ sub _cmd_downtimetask {
     $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
     $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
+    my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
     my $errors = 0;
     if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
         my $hosts = $downtime->{'host'};
         for my $hst (@{$hosts}) {
             $downtime->{'host'} = $hst;
-            $errors++ if !_set_downtime($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes);
+            $errors++ if !_set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
         }
         $downtime->{'host'} = $hosts;
     }
@@ -891,7 +893,7 @@ sub _cmd_downtimetask {
         my $grps = $downtime->{$downtime->{'target'}};
         for my $grp (@{$grps}) {
             $downtime->{$downtime->{'target'}} = $grp;
-            $errors++ if !_set_downtime($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes);
+            $errors++ if !_set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
         }
         $downtime->{$downtime->{'target'}} = $grps;
     }
@@ -911,37 +913,8 @@ sub _cmd_downtimetask {
 
 ##############################################
 sub _set_downtime {
-    my($c, $downtime, $choose_backends, $backends, $start, $end, $hours, $minutes) = @_;
+    my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
 
-    my $cmd_typ;
-    if($downtime->{'target'} eq 'host') {
-        $cmd_typ = 55;
-        if($choose_backends) {
-            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $downtime->{'host'} } ], columns => [qw/name/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
-        }
-    }
-    elsif($downtime->{'target'} eq 'service') {
-        $cmd_typ = 56;
-        if($choose_backends) {
-            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $downtime->{'host'}, 'description' => $downtime->{'service'} } ], columns => [qw/description/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
-        }
-    }
-    elsif($downtime->{'target'} eq 'hostgroup') {
-        $cmd_typ = 84;
-        if($choose_backends) {
-            my $data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'groups' => { '>=' => $downtime->{'hostgroup'} }} ], columns => [qw/name/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
-        }
-    }
-    elsif($downtime->{'target'} eq 'servicegroup') {
-        $cmd_typ = 122;
-        if($choose_backends) {
-            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/name/] );
-            $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
-        }
-    }
     # convert to normal url request
     my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
                       $cmd_typ,
@@ -1303,6 +1276,20 @@ sub _cmd_ext_job {
     }
     return([undef, 1, $res, $last_error], 0);
 }
+
+##############################################
+sub _cmd_selfcheck {
+    my($c, $type, $opt) = @_;
+    $c->stats->profile(begin => "_cmd_selfcheck()");
+    $type = 'all' unless $type;
+
+    require Thruk::Utils::SelfCheck;
+    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $type);
+
+    $c->stats->profile(end => "_cmd_selfcheck()");
+    return($msg."\n".$details."\n", $rc);
+}
+
 ##############################################
 sub _get_user_agent {
     my $ua = LWP::UserAgent->new;

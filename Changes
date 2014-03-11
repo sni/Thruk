@@ -8,6 +8,7 @@ next:
           - Exfoliation theme fixes (awiddersheim)
           - fixed number format in performance data (awiddersheim)
           - config tool improvements for shinken (Mathieu Parent)
+          - added new command "thruk -a selfcheck" to perform some self checks
           - Reports
             - add maximum sla threshold to hide detail pages
             - allow multiple pnp graphs in sla reports (lkco)
