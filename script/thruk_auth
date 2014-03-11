@@ -104,7 +104,7 @@ sub process {
         if(!-f $sessionfile) {
             print STDERR "thruk_auth: session expired: ".($sessioncache->{$auth}->{'login'} || '?') if $verbose;
             delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
-            return "/loginok/".$guest."/",$path."\n" if $guest;
+            return "/loginok/".$guest."/".$path."\n" if $guest;
             return $loginurl."?expired&".$path."\n";
         }
 
@@ -113,7 +113,7 @@ sub process {
             print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
             unlink($sessionfile);
             delete $sessioncache->{$auth};
-            return "/loginok/".$guest."/",$path."\n" if $guest;
+            return "/loginok/".$guest."/".$path."\n" if $guest;
             return $loginurl."?expired&".$path."\n";
         }
 
