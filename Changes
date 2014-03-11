@@ -8,7 +8,9 @@ next:
           - Exfoliation theme fixes (awiddersheim)
           - fixed number format in performance data (awiddersheim)
           - config tool improvements for shinken (Mathieu Parent)
-          - allow multiple pnp graphs in sla reports (lkco)
+          - Reports
+            - add maximum sla threshold to hide detail pages
+            - allow multiple pnp graphs in sla reports (lkco)
           - Bug Fixes
             - fixed displaying partially active attributes
             - fixed wait trigger not working all the time

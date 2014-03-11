@@ -10,6 +10,7 @@
         { 'rpttimeperiod'                => [ 'Report Timeperiod',          'rpttimeperiod',   ''                              ] },
         { 'sla'                          => [ 'SLA %',                      'int',             '98'                  ,'', 1    ] },
         { 'graph_min_sla'                => [ 'Graph SLA %',                'int',             '90'                  ,'', 1    ] },
+        { 'details_max_level'            => [ 'Details SLA %',              'int',             '100' ,'hide details if sla is above threshold', 1 ] },
         { 'decimals'                     => [ 'Decimal Points',             'int',             '2'                   ,'', 1    ] },
         { 'assumeinitialstates'          => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
         { 'initialassumedhoststate'      => [ 'Initial Assumed State',      'hst_initialassumedstate',          '0'            ] },
@@ -52,6 +53,8 @@
     [% FOREACH hst = avail_data.hosts.keys.sort %]
     [% c.request.parameters.host    = hst %]
     [% c.request.parameters.service = "" %]
+    [% available = get_availability_percents() %]
+    [% NEXT IF available.total.percent >= param.details_max_level %]
     [% pagetitle = loc("Host: %s", hst) %]
     [% WRAPPER 'reports/comp/page_standard.tt' %]
       [% PROCESS 'reports/comp/sla_graph_page.tt' %]
