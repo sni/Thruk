@@ -1790,11 +1790,11 @@ sub get_cron_entries_from_param {
             my $cust = $params->{'send_cust_'.$x} || '';
             push @{$cron_entries}, {
                 'type'      => $type,
-                'hour'      => $params->{'send_hour_'.$x},
-                'minute'    => $params->{'send_minute_'.$x},
+                'hour'      => defined $params->{'send_hour_'.$x}     ? $params->{'send_hour_'.$x}     : '',
+                'minute'    => defined $params->{'send_minute_'.$x}   ? $params->{'send_minute_'.$x}   : '',
                 'week_day'  => join(',', @weekdays),
-                'day'       => $params->{'send_day_'.$x},
-                'month_day' => $params->{'send_monthday_'.$x},
+                'day'       => defined $params->{'send_day_'.$x}      ? $params->{'send_day_'.$x}      : '',
+                'month_day' => defined $params->{'send_monthday_'.$x} ? $params->{'send_monthday_'.$x} : '',
                 'cust'      => $cust,
             };
         }

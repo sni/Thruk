@@ -136,11 +136,11 @@ sub get_downtimes_list {
     update_cron_file($c) if $reinstall_required;
 
     # sort by target & host & service
-    @{$downtimes} = sort {    $a->{'target'}               cmp $b->{'target'}
-                           or lc $a->{'host'}->[0]         cmp lc $b->{'host'}->[0]
-                           or lc $a->{'service'}->[0]      cmp lc $b->{'service'}->[0]
-                           or lc $a->{'servicegroup'}->[0] cmp lc $b->{'servicegroup'}->[0]
-                           or lc $a->{'hostgroup'}->[0]    cmp lc $b->{'hostgroup'}->[0]
+    @{$downtimes} = sort {    $a->{'target'}                         cmp $b->{'target'}
+                           or (lc join(',', @{$a->{'host'}})         cmp lc join(',', @{$b->{'host'}}))
+                           or lc $a->{'service'}                     cmp lc $b->{'service'}
+                           or (lc join(',', @{$a->{'hostgroup'}})    cmp lc join(',', @{$b->{'hostgroup'}}))
+                           or (lc join(',', @{$a->{'servicegroup'}}) cmp lc join(',', @{$b->{'servicegroup'}}))
                          } @{$downtimes};
 
     return $downtimes;
