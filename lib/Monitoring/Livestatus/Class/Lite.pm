@@ -215,9 +215,15 @@ sub hashref_array {
 }
 
 ################################################################################
-# INTERNAL SUBs
-################################################################################
-sub _execute {
+
+=head2 statement
+
+    statement()
+
+return query as text
+
+=cut
+sub statement {
     my($self) = @_;
 
     confess("no table??") unless $self->{'_table'};
@@ -240,6 +246,16 @@ sub _execute {
     printf STDERR "EXEC: %s\n", join("\nEXEC: ",@statements) if $TRACE >= 1;
 
     my $statement = join("\n",@statements);
+
+    return $statement;
+}
+
+################################################################################
+# INTERNAL SUBs
+################################################################################
+sub _execute {
+    my($self) = @_;
+    my $statement = $self->statement();
     my $options   = $self->{'_options'};
     $options->{'slice'} = {};
 
