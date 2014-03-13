@@ -40,7 +40,11 @@ jQuery(document).ready(function() {
           label[[% x %]] += "<span class='graph_svc_hst_legend'>[% hst %]<\/span>";
           [% END %]
           label[[% x %]] += "<span class='graph_svc_legend'> - [% svc %]<\/span>";
+          [% IF values.$x.0 == -1 %][%# no data at all... #%]
+          label[[% x %]] += "<span class='graph_percent_legend'>n/a<\/span>";
+          [% ELSE %]
           label[[% x %]] += "<span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+          [% END %]
           [% x = x + 1 %]
         [% END %]
       [% END %]

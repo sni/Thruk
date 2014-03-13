@@ -54,7 +54,7 @@
       [% c.request.parameters.host    = hst %]
       [% c.request.parameters.service = "" %]
       [% available = get_availability_percents() %]
-      [% IF param.details_max_level != -1 && available.total.percent >= param.details_max_level; NEXT; END %]
+      [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
       [% pagetitle                    = loc("Host: %s", hst) %]
 
       [% WRAPPER 'reports/comp/page_standard.tt' %]
