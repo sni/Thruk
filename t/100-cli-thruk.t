@@ -151,7 +151,8 @@ TestUtils::test_command({
 # self check
 TestUtils::test_command({
     cmd  => $BIN.' -a selfcheck',
-    like => ['/^OK/'],
+    like => ['/Filesystem:/', '/is writable/', '/Logfiles:/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    exit => undef,
 });
 
 done_testing();
