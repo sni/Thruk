@@ -348,11 +348,13 @@ sub calculate_availability {
     # multiple or all hostgroups
     elsif(defined $hostgroup and $hostgroup ne '') {
         my @hostfilter;
+        my @servicefilter;
         my @groupfilter;
         if($hostgroup ne '' and $hostgroup ne 'all') {
             for my $hg (split(/\s*,\s*/mx, $hostgroup)) {
-                push @hostfilter,       { groups => { '>=' => $hg }};
-                push @groupfilter,      { name   => $hg };
+                push @hostfilter,       { groups      => { '>=' => $hg }};
+                push @servicefilter,    { host_groups => { '>=' => $hg }};
+                push @groupfilter,      { name        => $hg };
             }
             $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
@@ -393,7 +395,6 @@ sub calculate_availability {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
-        $logserviceheadfilter = { service_description => undef };
 
         push @{$hosts}, keys %{$host_data};
 
@@ -401,6 +402,24 @@ sub calculate_availability {
             for my $hostname (keys %{$host_data}) {
                 $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
             }
+        }
+
+        if($c->{'request'}->{'parameters'}->{'include_host_services'}) {
+            # some pages includes services too, so
+            # calculate service availability for services on these hosts too
+            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+            for my $service (@{$service_data}) {
+                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+                push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            }
+
+            if($initialassumedservicestate == -1) {
+                for my $service (@{$service_data}) {
+                    $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+                }
+            }
+        } else {
+            $logserviceheadfilter = { service_description => undef };
         }
     }
 
@@ -493,7 +512,7 @@ sub calculate_availability {
         push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
     }
     push @loghostfilter, { type => 'HOST DOWNTIME ALERT' };
-    if($service or $host or $servicegroup) {
+    if($service or $host or $servicegroup or $c->{'request'}->{'parameters'}->{'include_host_services'}) {
         push @logservicefilter, [ { type => 'SERVICE ALERT' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'INITIAL SERVICE STATE' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'CURRENT SERVICE STATE' }, $softlogfilter ];

@@ -102,10 +102,11 @@ print outages from log entries
 sub outages {
     my($logs, $start, $end) = @_;
 
-    my $c       = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    my $u       = $c->stash->{'unavailable_states'};
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
+    my $c                  = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $u                  = $c->stash->{'unavailable_states'};
+    my $host               = $c->{'request'}->{'parameters'}->{'host'};
+    my $service            = $c->{'request'}->{'parameters'}->{'service'};
+    my $only_host_services = $c->{'request'}->{'parameters'}->{'only_host_services'};
 
     # combine outages
     my @reduced_logs;
@@ -115,11 +116,16 @@ sub outages {
     for my $l (@{$logs}) {
         next if $l->{'type'} eq 'TIMEPERIOD START' and $in_time == 1; # skip repeating timeperiod starts
         next if $l->{'type'} eq 'TIMEPERIOD STOP'  and $in_time == 0; # skip repeating timeperiod stops
-        if($service) {
-            next if(defined $l->{'service'} and $l->{'service'} ne $service);
-            next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+        if($only_host_services) {
+            next if  $l->{'host'} ne $host;
+            next if !$l->{'service'};
         } else {
-            next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+            if($service) {
+                next if(defined $l->{'service'} and $l->{'service'} ne $service);
+                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+            } else {
+                next if(defined $l->{'host'}    and $l->{'host'}    ne $host);
+            }
         }
 
         $l->{'class'} = lc $l->{'class'};
