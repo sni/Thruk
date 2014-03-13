@@ -325,7 +325,7 @@ sub _run {
     }
 
     # with output
-    if($result->{'rc'} == 0) {
+    if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
         print STDOUT $result->{'output'};
     } else {
@@ -585,6 +585,7 @@ sub _run_command_action {
     # self check
     elsif($action eq 'selfcheck' or $action =~ /^selfcheck=(.*)$/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_selfcheck($c, $1, $opt);
+        $data->{'all_stdout'} = 1;
     }
 
     # nothing matched...
