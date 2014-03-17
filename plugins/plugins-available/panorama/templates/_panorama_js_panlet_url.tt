@@ -76,12 +76,22 @@
             }
         };
 
+        this.iframeErrorHandler = function(evt) {
+            evt = (evt) ? evt : ((window.event) ? event : null);
+            var iframe = evt.target;
+            var ifrm   = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+            ifrm.document.open();
+            ifrm.document.write("<style type='text/css'>body {background: white;}</style><span style='color: red; font-weight:bold;'>failed to load: " + iframe.src+"</span><br>due to javascripts cross domain policy, the exact error cannot be determinced.<br>possible causes:<ul><li>Server does not respond</li><li>Trying to access http url from https dashboard.</li></ul>");
+            ifrm.document.close();
+        };
+
         this.refreshHandler = function() {
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
                 /* set external url as src */
                 var iframeObj = this.items.getAt(1).getEl();
                 if(iframeObj && iframeObj.dom) {
-                    iframeObj.dom.src = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
+                    iframeObj.dom.onerror = this.iframeErrorHandler;
+                    iframeObj.dom.src     = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
                 }
             } else {
                 TP.defaultSiteRefreshHandler(this);
