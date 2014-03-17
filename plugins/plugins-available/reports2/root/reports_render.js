@@ -65,23 +65,18 @@ function split_table(table, max_height) {
     page.after(cloned);
 
     // find rows till max height and remove all rows below
-    var firstrow, top, lastrow;
-    table.find('TBODY > TR').each(function(nr, tr) {
-        if(nr == 0) {
-            firstrow = tr;
-            top = jQuery(firstrow).position().top;
-        } else {
-            var tr_bottom = jQuery(tr).position().top + jQuery(tr).height();
-            if(tr_bottom > top + max_height) {
-                if(lastrow == undefined) {
-                    lastrow = nr;
-                }
-            }
-        }
-        if(lastrow != undefined) {
+    var num_removed;
+    jQuery(table.find('TBODY > TR').toArray().reverse()).each(function(nr, tr) {
+        if(table.height() > max_height) {
             jQuery(tr).remove();
+        } else {
+            num_removed = nr;
+            return false;
         }
+        return true;
     });
+    var num_trs = cloned.find('TABLE.paged_table > TBODY > TR').size();
+    var lastrow = num_trs - num_removed;
 
     // find rows on the cloned table and remove all from the page above
     // except first row
