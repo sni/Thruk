@@ -76,8 +76,10 @@ function split_table(table, max_height) {
                 if(lastrow == undefined) {
                     lastrow = nr;
                 }
-                jQuery(tr).remove();
             }
+        }
+        if(lastrow != undefined) {
+            jQuery(tr).remove();
         }
     });
 
