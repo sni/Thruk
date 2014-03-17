@@ -160,7 +160,7 @@ sub read_downtime {
 
     # move file to new file layout
     if($dfile !~ m/\/\d+\.tsk$/mx) {
-        my $newfile = _get_data_file_name($c);
+        my $newfile = get_data_file_name($c);
         move($dfile, $newfile);
         $dfile = $newfile;
     }
@@ -409,6 +409,28 @@ sub get_downtime_backends {
 }
 
 ##########################################################
+
+=head2 get_data_file_name
+
+    get_data_file_name($c,  [$nr])
+
+return filename for data file
+
+=cut
+sub get_data_file_name {
+    my($c, $nr) = @_;
+    if(!defined $nr or $nr !~ m/^\d+$/mx) {
+        $nr = 1;
+    }
+
+    while(-f $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk') {
+        $nr++;
+    }
+
+    return $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
+}
+
+##########################################################
 # return cmd line for downtime
 sub _get_cron_entry {
     my($c, $downtime, $rd) = @_;
@@ -435,21 +457,6 @@ sub _get_downtime_cmd {
                             $log,
                     );
     return $cmd;
-}
-
-##########################################################
-# return filename for data file
-sub _get_data_file_name {
-    my($c, $nr) = @_;
-    if(!defined $nr or $nr !~ m/^\d+$/mx) {
-        $nr = 1;
-    }
-
-    while(-f $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk') {
-        $nr++;
-    }
-
-    return $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
 }
 
 ##########################################################
