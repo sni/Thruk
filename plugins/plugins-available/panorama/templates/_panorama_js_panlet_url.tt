@@ -2,6 +2,8 @@
     extend: 'TP.Panlet',
 
     title: 'url panlet',
+    height: 220,
+    width:  440,
     initComponent: function() {
         this.callParent();
         this.xdata.url      = '';
