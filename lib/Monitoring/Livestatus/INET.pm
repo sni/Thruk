@@ -63,7 +63,7 @@ sub _open {
                                          Timeout  => $self->{'connect_timeout'},
                                          );
         if(!defined $sock or !$sock->connected()) {
-            my $msg = "failed to connect to $self->{'peer'} :$!";
+            my $msg = "failed to connect to $self->{'peer'}: $!";
             if($self->{'errors_are_fatal'}) {
                 croak($msg);
             }

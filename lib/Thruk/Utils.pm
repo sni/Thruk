@@ -2152,14 +2152,14 @@ sub get_memory_usage {
 
 =head2 check_shadow_naemon_procs
 
-  check_shadow_naemon_procs($config)
+  check_shadow_naemon_procs($config, [$log_missing])
 
 makes sure all shadownaemon processes are running
 
 =cut
 
 sub check_shadow_naemon_procs {
-    my($config) = @_;
+    my($config, $log_missing) = @_;
     local $SIG{CHLD} = 'DEFAULT';
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
@@ -2172,6 +2172,9 @@ sub check_shadow_naemon_procs {
             }
         }
         if(!$started) {
+            if($log_missing) {
+                $log_missing->log->error(sprintf("shadownaemon %s for peer %s crashed, restarting...", $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'})));
+            }
             my $cmd = sprintf("%s -d -i %s -o %s%s",
                               $config->{'shadow_naemon_bin'},
                               $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},

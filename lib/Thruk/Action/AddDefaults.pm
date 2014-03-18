@@ -302,6 +302,11 @@ sub after_execute {
         $c->stash->{'no_auto_reload'} = 1;
     }
 
+    # check if our shadows are still up and running
+    if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+        $c->run_after_request('Thruk::Utils::check_shadow_naemon_procs($c->config, $c);');
+    }
+
     $c->stats->profile(end => "AddDefaults::after");
     return;
 }
@@ -454,7 +459,9 @@ sub set_processinfo {
                 my $key  = $peer->peer_key();
                 my $name = $peer->peer_name();
                 $processinfo->{$key}->{'peer_name'} = $name;
-                $cached_data->{'processinfo'}->{$key} = $processinfo->{$key} if scalar keys %{$processinfo->{$key}} > 0;
+                if(scalar keys %{$processinfo->{$key}} > 5) {
+                    $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
+                }
             }
         }
         $cached_data->{'processinfo_time'} = time();
