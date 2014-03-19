@@ -64,6 +64,9 @@ function split_table(table, max_height) {
     var cloned = page.clone();
     page.after(cloned);
 
+    // remove things which should stay on the last page only
+    page.find('.split_pages_lastpage_only').remove();
+
     // find rows till max height and remove all rows below
     var num_removed;
     jQuery(table.find('TBODY > TR').toArray().reverse()).each(function(nr, tr) {
@@ -170,8 +173,14 @@ function render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, typ
         cloned.find("#flotgraph"+nr+'_0').attr('id', 'flotgraph'+nr+'_'+x);
         cloned.find('SCRIPT').remove();
         lastpage.after(cloned);
+        // remove things which should stay on the last page only
+        if(x != pages - 1) {
+            cloned.find('.split_pages_lastpage_only').remove();
+        }
         lastpage = cloned;
     };
+    // remove things which should stay on the last page only
+    fpage.find('.split_pages_lastpage_only').remove();
 
     data  = data.reverse();
     label = label.reverse();

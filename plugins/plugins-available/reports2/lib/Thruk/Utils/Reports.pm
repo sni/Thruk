@@ -396,6 +396,15 @@ sub generate_report {
     if($options->{'params'}->{'language'}) {
         $c->stash->{'loc'} = $c->stash->{'_locale'};
         $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
+        my $overrides = {};
+        eval {
+            $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
+        };
+        if($overrides) {
+            for my $key (keys %{$overrides}) {
+                $Thruk::Utils::Reports::Render::locale->{$key} = $overrides->{$key};
+            }
+        }
     }
 
     # prepage stage, functions here could still change stash
@@ -622,6 +631,7 @@ sub get_report_languages {
     for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
         for my $file (glob($path.'/reports/locale/*.tt')) {
             $file    =~ s/^.*\/(.*)$/$1/mx;
+            next if $file =~ m/_custom\.tt/mx;
             my $name = _get_locale_name($c, $file) || 'unknown';
             my $abrv = $file;
             $abrv    =~ s/\.tt$//gmx;

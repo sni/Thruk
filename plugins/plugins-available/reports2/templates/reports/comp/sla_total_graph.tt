@@ -18,6 +18,7 @@
   [% END %]
 [% END %]
 
+[% sla_averages_total = 0; sla_averages_num = 0; %]
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
 <script type="text/javascript">
 <!--
@@ -32,6 +33,7 @@ jQuery(document).ready(function() {
         label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
         [% ELSE %]
         label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+        [% sla_averages_total = sla_averages_total + val; sla_averages_num = sla_averages_num + 1; %]
         [% END %]
       [% END %]
     [% ELSE %]
@@ -59,3 +61,16 @@ jQuery(document).ready(function() {
 });
 -->
 </script>
+
+[% IF sla_averages_num > 0 %]
+<table class="availability_details split_pages_lastpage_only">
+  <tr>
+    <th>[% loc("Average Availability") %]</th>
+    <td>
+    [% format = '%0.' _ param.decimals _ 'f'; val = sla_averages_total / sla_averages_num %]
+    [% value  = sprintf(format, val) %]
+    <span class='[% IF value < param.sla %] sla_nok[% END %]'>[% value %] %</span>
+    </td>
+  </tr>
+</table>
+[% END %]
