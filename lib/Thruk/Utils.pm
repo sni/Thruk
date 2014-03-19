@@ -2198,6 +2198,7 @@ stop all shadownaemon processes
 =cut
 sub shutdown_shadow_naemon_procs {
     my($config) = @_;
+    return unless $config->{'shadow_naemon_dir'};
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         my $pidfile = $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.pid';
