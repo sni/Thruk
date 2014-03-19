@@ -269,6 +269,10 @@ sub begin : Private {
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
 
+    # bypass shadownaemon by url
+    $ENV{'THRUK_USE_SHADOW'} = 1;
+    $ENV{'THRUK_USE_SHADOW'} = 0 if $c->{'request'}->{'parameters'}->{'nocache'};
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }

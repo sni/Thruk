@@ -357,8 +357,8 @@ do the work on threads
 =cut
 
 sub _do_thread {
-    my($key, $function, $arg) = @_;
-    return(do_on_peer($key, $function, $arg));
+    my($key, $function, $arg, $use_shadow) = @_;
+    return(do_on_peer($key, $function, $arg, $use_shadow));
 }
 
 ########################################
@@ -372,7 +372,7 @@ run a function on a backend peer
 =cut
 
 sub do_on_peer {
-    my($key, $function, $arg) = @_;
+    my($key, $function, $arg, $use_shadow) = @_;
 
     # make it possible to run code in thread context
     if(ref $arg eq 'ARRAY') {
@@ -410,10 +410,10 @@ sub do_on_peer {
     my $errors = 0;
     while($errors < 3) {
         eval {
-            if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
+            if($use_shadow and $peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
                 ($data,$type,$size) = $peer->{'cacheproxy'}->$function(@{$arg});
             } else {
-                if($peer->{'cacheproxy'} and $function eq 'send_command') {
+                if($use_shadow and $peer->{'cacheproxy'} and $function eq 'send_command') {
                     # duplicate command to cache, otherwise we would have to wait
                     # for a full sync of this host/service
                     my $filename = $peer->{'cacheproxy'}->{'live'}->{'peer'};

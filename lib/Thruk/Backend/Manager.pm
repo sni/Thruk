@@ -1309,9 +1309,9 @@ sub _get_result {
        or $force_serial
        or scalar @{$peers} <= 1)
     {
-        return $self->_get_result_serial($peers, $function, $arg);
+        return $self->_get_result_serial($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
     }
-    return $self->_get_result_parallel($peers, $function, $arg);
+    return $self->_get_result_parallel($peers, $function, $arg, $ENV{'THRUK_USE_SHADOW'});
 }
 
 ########################################
@@ -1325,7 +1325,7 @@ returns result for given function
 =cut
 
 sub _get_result_serial {
-    my($self,$peers, $function, $arg) = @_;
+    my($self,$peers, $function, $arg, $use_shadow) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
 
@@ -1335,7 +1335,7 @@ sub _get_result_serial {
 
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg);
+            my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
             my $res = shift @res;
             my($typ, $size, $data, $last_error) = @{$res};
             chomp($last_error) if $last_error;
@@ -1363,7 +1363,7 @@ returns result for given function and args using the worker pool
 =cut
 
 sub _get_result_parallel {
-    my($self, $peers, $function, $arg) = @_;
+    my($self, $peers, $function, $arg, $use_shadow) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
 
@@ -1375,7 +1375,7 @@ sub _get_result_parallel {
         if(!$c->stash->{'failed_backends'}->{$key}) {
             my $id;
             eval {
-                $id = $Thruk::Backend::Pool::pool->add($key, $function, $arg);
+                $id = $Thruk::Backend::Pool::pool->add($key, $function, $arg, $use_shadow);
                 $ids{$id} = $key;
             };
             confess($@) if $@;
