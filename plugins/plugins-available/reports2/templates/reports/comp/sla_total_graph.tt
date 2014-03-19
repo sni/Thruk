@@ -28,7 +28,11 @@ jQuery(document).ready(function() {
       [% x=0; FOREACH hst = avail_data.hosts.keys.sort.reverse %]
         [% format = '%0.' _ param.decimals _ 'f' %]
         [% val  = sprintf(format, values.$x.0) %]
+        [% IF values.$x.0 == -1 %][%# no data at all... #%]
+        label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend'>n/a<\/span>";
+        [% ELSE %]
         label[[% x; x = x + 1 %]] = "<span class='graph_hst_legend'>[% hst %]<\/span><span class='graph_percent_legend[% IF val < param.sla %] sla_nok[% END %]'>[% val %] %<\/span>";
+        [% END %]
       [% END %]
     [% ELSE %]
       [% x=0; FOREACH hst = avail_data.services.keys.sort.reverse %]
