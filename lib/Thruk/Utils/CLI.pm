@@ -404,6 +404,11 @@ sub _from_fcgi {
     $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
 
+    # ensure secret key is fresh
+    my $secret_file = $c->config->{'var_path'}.'/secret.key';
+    $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
+    chomp($c->config->{'secret_key'});
+
     # check credentials
     my $res = {};
     if(   !defined $c->config->{'secret_key'}
