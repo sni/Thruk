@@ -462,17 +462,19 @@ sub wait_for_job {
     my $job = shift;
     my $config = Thruk::Backend::Pool::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
-    alarm(60);
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);
-        alarm(0);
         return;
     }
-    while(Thruk::Utils::External::_is_running($jobdir)) {
-        sleep(1);
-    }
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished');
+    local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
+    alarm(60);
+    eval {
+        while(Thruk::Utils::External::_is_running($jobdir)) {
+            sleep(1);
+        }
+    };
     alarm(0);
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished') or diag(Dumper(`find $jobdir/ -ls -exec cat {} \\;`));
     return;
 }
 
