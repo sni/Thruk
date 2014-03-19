@@ -1745,7 +1745,7 @@ sub wait_after_reload {
     $pkey = $c->stash->{'param_backend'} unless $pkey;
 
     # wait until core responds again
-    my $start = time();
+    my $start    = time();
     my $procinfo = {};
     while($start > time() - 60) {
         sleep(1);
@@ -1758,7 +1758,7 @@ sub wait_after_reload {
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
         if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$pkey}) {
-            if($pkey and $time and $procinfo->{$pkey}->{'program_start'} and  $procinfo->{$pkey}->{'program_start'} < $time) {
+            if($pkey and $time and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
                 # not yet restarted
             } else {
                 last;
