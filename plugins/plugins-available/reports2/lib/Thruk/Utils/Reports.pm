@@ -397,9 +397,12 @@ sub generate_report {
         $c->stash->{'loc'} = $c->stash->{'_locale'};
         $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
         my $overrides = {};
-        eval {
-            $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
-        };
+        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+            if(-e $path.'/reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt') {
+                $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
+                last;
+            }
+        }
         if($overrides) {
             for my $key (keys %{$overrides}) {
                 $Thruk::Utils::Reports::Render::locale->{$key} = $overrides->{$key};
