@@ -145,7 +145,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
-        'like'    => [ 'Config Tool', $type, "\Q".$testname."\E"],
+        'like'    => [ 'Config Tool', $type, "\Q$testname\E"],
     );
 
     # new object
