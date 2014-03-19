@@ -168,6 +168,7 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
         if(defined $fh) {
             print $fh $digest;
             Thruk::Utils::IO::close($fh, $secretfile);
+            chmod(0640, $secretfile);
         }
         __PACKAGE__->config->{'secret_key'} = $digest;
     } else {
