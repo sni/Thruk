@@ -141,7 +141,6 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     $data->[0]->{'data'}->[0] = "none" unless defined $data->[0]->{'data'}->[0];
     $data->[0]->{'data'}->[0] = encode_utf8($data->[0]->{'data'}->[0]);
     my $testname = $data->[0]->{'data'}->[0];
-    $testname =~ s|\\|\\\\|gmx;
 
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
