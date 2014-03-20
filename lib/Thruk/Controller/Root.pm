@@ -259,8 +259,9 @@ sub begin : Private {
     if($c->request->{'headers'}->{'cookie'}) {
         for my $cookiename (qw/thruk_backends thruk_side thruk_auth thruk_theme
                                thruk_sounds thruk_favicon thruk_mobile thruk_obj_layout
+                               thruk_conf
                               /) {
-            if(scalar @{[$c->request->{'headers'}->{'cookie'} =~ m/($cookiename=[^;]+;)/gmx]} > 1) {
+            if(scalar @{[$c->request->{'headers'}->{'cookie'} =~ m/($cookiename=[^;]+(;|$))/gmx]} > 1) {
                 push @{$c->stash->{'fix_cookies'}}, $cookiename;
             }
         }
