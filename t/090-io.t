@@ -33,6 +33,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m|lib/Monitoring/Availability|mx;
     next if $line =~ m|lib/Monitoring/Livestatus|mx;
     next if $line =~ m|\Qmake sure the core can read it\E|mx;
+    next if $line =~ m|secretfile|mx;
 
     push @fails, $line;
   }
