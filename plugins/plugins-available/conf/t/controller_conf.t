@@ -8,7 +8,9 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1316;
+    my $tests = 1316;
+    $tests    = $tests - 12 if $ENV{'THRUK_TEST_NO_RELOADS'};
+    plan tests => $tests;
 }
 
 BEGIN {
@@ -100,7 +102,12 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 
 for my $url (@{$pages}) {
     my $test = TestUtils::make_test_hash($url, {'like' => 'Config Tool'});
-    TestUtils::test_page(%{$test});
+    # reloading breaks running multiple tests against same core
+    if($test->{'url'} =~ m/reload=yes/mx and $ENV{'THRUK_TEST_NO_RELOADS'}) {
+        # silently skip this test
+    } else {
+        TestUtils::test_page(%{$test});
+    }
 }
 
 my $redirects = [
