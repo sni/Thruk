@@ -9,6 +9,7 @@ use warnings;
 use lib 'lib';
 use Thruk::Backend::Pool;
 BEGIN {
+    $ENV{'THRUK_SRC'} = 'FastCGI';
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
@@ -21,7 +22,6 @@ BEGIN {
 
 require Catalyst::ScriptRunner;
 Catalyst::ScriptRunner->import();
-$ENV{'THRUK_SRC'} = 'FastCGI';
 Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
 
 1;
