@@ -205,7 +205,7 @@ sub _initialise_peer {
         elsif(defined $self->{'use_shadow'} and $self->{'use_shadow'} == 0) {
             undef $use_shadow_naemon;
         }
-        elsif($self->{'local'} == 0 and (!defined $self->{'use_shadow'} or $self->{'use_shadow'} == 0)) {
+        elsif($self->{'local'} == 1 and (!defined $self->{'use_shadow'} or $self->{'use_shadow'} == 0)) {
             undef $use_shadow_naemon;
         }
     }
