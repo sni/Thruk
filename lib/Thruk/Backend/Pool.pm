@@ -294,6 +294,7 @@ sub init_backend_thread_pool {
     my $use_shadow_naemon;
     if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
         if($config->{'use_shadow_naemon'}) {
+            die("missing configuration option: shadow_naemon_dir") unless $config->{'shadow_naemon_dir'};
             $use_shadow_naemon = $config->{'shadow_naemon_dir'};
         }
     }

@@ -19214,6 +19214,12 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_ssl_verify_hostnames'>ssl_verify_hostnames</a></div>
 
+<div class='toclevel4'><a href='#_use_shadow_naemon'>use_shadow_naemon</a></div>
+
+<div class='toclevel4'><a href='#_shadow_naemon_dir'>shadow_naemon_dir</a></div>
+
+<div class='toclevel4'><a href='#_shadow_naemon_bin'>shadow_naemon_bin</a></div>
+
 <div class='toclevel3'><a href='#_cookie_authentication_settings'>Cookie Authentication Settings</a></div>
 
 <div class='toclevel4'><a href='#_cookie_auth_login_url'>cookie_auth_login_url</a></div>
@@ -20442,6 +20448,39 @@ example for the cookie login or the http backend.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ssl_verify_hostnames = 1</tt></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_use_shadow_naemon">use_shadow_naemon</h4>
+<div class="paragraph"><p>Enable usage of shadownaemon. This is a daemon which shadows a remote
+core via livestatus and therefor removes network latency from accessing
+remote sites. It also reduces network bandwidth usage. Best used together
+with the logcache. Enabled with any true value, disabled when set to <em>0</em>.</p></div>
+<div class="paragraph"><p>Default: 0</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_shadow_naemon=1</tt></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_shadow_naemon_dir">shadow_naemon_dir</h4>
+<div class="paragraph"><p>Defines the folder where all shadow cores will run in. This
+also defines the path to the local socket, which will be
+<em>shadow_naemon_dir</em>/<em>peer key</em>/live</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>shadow_naemon_dir=/omd/sites/&lt;site&gt;/tmp/remotecache</tt></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_shadow_naemon_bin">shadow_naemon_bin</h4>
+<div class="paragraph"><p>Defines the path to the shadownaemon binary.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>shadow_naemon_bin=/omd/sites/&lt;site&gt;/bin/shadownaemon</tt></pre>
 </div></div>
 </div>
 </div>
@@ -24906,7 +24945,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-02-23 20:26:49 CET
+Last updated 2014-03-21 14:11:48 CET
 </div>
 </div>
 </body>

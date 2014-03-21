@@ -1730,7 +1730,36 @@ ex.:
   ssl_verify_hostnames = 1
 
 
+==== use_shadow_naemon
 
+Enable usage of shadownaemon. This is a daemon which shadows a remote
+core via livestatus and therefor removes network latency from accessing
+remote sites. It also reduces network bandwidth usage. Best used together
+with the logcache. Enabled with any true value, disabled when set to '0'.
+
+Default: 0
+
+ex.:
+
+    use_shadow_naemon=1
+
+
+==== shadow_naemon_dir
+Defines the folder where all shadow cores will run in. This
+also defines the path to the local socket, which will be
+'shadow_naemon_dir'/'peer key'/live
+
+ex.:
+
+    shadow_naemon_dir=/omd/sites/<site>/tmp/remotecache
+
+
+==== shadow_naemon_bin
+Defines the path to the shadownaemon binary.
+
+ex.:
+
+    shadow_naemon_bin=/omd/sites/<site>/bin/shadownaemon
 
 
 === Cookie Authentication Settings
