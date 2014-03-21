@@ -2174,7 +2174,7 @@ sub check_shadow_naemon_procs {
         }
         if(!$started) {
             if($log_missing) {
-                $log_missing->log->error(sprintf("shadownaemon %s for peer %s crashed, restarting...", $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'})));
+                $log_missing->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'})));
             }
             my $cmd = sprintf("%s -d -i %s -o %s%s",
                               $config->{'shadow_naemon_bin'},

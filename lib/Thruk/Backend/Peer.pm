@@ -134,6 +134,7 @@ sub _initialise_peer {
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
     $self->{'state_host'}    = $config->{'state_host'};
+    $self->{'use_shadow'}    = $config->{'use_shadow'};
 
     # shorten backend id
     my $key = substr(md5_hex($self->{'class'}->peer_addr." ".$self->{'class'}->peer_name), 0, 5);
@@ -197,10 +198,21 @@ sub _initialise_peer {
     }
 
     # livestatus booster
-    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'} and $self->{'local'} == 0) {
+    if($use_shadow_naemon) {
+        if($ENV{'NO_SHADOW_NAEMON'}) {
+            undef $use_shadow_naemon;
+        }
+        elsif(defined $self->{'use_shadow'} and $self->{'use_shadow'} == 0) {
+            undef $use_shadow_naemon;
+        }
+        elsif($self->{'local'} == 0 and (!defined $self->{'use_shadow'} or $self->{'use_shadow'} == 0))
+            undef $use_shadow_naemon;
+        }
+    }
+    if($use_shadow_naemon) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
-                                                peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
-                                                peer_key  => $self->{'key'},
+                                                peer     => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
+                                                peer_key => $self->{'key'},
                                             });
         $self->{'cacheproxy'}->peer_key($self->{'key'});
     }
