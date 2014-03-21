@@ -329,16 +329,16 @@ sub init_backend_thread_pool {
             }
         }
         if($pool_size > 1) {
-            printf(STDERR "mem:% 7s MB  before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             $pool = Thruk::Pool::Simple->new(
                 min      => $pool_size,
                 max      => $pool_size,
                 do       => [\&Thruk::Backend::Pool::_do_thread ],
             );
-            printf(STDERR "mem:% 7s MB  after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
-            printf(STDERR "mem:% 7s MB  without pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
     }

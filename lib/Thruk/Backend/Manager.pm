@@ -85,25 +85,10 @@ sub init {
         $self->{'by_key'}->{$peer->{'key'}}   = $peer;
         $self->{'by_name'}->{$peer->{'name'}} = $peer;
 
-        $peer->{'local'} = 1;
-        my $addr = $peer->{'addr'};
-        if($addr) {
-            if($peer->{'type'} eq 'http') {
-                $addr =~ s/^http(|s):\/\///mx;
-                $addr =~ s/\/.*$//mx;
-            }
-            if($peer->{'type'} eq 'livestatus') {
-                $addr =~ s/:.*$//mx;
-            }
-
-            if($peer->{'state_host'}) {
-                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $peer->{'state_host'} };
-            }
-            elsif($addr =~ m/^\//mx or $addr eq 'localhost' or $addr =~ /^127\.0\.0\./mx) {
-                $self->{'local_hosts'}->{$peer->{'key'}} = 1;
-            } else {
-                $self->{'state_hosts'}->{$peer->{'key'}} = { source => $addr };
-            }
+        if($peer->{'state_host'}) {
+            $self->{'state_hosts'}->{$peer->{'key'}} = { source => $peer->{'state_host'} };
+        } else {
+            $self->{'local_hosts'}->{$peer->{'key'}} = 1;
         }
         my($subsection,$section) = split(/\//mx, $peer->{'section'}, 2);
         if(!$section) {

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
+use Thruk::Backend::Provider::Livestatus;
 
 our $AUTOLOAD;
 
@@ -151,6 +152,30 @@ sub _initialise_peer {
         $self->{'class'}->set_verbose(1);
     }
 
+    # state hosts
+    my $addr              = $self->{'addr'};
+    $self->{'local'}      = 0;
+    $self->{'state_host'} = $config->{'state_host'};
+    if($addr) {
+        if($self->{'type'} eq 'http') {
+            $addr =~ s/^http(|s):\/\///mx;
+            $addr =~ s/\/.*$//mx;
+        }
+        if($self->{'type'} eq 'livestatus') {
+            $addr =~ s/:.*$//mx;
+        }
+
+        if($self->{'state_host'}) {
+            $self->{'local'} = 0;
+        }
+        elsif($addr =~ m/^\//mx or $addr eq 'localhost' or $addr =~ /^127\.0\.0\./mx) {
+            $self->{'local'} = 1;
+        } else {
+            $self->{'local'} = 0;
+            $self->{'state_host'} = $addr;
+        }
+    }
+
     # log cache?
     if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
         if($logcache =~ m/^mysql/mxi) {
@@ -172,9 +197,7 @@ sub _initialise_peer {
     }
 
     # livestatus booster
-    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
-        require Thruk::Backend::Provider::Livestatus;
-        Thruk::Backend::Provider::Livestatus->import;
+    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'} and $self->{'local'} == 0) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
                                                 peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
                                                 peer_key  => $self->{'key'},
