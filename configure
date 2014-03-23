@@ -207,6 +207,6 @@ __END__
     --with-thruk-user            sets user name to run thruk [thruk]
     --with-thruk-group           sets group name to run thruk [thruk]
     --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
-    --without-compress           skip compression of css and javascript files. Requires yui-compressor.
+    --without-compress           skip compression of css and javascript files which requires yui-compressor
 
 =cut
