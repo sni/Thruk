@@ -60,6 +60,7 @@ if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::C
 }
 
 if(!$js_required and !$css_required) {
+    print STDERR "no update necessary\n";
     exit;
 }
 
