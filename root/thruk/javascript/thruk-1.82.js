@@ -3182,6 +3182,7 @@ function add_new_filter(search_prefix, table) {
                              'Notification Period',
                              'Number of Services',
                              'Parent',
+                             'Plugin Output',
                              'Service',
                              'Servicegroup',
                              '% State Change'
