@@ -59,14 +59,14 @@ if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::C
     }
 }
 
-if(!$js_required and !$css_required) {
+if(!$js_required and !$css_required and !$skip_compress) {
     print STDERR "no update necessary\n";
     exit;
 }
 
 #################################################
 # required tools available?
-unless($ENV{THRUK_SKIP_COMPRESS}) {
+unless($skip_compress) {
     if(!$yuicompr) {
         warn("E: yuicompressor not installed, won't compress javascript and stylesheets!") ;
         $skip_compress = 1;
