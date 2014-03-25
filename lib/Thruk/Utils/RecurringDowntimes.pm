@@ -8,7 +8,7 @@ use File::Copy qw/move/;
 
 =head1 NAME
 
-Thruk::Utils::RecurringDowntimes- Utils for Recurring Downtimes
+Thruk::Utils::RecurringDowntimes - Utils for Recurring Downtimes
 
 =head1 DESCRIPTION
 
