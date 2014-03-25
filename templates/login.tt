@@ -53,18 +53,28 @@
   </div>
   <script type="text/javascript">
   <!--
+    function clean_ref(ref) {
+        ref = ref.replace(/^\?expired\&/, '?');
+        ref = ref.replace(/^\?expired$/,  '');
+        ref = ref.replace(/^\?invalid\&/, '?');
+        ref = ref.replace(/^\?invalid$/,  '');
+        ref = ref.replace(/^\?problem\&/, '?');
+        ref = ref.replace(/^\?problem$/,  '');
+        ref = ref.replace(/^\?/, '/');
+        ref = ref.replace(/^\/+/, '/');
+        ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
+        ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
+        ref = ref.replace(/^\?/, '/');
+        return(ref);
+    }
+
     if ( top.location != location ) {
-      var ref = document.location.pathname + document.location.search + document.location.hash;
+      // when inside a frame, open login page in top frame
+      var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash);
+      ref = ref.replace(/\/thruk\//, '/thruk/#');
       top.location.href = '[% loginurl %]?'+ref;
     } else {
-      var ref = window.location.search + window.location.hash;
-      ref = ref.replace(/^\?expired\&/, '?');
-      ref = ref.replace(/^\?expired$/,  '');
-      ref = ref.replace(/^\?invalid\&/, '?');
-      ref = ref.replace(/^\?invalid$/,  '');
-      ref = ref.replace(/^\?problem\&/, '?');
-      ref = ref.replace(/^\?problem$/,  '');
-      ref = ref.replace(/^\?/, '/');
+      var ref = clean_ref(window.location.search + window.location.hash);
       jQuery('#referer').val(ref);
     }
   -->

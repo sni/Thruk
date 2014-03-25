@@ -190,7 +190,7 @@ sub set_default_config {
     my $product_prefix = $config->{'product_prefix'};
     $defaults->{'cookie_path'} =~ s/\/\Q$product_prefix\E\/*$//mx;
     $defaults->{'cookie_path'} = '/'.$product_prefix if $defaults->{'cookie_path'} eq '';
-    $defaults->{'cookie_path'} =~ s|/*$||mx; # remove trailing slashed, chrome doesn't seem to like them
+    $defaults->{'cookie_path'} =~ s|/*$||mx; # remove trailing slash, chrome doesn't seem to like them
 
     for my $key (keys %{$defaults}) {
         $config->{$key} = exists $config->{$key} ? $config->{$key} : $defaults->{$key};
