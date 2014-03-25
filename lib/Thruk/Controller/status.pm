@@ -971,19 +971,7 @@ sub _process_perfmap_page {
     my $data = [];
     my $keys = {};
     for my $svc (@{$services}) {
-        my $svc_data = {
-            host_name           => $svc->{'host_name'},
-            host_state          => $svc->{'host_state'},
-            host_address        => $svc->{'host_address'},
-            host_display_name   => $svc->{'host_display_name'},
-            description         => $svc->{'description'},
-            display_name        => $svc->{'display_name'},
-            has_been_checked    => $svc->{'has_been_checked'},
-            peer_key            => $svc->{'peer_key'},
-            plugin_output       => $svc->{'plugin_output'},
-            state               => $svc->{'state'},
-            perf                => {},
-        };
+        $svc->{'perf'} = {};
         my $perfdata = $svc->{'perf_data'};
         my @matches  = $perfdata =~ m/([^\s]+|'[^']+')=([^\s]*)/gmxoi;
         for(my $x = 0; $x < scalar @matches; $x=$x+2) {
@@ -995,13 +983,13 @@ sub _process_perfmap_page {
             $val =~ s/,/./gmxo;
             $val =~ m/^([\d\.\-]+)(.*?)$/mx;
             if(defined $1) {
-                $svc_data->{'perf'}->{$key} = 1;
+                $svc->{'perf'}->{$key} = 1;
                 $keys->{$key} = 1;
-                $svc_data->{$key} = $1.$2;
-                $svc_data->{$key.'_sort'} = $1;
+                $svc->{$key} = $1.$2;
+                $svc->{$key.'_sort'} = $1;
             }
         }
-        push @{$data}, $svc_data;
+        push @{$data}, $svc;
     }
 
     if( $view_mode eq 'xls' ) {
