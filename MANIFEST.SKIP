@@ -70,3 +70,4 @@ test_hook.sh
 bp/\d+\.tbp
 root/tests/
 script/append.make.options
+^bp/.*\.pm

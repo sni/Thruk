@@ -42,18 +42,21 @@
     <tr>
       <th>Live Status</th>
       <th colspan=3 align="center">Aggregation Functions</th>
+      <th>Custom</th>
     </tr>
     <tr>
       <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_type('status')"></td>
       <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_type('best')"></td>
       <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_type('at_least')"></td>
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_type('equals')"></td>
+      <td><input type="button" class="bp_type_btn" value="Custom" onclick="bp_select_type('custom')"></td>
     </tr>
     <tr>
       <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host- / Service- group" onclick="bp_select_type('groupstatus')"></td>
       <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_type('worst')"></td>
       <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_type('not_more')"></td>
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_type('fixed')"></td>
+      <td></td>
     </tr>
   </table>
 </div>
@@ -81,18 +84,21 @@
       <tr>
         <th>Live Status</th>
         <th colspan=3 align="center">Aggregation Functions</th>
+        <th>Custom</th>
       </tr>
       <tr>
         <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_status" value="Status" onclick="bp_select_type('status')"/><label for="bp_check_status" class="bp_type_box_label">Host / Service Status</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_best" value="Best" onclick="bp_select_type('best')"/><label for="bp_check_best" class="bp_type_box_label">Best</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_at_least" value="At Least" onclick="bp_select_type('at_least')"/><label for="bp_check_at_least" class="bp_type_box_label">&gt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_equals" value="Equals" onclick="bp_select_type('equals')"/><label for="bp_check_equals" class="bp_type_box_label">=</label></td>
+        <td><input type="checkbox" class="bp_type_box" id="bp_check_custom" value="Custom" onclick="bp_select_type('custom')"/><label for="bp_check_custom" class="bp_type_box_label">Custom</label></td>
       </tr>
       <tr>
         <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_groupstatus" value="Groupstatus" onclick="bp_select_type('groupstatus')"/><label for="bp_check_groupstatus" class="bp_type_box_label">Host- / Service- group</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_worst" value="Worst" onclick="bp_select_type('worst')"/><label for="bp_check_worst" class="bp_type_box_label">Worst</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_not_more" value="Not_More" onclick="bp_select_type('not_more')"/><label for="bp_check_not_more" class="bp_type_box_label">&lt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_fixed" value="Fixed" onclick="bp_select_type('fixed')"/><label for="bp_check_fixed" class="bp_type_box_label">Dummy</label></td>
+        <td></td>
       </tr>
     </table>
   </div>
@@ -243,6 +249,25 @@
 <tr>
   <th align="right">Critical</th>
   <td align="left"><input type="text" value="" name="bp_arg2_at_least" placeholder="threshold, ex.: 3"></td>
+</tr>
+[% END %]
+
+<!-- custom type select -->
+[% WRAPPER _bp_context_menu_frame.tt
+    div_id='bp_select_custom'
+    function='custom'
+    div_help='custom aggregation functions.'
+%]
+<tr>
+  <th align="right">Custom Function</th>
+  <td align="left">
+    <select name="bp_arg1_custom" id="bp_arg1_custom">
+    </select>
+  </td>
+</tr>
+<tr>
+  <th align="right">Args</th>
+  <td align="left"><input type="text" value="" name="bp_arg2_custom" placeholder="custom arguments, anything your function can handle..."></td>
 </tr>
 [% END %]
 

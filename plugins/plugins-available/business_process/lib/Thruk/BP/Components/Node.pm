@@ -339,7 +339,7 @@ sub set_status {
     # if this node has no parents, use this state for the complete bp
     if($bp and scalar @{$self->{'parents'}} == 0) {
         my $text = $self->{'status_text'};
-        if(scalar @{$self->{'depends'}} > 0) {
+        if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
             my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
             if($sum->{'3'}) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';

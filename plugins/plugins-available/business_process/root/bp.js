@@ -288,7 +288,7 @@ function bp_add_new_node() {
     jQuery("#bp_add_new_node").dialog({
         modal: true,
         closeOnEscape: true,
-        width: 365
+        width: 450
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_add_new_node');
@@ -367,6 +367,7 @@ function bp_select_type(type) {
     else if(type == 'best')        { bp_select_best(node)        }
     else if(type == 'worst')       { bp_select_worst(node)       }
     else if(type == 'equals')      { bp_select_equals(node)      }
+    else if(type == 'custom')      { bp_select_custom(node)      }
     jQuery('#bp_function').val(type);
 }
 
@@ -441,6 +442,28 @@ function bp_select_equals(node) {
     } else {
         bp_fill_select_form({
             text:  { 'bp_arg1_equals': '' }
+        });
+    }
+}
+
+/* show node type select: custom */
+function bp_select_custom(node) {
+
+    var options = [];
+    jQuery(cust_func).each(function(nr, f) {
+        options.push(new Option(f['function'], f['function']));
+    });
+    set_select_options("bp_arg1_custom", options, true);
+
+    if(node && node.func.toLowerCase() == 'custom') {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': node.func_args[0] },
+            text:    { 'bp_arg2_custom': node.func_args[1] }
+        });
+    } else {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': '' },
+            text:    { 'bp_arg2_custom': '' }
         });
     }
 }

@@ -3352,6 +3352,38 @@ Configuration settings are covered by the
 
 
 
+==== Custom Functions
+Besides the normal functions you can write your own aggregation functions easily.
+Custom functions are written in Perl and located in the <config dir>/bp/ with
+the .pm filename extension.
+
+/etc/thruk/bp/sample.pm:
+------
+# help: sample custom function. args: text
+sub sample {
+    my($c, $bp, $node, $args, $livedata) = @_;
+    return(0, "sample desc", "sample status", { extra => "args" });
+}
+------
+
+Input arguments are:
+
+ - $c: catalyst context object containing livestatus connection pool
+ - $bp: business process object
+ - $node: business process node object
+ - $args: arguments from the node edit dialog
+ - $livestatus: optional livestatus data for all hosts and services in this business process
+
+A custom aggregation function needs to return at least 3 values and an
+optional 4th hash.
+
+ - status code: 0 = Ok, 1 = Warning, 2 = Critical, 3 = Unknown
+ - description:
+ - textual output: text output of aggregation function with optional performance data
+ - extra arguments: hash list of node attributes
+
+
+
 == CLI Tool & Scripting
 
 It is possible to do comprehensive scripting with Thruk. For example

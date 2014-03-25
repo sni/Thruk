@@ -113,7 +113,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     }
 
     # read / write actions
-    if($id and $allowed_for_edit) {
+    if($id and $allowed_for_edit and ($action ne 'details' and $action ne 'refresh')) {
         $c->stash->{editmode} = 1;
         my $bps = Thruk::BP::Utils::load_bp_data($c, $id, $c->stash->{editmode});
         if(scalar @{$bps} != 1) {
@@ -298,7 +298,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
 
-        if(!defined $c->{'request'}->{'parameters'}->{'update'} or $c->{'request'}->{'parameters'}->{'update'}) {
+        if($c->{'request'}->{'parameters'}->{'update'}) {
             $bp->update_status($c);
         }
         # try to find this bp on any system
@@ -307,6 +307,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         if(scalar @{$hosts} > 0) {
             $c->stash->{'bp_backend'} = $hosts->[0]->{'peer_key'};
         }
+
+        $c->stash->{'bp_custom_functions'} = Thruk::BP::Utils::get_custom_functions($c);
 
         if($action eq 'details') {
             if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {

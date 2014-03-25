@@ -23619,6 +23619,73 @@ authorized_for_system_commands
 <div class="paragraph"><p>Configuration settings are covered by the
 <a href="#_component_thruk_plugin_bp">configuration sections</a>.</p></div>
 </div>
+<div class="sect3">
+<h4 id="_custom_functions">Custom Functions</h4>
+<div class="paragraph"><p>Besides the normal functions you can write your own aggregation functions easily.
+Custom functions are written in Perl and located in the &lt;config dir&gt;/bp/ with
+the .pm filename extension.</p></div>
+<div class="paragraph"><p>/etc/thruk/bp/sample.pm:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt># help: sample custom function. args: text
+sub sample {
+    my($c, $bp, $node, $args, $livedata) = @_;
+    return(0, "sample desc", "sample status", { extra =&gt; "args" });
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>Input arguments are:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+$c: catalyst context object containing livestatus connection pool
+</p>
+</li>
+<li>
+<p>
+$bp: business process object
+</p>
+</li>
+<li>
+<p>
+$node: business process node object
+</p>
+</li>
+<li>
+<p>
+$args: arguments from the node edit dialog
+</p>
+</li>
+<li>
+<p>
+$livestatus: optional livestatus data for all hosts and services in this business process
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>A custom aggregation function needs to return at least 3 values and an
+optional 4th hash.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+status code: 0 = Ok, 1 = Warning, 2 = Critical, 3 = Unknown
+</p>
+</li>
+<li>
+<p>
+description:
+</p>
+</li>
+<li>
+<p>
+textual output: text output of aggregation function with optional performance data
+</p>
+</li>
+<li>
+<p>
+extra arguments: hash list of node attributes
+</p>
+</li>
+</ul></div>
+</div>
 </div>
 </div>
 </div>
@@ -24945,7 +25012,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-03-21 14:11:48 CET
+Last updated 2014-03-26 00:34:02 CET
 </div>
 </div>
 </body>

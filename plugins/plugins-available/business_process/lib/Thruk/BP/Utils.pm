@@ -303,6 +303,41 @@ sub update_cron_file {
 
 ##########################################################
 
+=head2 get_custom_functions
+
+  get_custom_functions($c)
+
+returns list of custom functions
+
+=cut
+sub get_custom_functions {
+    my($c) = @_;
+
+    # get required files
+    my $files = [];
+    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.pm');
+    my $current_help = "";
+    for my $filename (@files) {
+        next unless -s $filename;
+        open(my $fh, '<', $filename);
+        while(my $line = <$fh>) {
+            if($line =~ m/^\s*sub\s+([\w_]+)(\s|\{)/mx) {
+                push @{$files}, { function => $1, help => $current_help, file => $filename };
+                $current_help = "";
+            }
+            if($line =~ m/^\s*\#\s*(.*?$)/mx) {
+                $current_help = $1;
+                chomp($current_help);
+            }
+        }
+        CORE::close($fh);
+    }
+
+    return $files;
+}
+
+##########################################################
+
 =head2 join_labels
 
     join_labels($nodes)

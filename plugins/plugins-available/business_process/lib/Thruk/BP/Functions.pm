@@ -318,6 +318,51 @@ sub random {
 }
 
 ##########################################################
+
+=head2 custom
+
+    custom($c, $bp, $n, $args, \%livedata)
+
+returns data from custom functions
+
+=cut
+sub custom {
+    my($c, $bp, $n, $args, $livedata) = @_;
+    my($status, $short_desc, $status_text, $extra) = (0, 'short desc', 'status text', {});
+    $c->stash->{'bp_custom_functions'} = Thruk::BP::Utils::get_custom_functions($c) unless defined $c->stash->{'bp_custom_functions'};
+    my($fname, $arg) = @{$args};
+    my $f;
+    for my $tmp (@{$c->stash->{'bp_custom_functions'}}) {
+        if($tmp->{'function'} eq $fname) {
+            $f = $tmp;
+            last;
+        }
+    }
+    if(!$f) {
+        return(3, "UNKNOWN", "no file found for custom function: $fname");
+    }
+    eval {
+        do($f->{'file'});
+        ## no critic
+        eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $arg, $livedata);');
+        ## use critic
+        if($@) {
+            $status      = 3;
+            $short_desc  = "UNKNOWN";
+            $status_text = $@;
+            $c->log->info("internal error in custum function $fname: $@");
+        }
+    };
+    if($@) {
+        $status      = 3;
+        $short_desc  = "UNKNOWN";
+        $status_text = $@;
+        $c->log->info("internal error in custum function $fname: $@");
+    }
+    return($status, $short_desc, $status_text, $extra);
+}
+
+##########################################################
 sub _get_nodes_grouped_by_state {
     my($n, $bp) = @_;
     my $states = {};

@@ -95,6 +95,7 @@
     var testmode    = [% testmode %];
     var bp_no_menu  = [% no_menu %];
     var testmodes   = [% json_encode(testmodes) %];
+    var cust_func   = [% json_encode(bp_custom_functions) %];
 
     var bp_graph_options = {
         'bp_rankDir': '[% bp.rankDir %]',
