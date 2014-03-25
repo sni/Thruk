@@ -124,7 +124,12 @@ generate and send the report
 sub report_send {
     my($c, $nr, $skip_generate, $to, $cc, $subject, $desc) = @_;
 
-    my $report   = _read_report_file($c, $nr);
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'sending mails disabled in demo mode');
+        return $c->response->redirect('reports2.cgi');
+    }
+
+    my $report = _read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->response->redirect('reports2.cgi');
