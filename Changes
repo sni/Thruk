@@ -10,6 +10,7 @@ next:
           - config tool improvements for shinken (Mathieu Parent)
           - added new command "thruk -a selfcheck" to perform some self checks
           - Reports
+            - add button to directly send report by email
             - add maximum sla threshold to hide detail pages
             - allow multiple pnp graphs in sla reports (lkco)
           - Bug Fixes

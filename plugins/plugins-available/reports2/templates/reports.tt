@@ -91,17 +91,14 @@
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.file_exists && r.var.is_running == 0 %]
-        [% icon = 'page_white_acrobat.png' %]
-        [% IF    r.var.ctype == 'html2pdf'              %][% icon = 'page_white_acrobat.png' %]
-        [% ELSIF r.var.ctype == 'application/x-msexcel' %][% icon = 'page_white_excel.png' %]
-        [% ELSIF r.var.ctype == 'text/html'             %][% icon = 'page_world.png' %]
-        [% ELSIF r.var.ctype == 'image/png'             %][% icon = 'page_white_picture.png' %]
-        [% ELSIF r.var.ctype != ''                      %][% icon = 'page_white_text.png' %]
-        [% END %]
+        [% PROCESS _reports_icon.tt r=r %]
         [% IF r.var.ctype == 'html2pdf' %]
           <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+        [% ELSE %]
+          <img style="padding-left: 3px;" src='[% url_prefix %]themes/[% theme %]/images/empty.gif' border="0" alt='' width=16 height=16>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16></a>
       [% END %]
     </td>
   </tr>

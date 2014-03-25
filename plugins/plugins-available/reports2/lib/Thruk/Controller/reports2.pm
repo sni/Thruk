@@ -144,6 +144,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($action eq 'remove') {
             return $self->report_remove($c, $report_nr);
         }
+        elsif($action eq 'email') {
+            return $self->report_email($c, $report_nr);
+        }
     }
 
     if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} and !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
@@ -300,6 +303,43 @@ sub report_remove {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+}
+
+##########################################################
+
+=head2 report_email
+
+=cut
+sub report_email {
+    my($self, $c, $report_nr) = @_;
+
+    my $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if(!defined $r) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'report does not exist' });
+        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    }
+
+    if($c->{'request'}->{'parameters'}->{'send'}) {
+        my $to      = $c->{'request'}->{'parameters'}->{'to'}      || '';
+        my $cc      = $c->{'request'}->{'parameters'}->{'cc'}      || '';
+        my $desc    = $c->{'request'}->{'parameters'}->{'desc'}    || '';
+        my $subject = $c->{'request'}->{'parameters'}->{'subject'} || '';
+        if($to) {
+            Thruk::Utils::Reports::report_send($c, $report_nr, 1, $to, $cc, $subject, $desc);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report successfully sent by e-mail' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
+        }
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => '\'to\' address missing' });
+    }
+
+    $c->stash->{size}    = -s $c->config->{'tmp_path'}.'/reports/'.$r->{'nr'}.'.dat';
+    $c->stash->{attach}  = $r->{'var'}->{'attachment'} || 'report.pdf';
+    $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
+    $c->stash->{r}       = $r;
+
+    Thruk::Utils::ssi_include($c);
+    $c->stash->{template} = 'reports_email.tt';
+    return;
 }
 
 ##########################################################

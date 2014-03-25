@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 102;
+    plan tests => 114;
 }
 
 BEGIN {
@@ -37,6 +37,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi?report=999', like => [ '%PDF-1.4', '%%EOF' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&html=1', like => [ 'SLA Report' ], skip_js_check => 1, fail_message_ok => 1, unlike => [ 'internal server error', 'HASH' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=edit' },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=email' },
     { url => '/thruk/cgi-bin/reports2.cgi?action=remove&report=999', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports2.cgi?action=edit&report=new', like => ['Create Report'] },
 ];

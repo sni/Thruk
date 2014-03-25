@@ -867,6 +867,7 @@ plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
+plugins/plugins-available/reports2/templates/_reports_icon.tt
 plugins/plugins-available/reports2/templates/custom_reports_edit_step2.tt
 plugins/plugins-available/reports2/templates/reports.tt
 plugins/plugins-available/reports2/templates/reports/comp/mail.tt
@@ -899,6 +900,7 @@ plugins/plugins-available/reports2/templates/reports/style/css.tt
 plugins/plugins-available/reports2/templates/reports/style/custom.tt
 plugins/plugins-available/reports2/templates/reports_edit.tt
 plugins/plugins-available/reports2/templates/reports_edit_step2.tt
+plugins/plugins-available/reports2/templates/reports_email.tt
 plugins/plugins-available/shinken_features/description.txt
 plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
 plugins/plugins-available/shinken_features/preview.png

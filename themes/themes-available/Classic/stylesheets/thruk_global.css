@@ -884,6 +884,9 @@ SPAN.deleteicon INPUT {
 .ui-refresh-button {
   background-image: url(../images/arrow_refresh.png) !important;
 }
+.ui-email-button {
+  background-image: url(../images/email_attach.png) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }

@@ -11,6 +11,10 @@ function init_report_tool_buttons() {
         icons: {primary: 'ui-save-button'}
     });
 
+    jQuery('.report_email_button').button({
+        icons: {primary: 'ui-email-button'}
+    });
+
     jQuery('.right_arrow_button').button({
         icons: {primary: 'ui-r-arrow-button'}
     });

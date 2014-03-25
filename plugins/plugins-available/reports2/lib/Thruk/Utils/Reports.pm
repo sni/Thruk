@@ -116,13 +116,13 @@ sub report_show {
 
 =head2 report_send
 
-  report_send($c, $nr)
+  report_send($c, $nr, [$skip_generate, $to, $cc, $subject, $desc])
 
 generate and send the report
 
 =cut
 sub report_send {
-    my($c, $nr) = @_;
+    my($c, $nr, $skip_generate, $to, $cc, $subject, $desc) = @_;
 
     my $report   = _read_report_file($c, $nr);
     if(!defined $report) {
@@ -130,12 +130,22 @@ sub report_send {
         return $c->response->redirect('reports2.cgi');
     }
     # make report available in template
+    $report->{'desc'} = $desc if $to;
     $c->stash->{'r'} = $report;
 
-    my $attachment = generate_report($c, $nr, $report);
-    $report        = _read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
+    my $attachment;
+    if($skip_generate) {
+        $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
+        if(!-s $attachment) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'report not yet generated' );
+            return $c->response->redirect('reports2.cgi');
+        }
+        _initialize_report_templates($c, $report);
+    } else {
+        $attachment = generate_report($c, $nr, $report);
+    }
+    $report = _read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
     if(defined $attachment) {
-
         $c->stash->{'block'} = 'mail';
         my $mailtext;
         eval {
@@ -164,13 +174,21 @@ sub report_send {
                 $bodystarted = 1;
             }
         }
+        my $bcc  = '';
+        my $from = $report->{'from'}    || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'};
+        if(!$to) {
+            $to      = $report->{'to'}      || $mailheader->{'to'};
+            $cc      = $report->{'cc'}      || $mailheader->{'cc'};
+            $bcc     = $report->{'bcc'}     || $mailheader->{'bcc'};
+            $subject = $report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report';
+        }
         my $msg = MIME::Lite->new();
         $msg->build(
-                 From    => $report->{'from'}    || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'},
-                 To      => $report->{'to'}      || $mailheader->{'to'},
-                 Cc      => $report->{'cc'}      || $mailheader->{'cc'},
-                 Bcc     => $report->{'bcc'}     || $mailheader->{'bcc'},
-                 Subject => encode("MIME-B", ($report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report')),
+                 From    => $from,
+                 To      => $to,
+                 Cc      => $cc,
+                 Bcc     => $bcc,
+                 Subject => encode("MIME-B", $subject),
                  Type    => 'multipart/mixed',
         );
         for my $key (keys %{$mailheader}) {
@@ -359,56 +377,11 @@ sub generate_report {
     $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 0; # Unspecified
     $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 0; # Unspecified
 
-    # add default params
-    add_report_defaults($c, undef, $options);
-
-    $c->stash->{'param'}              = $options->{'params'};
-    $c->stash->{'r'}                  = $options;
-    $c->stash->{'show_empty_outages'} = 1;
-    for my $p (keys %{$options->{'params'}}) {
-        $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
-    }
-
     if(!defined $options->{'template'}) {
         confess('template reports/'.$options->{'template'}.' does not exist');
     }
 
-    # set some render helper
-    for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
-        $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
-    }
-    # set custom render helper
-    my $custom = [];
-    eval {
-        require Thruk::Utils::Reports::CustomRender;
-        Thruk::Utils::Reports::CustomRender->import;
-        $custom = Class::Inspector->functions('Thruk::Utils::Reports::CustomRender');
-    };
-    # show errors if module was found
-    if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
-        $Thruk::Utils::Reports::error = $@;
-        $c->log->error($@);
-    }
-    for my $s (@{$custom}) {
-        $c->stash->{$s} = \&{'Thruk::Utils::Reports::CustomRender::'.$s};
-    }
-    # initialize localization
-    if($options->{'params'}->{'language'}) {
-        $c->stash->{'loc'} = $c->stash->{'_locale'};
-        $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
-        my $overrides = {};
-        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
-            if(-e $path.'/reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt') {
-                $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
-                last;
-            }
-        }
-        if($overrides) {
-            for my $key (keys %{$overrides}) {
-                $Thruk::Utils::Reports::Render::locale->{$key} = $overrides->{$key};
-            }
-        }
-    }
+    _initialize_report_templates($c, $options);
 
     # prepage stage, functions here could still change stash
     eval {
@@ -999,6 +972,60 @@ sub _convert_to_pdf {
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
+    return;
+}
+
+##########################################################
+sub _initialize_report_templates {
+    my($c, $options) = @_;
+
+    # add default params
+    add_report_defaults($c, undef, $options);
+
+    $c->stash->{'param'}              = $options->{'params'};
+    $c->stash->{'r'}                  = $options;
+    $c->stash->{'show_empty_outages'} = 1;
+    for my $p (keys %{$options->{'params'}}) {
+        $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
+    }
+
+    # set some render helper
+    for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
+        $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
+    }
+    # set custom render helper
+    my $custom = [];
+    eval {
+        require Thruk::Utils::Reports::CustomRender;
+        Thruk::Utils::Reports::CustomRender->import;
+        $custom = Class::Inspector->functions('Thruk::Utils::Reports::CustomRender');
+    };
+    # show errors if module was found
+    if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {
+        $Thruk::Utils::Reports::error = $@;
+        $c->log->error($@);
+    }
+    for my $s (@{$custom}) {
+        $c->stash->{$s} = \&{'Thruk::Utils::Reports::CustomRender::'.$s};
+    }
+
+    # initialize localization
+    if($options->{'params'}->{'language'}) {
+        $c->stash->{'loc'} = $c->stash->{'_locale'};
+        $Thruk::Utils::Reports::Render::locale = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'.tt', 'translations');
+        my $overrides = {};
+        for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+            if(-e $path.'/reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt') {
+                $overrides = Thruk::Utils::get_template_variable($c, 'reports/locale/'.$options->{'params'}->{'language'}.'_custom.tt', 'translations_overrides');
+                last;
+            }
+        }
+        if($overrides) {
+            for my $key (keys %{$overrides}) {
+                $Thruk::Utils::Reports::Render::locale->{$key} = $overrides->{$key};
+            }
+        }
+    }
     return;
 }
 
