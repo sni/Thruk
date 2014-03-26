@@ -7,7 +7,7 @@ use JSON::XS;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 224;
+    plan tests => 266;
 }
 
 BEGIN {
@@ -49,7 +49,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1, like => 'Clone of Test App' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
-    { url => '/thruk/cgi-bin/bp.cgi?bp=9999', like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?bp='.$bpid, like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
 ];
 
 for my $url (@{$pages}) {
@@ -61,13 +61,31 @@ for my $url (@{$pages}) {
 ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
 
 ###########################################################
+# test custom aggregation function
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp')                 or die("copy failed: ".$!);
+copy('t/xt/business_process/data/test_cust_function.pm', './bp/test_cust_function.pm') or die("copy failed: ".$!);
+ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
+$pages = [
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=testfunction&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'custom text: blah', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'custom text: blah', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
+];
+for my $url (@{$pages}) {
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
+    TestUtils::test_page(%{$test});
+}
+unlink('./bp/test_cust_function.pm');
+ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
+
+###########################################################
 # test json some pages
 copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp') or die("copy failed: ".$!);
 ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
 
 my $json_pages = [
     '/thruk/cgi-bin/bp.cgi?view_mode=json',
-    '/thruk/cgi-bin/bp.cgi?view_mode=json&bp=9999',
+    '/thruk/cgi-bin/bp.cgi?view_mode=json&bp='.$bpid,
 ];
 
 for my $url (@{$json_pages}) {

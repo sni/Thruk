@@ -449,6 +449,7 @@ clean nasty chars from string
 =cut
 sub clean_nasty {
     my($str) = @_;
+    confess("nothing?") unless defined $str;
     $str =~ s#[`~!\$%^&*\|'"<>\?,\(\)=]*##gmxo;
     return($str);
 }
