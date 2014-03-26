@@ -330,7 +330,7 @@ sub custom {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($status, $short_desc, $status_text, $extra) = (0, 'short desc', 'status text', {});
     $c->stash->{'bp_custom_functions'} = Thruk::BP::Utils::get_custom_functions($c) unless defined $c->stash->{'bp_custom_functions'};
-    my($fname, $arg) = @{$args};
+    my $fname = $args->[0];
     my $f;
     for my $tmp (@{$c->stash->{'bp_custom_functions'}}) {
         if($tmp->{'function'} eq $fname) {
@@ -341,10 +341,12 @@ sub custom {
     if(!$f) {
         return(3, "UNKNOWN", "no file found for custom function: $fname");
     }
+    my $last = scalar @{$args} -1;
+    my $real_args = [@{$args}[1..$last]];
     eval {
         do($f->{'file'});
         ## no critic
-        eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $arg, $livedata);');
+        eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $real_args, $livedata);');
         ## use critic
         if($@) {
             $status      = 3;
@@ -359,6 +361,8 @@ sub custom {
         $status_text = $@;
         $c->log->info("internal error in custum function $fname: $@");
     }
+    $short_desc  = '(no output)' unless $short_desc;
+    $status_text = '(no output)' unless $status_text;
     return($status, $short_desc, $status_text, $extra);
 }
 

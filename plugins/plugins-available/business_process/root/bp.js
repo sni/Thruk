@@ -316,8 +316,8 @@ function bp_fill_select_form(data, form) {
     if(data.select) {
         for(var key in data.select) {
             var d = data.select[key];
-            jQuery("#"+form+" option[text="+d+"]").attr("selected","selected");
-            jQuery("#"+form+" option[value="+d+"]").attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[text="'+d+'"]').attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').attr("selected","selected");
         }
     }
 }
@@ -449,6 +449,11 @@ function bp_select_equals(node) {
 /* show node type select: custom */
 function bp_select_custom(node) {
 
+    if(node == undefined) {
+        node = bp_get_node(current_edit_node);
+    }
+
+    // function select field
     var options = [];
     jQuery(cust_func).each(function(nr, f) {
         options.push(new Option(f['function'], f['function']));
@@ -457,30 +462,80 @@ function bp_select_custom(node) {
 
     if(node && node.func.toLowerCase() == 'custom') {
         bp_fill_select_form({
-            select:  { 'bp_arg1_custom': node.func_args[0] },
-            text:    { 'bp_arg2_custom': node.func_args[1] }
+            select:  { 'bp_arg1_custom': node.func_args[0] }
         });
     } else {
         bp_fill_select_form({
-            select:  { 'bp_arg1_custom': '' },
-            text:    { 'bp_arg2_custom': '' }
+            select:  { 'bp_arg1_custom': '' }
         });
     }
 
-    // update help text
-    bp_update_cust_help(document.getElementById('bp_arg1_custom'));
+    // update help text and attributes
+    bp_update_cust_attributes(document.getElementById('bp_arg1_custom'), node);
 }
 
 /* update custom function help text */
-function bp_update_cust_help(select) {
+function bp_update_cust_attributes(select, node) {
     var selected = jQuery(select).val();
-    var help;
+    var func;
     jQuery(cust_func).each(function(nr, f) {
         if(f['function'] == selected) {
-            help = f['help'];
+            func = f;
         }
     });
-    document.getElementById('cust_help').innerHTML = help;
+
+    // remove old attributes and help
+    jQuery('#bp_select_custom > tbody > tr').each(function(nr, row) {
+        if(nr >= 3) {
+            jQuery(row).remove();
+        }
+    });
+
+    // add new attributes
+    jQuery(func['args']).each(function(x, arg) {
+        var nr = x + 2;
+        var field;
+        var val = node['func_args'][x+1];
+        if(arg['type'] == 'text') {
+            field = '<input type="text" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
+        }
+        else if(arg['type'] == 'select') {
+            field = '<select name="bp_arg'+nr+'_custom">';
+            jQuery(arg['args']).each(function(x, option) {
+                field += "<option value='"+option+"'>"+option+"<\/option>";
+            });
+            field += '<\/select>';
+        }
+        else if(arg['type'] == 'checkbox') {
+            field = '<div id="bp_radio_'+nr+'">';
+            jQuery(arg['args']).each(function(y, option) {
+                field += '<input type="radio" value="'+option+'" id="bp_custom_'+nr+'_'+y+'" name="bp_arg'+nr+'_custom" /><label for="bp_custom_'+nr+'_'+y+'">'+option+'</label>';
+            });
+            field += "<\/div>";
+        }
+        jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">'+arg['name']+'</th><td align="left">'+field+'<\/td><\/tr>');
+
+        // make buttonset nicer
+        if(arg['type'] == 'checkbox') {
+            jQuery('#bp_radio_'+nr).buttonset();
+        }
+
+        var value = {};
+        value['bp_arg'+nr+'_custom'] = val;
+        if(arg['type'] == 'text') {
+            bp_fill_select_form({ text: value });
+        }
+        else if(arg['type'] == 'select') {
+            bp_fill_select_form({ select: value });
+        }
+        else if(arg['type'] == 'checkbox') {
+            value['bp_arg'+nr+'_custom'] = [val, '#bp_radio_'+nr];
+            bp_fill_select_form({ radio: value });
+        }
+    });
+
+    // add help row
+    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" class="bp_type_desc" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
 }
 
 /* show node type select: not_more */

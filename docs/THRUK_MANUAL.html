@@ -23624,13 +23624,25 @@ authorized_for_system_commands
 <div class="paragraph"><p>Besides the normal functions you can write your own aggregation functions easily.
 Custom functions are written in Perl and located in the &lt;config dir&gt;/bp/ with
 the .pm filename extension.</p></div>
-<div class="paragraph"><p>/etc/thruk/bp/sample.pm:</p></div>
+<div class="paragraph"><p>/etc/thruk/bp/echo.pm:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt># help: sample custom function. args: text
-sub sample {
-    my($c, $bp, $node, $args, $livedata) = @_;
-    return(0, "sample desc", "sample status", { extra =&gt; "args" });
+<pre><tt># echofunction:
+#
+# This function just echoes the
+# provided text sample and optionally
+# reverses the text.
+#
+# Arguments:
+# arg1: Text;      text;     text that should be echoed
+# arg2: Reverse;   checkbox; yes; no
+# arg3: Uppercase; select;   yes; no
+sub echofunction {
+    my($c, $bp, $n, $args, $livedata) = @_;
+    my($text, $reverse, $upper) = @{$args};
+    $text = scalar reverse $text if $reverse eq 'yes';
+    $text =             uc $text if $upper   eq 'yes';
+    return(0, $text, $text, {});
 }</tt></pre>
 </div></div>
 <div class="paragraph"><p>Input arguments are:</p></div>
@@ -23652,7 +23664,7 @@ $node: business process node object
 </li>
 <li>
 <p>
-$args: arguments from the node edit dialog
+$args: array ref of arguments from the node edit dialog
 </p>
 </li>
 <li>
@@ -23671,7 +23683,7 @@ status code: 0 = Ok, 1 = Warning, 2 = Critical, 3 = Unknown
 </li>
 <li>
 <p>
-description:
+node sub label: short text used inside the node
 </p>
 </li>
 <li>
@@ -23681,7 +23693,32 @@ textual output: text output of aggregation function with optional performance da
 </li>
 <li>
 <p>
-extra arguments: hash list of node attributes
+extra arguments: hash list of node attributes which will be overridden.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Arguments can be specified by comments in the perl module containing your function.
+See the example above&#8230;
+Each Argument requires 3 attributes which are seperated by a semicolon ;</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt># arg1: Text;      text;     text that should be echoed</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Name: name of this attribute, used in the edit dialog
+</p>
+</li>
+<li>
+<p>
+Type: can be any of <em>Text</em>, <em>Select</em>, <em>Checkbox</em>, <em>Host</em>, <em>Hostgroup</em>, <em>Service</em>, <em>Servicegroup</em>.
+</p>
+</li>
+<li>
+<p>
+Options: optional arguments. In case of Text used as placeholder, in case of Select
+            or Checkbox used as semicolon seperated list of options.
 </p>
 </li>
 </ul></div>
@@ -25012,7 +25049,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-03-26 00:34:02 CET
+Last updated 2014-03-26 23:36:43 CET
 </div>
 </div>
 </body>

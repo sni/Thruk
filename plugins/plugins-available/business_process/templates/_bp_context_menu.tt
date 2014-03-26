@@ -261,17 +261,9 @@
 <tr>
   <th align="right">Custom Function</th>
   <td align="left">
-    <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_help(this)">
+    <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this, node)">
     </select>
   </td>
-</tr>
-<tr>
-  <th align="right">Args</th>
-  <td align="left"><input type="text" value="" name="bp_arg2_custom" placeholder="custom arguments, anything your function can handle..."></td>
-</tr>
-<tr>
-  <th align="right">Help</th>
-  <td align="left" colspan=2 class="bp_type_desc" id="cust_help"></td>
 </tr>
 [% END %]
 

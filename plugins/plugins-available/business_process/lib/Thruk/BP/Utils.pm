@@ -314,27 +314,51 @@ sub get_custom_functions {
     my($c) = @_;
 
     # get required files
-    my $files = [];
+    my $functions = [];
     my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.pm');
-    my $current_help = "";
     for my $filename (@files) {
         next unless -s $filename;
-        open(my $fh, '<', $filename);
-        while(my $line = <$fh>) {
-            if($line =~ m/^\s*sub\s+([\w_]+)(\s|\{)/mx) {
-                push @{$files}, { function => $1, help => $current_help, file => $filename };
-                $current_help = "";
-            }
-            if($line =~ m/^\s*\#\s*(.*?$)/mx) {
-                $current_help = $1;
-                $current_help =~ s/^\s*help:\s*//gmx;
-                chomp($current_help);
-            }
-        }
-        CORE::close($fh);
+        my $f = _parse_custom_functions($filename);
+        push @{$functions}, @{$f};
     }
+    return $functions;
+}
 
-    return $files;
+##########################################################
+sub _parse_custom_functions {
+    my($filename) = @_;
+
+    my $functions = [];
+    my $last_help = "";
+    my $last_args = [];
+
+    open(my $fh, '<', $filename);
+    while(my $line = <$fh>) {
+        if($line =~ m/^\s*sub\s+([\w_]+)(\s|\{)/mx) {
+            my $func = $1;
+            $last_help =~ s/^Arguments:\s$//mx;
+            $last_help =~ s/\A\s*//msx;
+            $last_help =~ s/\s*\Z//msx;
+            push @{$functions}, { function => $func, help => $last_help, file => $filename, args => $last_args };
+            $last_help = "";
+            $last_args = [];
+        }
+        elsif($line =~ m/^\s*\#\s*arg\d+:\s*(.*)/mx) {
+            my($name, $type, $args) = split(/\s*;\s*/mx,$1,3);
+            if($type eq 'checkbox' or $type eq 'select') { $args = [split(/\s*;\s*/mx,$args)]; }
+            push @{$last_args}, {name => $name, type => $type, args => $args};
+        }
+        elsif($line =~ m/^\s*\#\ ?(.*?$)/mx) {
+            $last_help .= $1."\n";
+        }
+        elsif($line =~ m/^\s*$/mx) {
+            $last_help = "";
+            $last_args = [];
+        }
+    }
+    CORE::close($fh);
+
+    return $functions;
 }
 
 ##########################################################
