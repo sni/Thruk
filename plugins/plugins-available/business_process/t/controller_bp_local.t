@@ -7,7 +7,7 @@ use JSON::XS;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 214;
+    plan tests => 224;
 }
 
 BEGIN {
@@ -42,7 +42,8 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=Test App Renamed', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_fixed=Critical&bp_function=Fixed&bp_label_fixed=addednode', skip_doctype => 1, like => 'OK' },
-    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid, like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&node=node2&bp_arg1_fixed=Warning&bp_arg2_fixed=newnodetest&bp_function=Fixed&bp_label_fixed=newnode&bp_node_id=new', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid, like => 'newnodetest', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1, like => 'Clone of Test App' },

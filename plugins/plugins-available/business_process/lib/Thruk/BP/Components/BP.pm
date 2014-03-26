@@ -112,10 +112,14 @@ update runtime data
 sub load_runtime_data {
     my($self) = @_;
 
-    return unless -e $self->{'datafile'};
+    my $file = $self->{'datafile'};
+    if($self->{'editmode'} and -s $self->{'datafile'}.'.edit') {
+        $file = $self->{'datafile'}.'.edit';
+    }
 
-    my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'datafile'});
+    return unless -e $file;
 
+    my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {
         $self->{$key} = $data->{$key} if defined $data->{$key};
     }
@@ -176,7 +180,11 @@ sub update_status {
     }
 
     # everything else is non-edit only
-    return if $self->{'editmode'} or $self->{'testmode'};
+    return if $self->{'testmode'};
+    if($self->{'editmode'}) {
+        $self->save_runtime();
+        return;
+    }
 
     # submit back to core
     $self->_submit_results_to_core($c, $results);
@@ -362,6 +370,7 @@ sub remove {
     unlink($self->{'file'});     # may not exist, if removed before first commit
     unlink($self->{'datafile'}); # can fail if not updated before removal
     unlink($self->{'editfile'}); # may also not exist
+    unlink($self->{'datafile'}.'.edit');
     return;
 }
 
@@ -465,7 +474,6 @@ save run time data
 sub save_runtime {
     my ( $self ) = @_;
     return if $self->{'testmode'};
-    return if $self->{'editmode'};
     my $data = {};
     for my $key (@stateful_keys) {
         $data->{$key} = $self->{$key};
@@ -473,7 +481,11 @@ sub save_runtime {
     for my $n (@{$self->{'nodes'}}) {
         $data->{'nodes'}->{$n->{'id'}} = $n->get_stateful_data();
     }
-    Thruk::Utils::IO::json_lock_store($self->{'datafile'}, $data);
+    if($self->{'editmode'}) {
+        Thruk::Utils::IO::json_lock_store($self->{'datafile'}.'.edit', $data);
+    } else {
+        Thruk::Utils::IO::json_lock_store($self->{'datafile'}, $data);
+    }
     return;
 }
 

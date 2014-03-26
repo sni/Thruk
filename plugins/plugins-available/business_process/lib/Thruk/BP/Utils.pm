@@ -327,6 +327,7 @@ sub get_custom_functions {
             }
             if($line =~ m/^\s*\#\s*(.*?$)/mx) {
                 $current_help = $1;
+                $current_help =~ s/^\s*help:\s*//gmx;
                 chomp($current_help);
             }
         }

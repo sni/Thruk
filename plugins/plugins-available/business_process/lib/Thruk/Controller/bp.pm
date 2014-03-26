@@ -142,6 +142,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         }
         elsif($action eq 'revert') {
             unlink($bp->{'editfile'});
+            unlink($bp->{'datafile'}.'.edit');
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
             if(-e $bp->{'file'}) {
                 return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);

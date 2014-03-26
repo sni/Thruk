@@ -344,7 +344,7 @@ function bp_select_type(type) {
     bp_show_edit_node(undefined, false);
     jQuery('.bp_type_box').attr('checked', false).button("refresh");
     jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
-    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
+    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
@@ -466,6 +466,21 @@ function bp_select_custom(node) {
             text:    { 'bp_arg2_custom': '' }
         });
     }
+
+    // update help text
+    bp_update_cust_help(document.getElementById('bp_arg1_custom'));
+}
+
+/* update custom function help text */
+function bp_update_cust_help(select) {
+    var selected = jQuery(select).val();
+    var help;
+    jQuery(cust_func).each(function(nr, f) {
+        if(f['function'] == selected) {
+            help = f['help'];
+        }
+    });
+    document.getElementById('cust_help').innerHTML = help;
 }
 
 /* show node type select: not_more */
