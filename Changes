@@ -20,6 +20,7 @@ next:
             - fixed wait trigger not working all the time
             - fixed tab rotation in panorama view
             - fixed loosing filter on reports page
+            - fixed save&reload button from within filesystem browser
 
 1.82-2   Fri Feb 21 17:20:55 CET 2014
           - redirect to host details page if no services found and no service filter was set

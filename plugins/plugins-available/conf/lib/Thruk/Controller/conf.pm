@@ -111,6 +111,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         $subcat = 'objects';
     }
 
+    # workaround for when specified more than once in the url...
+    $subcat = shift @{$subcat} if ref $subcat eq 'ARRAY';
+
     $c->stash->{sub}          = $subcat;
     $c->stash->{action}       = $action;
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
