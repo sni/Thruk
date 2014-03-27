@@ -702,6 +702,10 @@ h4#_peer + div > ul tt {
 <div class='toclevel3'><a href='#_customized_reports'>Customized Reports</a></div>
 <div class='toclevel2'><a href='#_business_process'>Business Process</a></div>
 <div class='toclevel3'><a href='#_how_it_works_3'>How it works</a></div>
+<div class='toclevel3'><a href='#_setup'>Setup</a></div>
+<div class='toclevel3'><a href='#_creating_new_business_processes'>Creating New Business Processes</a></div>
+<div class='toclevel3'><a href='#_configuration_3'>Configuration</a></div>
+<div class='toclevel3'><a href='#_custom_functions'>Custom Functions</a></div>
 <div class='toclevel2'><a href='#_cli_tool_amp_scripting'>CLI Tool &amp; Scripting</a></div>
 <div class='toclevel2'><a href='#_integration_with_3rd_party_software'>Integration With 3rd Party Software</a></div>
 <div class='toclevel3'><a href='#_configuration_generators'>Configuration Generators</a></div>
@@ -20518,7 +20522,9 @@ credentials.</p></div>
 <div class="sect3">
 <h4 id="_cookie_auth_session_cache_timeout">cookie_auth_session_cache_timeout</h4>
 <div class="paragraph"><p>Specifies the amount of seconds in which subsequent requests won&#8217;t
-verify authentication again.</p></div>
+verify authentication again. Set to zero to disable storing hashed
+credentials in the filesystem and disabling revalidation of active
+sessions.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -23444,8 +23450,9 @@ Results are submited to Naemon by using the check_results folder or by livestatu
 </p>
 </li>
 </ul></div>
-<div class="sect3">
-<h4 id="_setup">Setup</h4>
+</div>
+<div class="sect2">
+<h3 id="_setup">Setup</h3>
 <div class="paragraph"><p>If you are not using OMD, you will have to do some manual steps:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -23508,7 +23515,6 @@ set <em>objects_reload_cmd</em> to  "sudo -u naemon /etc/init.d/naemon
 </p>
 </li>
 </ul></div>
-</div>
 <div class="sect3">
 <h4 id="_integration_in_naemon">Integration in Naemon</h4>
 <div class="paragraph"><p>Thruk will create Hosts and Services for selected nodes of your business model.
@@ -23597,8 +23603,9 @@ if some internal error happens.</p></div>
 </tr></table>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_creating_new_business_processes">Creating New Business Processes</h4>
+</div>
+<div class="sect2">
+<h3 id="_creating_new_business_processes">Creating New Business Processes</h3>
 <div class="paragraph"><p>In order to change or create business processes, you need these roles from the cgi.cfg.</p></div>
 <div class="ulist"><ul>
 <li>
@@ -23614,13 +23621,13 @@ authorized_for_system_commands
 </ul></div>
 <div class="paragraph"><p>Then simply model your business process from the web gui.</p></div>
 </div>
-<div class="sect3">
-<h4 id="_configuration_3">Configuration</h4>
+<div class="sect2">
+<h3 id="_configuration_3">Configuration</h3>
 <div class="paragraph"><p>Configuration settings are covered by the
 <a href="#_component_thruk_plugin_bp">configuration sections</a>.</p></div>
 </div>
-<div class="sect3">
-<h4 id="_custom_functions">Custom Functions</h4>
+<div class="sect2">
+<h3 id="_custom_functions">Custom Functions</h3>
 <div class="paragraph"><p>Besides the normal functions you can write your own aggregation functions easily.
 Custom functions are written in Perl and located in the &lt;config dir&gt;/bp/ with
 the .pm filename extension.</p></div>
@@ -23778,7 +23785,6 @@ default and run in <em>Thruk::BP::Functions</em> context, means they have access
 normal aggregation functions and helpers from <a href="http://thruk.org/api/Thruk/BP/Functions.html">http://thruk.org/api/Thruk/BP/Functions.html</a></p></div>
 </td>
 </tr></table>
-</div>
 </div>
 </div>
 </div>
@@ -25106,7 +25112,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-03-27 10:39:13 CET
+Last updated 2014-03-27 16:26:45 CET
 </div>
 </div>
 </body>

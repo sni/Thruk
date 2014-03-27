@@ -3275,7 +3275,7 @@ image:source/bp_arch.png[Business Process Architecture]
  - Results are submited to Naemon by using the check_results folder or by livestatus.
  - 'Livestatus' will be used to fetch input data for the calculation itself.
 
-==== Setup
+=== Setup
 If you are not using OMD, you will have to do some manual steps:
 
  - copy the <Component Thruk::Plugin::BP> block from your
@@ -3339,7 +3339,7 @@ if some internal error happens.
 
 
 
-==== Creating New Business Processes
+=== Creating New Business Processes
 In order to change or create business processes, you need these roles from the cgi.cfg.
 
  - authorized_for_configuration_information
@@ -3348,13 +3348,13 @@ In order to change or create business processes, you need these roles from the c
 Then simply model your business process from the web gui.
 
 
-==== Configuration
+=== Configuration
 Configuration settings are covered by the
 <<_component_thruk_plugin_bp,configuration sections>>.
 
 
 
-==== Custom Functions
+=== Custom Functions
 Besides the normal functions you can write your own aggregation functions easily.
 Custom functions are written in Perl and located in the <config dir>/bp/ with
 the .pm filename extension.
