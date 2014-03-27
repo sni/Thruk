@@ -1125,6 +1125,7 @@ t/900-firefox-js.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
+t/data/javascript_tests_login_tt.js
 t/data/log4perl.conf
 t/data/mysql/archive.log
 t/data/naglint/basic/in.cfg

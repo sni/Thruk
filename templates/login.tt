@@ -53,24 +53,23 @@
   </div>
   <script type="text/javascript">
   <!--
-    function clean_ref(ref) {
-        ref = ref.replace(/^\?expired\&/, '?');
-        ref = ref.replace(/^\?expired$/,  '');
-        ref = ref.replace(/^\?invalid\&/, '?');
-        ref = ref.replace(/^\?invalid$/,  '');
-        ref = ref.replace(/^\?problem\&/, '?');
-        ref = ref.replace(/^\?problem$/,  '');
-        ref = ref.replace(/^\?/, '/');
-        ref = ref.replace(/^\/+/, '/');
+    function clean_ref(ref, keepflag) {
         ref = ref.replace(/\/\w+\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
         ref = ref.replace(/\/[% product_prefix %]\/cgi\-bin\/login.cgi/, '');
+        if(keepflag == undefined || keepflag == false) {
+            ref = ref.replace(/^\?(expired|invalid|problem)\&/, '?');
+            ref = ref.replace(/^\?(expired|invalid|problem)$/,  '');
+        }
         ref = ref.replace(/^\?/, '/');
+        ref = ref.replace(/^\/+/, '/');
+        ref = ref.replace(/^\?/, '/');
+        ref = ref.replace(/^\/(expired|invalid|problem)\&/,  '$1&/');
         return(ref);
     }
 
     if ( top.location != location ) {
       // when inside a frame, open login page in top frame
-      var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash);
+      var ref = clean_ref(document.location.pathname + document.location.search + document.location.hash, true);
       ref = ref.replace(/\/thruk\//, '/thruk/#');
       top.location.href = '[% loginurl %]?'+ref;
     } else {
