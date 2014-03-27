@@ -3356,10 +3356,10 @@ Configuration settings are covered by the
 
 === Custom Functions
 Besides the normal functions you can write your own aggregation functions easily.
-Custom functions are written in Perl and located in the <config dir>/bp/ with
+Custom functions are written in Perl and are located in the <config dir>/bp/ with
 the .pm filename extension.
 
-/etc/thruk/bp/echo.pm:
+Example: /etc/thruk/bp/echo.pm
 ------
 # echofunction:
 #
