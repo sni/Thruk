@@ -6,7 +6,7 @@
     height:    200,
     width:     400,
     layout:    'fit',
-    constrain: true,
+    constrain: false,
     hideMode:  'visibility',
     autoShow:  false,
     stateful:  true,
@@ -341,7 +341,6 @@
         return null;
     },
     showHeader: function(global) {
-a = this;
         if(global.xdata.autohideheader) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
@@ -366,4 +365,3 @@ a = this;
         }
     }
 });
-var a;

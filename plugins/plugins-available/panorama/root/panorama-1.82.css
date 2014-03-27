@@ -328,3 +328,6 @@ TD.less_padding DIV.x-grid-cell-inner {
   padding: 3px;
 }
 
+.x-viewport, .x-viewport body {
+  overflow: auto;
+}

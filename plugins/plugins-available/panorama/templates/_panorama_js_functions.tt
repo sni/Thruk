@@ -28,6 +28,8 @@ var TP = {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
         newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
         if(newy < TP.offset_y) { newy = TP.offset_y; }
+        if(newx < 0) { newx = 0; }
+        if(newy < 0) { newy = 0; }
         return([newx, newy]);
     },
 

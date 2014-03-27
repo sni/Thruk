@@ -16,6 +16,8 @@ next:
             - add button to directly send report by email
             - add maximum sla threshold to hide detail pages
             - allow multiple pnp graphs in sla reports (lkco)
+          - Panorama View:
+            - fixed panlet cluttering when opening dashboard with smaller screens
           - Bug Fixes
             - fixed displaying partially active attributes
             - fixed wait trigger not working all the time
