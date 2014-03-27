@@ -7,7 +7,7 @@ use JSON::XS;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 266;
+    plan tests => 298;
 }
 
 BEGIN {
@@ -66,9 +66,9 @@ copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp')          
 copy('t/xt/business_process/data/test_cust_function.pm', './bp/test_cust_function.pm') or die("copy failed: ".$!);
 ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
 $pages = [
-    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=testfunction&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
-    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'custom text: blah', skip_doctype => 1 },
-    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'custom text: blah', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=echofunction&bp_arg2_custom=testtext&bp_arg3_custom=yes&bp_arg4_custom=yes&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'TXETTSET', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'TXETTSET', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
 ];
 for my $url (@{$pages}) {
@@ -76,6 +76,21 @@ for my $url (@{$pages}) {
     TestUtils::test_page(%{$test});
 }
 unlink('./bp/test_cust_function.pm');
+ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
+
+###########################################################
+# test unknown custom aggregation function
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp') or die("copy failed: ".$!);
+ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
+$pages = [
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=unknownfunction&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'no file found for custom function: unknownfunction', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
+];
+for my $url (@{$pages}) {
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
+    TestUtils::test_page(%{$test});
+}
 ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
 
 ###########################################################

@@ -3408,6 +3408,15 @@ Each Argument requires 3 attributes which are seperated by a semicolon ;
  - Options: optional arguments. In case of Text used as placeholder, in case of Select
             or Checkbox used as semicolon seperated list of options.
 
+[TIP]
+.perl
+=======
+All custom aggregation functions have 'use warnings' and 'use strict' enabled by
+default and run in 'Thruk::BP::Functions' context, means they have access to all
+normal aggregation functions and helpers from http://thruk.org/api/Thruk/BP/Functions.html
+=======
+
+
 
 == CLI Tool & Scripting
 
