@@ -38,7 +38,7 @@ sub set_object_model {
 
     return unless $c->stash->{has_obj_conf};
 
-    my $refresh = $c->{'request'}->{'parameters'}->{'refresh'} || 0;
+    my $refresh = $c->{'request'}->{'parameters'}->{'refreshdata'} || 0;
 
     $c->stats->profile(begin => "_update_objects_config()");
     my $model                    = $c->model('Objects');
@@ -67,7 +67,7 @@ sub set_object_model {
                                               }
                                         );
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
-            $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+            $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refreshdata'};
             if($c->config->{'no_external_job_forks'} == 1 and !$no_recursion) {
                 # should be parsed now
                 return set_object_model($c, 1);
@@ -97,7 +97,7 @@ sub set_object_model {
             $error = 'Got multiple errors!';
         }
         if($c->{'obj_db'}->{'needs_update'}) {
-            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refresh' => 1 }).'">refresh</a> objects.';
+            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refreshdata' => 1 }).'">refresh</a> objects.';
         }
         Thruk::Utils::set_message( $c,
                                   'fail_message',
