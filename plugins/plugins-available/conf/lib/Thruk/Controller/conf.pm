@@ -1302,14 +1302,13 @@ sub _cmd {
     local $SIG{CHLD}='';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
     $c->log->debug( "running cmd: ". $cmd );
-    my $rc = $?;
     my $output = `$cmd 2>&1`;
-    if($? == -1) {
+    my $rc = $?;
+    if($rc == -1) {
         $output .= "[".$!."]";
     } else {
-        $rc = $?>>8;
+        $rc = $rc>>8;
     }
-
     $c->{'stash'}->{'output'} = decode_utf8($output);
     $c->log->debug( "rc:     ". $rc );
     $c->log->debug( "output: ". $output );
@@ -2177,6 +2176,7 @@ sub _config_reload {
 
     my $time = time();
     my $pkey;
+    my $wait = 1;
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
@@ -2189,6 +2189,7 @@ sub _config_reload {
             $c->stash->{'needs_commit'} = 0;
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
+            $wait = 0;
         }
 
         _nice_check_output($c);
@@ -2207,7 +2208,7 @@ sub _config_reload {
     }
 
     # wait until core responds again
-    Thruk::Utils::wait_after_reload($c, $pkey, $time);
+    Thruk::Utils::wait_after_reload($c, $pkey, $time) if $wait;
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;

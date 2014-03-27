@@ -460,6 +460,7 @@ sub get_user {
 #########################
 sub wait_for_job {
     my $job = shift;
+    my $start  = time();
     my $config = Thruk::Backend::Pool::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     if(!-e $jobdir) {
@@ -474,7 +475,8 @@ sub wait_for_job {
         }
     };
     alarm(0);
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished') or diag(Dumper(`find $jobdir/ -ls -exec cat {} \\;`));
+    my $end  = time();
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds') or diag(Dumper(`find $jobdir/ -ls -exec cat {} \\;`));
     return;
 }
 
