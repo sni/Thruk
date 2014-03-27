@@ -1792,7 +1792,9 @@ ex.:
 
 ==== cookie_auth_session_cache_timeout
 Specifies the amount of seconds in which subsequent requests won't
-verify authentication again.
+verify authentication again. Set to zero to disable storing hashed
+credentials in the filesystem and disabling revalidation of active
+sessions.
 
 ex.:
 

@@ -61,20 +61,7 @@ sub index :Path :Args(0) {
     }
     if(defined $keywords) {
         if($keywords eq 'logout') {
-            my $cookie = $c->request->cookie('thruk_auth');
-            $c->res->cookies->{'thruk_auth'} = {
-                value   => '',
-                expires => '-1M',
-                path    => $cookie_path,
-                domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-            };
-            if(defined $cookie and defined $cookie->value) {
-                my $sessionid = $cookie->value;
-                if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
-                    unlink($sdir.'/'.$sessionid);
-                }
-            }
-
+            _invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
             return $c->response->redirect($logoutref) if $logoutref;
             return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
@@ -84,12 +71,15 @@ sub index :Path :Args(0) {
             Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
         }
         if($keywords =~ /^expired\&(.*)$/mx or $keywords eq 'expired') {
+            _invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
         }
         if($keywords =~ /^invalid\&(.*)$/mx or $keywords eq 'invalid') {
+            _invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
         }
         if($keywords =~ /^problem\&(.*)$/mx or $keywords eq 'problem') {
+            _invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
         }
     }
@@ -159,6 +149,25 @@ sub index :Path :Args(0) {
     $c->stats->profile(end => "login::index");
 
     return 1;
+}
+
+##########################################################
+sub _invalidate_current_session {
+    my($c, $cookie_path, $sdir) = @_;
+    my $cookie = $c->request->cookie('thruk_auth');
+    $c->res->cookies->{'thruk_auth'} = {
+        value   => '',
+        expires => '-1M',
+        path    => $cookie_path,
+        domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
+    };
+    if(defined $cookie and defined $cookie->value) {
+        my $sessionid = $cookie->value;
+        if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
+            unlink($sdir.'/'.$sessionid);
+        }
+    }
+    return;
 }
 
 ##########################################################

@@ -75,6 +75,7 @@ sub external_authentication {
                     chomp($sessionid);
                     my $hash = $res->request->header('authorization');
                     $hash =~ s/^Basic\ //mx;
+                    $hash = 'none' if $config->{'cookie_auth_session_cache_timeout'} == 0;
                     my $sessionfile = $sdir.'/'.$sessionid;
                     open(my $fh, '>', $sessionfile) or die('failed to open session file: '.$sessionfile.' '.$!);
                     print $fh join('~~~', $hash, $address, $login), "\n";
