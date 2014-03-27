@@ -32,11 +32,11 @@ my $expected_functions = [{
                           'name' => 'Text',
                           'type' => 'text'
                        }, {
-                          'args' => [ 'yes', 'no' ],
+                          'args' => [ 'no', 'yes' ],
                           'type' => 'checkbox',
                           'name' => 'Reverse'
                        }, {
-                          'args' => [ 'yes', 'no' ],
+                          'args' => [ 'no', 'yes' ],
                           'name' => 'Uppercase',
                           'type' => 'select'
                        }],
