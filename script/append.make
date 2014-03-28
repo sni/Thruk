@@ -52,7 +52,7 @@ local_install: local_patches
 	cp -p thruk.conf ${DESTDIR}${SYSCONFDIR}/thruk.conf
 	mkdir -p ${DESTDIR}${SYSCONFDIR}/usercontent/images
 	rm -rf ${DESTDIR}${DATADIR}/root/thruk/usercontent
-	ln -fs ${SYSCONFDIR}/usercontent ${DESTDIR} ${DESTDIR}${DATADIR}/root/thruk/usercontent
+	ln -fs ${SYSCONFDIR}/usercontent ${DESTDIR}${DATADIR}/root/thruk/usercontent
 	cp root/thruk/usercontent/images/* ${DESTDIR}${DATADIR}/root/thruk/usercontent/images/
 	echo "do '${DATADIR}/menu.conf';" > ${DESTDIR}${SYSCONFDIR}/menu_local.conf
 	cp -p support/thruk_local.conf.example ${DESTDIR}${SYSCONFDIR}/thruk_local.conf
