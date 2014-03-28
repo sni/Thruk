@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 149;
+    plan tests => 156;
 }
 
 BEGIN {
@@ -21,16 +21,14 @@ SKIP: {
 };
 
 my $pages = [
-    '/thruk/cgi-bin/panorama.cgi',
-    '/thruk/cgi-bin/panorama.cgi?readonly=1',
+    { url => '/thruk/cgi-bin/panorama.cgi', like => 'Thruk Panorama' },
+    { url => '/thruk/cgi-bin/panorama.cgi?readonly=1', like => 'Thruk Panorama' },
+    { url => '/thruk/usercontent/images/world.png', like => 'PNG' },
 ];
 
 
-for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url'     => $url,
-        'like'    => 'Thruk Panorama',
-    );
+for my $page (@{$pages}) {
+    TestUtils::test_page(%{$page});
 }
 
 # json pages
