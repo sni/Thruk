@@ -85,4 +85,7 @@ Ext.onReady(function() {
     var icon = Ext.query('SPAN.new-tab')[0];
     icon.parentNode.parentNode.parentNode.style.display = 'none';
   [% END %]
+
+  // make sure initialized is set to true
+  window.setTimeout("TP.initialized = true;", 60000);
 });

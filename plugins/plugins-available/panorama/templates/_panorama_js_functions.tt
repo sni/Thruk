@@ -37,7 +37,9 @@ var TP = {
         var tabpan = Ext.getCmp('tabpan');
         var size   = tabpan.items.length;
         var nextid = TP.getNextId("tabpan-tab", id);
-
+        if(cp.state[nextid] == undefined) {
+            TP.initialized = true;
+        }
         /* add new tab panel */
         tabpan.add(new TP.Pantab({id: nextid})).show();
 

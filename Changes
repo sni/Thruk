@@ -19,6 +19,7 @@ next:
           - Panorama View:
             - background can be change in dashboard settings
             - fixed panlet cluttering when opening dashboard with smaller screens
+            - fixed state not being saved in some conditions
           - Bug Fixes
             - fixed displaying partially active attributes
             - fixed wait trigger not working all the time
