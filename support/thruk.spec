@@ -203,6 +203,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/plugins
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
+%config(noreplace) %{_sysconfdir}/thruk/usercontent/
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/wkhtmltopdf
