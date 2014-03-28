@@ -18,6 +18,7 @@ next:
             - allow multiple pnp graphs in sla reports (lkco)
           - Panorama View:
             - background can be change in dashboard settings
+            - changed internal storage format
             - fixed panlet cluttering when opening dashboard with smaller screens
             - fixed state not being saved in some conditions
           - Bug Fixes

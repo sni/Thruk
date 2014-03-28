@@ -29,6 +29,9 @@ Ext.onReady(function() {
         TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
         TP.initMask.show();
     }
+    if(TP.num_panels == 0) {
+        TP.initialized = true;
+    }
 });
 
 [%+ PROCESS _panorama_js_tab_reorder.tt +%]

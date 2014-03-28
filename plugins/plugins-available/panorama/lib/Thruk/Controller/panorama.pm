@@ -207,6 +207,7 @@ sub _stateprovider {
     my $value = $c->request->parameters->{'value'};
     my $name  = $c->request->parameters->{'name'};
 
+use Data::Dumper; print STDERR Dumper($c->request->parameters);
     if($c->stash->{'readonly'}) {
         $c->stash->{'json'} = {
             'status' => 'failed'

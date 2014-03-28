@@ -54,7 +54,15 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var state = {};
         for (var key in ExtState) {
             if(key!='remove') {
-                state[key] = this.decodeValue(ExtState[key]);
+                // new is json already
+                try {
+                    state[key] = Ext.JSON.decode(ExtState[key]);
+                } catch(e) {
+                    // old style is just decoded
+                    if(state[key] == undefined) {
+                        state[key] = this.decodeValue(ExtState[key]);
+                    }
+                }
             }
         }
         return state;
@@ -105,7 +113,8 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         this.lastdata = sum;
         var params = { task:  'update' };
         for (var key in ExtState) {
-            params[key] = ExtState[key];
+            // save data json encoded
+            params[key] = Ext.JSON.encode(this.decodeValue(ExtState[key]));
         }
         var conn = new Ext.data.Connection();
         conn.request({ url: this.url, params: params, async: async });
