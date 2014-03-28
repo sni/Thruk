@@ -333,18 +333,31 @@ TD.less_padding DIV.x-grid-cell-inner {
 }
 
 DIV.x-window-default.gearopen {
-  background-color: #FFFFFF;
+  background-color: #E8E8E8;
 }
 
 .x-window-body.autohideheader, .x-window-default.autohideheader {
   background-color: transparent;
   border-width: 0;
   box-shadow: none;
+}
+.x-window-default.autohideheader {
   padding: 4px;
 }
 
+DIV.autohideheader.autohideheaderover .x-window-header-default-top {
+   border-width: 0;
+}
+DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
+   padding-top: 5px;
+   padding-left: 6px;
+}
 .x-window-default.autohideheader.autohideheaderover, DIV.x-window-default.gearopen {
-  border-width: 0px;
-  padding: 4px;
+  border-width: 1px;
+  padding: 3px;
   box-shadow: 0 1px 0 0 #EBE7E7 inset, 0 -1px 0 0 #EBE7E7 inset, -1px 0 0 0 #EBE7E7 inset, 1px 0 0 0 #EBE7E7 inset;
+}
+
+.x-window-body.gearopen {
+  background-color: #FFFFFF;
 }
