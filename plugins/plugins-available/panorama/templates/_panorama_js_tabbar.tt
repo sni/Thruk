@@ -70,7 +70,12 @@ Ext.define('TP.TabBar', {
                     },
                     [%+ UNLESS readonly +%]
                     {
-                        text: 'Settings',
+                        text: 'Dashboard Settings',
+                        icon: '[% url_prefix %]plugins/panorama/images/table_gear.png',
+                        handler: function() { TP.tabSettingsWindow() }
+                    },
+                    {
+                        text: 'Global Settings',
                         icon: '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.settingsWindow() }
                     },

@@ -38,6 +38,7 @@ Ext.onReady(function() {
 [%+ PROCESS _panorama_js_form_filter.tt +%]
 [%+ PROCESS _panorama_js_grid_renderer.tt +%]
 [%+ PROCESS _panorama_js_settings_global.tt +%]
+[%+ PROCESS _panorama_js_settings_tab.tt +%]
 [%+ PROCESS _panorama_js_tabbar.tt +%]
 [%+ PROCESS _panorama_js_pantab.tt +%]
 [%+ PROCESS _panorama_js_panlet.tt +%]

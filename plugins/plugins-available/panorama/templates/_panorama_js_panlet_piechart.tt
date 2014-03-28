@@ -4,6 +4,7 @@
     title:  'chart',
     width:  200,
     height: 200,
+    noHeaderBorderless: true,
     initComponent: function() {
         this.callParent();
 
@@ -65,7 +66,7 @@
             shadow: true,
             legend: false,
             insetPadding: 3,
-            style: 'background-color: white;',
+            style: 'background-color: transparent;',
             theme: 'Base:gradients',
             series: [{
                 type: 'pie',
@@ -93,7 +94,7 @@
                     field: 'name',
                     display: 'rotate',
                     contrast: true,
-                    font: '14px Arial'
+                    font: '12px Arial'
                 }
             }]
         });

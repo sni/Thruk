@@ -14,6 +14,7 @@
     resizable: false,
     closable: false,
     draggable: false,
+    noHeaderBorderless: false,
     [% ELSE %]
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
@@ -31,6 +32,7 @@
         this.xdata.pinned   = false;
         this.xdata.backends = [];
 
+        var global = Ext.getCmp('tabpan');
         this.gearHandler = function() {
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
@@ -42,7 +44,6 @@
                 this.header.show();
                 this.gearitem.show();
             } else {
-                var global = Ext.getCmp('tabpan');
                 if(global.xdata.autohideheader) {
                     this.header.hide();
                 }
@@ -50,6 +51,12 @@
                 this.gearitem.hide();
             }
         };
+        if(this.noHeaderBorderless == true && global.xdata.autohideheader) {
+            this.bodyCls = 'autohideheader';
+            this.cls     = 'autohideheader';
+            this.overCls = 'autohideheaderover';
+            this.shadow  = false;
+        }
         [% IF readonly %]
         this.tools = [];
         [% ELSE %]

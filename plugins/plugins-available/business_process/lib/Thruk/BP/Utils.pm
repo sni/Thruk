@@ -489,10 +489,7 @@ return base folder of business process files
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'CATALYST_CONFIG'}) {
-        return($ENV{'CATALYST_CONFIG'}.'/bp');
-    }
-    return($c->config->{'home'}.'/bp');
+    return(Thruk::Utils::base_folder($c).'/bp');
 }
 
 ##########################################################

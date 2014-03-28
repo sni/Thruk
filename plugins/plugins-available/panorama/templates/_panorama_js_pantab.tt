@@ -2,6 +2,7 @@
     extend: 'Ext.panel.Panel',
 
     title:       'Dashboard',
+    background:  'none',
     [% UNLESS readonly %]
     tooltip:     'double click to rename',
     closable:    true,
@@ -64,7 +65,8 @@
     getState: function() {
         return {
             title:      this.title,
-            window_ids: this.window_ids
+            window_ids: this.window_ids,
+            background: this.background
         }
     },
     applyState: function(state) {
@@ -94,10 +96,20 @@
             TP.startAllPanelRefreshTimeout = window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive + 2000);
             this.window_ids = state.window_ids;
             this.setTitle(state.title);
+            this.background = state.background;
+            this.setBackground(this.background);
             Ext.apply(this, state);
         } else {
             TP.initialized = true;
             if(TP.initMask) { TP.initMask.destroy() }
+        }
+    },
+    setBackground: function(background) {
+        if(background != undefined && background != 'none') {
+            this.setBodyStyle("background:url('"+background+"');");
+            this.setBodyStyle("background-repeat:no-repeat;");
+        } else {
+            this.setBodyStyle("background:#ffffff");
         }
     }
 });

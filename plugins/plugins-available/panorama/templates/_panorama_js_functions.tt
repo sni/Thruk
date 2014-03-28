@@ -27,9 +27,9 @@ var TP = {
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
         newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
-        if(newy < TP.offset_y) { newy = TP.offset_y; }
         if(newx < 0) { newx = 0; }
         if(newy < 0) { newy = 0; }
+        if(newy < TP.offset_y) { newy = TP.offset_y; }
         return([newx, newy]);
     },
 
@@ -569,11 +569,7 @@ var TP = {
     },
     addDblClickRename: function(el, item, id) {
         el.on("dblclick", function() {
-            Ext.Msg.prompt('Change Title', '', function(btn, text) {
-                if(btn == 'ok') {
-                    Ext.getCmp(id).setTitle(text);
-                }
-            }, undefined, undefined, item.getText());
+            TP.tabSettingsWindow();
         });
     },
     /* sum list elements */

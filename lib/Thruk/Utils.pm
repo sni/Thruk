@@ -2211,6 +2211,23 @@ sub shutdown_shadow_naemon_procs {
     return;
 }
 
+##########################################################
+
+=head2 base_folder
+
+    base_folder($c)
+
+return base etc folder
+
+=cut
+sub base_folder {
+    my($c) = @_;
+    if($ENV{'CATALYST_CONFIG'}) {
+        return($ENV{'CATALYST_CONFIG'});
+    }
+    return($c->config->{'home'});
+}
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;

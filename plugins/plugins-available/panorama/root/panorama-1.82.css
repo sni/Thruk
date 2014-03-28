@@ -331,3 +331,21 @@ TD.less_padding DIV.x-grid-cell-inner {
 .x-viewport, .x-viewport body {
   overflow: auto;
 }
+
+DIV.x-window-body, DIV.x-window-default {
+  /*background-color: #FFFFFF;*/
+}
+
+.x-window-body.autohideheader, .x-window-default.autohideheader {
+  background-color: transparent;
+  border-width: 0;
+  box-shadow: none;
+  padding: 4px;
+}
+
+.x-window-default.autohideheader.autohideheaderover {
+  border-width: 0px;
+  padding: 4px;
+  box-shadow: 0 1px 0 0 #EBE7E7 inset, 0 -1px 0 0 #EBE7E7 inset, -1px 0 0 0 #EBE7E7 inset, 1px 0 0 0 #EBE7E7 inset;
+  /*border-color: #E8E8E8;*/
+}

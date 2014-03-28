@@ -134,6 +134,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'pnp_graphs') {
             return($self->_task_pnp_graphs($c));
         }
+        elsif($task eq 'userdata_images') {
+            return($self->_task_userdata_images($c));
+        }
     }
 
     # find images for preloader
@@ -933,6 +936,27 @@ sub _task_pnp_graphs {
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
 
     $c->stash->{'json'} = { data => $graphs };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_userdata_images {
+    my($self, $c) = @_;
+    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/images/';
+    my $images = [];
+    for my $img (glob("$folder/*.png $folder/*.gif $folder/*.jpg")) {
+        my $path = $img;
+        $path    =~ s/^\Q$folder\E//gmx;
+        my $name = $path;
+        $name    =~ s/^.*\///gmx;
+        push @{$images}, {
+            path  => '../usercontent/images'.$path,
+            image => $name,
+        };
+    }
+    $images = Thruk::Backend::Manager::_sort({}, $images, 'image');
+    unshift @{$images}, { path => '', image => 'none'};
+    $c->stash->{'json'} = { data => $images };
     return $c->forward('Thruk::View::JSON');
 }
 

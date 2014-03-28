@@ -1,0 +1,100 @@
+﻿var backgrounds = Ext.create('Ext.data.Store', {
+    fields: ['path', 'image'],
+    proxy: {
+        type: 'ajax',
+        url: 'panorama.cgi?task=userdata_images',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: false,
+    data : []
+});
+
+/* show settings window */
+TP.tabSettingsWindow = function() {
+    var tab    = Ext.getCmp('tabpan').getActiveTab();
+    var config = tab.getState();
+    config.id  = tab.id;
+
+    // set defaults
+    if(config.background == undefined || config.background == "") {
+        config.background = 'none';
+    }
+
+    backgrounds.load();
+
+    /* the settings form */
+    var settings_form = new Ext.form.Panel({
+        bodyPadding: 5,
+        border:      0,
+        defaults: {
+            labelWidth:  120,
+            anchor: '99%'
+        },
+        items: [{
+            /* tab title */
+            xtype:      'textfield',
+            name:       'title',
+            fieldLabel: 'Title',
+            value: config.title
+        },{
+            xtype:      'combobox',
+            name:       'background',
+            fieldLabel: 'Background',
+            store: backgrounds,
+            queryMode: 'local',
+            displayField: 'image',
+            valueField: 'path',
+            value: config.background
+        }]
+    });
+
+    /* save global settings */
+    var settingsSave = function() {
+        var win   = this.up('window');
+        var form  = win.down('form').getForm();
+        var tab   = Ext.getCmp(config.id);
+        var xdata = cp.state[tab.id];
+        if(form.isValid()) {
+            var values = form.getFieldValues();
+            // save title
+            tab.setTitle(values.title);
+            // save background
+            tab.background = values.background;
+            tab.setBackground(tab.background);
+            // save state
+            tab.saveState();
+            // close window
+            win.destroy();
+            return true;
+        }
+        return false;
+    }
+
+    /* the panel containing the form panel */
+    var settings_panel = new Ext.panel.Panel({
+        layout:     'fit',
+        border:     0,
+        items:      [settings_form],
+        buttonAlign: 'center',
+        fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
+               { xtype:  'button',
+                 text:    'save',
+                 handler: settingsSave
+               }
+        ]
+    });
+
+    /* the actual settings window containing the panel */
+    var tab_win_settings = new Ext.window.Window({
+        autoShow:    true,
+        modal:       true,
+        width:       400,
+        title:       'Dashboard Settings',
+        html:        '',
+        buttonAlign: 'center',
+        items:       [settings_panel]
+    });
+};
