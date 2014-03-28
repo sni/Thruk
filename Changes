@@ -17,7 +17,7 @@ next:
             - add maximum sla threshold to hide detail pages
             - allow multiple pnp graphs in sla reports (lkco)
           - Panorama View:
-            - background can be change in bashboard settings
+            - background can be change in dashboard settings
             - fixed panlet cluttering when opening dashboard with smaller screens
           - Bug Fixes
             - fixed displaying partially active attributes
