@@ -36,19 +36,31 @@
         this.gearHandler = function() {
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
+                this.stateful = false;
                 this.items.getAt(0).hide();
                 this.gearitem.down('form').getForm().reset();
                 if(this.gearInitCallback) {
                     this.gearInitCallback(this);
                 }
+                this.origSize = this.getSize();
+                if(this.origSize.width < 450 || this.origSize.height < 250) {
+                    this.setSize(450, 250);
+                }
                 this.header.show();
                 this.gearitem.show();
+                this.addCls('gearopen');
             } else {
+                this.stateful = true;
                 if(global.xdata.autohideheader) {
                     this.header.hide();
                 }
+                if(this.origSize != undefined) {
+                    this.setSize(this.origSize);
+                    delete this.origSize;
+                }
                 this.items.getAt(0).show();
                 this.gearitem.hide();
+                this.removeCls('gearopen');
             }
         };
         if(this.noHeaderBorderless == true && global.xdata.autohideheader) {
@@ -176,8 +188,14 @@
                  text:   'save',
                  handler: function() {
                     var win      = this.up('window');
+                    win.stateful = true;
                     var form     = win.gearitem.down('form').getForm();
                     if(form.isValid()) {
+                        if(win.origSize != undefined) {
+                            win.setSize(win.origSize);
+                            delete win.origSize;
+                        }
+                        win.removeCls('gearopen');
                         win.gearitem.hide();
                         win.xdata = TP.storeFormToData(form, win.xdata);
                         win.setTitle(win.xdata.title);
