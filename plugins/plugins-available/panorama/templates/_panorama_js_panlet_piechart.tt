@@ -96,7 +96,18 @@
                     contrast: true,
                     font: '12px Arial'
                 }
-            }]
+            }],
+            listeners: {
+                render: function(This, eOpts) {
+                    var div = This.getEl();
+                    div.on("mouseout", function()  {
+                        TP.timeouts[This.id] = window.setTimeout(Ext.bind(This.redraw, This, []), 1000);
+                    });
+                    div.on("mouseover", function()  {
+                        window.clearTimeout(TP.timeouts[This.id]);
+                    });
+                }
+            }
         });
         this.add(this.chart);
 

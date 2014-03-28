@@ -19,6 +19,7 @@ Ext.namespace("TP");
 TP.initialized = false;
 TP.num_panels  = 0;
 TP.cur_panels  = 0;
+TP.timeouts    = {};
 for(var key in ExtState) {
     if(key.match(/^panlet_/)) {
         TP.num_panels++;
