@@ -59,6 +59,11 @@
             }
         };
 
+        var global = Ext.getCmp('tabpan');
+        var background = 'white';
+        if(global.xdata.autohideheader) {
+            background = 'transparent';
+        }
         this.chart = Ext.create('Ext.chart.Chart', {
             xtype: 'chart',
             animate: true,
@@ -66,7 +71,7 @@
             shadow: true,
             legend: false,
             insetPadding: 3,
-            style: 'background-color: transparent;',
+            style: 'background-color: '+background+';',
             theme: 'Base:gradients',
             series: [{
                 type: 'pie',
