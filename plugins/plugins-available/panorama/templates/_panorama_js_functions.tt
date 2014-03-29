@@ -307,10 +307,10 @@ var TP = {
             var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 f.removeAll();
-                for(var x in initial_backends) {
+                for(var key in initial_backends) {
                     var checked = false;
-                    if(Ext.Array.contains(data.backends, x)) { checked = true; }
-                    f.add({ boxLabel: initial_backends[x].name, name: 'backends', inputValue: x, checked: checked });
+                    if(Ext.Array.contains(data.backends, key)) { checked = true; }
+                    f.add({ boxLabel: initial_backends[key].name, name: 'backends', inputValue: key, checked: checked });
                 }
             }
         };
