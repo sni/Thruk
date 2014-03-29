@@ -129,7 +129,7 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
             }
         }
         my $cmd_typ;
-        $c->{'request'}->{'parameters'}->{'cmd_mod'}           = 1;
+        $c->{'request'}->{'parameters'}->{'cmd_mod'}           = 2;
         $c->{'request'}->{'parameters'}->{'trigger'}           = 0;
         $c->{'request'}->{'parameters'}->{'selected_hosts'}    = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
         $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
@@ -318,7 +318,7 @@ sub _check_for_commands {
     my( $self, $c ) = @_;
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
-    my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
+    my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'} || 0;
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
@@ -326,12 +326,12 @@ sub _check_for_commands {
     }
 
     # command commited?
-    if( defined $cmd_mod and $self->_do_send_command($c) ) {
+    if( $cmd_mod == 2 and $self->_do_send_command($c) ) {
+        return unless Thruk::Utils::check_csrf($c);
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
         $self->_redirect_or_success( $c, -2 );
     }
     else {
-
         # no command submited, view commands page (can be nonnumerical)
         if( $cmd_typ eq "55" or $cmd_typ eq "56" or $cmd_typ eq "86" ) {
             $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
