@@ -170,7 +170,6 @@ sub _process_json_page {
 
     # name resolver
     if($type eq 'dig') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $resolved = 'unknown';
         if(defined $c->{'request'}->{'parameters'}->{'host'} and $c->{'request'}->{'parameters'}->{'host'} ne '') {
@@ -268,7 +267,6 @@ sub _process_json_page {
 
     # plugin help
     if($type eq 'pluginhelp' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $help            = $c->{'obj_db'}->get_plugin_help($c, $c->{'request'}->{'parameters'}->{'plugin'});
         my $json            = [ { 'plugin_help' => $help } ];
@@ -279,7 +277,6 @@ sub _process_json_page {
 
     # plugin preview
     if($type eq 'pluginpreview' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $output          = $c->{'obj_db'}->get_plugin_preview($c,
                                                          $c->{'request'}->{'parameters'}->{'command'},
@@ -295,7 +292,6 @@ sub _process_json_page {
 
     # command line
     if($type eq 'commanddetail') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $name    = $c->{'request'}->{'parameters'}->{'command'};
         my $objects = $c->{'obj_db'}->get_objects_by_name('command', $name);
@@ -431,7 +427,6 @@ sub _process_cgi_page {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->response->redirect('conf.cgi?sub=cgi');
         }
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
 
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
@@ -524,7 +519,6 @@ sub _process_thruk_page {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->response->redirect('conf.cgi?sub=thruk');
         }
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
 
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
@@ -625,7 +619,6 @@ sub _process_users_page {
     # save changes to user
     my $user = $c->{'request'}->{'parameters'}->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $redirect = 'conf.cgi?action=change&sub=users&data.username='.$user;
         if($c->stash->{'readonly'}) {
@@ -744,7 +737,6 @@ sub _process_plugins_page {
         return 1;
     }
     elsif($c->stash->{action} eq 'save') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         # don't store in demo mode
         if($c->config->{'demo_mode'}) {
@@ -815,7 +807,6 @@ sub _process_backends_page {
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     if($c->stash->{action} eq 'save') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         # don't store in demo mode
         if($c->config->{'demo_mode'}) {
@@ -870,7 +861,6 @@ sub _process_backends_page {
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $peer        = $c->request->parameters->{'peer'};
         my $type        = $c->request->parameters->{'type'};
@@ -989,14 +979,12 @@ sub _process_objects_page {
 
         # revert all changes from one file
         if($c->stash->{action} eq 'revert') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             return if $self->_object_revert($c, $obj);
         }
 
         # save this object
         elsif($c->stash->{action} eq 'store') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             my $rc = $self->_object_save($c, $obj);
             if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
@@ -1007,21 +995,18 @@ sub _process_objects_page {
 
         # disable this object temporarily
         elsif($c->stash->{action} eq 'disable') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             return if $self->_object_disable($c, $obj);
         }
 
         # enable this object
         elsif($c->stash->{action} eq 'enable') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             return if $self->_object_enable($c, $obj);
         }
 
         # delete this object
         elsif($c->stash->{action} eq 'delete') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             return if $self->_object_delete($c, $obj);
         }
@@ -1034,7 +1019,6 @@ sub _process_objects_page {
 
         # clone this object
         elsif($c->stash->{action} eq 'clone') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             $obj = $self->_object_clone($c, $obj);
         }
@@ -1082,21 +1066,18 @@ sub _process_objects_page {
 
     # save changed files from editor
     elsif($c->stash->{action} eq 'savefile') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         return if $self->_file_save($c);
     }
 
     # delete files/folders from browser
     elsif($c->stash->{action} eq 'deletefiles') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         return if $self->_file_delete($c);
     }
 
     # undelete files/folders from browser
     elsif($c->stash->{action} eq 'undeletefiles') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         return if $self->_file_undelete($c);
     }
@@ -1140,7 +1121,6 @@ sub _apply_config_changes {
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
 
     if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         # don't store in demo mode
         if($c->config->{'demo_mode'}) {
@@ -1173,7 +1153,6 @@ sub _apply_config_changes {
 
     # config check
     elsif(defined $c->{'request'}->{'parameters'}->{'check'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
@@ -1189,7 +1168,6 @@ sub _apply_config_changes {
 
     # config reload
     elsif(defined $c->{'request'}->{'parameters'}->{'reload'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         # don't store in demo mode
         if($c->config->{'demo_mode'}) {
@@ -1210,7 +1188,6 @@ sub _apply_config_changes {
 
     # save changes to file
     elsif(defined $c->{'request'}->{'parameters'}->{'save'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         # don't store in demo mode
         if($c->config->{'demo_mode'}) {
@@ -1230,7 +1207,6 @@ sub _apply_config_changes {
 
     # discard changes
     if($c->{'request'}->{'parameters'}->{'discard'}) {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         $c->{'obj_db'}->discard_changes();
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
@@ -1276,7 +1252,6 @@ sub _update_password {
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
         # remove password?
         if($send eq 'remove password') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             my $cmd = sprintf("%s -D %s '%s' 2>&1",
                                  '$(which htpasswd2 2>/dev/null || which htpasswd 2>/dev/null)',
@@ -1294,7 +1269,6 @@ sub _update_password {
         my $pass1 = $c->{'request'}->{'parameters'}->{'data.password'}  || '';
         my $pass2 = $c->{'request'}->{'parameters'}->{'data.password2'} || '';
         if($pass1 ne '') {
-            return unless Thruk::Utils::is_post($c);
             return unless Thruk::Utils::check_csrf($c);
             if($pass1 eq $pass2) {
                 $pass1 =~ s/'/\'/gmx;
@@ -1325,7 +1299,6 @@ sub _update_password {
 # store changes to a file
 sub _store_changes {
     my ( $self, $c, $file, $data, $defaults, $update_in_conf ) = @_;
-    return unless Thruk::Utils::is_post($c);
     return unless Thruk::Utils::check_csrf($c);
     my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'};
     if(!defined $old_md5 or $old_md5 eq '') {
@@ -1780,7 +1753,6 @@ sub _object_move {
 
     my $files_root = $self->_set_files_stash($c, 1);
     if($c->stash->{action} eq 'movefile') {
-        return unless Thruk::Utils::is_post($c);
         return unless Thruk::Utils::check_csrf($c);
         my $new_file = $c->{'request'}->{'parameters'}->{'newfile'};
         my $file     = $self->_get_context_file($c, $obj, $new_file);
