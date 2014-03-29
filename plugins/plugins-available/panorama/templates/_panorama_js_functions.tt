@@ -307,7 +307,7 @@ var TP = {
             var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 f.removeAll();
-                for(var x=0; x<initial_backends.length; x++) {
+                for(var x in initial_backends) {
                     var checked = false;
                     if(Ext.Array.contains(data.backends, x)) { checked = true; }
                     f.add({ boxLabel: initial_backends[x].name, name: 'backends', inputValue: x, checked: checked });
