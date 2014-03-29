@@ -890,18 +890,19 @@ sub get_user_token {
     if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
         return("");
     }
-    my $tokens = $c->cache->get('token');
-    my $minage = time() - 600;
+    my $store  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
+    my $tokens = $store->get('token');
+    my $minage = time() - 7200;
     for my $usr (keys %{$tokens}) {
         delete $tokens->{$usr} if $tokens->{$usr}->{'time'} < $minage;
     }
     if(!defined $tokens->{$c->stash->{'remote_user'}}) {
         $tokens->{$c->stash->{'remote_user'}} = {
-            'time'  => time(),
             'token' => md5_hex($c->stash->{'remote_user'}.time().rand()),
         };
-        $c->cache->set('token', $tokens);
     }
+    $tokens->{$c->stash->{'remote_user'}}->{'time'} = time();
+    $store->set('token', $tokens);
     $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
     return $c->stash->{'user_token'};
 }

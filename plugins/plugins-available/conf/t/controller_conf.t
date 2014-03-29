@@ -35,6 +35,7 @@ SKIP: {
 use_ok 'Monitoring::Config::Object';
 
 ###########################################################
+TestUtils::set_test_user_token();
 my($host,$service) = TestUtils::get_test_service();
 
 ###########################################################

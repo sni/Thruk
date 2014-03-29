@@ -615,11 +615,6 @@ sub _request {
 
     my $request;
     if($post) {
-        my $config = Thruk::Backend::Pool::get_config();
-        my $cache  = Thruk::Utils::Cache->new($config->{'tmp_path'}.'/thruk.cache');
-        my $tokens = $cache->get('token');
-        $tokens->{get_test_user()} = { token => 'test', time => time() };
-        $cache->set('token', $tokens);
         $post->{'token'} = 'test';
         $request = request POST $url, $post;
     } else {
@@ -666,11 +661,6 @@ sub _external_request {
 
     my $request;
     if($post) {
-        my $config = Thruk::Backend::Pool::get_config();
-        my $cache  = Thruk::Utils::Cache->new($config->{'tmp_path'}.'/thruk.cache');
-        my $tokens = $cache->get('token');
-        $tokens->{get_test_user()} = { token => 'test', time => time() };
-        $cache->set('token', $tokens);
         $post->{'token'} = 'test';
         $request = $ua->post($url, $post);
     } else {
@@ -736,6 +726,16 @@ sub bail_out_req {
     diag(Dumper($msg));
     diag(Dumper($req));
     BAIL_OUT($0.': '.$msg);
+    return;
+}
+
+#########################
+sub set_test_user_token {
+    my $config = Thruk::Backend::Pool::get_config();
+    my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
+    my $tokens = $store->get('token');
+    $tokens->{get_test_user()} = { token => 'test', time => time() };
+    $store->set('token', $tokens);
     return;
 }
 
