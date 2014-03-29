@@ -10,6 +10,7 @@ next:
           - config tool improvements for shinken (Mathieu Parent)
           - added new command "thruk -a selfcheck" to perform some self checks
           - optionally disable session revalidation in cookie auth
+          - added csrf protection
           - Business Process
             - added support for custom functions
           - Reports

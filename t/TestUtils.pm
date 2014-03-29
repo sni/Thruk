@@ -62,6 +62,8 @@ sub get_test_hostgroup {
 
 #########################
 sub get_test_user {
+    our $remote_user_cache;
+    return $remote_user_cache if $remote_user_cache;
     my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
     ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
@@ -70,6 +72,7 @@ sub get_test_user {
         $user = $1;
     }
     isnt($user, undef, "got a user from config.cgi") or bail_out_req('got no test user, cannot test.', $request);
+    $remote_user_cache = $user;
     return($user);
 }
 
@@ -187,7 +190,13 @@ sub test_page {
         $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
 
-    ok($opts->{'url'}, $opts->{'url'});
+    if($opts->{'post'}) {
+        local $Data::Dumper::Indent = 0;
+        local $Data::Dumper::Varname = 'POST';
+        ok($opts->{'url'}, $opts->{'url'}.' '.Dumper($opts->{'post'}));
+    } else {
+        ok($opts->{'url'}, $opts->{'url'});
+    }
 
     my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'});
 
@@ -606,6 +615,12 @@ sub _request {
 
     my $request;
     if($post) {
+        my $config = Thruk::Backend::Pool::get_config();
+        my $cache  = Thruk::Utils::Cache->new($config->{'tmp_path'}.'/thruk.cache');
+        my $tokens = $cache->get('token');
+        $tokens->{get_test_user()} = { token => 'test', time => time() };
+        $cache->set('token', $tokens);
+        $post->{'token'} = 'test';
         $request = request POST $url, $post;
     } else {
         $request = request($url);
@@ -651,6 +666,12 @@ sub _external_request {
 
     my $request;
     if($post) {
+        my $config = Thruk::Backend::Pool::get_config();
+        my $cache  = Thruk::Utils::Cache->new($config->{'tmp_path'}.'/thruk.cache');
+        my $tokens = $cache->get('token');
+        $tokens->{get_test_user()} = { token => 'test', time => time() };
+        $cache->set('token', $tokens);
+        $post->{'token'} = 'test';
         $request = $ua->post($url, $post);
     } else {
         $request = $ua->get($url);
@@ -708,9 +729,9 @@ sub bail_out_req {
     my $error   = "";
     if($page =~ m/<!--error:(.*?):error-->/smxo) {
         $error = $1;
-        diag(Dumper($msg));
-        diag(Dumper($error));
-        BAIL_OUT($0.': '.$msg);
+        $error =~ s/\A\s*//gmsx;
+        $error =~ s/\s*\Z//gmsx;
+        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     diag(Dumper($msg));
     diag(Dumper($req));

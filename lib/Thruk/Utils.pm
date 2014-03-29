@@ -1772,11 +1772,6 @@ sub wait_after_reload {
         }
         $c->log->debug('waiting for core reload for '.($start-time()).'s: '.$@);
     }
-    if(scalar keys %{$procinfo->{$pkey}} > 0) {
-        my $cached_data = $c->cache->get->{'global'} || {};
-        $cached_data->{'processinfo'}->{$pkey} = $procinfo->{$pkey};
-        $c->cache->set('global', $cached_data);
-    }
     return;
 }
 

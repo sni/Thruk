@@ -52,7 +52,7 @@
     Help making Thruk better and send a bug report</a>.<br>
   </div>
   [% END %]
-[% IF make_test_mode %]
+[% IF make_test_mode || thruk_debug %]
 <!--error:
 [%+ errorMessage +%]
 [%+ errorDetails +%]
