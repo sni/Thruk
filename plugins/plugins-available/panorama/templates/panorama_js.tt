@@ -20,19 +20,27 @@ TP.initialized = false;
 TP.num_panels  = 0;
 TP.cur_panels  = 0;
 TP.timeouts    = {};
-for(var key in ExtState) {
-    if(key.match(/^panlet_/)) {
-        TP.num_panels++;
-    }
-}
 Ext.onReady(function() {
-    if(TP.num_panels > 0) {
-        TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
-        TP.initMask.show();
+  /* do we have a state? */
+  var state = cp.readValues();
+  if(!state['tabpan'] && default_view != '') {
+      debug("using default view");
+      data = cp.decodeValue(decode64(default_view));
+      cp.loadData(data);
+  }
+
+  for(var key in ExtState) {
+    if(key.match(/^panlet_/)) {
+      TP.num_panels++;
     }
-    if(TP.num_panels == 0) {
-        TP.initialized = true;
-    }
+  }
+  if(TP.num_panels > 0) {
+    TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
+    TP.initMask.show();
+  }
+  if(TP.num_panels == 0) {
+    TP.initialized = true;
+  }
 });
 
 [%+ PROCESS _panorama_js_tab_reorder.tt +%]
@@ -66,14 +74,6 @@ Ext.onReady(function() {
 /* main viewport */
 Ext.onReady(function() {
   Ext.QuickTips.init();
-
-  /* do we have a state? */
-  var state = cp.readValues();
-  if(!state['tabpan'] && default_view != '') {
-      debug("using default view");
-      data = cp.decodeValue(decode64(default_view));
-      cp.loadData(data);
-  }
 
   TP.viewport = new Ext.Viewport({
     id:       'viewport',
