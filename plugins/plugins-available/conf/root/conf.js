@@ -164,7 +164,13 @@ function init_conf_tool_buttons() {
         }
 
         jQuery.ajax({
-            url: 'conf.cgi?action=json&amp;type=dig&host='+host,
+            url: 'conf.cgi',
+            data: {
+                action: 'json',
+                type:   'dig',
+                host:   host,
+                token:  user_token
+            },
             type: 'POST',
             success: function(data) {
                 jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
@@ -272,8 +278,14 @@ function update_command_line(id) {
     document.getElementById(id + 'command_line').innerHTML = "";
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name,
+        url: 'conf.cgi',
         type: 'POST',
+        data: {
+            action: 'json',
+            type:   'commanddetails',
+            command: cmd_name,
+            token:   user_token
+        },
         success: function(data) {
             hideElement(id + 'wait');
             var cmd_line = data[0].cmd_line;
@@ -446,7 +458,13 @@ function load_plugin_help(id, plugin) {
     last_plugin_help = plugin;
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin,
+        url: 'conf.cgi',
+        data: {
+            action: 'json',
+            type:   'pluginhelp',
+            plugin:  plugin,
+            token:   user_token
+        },
         type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_help');
@@ -480,7 +498,16 @@ function check_plugin_exec(id) {
     showElement(id + 'wait_run');
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args,
+        url: 'conf.cgi',
+        data: {
+            action: 'json',
+            type:   'pluginpreview',
+            command: command,
+            host:    host,
+            service: service,
+            args:    args,
+            token:   user_token
+        },
         type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_run');

@@ -4,6 +4,7 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="apply" value="commit">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'>
     [% PROCESS _conf_objects_menu.tt type="apply" %]
     <tr><td colspan=10 align="center">

@@ -19,6 +19,7 @@
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="referer" value="[% referer %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'[% IF bare %] width="100%"[% END %]>
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>

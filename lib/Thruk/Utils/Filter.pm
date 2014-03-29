@@ -18,6 +18,7 @@ use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
 use JSON::XS;
 use Encode qw/decode_utf8/;
+use Digest::MD5 qw(md5_hex);
 
 ##############################################
 
@@ -871,6 +872,38 @@ sub get_cookie_remove_paths {
         $product.'/thruk/',
     ];
     return($paths);
+}
+
+
+########################################
+
+=head2 get_user_token
+
+  get_user_token($c)
+
+returns user token which can be used to validate requests
+
+=cut
+sub get_user_token {
+    my($c) = @_;
+    return $c->stash->{'user_token'} if $c->stash->{'user_token'};
+    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+        return("");
+    }
+    my $tokens = $c->cache->get('token');
+    my $minage = time() - 600;
+    for my $usr (keys %{$tokens}) {
+        delete $tokens->{$usr} if $tokens->{$usr}->{'time'} < $minage;
+    }
+    if(!defined $tokens->{$c->stash->{'remote_user'}}) {
+        $tokens->{$c->stash->{'remote_user'}} = {
+            'time'  => time(),
+            'token' => md5_hex($c->stash->{'remote_user'}.time().rand()),
+        };
+        $c->cache->set('token', $tokens);
+    }
+    $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
+    return $c->stash->{'user_token'};
 }
 
 ########################################

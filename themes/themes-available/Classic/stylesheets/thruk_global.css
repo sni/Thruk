@@ -1091,16 +1091,17 @@ DIV.alert.floating {
 }
 
 .btn_small {
-    height: inherit;
-    width: inherit;
-    white-space: inherit;
+  height: inherit;
+  width: inherit;
+  white-space: inherit;
 }
 
 TABLE.livestatus_metrics TD.dataVal {
-    text-align: right;
-    padding-left: 6px;
+  text-align: right;
+  padding-left: 6px;
 }
 
 .tab_hidden, .filter_hidden {
-    display: none;
+  display: none;
 }
+

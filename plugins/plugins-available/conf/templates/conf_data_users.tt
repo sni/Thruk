@@ -36,6 +36,7 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolusers'>
     <tr>
       <td colspan=2 class='dataVar dataUserVar'>Edit: [% user_name %]</td>

@@ -185,6 +185,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'background job failed, look at your logfile for details',
             'code' => 500, # internal server error
         },
+        '24'  => {
+            'mess' => 'Security Alert',
+            'dscr' => 'this request is not allowed, details can be found in the thruk.log',
+            'code' => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

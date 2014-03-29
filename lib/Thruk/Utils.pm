@@ -1057,13 +1057,19 @@ returns user data
 sub get_user_data {
     my($c) = @_;
 
+    return $c->stash->{'user_data'} if $c->stash->{'user_data'};
+
     if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
         return {};
     }
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    return {} unless -s $file;
-    return read_data_file($file);
+    if(-s $file) {
+        $c->stash->{'user_data'} = read_data_file($file);
+    } else {
+        $c->stash->{'user_data'} = {};
+    }
+    return $c->stash->{'user_data'};
 }
 
 
@@ -2226,6 +2232,44 @@ sub base_folder {
         return($ENV{'CATALYST_CONFIG'});
     }
     return($c->config->{'home'});
+}
+
+########################################
+
+=head2 is_post
+
+    is_post($c)
+
+make sure this is a post request
+
+=cut
+sub is_post {
+    my($c) = @_;
+    return(1) if $c->request->method eq 'POST';
+    $c->log->error("insecure request: ".Dumper($c->request));
+    $c->detach('/error/index/24');
+    return;
+}
+
+########################################
+
+=head2 check_csrf
+
+    check_csrf($c)
+
+ensure valid cross site request forgery token
+
+=cut
+sub check_csrf {
+    my($c) = @_;
+    my $post_token  = $c->request->{'parameters'}->{'token'};
+    my $valid_token = Thruk::Utils::Filter::get_user_token($c);
+    if($valid_token and $post_token and $valid_token eq $post_token) {
+        return(1);
+    }
+    $c->log->error("possible csrf: ".Dumper($c->request));
+    $c->detach('/error/index/24');
+    return;
 }
 
 ########################################

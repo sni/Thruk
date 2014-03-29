@@ -14,6 +14,7 @@
   var jquery_ui_url          = '[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
   var thruk_debug_js         = [% IF thruk_debug %]1[% ELSE %]0[% END %];
   var minimal                = [% IF minimal %]true[% ELSE %]false[% END %];
+  var user_token             = '[% get_user_token(c) %]';
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
