@@ -32,10 +32,11 @@ create new cache instance
 sub new {
     my($class,$cachefile) = @_;
     my $self = {
-        '_cachefile' => $cachefile,
-        '_data'      => {},
-        '_stat'      => [],
-        '_checked'   => 0,
+        '_cachefile'    => $cachefile,
+        '_data'         => {},
+        '_stat'         => [],
+        '_checked'      => 0,
+        '_lock_timeout' => 10,
     };
     bless $self, $class;
     $self->_update();
@@ -151,14 +152,14 @@ sub _update {
             $self->{'_checked'} = $now;
             my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
             if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
-                $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
+                $self->{'_data'} = $self->_retrieve();
                 $self->{'_stat'} = \@stat;
                 return;
             }
         }
         if($update) {
             my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-            $self->{'_data'} = lock_retrieve($self->{'_cachefile'});
+            $self->{'_data'} = $self->_retrieve();
             $self->{'_stat'} = \@stat;
         }
     } else {
@@ -179,13 +180,34 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
+    local $SIG{ALRM} = sub { die('timeout while waiting for cache store') };
+    alarm($self->{'_lock_timeout'});
     lock_nstore($self->{'_data'}, $self->{'_cachefile'});
+    alarm(0);
     my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-    $self->{'_stat'}    = \@stat;
+    $self->{'_stat'} = \@stat;
     Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
     my $now = time();
     $self->{'_checked'} = $now;
     return;
+}
+
+##############################################
+
+=head2 _retrieve
+
+  _retrieve()
+
+retrieve data from disk
+
+=cut
+sub _retrieve {
+    my($self) = @_;
+    local $SIG{ALRM} = sub { die('timeout while reading cache') };
+    alarm($self->{'_lock_timeout'});
+    my $data = lock_retrieve($self->{'_cachefile'});
+    alarm(0);
+    return $data;
 }
 
 ##############################################
