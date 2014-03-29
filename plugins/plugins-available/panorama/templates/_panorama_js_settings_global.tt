@@ -51,7 +51,7 @@ TP.settingsWindow = function() {
         }, {
             /* auto hide panlet header */
             xtype:      'checkbox',
-            fieldLabel: 'Autohide Panlet Header',
+            fieldLabel: 'Hide Panlet Header',
             name:       'autohideheader'
         }, {
             /* Import / Export */
