@@ -104,7 +104,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 for my $url (@{$pages}) {
     my $test = TestUtils::make_test_hash($url, {'like' => 'Config Tool'});
     # reloading breaks running multiple tests against same core
-    if($test->{'url'} =~ m/reload=yes/mx and $ENV{'THRUK_TEST_NO_RELOADS'}) {
+    if($test->{'post'} and $test->{'post'}->{'reload'} and $ENV{'THRUK_TEST_NO_RELOADS'}) {
         # silently skip this test
     } else {
         TestUtils::test_page(%{$test});
