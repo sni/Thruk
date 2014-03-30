@@ -970,6 +970,9 @@ sub _cmd_url {
     $c->stats->profile(end => "_cmd_url()");
     my $rc = $res[0] >= 400 ? 1 : 0;
     return($res[2], $rc) if $res[2];
+    if($res[1]->{'result'} =~ m/\Q<div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.\E/gmx) {
+        return("Command request successfully submitted to the Backend for processing\n", $rc);
+    }
     return($res[1]->{'result'}, $rc);
 }
 

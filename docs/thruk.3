@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2014-02-21" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2014-03-30" "perl v5.14.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -238,6 +238,14 @@ script has the following arguments
 \&      \- listhosts                   list hostnames
 \&      \- listhostgroups              list hostgroupnames
 \&      \- command <host> <service>    print used command line for this host/service
+\&
+\&    Selfcheck Commands
+\&      \- selfcheck(=subtype)         run self check(s)
+\&                                    availabel subtypes:
+\&                                     \- filesystem
+\&                                     \- logfiles
+\&                                     \- reports
+\&                                     \- recurring_downtimes
 .Ve
 .IP "\fB\-A\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
 .IX Item "-A authname, --auth=authname"
@@ -273,7 +281,7 @@ script has the following arguments
 thruk returns 0 on success and >= 1 otherwise
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-List available backends
+List available backends:
 .PP
 .Vb 1
 \&  %> thruk \-l
@@ -304,11 +312,17 @@ Generate pdf report
 \&  %> thruk \-a \*(Aqreport=1\*(Aq > report.pdf
 .Ve
 .PP
-Generate pdf report and send it by mail
+Generate pdf report and send it by mail:
 .PP
 .Vb 1
 \&  %> thruk \-a \*(Aqreportmail=1\*(Aq
 .Ve
+.PP
+Reschedule next check for host localhost now:
+.PP
+.Vb 1
+\&  %> thruk \*(Aqcmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now\*(Aq
+.Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"
-2012\-2013, Sven Nierlein, <sven@nierlein.de>
+Sven Nierlein, 2009\-2014, <sven@nierlein.org>
