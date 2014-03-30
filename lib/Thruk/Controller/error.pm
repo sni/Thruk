@@ -187,7 +187,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '24'  => {
             'mess' => 'Security Alert',
-            'dscr' => 'this request is not allowed, details can be found in the thruk.log',
+            'dscr' => 'This request is not allowed, details can be found in the thruk.log.',
             'code' => 403, # forbidden
         },
     };
