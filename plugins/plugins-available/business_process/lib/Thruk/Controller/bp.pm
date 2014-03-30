@@ -128,6 +128,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'save is disabled in demo mode.' });
                 return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
             }
+            return unless Thruk::Utils::check_csrf($c);
             $bp->commit($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
             my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
@@ -141,6 +142,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
         }
         elsif($action eq 'revert') {
+            return unless Thruk::Utils::check_csrf($c);
             unlink($bp->{'editfile'});
             unlink($bp->{'datafile'}.'.edit');
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
@@ -151,6 +153,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             }
         }
         elsif($action eq 'remove') {
+            return unless Thruk::Utils::check_csrf($c);
             $bp->remove($c);
             $bps = Thruk::BP::Utils::load_bp_data($c);
             my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
