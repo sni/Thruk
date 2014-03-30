@@ -326,8 +326,8 @@ sub _check_for_commands {
     }
 
     # command commited?
+    $c->stash->{'use_csrf'} = 1;
     if( $cmd_mod == 2 and $self->_do_send_command($c) ) {
-        return unless Thruk::Utils::check_csrf($c);
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
         $self->_redirect_or_success( $c, -2 );
     }
@@ -500,6 +500,10 @@ sub _redirect_or_success {
 # sending commands
 sub _do_send_command {
     my( $self, $c ) = @_;
+
+    if($c->stash->{'use_csrf'}) {
+        return unless Thruk::Utils::check_csrf($c);
+    }
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     return $c->detach('/error/index/6') unless defined $cmd_typ;

@@ -2257,6 +2257,7 @@ ensure valid cross site request forgery token
 =cut
 sub check_csrf {
     my($c) = @_;
+    return if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
     return unless is_post($c);
     my $post_token  = $c->request->{'parameters'}->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
