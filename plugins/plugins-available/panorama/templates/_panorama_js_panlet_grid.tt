@@ -5,6 +5,7 @@
     width:   640,
     height:  260,
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.pageSize    = 5;
         this.xdata.currentPage = 1;
@@ -74,7 +75,7 @@
                                 root: 'items'
                             }
                         },
-                        groupField: data.group
+                        groupField: this.xdata.groupField != undefined ? this.xdata.groupField : data.group
                     });
                     if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
                         this.gridcolumns = newcolumns;
@@ -82,14 +83,14 @@
                     } else {
                         this.grid.reconfigure(this.gridStore);
                     }
-                    if(this.xdata.gridstate != undefined) {
-                        this.grid.applyState(this.xdata.gridstate);
-                    }
                     if(this.initialState != undefined) {
                         /* applyState throws internal error but state gets applied anyway */
                         try {
                             this.grid.applyState(this.initialState);
                         } catch(e) {}
+                    }
+                    if(this.xdata.gridstate != undefined) {
+                        this.grid.applyState(this.xdata.gridstate);
                     }
                     this.pagingToolbar.onLoad();
                     if(data.paging && this.pagingToolbar.getPageData().pageCount == 1) {
@@ -131,6 +132,11 @@
                     }
                     var panlet = This.up('panel');
                     panlet.xdata.gridstate = state;
+                    if(panlet.grid.store.groupers.length == 1) {
+                        panlet.xdata.groupField = panlet.grid.store.groupers.get(0).property;
+                    } else {
+                        panlet.xdata.groupField = undefined;
+                    }
                     panlet.saveState();
                     return false;
                 },
@@ -160,6 +166,9 @@
         this.addListener('beforestaterestore', function(This, state, eOpts) {
             if(state.xdata.gridstate != undefined) {
                 This.grid.applyState(state.xdata.gridstate);
+            }
+            if(state.xdata.groupField != undefined) {
+                This.grid.store.group(state.xdata.groupField);
             }
             return true;
         });
