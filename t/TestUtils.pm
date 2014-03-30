@@ -731,8 +731,9 @@ sub bail_out_req {
 
 #########################
 sub set_test_user_token {
-    my $config = Thruk::Backend::Pool::get_config();
+    require Thruk::Config;
     require Thruk::Utils::Cache;
+    my $config = Thruk::Config::get_config();
     my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
     my $tokens = $store->get('token');
     $tokens->{get_test_user()} = { token => 'test', time => time() };
