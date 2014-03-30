@@ -1057,7 +1057,7 @@ returns user data
 sub get_user_data {
     my($c) = @_;
 
-    return $c->stash->{'user_data'} if $c->stash->{'user_data'};
+    return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
 
     if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
         return {};
@@ -1065,11 +1065,11 @@ sub get_user_data {
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     if(-s $file) {
-        $c->stash->{'user_data'} = read_data_file($file);
+        $c->stash->{'user_data_cached'} = read_data_file($file);
     } else {
-        $c->stash->{'user_data'} = {};
+        $c->stash->{'user_data_cached'} = {};
     }
-    return $c->stash->{'user_data'};
+    return $c->stash->{'user_data_cached'};
 }
 
 

@@ -8,5 +8,6 @@ var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
 var theme          = '[% theme %]';
 var cookie_path    = '[% cookie_path %]';
 var base           = '[% url_prefix %]plugins/panorama';
+var user_token     = '[% get_user_token(c) %]';
 
 [%+ PROCESS _header_initial_states.tt +%]

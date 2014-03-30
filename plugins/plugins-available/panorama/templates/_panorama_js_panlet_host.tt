@@ -336,6 +336,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
     fields.push({ xtype: 'hidden', name: 'service', value: '' });
     fields.push({ xtype: 'hidden', name: 'cmd_typ', value: cmd_typ });
     fields.push({ xtype: 'hidden', name: 'cmd_mod', value: '2' });
+    fields.push({ xtype: 'hidden', name: 'token',   value: '' });
     return {
         plain:      true,
         letItClose: false,
@@ -384,7 +385,8 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                     start_time:         new Date(),
                     sticky_ack:         [% IF c.config.cmd_defaults.sticky_ack %]true[% ELSE %]false[% END %],
                     send_notification:  [% IF c.config.cmd_defaults.send_notification %]true[% ELSE %]false[% END %],
-                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %]
+                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %],
+                    token:              user_token
                 });
                 panel.menusnr = panel.menusnr + 1;
                 return true;
