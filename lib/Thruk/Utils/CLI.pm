@@ -935,8 +935,8 @@ sub _set_downtime {
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
                       $downtime->{'host'} ? '&host='.URI::Escape::uri_escape($downtime->{'host'}) : '',
                       $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
-                      $downtime->{'hostgroup'} ? '&hostgroup='.URI::Escape::uri_escape($downtime->{'hostgroup'}) : '',
-                      $downtime->{'servicegroup'} ? '&servicegroup='.URI::Escape::uri_escape($downtime->{'servicegroup'}) : '',
+                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape($downtime->{'hostgroup'}) : '',
+                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape($downtime->{'servicegroup'}) : '',
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
