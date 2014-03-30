@@ -24,6 +24,7 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 <input type="hidden" name="report" value="[% r.nr %]">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
 <table border="1" class='data reports'>
   <tr>
     <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
@@ -120,7 +121,7 @@
   <tr>
     <td class="dataEven" align="center" colspan=3>
       <span class="required" style="float: left;">* - required</span>
-      [% IF r.nr != "new" %]<a href="reports2.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>[% END %]
+      [% IF r.nr != "new" %]<button name="action" value="remove" class="report_remove_button report_button" style="width: 80px;">Delete</button>[% END %]
       <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
     </td>
   </tr>

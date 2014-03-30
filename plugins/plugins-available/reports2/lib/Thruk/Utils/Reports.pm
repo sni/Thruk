@@ -650,6 +650,7 @@ sub add_report_defaults {
         # unavailable states may be empty when switching from hosts to services templates
         if($f->[1] eq 'hst_unavailable' or $f->[1] eq 'svc_unavailable') {
             my %default = map {$_ => 1} @{$f->[2]};
+            $report->{'params'}->{$key} = [$report->{'params'}->{$key}] unless ref $report->{'params'}->{$key} eq 'ARRAY';
             my @used    = grep {$default{$_}} @{$report->{'params'}->{$key}};
             if(scalar @used == 0) {
                 push @{$report->{'params'}->{$key}}, @{$f->[2]};

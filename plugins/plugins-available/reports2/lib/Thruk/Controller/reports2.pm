@@ -69,6 +69,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my $refresh   = 0;
     $refresh = $c->{'request'}->{'parameters'}->{'refresh'} if exists $c->{'request'}->{'parameters'}->{'refresh'};
 
+    if(ref $action eq 'ARRAY') { $action = pop @{$action}; }
+
     if($action eq 'updatecron') {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'updated crontab' });
@@ -245,6 +247,8 @@ sub report_edit_step2 {
 sub report_save {
     my($self, $c, $report_nr) = @_;
 
+    return unless Thruk::Utils::check_csrf($c);
+
     my $params = $c->{'request'}->{'parameters'};
     $params->{'params.t1'} = Thruk::Utils::parse_date($c, $params->{'t1'}) if defined $params->{'t1'};
     $params->{'params.t2'} = Thruk::Utils::parse_date($c, $params->{'t2'}) if defined $params->{'t2'};
@@ -297,6 +301,8 @@ sub report_update {
 sub report_remove {
     my($self, $c, $report_nr) = @_;
 
+    return unless Thruk::Utils::check_csrf($c);
+
     if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
     } else {
@@ -320,6 +326,7 @@ sub report_email {
     }
 
     if($c->{'request'}->{'parameters'}->{'send'}) {
+        return unless Thruk::Utils::check_csrf($c);
         my $to      = $c->{'request'}->{'parameters'}->{'to'}      || '';
         my $cc      = $c->{'request'}->{'parameters'}->{'cc'}      || '';
         my $desc    = $c->{'request'}->{'parameters'}->{'desc'}    || '';
