@@ -497,6 +497,8 @@ sub _task_site_status {
         columns => [
             { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
             { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
+            { 'header' => 'Category',         dataIndex => 'category',                width => 60, hidden => JSON::XS::true },
+            { 'header' => 'Section',          dataIndex => 'section',                 width => 60, hidden => JSON::XS::true },
             { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
             { 'header' => 'Version',          dataIndex => 'version',                 width => 50, renderer => 'TP.add_title' },
             { 'header' => 'Runtime',          dataIndex => 'runtime',                 width => 85 },
@@ -509,11 +511,23 @@ sub _task_site_status {
         data    => []
     };
 
+    # get sections
+    for my $category (keys %{$c->{'db'}->{'sections'}}) {
+        for my $section (keys %{$c->{'db'}->{'sections'}->{$category}}) {
+            for my $name (keys %{$c->{'db'}->{'sections'}->{$category}->{$section}}) {
+                my $backends = $c->{'db'}->{'sections'}->{$category}->{$section}->{$name};
+                for my $b (@{$backends}) {
+                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'category'} = $category;
+                    $c->stash->{'pi_detail'}->{$b->{'key'}}->{'section'}  = $section;
+                }
+            }
+        }
+    }
     for my $key (@{$c->stash->{'backends'}}) {
-        my $b = $c->stash->{'backend_detail'}->{$key};
-        my $d = {};
-        $d = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
-        my $icon            = 'exclamation.png';
+        my $b    = $c->stash->{'backend_detail'}->{$key};
+        my $d    = {};
+        $d       = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
+        my $icon = 'exclamation.png';
         if($b->{'running'} && $d->{'program_start'}) { $icon = 'accept.png'; }
         elsif($b->{'disabled'} == 2) { $icon = 'sport_golf.png'; }
         my $runtime = "";
@@ -523,13 +537,14 @@ sub _task_site_status {
             $program_version = $d->{'program_version'};
         }
         my $row = {
-            id      => $key,
-            icon    => $icon,
-            site    => $b->{'name'},
-            version => $program_version,
-            runtime => $runtime,
+            id       => $key,
+            icon     => $icon,
+            site     => $b->{'name'},
+            version  => $program_version,
+            runtime  => $runtime,
         };
-        for my $attr (qw/enable_notifications execute_host_checks execute_service_checks enable_event_handlers process_performance_data/) {
+        for my $attr (qw/enable_notifications execute_host_checks execute_service_checks
+                      enable_event_handlers process_performance_data category section/) {
             $row->{$attr} = $d->{$attr};
         }
         push @{$json->{'data'}}, $row;
