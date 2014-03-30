@@ -77,9 +77,15 @@
                         },
                         groupField: this.xdata.groupField != undefined ? this.xdata.groupField : data.group
                     });
+                    var columns;
+                    if(panel.xdata && panel.xdata.gridstate && panel.xdata.gridstate.columns) {
+                        columns = panel.xdata.gridstate.columns;
+                    }
+                    var changed = false;
                     if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
                         this.gridcolumns = newcolumns;
                         this.grid.reconfigure(this.gridStore, data.columns);
+                        changed = true;
                     } else {
                         this.grid.reconfigure(this.gridStore);
                     }
@@ -95,6 +101,15 @@
                     this.pagingToolbar.onLoad();
                     if(data.paging && this.pagingToolbar.getPageData().pageCount == 1) {
                         this.pagingToolbar.hide();
+                    }
+                    if(changed && columns) {
+                        for(var x=0; x<columns.length; x++) {
+                            if(columns[x].hidden != undefined) {
+                                // toggle header once to workaround a display clitch
+                                this.grid.columns[x].setVisible(columns[x].hidden);
+                                this.grid.columns[x].setVisible(!columns[x].hidden);
+                            }
+                        }
                     }
                 }
             }
@@ -127,7 +142,7 @@
             listeners: {
                 beforestatesave: function(This, state, eOpts) {
                     /* only save filled grids state */
-                    if(This.columns.length == 0) {
+                    if(This.columns.length == 0 || TP.initialized == false) {
                         return false;
                     }
                     var panlet = This.up('panel');
@@ -162,15 +177,6 @@
             },
             columns: [],
             dockedItems: [this.pagingToolbar]
-        });
-        this.addListener('beforestaterestore', function(This, state, eOpts) {
-            if(state.xdata.gridstate != undefined) {
-                This.grid.applyState(state.xdata.gridstate);
-            }
-            if(state.xdata.groupField != undefined) {
-                This.grid.store.group(state.xdata.groupField);
-            }
-            return true;
         });
         var state = cp.get(this.id);
         if(state && state.xdata && state.xdata.gridstate) {
