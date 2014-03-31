@@ -206,7 +206,9 @@ Ext.define('TP.formFilterSelect', {
             'latency':             ['=','!=','<=','>='],
             'next check':          ['=','!=','<=','>='],
             'notification period': ['~','!~','=','!='],
+            'number of services':  ['=','!=','<=','>='],
             'parent':              ['~','!~','=','!='],
+            'plugin output':       ['~','!~','=','!='],
             'service':             ['~','!~','=','!='],
             'servicegroup':        ['~','!~','=','!='],
             '% state change':      ['=','!=','<=','>=']

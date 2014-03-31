@@ -3166,7 +3166,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect = document.createElement('select');
-  var options    = new Array('Check Period',
+  var options    = new Array('Check Period', /* when changed, update _panorama_js_form_filter.tt too! */
                              'Comment',
                              'Contact',
                              'Current Attempt',
