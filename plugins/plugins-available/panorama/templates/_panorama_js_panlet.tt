@@ -39,6 +39,11 @@
                 this.stateful = false;
                 this.items.getAt(0).hide();
                 this.gearitem.down('form').getForm().reset();
+                if(this.has_search_button != undefined) {
+                    // make filter show the same value as the main filter button
+                    var form = this.gearitem.down('form').getForm();
+                    form.setValues({filter: this.xdata.filter});
+                }
                 if(this.gearInitCallback) {
                     this.gearInitCallback(this);
                 }
