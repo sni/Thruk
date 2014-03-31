@@ -2241,7 +2241,7 @@ make sure this is a post request
 sub is_post {
     my($c) = @_;
     return(1) if $c->request->method eq 'POST';
-    $c->log->error("insecure request: ".Dumper($c->request));
+    $c->log->error("insecure request, post method required: ".Dumper($c->request));
     $c->detach('/error/index/24');
     return;
 }
@@ -2259,12 +2259,13 @@ sub check_csrf {
     my($c) = @_;
     return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
     return unless is_post($c);
+    return 1 if $c->request->address eq '127.0.0.1';
     my $post_token  = $c->request->{'parameters'}->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
     if($valid_token and $post_token and $valid_token eq $post_token) {
         return(1);
     }
-    $c->log->error("possible csrf: ".Dumper($c->request));
+    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->request));
     $c->detach('/error/index/24');
     return;
 }
