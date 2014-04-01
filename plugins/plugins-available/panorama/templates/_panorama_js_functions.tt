@@ -378,13 +378,17 @@ var TP = {
             var delay    = 0;
             var interval = 60 / panels.length;
             for(var nr=0; nr<panels.length; nr++) {
-                window.setTimeout(Ext.bind(panels[nr].startInterval, panels[nr], []), delay);
-                delay = delay + Math.round(interval*1000);
+                if(panels[nr].startInterval) {
+                    window.setTimeout(Ext.bind(panels[nr].startInterval, panels[nr], []), delay);
+                    delay = delay + Math.round(interval*1000);
+                }
             }
         } else {
             // no delay required
             for(var nr=0; nr<panels.length; nr++) {
-                panels[nr].startInterval();
+                if(panels[nr].startInterval) {
+                    panels[nr].startInterval();
+                }
             }
         }
         TP.initialized = true;
@@ -412,7 +416,9 @@ var TP = {
     stopAllPanelRefresh: function() {
         var panels = TP.getAllPanel();
         for(var nr=0; nr<panels.length; nr++) {
-            panels[nr].stopInterval();
+            if(panels[nr].stopInterval) {
+                panels[nr].stopInterval();
+            }
         }
     },
     /* convert time frame into seconds */
@@ -662,5 +668,40 @@ var TP = {
         var menu = new Ext.menu.Menu(menuCfg);
         panel.add(menu);
         menu.show();
+    },
+    objectSearchItem: function(type, name) {
+        return({
+            name:           type,
+            fieldLabel:     name,
+            xtype:          'combobox',
+            queryMode:      'remote',
+            store:          searchStore,
+            triggerAction:  'all',
+            pageSize:       true,
+            selectOnFocus:  true,
+            typeAhead:      true,
+            minChars:       0,
+            listeners: {
+                'expand': function(field, eOpts) {
+                    searchStore.search_type = type;
+                },
+                'change': function(This, newValue, oldValue, eOpts) {
+                    searchStore.search_type = type;
+                },
+                'keyup': function() {
+                    searchStore.search_type = type;
+                }
+            }
+        });
+    },
+    removeWindowFromPanels: function(win_id) {
+        /* remove panel reference */
+        var tabpan = Ext.getCmp('tabpan');
+        tabpan.items.each(function(panel) {
+            if(panel.window_ids) {
+                panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
+                panel.saveState();
+            }
+        });
     }
 }

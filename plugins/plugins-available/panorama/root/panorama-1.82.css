@@ -361,3 +361,7 @@ DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
 .x-window-body.gearopen {
   background-color: #FFFFFF;
 }
+
+DIV.hideRightArrow IMG.x-menu-item-arrow {
+    display: none;
+}

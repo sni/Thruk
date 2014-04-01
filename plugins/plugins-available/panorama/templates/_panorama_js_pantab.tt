@@ -18,7 +18,7 @@
     },
     listeners: {
         beforedestroy: function( This, eOpts ) {
-            for(var nr=0; nr<This.window_ids; nr++) {
+            for(var nr=0; nr<This.window_ids.length; nr++) {
                 Ext.getCmp(This.window_ids[nr]).destroy();
             }
             var tabpan = Ext.getCmp('tabpan');

@@ -1,0 +1,231 @@
+﻿Ext.define('TP.IconWidget', {
+    extend: 'Ext.Img',
+
+    src: '../usercontent/images/status/default/pending.png',
+    [% UNLESS readonly %]
+    stateful:  true,
+    stateEvents: ['reconfigure', 'afterlayout', 'move', 'dragend'],
+    draggable: true,
+    [% END %]
+    floating:  true,
+    initComponent: function() {
+        this.stateId = this.id;
+        if(this.xdata == undefined) {
+            this.xdata = {};
+        } else {
+            this.xdata = TP.clone(this.xdata);
+        }
+        this.xdata.cls      = this.$className;
+        this.xdata.backends = [];
+        this.xdata.state    = 4;
+        this.xdata.general  = {};
+        this.xdata.layout   = { iconset: 'default' };
+        if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
+        this.callParent();
+    },
+    listeners: {
+        afterrender: function(This, eOpts) {
+            [% UNLESS readonly %]
+            This.saveState();
+            /* open edit box on double or right click */
+            this.el.on("dblclick", function(e) {
+                TP.iconShowEditDialog(This);
+            });
+            this.el.on("contextmenu", function(e) {
+                e.preventDefault();
+                Ext.create('Ext.menu.Menu', {
+                    margin: '0 0 10 0',
+                    items: [{
+                        text:   'Settings',
+                        icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                        handler: function() { TP.iconShowEditDialog(This) }
+                    },{
+                        text:   'Remove',
+                        icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
+                        handler: function() { This.destroy(); }
+                    }]
+                }).showBy(This);
+            });
+            if(this.xdata.general[this.iconType] == '') {
+                TP.iconShowEditDialog(This);
+            }
+            [% END %]
+        },
+        destroy: function( This, eOpts ) {
+            /* remove window from panels window ids */
+            TP.removeWindowFromPanels(this.id);
+            /* clear state information */
+            cp.clear(this.id);
+        },
+        move: function(This, x, y, eOpts) {
+            this.xdata.layout.x = x;
+            this.xdata.layout.y = y;
+        }
+    },
+    refreshHandler: function() {
+        iconset = this.xdata.layout.iconset;
+        if(     this.xdata.status == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
+        else if(this.xdata.status == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
+        else if(this.xdata.status == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
+        else if(this.xdata.status == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
+        else                            { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+    },
+    getState: function() {
+        var state      = {};
+        var pos        = this.getPosition();
+        state.xdata    = this.xdata;
+        return state;
+    },
+    applyState: function(state) {
+        this.callParent(arguments);
+        if(state) {
+            this.setPosition([Number(state.xdata.layout.x), Number(state.xdata.layout.y)]);
+        }
+    }
+});
+
+TP.iconShowEditDialog = function(This) {
+    var panel = This;
+    panel.stateful = false;
+
+    /* General Settings Tab */
+    var generalTab = {
+        title : 'General',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:       'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults: {
+                        anchor: '-12'
+                    },
+                    items: [TP.objectSearchItem(panel.iconType, panel.iconName)]
+            }]
+        }]
+    };
+
+    /* Layout Settings Tab */
+    var layoutTab = {
+        title: 'Layout',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12' },
+                items: [{
+                    fieldLabel: 'Position',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    defaults:  { style: 'margin-left: 5px;' },
+                    items: [{ xtype: 'label', text:  'x:' },
+                            { xtype: 'textfield', name:  'x', width: 40 },
+                            { xtype: 'label', text:  'y:' },
+                            { xtype: 'textfield', name:  'y', width: 40 }
+                    ]
+                }, {
+                    fieldLabel: 'Icon Set',
+                    xtype:      'combobox',
+                    name:       'iconset',
+                    store:     ['default'],
+                    value:      'default',
+                }]
+            }]
+        }]
+    };
+
+    var tabPanel = new Ext.TabPanel({
+        activeTab         : 0,
+        id                : 'myTPanel',
+        enableTabScroll   : true,
+        items             : [
+            generalTab,
+            layoutTab
+        ]
+    });
+    var settingsWindow = new Ext.Window({
+        height : 300,
+        width  : 400,
+        layout : 'fit',
+        items  : tabPanel,
+        title  : 'Icon Settings',
+        buttonAlign: 'center',
+        fbar: [/* panlet setting cancel button */
+               { xtype:  'button',
+                 text:   'cancel',
+                 handler: function(This) { panel.stateful = true; This.up('window').destroy() }
+               },
+               /* panlet setting save button */
+               { xtype : 'button',
+                 text:   'save',
+                 handler: function() {
+                    panel.stateful = true;
+                    panel.xdata.general = settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues();
+                    panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
+                    panel.applyState({xdata: panel.xdata});
+                    panel.saveState();
+                    settingsWindow.destroy();
+                 }
+               }
+        ]
+    }).show();
+
+    settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
+    settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
+}
+
+/* Host Status Icon */
+Ext.define('TP.HostStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'host',
+    iconName: 'Hostname',
+    initComponent: function() {
+        this.callParent();
+    }
+});
+
+/* Hostgroup Status Icon */
+Ext.define('TP.HostgroupStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'hostgroup',
+    iconName: 'Hostgroupname',
+    initComponent: function() {
+        this.callParent();
+    }
+});
+
+/* Service Status Icon */
+Ext.define('TP.ServiceStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'Service',
+    iconName: 'Servicename',
+    initComponent: function() {
+        this.callParent();
+    }
+});
+
+/* Servicegroup Status Icon */
+Ext.define('TP.ServicegroupStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'Servicegroup',
+    iconName: 'Servicegroupname',
+    initComponent: function() {
+        this.callParent();
+    }
+});

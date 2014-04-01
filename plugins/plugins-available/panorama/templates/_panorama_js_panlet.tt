@@ -56,7 +56,7 @@
                 this.addCls('gearopen');
             } else {
                 this.stateful = true;
-                if(global.xdata.autohideheader) {
+                if(global.xdata.autohideheader || this.alwaysBorderless) {
                     this.header.hide();
                 }
                 if(this.origSize != undefined) {
@@ -68,7 +68,7 @@
                 this.removeCls('gearopen');
             }
         };
-        if(this.noHeaderBorderless == true && global.xdata.autohideheader) {
+        if(this.alwaysBorderless || (this.noHeaderBorderless == true && global.xdata.autohideheader)) {
             this.bodyCls = 'autohideheader';
             this.cls     = 'autohideheader';
             this.overCls = 'autohideheaderover';
@@ -85,7 +85,7 @@
                 if(this.xdata.pinned) {
                     this.xdata.pinned = false;
                     /* make sure panlet is now connected to the active tab */
-                    this.removeWindowFromPanels();
+                    TP.removeWindowFromPanels(this.id);
                     var activeTab = tabpan.getActiveTab();
                     activeTab.window_ids.push(this.id);
                     activeTab.saveState();
@@ -248,7 +248,9 @@
         move: function( This, x, y, eOpts ) {
             var newpos = TP.get_snap(x, y);
             if(newpos[0] != x || newpos[1] != y) {
-                This.setPosition( newpos[0], newpos[1], false );
+                if(this.snap != false) {
+                    This.setPosition( newpos[0], newpos[1], false );
+                }
             }
             var shadow = Ext.get(This.id + '_shadow');
             if(shadow != undefined) { shadow.hide(); }
@@ -258,7 +260,7 @@
             This.win_shadow.destroy();
 
             /* remove window from panels window ids */
-            this.removeWindowFromPanels();
+            TP.removeWindowFromPanels(this.id);
 
             /* stop refreshing */
             window.clearInterval(this.interval);
@@ -277,7 +279,12 @@
                     var y = me.startPosition[1] + offset[1];
                     comp.setPagePosition(x, y);
                     // show shadow
-                    var newpos = TP.get_snap(x, y);
+                    var newpos;
+                    if(This.snap == false) {
+                        newpos = [x,y];
+                    } else {
+                        newpos = TP.get_snap(x, y);
+                    }
                     This.win_shadow.moveTo(newpos[0], newpos[1]);
                     This.win_shadow.setSize(This.getSize());
                     This.win_shadow.show();
@@ -318,7 +325,7 @@
                 this.show();
             }
             var global = Ext.getCmp('tabpan');
-            if(global.xdata.autohideheader) { this.header.hide() }
+            if(global.xdata.autohideheader || this.alwaysBorderless) { this.header.hide() }
         }
     },
     setFormDefaults: function() {
@@ -330,7 +337,7 @@
             this.formUpdatedCallback(this);
         }
     },
-    check_pintool: function() {
+    check_pintool: function(comp) {
         [% IF readonly %]return;[% END %]
         /* check pin icon and position */
         if(this.xdata.pinned) {
@@ -342,17 +349,6 @@
         this.pintool.setPosition(0,1);
         var head = Ext.get(this.id + '_header_hd');
         head.setPositioning({left:'20px'});
-    },
-    removeWindowFromPanels: function() {
-        /* remove panel reference */
-        var tabpan = Ext.getCmp('tabpan');
-        var win_id = this.id;
-        tabpan.items.each(function(panel) {
-            if(panel.window_ids) {
-                panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
-                panel.saveState();
-            }
-        });
     },
     manualRefresh: function() {
         if(this.loader != undefined) { this.loader.loadMask=true; }
@@ -371,7 +367,7 @@
         return null;
     },
     showHeader: function(global) {
-        if(global.xdata.autohideheader) {
+        if(global.xdata.autohideheader || this.alwaysBorderless) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -387,7 +383,7 @@
         }
     },
     hideHeader: function(global) {
-        if(global.xdata.autohideheader && this.gearitem.isHidden()) {
+        if((this.alwaysBorderless || global.xdata.autohideheader) && this.gearitem.isHidden()) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';

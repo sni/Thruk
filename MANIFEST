@@ -772,7 +772,9 @@ plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/computer.png
+plugins/plugins-available/panorama/root/images/computer_link.png
 plugins/plugins-available/panorama/root/images/cup_key.png
+plugins/plugins-available/panorama/root/images/delete.png
 plugins/plugins-available/panorama/root/images/door_in.png
 plugins/plugins-available/panorama/root/images/down.png
 plugins/plugins-available/panorama/root/images/exclamation.png
@@ -782,6 +784,7 @@ plugins/plugins-available/panorama/root/images/house.png
 plugins/plugins-available/panorama/root/images/html_add.png
 plugins/plugins-available/panorama/root/images/image_edit.png
 plugins/plugins-available/panorama/root/images/information.png
+plugins/plugins-available/panorama/root/images/menu-parent.gif
 plugins/plugins-available/panorama/root/images/minemap.png
 plugins/plugins-available/panorama/root/images/minemap0.png
 plugins/plugins-available/panorama/root/images/minemap1.png
@@ -795,6 +798,7 @@ plugins/plugins-available/panorama/root/images/remove.png
 plugins/plugins-available/panorama/root/images/s.gif
 plugins/plugins-available/panorama/root/images/server.png
 plugins/plugins-available/panorama/root/images/server_connect.png
+plugins/plugins-available/panorama/root/images/server_link.png
 plugins/plugins-available/panorama/root/images/sport_golf.png
 plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
@@ -820,6 +824,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_services.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_host.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_icon_widgets.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_stats.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_pnp.tt
@@ -1012,6 +1017,11 @@ root/thruk/media/unknown.wav
 root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
+root/thruk/usercontent/images/status/default/critical.png
+root/thruk/usercontent/images/status/default/ok.png
+root/thruk/usercontent/images/status/default/pending.png
+root/thruk/usercontent/images/status/default/unknown.png
+root/thruk/usercontent/images/status/default/warning.png
 root/thruk/usercontent/images/world.png
 script/append.make
 script/nagexp

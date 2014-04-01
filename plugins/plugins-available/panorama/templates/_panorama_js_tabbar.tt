@@ -112,7 +112,34 @@ Ext.define('TP.TabBar', {
             html:     'add',
             menu: {
                 items: [{
+                        text:    'Icons & Widgets',
+                        icon:   '[% url_prefix %]plugins/panorama/images/menu-parent.gif',
+                        cls:    'hideRightArrow',
+                        menu:    [{
+                                text:   'Host Status',
+                                icon:   '[% url_prefix %]plugins/panorama/images/server.png',
+                                handler: function() { TP.add_panlet({type:'TP.HostStatusIcon'}) }
+                            }, {
+                                text:   'Hostgroup Status',
+                                icon:   '[% url_prefix %]plugins/panorama/images/server_link.png',
+                                handler: function() { TP.add_panlet({type:'TP.HostgroupStatusIcon'}) }
+                            }, {
+                                text:   'Service Status',
+                                icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
+                                handler: function() { TP.add_panlet({type:'TP.ServiceStatusIcon'}) }
+                            }, {
+                                text:   'Servicegroup Status',
+                                icon:   '[% url_prefix %]plugins/panorama/images/computer_link.png',
+                                handler: function() { TP.add_panlet({type:'TP.ServicegroupStatusIcon'}) }
+                            }, {
+                                text:   'Site Status',
+                                icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
+                                handler: function() { TP.add_panlet({type:'TP.SiteStatusIcon'}) }
+                            }
+                        ]
+                    },
                     /* Server */
+                    '-', {
                         text:   'Site Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
