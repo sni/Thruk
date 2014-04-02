@@ -46,8 +46,36 @@
                     },{
                         text:   'Remove',
                         icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
-                        handler: function() { This.destroy(); }
-                    }]
+                        handler: function(me, eOpts) {
+                            var menu = me.parentMenu;
+                            var i = menu.items.findIndexBy(function(e) { if(e.text == 'Remove') {return true;} });
+                            menu.remove(i);
+                            menu.add({
+                                xtype: 'panel',
+                                border: false,
+                                bodyStyle: 'background: #F0F0F0;',
+                                items: [{
+                                    xtype:  'label',
+                                    text:   'Remove? ',
+                                    style:  'top: 3px; position: relative; color: red; font-weight: bold;'
+                                },{
+                                    xtype:  'button',
+                                    text:   'No',
+                                    width:  50,
+                                    handler: function() { menu.destroy(); }
+                                }, {
+                                    xtype: 'button',
+                                    text:  'Yes',
+                                    width:  30,
+                                    handler: function() { This.destroy(); menu.destroy(); }
+                                }]
+                            });
+                            menu.move(menu.items.length, i);
+                        }
+                    }],
+                    listeners: {
+                        beforehide: function(menu, eOpts) { menu.destroy(); }
+                    }
                 }).showBy(This);
             });
             if(this.xdata.general[this.iconType] == '') {
