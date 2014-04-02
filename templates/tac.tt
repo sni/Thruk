@@ -258,7 +258,7 @@
         <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=16' class='serviceHeader'>[% service_stats.critical %] Critical</a></td>
         <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=4' class='serviceHeader'>[% service_stats.warning %] Warning</a></td>
         <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=8' class='serviceHeader'>[% service_stats.unknown %] Unknown</a></td>
-        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=2' class='serviceHeader'>[% service_stats.ok %] Ok</a></td>
+        <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=2' class='serviceHeader'>[% service_stats.ok %] OK</a></td>
         <td class='serviceHeader' width="125"><a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=1' class='serviceHeader'>[% service_stats.pending %] Pending</a></td>
       </tr>
       <tr>
