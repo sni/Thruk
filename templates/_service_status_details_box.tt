@@ -6,7 +6,7 @@
     <td>
       <table border="1" class='serviceTotals'>
         <tr>
-          <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 2,  hoststatustypes => hoststatustypes) %]'>Ok</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 2,  hoststatustypes => hoststatustypes) %]'>OK</a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 4,  hoststatustypes => hoststatustypes) %]'>Warning</a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 8,  hoststatustypes => hoststatustypes) %]'>Unknown</a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 16, hoststatustypes => hoststatustypes) %]'>Critical</a></th>
