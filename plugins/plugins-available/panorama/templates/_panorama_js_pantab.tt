@@ -17,14 +17,42 @@
         this.window_ids = [];
     },
     listeners: {
-        beforedestroy: function( This, eOpts ) {
+        beforeclose: function( This, eOpts ) {
+            if(This.destroyConfirmed == undefined) {
+                Ext.Msg.confirm('Delete dashboard and all its components?', 'Do you really want to remove this dashboard with all icons and widgets?', function(button) {
+                    if (button === 'yes') {
+                        This.destroyConfirmed = true;
+                        window.setTimeout(function() { This.destroy(); }, 100);
+                    } else {
+                        This.destroyConfirmed = undefined;
+                    }
+                });
+                return false;
+            }
+            return true;
+        },
+        destroy: function( This, eOpts ) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
-                Ext.getCmp(This.window_ids[nr]).destroy();
+                if(This.window_ids[nr].xdata == undefined || !This.window_ids[nr].xdata.pinned) {
+                    Ext.getCmp(This.window_ids[nr]).destroy();
+                }
             }
             var tabpan = Ext.getCmp('tabpan');
-            tabpan.item_ids = TP.removeFromList(tabpan.item_ids, this.id);
+            tabpan.item_ids = TP.removeFromList(tabpan.item_ids, This.id);
+            cp.clear(This.id);
+            // activate first tab or create new empty one
+            if(!tabpan.getActiveTab()) {
+                var tabs = Ext.query('.x-tab-closable');
+                for(var nr=0; nr<tabs.length; nr++) {
+                    if(tabpan.tabs_tr[tabs[nr].id] != undefined) {
+                        tabpan.setActiveTab(tabpan.tabs_tr[tabs[nr].id]);
+                    }
+                }
+            }
+            if(!tabpan.getActiveTab()) {
+                TP.add_pantab();
+            }
             tabpan.saveState();
-            cp.clear(this.id);
         },
         activate: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {

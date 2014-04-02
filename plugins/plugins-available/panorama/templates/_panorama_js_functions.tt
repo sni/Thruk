@@ -803,7 +803,6 @@ var TP = {
             params: { types: Ext.JSON.encode(req) },
             callback: function(options, success, response) {
                 if(!success) {
-                    // TODO:
                     // not yet handled:
                     // add global error indicator
                 } else {
