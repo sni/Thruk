@@ -16,7 +16,6 @@
             this.xdata = TP.clone(this.xdata);
         }
         this.xdata.cls      = this.$className;
-        this.xdata.backends = [];
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { iconset: 'default' };
@@ -31,6 +30,7 @@
             this.el.on("dblclick", function(e) {
                 TP.iconShowEditDialog(This);
             });
+            /* right click context menu on icon widgets */
             this.el.on("contextmenu", function(e) {
                 e.preventDefault();
                 Ext.create('Ext.menu.Menu', {
@@ -39,6 +39,10 @@
                         text:   'Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.iconShowEditDialog(This) }
+                    },'-',{
+                        text:   'Clone',
+                        icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
+                        handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) }
                     },{
                         text:   'Remove',
                         icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
