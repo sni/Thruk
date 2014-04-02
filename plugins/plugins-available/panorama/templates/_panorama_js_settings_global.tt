@@ -102,9 +102,9 @@ TP.settingsWindow = function() {
                 handler: function() {
                     Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                         if (button === 'yes') {
-                            TP.importAllTabs(default_view);
                             win_settings.close();
                             Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
+                            window.location = 'panorama.cgi?clean=1';
                         }
                     });
                 }

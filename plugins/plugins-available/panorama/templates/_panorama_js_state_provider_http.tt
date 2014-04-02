@@ -69,7 +69,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     setValue: function(name, value) {
-        encoded = this.encodeValue(value)
+        encoded = this.encodeValue(value);
         if(ExtState[name] != undefined && ExtState[name] == encoded) {
             return;
         }
@@ -92,8 +92,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
     /* set state from object */
     loadData: function(data) {
+        ExtState = {};
         for(var key in data) {
             this.set(key, data[key]);
+            ExtState[key] = this.encodeValue(data[key]);
         }
         this.saveChanges();
     },

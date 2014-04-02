@@ -443,6 +443,7 @@ var TP = {
             debug("forced setting activeTab");
             activeTab = tabpan.setActiveTab(0);
         }
+
         // ensure panels from the active tab are displayed
         if(TP.initial_active_tab != activeTab.getStateId()) {
             debug("active tab changed...");
@@ -500,7 +501,6 @@ var TP = {
 
         cp.clearAll();
         cp.loadData(data);
-        //Ext.getCmp('viewport').add(new TP.TabBar()); // seems unnecessary
         window.setTimeout("window.location.reload()", 1000);
     },
     /* eval response data */

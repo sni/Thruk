@@ -118,18 +118,16 @@
                 }
             };
             // make sure all refresh timers are running now
-            if(TP.startAllPanelRefreshTimeout) {
-                window.clearTimeout(TP.startAllPanelRefreshTimeout);
-            }
-            TP.startAllPanelRefreshTimeout = window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive + 2000);
+            window.clearTimeout(TP.startAllPanelRefreshTimeout);
+            TP.startAllPanelRefreshTimeout = window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive);
             this.window_ids = state.window_ids;
             this.setTitle(state.title);
             this.background = state.background;
             this.setBackground(this.background);
             Ext.apply(this, state);
         } else {
-            TP.initialized = true;
-            if(TP.initMask) { TP.initMask.destroy() }
+            window.clearTimeout(TP.startAllPanelRefreshTimeout);
+            TP.startAllPanelRefresh();
         }
     },
     setBackground: function(background) {
