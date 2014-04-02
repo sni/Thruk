@@ -77,7 +77,10 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     if(defined $c->request->parameters->{'task'}) {
         my $task = $c->request->parameters->{'task'};
-        if($task eq 'stats_core_metrics') {
+        if($task eq 'status') {
+            return($self->_task_status($c));
+        }
+        elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
         }
         elsif($task eq 'stats_check_metrics') {
@@ -282,6 +285,47 @@ sub _nice_ext_value {
     $value =~ s/\n/ /gmx;
     $value =~ s/\s+/ /gmx;
     return $value;
+}
+
+##########################################################
+sub _task_status {
+    my($self, $c) = @_;
+    my $types = {};
+    if($c->request->parameters->{'types'}) {
+        $types = decode_json($c->request->parameters->{'types'});
+    }
+
+    my $data = {};
+    if(scalar keys %{$types->{'hostgroups'}} > 0) {
+        $data->{'hostgroups'} = [values $self->_summarize_hostgroup_query($c, $types->{'hostgroups'})];
+    }
+    if(scalar keys %{$types->{'servicegroups'}} > 0) {
+        $data->{'servicegroups'} = [values $self->_summarize_servicegroup_query($c, $types->{'servicegroups'})];
+    }
+    if(scalar keys %{$types->{'hosts'}} > 0) {
+        my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
+        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state scheduled_downtime_depth acknowledged last_state_change/]);
+    }
+    if(scalar keys %{$types->{'services'}} > 0) {
+        my $filter = [];
+        for my $host (keys %{$types->{'services'}}) {
+            for my $svc (keys %{$types->{'services'}->{$host}}) {
+                push @{$filter}, { host_name => $host, description => $svc};
+            }
+        }
+        $filter = Thruk::Utils::combine_filter('-or', $filter);
+        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state scheduled_downtime_depth acknowledged last_state_change/]);
+    }
+
+    $data->{backends} = $c->stash->{'backend_detail'};
+
+    my $json = {
+        data        => $data,
+        pi_detail   => $c->stash->{pi_detail},
+    };
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
 }
 
 ##########################################################
@@ -607,7 +651,6 @@ sub _task_hosts {
             { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => JSON::XS::true, renderer => 'TP.render_date' },
         ],
-        data        => $data,
         data        => $c->stash->{'data'},
         totalCount  => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
@@ -1164,6 +1207,97 @@ sub _long_plugin {
         $o->{'long_plugin_output'} = '';
     }
     return $o;
+}
+
+##########################################################
+sub _summarize_hostgroup_query {
+    my($self, $c, $type_groups) = @_;
+    my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $hostgroups = {};
+    for my $hst (@{$hosts}) {
+        for my $grp (@{$hst->{'groups'}}) {
+            next unless defined $type_groups->{$grp};
+            if(!defined $hostgroups->{$grp}) {
+                $hostgroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
+                                        hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
+                                        name     => $grp,
+                                      }
+            }
+            if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'pending'}++;     }
+            elsif($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'up'}++;          }
+            elsif($hst->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'down'}++;        }
+            elsif($hst->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'unreachable'}++; }
+            if($hst->{'acknowledged'}) {
+                   if($hst->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'ack_down'}++;        }
+                elsif($hst->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'ack_unreachable'}++; }
+            }
+            if($hst->{'scheduled_downtime_depth'}) {
+                   if($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_up'}++;          }
+                elsif($hst->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_down'}++;        }
+                elsif($hst->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_unreachable'}++; }
+            }
+        }
+    }
+    $filter      = Thruk::Utils::combine_filter('-or', [map {{ host_groups => { '>=' => $_ }}} keys %{$type_groups}]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    for my $svc (@{$services}) {
+        for my $grp (@{$svc->{'host_groups'}}) {
+            next unless defined $type_groups->{$grp};
+            if($svc->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'services'}->{'pending'}++;  }
+            elsif($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'services'}->{'ok'}++;       }
+            elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'services'}->{'warning'}++;  }
+            elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'services'}->{'critical'}++; }
+            elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'services'}->{'unknown'}++;  }
+            if($svc->{'acknowledged'}) {
+                   if($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'ack_warning'}++;    }
+                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'ack_critical'}++;   }
+                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'hosts'}->{'ack_unknown'}++;    }
+            }
+            if($svc->{'scheduled_downtime_depth'}) {
+                   if($svc->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_ok'}++;        }
+                elsif($svc->{'state'} == 1)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_warning'}++;   }
+                elsif($svc->{'state'} == 2)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_critical'}++;  }
+                elsif($svc->{'state'} == 3)         { $hostgroups->{$grp}->{'hosts'}->{'downtime_unknown'}++;   }
+            }
+        }
+    }
+    return($hostgroups);
+}
+
+##########################################################
+sub _summarize_servicegroup_query {
+    my($self, $c, $type_groups) = @_;
+    my $filter   = Thruk::Utils::combine_filter('-or', [map {{ name => $_ }} keys %{$type_groups}]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $servicegroups = {};
+    for my $svc (@{$services}) {
+        for my $grp (@{$svc->{'groups'}}) {
+            next unless defined $type_groups->{$grp};
+            if(!defined $servicegroups->{$grp}) {
+                $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
+                                           name     => $grp,
+                                         }
+            }
+            if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'pending'}++;  }
+            elsif($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'ok'}++;       }
+            elsif($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'services'}->{'warning'}++;  }
+            elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'services'}->{'critical'}++; }
+            elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'services'}->{'unknown'}++;  }
+            if($svc->{'acknowledged'}) {
+                   if($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'hosts'}->{'ack_warning'}++;    }
+                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'hosts'}->{'ack_critical'}++;   }
+                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'hosts'}->{'ack_unknown'}++;    }
+            }
+            if($svc->{'scheduled_downtime_depth'}) {
+                   if($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_ok'}++;        }
+                elsif($svc->{'state'} == 1)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_warning'}++;   }
+                elsif($svc->{'state'} == 2)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_critical'}++;  }
+                elsif($svc->{'state'} == 3)         { $servicegroups->{$grp}->{'hosts'}->{'downtime_unknown'}++;   }
+            }
+        }
+    }
+    return($servicegroups);
 }
 
 ##########################################################

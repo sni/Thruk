@@ -183,6 +183,14 @@ sub _process_raw_request {
             }
             elsif($type eq 'custom variable') {
                 $data = [];
+            }
+            elsif($type eq 'site') {
+                $data = [];
+                for my $key (@{$c->stash->{'backends'}}) {
+                    my $b = $c->stash->{'backend_detail'}->{$key};
+                    push @{$data}, $b->{'name'};
+                }
+                @{$data} = sort @{$data};
             } else {
                 die("unknown type: " . $type);
             }

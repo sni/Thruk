@@ -47,9 +47,13 @@
                 }).showBy(This);
             });
             if(this.xdata.general[this.iconType] == '') {
+                this.firstRun = true;
                 TP.iconShowEditDialog(This);
             }
             [% END %]
+            window.setTimeout(function() {
+                This.syncShadow();
+            }, 500)
         },
         destroy: function( This, eOpts ) {
             /* remove window from panels window ids */
@@ -60,15 +64,28 @@
         move: function(This, x, y, eOpts) {
             this.xdata.layout.x = x;
             this.xdata.layout.y = y;
+            // update settings window
+            if(this.settingsWindow) {
+                this.settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+            }
         }
     },
-    refreshHandler: function() {
+    refreshHandler: function(newStatus) {
+        if(newStatus != undefined && this.xdata.state != newStatus) {
+            this.xdata.state = newStatus;
+            window.setTimeout(TP.flickerImg(this.id), 200);
+            this.saveState();
+        }
         iconset = this.xdata.layout.iconset;
-        if(     this.xdata.status == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
-        else if(this.xdata.status == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
-        else if(this.xdata.status == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
-        else if(this.xdata.status == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
-        else                            { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+        if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
+        else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
+        else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
+        else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
+        else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+        var This = this;
+        window.setTimeout(function() {
+            This.syncShadow();
+        }, 500)
     },
     getState: function() {
         var state      = {};
@@ -80,6 +97,7 @@
         this.callParent(arguments);
         if(state) {
             this.setPosition([Number(state.xdata.layout.x), Number(state.xdata.layout.y)]);
+            this.refreshHandler();
         }
     }
 });
@@ -87,6 +105,36 @@
 TP.iconShowEditDialog = function(This) {
     var panel = This;
     panel.stateful = false;
+
+    var generalItems = [];
+    if(panel.iconType == 'service') {
+        generalItems.push(TP.objectSearchItem('host', 'Hostname'));
+    }
+    generalItems.push(TP.objectSearchItem(panel.iconType, panel.iconName));
+    if(panel.xdata.general.incl_svc != undefined) {
+        generalItems.push({
+            fieldLabel: 'Include Services',
+            xtype:      'checkbox',
+            name:       'incl_svc',
+            value:      false
+        });
+    }
+    if(panel.xdata.general.incl_downtimes != undefined) {
+        generalItems.push({
+            fieldLabel: 'Include Downtimes',
+            xtype:      'checkbox',
+            name:       'incl_downtimes',
+            value:      true
+        });
+    }
+    if(panel.xdata.general.incl_ack != undefined) {
+        generalItems.push({
+            fieldLabel: 'Include Acknowledged',
+            xtype:      'checkbox',
+            name:       'incl_ack',
+            value:      true
+        });
+    }
 
     /* General Settings Tab */
     var generalTab = {
@@ -102,10 +150,8 @@ TP.iconShowEditDialog = function(This) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults: {
-                        anchor: '-12'
-                    },
-                    items: [TP.objectSearchItem(panel.iconType, panel.iconName)]
+                    defaults:      { anchor: '-12', labelWidth: 130 },
+                    items: generalItems
             }]
         }]
     };
@@ -124,7 +170,7 @@ TP.iconShowEditDialog = function(This) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12' },
+                defaults:      { anchor: '-12', labelWidth: 130 },
                 items: [{
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
@@ -140,7 +186,7 @@ TP.iconShowEditDialog = function(This) {
                     xtype:      'combobox',
                     name:       'iconset',
                     store:     ['default'],
-                    value:      'default',
+                    value:      'default'
                 }]
             }]
         }]
@@ -165,7 +211,15 @@ TP.iconShowEditDialog = function(This) {
         fbar: [/* panlet setting cancel button */
                { xtype:  'button',
                  text:   'cancel',
-                 handler: function(This) { panel.stateful = true; This.up('window').destroy() }
+                 handler: function(This) {
+                    delete panel.settingsWindow;
+                    panel.stateful = true;
+                    // if we cancel directly after adding a new icon, destroy it
+                    if(panel.firstRun) {
+                        panel.destroy();
+                    }
+                    settingsWindow.destroy();
+                 }
                },
                /* panlet setting save button */
                { xtype : 'button',
@@ -176,7 +230,10 @@ TP.iconShowEditDialog = function(This) {
                     panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
+                    TP.updateAllIcons(panel.id);
+                    delete panel.settingsWindow;
                     settingsWindow.destroy();
+                    This.firstRun = false;
                  }
                }
         ]
@@ -184,6 +241,7 @@ TP.iconShowEditDialog = function(This) {
 
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
     settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
+    This.settingsWindow = settingsWindow;
 }
 
 /* Host Status Icon */
@@ -194,6 +252,9 @@ Ext.define('TP.HostStatusIcon', {
     iconName: 'Hostname',
     initComponent: function() {
         this.callParent();
+        this.xdata.general.incl_svc       = true;
+        this.xdata.general.incl_downtimes = true;
+        this.xdata.general.incl_ack       = true;
     }
 });
 
@@ -205,6 +266,33 @@ Ext.define('TP.HostgroupStatusIcon', {
     iconName: 'Hostgroupname',
     initComponent: function() {
         this.callParent();
+        this.xdata.general.incl_svc       = true;
+        this.xdata.general.incl_downtimes = true;
+        this.xdata.general.incl_ack       = true;
+    },
+    refreshHandler: function(newStatus) {
+        // calculate summarized status
+        if(this.hostgroup) {
+            var s;
+                 if(this.xdata.general.incl_svc && this.hostgroup.services.unknown > 0)                                                 { s = 3; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.hostgroup.services.ack_unknown > 0)              { s = 3; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.hostgroup.services.downtimes_unknown > 0)  { s = 3; }
+            else if(this.hostgroup.hosts.unreachable > 0)                                                                               { s = 2; }
+            else if(this.hostgroup.hosts.down        > 0)                                                                               { s = 2; }
+            else if(this.xdata.general.incl_ack && this.hostgroup.hosts.ack_unreachable > 0)                                            { s = 2; }
+            else if(this.xdata.general.incl_ack && this.hostgroup.hosts.ack_down        > 0)                                            { s = 2; }
+            else if(this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_down        > 0)                                 { s = 2; }
+            else if(this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_unreachable > 0)                                 { s = 2; }
+            else if(this.xdata.general.incl_svc && this.hostgroup.services.critical > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.hostgroup.services.ack_critical > 0)             { s = 2; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.hostgroup.services.downtimes_critical > 0) { s = 2; }
+            else if(this.xdata.general.incl_svc && this.hostgroup.services.warning > 0)                                                 { s = 1; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.hostgroup.services.ack_warning > 0)              { s = 1; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.hostgroup.services.downtimes_warning > 0)  { s = 1; }
+            else                                                                                                                        { s = 0; }
+            newStatus = s;
+        }
+        this.callParent([newStatus]);
     }
 });
 
@@ -212,10 +300,12 @@ Ext.define('TP.HostgroupStatusIcon', {
 Ext.define('TP.ServiceStatusIcon', {
     extend: 'TP.IconWidget',
 
-    iconType: 'Service',
+    iconType: 'service',
     iconName: 'Servicename',
     initComponent: function() {
         this.callParent();
+        this.xdata.general.incl_downtimes = true;
+        this.xdata.general.incl_ack       = true;
     }
 });
 
@@ -223,9 +313,51 @@ Ext.define('TP.ServiceStatusIcon', {
 Ext.define('TP.ServicegroupStatusIcon', {
     extend: 'TP.IconWidget',
 
-    iconType: 'Servicegroup',
+    iconType: 'servicegroup',
     iconName: 'Servicegroupname',
     initComponent: function() {
         this.callParent();
+        this.xdata.general.incl_downtimes = true;
+        this.xdata.general.incl_ack       = true;
+    },
+    refreshHandler: function(newStatus) {
+        // calculate summarized status
+        if(this.servicegroup) {
+            var s;
+                 if(this.servicegroup.services.unknown > 0)                                                 { s = 3; }
+            else if(this.xdata.general.incl_ack && this.servicegroup.services.ack_unknown > 0)              { s = 3; }
+            else if(this.xdata.general.incl_downtimes && this.servicegroup.services.downtimes_unknown > 0)  { s = 3; }
+            else if(this.servicegroup.services.critical > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_ack && this.servicegroup.services.ack_critical > 0)             { s = 2; }
+            else if(this.xdata.general.incl_downtimes && this.servicegroup.services.downtimes_critical > 0) { s = 2; }
+            else if(this.servicegroup.services.warning > 0)                                                 { s = 1; }
+            else if(this.xdata.general.incl_ack && this.servicegroup.services.ack_warning > 0)              { s = 1; }
+            else if(this.xdata.general.incl_downtimes && this.servicegroup.services.downtimes_warning > 0)  { s = 1; }
+            else                                                                                            { s = 0; }
+            newStatus = s;
+        }
+        this.callParent([newStatus]);
+    }
+});
+
+/* Sitestatus Icon */
+Ext.define('TP.SiteStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'site',
+    iconName: 'Sitename',
+    initComponent: function() {
+        this.callParent();
+    },
+    refreshHandler: function(newStatus) {
+        // calculate site status
+        if(this.site) {
+                 if(this.site.running == 1) { newStatus = 0; }
+            else if(this.site.state   == 0) { newStatus = 0; }
+            else                            { newStatus = 2; }
+        } else if(newStatus == undefined) {
+            newStatus = this.state;
+        }
+        this.callParent([newStatus]);
     }
 });

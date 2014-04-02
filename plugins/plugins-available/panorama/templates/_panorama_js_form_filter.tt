@@ -52,9 +52,10 @@ var searchStore = Ext.create('Ext.data.Store', {
             if(type == 'parent') {
                 type = 'host';
             }
-            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod') {
+            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod' || type == 'site') {
                 store.proxy.extraParams['type'] = type;
             } else {
+                debug("type: "+type+" not supported");
                 return false;
             }
             return true;
@@ -145,13 +146,22 @@ Ext.define('TP.formFilterSelect', {
         minChars:       0,
         listeners: {
             'expand': function(field, eOpts) {
-                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
+                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.load();
+                }
             },
             'change': function(This, newValue, oldValue, eOpts) {
-                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
+                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.load();
+                }
             },
             'keyup': function() {
-                searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
+                    searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.load();
+                }
             }
         }
     }, {
