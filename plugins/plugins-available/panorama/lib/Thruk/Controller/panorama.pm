@@ -300,10 +300,10 @@ sub _task_status {
 
     my $data = {};
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
-        $data->{'hostgroups'} = [values $self->_summarize_hostgroup_query($c, $types->{'hostgroups'})];
+        $data->{'hostgroups'} = [values %{$self->_summarize_hostgroup_query($c, $types->{'hostgroups'})}];
     }
     if(scalar keys %{$types->{'servicegroups'}} > 0) {
-        $data->{'servicegroups'} = [values $self->_summarize_servicegroup_query($c, $types->{'servicegroups'})];
+        $data->{'servicegroups'} = [values %{$self->_summarize_servicegroup_query($c, $types->{'servicegroups'})}];
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
