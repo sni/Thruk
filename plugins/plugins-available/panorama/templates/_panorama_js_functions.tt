@@ -501,6 +501,7 @@ var TP = {
             Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
+        if(data == '') { data = {}; }
 
         // stop everything
         this.stopRotatingTabs();

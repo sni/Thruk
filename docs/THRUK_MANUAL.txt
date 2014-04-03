@@ -2298,7 +2298,7 @@ Valid options are 'cookie' or 'server'. Cookie store is useful for demo systems
 where lot people share the same account.
 
 ==== default_view
-Can be either the string of an exported view or path to a file with exported view.
+Contains path to a file with a saved exported view.
 
 ==== readonly
 Make panorama dashboard readonly. The user cannot add, remove or

@@ -20,6 +20,7 @@ next:
           - Panorama View:
             - background can be change in dashboard settings
             - changed internal storage format
+            - default_view can no longer be a string, its always a file now
             - fixed panlet cluttering when opening dashboard with smaller screens
             - fixed state not being saved in some conditions
           - Bug Fixes

@@ -184,12 +184,14 @@ sub _js {
     my $default_file = $c->config->{'Thruk::Plugin::Panorama'}->{'default_view'};
     if($default_file) {
         my $default_view = $default_file;
-        if(-e $default_file) {
+        if(!-e $default_file) {
+            $c->log->info("Panorama defaults file (".$default_file.") not readable: ".$!);
+        } else {
             $default_view = read_file($default_file);
+            chomp($default_view);
+            $default_view =~ s/\s*\#.*?$//gmx;
+            $default_view =~ s/\s//gmx;
         }
-        chomp($default_view);
-        $default_view =~ s/\s*\#.*?$//gmx;
-        $default_view =~ s/\s//gmx;
         $c->stash->{default_view} = $default_view;
     }
 
