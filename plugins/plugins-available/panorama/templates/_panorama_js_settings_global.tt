@@ -159,9 +159,9 @@ TP.settingsWindow = function() {
                 var form = This.down('form').getForm();
                 // reset backends to global ones
                 tab.xdata.backends = [];
-                for(var nr=0; nr<initial_backends.length; nr++) {
-                    if(initial_backends[nr].state != 2) {
-                        tab.xdata.backends.push(nr);
+                for(var key in initial_backends) {
+                    if(initial_backends[key].state != 2) {
+                        tab.xdata.backends.push(key);
                     }
                 }
                 TP.setRefreshText(tab.xdata, 'rotate_tabs', 'rotate_tabs_txt');
@@ -188,9 +188,9 @@ TP.settingsWindow = function() {
 
 /* set backends from list */
 TP.setBackends = function(backends) {
-    for(var nr=0; nr<initial_backend_states.length; nr++) {
-        initial_backend_states[nr] = 2;
-        initial_backends[nr].state = 2;
+    for(var key in initial_backend_states) {
+        initial_backend_states[key] = 2;
+        initial_backends[key].state = 2;
     }
     for(var nr=0; nr<backends.length; nr++) {
         var b = backends[nr];
