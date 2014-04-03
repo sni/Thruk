@@ -449,24 +449,27 @@ sub _redirect_or_success {
                                 'WaitCondition' => $waitcondition,
                             }
                 };
-                if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
-                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
-                    $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
-                                                       { 'name' => $c->stash->{'lasthost'} } ],
-                                            columns => [ 'name' ],
-                                            options => $options
-                                        );
-                }
-                if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
-                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
-                    $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
-                                                          { 'host_name'   => $c->stash->{'lasthost'} },
-                                                          { 'description' => $c->stash->{'lastservice'} }
-                                                         ],
-                                              columns => [ 'description' ],
-                                              options => $options
+                eval { # this query is not critical, so it can safely fail
+                    if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
+                        $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
+                        $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                           { 'name' => $c->stash->{'lasthost'} } ],
+                                                columns => [ 'name' ],
+                                                options => $options
                                             );
-                }
+                    }
+                    if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
+                        $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
+                        $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                                                              { 'host_name'   => $c->stash->{'lasthost'} },
+                                                              { 'description' => $c->stash->{'lastservice'} }
+                                                             ],
+                                                  columns => [ 'description' ],
+                                                  options => $options
+                                                );
+                    }
+                };
+                $c->log->debug(Dumper($@)) if $@;
                 if(defined $c->stash->{'additional_wait'}) {
                     sleep(1);
                 }
