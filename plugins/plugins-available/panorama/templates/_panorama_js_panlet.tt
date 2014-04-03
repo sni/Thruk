@@ -157,8 +157,8 @@
                     name:       'title'
                 }, {
                     xtype:      'tp_slider',
+                    fieldLabel: 'Refresh Rate',
                     formConf: {
-                        fieldLabel: 'Refresh Rate',
                         value:      60,
                         nameS:      'refresh',
                         nameL:      'refresh_txt'

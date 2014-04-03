@@ -8,36 +8,34 @@ TP.settingsWindow = function() {
     var settings_form = new Ext.form.Panel({
         bodyPadding: 5,
         border:      0,
-        defaults: {
-            labelWidth:  120,
-            anchor: '99%'
-        },
+        defaults:  { labelWidth:  120 },
         items: [{
             /* global refresh rate */
             xtype:      'tp_slider',
+            fieldLabel: 'Global Refresh Rate',
             formConf: {
-                fieldLabel: 'Global Refresh Rate',
                 value:      60,
                 minValue:   0,
                 nameS:      'refresh',
                 nameL:      'refresh_txt'
             }
-        }, new Ext.form.CheckboxGroup({
+        }, {
             /* global backends */
             id:         'global_backends',
             fieldLabel: 'Backends / Sites',
             xtype:      'checkboxgroup',
             vertical:   true,
             columns:    6,
+            style:      'padding-left: 0;',
             defaults:    {
                 style:      'white-space: nowrap; margin-right: 6px;'
             },
             items:      []
-        }), {
+        }, {
             /* rotating tabs */
             xtype:      'tp_slider',
+            fieldLabel: 'Rotate Tabs',
             formConf: {
-                fieldLabel: 'Rotate Tabs',
                 value:      0,
                 minValue:   0,
                 nameS:      'rotate_tabs',
@@ -55,10 +53,13 @@ TP.settingsWindow = function() {
             name:       'autohideheader'
         }, {
             /* Import / Export */
-            xtype: 'panel',
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
+            fieldLabel: 'Import/Export',
+            xtype: 'fieldcontainer',
+            border: false,
+            layout: 'table',
+            defaults: {
+                style: 'margin-right: 5px;',
+                width: 120
             },
             items: [{
                 xtype: 'button',

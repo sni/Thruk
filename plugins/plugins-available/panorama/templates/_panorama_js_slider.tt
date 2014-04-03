@@ -1,5 +1,5 @@
 ﻿Ext.define('TP.Slider', {
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.form.FieldContainer',
 
     alias:  'widget.tp_slider',
 
@@ -25,7 +25,7 @@
             change: function(s) {
                 var form    = s.up('form').getForm();
                 var v       = s.getValue();
-                var label   = s.up('panel').formConf.nameL;
+                var label   = s.up().formConf.nameL;
                 var newv    = {};
                 newv[label] = TP.sliderValue2Txt(v);
                 form.setValues(newv);
@@ -36,14 +36,12 @@
         margin:    '0 0 0 10',
         readOnly:  true,
         cellCls:   'slider_txt',
-        readOnly:  true,
         size:      4,
         maxLength: 7
     }],
 
     initComponent: function() {
         this.callParent();
-        this.items.getAt(0).fieldLabel = this.formConf.fieldLabel;
         this.items.getAt(0).value      = this.formConf.value;
         this.items.getAt(0).name       = this.formConf.nameS;
         if(this.formConf.minValue != undefined) {

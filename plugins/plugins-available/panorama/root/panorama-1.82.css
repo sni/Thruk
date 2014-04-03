@@ -416,3 +416,7 @@ TABLE.ministatus TH {
   font-weight: bold;
 }
 .miniEmpty { background: #FFFFFF !important; }
+
+.x-form-checkboxgroup-body {
+    padding-left: 0;
+}
