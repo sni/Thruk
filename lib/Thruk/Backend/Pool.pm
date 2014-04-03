@@ -7,6 +7,7 @@ use Carp qw/confess/;
 
 use Thruk::Pool::Simple;
 use Thruk::Backend::Peer;
+use Thruk::Utils::IO;
 use Config::General;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
@@ -296,6 +297,10 @@ sub init_backend_thread_pool {
         if($config->{'use_shadow_naemon'}) {
             die("missing configuration option: shadow_naemon_dir") unless $config->{'shadow_naemon_dir'};
             $use_shadow_naemon = $config->{'shadow_naemon_dir'};
+            eval {
+                Thruk::Utils::IO::mkdir_r($config->{'shadow_naemon_dir'}) ;
+            };
+            die("could not create shadow_naemon_dir ".$config->{'shadow_naemon_dir'}.': '.$@) if $@;
         }
     }
 
