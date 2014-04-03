@@ -487,14 +487,20 @@ var TP = {
     },
     /* import tabs from string */
     importAllTabs: function(data) {
+        // strip off comments
+        data = data.replace(/\s*\#.*/g, '').replace(/\n/g, '');
         try {
             data = cp.decodeValue(decode64(data));
         }
         catch(e) {
-            Ext.MessageBox.alert('Failed', 'Import Failed!');
-            return;
+            debug(e);
+            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+            return(false);
         }
-        if(data == undefined || data == '') { data = {} }
+        if(data == undefined || data == '') {
+            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+            return(false);
+        }
 
         // stop everything
         this.stopRotatingTabs();
@@ -503,6 +509,7 @@ var TP = {
         cp.clearAll();
         cp.loadData(data);
         window.setTimeout("window.location.reload()", 1000);
+        return(true);
     },
     /* eval response data */
     getResponse: function(panlet, response, no_json) {
