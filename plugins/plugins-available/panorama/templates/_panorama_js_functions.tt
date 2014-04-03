@@ -459,6 +459,7 @@ var TP = {
         if(tabpan.xdata.refresh > 0) {
             TP.timeouts['global'] = window.setInterval(TP.updateAllIcons, tabpan.xdata.refresh * 1000);
         }
+        TP.updateAllIcons();
         if(TP.initMask) { TP.initMask.destroy() }
     },
     stopAllPanelRefresh: function() {
@@ -765,6 +766,7 @@ var TP = {
             var p = panels[nr];
             if(id && p.id != id) { continue; }
             if(p.xdata && p.xdata.general) {
+                /* update services */
                 if(p.xdata.general.service && p.xdata.general.host) {
                     if(req.services[p.xdata.general.host] == undefined) {
                         req.services[p.xdata.general.host] = {};
@@ -776,21 +778,25 @@ var TP = {
                     req.services[p.xdata.general.host][p.xdata.general.service] = 1;
                     ref.services[p.xdata.general.host][p.xdata.general.service].push(p);
                 }
+                /* update hosts */
                 else if(p.xdata.general.host) {
                     if(ref.hosts[p.xdata.general.host] == undefined) { ref.hosts[p.xdata.general.host] = []; }
                     req.hosts[p.xdata.general.host] = 1;
                     ref.hosts[p.xdata.general.host].push(p);
                 }
+                /* update hostgroups */
                 else if(p.xdata.general.hostgroup) {
                     if(ref.hostgroups[p.xdata.general.hostgroup] == undefined) { ref.hostgroups[p.xdata.general.hostgroup] = []; }
                     req.hostgroups[p.xdata.general.hostgroup] = 1;
                     ref.hostgroups[p.xdata.general.hostgroup].push(p);
                 }
+                /* update servicegroups */
                 else if(p.xdata.general.servicegroup) {
                     if(ref.servicegroups[p.xdata.general.servicegroup] == undefined) { ref.servicegroups[p.xdata.general.servicegroup] = []; }
                     req.servicegroups[p.xdata.general.servicegroup] = 1;
                     ref.servicegroups[p.xdata.general.servicegroup].push(p);
                 }
+                /* update sites */
                 else if(p.xdata.general.site) {
                     if(ref.sites[p.xdata.general.site] == undefined) { ref.sites[p.xdata.general.site] = []; }
                     ref.sites[p.xdata.general.site].push(p);
@@ -803,21 +809,28 @@ var TP = {
             params: { types: Ext.JSON.encode(req) },
             callback: function(options, success, response) {
                 if(!success) {
-                    // not yet handled:
-                    // add global error indicator
+                    if(response.status == 0) {
+                        TP.Msg.msg("fail_message~~refreshing status failed");
+                    } else {
+                        TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText);
+                    }
                 } else {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
+                    /* update hosts */
                     if(data.hosts) {
                         for(var x=0; x<data.hosts.length; x++) {
                             var name  = data.hosts[x]['name'];
                             var state = data.hosts[x]['state'];
+                            if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
                             for(var y=0; y<ref.hosts[name].length; y++) {
                                 ref.hosts[name][y].host = data.hosts[x];
                                 ref.hosts[name][y].refreshHandler(state);
                             }
+                            delete ref.hosts[name];
                         }
                     }
+                    /* update hostgroups */
                     if(data.hostgroups) {
                         for(var x=0; x<data.hostgroups.length; x++) {
                             var name  = data.hostgroups[x]['name'];
@@ -826,8 +839,10 @@ var TP = {
                                 ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
                                 ref.hostgroups[name][y].refreshHandler();
                             }
+                            delete ref.hostgroups[name];
                         }
                     }
+                    /* update servicegroups */
                     if(data.servicegroups) {
                         for(var x=0; x<data.servicegroups.length; x++) {
                             var name  = data.servicegroups[x]['name'];
@@ -836,19 +851,24 @@ var TP = {
                                 ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
                                 ref.servicegroups[name][y].refreshHandler();
                             }
+                            delete ref.servicegroups[name];
                         }
                     }
+                    /* update services */
                     if(data.services) {
                         for(var x=0; x<data.services.length; x++) {
                             var hst   = data.services[x]['host_name'];
                             var svc   = data.services[x]['description'];
                             var state = data.services[x]['state'];
+                            if(data.services[x]['has_been_checked'] == 0) { state = 4; }
                             for(var y=0; y<ref.services[hst][svc].length; y++) {
                                 ref.services[hst][svc][y].service = data.services[x];
                                 ref.services[hst][svc][y].refreshHandler(state);
                             }
+                            delete ref.services[hst][svc];
                         }
                     }
+                    /* update sites */
                     if(data.backends) {
                         for(var key in data.backends) {
                             var name = data.backends[key].name;
@@ -857,6 +877,28 @@ var TP = {
                                     ref.sites[name][x].site = data.backends[key];
                                     ref.sites[name][x].refreshHandler();
                                 }
+                            }
+                            delete ref.sites[name];
+                        }
+                    }
+
+                    /* mark remaining as unknown */
+                    var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites'];
+                    for(var x=0; x<keys.length; x++) {
+                        var name = keys[x];
+                        for(var key in ref[name]) {
+                            for(var y=0; y<ref[name][key].length; y++) {
+                                ref[name][key][y].refreshHandler(3);
+                                delete ref[name][key][y][name];
+                            }
+                        }
+                    }
+                    // mark unknown services
+                    for(var key in ref.services) {
+                        for(var key2 in ref.services[key]) {
+                            for(var y=0; y<ref.services[key][key2].length; y++) {
+                                ref.services[key][key2][y].refreshHandler(3);
+                                delete ref.services[key][key2][y]['service'];
                             }
                         }
                     }

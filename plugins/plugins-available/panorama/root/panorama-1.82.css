@@ -247,7 +247,7 @@ DIV.msg {
     position:absolute;
     left:35%;
     top:10px;
-    width:300px;
+    width:350px;
     z-index:20000;
 }
 #msg-div .msg {
@@ -365,3 +365,54 @@ DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
 DIV.hideRightArrow IMG.x-menu-item-arrow {
     display: none;
 }
+
+TABLE.iconDetails {
+  width: 100%;
+  padding: 3px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: #FFFFFF;
+}
+TABLE.iconDetails TH {
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: top;
+  border: 1px solid #AAAAAA;
+  padding: 2px;
+  padding-right: 4px;
+  width: 120px;
+}
+TABLE.iconDetails TD {
+  text-align: left;
+  border: 1px solid #AAAAAA;
+  padding: 2px;
+}
+
+TABLE.ministatus {
+  padding: 0px;
+  margin: 0px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: #FFFFFF;
+  width: 100%;
+  border: 0;
+}
+TABLE.ministatus TD, TABLE.ministatus TH {
+  border-right: 0;
+  border-bottom: 0;
+  border-top: 1px solid #AAAAAA;
+  border-left: 1px solid #AAAAAA;
+  text-align: center;
+  width: 20%;
+}
+TABLE.ministatus TR:first-child TD, TABLE.ministatus TR:first-child TH {
+  border-top: 1px solid #FFFFFF;
+}
+TABLE.ministatus TD:first-child, TABLE.ministatus TH:first-child {
+  border-left: 1px solid #FFFFFF;
+}
+TABLE.ministatus TH {
+  font-weight: bold;
+}
+.miniEmpty { background: #FFFFFF !important; }

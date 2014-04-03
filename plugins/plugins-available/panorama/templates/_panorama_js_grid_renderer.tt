@@ -52,18 +52,37 @@ TP.render_on_off = function(v, td, item) {
     return "Off";
 }
 
+/* return text status for service */
+TP.text_host_status = function(v) {
+    var state = 'Unknown';
+         if(v==0) { state = 'Up';          }
+    else if(v==1) { state = 'Unreachable'; }
+    else if(v==2) { state = 'Down';        }
+    else if(v==4) { state = 'Pending';     }
+    return(state);
+}
+
 /* render host status */
 TP.render_host_status = function(v, td, item) {
     var state;
     if(item.data.has_been_checked==0) {
         state = 'Pending';
+    } else {
+        state = TP.text_host_status(v);
     }
-    else if(v==0) { state = 'Up';          }
-    else if(v==1) { state = 'Unreachable'; }
-    else if(v==2) { state = 'Down';        }
 
     td.tdCls = state.toUpperCase();
     return state;
+}
+
+/* return text status for service */
+TP.text_service_status = function(v) {
+    var state = 'Unknown';
+         if(v==0) { state = 'Ok';       }
+    else if(v==1) { state = 'Warning';  }
+    else if(v==2) { state = 'Critical'; }
+    else if(v==4) { state = 'Pending';  }
+    return(state);
 }
 
 /* render service status */
@@ -71,11 +90,9 @@ TP.render_service_status = function(v, td, item) {
     var state;
     if(item.data.has_been_checked==0) {
         state = 'Pending';
+    } else {
+        state = TP.text_service_status(v);
     }
-    else if(v==0) { state = 'Ok';       }
-    else if(v==1) { state = 'Warning';  }
-    else if(v==2) { state = 'Critical'; }
-    else if(v==3) { state = 'Unknown';  }
 
     td.tdCls = state.toUpperCase();
     return state;

@@ -304,7 +304,7 @@ sub _task_status {
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
-        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state scheduled_downtime_depth acknowledged last_state_change/]);
+        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number/]);
     }
     if(scalar keys %{$types->{'services'}} > 0) {
         my $filter = [];
@@ -314,7 +314,7 @@ sub _task_status {
             }
         }
         $filter = Thruk::Utils::combine_filter('-or', $filter);
-        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state scheduled_downtime_depth acknowledged last_state_change/]);
+        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number/]);
     }
 
     $data->{backends} = $c->stash->{'backend_detail'};
@@ -1268,8 +1268,8 @@ sub _summarize_hostgroup_query {
 ##########################################################
 sub _summarize_servicegroup_query {
     my($self, $c, $type_groups) = @_;
-    my $filter   = Thruk::Utils::combine_filter('-or', [map {{ name => $_ }} keys %{$type_groups}]);
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description host_groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
+    my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $servicegroups = {};
     for my $svc (@{$services}) {
         for my $grp (@{$svc->{'groups'}}) {
