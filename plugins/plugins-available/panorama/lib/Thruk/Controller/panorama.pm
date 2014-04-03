@@ -188,6 +188,7 @@ sub _js {
             $default_view = read_file($default_file);
         }
         chomp($default_view);
+        $default_view =~ s/\s*\#.*?$//gmx;
         $default_view =~ s/\s//gmx;
         $c->stash->{default_view} = $default_view;
     }
