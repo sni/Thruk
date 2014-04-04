@@ -175,6 +175,20 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   }
 }
 
+/* remove element from close elements list */
+function remove_close_element(id) {
+    var new_elems = [];
+    jQuery.each(close_elements, function(key, value) {
+        if(value[0] != id) {
+            new_elems.push(value);
+        }
+    });
+    close_elements = new_elems;
+    if(new_elems.length == 0) {
+        removeEvent(document, 'click', close_and_remove_event);
+    }
+}
+
 /* close and remove eventhandler */
 function close_and_remove_event(evt) {
     evt = (evt) ? evt : ((window.event) ? event : null);
@@ -3016,6 +3030,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
   }
   if(!toggleElement(search_prefix+panel, undefined, true)) {
     accept_filter_types(search_prefix, checkbox_name, input_name, checkbox_prefix);
+    remove_close_element(search_prefix+panel);
   } {
     set_filter_types(search_prefix, input_name, checkbox_prefix);
   }
