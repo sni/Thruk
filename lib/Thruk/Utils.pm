@@ -2166,7 +2166,9 @@ sub check_shadow_naemon_procs {
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
-        my $pidfile = $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.pid';
+        my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
+        Thruk::Utils::IO::mkdir_r($basedir.'/tmp');
+        my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         my $started = 0;
         if(-s $pidfile) {
             my $pid = read_file($pidfile);
@@ -2176,7 +2178,7 @@ sub check_shadow_naemon_procs {
         }
         if(!$started) {
             $log_missing->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}))) if $log_missing;
-            my $cmd = sprintf("%s -d -i %s -o %s%s",
+            my $cmd = sprintf("%s -d -i %s -o %s%s >> %s/tmp/shadownaemon.log 2>&1",
                               $config->{'shadow_naemon_bin'} || 'shadownaemon',
                               $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},
                               $config->{'shadow_naemon_dir'}.'/'.$key,
