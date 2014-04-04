@@ -179,7 +179,7 @@ sub set_default_config {
         'perf_bar_mode'                     => 'match',
         'sitepanel'                         => 'auto',
         'ssl_verify_hostnames'              => 1,
-        'precompile_templates'              => 1,
+        'precompile_templates'              => 0,
         'report_use_temp_files'             => 14,
         'report_max_objects'                => 1000,
         'perf_bar_pnp_popup'                => 1,

@@ -1987,6 +1987,7 @@ precompile and load templates into memory
 
 sub precompile_templates {
     my($c) = @_;
+    return if $c->config->{'precompile_templates'} == 2;
     my $t0 = [gettimeofday];
     my @includes;
     push @includes, @{$c->config->{templates_paths}} if $c->config->{templates_paths};
@@ -2031,7 +2032,7 @@ sub precompile_templates {
     };
     $c->log->error($@) if $@;
 
-    $c->config->{'precompile_templates'} = 0;
+    $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
     my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
     $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));

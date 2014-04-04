@@ -56,7 +56,7 @@ sub index :Path :Args(0) {
             $c->config->{'started'} = 1;
             $c->log->info("started ($$)");
             $c->stash->{'text'} = 'startup done';
-            if($c->config->{'precompile_templates'}) {
+            if(defined $c->{'request'}->{'headers'}->{'user-agent'} and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/wget/mix)) {
                 # compile templates in background
                 $c->run_after_request('Thruk::Utils::precompile_templates($c)');
             }
@@ -66,11 +66,11 @@ sub index :Path :Args(0) {
 
     # compile request?
     if($action eq 'compile' or exists $c->{'request'}->{'parameters'}->{'compile'}) {
-        if($c->config->{'precompile_templates'}) {
+        if($c->config->{'precompile_templates'} == 2) {
+            $c->stash->{'text'} = 'already compiled';
+        } else {
             $c->stash->{'text'} = Thruk::Utils::precompile_templates($c);
             $c->log->info($c->stash->{'text'});
-        } else {
-            $c->stash->{'text'} = 'disabled or already compiled';
         }
         return;
     }
