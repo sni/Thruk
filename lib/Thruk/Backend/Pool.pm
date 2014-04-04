@@ -262,6 +262,10 @@ init thread connection pool
 
 sub init_backend_thread_pool {
     our($peer_order, $peers, $pool, $pool_size);
+
+    # change into home folder so we can use relative paths
+    chdir($ENV{'OMD_ROOT'}) if $ENV{'OMD_ROOT'};
+
     if(defined $peers) {
         return;
     }
