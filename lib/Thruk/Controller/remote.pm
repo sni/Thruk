@@ -56,7 +56,7 @@ sub index :Path :Args(0) {
             $c->config->{'started'} = 1;
             $c->log->info("started ($$)");
             $c->stash->{'text'} = 'startup done';
-            if(defined $c->{'request'}->{'headers'}->{'user-agent'} and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/wget/mix)) {
+            if(defined $c->{'request'}->{'headers'}->{'user-agent'} and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/wget/mix) {
                 # compile templates in background
                 $c->run_after_request('Thruk::Utils::precompile_templates($c)');
             }
