@@ -1359,7 +1359,7 @@ sub get_action_url {
         return($action_url);
     }
 
-    if ($action_url =~ m|/render/|mx) {
+    if ($action_url =~ m|/render/\|/graphlot/|mx) {
         my $new_host = $host;
         $new_host =~ s/[^\w\-]/_/gmx;
         $new_action_url =~ s/\Q$host\E/$new_host/gmx;
