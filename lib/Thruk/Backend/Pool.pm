@@ -265,7 +265,10 @@ sub init_backend_thread_pool {
     our($peer_order, $peers, $pool, $pool_size);
 
     # change into home folder so we can use relative paths
-    chdir($ENV{'OMD_ROOT'}) if $ENV{'OMD_ROOT'};
+    if($ENV{'OMD_ROOT'}) {
+        $ENV{'HOME'} = $ENV{'OMD_ROOT'};
+        chdir($ENV{'HOME'});
+    }
 
     if(defined $peers) {
         return;
