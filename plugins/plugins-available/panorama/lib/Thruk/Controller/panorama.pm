@@ -1165,6 +1165,9 @@ sub _task_dashboard_data {
     } else {
         my $data = {};
         $self->_merge_dashboard_into_hash($dashboard, $data);
+        if($nr eq 'new') {
+            $data->{'newid'} = $dashboard->{'id'};
+        }
         $c->stash->{'json'} = { data => $data };
     }
     return $c->forward('Thruk::View::JSON');
@@ -1388,7 +1391,7 @@ sub _save_dashboard {
     $nr      =~ s/^tabpan-tab_//gmx;
     my $file = $self->{'var'}.'/'.$nr.'.tab';
 
-    my $existing = $self->_load_dashboard($c, $nr);
+    my $existing = $nr eq 'new' ? $dashboard : $self->_load_dashboard($c, $nr);
     return unless $self->_is_authorized_for_dashboard($c, $nr, $existing) == 1;
 
     if($nr eq 'new') {
@@ -1425,6 +1428,24 @@ sub _save_dashboard {
 ##########################################################
 sub _load_dashboard {
     my($self, $c, $nr) = @_;
+    if($nr eq 'new') {
+        return if $c->stash->{'readonly'};
+        my $dashboard = {
+            tab     => {
+                xdata => {
+                    title           => 'Dashboard',
+                    refresh         => $c->stash->{'refresh'},
+                    backends        => [],
+                    background      => 'none',
+                    autohideheader  => 1,
+                }
+            },
+            id      => 'new'
+        };
+        $dashboard = $self->_save_dashboard($c, $dashboard);
+        return $dashboard;
+    }
+
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $self->{'var'}.'/'.$nr.'.tab';
     return unless -s $file;

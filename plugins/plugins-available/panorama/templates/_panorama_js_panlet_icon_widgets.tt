@@ -263,7 +263,7 @@ TP.iconShowEditDialog = function(This) {
                     panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
-                    TP.updateAllIcons(panel.id);
+                    TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
                     delete panel.settingsWindow;
                     settingsWindow.destroy();
                     This.firstRun = false;

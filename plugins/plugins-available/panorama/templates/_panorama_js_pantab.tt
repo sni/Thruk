@@ -15,14 +15,6 @@
         } else {
             this.xdata = TP.clone(this.xdata);
         }
-        this.xdata.background     = 'none';
-        this.xdata.title          = 'Dashboard';
-        this.xdata.refresh        = 60;
-        this.xdata.backends       = [];
-        [%+ FOREACH b = backend_detail.keys %]
-        [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
-        [% END +%]
-        this.xdata.autohideheader = true;
 
         // fetch window ids from ExtState
         this.window_ids = [];
@@ -204,12 +196,12 @@
                 }
             }
         }
+        var This = this;
         if(tabpan.xdata.refresh > 0) {
-            var This = this;
             TP.timeouts['global_icons' + This.id] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
         }
 
-        TP.updateAllIcons();
+        TP.updateAllIcons(This);
         if(TP.initMask) { TP.initMask.destroy() }
     },
 
