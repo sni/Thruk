@@ -6,7 +6,7 @@ use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
-my @dirs = glob("./lib ./plugins/plugins-available/*/lib");
+my @dirs = glob("./lib/ ./plugins/plugins-available/*/lib/ templates/ ./plugins/plugins-available/*/templates/");
 for my $dir (@dirs) {
     check_remove_afters($dir.'/');
 }

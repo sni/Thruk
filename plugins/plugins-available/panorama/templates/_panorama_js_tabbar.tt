@@ -236,15 +236,9 @@ Ext.define('TP.TabBar', {
 
         /* global default setttings */
         this.xdata = {
-            refresh:        60,
             rotate_tabs:     0,
-            backends:       [],
-            server_time:    true,
-            autohideheader: false
+            server_time:    true
         }
-        [%+ FOREACH b = backend_detail.keys %]
-        [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
-        [% END +%]
 
         /* create new tab */
         var tabhead = this.getTabBar().items.getAt(0);
@@ -253,6 +247,19 @@ Ext.define('TP.TabBar', {
         });
 
         this.addListener('afterrender', function(This, eOpts) {
+            var open_tabs = [];
+            this.items.each(function(item, idx, length) {
+                var stateId = item.getStateId();
+                if(stateId) {
+                    open_tabs.push(stateId);
+                }
+            });
+            if(open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
+                debug("using default view");
+                for(var x = 0; x<default_dashboard.length; x++) {
+                    TP.add_pantab(default_dashboard[x]);
+                }
+            }
             TP.startServerTime();
         });
         if(!ExtState[this.id]) {
@@ -261,11 +268,11 @@ Ext.define('TP.TabBar', {
         }
     },
     getState: function() {
-        var item_ids = [];
+        var open_tabs = [];
         this.items.each(function(item, idx, length) {
             var stateId = item.getStateId();
             if(stateId) {
-                item_ids.push(stateId);
+                open_tabs.push(stateId);
             }
         });
         if(this.tabs_tr == undefined) {
@@ -274,15 +281,15 @@ Ext.define('TP.TabBar', {
         var tabs = Ext.query('.x-tab-closable');
         for(var nr=0; nr<tabs.length; nr++) {
             if(this.tabs_tr[tabs[nr].id] == undefined) {
-                this.tabs_tr[tabs[nr].id] = item_ids[nr];
+                this.tabs_tr[tabs[nr].id] = open_tabs[nr];
             }
         }
         var ordered_items = [];
         for(var nr=0; nr<tabs.length; nr++) {
             ordered_items.push(this.tabs_tr[tabs[nr].id]);
         }
-        if(item_ids.length == ordered_items.length) {
-            item_ids = ordered_items;
+        if(open_tabs.length == ordered_items.length) {
+            open_tabs = ordered_items;
         }
         var activeTab = this.getActiveTab();
         if(!activeTab) {
@@ -290,48 +297,57 @@ Ext.define('TP.TabBar', {
             activeTab = this.setActiveTab(0);
         }
         activeTab = activeTab.getStateId();
+
         return {
-            item_ids:  item_ids,
-            xdata:     this.xdata,
-            activeTab: activeTab
+            open_tabs:  open_tabs,
+            xdata:      this.xdata,
+            activeTab:  activeTab
         }
     },
     applyState: function(state) {
         var tmp = Ext.dom.Query.select('.x-mask');
         if(tmp.length > 0) {
+            // make sure our mask covers new windows...
             Ext.dom.Query.select('.x-mask')[0].style.zIndex         = 100000;
             Ext.dom.Query.select('.x-mask-loading')[0].style.zIndex = 100001;
         }
         try {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
-            TP.initial_create_delay_inactive = 3000; // placement of inactive panlet starts delayed
+            TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
             if(state) {
                 if(state.activeTab && TP.initial_active_tab == undefined) {
                     TP.initial_active_tab = state.activeTab;
                 }
                 this.xdata = state.xdata;
-                for(var nr=0; nr<state.item_ids.length; nr++) {
-                    TP.add_pantab(state.item_ids[nr]);
-                };
+
+                // REMOVE AFTER: 01.01.2016
+                if(state.item_ids) {
+                    for(var nr=0; nr<state.item_ids.length; nr++) {
+                        TP.add_pantab(state.item_ids[nr]);
+                    };
+                }
+
+                if(state.open_tabs) {
+                    for(var nr=0; nr<state.open_tabs.length; nr++) {
+                        var name = state.open_tabs[nr];
+                        TP.add_pantab(state.open_tabs[nr]);
+                    };
+                }
                 this.setActiveTab(state.activeTab);
                 Ext.apply(this, state);
             }
-            TP.startRotatingTabs();
-            TP.startServerTime();
+            window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_inactive);
         } catch(e) {
             debug(e);
             if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
-                [%+ IF stateprovider == 'cookie' +%]
-                try { cp.clearAll(); } catch(e) {}
-                [%+ END +%]
                 window.location = 'panorama.cgi?clean=1';
             }
         }
         if(TP.initMask) {
             window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive);
         }
-    }
-    ,items: [{
+    },
+    items: [{
         title: '',
         closable: false,
         iconCls: 'new-tab',
@@ -352,5 +368,46 @@ Ext.define('TP.TabBar', {
                 return false;
             }
         }
-    }]
+    }],
+
+    /* start all timed actions all tabs all panels */
+    startTimeouts: function() {
+        TP.initialized = true;
+        this.stopTimeouts();
+
+        // REMOVE AFTER: 01.01.2016
+        delete this.xdata['refresh'];
+        delete this.xdata['autohideheader'];
+        delete this.xdata['backends'];
+        if(TP.reload_required) {
+            Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...").toFront();
+            window.setTimeout(function() { cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
+            return;
+        }
+
+        var activeTab = this.getActiveTab();
+        if(!activeTab) {
+            activeTab = this.setActiveTab(0);
+        }
+
+        TP.startRotatingTabs();
+        TP.startServerTime();
+        this.items.each(function(tab) {
+            if(tab.startTimeouts) {
+                tab.startTimeouts();
+            }
+        });
+
+    },
+
+    /* stop all timed actions all tabs all panels */
+    stopTimeouts: function() {
+        TP.stopRotatingTabs();
+        TP.stopServerTime();
+        this.items.each(function(tab) {
+            if(tab.stopTimeouts) {
+                tab.stopTimeouts();
+            }
+        });
+    }
 });

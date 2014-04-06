@@ -1,0 +1,177 @@
+﻿/* combine settings by tab */
+function setStateByTab(state) {
+    var data = {};
+    for(var key in state) {
+        if(key == 'tabpan') { data.tabpan = state[key]; }
+        if(key.search(/tabpan-tab_\d+$/) != -1) {
+            if(data[key] == undefined) { data[key] = {}; }
+            data[key].tab = state[key];
+        }
+        var matches = key.match(/(tabpan-tab_\d+)_(.*)$/);
+        if(matches) {
+            var tab_id = matches[1];
+            if(data[tab_id] == undefined) { data[tab_id] = {}; }
+            data[tab_id][key] = state[key];
+        }
+    }
+    for(var key in data) {
+        if(key != 'tabpan') {
+            data[key] = Ext.JSON.encode(data[key]);
+        }
+    }
+    return(data);
+}
+
+/* extends state provider by saving states via http */
+Ext.state.HttpProvider = function(config){
+    Ext.state.HttpProvider.superclass.constructor.call(this);
+    this.url       = '';
+    this.saveDelay = 500;
+    Ext.apply(this, config);
+    this.state = this.readValues();
+};
+
+Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
+    set: function(name, value) {
+        if(typeof value == "undefined" || value === null) {
+            this.clear(name);
+            return;
+        }
+        this.setValue(name, value);
+        Ext.state.HttpProvider.superclass.set.call(this, name, value);
+    },
+
+    clear: function(name) {
+        this.clearValue(name);
+        Ext.state.HttpProvider.superclass.clear.call(this, name);
+    },
+
+    /* read initial states */
+    readValues: function() {
+        var state = {};
+        for (var key in ExtState) {
+            if(key!='remove') {
+                // new is json already
+                try {
+                    state[key] = Ext.JSON.decode(ExtState[key]);
+                } catch(e) {
+                    // REMOVE AFTER: 01.01.2016
+                    // old style is just decoded
+                    if(state[key] == undefined) {
+                        state[key] = this.decodeValue(ExtState[key]);
+                        ExtState[key] = Ext.JSON.encode(state[key]);
+                        // save in new format
+                        this.queueChanges();
+                        TP.reload_required = true;
+                    }
+                }
+            }
+        }
+
+        // REMOVE AFTER: 01.01.2016
+        if(ExtStateSplit == false) {
+            this.lastdata = Ext.JSON.encode(ExtState);
+        }
+
+        else {
+            /* set initial data which we can later check against to reduce number of update querys */
+            this.lastdata = setStateByTab(ExtState);
+        }
+        return state;
+    },
+
+    /* sets value by name */
+    setValue: function(name, value) {
+        encoded = Ext.JSON.encode(value);
+        if(ExtState[name] != undefined && ExtState[name] == encoded) {
+            return;
+        }
+        ExtState[name] = encoded;
+        this.queueChanges();
+    },
+
+    /* removes value by name */
+    clearValue: function(name) {
+        delete ExtState[name];
+        this.queueChanges();
+    },
+
+    /* clear all values */
+    clearAll: function() {
+        for(var key in ExtState) {
+            this.clear(key);
+        }
+        this.saveChanges();
+    },
+
+    /* set state from object */
+    loadData: function(data) {
+        ExtState = {};
+        for(var key in data) {
+            this.set(key, data[key]);
+            ExtState[key] = Ext.JSON.encode(data[key]);
+        }
+        this.saveChanges();
+    },
+
+    /* queue save changes */
+    queueChanges: function() {
+        window.clearTimeout(this.interval);
+        this.interval = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
+    },
+
+    /* send changes back to server */
+    saveChanges: function(async) {
+        [% IF readonly %]return;[% END %]
+        if(!TP.initialized) { return; }
+        if(async == undefined) { async = true; }
+
+        // REMOVE AFTER: 01.01.2016
+        if(ExtStateSplit == false) {
+            var sum = Ext.JSON.encode(ExtState);
+            if(sum == this.lastdata) {
+                return;
+            }
+            this.lastdata = sum;
+            var params = { task:  'update' };
+            for (var key in ExtState) {
+                // save data json encoded
+                params[key] = ExtState[key];
+            }
+            var conn = new Ext.data.Connection();
+            conn.request({ url: this.url, params: params, async: async });
+            return;
+        }
+
+        /* seperate state by dashboards */
+        var data    = setStateByTab(ExtState);
+        var params  = {};
+        var changed = 0;
+        for(var key in data) {
+            if(!this.lastdata[key] || data[key] != this.lastdata[key]) {
+                params[key] = data[key];
+                changed++;
+            }
+        }
+        if(changed == 0) { return; }
+        this.lastdata = data;
+        params.task   = 'update2';
+        var conn      = new Ext.data.Connection();
+        conn.request({
+            url:    this.url,
+            params: params,
+            async: async,
+            success: function(response, opts) {
+                // allow response to contain cookie messages
+                TP.getResponse(undefined, response, false);
+            }
+        });
+    }
+});
+
+
+/* create state provider */
+var cp = new Ext.state.HttpProvider({
+    url: 'panorama.cgi?state'
+});
+Ext.state.Manager.setProvider(cp);

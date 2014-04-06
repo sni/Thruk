@@ -8,6 +8,7 @@ use JSON::XS;
 use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
+use File::Copy qw/copy/;
 use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
@@ -65,6 +66,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
 
+    $self->{'var'} = $c->config->{'var_path'}.'/panorama';
+    Thruk::Utils::IO::mkdir_r($self->{'var'});
+
     if(defined $c->request->query_keywords) {
         if($c->request->query_keywords eq 'state') {
             return($self->_stateprovider($c));
@@ -79,6 +83,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         my $task = $c->request->parameters->{'task'};
         if($task eq 'status') {
             return($self->_task_status($c));
+        }
+        elsif($task eq 'dashboard_data') {
+            return($self->_task_dashboard_data($c));
         }
         elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
@@ -176,27 +183,59 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 sub _js {
     my ( $self, $c, $only_data ) = @_;
 
-    my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
-    if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
-    $c->stash->{stateprovider} = $stateprovider;
+    my $data = Thruk::Utils::get_user_data($c);
+    # split old format into new separated format
+    # REMOVE AFTER: 01.01.2016
+    $c->stash->{state} = '';
+    if(defined $data->{'panorama'}->{'state'} and defined $data->{'panorama'}->{'state'}->{'tabpan'}) {
+        $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
+        if($data->{'panorama'}->{'state'}->{'tabpan'} && $data->{'panorama'}->{'state'}->{'tabpan'} !~ m/^o/mx) {
+            # migrate data, but make backup of user data before...
+            my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+            copy($file, $file.'.backup_panorama_migration');
 
-    $c->stash->{default_view} = '';
-    my $default_file = $c->config->{'Thruk::Plugin::Panorama'}->{'default_view'};
-    if($default_file) {
-        my $default_view = $default_file;
-        if(!-e $default_file) {
-            $c->log->info("Panorama defaults file (".$default_file.") not readable: ".$!);
-        } else {
-            $default_view = read_file($default_file);
-            chomp($default_view);
-            $default_view =~ s/\s*\#.*?$//gmx;
-            $default_view =~ s/\s//gmx;
+            my $state  = delete $data->{'panorama'}->{'state'};
+            my $tabpan = decode_json($state->{'tabpan'});
+            $data->{'panorama'}->{'dashboards'}->{'tabpan'} = $tabpan;
+            $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs} = [];
+            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'item_ids'};
+            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'backends'};
+            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'autohideheader'};
+            delete $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'xdata'}->{'refresh'};
+            for my $key (keys %{$state}) {
+                if($key =~ m/^tabpan\-tab/mx) {
+                    my $tabdata = decode_json($state->{$key});
+                    my $dashboard = {
+                        'id'    => 'new',
+                        'tab'   => $tabdata,
+                    };
+                    for my $id (@{$tabdata->{'xdata'}->{'window_ids'}}) {
+                        my $win = $state->{$id};
+                        next if $win eq 'null';
+                        $dashboard->{$id} = decode_json($win);
+                    }
+                    delete $tabdata->{'xdata'}->{'window_ids'};
+                    $dashboard = $self->_save_dashboard($c, $dashboard);
+                    $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'} = $key if $key eq $tabpan->{'activeTab'};
+                    push @{$data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs}}, $dashboard->{'id'};
+                }
+            }
+            Thruk::Utils::store_user_data($c, $data);
         }
-        $c->stash->{default_view} = $default_view;
     }
 
-    my $data = Thruk::Utils::get_user_data($c);
-    $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
+    # merge open dashboards into state
+    if($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
+        $c->stash->{state} = '';
+        for my $nr (@{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}}) {
+            my $dashboard = $self->_load_dashboard($c, $nr);
+            $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
+        }
+        $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'});
+    }
+
+    $c->stash->{dashboards}        = encode_json($data->{'panorama'}->{'dashboards'} || {});
+    $c->stash->{default_dashboard} = encode_json($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'} || []);
 
     unless($only_data) {
         $c->res->content_type('text/javascript; charset=UTF-8');
@@ -209,21 +248,20 @@ sub _js {
 sub _stateprovider {
     my ( $self, $c ) = @_;
 
-    my $task  = $c->request->parameters->{'task'};
-    my $value = $c->request->parameters->{'value'};
-    my $name  = $c->request->parameters->{'name'};
-
+    my $param = $c->request->parameters;
+    my $task  = $param->{'task'};
+    my $value = $param->{'value'};
+    my $name  = $param->{'name'};
+    delete $param->{'task'};
     if($c->stash->{'readonly'}) {
-        $c->stash->{'json'} = {
-            'status' => 'failed'
-        };
+        $c->stash->{'json'} = { 'status' => 'failed' };
     }
+    # REMOVE AFTER: 01.01.2016
     elsif(defined $task and ($task eq 'set' or $task eq 'update')) {
         my $data = Thruk::Utils::get_user_data($c);
         if($task eq 'update') {
             $c->log->debug("panorama: update users data");
-            $data->{'panorama'}->{'state'} = $c->request->parameters;
-            delete $data->{'panorama'}->{'state'}->{'task'};
+            $data->{'panorama'}->{'state'} = $param;
         } else {
             if($value eq 'null') {
                 $c->log->debug("panorama: removed ".$name);
@@ -242,13 +280,36 @@ sub _stateprovider {
             Thruk::Utils::store_user_data($c, $data);
         }
 
-        $c->stash->{'json'} = {
-            'status' => 'ok'
-        };
+        $c->stash->{'json'} = { 'status' => 'ok' };
+    }
+    elsif(defined $task and $task eq 'update2') {
+        $c->stash->{'json'} = { 'status' => 'ok' };
+        for my $key (keys %{$param}) {
+            my $param_data = decode_json($param->{$key});
+            if($key eq 'tabpan') {
+                my $data = Thruk::Utils::get_user_data($c);
+                $data->{'panorama'}->{dashboards}->{$key} = $param_data;
+                if($c->config->{'demo_mode'}) {
+                    eval { Thruk::Utils::store_user_data($c, $data) };
+                    Thruk::Utils::Filter::get_message($c);
+                } else {
+                    Thruk::Utils::store_user_data($c, $data);
+                }
+            } else {
+                next if $c->config->{'demo_mode'};
+                # update dashboards
+                for my $k2 (keys %{$param_data}) {
+                    $param_data->{$k2} = decode_json($param_data->{$k2});
+                }
+                $param_data->{'id'}   = $key;
+                $param_data->{'user'} = $c->stash->{'remote_user'};
+                if(!$self->_save_dashboard($c, $param_data)) {
+                    $c->stash->{'json'} = { 'status' => 'failed' };
+                }
+            }
+        }
     } else {
-        $c->stash->{'json'} = {
-            'status' => 'failed'
-        };
+        $c->stash->{'json'} = { 'status' => 'failed' };
     }
 
     return $c->forward('Thruk::View::JSON');
@@ -1094,6 +1155,22 @@ sub _task_service_detail {
 }
 
 ##########################################################
+sub _task_dashboard_data {
+    my($self, $c) = @_;
+    my $nr = $c->request->parameters->{'nr'} || die('no number supplied');
+    my $dashboard = $self->_load_dashboard($c, $nr);
+    if(!$dashboard) {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
+        $c->stash->{'json'} = { 'status' => 'failed' };
+    } else {
+        my $data = {};
+        $self->_merge_dashboard_into_hash($dashboard, $data);
+        $c->stash->{'json'} = { data => $data };
+    }
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
 sub _get_gearman_stats {
     my($self, $c) = @_;
 
@@ -1301,6 +1378,118 @@ sub _summarize_servicegroup_query {
         }
     }
     return($servicegroups);
+}
+
+##########################################################
+sub _save_dashboard {
+    my($self, $c, $dashboard, $extra_settings) = @_;
+
+    my $nr   = delete $dashboard->{'id'};
+    $nr      =~ s/^tabpan-tab_//gmx;
+    my $file = $self->{'var'}.'/'.$nr.'.tab';
+
+    my $existing = $self->_load_dashboard($c, $nr);
+    return unless $self->_is_authorized_for_dashboard($c, $nr, $existing) == 1;
+
+    if($nr eq 'new') {
+        # find next free number
+        $nr = 1;
+        $file = $self->{'var'}.'/'.$nr.'.tab';
+        while(-e $file) {
+            $nr++;
+            $file = $self->{'var'}.'/'.$nr.'.tab';
+        }
+    }
+
+    # preserve some settings
+    if($existing) {
+        $dashboard->{'user'}   = $existing->{'user'} || $c->stash->{'remote_user'};
+        $dashboard->{'public'} = defined $existing->{'public'} ? $existing->{'public'} : 0;
+    }
+
+    if($extra_settings) {
+        for my $key (keys %{$extra_settings}) {
+            $dashboard->{$key} = $extra_settings->{$key};
+        }
+    }
+
+    delete $dashboard->{'nr'};
+    delete $dashboard->{'id'};
+
+    Thruk::Utils::write_data_file($file, $dashboard);
+    $dashboard->{'nr'} = $nr;
+    $dashboard->{'id'} = 'tabpan-tab_'.$nr;
+    return $dashboard;
+}
+
+##########################################################
+sub _load_dashboard {
+    my($self, $c, $nr) = @_;
+    $nr       =~ s/^tabpan-tab_//gmx;
+    my $file  = $self->{'var'}.'/'.$nr.'.tab';
+    return unless -s $file;
+    my $dashboard  = Thruk::Utils::read_data_file($file);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    return unless $permission;
+    if($permission == 2) {
+        $dashboard->{'readonly'} = 1;
+    } elsif($permission == 1) {
+        $dashboard->{'readonly'} = 0;
+    }
+    $dashboard->{'nr'} = $nr;
+    $dashboard->{'id'} = 'tabpan-tab_'.$nr;
+    return $dashboard;
+}
+
+##########################################################
+# returns:
+#     0        no access
+#     1        private dashboard, readwrite access
+#     2        public dashboard, readonly access
+sub _is_authorized_for_dashboard {
+    my($self, $c, $nr, $dashboard) = @_;
+    $nr =~ s/^tabpan-tab_//gmx;
+    my $file = $self->{'var'}.'/'.$nr.'.tab';
+
+    # super user have permission for all reports
+    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+        return 1;
+    }
+
+    # does that dashboard already exist?
+    if(-s $file) {
+        $dashboard = $self->_load_dashboard($c, $nr) unless $dashboard;
+        if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
+            return 2 if $c->stash->{'readonly'};
+            return 1;
+        }
+        return 0;
+    }
+    return 2 if $c->stash->{'readonly'};
+    return 1;
+}
+
+##########################################################
+sub _merge_dashboard_into_hash {
+    my($self, $dashboard, $data) = @_;
+    return $data unless $dashboard;
+
+    my $id = $dashboard->{'id'};
+    for my $key (keys %{$dashboard}) {
+        if($key =~ m/^panlet_\d+$/mx or $key =~ m/^tabpan-tab_\d+_panlet_\d+/mx) {
+            my $pkey = $key;
+            $pkey =~ s/^tabpan-tab_\d+_//mx;
+            $data->{$id.'_'.$pkey} = encode_json($dashboard->{$key});
+        }
+        elsif($key eq 'tab') {
+            # add some values to the tab
+            for my $k (qw/user public readonly/) {
+                $dashboard->{$k} = $dashboard->{$k};
+            }
+            $data->{$id} = encode_json($dashboard->{$key});
+        }
+    }
+    return $data;
 }
 
 ##########################################################

@@ -18,7 +18,10 @@ next:
             - add maximum sla threshold to hide detail pages
             - allow multiple pnp graphs in sla reports (lkco)
           - Panorama View:
+            - cookie state_provider has been removed
             - background can be change in dashboard settings
+            - panels are not pinnable anymore
+            - tabs are now independant and can be exported and imported seperatly
             - changed internal storage format
             - default_view can no longer be a string, its always a file now
             - fixed panlet cluttering when opening dashboard with smaller screens

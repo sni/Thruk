@@ -59,7 +59,7 @@
             }
         };
 
-        var global = Ext.getCmp('tabpan');
+        var global = Ext.getCmp(this.panel_id);
         var background = 'white';
         if(global.xdata.autohideheader) {
             background = 'transparent';

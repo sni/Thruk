@@ -1,8 +1,6 @@
 ﻿Ext.define('TP.Pantab', {
     extend: 'Ext.panel.Panel',
 
-    title:       'Dashboard',
-    background:  'none',
     [% UNLESS readonly %]
     tooltip:     'double click to rename',
     closable:    true,
@@ -10,35 +8,42 @@
     closable:    false,
     [% END %]
     stateful:    true,
-    window_ids:  false,
     stateEvents: ['add', 'titlechange'],
     initComponent: function() {
-        this.callParent();
+        if(this.xdata == undefined) {
+            this.xdata = {};
+        } else {
+            this.xdata = TP.clone(this.xdata);
+        }
+        this.xdata.background     = 'none';
+        this.xdata.title          = 'Dashboard';
+        this.xdata.refresh        = 60;
+        this.xdata.backends       = [];
+        [%+ FOREACH b = backend_detail.keys %]
+        [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
+        [% END +%]
+        this.xdata.autohideheader = true;
+
+        // fetch window ids from ExtState
         this.window_ids = [];
+        for(var key in ExtState) {
+            var matches = key.match(/^(tabpan-tab_\d+)_panlet_(\d+)$/);
+            if(matches && matches[1] == this.id) {
+                this.window_ids.push(key);
+            }
+        }
+
+        this.callParent();
     },
     listeners: {
-        beforeclose: function( This, eOpts ) {
-            if(This.destroyConfirmed == undefined) {
-                Ext.Msg.confirm('Delete dashboard and all its components?', 'Do you really want to remove this dashboard with all icons and widgets?', function(button) {
-                    if (button === 'yes') {
-                        This.destroyConfirmed = true;
-                        window.setTimeout(function() { This.destroy(); }, 100);
-                    } else {
-                        This.destroyConfirmed = undefined;
-                    }
-                });
-                return false;
-            }
-            return true;
-        },
         destroy: function( This, eOpts ) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
-                if(This.window_ids[nr].xdata == undefined || !This.window_ids[nr].xdata.pinned) {
+                if(This.window_ids[nr].xdata == undefined) {
                     Ext.getCmp(This.window_ids[nr]).destroy();
                 }
             }
             var tabpan = Ext.getCmp('tabpan');
-            tabpan.item_ids = TP.removeFromList(tabpan.item_ids, This.id);
+            tabpan.open_tabs = TP.removeFromList(tabpan.open_tabs, This.id);
             cp.clear(This.id);
             // activate first tab or create new empty one
             if(!tabpan.getActiveTab()) {
@@ -72,63 +77,153 @@
         hide: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
-                if(panlet && !panlet.xdata.pinned) {
+                if(panlet) {
                     panlet.hide(false);
                 }
             }
         },
         afterrender: function(This, eOpts) {
+            if(!this.title) {
+                this.applyXdata();
+            }
             var header = This.getDockedItems()[0];
             if(header) { header.hide() }
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
-                if(panlet && !panlet.xdata.pinned) {
+                if(panlet) {
                     panlet.hide();
                 }
             }
         }
     },
     getState: function() {
-        return {
-            title:      this.title,
-            window_ids: this.window_ids,
-            background: this.background
-        }
+        var state = {
+            xdata: this.xdata
+        };
+        return state;
     },
     applyState: function(state) {
+        this.callParent(arguments);
         if(state) {
-            for(var nr=0; nr<state.window_ids.length; nr++) {
-                if(state.window_ids[nr]) {
-                    // delayed panlet creation
-                    var autoshow = false;
-                    var delay    = TP.initial_create_delay_inactive;
-                    if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
-                        autoshow = true;
-                        delay    = TP.initial_create_delay_active;
-                    }
-                    window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:state.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
+            // REMOVE AFTER: 01.01.2016
+            // migrate old settings
+            if(state.xdata == undefined) { state.xdata = {} }
+            var oldKeys = ['window_ids', 'background', 'title'];
+            for(var x=0; x<oldKeys.length; x++) {
+                var key = oldKeys[x];
+                if(state[key]) {
+                    state.xdata[key] = state[key];
+                    delete this[key];
+                    delete state[key];
+                }
+            }
+            // migrate some global settings
+            var global = Ext.getCmp('tabpan');
+            var oldGlobals = ['refresh', 'backends', 'autohideheader'];
+            for(var x=0; x<oldGlobals.length; x++) {
+                var key = oldGlobals[x];
+                if(global.xdata[key] != undefined) {
+                    state.xdata[key] = global.xdata[key];
+                }
+            }
 
-                    if(autoshow) {
-                       TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
-                    } else {
-                       TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 50;
-                    }
+            // REMOVE AFTER: 01.01.2016
+            if(state.xdata.window_ids) {
+                this.window_ids = state.xdata.window_ids;
+            }
+
+            // create panlets
+            for(var nr=0; nr<this.window_ids.length; nr++) {
+                // delayed panlet creation
+                var autoshow = false;
+                var delay    = TP.initial_create_delay_inactive;
+                if(TP.initial_active_tab != undefined && this.dashboard == TP.initial_active_tab) {
+                    autoshow = true;
+                    delay    = TP.initial_create_delay_active;
+                }
+                window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
+
+                if(autoshow) {
+                   TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
+                } else {
+                   TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 50;
                 }
             };
-            // make sure all refresh timers are running now
-            window.clearTimeout(TP.startAllPanelRefreshTimeout);
-            TP.startAllPanelRefreshTimeout = window.setTimeout(TP.startAllPanelRefresh, TP.initial_create_delay_inactive);
-            this.window_ids = state.window_ids;
-            this.setTitle(state.title);
-            this.background = state.background;
-            this.setBackground(this.background);
-            Ext.apply(this, state);
-        } else {
-            window.clearTimeout(TP.startAllPanelRefreshTimeout);
-            TP.startAllPanelRefresh();
+            Ext.apply(this.xdata, state.xdata);
         }
+        this.applyXdata();
+    },
+    applyXdata: function(xdata) {
+        if(xdata == undefined) {
+            xdata = this.xdata;
+        }
+        this.setTitle(xdata.title);
+        this.setBackground(xdata.background);
+        if(TP.initialized) {
+            this.startTimeouts();
+        }
+    },
+
+    /* start all timed actions for this tab and its panels */
+    startTimeouts: function() {
+        this.stopTimeouts();
+
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+
+        /* ensure panels from the active tab are displayed */
+        if(this.id == activeTab.id) {
+            if(this.window_ids) {
+                for(var nr=0; nr<this.window_ids.length; nr++) {
+                    var panlet = Ext.getCmp(this.window_ids[nr]);
+                    if(panlet) { // may not yet exists due to delayed rendering
+                        try {    // so allow it to fail
+                            panlet.show(false);
+                        } catch(e) { debug(e) }
+                    }
+                }
+            }
+        }
+
+        /* start refresh for all panlets with our refresh rate */
+        var panels = TP.getAllPanel(this);
+        if(panels.length > 0) {
+            // spread panel reload
+            var delay    = 0;
+            var interval = 60 / panels.length;
+            for(var nr=0; nr<panels.length; nr++) {
+                var p = panels[nr];
+                if(p.startTimeouts) {
+                    window.setTimeout(Ext.bind(p.startTimeouts, p, []), delay);
+                    delay = delay + Math.round(interval*1000);
+                }
+                if(p.header) {
+                    if(this.xdata.autohideheader) { p.header.hide() } else { p.header.show() }
+                }
+            }
+        }
+        if(tabpan.xdata.refresh > 0) {
+            var This = this;
+            TP.timeouts['global_icons' + This.id] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
+        }
+
+        TP.updateAllIcons();
+        if(TP.initMask) { TP.initMask.destroy() }
+    },
+
+    /* stop all timed actions for this tab and its panels */
+    stopTimeouts: function() {
+        /* start refresh for all panlets with our refresh rate */
+        var panels = TP.getAllPanel(this);
+        for(var nr=0; nr<panels.length; nr++) {
+            if(panels[nr].stopTimeouts) {
+                panels[nr].stopTimeouts();
+            }
+        }
+
+        window.clearInterval(TP.timeouts['global_icons' + this.id]);
     },
     setBackground: function(background) {
         if(background != undefined && background != 'none') {

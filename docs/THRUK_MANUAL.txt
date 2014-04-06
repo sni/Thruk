@@ -2286,16 +2286,10 @@ you to build your own panorama views.
 ex.:
 
   <Component Thruk::Plugin::Panorama>
-    state_provider  = server
     default_view    = /var/lib/thruk/default_panorama_view
     readonly        = 0
   </Component>
 
-
-==== state_provider
-Sets the way states between reloads are preserved.
-Valid options are 'cookie' or 'server'. Cookie store is useful for demo systems
-where lot people share the same account.
 
 ==== default_view
 Contains path to a file with a saved exported view.
@@ -2502,7 +2496,6 @@ ex.:
 
         # also available for nested components
         <Component Thruk::Plugin::Panorama>
-          state_provider  = server
           default_view    = /etc/thruk/default_panorama_view_guest
         </Component>
     </User>

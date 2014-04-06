@@ -837,8 +837,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_global.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_tab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_slider.tt
-plugins/plugins-available/panorama/templates/_panorama_js_state_provider_cookie.tt
-plugins/plugins-available/panorama/templates/_panorama_js_state_provider_http.tt
+plugins/plugins-available/panorama/templates/_panorama_js_state_provider.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tab_reorder.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tabbar.tt
 plugins/plugins-available/panorama/templates/_panorama_js_utils_base64.tt

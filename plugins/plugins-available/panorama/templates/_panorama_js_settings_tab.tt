@@ -18,11 +18,6 @@ TP.tabSettingsWindow = function() {
     var config = tab.getState();
     config.id  = tab.id;
 
-    // set defaults
-    if(config.background == undefined || config.background == "") {
-        config.background = 'none';
-    }
-
     backgrounds.load();
 
     /* the settings form */
@@ -37,17 +32,41 @@ TP.tabSettingsWindow = function() {
             /* tab title */
             xtype:      'textfield',
             name:       'title',
-            fieldLabel: 'Title',
-            value: config.title
-        },{
+            fieldLabel: 'Title'
+        }, {
+            /* global refresh rate */
+            xtype:      'tp_slider',
+            fieldLabel: 'Refresh Rate',
+            formConf: {
+                value:      config.xdata.refresh,
+                minValue:   0,
+                nameS:      'refresh',
+                nameL:      'refresh_txt'
+            }
+        }, {
             xtype:      'combobox',
             name:       'background',
             fieldLabel: 'Background',
-            store: backgrounds,
-            queryMode: 'local',
+            store:       backgrounds,
+            queryMode:  'local',
             displayField: 'image',
-            valueField: 'path',
-            value: config.background
+            valueField: 'path'
+        }, {
+            /* global backends */
+            fieldLabel: 'Backends / Sites',
+            xtype:      'checkboxgroup',
+            vertical:    true,
+            columns:     6,
+            style:      'padding-left: 0;',
+            defaults:   {
+                style:      'white-space: nowrap; margin-right: 6px;'
+            },
+            items:      []
+        }, {
+            /* auto hide panlet header */
+            xtype:      'checkbox',
+            fieldLabel: 'Hide Panlet Header',
+            name:       'autohideheader'
         }]
     });
 
@@ -59,13 +78,13 @@ TP.tabSettingsWindow = function() {
         var xdata = cp.state[tab.id];
         if(form.isValid()) {
             var values = form.getFieldValues();
-            // save title
-            tab.setTitle(values.title);
-            // save background
-            tab.background = values.background;
-            tab.setBackground(tab.background);
+            delete values['refresh_txt'];
+            Ext.apply(tab.xdata, values);
+            tab.applyXdata();
+
             // save state
             tab.saveState();
+
             // close window
             win.destroy();
             return true;
@@ -84,17 +103,56 @@ TP.tabSettingsWindow = function() {
                  text:    'save',
                  handler: settingsSave
                }
-        ]
+        ],
+        listeners: {
+            afterrender: function(This, eOpts) {
+                var tab = Ext.getCmp(config.id);
+                var form = This.down('form').getForm();
+                // reset backends to global ones
+                tab.xdata.backends = [];
+                for(var key in initial_backends) {
+                    if(initial_backends[key].state != 2) {
+                        tab.xdata.backends.push(key);
+                    }
+                }
+                TP.applyFormValues(form, tab.xdata);
+            }
+        }
     });
 
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
         autoShow:    true,
         modal:       true,
-        width:       400,
+        width:       700,
         title:       'Dashboard Settings',
         html:        '',
         buttonAlign: 'center',
         items:       [settings_panel]
     });
 };
+
+/* set backends from list */
+TP.setBackends = function(backends) {
+    for(var key in initial_backend_states) {
+        initial_backend_states[key] = 2;
+        initial_backends[key].state = 2;
+    }
+    for(var nr=0; nr<backends.length; nr++) {
+        var b = backends[nr];
+        initial_backend_states[b] = 0;
+        initial_backends[b].state = 0;
+    }
+    TP.setBackendsCookieAndRefresh(0);
+}
+
+/* set cookie and reload panels */
+var backendSelTimer;
+TP.setBackendsCookieAndRefresh = function(wait) {
+    /* save current selected backends in session cookie */
+    document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
+
+    /* reload panel */
+    window.clearTimeout(backendSelTimer);
+    backendSelTimer = window.setTimeout(TP.refreshAllSitePanel, wait);
+}

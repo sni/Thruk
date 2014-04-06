@@ -29,10 +29,9 @@
         }
         this.xdata.refresh  = -1;
         this.xdata.cls      = this.$className;
-        this.xdata.pinned   = false;
         this.xdata.backends = [];
 
-        var global = Ext.getCmp('tabpan');
+        var global = Ext.getCmp(this.panel_id);
         this.gearHandler = function() {
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
@@ -77,29 +76,7 @@
         [% IF readonly %]
         this.tools = [];
         [% ELSE %]
-        this.tools = [{
-            type: 'pin',
-            cls: 'pintool',
-            handler: function() {
-                var tabpan = Ext.getCmp('tabpan');
-                if(this.xdata.pinned) {
-                    this.xdata.pinned = false;
-                    /* make sure panlet is now connected to the active tab */
-                    TP.removeWindowFromPanels(this.id);
-                    var activeTab = tabpan.getActiveTab();
-                    activeTab.window_ids.push(this.id);
-                    activeTab.saveState();
-                } else {
-                    this.xdata.pinned = true;
-                }
-                this.saveState();
-                tabpan.saveState();
-                this.check_pintool();
-            },
-            listeners: { afterrender: function() { this.up('panel').pintool = this; }},
-            scope: this,
-            tooltip: 'make this panlet sticky'
-        }];
+        this.tools = [];
         if(this.has_search_button != undefined) {
             var This = this;
             this.tools.push({
@@ -132,8 +109,6 @@
         });
         this.callParent();
         this.gearitem = this.items.getAt(0);
-
-        this.addListener('afterlayout', function() { this.check_pintool(); });
     },
     items: [{
         /* Panlet Settings Panel */
@@ -205,7 +180,7 @@
                         win.xdata = TP.storeFormToData(form, win.xdata);
                         win.setTitle(win.xdata.title);
                         win.setFormDefaults();
-                        win.startInterval();
+                        win.startTimeouts();
                         win.saveState();
                         win.manualRefresh();
                     }
@@ -215,18 +190,19 @@
     }],
     html:       '',
     onEsc:      function() { return false; },
-    startInterval: function() {
-        this.stopInterval();
+    startTimeouts: function() {
+        if(!TP.initialized) { return; }
+        this.stopTimeouts();
         var refresh = this.xdata.refresh;
         if(this.xdata.refresh == -1) {
-            var tab = Ext.getCmp('tabpan');
+            var tab = Ext.getCmp(this.panel_id);
             refresh = tab.xdata.refresh;
         }
         if(refresh > 0) {
             this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), refresh * 1000);
         }
     },
-    stopInterval: function() {
+    stopTimeouts: function() {
         window.clearInterval(this.interval);
     },
     dd_overriden: false,
@@ -239,7 +215,7 @@
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
-            this.xdata = state.xdata;
+            Ext.apply(this, state);
             this.setTitle(state.title);
         }
     },
@@ -309,7 +285,7 @@
             [%+ END +%]
             /* make header show on mouseover only */
             var div    = This.getEl();
-            var global = Ext.getCmp('tabpan');
+            var global = Ext.getCmp(This.panel_id);
             div.on("mouseout", function()  { This.hideHeader(global); });
             div.on("mouseover", function() { This.showHeader(global); });
         },
@@ -318,13 +294,9 @@
             this.setFormDefaults();
 
             /* start refresh interval */
-            this.startInterval();
+            this.startTimeouts();
 
-            /* show all pinned panlets */
-            if(this.xdata.pinned) {
-                this.show();
-            }
-            var global = Ext.getCmp('tabpan');
+            var global = Ext.getCmp(this.panel_id);
             if(global.xdata.autohideheader || this.alwaysBorderless) { this.header.hide() }
         }
     },
@@ -336,19 +308,6 @@
         if(this.formUpdatedCallback) {
             this.formUpdatedCallback(this);
         }
-    },
-    check_pintool: function(comp) {
-        [% IF readonly %]return;[% END %]
-        /* check pin icon and position */
-        if(this.xdata.pinned) {
-            this.pintool.setType('unpin');
-        } else {
-            this.pintool.setType('pin');
-        }
-        /* move pin tool */
-        this.pintool.setPosition(0,1);
-        var head = Ext.get(this.id + '_header_hd');
-        head.setPositioning({left:'20px'});
     },
     manualRefresh: function() {
         if(this.loader != undefined) { this.loader.loadMask=true; }

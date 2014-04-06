@@ -20,9 +20,13 @@ function ucfirst(str) {
 
 /* global Thruk Panorama Object */
 var TP = {
-    snap_x: 20,
-    snap_y: 20,
-    offset_y: 25,
+    snap_x:       20,
+    snap_y:       20,
+    offset_y:     25,
+    initialized:  false,
+    timeouts:     {},
+    num_panels:   0,
+    cur_panels:   0,
 
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
@@ -36,6 +40,39 @@ var TP = {
     add_pantab: function(id) {
         var tabpan = Ext.getCmp('tabpan');
         var size   = tabpan.items.length;
+
+        /* existing tab but not yet openended */
+        if(id && cp.state[id] == undefined) {
+            /* fetch state info and add new tab as callback */
+            Ext.Ajax.request({
+                url: 'panorama.cgi?task=dashboard_data',
+                method: 'POST',
+                params: { nr: id },
+                async: false,
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        var data = TP.getResponse(undefined, response);
+                        data = data.data;
+                        for(var key in data) {
+                            cp.set(key, Ext.JSON.decode(data[key]));
+                        }
+                        if(cp.state[id]) {
+                            TP.add_pantab(id);
+                        } else {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                        }
+                    }
+                }
+            });
+            return;
+        }
+
         var nextid = TP.getNextId("tabpan-tab", id);
         if(cp.state[nextid] == undefined) {
             TP.initialized = true;
@@ -115,8 +152,8 @@ var TP = {
         if(config.state) {
             cp.set(config.conf.id, config.state);
         }
+        config.conf.panel_id = tb.id;
         var win = Ext.create(config.type, config.conf);
-        win.panel_id = tb.id;
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
             if(config.conf.pos) {
@@ -227,18 +264,15 @@ var TP = {
 
         /* get list of boxes */
         var boxes = [];
-        var tabpan = Ext.getCmp('tabpan');
-        tabpan.items.each(function(panel) {
-            if(panel.window_ids) {
-                for(var nr=0; nr<panel.window_ids.length; nr++) {
-                    var id = panel.window_ids[nr];
-                    var w  = Ext.getCmp(id);
-                    if(id != win.id && (panel.id == win.panel_id || w.xdata.pinned == true )) {
-                        boxes.push(TP.getBox(w));
-                    }
-                };
-            }
-        });
+        if(tab.window_ids) {
+            for(var nr=0; nr<tab.window_ids.length; nr++) {
+                var id = tab.window_ids[nr];
+                var w  = Ext.getCmp(id);
+                if(id != win.id && (panel.id == win.panel_id)) {
+                    boxes.push(TP.getBox(w));
+                }
+            };
+        }
 
         /* get first place which fits */
         var x = 0;
@@ -308,20 +342,24 @@ var TP = {
         }
     },
     /* return all panlets */
-    getAllPanel: function() {
+    getAllPanel: function(tab) {
         var panels = [];
-        var tabpan = Ext.getCmp('tabpan');
-        tabpan.items.each(function(panel) {
-            if(panel.window_ids) {
-                for(var nr=0; nr<panel.window_ids.length; nr++) {
-                    var id = panel.window_ids[nr];
-                    var p  = Ext.getCmp(id);
-                    if(p) { // can be undefined unless already rendered
-                        panels.push(p);
-                    }
+        if(tab == undefined) {
+            var tabpan = Ext.getCmp('tabpan');
+            tab = tabpan.getActiveTab();
+            if(!tab) {
+                tab = tabpan.setActiveTab(0);
+            }
+        }
+        if(tab.window_ids) {
+            for(var nr=0; nr<tab.window_ids.length; nr++) {
+                var id = tab.window_ids[nr];
+                var p  = Ext.getCmp(id);
+                if(p) { // can be undefined unless already rendered
+                    panels.push(p);
                 }
             }
-        });
+        }
         return panels;
     },
     /* set form values from data hash */
@@ -414,63 +452,6 @@ var TP = {
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },
-    startAllPanelRefresh: function() {
-        TP.stopAllPanelRefresh();
-        var panels = TP.getAllPanel();
-        // spread panel reload
-        if(panels.length > 30) {
-            var delay    = 0;
-            var interval = 60 / panels.length;
-            for(var nr=0; nr<panels.length; nr++) {
-                if(panels[nr].startInterval) {
-                    window.setTimeout(Ext.bind(panels[nr].startInterval, panels[nr], []), delay);
-                    delay = delay + Math.round(interval*1000);
-                }
-            }
-        } else {
-            // no delay required
-            for(var nr=0; nr<panels.length; nr++) {
-                if(panels[nr].startInterval) {
-                    panels[nr].startInterval();
-                }
-            }
-        }
-        TP.initialized = true;
-
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(!activeTab) {
-            debug("forced setting activeTab");
-            activeTab = tabpan.setActiveTab(0);
-        }
-
-        // ensure panels from the active tab are displayed
-        if(TP.initial_active_tab != activeTab.getStateId()) {
-            debug("active tab changed...");
-            for(var nr=0; nr<activeTab.window_ids.length; nr++) {
-                var panlet = Ext.getCmp(activeTab.window_ids[nr]);
-                if(panlet) { // may not yet exists due to delayed rendering
-                    try {    // so allow it to fail
-                        panlet.show(false);
-                    } catch(e) { debug(e) }
-                }
-            }
-        }
-        if(tabpan.xdata.refresh > 0) {
-            TP.timeouts['global'] = window.setInterval(TP.updateAllIcons, tabpan.xdata.refresh * 1000);
-        }
-        TP.updateAllIcons();
-        if(TP.initMask) { TP.initMask.destroy() }
-    },
-    stopAllPanelRefresh: function() {
-        var panels = TP.getAllPanel();
-        for(var nr=0; nr<panels.length; nr++) {
-            if(panels[nr].stopInterval) {
-                panels[nr].stopInterval();
-            }
-        }
-        window.clearInterval(TP.timeouts['global']);
-    },
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         var res  = timedef.match(/^(\d+)(\w{1})/);
@@ -532,7 +513,7 @@ var TP = {
             }
             if(refresh.setType) { refresh.setType('refresh') }
             /* extract pi details */
-            if(data.pi_detail != undefined) {
+            if(data && data.pi_detail != undefined) {
                 for(var key in data.pi_detail) {
                     if(data.pi_detail[key] && data.pi_detail[key]['state'] != undefined) {
                         initial_backends[key].state         = 0;
@@ -553,7 +534,7 @@ var TP = {
                 // clear message
                 Ext.util.Cookies.clear('thruk_message', '[% cookie_path %]');
             }
-            if(data.errors) {
+            if(data && data.errors) {
                 for(var nr=0; nr<data.errors.length; nr++) {
                     TP.Msg.msg("fail_message~~"+data.errors[nr].message);
                 }
@@ -591,7 +572,7 @@ var TP = {
     /* start server time */
     startServerTime: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval_servertime);
+        this.stopServerTime();
         var label = Ext.getCmp('server_time');
         if(!tabpan.xdata.server_time) {
             label.hide();
@@ -599,6 +580,10 @@ var TP = {
         }
         label.show();
         tabpan.interval_servertime = window.setInterval(TP.updateServerTime, 1000);
+    },
+    stopServerTime: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        window.clearInterval(tabpan.interval_servertime);
     },
     /* update server time */
     updateServerTime: function() {
@@ -760,13 +745,12 @@ var TP = {
     },
     removeWindowFromPanels: function(win_id) {
         /* remove panel reference */
-        var tabpan = Ext.getCmp('tabpan');
-        tabpan.items.each(function(panel) {
-            if(panel.window_ids) {
-                panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
-                panel.saveState();
-            }
-        });
+        var panel = Ext.getCmp(win_id);
+        var tab   = Ext.getCmp(panel.panel_id);
+        if(tab.window_ids) {
+            tab.window_ids = TP.removeFromList(tab.window_ids, win_id);
+            tab.saveState();
+        }
     },
     updateAllIcons: function(id) {
         var panels = TP.getAllPanel();

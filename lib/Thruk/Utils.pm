@@ -1834,14 +1834,14 @@ sub read_data_file {
     # replace broken escape sequences
     $cont =~ s/\\x\{[\w]{5,}\}/\x{fffd}/gmxi;
 
-    my $data;
+    my $VAR1;
     ## no critic
-    eval('$data = '.$cont.';');
+    eval('$VAR1 = '.$cont.';');
     ## use critic
 
     warn($@) if $@;
 
-    return $data;
+    return $VAR1;
 }
 
 ##############################################
