@@ -508,6 +508,11 @@ var TP = {
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
+            // REMOVE AFTER: 01.01.2016
+            cp.loadData(decoded);
+            cp.saveChanges(false);
+            Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
+            window.setTimeout("window.location.reload()", 1000);
         } else {
             /* new single tab export */
             var param = {
@@ -528,20 +533,13 @@ var TP = {
                         TP.initial_create_delay_inactive = 0;
                         TP.initial_active_tab            = resp.newid;
                         TP.add_pantab(resp.newid);
-                        return(true);
                     } else {
                         Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                         return(false);
                     }
                 }
             });
-            return(true);
         }
-
-        cp.clearAll();
-        cp.loadData(data);
-        Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
-        window.setTimeout("window.location.reload()", 1000);
         return(true);
     },
     /* eval response data */

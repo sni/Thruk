@@ -310,7 +310,11 @@ sub _stateprovider {
                 next if $c->config->{'demo_mode'};
                 # update dashboards
                 for my $k2 (keys %{$param_data}) {
-                    $param_data->{$k2} = decode_json($param_data->{$k2});
+                    if($k2 eq 'id') {
+                        $newid = $param_data->{$k2};
+                    } else {
+                        $param_data->{$k2} = decode_json($param_data->{$k2});
+                    }
                 }
                 $param_data->{'id'}   = $newid || $key;
                 $param_data->{'user'} = $c->stash->{'remote_user'};

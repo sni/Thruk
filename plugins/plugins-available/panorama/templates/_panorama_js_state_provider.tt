@@ -1,11 +1,26 @@
 ﻿/* combine settings by tab */
 function setStateByTab(state) {
+    state = TP.clone(state);
     var data = {};
     for(var key in state) {
         if(key == 'tabpan') { data.tabpan = state[key]; }
         if(key.search(/tabpan-tab_\d+$/) != -1) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
+
+            // allow import of old data
+            var tmp = Ext.JSON.decode(state[key]);
+            if(tmp.window_ids) {
+                for(var x = 0; x<tmp.window_ids.length;x++) {
+                    var win_id = tmp.window_ids[x];
+                    data[key][win_id] = state[win_id];
+                    delete state[win_id];
+                }
+                delete tmp['window_ids'];
+                data[key].id  = 'new';
+                data[key].tab = Ext.JSON.encode(tmp);
+            }
+
         }
         var matches = key.match(/(tabpan-tab_\d+)_(.*)$/);
         if(matches) {

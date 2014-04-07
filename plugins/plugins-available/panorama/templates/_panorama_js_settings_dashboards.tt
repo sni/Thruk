@@ -35,6 +35,10 @@ Ext.define('TP.DashboardManagementWindow', {
                     TP.toggleDashboardOption(e.record.data.id, e.field, e.value);
                     e.record.commit();
                 }
+            },
+            close: function(This, eOpts) {
+                delete TP.dashboardsSettingWindow;
+                delete TP.dashboardsSettingGrid;
             }
         }
         /* My Dasboards */
