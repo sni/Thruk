@@ -433,7 +433,10 @@
               </tr>
             </table>
             [% IF comments.size > 0 %]
-              [% PROCESS _comments_table.tt comments = comments type='service' names=0 %]
+              [% IF sortoption_cmt %]
+              <div class="statusSort" align="CENTER">Comments sorted by <b>[% cmt_orderby %]</b> ([% IF cmt_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+              [% END %]
+              [% PROCESS _comments_table.tt comments = comments type='service' names=0 sortprefix='_cmt' %]
             [% END %]
           [% END %]
           </td>
@@ -465,7 +468,10 @@
               </tr>
             </table>
             [% IF downtimes.size > 0 %]
-              [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 %]
+              [% IF sortoption_dtm %]
+              <div class="statusSort" align="CENTER">Downtimes sorted by <b>[% dtm_orderby %]</b> ([% IF dtm_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+              [% END %]
+              [% PROCESS _downtimes_table.tt downtimes = downtimes type='service' names=0 sortprefix='_dtm' %]
             [% END %]
             [% IF recurring_downtimes.size > 0 && use_feature_recurring_downtime %]
               <br>

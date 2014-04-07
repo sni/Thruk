@@ -22,12 +22,13 @@
 
     <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
     <div class='commentTitle'>Host Comments</div>
-    <div class='comment'>
-      [% UNLESS c.config.command_disabled.exists('1') || c.check_user_roles_wrapper('authorized_for_read_only') %]
-      <img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
-      [% END %]
-    </div><br>
-
+    [% UNLESS c.config.command_disabled.exists('1') || c.check_user_roles_wrapper('authorized_for_read_only') %]
+    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a></div>
+    [% END %]
+    <br>
+    [% IF sortoption_hst %]
+    <div class="statusSort" align="CENTER">Host comments sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+    [% END %]
     <div align="center">
     <table border=0 cellpadding=0 cellspacing=0>
       <tr>
@@ -58,6 +59,11 @@
     [% UNLESS c.config.command_disabled.exists('3') || c.check_user_roles_wrapper('authorized_for_read_only') %]
     <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div>
     [% END %]
+    <br>
+    [% IF sortoption_svc %]
+    <div class="statusSort" align="CENTER">Service comments sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+    [% END %]
+    <div align="center" class="hint" style="padding: 4px;">Mark service comments with leftclick. Select multiple with shift + mouse.</div>
     [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 sortprefix='_svc' %]
 <br>
 
