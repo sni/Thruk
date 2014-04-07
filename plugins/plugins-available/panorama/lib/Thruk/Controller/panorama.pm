@@ -249,10 +249,9 @@ sub _stateprovider {
     my ( $self, $c ) = @_;
 
     my $param = $c->request->parameters;
-    my $task  = $param->{'task'};
+    my $task  = delete $param->{'task'};
     my $value = $param->{'value'};
     my $name  = $param->{'name'};
-    delete $param->{'task'};
     if($c->stash->{'readonly'}) {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
@@ -284,6 +283,7 @@ sub _stateprovider {
     }
     elsif(defined $task and $task eq 'update2') {
         $c->stash->{'json'} = { 'status' => 'ok' };
+        my $newid = delete $param->{'nr'} || '';
         for my $key (keys %{$param}) {
             my $param_data = decode_json($param->{$key});
             if($key eq 'tabpan') {
@@ -301,10 +301,12 @@ sub _stateprovider {
                 for my $k2 (keys %{$param_data}) {
                     $param_data->{$k2} = decode_json($param_data->{$k2});
                 }
-                $param_data->{'id'}   = $key;
+                $param_data->{'id'}   = $newid || $key;
                 $param_data->{'user'} = $c->stash->{'remote_user'};
                 if(!$self->_save_dashboard($c, $param_data)) {
                     $c->stash->{'json'} = { 'status' => 'failed' };
+                } else {
+                    $c->stash->{'json'}->{'newid'} = $param_data->{'id'} if $newid;
                 }
             }
         }
@@ -1158,7 +1160,25 @@ sub _task_service_detail {
 sub _task_dashboard_data {
     my($self, $c) = @_;
     my $nr = $c->request->parameters->{'nr'} || die('no number supplied');
-    my $dashboard = $self->_load_dashboard($c, $nr);
+    my $dashboard;
+    if($nr eq 'new') {
+        return if $c->stash->{'readonly'};
+        $dashboard = {
+            tab     => {
+                xdata => {
+                    title           => 'Dashboard',
+                    refresh         => $c->stash->{'refresh_rate'},
+                    backends        => [],
+                    background      => 'none',
+                    autohideheader  => 1,
+                }
+            },
+            id      => 'new'
+        };
+        $dashboard = $self->_save_dashboard($c, $dashboard);
+    } else {
+        $dashboard = $self->_load_dashboard($c, $nr);
+    }
     if(!$dashboard) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
         $c->stash->{'json'} = { 'status' => 'failed' };
@@ -1428,24 +1448,6 @@ sub _save_dashboard {
 ##########################################################
 sub _load_dashboard {
     my($self, $c, $nr) = @_;
-    if($nr eq 'new') {
-        return if $c->stash->{'readonly'};
-        my $dashboard = {
-            tab     => {
-                xdata => {
-                    title           => 'Dashboard',
-                    refresh         => $c->stash->{'refresh'},
-                    backends        => [],
-                    background      => 'none',
-                    autohideheader  => 1,
-                }
-            },
-            id      => 'new'
-        };
-        $dashboard = $self->_save_dashboard($c, $dashboard);
-        return $dashboard;
-    }
-
     $nr       =~ s/^tabpan-tab_//gmx;
     my $file  = $self->{'var'}.'/'.$nr.'.tab';
     return unless -s $file;

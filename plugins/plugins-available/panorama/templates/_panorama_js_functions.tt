@@ -473,26 +473,70 @@ var TP = {
     importAllTabs: function(data) {
         // strip off comments
         data = data.replace(/\s*\#.*/g, '').replace(/\n/g, '');
+        var decoded;
         try {
-            data = cp.decodeValue(decode64(data));
+            decoded = cp.decodeValue(decode64(data));
         }
         catch(e) {
             debug(e);
             Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
-        if(data == undefined || data == '') {
+        if(decoded == null) {
+            try {
+                decoded = Ext.JSON.decode(decode64(data));
+            }
+            catch(e) {
+                debug(e);
+                Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+                return(false);
+            }
+        }
+        if(decoded == undefined || decoded == '') {
             Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
-        if(data == '') { data = {}; }
+        if(decoded == '') { decoded = {}; }
 
-        // stop everything
-        this.stopRotatingTabs();
-        this.stopAllPanelRefresh();
+        /* stop everything */
+        var tabpan = Ext.getCmp('tabpan');
+        tabpan.stopTimeouts();
+
+        if(decoded.tabpan) {
+            /* old export with all tabs*/
+        } else {
+            /* new single tab export */
+            var param = {
+                task:  'update2',
+                nr:    'new',
+                'tabpan-tab_1': Ext.JSON.encode(decoded)
+            }
+            var conn = new Ext.data.Connection();
+            conn.request({
+                url:    'panorama.cgi?state',
+                params:  param,
+                async:   true,
+                success: function(response, opts) {
+                    /* allow response to contain cookie messages */
+                    var resp = TP.getResponse(undefined, response, false);
+                    if(resp.newid) {
+                        TP.initial_create_delay_active   = 0;
+                        TP.initial_create_delay_inactive = 0;
+                        TP.initial_active_tab            = resp.newid;
+                        TP.add_pantab(resp.newid);
+                        return(true);
+                    } else {
+                        Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+                        return(false);
+                    }
+                }
+            });
+            return(true);
+        }
 
         cp.clearAll();
         cp.loadData(data);
+        Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
         window.setTimeout("window.location.reload()", 1000);
         return(true);
     },

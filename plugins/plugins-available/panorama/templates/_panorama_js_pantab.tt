@@ -131,10 +131,12 @@
                 // delayed panlet creation
                 var autoshow = false;
                 var delay    = TP.initial_create_delay_inactive;
-                if(TP.initial_active_tab != undefined && this.dashboard == TP.initial_active_tab) {
+                if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
                     autoshow = true;
                     delay    = TP.initial_create_delay_active;
                 }
+                var tabpan    = Ext.getCmp('tabpan');
+                var activeTab = tabpan.getActiveTab();
                 window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
 
                 if(autoshow) {

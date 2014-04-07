@@ -160,7 +160,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         conn.request({
             url:    this.url,
             params: params,
-            async: async,
+            async:  async,
             success: function(response, opts) {
                 // allow response to contain cookie messages
                 TP.getResponse(undefined, response, false);

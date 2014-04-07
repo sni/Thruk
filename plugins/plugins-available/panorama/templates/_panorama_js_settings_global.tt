@@ -4,6 +4,9 @@ TP.settingsWindow = function() {
     /* stop rotation */
     TP.stopRotatingTabs();
 
+    var tabpan    = Ext.getCmp('tabpan');
+    var activeTab = tabpan.getActiveTab();
+
     /* the settings form */
     var settings_form = new Ext.form.Panel({
         bodyPadding: 5,
@@ -39,12 +42,11 @@ TP.settingsWindow = function() {
                 text: 'Export Active Tab',
                 handler: function() {
                     Ext.MessageBox.show({
-// TODO: implement
                         title:      'Current Tab Export',
                         multiline:  true,
                         width:      600,
                         msg:        'Copy this string and use it for later import:',
-                        value:      '# Thruk Panorama Dashboard Export\n'+encode64(cp.encodeValue(cp.readValues())).match(/.{1,70}/g).join("\n")+"\n# End Export",
+                        value:      '# Thruk Panorama Dashboard Export: '+activeTab.title+'\n'+encode64(cp.lastdata[activeTab.id]).match(/.{1,70}/g).join("\n")+"\n# End Export",
                         buttons:    Ext.MessageBox.OK,
                         icon:       Ext.MessageBox.INFO
                     });
@@ -68,12 +70,11 @@ TP.settingsWindow = function() {
                 text: 'Import Tab(s)',
                 handler: function() {
                     Ext.MessageBox.prompt({
-// TODO: implement
                         title:      'Import Tab(s)',
                         id:         'importdialog',
                         multiline:  true,
                         value:      '',
-                        width:      500,
+                        width:      600,
                         msg:        'Enter Saved String.<br>This will add the imported tabs next to your current ones.',
                         buttons:    Ext.MessageBox.OKCANCEL,
                         icon:       Ext.MessageBox.INFO,
@@ -81,7 +82,6 @@ TP.settingsWindow = function() {
                             if(btn == 'ok') {
                                 if(TP.importAllTabs(text)) {
                                     win_settings.close();
-                                    Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
                                 }
                             }
                         }
@@ -156,4 +156,3 @@ TP.settingsWindow = function() {
         items:       [settings_panel]
     });
 };
-
