@@ -87,6 +87,7 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'business_impact_modulations'  => { type => 'STRING', cat => 'Extended' },
     'escalations'                  => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
     'icon_set'                     => { type => 'STRING', cat => 'Extended' },
+    'duplicate_foreach'            => { type => 'STRING', cat => 'Extended' },
 };
 
 ##########################################################
