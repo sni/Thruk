@@ -420,3 +420,7 @@ TABLE.ministatus TH {
 .x-form-checkboxgroup-body {
     padding-left: 0;
 }
+
+.editable {
+    cursor: text;
+}

@@ -1,32 +1,110 @@
-/* show dashboard managment window */
+﻿/* show dashboard managment window */
 Ext.define('TP.DashboardManagementWindow', {
     extend:     'Ext.window.Window',
     autoShow:    true,
     modal:       true,
-    width:       800,
+    width:       670,
     resizable:   false,
     title:       'Dashboard Managment',
+    closeAction: 'destroy',
     initComponent: function() {
         this.xdata         = {};
         this.callParent();
-        this.pagingToolbar = new TP.PagingToolbar();
-        this.loader        = Ext.create('TP.GridLoader',  {
+        //this.pagingToolbar = new TP.PagingToolbar();
+        this.loader        = Ext.create('TP.GridLoader', {
             scope:       this,
-            url:        'panorama.cgi?task=dashboard_list',
+            url:        'panorama.cgi?task=dashboard_list&list=my',
             loadMask:    true,
             target:      this
         });
-        this.grid          = Ext.create('Ext.grid.Panel', {
-            height:      380,
+
+        var listeners = {
+            activate: function(This, eOpts) {
+                var panel = This.up('panel').up('panel');
+                This.loader.grid  = This;
+                This.loader.xdata = panel.xdata;
+                This.loader.load();
+                TP.dashboardsSettingGrid = This;
+            },
+            beforeselect: function(This, record, index, eOpts) {
+                /* prevent selections */
+                return false;
+            },
+            edit: function(editor, e) {
+                if(e.value != e.originalValue) {
+                    TP.toggleDashboardOption(e.record.data.id, e.field, e.value);
+                    e.record.commit();
+                }
+            }
+        }
+        /* My Dasboards */
+        this.grid_my = Ext.create('Ext.grid.Panel', {
+            tabConfig: {
+                title:   'My',
+                tooltip: 'My Dashboards'
+            },
             columns:     [],
-            dockedItems: [this.pagingToolbar]
+            listeners:   listeners,
+            loader:      Ext.create('TP.GridLoader', {
+                url:        'panorama.cgi?task=dashboard_list&list=my',
+                loadMask:    true,
+                target:      this
+            })
+            [%+ UNLESS readonly +%]
+            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
+            [%+ END +%]
         });
-        this.add(this.grid);
-    }
+        this.items.get(0).add(this.grid_my);
+
+        /* Public Dasboards */
+        this.grid_public = Ext.create('Ext.grid.Panel', {
+            tabConfig: {
+                title:   'Public',
+                tooltip: 'Public Dashboards'
+            },
+            columns:     [],
+            listeners:   listeners,
+            loader:      Ext.create('TP.GridLoader', {
+                url:        'panorama.cgi?task=dashboard_list&list=public',
+                loadMask:    true,
+                target:      this
+            })
+            [%+ UNLESS readonly +%]
+            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
+            [%+ END +%]
+        });
+        this.items.get(0).add(this.grid_public);
+
+        /* All Dasboards, Admins only */
+        [% IF is_admin %]
+        this.grid_all = Ext.create('Ext.grid.Panel', {
+            tabConfig: {
+                title:   'All',
+                tooltip: 'All Dashboards'
+            },
+            columns:     [],
+            listeners:   listeners,
+            loader:      Ext.create('TP.GridLoader', {
+                url:        'panorama.cgi?task=dashboard_list&list=all',
+                loadMask:    true,
+                target:      this
+            })
+            [%+ UNLESS readonly +%]
+            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
+            [%+ END +%]
+        });
+        this.items.get(0).add(this.grid_all);
+        [% END %]
+        this.items.get(0).setActiveTab(0);
+    },
+    items: [{
+        xtype:        'tabpanel',
+        height:        380,
+        items:         []
+    }]
 });
 
 TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
-    win.loader.load();
+    TP.dashboardsSettingWindow = win;
 }
-

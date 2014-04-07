@@ -386,15 +386,19 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
 
 /* render public on/off button */
 TP.render_dashboard_option_public = function(v, td, item) {
-    var img = 'sport_golf.png';
-    if(v) { img = 'accept.png'; }
-    return "<div class='clickable' onclick='TP.toggleDashboardOption(\'"+item.data.nr+"\', 'public')' style='margin-left: 12px;width:20px;height:20px;background-image:url(../plugins/panorama/images/"+img+");background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+    var img = 'bullet_white.png';
+    if(v) { img = 'world.png'; }
+    return "<div class='clickable' title='Change public flag for this dashboard' onclick='TP.toggleDashboardOption(\""+item.data.nr+"\", \"public\"); return false;' style='margin-left: 12px;width:20px;height:20px;background-image:url(../plugins/panorama/images/"+img+");background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
 }
 
-/* render clickable on / off button */
-TP.render_dashboard_actions = function(v, td, item) {
+/* toggle visibility of dashboards */
+TP.render_dashboard_toggle_visible = function(v, td, item, row, col, store, view) {
     var actions = "";
-    actions += "<div class='clickable' title='removes this dashboard' onclick='TP.toggleDashboardAction(\'"+item.data.nr+"\', 'remove')' style='width:20px;height:20px;background-image:url(../plugins/panorama/images/delete.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+    if(Ext.getCmp(item.data.id)) {
+        actions += "<div class='clickable' title='removes dashboard from current view' onclick='Ext.getCmp(\""+item.data.id+"\").destroy(); TP.dashboardsSettingGrid.getView().refresh(); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/eye.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+    } else {
+        actions += "<div class='clickable' title='adds this dashboard to current view' onclick='TP.add_pantab(\""+item.data.id+"\"); return false;' style='margin-left: -5px; width:20px;height:20px;background-image:url(../plugins/panorama/images/bullet_white.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+    }
     return(actions);
 }
 

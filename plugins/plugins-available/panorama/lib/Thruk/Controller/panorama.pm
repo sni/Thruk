@@ -66,6 +66,11 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
 
+    $c->stash->{'is_admin'} = 0;
+    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
+        $c->stash->{'is_admin'} = 1;
+    }
+
     $self->{'var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($self->{'var'});
 
@@ -89,6 +94,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         }
         elsif($task eq 'dashboard_list') {
             return($self->_task_dashboard_list($c));
+        }
+        elsif($task eq 'dashboard_update') {
+            return($self->_task_dashboard_update($c));
         }
         elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
@@ -1200,39 +1208,96 @@ sub _task_dashboard_data {
 sub _task_dashboard_list {
     my($self, $c) = @_;
 
+    my $type = $c->request->parameters->{'list'} || 'my';
+    return if($type eq 'all' and !$c->stash->{'is_admin'});
     my $dashboards = [];
     for my $file (glob($self->{'var'}.'/*.tab')) {
-        if($file =~ s/^.*\/(\d+)\.tab$//) {
+        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $d = $self->_load_dashboard($c, $1);
             if($d) {
+                if($type eq 'all') {
+                    # pass all except our own
+                    next if $d->{'user'} eq $c->stash->{'remote_user'};
+                } elsif($type eq 'public') {
+                    next if  $d->{'user'} eq $c->stash->{'remote_user'};
+                    next if !$d->{'public'};
+                } else {
+                    next if $d->{'user'} ne $c->stash->{'remote_user'};
+                }
                 push @{$dashboards}, {
-                    nr       => $d->{'nr'},
-                    name     => $d->{'tab'}->{'xdata'}->{'title'},
-                    user     => $d->{'user'},
-                    public   => $d->{'public'}   ? JSON::XS::true : JSON::XS::false,
-                    readonly => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
+                    id          => $d->{'id'},
+                    nr          => $d->{'nr'},
+                    name        => $d->{'tab'}->{'xdata'}->{'title'},
+                    user        => $d->{'user'},
+                    public      => $d->{'public'}   ? JSON::XS::true : JSON::XS::false,
+                    readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
+                    description => $d->{'description'} || '',
                 };
             }
         }
     }
 
+    $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
+
     my $json = {
         columns => [
-            { 'header' => 'Nr',                     dataIndex => 'nr',        hidden => JSON::XS::true },
-            { 'header' => 'Name',     width => 120, dataIndex => 'name',      align => 'center' },
-            { 'header' => 'User',     width => 120, dataIndex => 'user',      align => 'center' },
-            { 'header' => 'Public',   width => 60,  dataIndex => 'public',    align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
-            { 'header' => 'Readonly', width => 60,  dataIndex => 'readonly',  align => 'center', renderer => 'TP.render_yes_no' },
-            { 'header' => 'Actions',  width => 100, dataIndex => 'actions',   align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_actions' },
+            { 'header' => 'Id',                        dataIndex => 'id',                              hidden => JSON::XS::true },
+            { 'header' => 'Nr',                        dataIndex => 'nr',                              hidden => JSON::XS::true },
+            { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
+            { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
+            { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
+            { 'header' => 'User',        width => 120, dataIndex => 'user',         align => 'center', hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false },
+            { 'header' => 'Public',      width => 60,  dataIndex => 'public',       align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
+            { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
+            { 'header' => 'Actions',     width => 100,
+                      xtype => 'actioncolumn',
+                      items => [{
+                            icon => '/thruk/plugins/panorama/images/delete.png',
+                            handler => 'TP.dashboardActionHandler',
+                            action  => 'remove'
+                      }],
+                      tdCls => 'clickable icon_column'
+            },
         ],
         data        => $dashboards,
-        #totalCount  => $c->stash->{'pager'}->{'total_entries'},
-        #currentPage => $c->stash->{'pager'}->{'current_page'},
-        #paging      => JSON::XS::true,
         pi_detail   => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_update {
+    my($self, $c) = @_;
+
+    $c->stash->{'json'} = { 'status' => 'failed' };
+    my $nr     = $c->request->parameters->{'nr'};
+    my $action = $c->request->parameters->{'action'};
+    my $dashboard = $self->_load_dashboard($c, $nr);
+    if($action and $dashboard and !$dashboard->{'readonly'}) {
+        $c->stash->{'json'} = { 'status' => 'ok' };
+        if($action eq 'remove') {
+            unlink($dashboard->{'file'});
+        }
+        if($action eq 'update') {
+            my $extra_settings = {};
+            my $field = $c->request->parameters->{'field'};
+            my $value = $c->request->parameters->{'value'};
+            if($field eq 'description') {
+                $extra_settings->{$field} = $value;
+            }
+            elsif($field eq 'public') {
+                if($value eq 'toggle') {
+                    $extra_settings->{$field} = !$dashboard->{$field};
+                }
+            }
+            elsif($field eq 'name') {
+                $dashboard->{'tab'}->{'xdata'}->{'title'} = $value;
+            }
+            $self->_save_dashboard($c, $dashboard, $extra_settings);
+        }
+    }
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1481,6 +1546,7 @@ sub _save_dashboard {
 
     delete $dashboard->{'nr'};
     delete $dashboard->{'id'};
+    delete $dashboard->{'file'};
 
     Thruk::Utils::write_data_file($file, $dashboard);
     $dashboard->{'nr'} = $nr;
@@ -1502,8 +1568,9 @@ sub _load_dashboard {
     } elsif($permission == 1) {
         $dashboard->{'readonly'} = 0;
     }
-    $dashboard->{'nr'} = $nr;
-    $dashboard->{'id'} = 'tabpan-tab_'.$nr;
+    $dashboard->{'nr'}   = $nr;
+    $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
+    $dashboard->{'file'} = $file;
     return $dashboard;
 }
 
@@ -1518,9 +1585,7 @@ sub _is_authorized_for_dashboard {
     my $file = $self->{'var'}.'/'.$nr.'.tab';
 
     # super user have permission for all reports
-    if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
-        return 1;
-    }
+    return 1 if $c->stash->{'is_admin'};
 
     # does that dashboard already exist?
     if(-s $file) {

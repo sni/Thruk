@@ -765,6 +765,7 @@ plugins/plugins-available/panorama/root/images/btn_ack_remove.png
 plugins/plugins-available/panorama/root/images/btn_delay.png
 plugins/plugins-available/panorama/root/images/btn_downtime.png
 plugins/plugins-available/panorama/root/images/bug_error.png
+plugins/plugins-available/panorama/root/images/bullet_white.png
 plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_organisation.png
@@ -779,6 +780,7 @@ plugins/plugins-available/panorama/root/images/door_in.png
 plugins/plugins-available/panorama/root/images/down.png
 plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
+plugins/plugins-available/panorama/root/images/eye.png
 plugins/plugins-available/panorama/root/images/gear.gif
 plugins/plugins-available/panorama/root/images/house.png
 plugins/plugins-available/panorama/root/images/html_add.png

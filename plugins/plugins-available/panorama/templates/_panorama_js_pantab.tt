@@ -168,7 +168,7 @@
         var activeTab = tabpan.getActiveTab();
 
         /* ensure panels from the active tab are displayed */
-        if(this.id == activeTab.id) {
+        if(activeTab && this.id == activeTab.id) {
             if(this.window_ids) {
                 for(var nr=0; nr<this.window_ids.length; nr++) {
                     var panlet = Ext.getCmp(this.window_ids[nr]);

@@ -268,6 +268,10 @@
                 };
                 This.dd_overriden = true;
             }
+            /* make sure we don't overlapt dashboard settings window */
+            if(TP.dashboardsSettingWindow) {
+                TP.dashboardsSettingWindow.toFront();
+            }
         },
         render: function(This, eOpts) {
             /* make title editable */

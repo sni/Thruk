@@ -70,6 +70,10 @@ var TP = {
                         }
                         if(cp.state[id]) {
                             TP.add_pantab(id);
+                            if(TP.dashboardsSettingGrid) {
+                                TP.dashboardsSettingGrid.getView().refresh();
+                                TP.dashboardsSettingWindow.toFront();
+                            }
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
                         }
@@ -981,5 +985,109 @@ var TP = {
             el.getEl().dom.style.top  = origTop;
             el.syncShadow();
         }, 2500);
+    },
+
+    /* toggle or set a dashboard option */
+    toggleDashboardOption: function(nr, field, value) {
+        if(value == undefined) { value = 'toggle'; }
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=dashboard_update',
+            method: 'POST',
+            params: { nr: nr, action: 'update', field: field, value: value },
+            async: false,
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(response.status == 0) {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed");
+                    } else {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                    }
+                } else {
+                    if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
+                        TP.dashboardsSettingGrid.loader.load();
+                    }
+                    TP.reconfigureDashboard(nr);
+                }
+            }
+        });
+        return false;
+    },
+
+    /* fetch dashboard data from server and reapply settings */
+    reconfigureDashboard: function(nr) {
+        /* update dashboard managment view */
+        if(TP.dashboardsSettingGrid) {
+            TP.dashboardsSettingGrid.getView().refresh();
+            TP.dashboardsSettingWindow.toFront();
+        }
+
+        var tab = Ext.getCmp(nr);
+        if(tab == undefined) { return; }
+
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=dashboard_data',
+            method: 'POST',
+            params: { nr: nr },
+            async: false,
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(response.status == 0) {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed");
+                    } else {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                    }
+                } else {
+                    var data = TP.getResponse(undefined, response);
+                    data = data.data;
+                    for(var key in data) {
+                        cp.set(key, Ext.JSON.decode(data[key]));
+                    }
+                    if(cp.state[nr]) {
+                        tab.applyXdata(cp.state[nr].xdata);
+                    } else {
+                        TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                    }
+                }
+            }
+        });
+    },
+
+    /* run action for dashboards */
+    dashboardActionHandler: function(grid, rowIndex, colIndex, item, e, record, row, confirmed) {
+        var action = item.action;
+        var nr     = record.data.nr;
+        if(confirmed == undefined || confirmed == 0) {
+            Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
+                if (button === 'yes') {
+                    TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
+                }
+            });
+            return false;
+        }
+        if(action == 'remove') {
+            Ext.Ajax.request({
+                url: 'panorama.cgi?task=dashboard_update',
+                method: 'POST',
+                params: { nr: nr, action: action },
+                async: false,
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
+                            TP.dashboardsSettingGrid.loader.load();
+                        }
+                        TP.reconfigureDashboard(nr);
+                    }
+                }
+            });
+        }
+        return false;
     }
 }
+
+var a;
