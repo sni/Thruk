@@ -106,7 +106,7 @@ sub _get_comment_sort_option {
         '9' => [ [ 'expires' ],                            'expires' ],
     };
 
-    return (defined $sortoptions->{$option}) ? $sortoptions->{$option} : undef;
+    return $sortoptions->{$option};
 }
 
 ##########################################################
@@ -128,7 +128,7 @@ sub _get_downtime_sort_option {
         '11' =>[ [ 'triggered_by' ],                       'trigger id' ],
     };
 
-    return (defined $sortoptions->{$option}) ? $sortoptions->{$option} : undef;
+    return $sortoptions->{$option};
 }
 
 ##########################################################
@@ -143,8 +143,9 @@ sub _process_comments_page {
     my $svc_order      = "ASC";
     $svc_order = "DESC" if $svc_sorttype == 2;
     $svc_sortoption = 1 if !defined $self->_get_comment_sort_option($svc_sortoption);
-    $c->stash->{'svc_orderby'}  = $self->_get_comment_sort_option($svc_sortoption)->[1];
-    $c->stash->{'svc_orderdir'} = $svc_order;
+    $c->stash->{'svc_orderby'}    = $self->_get_comment_sort_option($svc_sortoption)->[1];
+    $c->stash->{'svc_orderdir'}   = $svc_order;
+    $c->stash->{'sortoption_svc'} = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || '';
 
     # hosts
     my $hst_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
@@ -152,8 +153,9 @@ sub _process_comments_page {
     my $hst_order      = "ASC";
     $hst_order = "DESC" if $hst_sorttype == 2;
     $hst_sortoption = 1 if !defined $self->_get_comment_sort_option($hst_sortoption);
-    $c->stash->{'hst_orderby'}  = $self->_get_comment_sort_option($hst_sortoption)->[1];
-    $c->stash->{'hst_orderdir'} = $hst_order;
+    $c->stash->{'hst_orderby'}    = $self->_get_comment_sort_option($hst_sortoption)->[1];
+    $c->stash->{'hst_orderdir'}   = $hst_order;
+    $c->stash->{'sortoption_hst'} = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || '';
 
     $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ],
                                                                sort   => { $hst_order => $self->_get_comment_sort_option($hst_sortoption)->[0] },
@@ -190,8 +192,9 @@ sub _process_downtimes_page {
     my $svc_order      = "ASC";
     $svc_order = "DESC" if $svc_sorttype == 2;
     $svc_sortoption = 1 if !defined $self->_get_downtime_sort_option($svc_sortoption);
-    $c->stash->{'svc_orderby'}  = $self->_get_downtime_sort_option($svc_sortoption)->[1];
-    $c->stash->{'svc_orderdir'} = $svc_order;
+    $c->stash->{'svc_orderby'}    = $self->_get_downtime_sort_option($svc_sortoption)->[1];
+    $c->stash->{'svc_orderdir'}   = $svc_order;
+    $c->stash->{'sortoption_svc'} = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || '';
 
     # hosts
     my $hst_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
@@ -199,8 +202,9 @@ sub _process_downtimes_page {
     my $hst_order      = "ASC";
     $hst_order = "DESC" if $hst_sorttype == 2;
     $hst_sortoption = 1 if !defined $self->_get_downtime_sort_option($hst_sortoption);
-    $c->stash->{'hst_orderby'}  = $self->_get_downtime_sort_option($hst_sortoption)->[1];
-    $c->stash->{'hst_orderdir'} = $hst_order;
+    $c->stash->{'hst_orderby'}    = $self->_get_downtime_sort_option($hst_sortoption)->[1];
+    $c->stash->{'hst_orderdir'}   = $hst_order;
+    $c->stash->{'sortoption_hst'} = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || '';
 
     $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ],
                                                                  sort   => { $hst_order => $self->_get_downtime_sort_option($hst_sortoption)->[0] },
@@ -418,8 +422,9 @@ sub _process_host_page {
     my $cmt_order      = "ASC";
     $cmt_order = "DESC" if $cmt_sorttype == 2;
     $cmt_sortoption = 1 if !defined $self->_get_comment_sort_option($cmt_sortoption);
-    $c->stash->{'cmt_orderby'}  = $self->_get_comment_sort_option($cmt_sortoption)->[1];
-    $c->stash->{'cmt_orderdir'} = $cmt_order;
+    $c->stash->{'cmt_orderby'}    = $self->_get_comment_sort_option($cmt_sortoption)->[1];
+    $c->stash->{'cmt_orderdir'}   = $cmt_order;
+    $c->stash->{'sortoption_cmt'} = $c->{'request'}->{'parameters'}->{'sortoption_cmt'} || '';
 
     $c->stash->{'comments'}  = $c->{'db'}->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
@@ -431,8 +436,9 @@ sub _process_host_page {
     my $dtm_order      = "ASC";
     $dtm_order = "DESC" if $dtm_sorttype == 2;
     $dtm_sortoption = 1 if !defined $self->_get_comment_sort_option($dtm_sortoption);
-    $c->stash->{'dtm_orderby'}  = $self->_get_comment_sort_option($dtm_sortoption)->[1];
-    $c->stash->{'dtm_orderdir'} = $dtm_order;
+    $c->stash->{'dtm_orderby'}    = $self->_get_comment_sort_option($dtm_sortoption)->[1];
+    $c->stash->{'dtm_orderdir'}   = $dtm_order;
+    $c->stash->{'sortoption_dtm'} = $c->{'request'}->{'parameters'}->{'sortoption_dtm'} || '';
 
     $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
@@ -546,8 +552,9 @@ sub _process_service_page {
     my $cmt_order      = "ASC";
     $cmt_order = "DESC" if $cmt_sorttype == 2;
     $cmt_sortoption = 1 if !defined $self->_get_comment_sort_option($cmt_sortoption);
-    $c->stash->{'cmt_orderby'}  = $self->_get_comment_sort_option($cmt_sortoption)->[1];
-    $c->stash->{'cmt_orderdir'} = $cmt_order;
+    $c->stash->{'cmt_orderby'}    = $self->_get_comment_sort_option($cmt_sortoption)->[1];
+    $c->stash->{'cmt_orderdir'}   = $cmt_order;
+    $c->stash->{'sortoption_cmt'} = $c->{'request'}->{'parameters'}->{'sortoption_cmt'} || '';
 
     $c->stash->{'comments'} = $c->{'db'}->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
@@ -559,8 +566,9 @@ sub _process_service_page {
     my $dtm_order      = "ASC";
     $dtm_order = "DESC" if $dtm_sorttype == 2;
     $dtm_sortoption = 1 if !defined $self->_get_comment_sort_option($dtm_sortoption);
-    $c->stash->{'dtm_orderby'}  = $self->_get_comment_sort_option($dtm_sortoption)->[1];
-    $c->stash->{'dtm_orderdir'} = $dtm_order;
+    $c->stash->{'dtm_orderby'}    = $self->_get_comment_sort_option($dtm_sortoption)->[1];
+    $c->stash->{'dtm_orderdir'}   = $dtm_order;
+    $c->stash->{'sortoption_dtm'} = $c->{'request'}->{'parameters'}->{'sortoption_dtm'} || '';
 
     $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
