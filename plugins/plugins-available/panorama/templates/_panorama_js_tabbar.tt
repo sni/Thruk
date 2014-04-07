@@ -58,12 +58,7 @@ Ext.define('TP.TabBar', {
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
             html:     '[% remote_user %]&nbsp;&nbsp;',
             menu: {
-                items: [/*{
-                        text: 'Switch User',
-                        icon: '[% url_prefix %]plugins/panorama/images/cup_key.png',
-                        handler: function() {}
-                }*/
-               {
+                items: [{
                         text: 'About',
                         icon: '[% url_prefix %]plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
@@ -73,11 +68,14 @@ Ext.define('TP.TabBar', {
                         text: 'Dashboard Settings',
                         icon: '[% url_prefix %]plugins/panorama/images/table_gear.png',
                         handler: function() { TP.tabSettingsWindow() }
-                    },
-                    {
+                    }, {
                         text: 'Global Settings',
                         icon: '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.settingsWindow() }
+                    }, {
+                        text: 'Dashboard Managment',
+                        icon: '[% url_prefix %]plugins/panorama/images/new_tab.gif',
+                        handler: function() { TP.dashboardsWindow() }
                     },
                     [%+ END +%]
                     /* Exit */

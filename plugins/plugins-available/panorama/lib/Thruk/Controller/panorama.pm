@@ -87,6 +87,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'dashboard_data') {
             return($self->_task_dashboard_data($c));
         }
+        elsif($task eq 'dashboard_list') {
+            return($self->_task_dashboard_list($c));
+        }
         elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
         }
@@ -1190,6 +1193,46 @@ sub _task_dashboard_data {
         }
         $c->stash->{'json'} = { data => $data };
     }
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_list {
+    my($self, $c) = @_;
+
+    my $dashboards = [];
+    for my $file (glob($self->{'var'}.'/*.tab')) {
+        if($file =~ s/^.*\/(\d+)\.tab$//) {
+            my $d = $self->_load_dashboard($c, $1);
+            if($d) {
+                push @{$dashboards}, {
+                    nr       => $d->{'nr'},
+                    name     => $d->{'tab'}->{'xdata'}->{'title'},
+                    user     => $d->{'user'},
+                    public   => $d->{'public'}   ? JSON::XS::true : JSON::XS::false,
+                    readonly => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
+                };
+            }
+        }
+    }
+
+    my $json = {
+        columns => [
+            { 'header' => 'Nr',                     dataIndex => 'nr',        hidden => JSON::XS::true },
+            { 'header' => 'Name',     width => 120, dataIndex => 'name',      align => 'center' },
+            { 'header' => 'User',     width => 120, dataIndex => 'user',      align => 'center' },
+            { 'header' => 'Public',   width => 60,  dataIndex => 'public',    align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
+            { 'header' => 'Readonly', width => 60,  dataIndex => 'readonly',  align => 'center', renderer => 'TP.render_yes_no' },
+            { 'header' => 'Actions',  width => 100, dataIndex => 'actions',   align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_actions' },
+        ],
+        data        => $dashboards,
+        #totalCount  => $c->stash->{'pager'}->{'total_entries'},
+        #currentPage => $c->stash->{'pager'}->{'current_page'},
+        #paging      => JSON::XS::true,
+        pi_detail   => $c->stash->{pi_detail},
+    };
+
+    $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
 }
 

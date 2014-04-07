@@ -297,7 +297,9 @@
             this.startTimeouts();
 
             var global = Ext.getCmp(this.panel_id);
-            if(global.xdata.autohideheader || this.alwaysBorderless) { this.header.hide() }
+            if(global) {
+                if(global.xdata.autohideheader || this.alwaysBorderless) { this.header.hide() }
+            }
         }
     },
     setFormDefaults: function() {

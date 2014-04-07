@@ -384,6 +384,19 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     return r;
 }
 
+/* render public on/off button */
+TP.render_dashboard_option_public = function(v, td, item) {
+    var img = 'sport_golf.png';
+    if(v) { img = 'accept.png'; }
+    return "<div class='clickable' onclick='TP.toggleDashboardOption(\'"+item.data.nr+"\', 'public')' style='margin-left: 12px;width:20px;height:20px;background-image:url(../plugins/panorama/images/"+img+");background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+}
+
+/* render clickable on / off button */
+TP.render_dashboard_actions = function(v, td, item) {
+    var actions = "";
+    actions += "<div class='clickable' title='removes this dashboard' onclick='TP.toggleDashboardAction(\'"+item.data.nr+"\', 'remove')' style='width:20px;height:20px;background-image:url(../plugins/panorama/images/delete.png);background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
+    return(actions);
+}
 
 /* make long pluginout not break layout */
 TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {

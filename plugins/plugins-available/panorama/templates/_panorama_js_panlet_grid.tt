@@ -1,4 +1,111 @@
-﻿Ext.define('TP.PanletGrid', {
+﻿Ext.define('TP.GridLoader', {
+    extend: 'Ext.ComponentLoader',
+
+    autoLoad: false,
+    renderer: 'data',
+    url:      '',
+    ajaxOptions: { method: 'POST' },
+    loading:  false,
+    listeners: {
+        'beforeload': function(This, options, eOpts) {
+            if(this.loading) {
+                return false;
+            }
+            this.loading = true;
+            return true;
+        }
+    },
+    callback: function(This, success, response, options) {
+        var panel    = this;
+        This.loading = false;
+        var data = TP.getResponse(this, response);
+        if(data) {
+            var b = Ext.get(this.grid.id+"-body");
+            var body;
+            if(b) { body = b.dom.firstChild }
+            if(data.paging) {
+                this.pagingToolbar.show();
+                this.pagingToolbar.items.getAt(9).hide();  // hide seperator
+                this.pagingToolbar.items.getAt(10).hide(); // hide refresh
+                this.pagingToolbar.updateData(data);
+                if(body) {
+                    body.style.overflow  = 'inherit';
+                    body.style.overflowY = 'hidden';
+                }
+            } else {
+                this.pagingToolbar.hide();
+                if(body) {
+                    body.style.overflowY = 'inherit';
+                    body.style.overflow  = 'auto';
+                }
+            }
+            var fields = [];
+            var newcolumns = Ext.JSON.encode(data.columns);
+            for(var key in data.columns) {
+                fields.push(data.columns[key].dataIndex);
+                for(var key2 in data.columns[key]) {
+                    /* this is usually a function, so eval it */
+                    if(key2 == 'renderer') {
+                        eval('data.columns[key][key2]=' + data.columns[key][key2]);
+                    }
+                    if(Ext.isIE && key2 == 'headerIE') {
+                        data.columns[key]['header'] = data.columns[key]['headerIE'];
+                    }
+                }
+            }
+            this.gridStore = Ext.create('Ext.data.Store', {
+                data:  {'items': data.data },
+                fields: fields,
+                pageSize: this.xdata.pageSize,
+                proxy: {
+                    type: 'memory',
+                    reader: {
+                        type: 'json',
+                        root: 'items'
+                    }
+                },
+                groupField: this.xdata.groupField != undefined ? this.xdata.groupField : data.group
+            });
+            var columns;
+            if(panel.xdata && panel.xdata.gridstate && panel.xdata.gridstate.columns) {
+                columns = panel.xdata.gridstate.columns;
+            }
+            var changed = false;
+            if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
+                this.gridcolumns = newcolumns;
+                this.grid.reconfigure(this.gridStore, data.columns);
+                changed = true;
+            } else {
+                this.grid.reconfigure(this.gridStore);
+            }
+            if(this.initialState != undefined) {
+                /* applyState throws internal error but state gets applied anyway */
+                try {
+                    this.grid.applyState(this.initialState);
+                } catch(e) {}
+            }
+            if(this.xdata.gridstate != undefined) {
+                this.grid.applyState(this.xdata.gridstate);
+            }
+            this.pagingToolbar.onLoad();
+            if(data.paging && this.pagingToolbar.getPageData().pageCount == 1) {
+                this.pagingToolbar.hide();
+            }
+            if(changed && columns) {
+                for(var x=0; x<columns.length; x++) {
+                    if(columns[x].hidden != undefined) {
+                        // toggle header once to workaround a display clitch
+                        this.grid.columns[x].setVisible(columns[x].hidden);
+                        this.grid.columns[x].setVisible(!columns[x].hidden);
+                    }
+                }
+            }
+        }
+    }
+});
+
+
+Ext.define('TP.PanletGrid', {
     extend: 'TP.Panlet',
 
     title:  'grid',
@@ -11,115 +118,11 @@
         this.xdata.currentPage = 1;
         this.xdata.totalCount  = 1;
 
-        this.loader = {
-            autoLoad: false,
-            renderer: 'data',
-            scope:    this,
-            url:      '',
-            ajaxOptions: { method: 'POST' },
-            loading:  false,
-            listeners: {
-                'beforeload': function(This, options, eOpts) {
-                    if(this.loading) {
-                        return false;
-                    }
-                    this.loading = true;
-                    return true;
-                }
-            },
-            callback: function(This, success, response, options) {
-                This.loading = false;
-                var data = TP.getResponse(this, response);
-                if(data) {
-                    var b    = Ext.get(this.grid.id+"-body");
-                    var body;
-                    if(b) { body = b.dom.firstChild }
-                    if(data.paging) {
-                        this.pagingToolbar.show();
-                        this.pagingToolbar.items.getAt(9).hide();  // hide seperator
-                        this.pagingToolbar.items.getAt(10).hide(); // hide refresh
-                        this.pagingToolbar.updateData(data);
-                        if(body) {
-                            body.style.overflow  = 'inherit';
-                            body.style.overflowY = 'hidden';
-                        }
-                    } else {
-                        this.pagingToolbar.hide();
-                        if(body) {
-                            body.style.overflowY = 'inherit';
-                            body.style.overflow  = 'auto';
-                        }
-                    }
-                    var fields = [];
-                    var newcolumns = Ext.JSON.encode(data.columns);
-                    for(var key in data.columns) {
-                        fields.push(data.columns[key].dataIndex);
-                        for(var key2 in data.columns[key]) {
-                            /* this is usually a function, so eval it */
-                            if(key2 == 'renderer') {
-                                eval('data.columns[key][key2]=' + data.columns[key][key2]);
-                            }
-                            if(Ext.isIE && key2 == 'headerIE') {
-                                data.columns[key]['header'] = data.columns[key]['headerIE'];
-                            }
-                        }
-                    }
-                    this.gridStore = Ext.create('Ext.data.Store', {
-                        data:  {'items': data.data },
-                        fields: fields,
-                        pageSize: this.xdata.pageSize,
-                        proxy: {
-                            type: 'memory',
-                            reader: {
-                                type: 'json',
-                                root: 'items'
-                            }
-                        },
-                        groupField: this.xdata.groupField != undefined ? this.xdata.groupField : data.group
-                    });
-                    var columns;
-                    if(panel.xdata && panel.xdata.gridstate && panel.xdata.gridstate.columns) {
-                        columns = panel.xdata.gridstate.columns;
-                    }
-                    var changed = false;
-                    if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
-                        this.gridcolumns = newcolumns;
-                        this.grid.reconfigure(this.gridStore, data.columns);
-                        changed = true;
-                    } else {
-                        this.grid.reconfigure(this.gridStore);
-                    }
-                    if(this.initialState != undefined) {
-                        /* applyState throws internal error but state gets applied anyway */
-                        try {
-                            this.grid.applyState(this.initialState);
-                        } catch(e) {}
-                    }
-                    if(this.xdata.gridstate != undefined) {
-                        this.grid.applyState(this.xdata.gridstate);
-                    }
-                    this.pagingToolbar.onLoad();
-                    if(data.paging && this.pagingToolbar.getPageData().pageCount == 1) {
-                        this.pagingToolbar.hide();
-                    }
-                    if(changed && columns) {
-                        for(var x=0; x<columns.length; x++) {
-                            if(columns[x].hidden != undefined) {
-                                // toggle header once to workaround a display clitch
-                                this.grid.columns[x].setVisible(columns[x].hidden);
-                                this.grid.columns[x].setVisible(!columns[x].hidden);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
+        this.loader         = Ext.create('TP.GridLoader', { scope: this });
         var groupingFeature = Ext.create('Ext.grid.feature.Grouping',{
             groupHeaderTpl: '{name}'
         });
-
-        this.pagingToolbar = new TP.PagingToolbar();
+        this.pagingToolbar  = new TP.PagingToolbar();
 
         if(this.grid_sort == undefined) {
             this.grid_sort = true;

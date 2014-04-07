@@ -834,6 +834,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_bp.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_nagvis.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
+plugins/plugins-available/panorama/templates/_panorama_js_settings_dashboards.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_global.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_tab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_slider.tt

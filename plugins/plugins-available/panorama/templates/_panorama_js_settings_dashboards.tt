@@ -1,0 +1,32 @@
+/* show dashboard managment window */
+Ext.define('TP.DashboardManagementWindow', {
+    extend:     'Ext.window.Window',
+    autoShow:    true,
+    modal:       true,
+    width:       800,
+    resizable:   false,
+    title:       'Dashboard Managment',
+    initComponent: function() {
+        this.xdata         = {};
+        this.callParent();
+        this.pagingToolbar = new TP.PagingToolbar();
+        this.loader        = Ext.create('TP.GridLoader',  {
+            scope:       this,
+            url:        'panorama.cgi?task=dashboard_list',
+            loadMask:    true,
+            target:      this
+        });
+        this.grid          = Ext.create('Ext.grid.Panel', {
+            height:      380,
+            columns:     [],
+            dockedItems: [this.pagingToolbar]
+        });
+        this.add(this.grid);
+    }
+});
+
+TP.dashboardsWindow = function() {
+    var win = Ext.create('TP.DashboardManagementWindow', {});
+    win.loader.load();
+}
+
