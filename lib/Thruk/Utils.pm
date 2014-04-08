@@ -2183,6 +2183,7 @@ sub check_shadow_naemon_procs {
                               $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},
                               $config->{'shadow_naemon_dir'}.'/'.$key,
                               $config->{'shadow_naemon_ls'} ? " -l ".$config->{'shadow_naemon_ls'} : '',
+                              $config->{'shadow_naemon_dir'}.'/'.$key,
                             );
             $log_missing->log->debug($cmd) if $log_missing;
             `$cmd`;
