@@ -256,7 +256,7 @@ sub _check_recurring_downtime  {
     my $file    = $c->config->{'var_path'}.'/downtimes/'.$downtime->{'file'}.'.tsk';
     if($downtime->{'target'} eq 'host') {
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backends => $backends );
+            my $data = $c->{'db'}->get_hosts(filter => [{ 'name' => $hst } ], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -265,7 +265,7 @@ sub _check_recurring_downtime  {
     }
     elsif($downtime->{'target'} eq 'service') {
         for my $hst (@{$downtime->{'host'}}) {
-            my $data = $c->{'db'}->get_services(filter => [{ 'host_name' => $hst, description => $downtime->{'service'} } ], columns => [qw/host_name/], backends => $backends );
+            my $data = $c->{'db'}->get_services(filter => [{ 'host_name' => $hst, description => $downtime->{'service'} } ], columns => [qw/host_name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$hst." - ".$downtime->{'service'}." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -274,7 +274,7 @@ sub _check_recurring_downtime  {
     }
     elsif($downtime->{'target'} eq 'hostgroup') {
         for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->{'db'}->get_hostgroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backends => $backends );
+            my $data = $c->{'db'}->get_hostgroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
@@ -283,7 +283,7 @@ sub _check_recurring_downtime  {
     }
     elsif($downtime->{'target'} eq 'servicegroup') {
         for my $grp (@{$downtime->{$downtime->{'target'}}}) {
-            my $data = $c->{'db'}->get_servicegroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backends => $backends );
+            my $data = $c->{'db'}->get_servicegroups(filter => [{ 'name' => $grp }], columns => [qw/name/], backend => $backends );
             if(!$data || scalar @{$data} == 0) {
                 $details .= "  - ERROR: ".$downtime->{'target'}." ".$grp." not found in recurring downtime ".$file."\n";
                 $errors++;
