@@ -261,9 +261,13 @@ sub begin : Private {
                                thruk_sounds thruk_favicon thruk_mobile thruk_obj_layout
                                thruk_conf
                               /) {
-            if(scalar @{[$c->request->{'headers'}->{'cookie'} =~ m/($cookiename=[^;]+(;|$))/gmx]} > 1) {
+            my @matches = $c->request->{'headers'}->{'cookie'} =~ m/($cookiename=[^;]+(;|$))/gmx;
+            if(scalar @matches > 2) {
                 push @{$c->stash->{'fix_cookies'}}, $cookiename;
             }
+        }
+        if($c->stash->{'fix_cookies'} > 0) {
+            $c->log->info("removing some cookies: ".join(', ', @{$c->stash->{'fix_cookies'}}));
         }
     }
 
