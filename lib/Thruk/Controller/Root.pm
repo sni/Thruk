@@ -266,7 +266,7 @@ sub begin : Private {
                 push @{$c->stash->{'fix_cookies'}}, $cookiename;
             }
         }
-        if($c->stash->{'fix_cookies'} > 0) {
+        if($c->stash->{'fix_cookies'}) {
             $c->log->info("removing some cookies: ".join(', ', @{$c->stash->{'fix_cookies'}}));
         }
     }
