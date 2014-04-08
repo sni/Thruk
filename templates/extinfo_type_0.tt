@@ -247,7 +247,7 @@
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal dataValBackendVersion'>
                         [% IF backend_detail.$pd.running %]
-                          [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version %]<br>([% END %]
+                          [% IF real_pi_detail.exists(pd) %][% real_pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]<br>([% END %]
                           [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
                           [% IF real_pi_detail.exists(pd) %])[% END %]
                         [% ELSE %]

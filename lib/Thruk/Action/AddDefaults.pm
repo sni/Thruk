@@ -469,7 +469,7 @@ sub set_processinfo {
                     push @{$missing_keys}, $key;
                 }
             }
-            {
+            if(scalar @{$missing_keys} > 0) {
                 local $ENV{'THRUK_USE_SHADOW'} = 0;
                 my $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
                 if(ref $real_processinfo eq 'HASH') {
