@@ -785,6 +785,10 @@ sub _get_subfilter {
                 }
                 return $k.' '.$v;
             }
+            # contact_name must be threated differently
+            if($k eq 'contact_name') {
+                return('p1.output LIKE '._quote('%;'.$v.';%'));
+            }
             return $k.' = '._quote($v);
         }
 
