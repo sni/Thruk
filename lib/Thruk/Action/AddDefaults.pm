@@ -455,12 +455,29 @@ sub set_processinfo {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
         $processinfo = $c->{'db'}->get_processinfo();
         if(ref $processinfo eq 'HASH') {
+            my $missing_keys = [];
             for my $peer (@{$c->{'db'}->get_peers()}) {
                 my $key  = $peer->peer_key();
                 my $name = $peer->peer_name();
                 $processinfo->{$key}->{'peer_name'} = $name;
                 if(scalar keys %{$processinfo->{$key}} > 5) {
                     $cached_data->{'processinfo'}->{$key} = $processinfo->{$key};
+                }
+
+                # check if we have original datasource and core version when using shadownaemon
+                if($peer->{'cacheproxy'} and !$cached_data->{'real_processinfo'}->{$key}) {
+                    push @{$missing_keys}, $key;
+                }
+            }
+            {
+                local $ENV{'THRUK_USE_SHADOW'} = 0;
+                my $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
+                if(ref $real_processinfo eq 'HASH') {
+                    for my $k (keys %{$real_processinfo}) {
+                        if(scalar keys %{$real_processinfo->{$k}} > 5) {
+                            $cached_data->{'real_processinfo'}->{$k} = $real_processinfo->{$k};
+                        }
+                    }
                 }
             }
         }
@@ -470,11 +487,13 @@ sub set_processinfo {
         $c->stats->profile(end => "AddDefaults::set_processinfo fetch");
     }
 
+
     $processinfo                 = {} unless defined $processinfo;
     $processinfo                 = {} if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0);
     my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo, $selected);
     $c->stash->{'pi'}            = $overall_processinfo;
     $c->stash->{'pi_detail'}     = $processinfo;
+    $c->stash->{'real_pi_detail'} = $cached_data->{'real_processinfo'} || {};
     $c->stash->{'has_proc_info'} = 1;
 
     # set last programm restart
