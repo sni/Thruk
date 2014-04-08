@@ -88,7 +88,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     elsif($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
-        push @{$filter}, { message => { '~' => ';'.$contact.';' }} if $contact ne 'all';
+        push @{$filter}, { contact_name => $contact } if $contact ne 'all';
     }
 
     push @{$filter}, { class => 3 };
