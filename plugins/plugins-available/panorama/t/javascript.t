@@ -41,13 +41,19 @@ var window = {
     removeEventListener: function(){}
   },
   location: {},
-  addEventListener: function(){},
-  removeEventListener: function(){}
+  addEventListener:    function(){},
+  removeEventListener: function(){},
+  setTimeout:          function(){},
+  clearTimeout:        function(){},
+  setInterva:          function(){},
+  clearInterval:       function(){}
 };
 var navigator = window.navigator;
 var document  = window.document;
-setTimeout    = function() {};
-setInterval   = function() {};
+setTimeout    = function(){};
+clearTimeout  = function(){};
+setInterval   = function(){};
+clearInterval = function(){};
 thruk_debug_js = 1;
 ", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');
