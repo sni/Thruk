@@ -220,12 +220,14 @@ sub _js {
                         'id'    => 'new',
                         'tab'   => $tabdata,
                     };
-                    for my $id (@{$tabdata->{'xdata'}->{'window_ids'}}) {
+                    my $window_ids = $tabdata->{'window_ids'} || $tabdata->{'xdata'}->{'window_ids'};
+                    for my $id (@{$window_ids}) {
                         my $win = $state->{$id};
                         next if $win eq 'null';
                         $dashboard->{$id} = decode_json($win);
                     }
                     delete $tabdata->{'xdata'}->{'window_ids'};
+                    delete $tabdata->{'window_ids'};
                     $dashboard = $self->_save_dashboard($c, $dashboard);
                     $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'} = $key if $key eq $tabpan->{'activeTab'};
                     push @{$data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs}}, $dashboard->{'id'};
