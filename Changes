@@ -11,6 +11,7 @@ next:
           - added new command "thruk -a selfcheck" to perform some self checks
           - optionally disable session revalidation in cookie auth
           - added csrf protection
+          - added sorting of comments/downtimes on host/service pages
           - Business Process
             - added support for custom functions
           - Reports
@@ -33,6 +34,8 @@ next:
             - fixed loosing filter on reports page
             - fixed save&reload button from within filesystem browser
             - fixed demanding system command permissions for enabling accept passive results (awiddersheim)
+            - fixed exclusion when using 'Plugin Output' filter
+            - fixed 'Plugin Output' not showing up as option when adding an and/or filter
 
 1.82-2   Fri Feb 21 17:20:55 CET 2014
           - redirect to host details page if no services found and no service filter was set
