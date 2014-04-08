@@ -84,7 +84,7 @@
                 TP.iconShowEditDialog(This);
             }
             [% END %]
-            window.setTimeout(function() {
+            TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
                 This.syncShadow();
             }, 500)
         },
@@ -106,7 +106,7 @@
     refreshHandler: function(newStatus) {
         if(newStatus != undefined && this.xdata.state != newStatus) {
             this.xdata.state = newStatus;
-            window.setTimeout(TP.flickerImg(this.id), 200);
+            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.id), 200);
             this.saveState();
         }
         iconset = this.xdata.layout.iconset;
@@ -116,7 +116,7 @@
         else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
         else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
         var This = this;
-        window.setTimeout(function() {
+        TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
             This.syncShadow();
         }, 500)
     },

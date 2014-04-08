@@ -512,7 +512,7 @@ var TP = {
             cp.loadData(decoded);
             cp.saveChanges(false);
             Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
-            window.setTimeout("window.location.reload()", 1000);
+            TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
         } else {
             /* new single tab export */
             var param = {
@@ -615,7 +615,7 @@ var TP = {
         this.stopRotatingTabs();
         if(tabpan.xdata.rotate_tabs > 0) {
             debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
-            tabpan.interval_rotatetabs = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
+            TP.timeouts['interval_global_rotate_tabs'] = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
         }
     },
     /* start server time */
@@ -628,11 +628,11 @@ var TP = {
             return;
         }
         label.show();
-        tabpan.interval_servertime = window.setInterval(TP.updateServerTime, 1000);
+        TP.timeouts['interval_global_servertime'] = window.setInterval(TP.updateServerTime, 1000);
     },
     stopServerTime: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval_servertime);
+        window.clearInterval(TP.timeouts['interval_global_servertime']);
     },
     /* update server time */
     updateServerTime: function() {
@@ -645,7 +645,7 @@ var TP = {
     /* stop tab rotation interval */
     stopRotatingTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval_rotatetabs);
+        window.clearInterval(TP.timeouts['interval_global_rotate_tabs']);
     },
     /* rotate tabs once */
     rotateTabs: function() {
@@ -977,7 +977,7 @@ var TP = {
           .animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
         el.syncShadow();
-        window.setTimeout(function() {
+        TP.timeouts['timeout_sync_shadow'+el.id] = window.setTimeout(function() {
             el.setSize({width: size.width, height: size.height});
             el.getEl().dom.style.left = origLeft;
             el.getEl().dom.style.top  = origTop;

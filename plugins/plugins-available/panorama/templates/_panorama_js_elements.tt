@@ -308,7 +308,7 @@ TP.Msg = function() {
             } else {
                 delay = 3000;
             }
-            window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
+            TP.timeouts['timeout_global_msg_ghost'] = window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
         }
     };
 }();

@@ -110,7 +110,7 @@
                 this.gearHandler();
             } else {
                 // update must be delayed, IE8 breaks otherwise
-                window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
+                TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.manualRefresh, this, []), 500);
             }
         });
 

@@ -147,12 +147,11 @@ TP.setBackends = function(backends) {
 }
 
 /* set cookie and reload panels */
-var backendSelTimer;
 TP.setBackendsCookieAndRefresh = function(wait) {
     /* save current selected backends in session cookie */
     document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
 
     /* reload panel */
-    window.clearTimeout(backendSelTimer);
-    backendSelTimer = window.setTimeout(TP.refreshAllSitePanel, wait);
+    window.clearTimeout(TP.timeouts['timeout_global_backend_refresh']);
+    TP.timeouts['timeout_global_backend_refresh'] = window.setTimeout(TP.refreshAllSitePanel, wait);
 }

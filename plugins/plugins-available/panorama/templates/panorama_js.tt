@@ -81,5 +81,5 @@ Ext.onReady(function() {
     [% END %]
 
     // make sure initialized is set to true
-    window.setTimeout("TP.initialized = true;", 60000);
+    TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);
 });

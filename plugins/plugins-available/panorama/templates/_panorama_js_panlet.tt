@@ -199,11 +199,11 @@
             refresh = tab.xdata.refresh;
         }
         if(refresh > 0) {
-            this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), refresh * 1000);
+            TP.timeouts['interval_'+this.id+'_refresh'] = window.setInterval(Ext.bind(this.refreshHandler, this, []), refresh * 1000);
         }
     },
     stopTimeouts: function() {
-        window.clearInterval(this.interval);
+        window.clearInterval(TP.timeouts['interval_'+this.id+'_refresh']);
     },
     dd_overriden: false,
     getState: function() {
@@ -239,7 +239,7 @@
             TP.removeWindowFromPanels(this.id);
 
             /* stop refreshing */
-            window.clearInterval(this.interval);
+            this.stopTimeouts();
             /* clear state information */
             cp.clear(this.id);
         },

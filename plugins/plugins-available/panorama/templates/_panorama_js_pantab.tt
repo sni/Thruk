@@ -137,7 +137,7 @@
                 }
                 var tabpan    = Ext.getCmp('tabpan');
                 var activeTab = tabpan.getActiveTab();
-                window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
+                TP.timeouts['timeout_' + this.window_ids[nr] + '_render'] = window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
 
                 if(autoshow) {
                    TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
@@ -190,7 +190,7 @@
             for(var nr=0; nr<panels.length; nr++) {
                 var p = panels[nr];
                 if(p.startTimeouts) {
-                    window.setTimeout(Ext.bind(p.startTimeouts, p, []), delay);
+                    TP.timeouts['timeout_' + p.id + '_delayed_start'] = window.setTimeout(Ext.bind(p.startTimeouts, p, []), delay);
                     delay = delay + Math.round(interval*1000);
                 }
                 if(p.header) {
@@ -200,7 +200,7 @@
         }
         var This = this;
         if(tabpan.xdata.refresh > 0) {
-            TP.timeouts['global_icons' + This.id] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
+            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
         }
 
         TP.updateAllIcons(This);
@@ -217,7 +217,7 @@
             }
         }
 
-        window.clearInterval(TP.timeouts['global_icons' + this.id]);
+        window.clearInterval(TP.timeouts['interval_global_icons' + this.id] + '_refresh');
     },
     setBackground: function(background) {
         if(background != undefined && background != 'none') {

@@ -70,7 +70,7 @@
                     } catch(e) {
                         /* first reload after changing from external to internal url does not work*/
                         iframe.src = 'about:blank';
-                        window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+                        TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
                     }
                 }
             }

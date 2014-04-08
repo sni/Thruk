@@ -106,10 +106,10 @@
                 render: function(This, eOpts) {
                     var div = This.getEl();
                     div.on("mouseout", function()  {
-                        TP.timeouts[This.id] = window.setTimeout(Ext.bind(This.redraw, This, []), 1000);
+                        TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(This.redraw, This, []), 1000);
                     });
                     div.on("mouseover", function()  {
-                        window.clearTimeout(TP.timeouts[This.id]);
+                        window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
                     });
                 }
             }

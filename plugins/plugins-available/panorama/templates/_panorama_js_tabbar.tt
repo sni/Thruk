@@ -334,7 +334,7 @@ Ext.define('TP.TabBar', {
                 this.setActiveTab(state.activeTab);
                 Ext.apply(this, state);
             }
-            window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_inactive);
+            TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_inactive);
         } catch(e) {
             debug(e);
             if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
@@ -342,7 +342,7 @@ Ext.define('TP.TabBar', {
             }
         }
         if(TP.initMask) {
-            window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive);
+            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive);
         }
     },
     items: [{
@@ -379,7 +379,7 @@ Ext.define('TP.TabBar', {
         delete this.xdata['backends'];
         if(TP.reload_required) {
             Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...").toFront();
-            window.setTimeout(function() { cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
+            TP.timeouts['timeout_'+this.id+'_window_reload'] = window.setTimeout(function() { cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
             return;
         }
 

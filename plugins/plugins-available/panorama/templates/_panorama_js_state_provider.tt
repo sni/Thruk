@@ -131,8 +131,8 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
     /* queue save changes */
     queueChanges: function() {
-        window.clearTimeout(this.interval);
-        this.interval = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
+        window.clearTimeout(TP.timeouts['timeout_stateprovider_savedelay']);
+        TP.timeouts['timeout_stateprovider_savedelay'] = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
     },
 
     /* send changes back to server */
