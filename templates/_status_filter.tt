@@ -232,7 +232,7 @@
                       <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">Ok</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">OK</td>
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_st2" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
