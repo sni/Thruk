@@ -34,6 +34,7 @@
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
                 this.stateful = false;
+                this.header.show();
                 this.items.getAt(0).hide();
                 this.gearitem.down('form').getForm().reset();
                 if(this.has_search_button != undefined) {
@@ -48,9 +49,15 @@
                 if(this.origSize.width < 450 || this.origSize.height < 250) {
                     this.setSize(450, 250);
                 }
-                this.header.show();
                 this.gearitem.show();
+                this.applyBorderAndBackground();
                 this.addCls('gearopen');
+                // settings panel is somehow hidden below header
+                if(this.xdata.showborder == false) {
+                    this.items.get(0).body.dom.style.marginTop = '17px';
+                } else {
+                    this.items.get(0).body.dom.style.marginTop = '';
+                }
             } else {
                 this.stateful = true;
                 if(this.origSize != undefined) {
@@ -61,6 +68,11 @@
                 this.items.getAt(0).show();
                 this.gearitem.hide();
                 this.removeCls('gearopen');
+                if(this.xdata.showborder == false) {
+                    TP.timeouts['timeout_'+this.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                        this.getEl().disableShadow();
+                    }, this, []), 1000);
+                }
             }
         };
         [% IF readonly %]
@@ -175,6 +187,11 @@
                         win.startTimeouts();
                         win.saveState();
                         win.manualRefresh();
+                        if(win.xdata.showborder == false) {
+                            TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                                win.getEl().disableShadow();
+                            }, win, []), 1000);
+                        }
                     }
                  }
                }
@@ -291,6 +308,12 @@
 
             /* start refresh interval */
             this.startTimeouts();
+
+            if(This.xdata && This.xdata.showborder == false) {
+                TP.timeouts['timeout_'+This.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                    This.getEl().disableShadow();
+                }, This, []), 1000);
+            }
         },
         afterlayout: function(This) {
             /* make all border and background work */
@@ -323,7 +346,7 @@
         return null;
     },
     showHeader: function(global) {
-        if((global.xdata.autohideheader || this.alwaysBorderless)) {
+        if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -334,8 +357,6 @@
                 this.xdata.refresh = refresh;
             }
             style.display  = 'inherit';
-            style.opacity  = 0.9;
-            style.zIndex   = 20;
             if(this.xdata.showborder == false) {
                 this.getEl().enableShadow(true);
             }
@@ -354,7 +375,7 @@
     },
     applyBorderAndBackground: function() {
         this.overCls = 'autohideheaderover';
-        if(this.alwaysBorderless || this.xdata.showborder == false) {
+        if((this.alwaysBorderless || this.xdata.showborder == false) && this.gearitem.isHidden()) {
             this.cls     = 'autohideheader';
             this.bodyCls = 'autohideheader';
             this.shadow  = false;

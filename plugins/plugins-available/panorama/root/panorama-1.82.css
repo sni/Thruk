@@ -357,9 +357,12 @@ DIV.autohideheader.autohideheaderover.gearopen .x-window-header-default-top {
   padding: 3px;
   box-shadow: 0 1px 0 0 #EBE7E7 inset, 0 -1px 0 0 #EBE7E7 inset, -1px 0 0 0 #EBE7E7 inset, 1px 0 0 0 #EBE7E7 inset;
 }
-
 .x-window-body.gearopen {
   background-color: #FFFFFF;
+}
+DIV.autohideheader DIV.x-window-header {
+  opacity: 0.9;
+  z-index: 20;
 }
 
 DIV.hideRightArrow IMG.x-menu-item-arrow {
