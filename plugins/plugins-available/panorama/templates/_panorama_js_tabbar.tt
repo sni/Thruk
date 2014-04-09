@@ -122,6 +122,10 @@ Ext.define('TP.TabBar', {
                                 icon:   '[% url_prefix %]plugins/panorama/images/server_link.png',
                                 handler: function() { TP.add_panlet_delayed({type:'TP.HostgroupStatusIcon'}, -8, -8) }
                             }, {
+                                text:   'Hosts Graph',
+                                icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                                handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
+                            }, '-' ,{
                                 text:   'Service Status',
                                 icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
                                 handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon'}, -8, -8) }
@@ -130,6 +134,10 @@ Ext.define('TP.TabBar', {
                                 icon:   '[% url_prefix %]plugins/panorama/images/computer_link.png',
                                 handler: function() { TP.add_panlet_delayed({type:'TP.ServicegroupStatusIcon'}, -8, -8) }
                             }, {
+                                text:   'Services Graph',
+                                icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                                handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
+                            }, '-', {
                                 text:   'Site Status',
                                 icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
                                 handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
@@ -163,10 +171,6 @@ Ext.define('TP.TabBar', {
                         text:   'Hosts Totals',
                         icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
-                    }, {
-                        text:   'Hosts Graph',
-                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
                     },
                     /* Services */
                     '-', {
@@ -177,10 +181,6 @@ Ext.define('TP.TabBar', {
                         text:   'Services Totals',
                         icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
-                    }, {
-                        text:   'Services Graph',
-                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
                     }, {
                         text:   'Mine Map',
                         icon:   '[% url_prefix %]plugins/panorama/images/minemap.png',
