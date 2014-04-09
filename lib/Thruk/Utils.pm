@@ -1860,6 +1860,9 @@ sub write_data_file {
     # make data::dumper save utf-8 directly
     local $Data::Dumper::Useqq = 1;
 
+    # avoid self-referential structures
+    local $Data::Dumper::Deepcopy = 1;
+
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
