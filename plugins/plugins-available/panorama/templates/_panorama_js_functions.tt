@@ -274,7 +274,7 @@ var TP = {
             for(var nr=0; nr<tab.window_ids.length; nr++) {
                 var id = tab.window_ids[nr];
                 var w  = Ext.getCmp(id);
-                if(id != win.id && (panel.id == win.panel_id)) {
+                if(id != win.id) {
                     boxes.push(TP.getBox(w));
                 }
             };
