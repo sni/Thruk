@@ -4,9 +4,9 @@
     title:  'chart',
     width:  200,
     height: 200,
-    noHeaderBorderless: true,
     initComponent: function() {
         this.callParent();
+        this.xdata.showborder = false;
 
         this.pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','data'],
@@ -60,19 +60,15 @@
         };
 
         var global = Ext.getCmp(this.panel_id);
-        var background = 'white';
-        if(global.xdata.autohideheader) {
-            background = 'transparent';
-        }
         this.chart = Ext.create('Ext.chart.Chart', {
-            xtype: 'chart',
+            xtype:  'chart',
             animate: true,
-            store: this.pieStore,
-            shadow: true,
-            legend: false,
+            store:   this.pieStore,
+            shadow:  true,
+            legend:  false,
             insetPadding: 3,
-            style: 'background-color: '+background+';',
-            theme: 'Base:gradients',
+            theme:  'Base:gradients',
+            panel:   this,
             series: [{
                 type: 'pie',
                 field: 'data',
@@ -104,13 +100,22 @@
             }],
             listeners: {
                 render: function(This, eOpts) {
-                    var div = This.getEl();
+                    var div   = This.getEl();
+                    var panel = This.panel;
                     div.on("mouseout", function()  {
-                        TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(This.redraw, This, []), 1000);
+                        TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
+                            panel.chart.redraw();
+                            if(panel.xdata && panel.xdata.showborder == false) {
+                                panel.getEl().disableShadow();
+                            }
+                        }, panel, []), 1000);
                     });
                     div.on("mouseover", function()  {
                         window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
                     });
+                },
+                destroy: function(This) {
+                    window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
                 }
             }
         });
@@ -118,6 +123,12 @@
 
         this.addListener('beforerender', function() {
             this.refreshHandler();
+        });
+
+        this.down('form').add({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
         });
     }
 });

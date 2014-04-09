@@ -14,7 +14,6 @@
     resizable: false,
     closable: false,
     draggable: false,
-    noHeaderBorderless: false,
     [% ELSE %]
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
@@ -31,7 +30,6 @@
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
 
-        var global = Ext.getCmp(this.panel_id);
         this.gearHandler = function() {
             [% IF readonly %]return;[% END %]
             if(this.gearitem.isHidden()) {
@@ -55,24 +53,16 @@
                 this.addCls('gearopen');
             } else {
                 this.stateful = true;
-                if(global.xdata.autohideheader || this.alwaysBorderless) {
-                    this.header.hide();
-                }
                 if(this.origSize != undefined) {
                     this.setSize(this.origSize);
                     delete this.origSize;
                 }
+                this.applyBorderAndBackground();
                 this.items.getAt(0).show();
                 this.gearitem.hide();
                 this.removeCls('gearopen');
             }
         };
-        if(this.alwaysBorderless || (this.noHeaderBorderless == true && global.xdata.autohideheader)) {
-            this.bodyCls = 'autohideheader';
-            this.cls     = 'autohideheader';
-            this.overCls = 'autohideheaderover';
-            this.shadow  = false;
-        }
         [% IF readonly %]
         this.tools = [];
         [% ELSE %]
@@ -107,6 +97,7 @@
             id:      this.shadow_id,
             cls:    'window_drop_shadow'
         });
+        this.applyBorderAndBackground();
         this.callParent();
         this.gearitem = this.items.getAt(0);
     },
@@ -178,6 +169,7 @@
                         win.removeCls('gearopen');
                         win.gearitem.hide();
                         win.xdata = TP.storeFormToData(form, win.xdata);
+                        win.applyBorderAndBackground();
                         win.setTitle(win.xdata.title);
                         win.setFormDefaults();
                         win.startTimeouts();
@@ -268,7 +260,7 @@
                 };
                 This.dd_overriden = true;
             }
-            /* make sure we don't overlapt dashboard settings window */
+            /* make sure we don't overlap dashboard settings window */
             if(TP.dashboardsSettingWindow) {
                 TP.dashboardsSettingWindow.toFront();
             }
@@ -299,11 +291,10 @@
 
             /* start refresh interval */
             this.startTimeouts();
-
-            var global = Ext.getCmp(this.panel_id);
-            if(global) {
-                if(global.xdata.autohideheader || this.alwaysBorderless) { this.header.hide() }
-            }
+        },
+        afterlayout: function(This) {
+            /* make all border and background work */
+            this.applyBorderAndBackground();
         }
     },
     setFormDefaults: function() {
@@ -332,7 +323,7 @@
         return null;
     },
     showHeader: function(global) {
-        if(global.xdata.autohideheader || this.alwaysBorderless) {
+        if((global.xdata.autohideheader || this.alwaysBorderless)) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -345,14 +336,60 @@
             style.display  = 'inherit';
             style.opacity  = 0.9;
             style.zIndex   = 20;
+            if(this.xdata.showborder == false) {
+                this.getEl().enableShadow(true);
+            }
         }
     },
     hideHeader: function(global) {
-        if((this.alwaysBorderless || global.xdata.autohideheader) && this.gearitem.isHidden()) {
+        if((this.alwaysBorderless || global.xdata.autohideheader) && this.xdata.showborder != true && this.gearitem.isHidden()) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
             style.zIndex   = '';
+            if(this.xdata.showborder == false) {
+                this.getEl().disableShadow();
+            }
+        }
+    },
+    applyBorderAndBackground: function() {
+        this.overCls = 'autohideheaderover';
+        if(this.alwaysBorderless || this.xdata.showborder == false) {
+            this.cls     = 'autohideheader';
+            this.bodyCls = 'autohideheader';
+            this.shadow  = false;
+            if(this.rendered) {
+                this.addCls('autohideheader');
+                this.body.addCls('autohideheader');
+                this.getEl().disableShadow();
+                this.getEl().setStyle('background-color', 'transparent');
+                if(this.chart) {
+                    this.chart.getEl().setStyle('background-color', 'transparent');
+                }
+            }
+        } else {
+            this.cls     = '';
+            this.bodyCls = '';
+            this.shadow = 'sides';
+            if(this.rendered) {
+                this.removeCls('autohideheader');
+                this.body.removeCls('autohideheader');
+                this.getEl().enableShadow();
+                this.getEl().setStyle('background-color', '');
+                if(this.chart) {
+                    this.chart.getEl().setStyle('background-color', '#FFFFFF');
+                }
+            }
+        }
+        var global = Ext.getCmp(this.panel_id);
+        if((global.xdata.autohideheader || this.alwaysBorderless) && this.xdata.showborder != true) {
+            if(this.header) {
+                this.header.hide();
+            }
+        }
+        if(this.xdata.showborder == true) {
+            this.header.show();
         }
     }
 });
+

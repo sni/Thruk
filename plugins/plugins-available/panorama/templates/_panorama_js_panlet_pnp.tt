@@ -13,14 +13,14 @@ Ext.define('TP.PanletPNP', {
     title: 'PNPGraph',
     height: 240,
     width:  420,
-    noHeaderBorderless: true,
     //maximizable: true, // does not work stateful
     initComponent: function() {
         this.callParent();
-        this.xdata.url      = '';
-        this.xdata.graph    = '';
-        this.xdata.source   = 0;
-        this.xdata.time     = '1h';
+        this.xdata.url        = '';
+        this.xdata.graph      = '';
+        this.xdata.source     = 0;
+        this.xdata.time       = '1h';
+        this.xdata.showborder = true;
         this.lastGraph      = '';
 
         this.size_adjustment_x = 97;
@@ -158,6 +158,11 @@ Ext.define('TP.PanletPNP', {
             fieldLabel:     'Time Frame',
             xtype:          'textfield',
             name:           'time'
+        });
+        this.down('form').add({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
         });
 
         /* auto load when url is set */
