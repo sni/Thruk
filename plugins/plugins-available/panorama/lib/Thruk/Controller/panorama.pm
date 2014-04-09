@@ -1184,7 +1184,7 @@ sub _task_dashboard_data {
             tab     => {
                 xdata => {
                     title           => 'Dashboard',
-                    refresh         => $c->stash->{'refresh_rate'},
+                    refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
                     backends        => [],
                     background      => 'none',
                     autohideheader  => 1,
