@@ -486,7 +486,7 @@ sub _cond_compining {
     }
     my ( $child_combining_count, @child_statment )= &_recurse_cond($value, 0 );
     push @statment, @child_statment;
-    if ( defined $combining ) {
+    if ( defined $combining and $child_combining_count > 1) {
         push @statment, sprintf("%s%s: %d",
             $compining_prefix,
             ucfirst( $combining ),
