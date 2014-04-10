@@ -267,7 +267,9 @@ sub begin : Private {
             }
         }
         if($c->stash->{'fix_cookies'}) {
-            $c->log->info("removing some cookies: ".join(', ', @{$c->stash->{'fix_cookies'}}));
+            if(!defined $c->request->headers->{'user-agent'} or $c->request->headers->{'user-agent'} !~ m/libwww\-perl/mx) {
+                $c->log->info("removing some cookies: ".join(', ', @{$c->stash->{'fix_cookies'}}));
+            }
         }
     }
 
