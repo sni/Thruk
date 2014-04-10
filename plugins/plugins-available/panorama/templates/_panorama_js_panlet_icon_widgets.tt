@@ -40,6 +40,10 @@
                         text:   'Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.iconShowEditDialog(This) }
+                    }, {
+                        text:   'Refresh',
+                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                        handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) }
                     },'-',{
                         text:   'Clone',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
@@ -143,8 +147,31 @@ TP.iconShowEditDialog = function(This) {
     if(panel.iconType == 'service') {
         generalItems.push(TP.objectSearchItem('host', 'Hostname'));
     }
-    generalItems.push(TP.objectSearchItem(panel.iconType, panel.iconName));
-    if(panel.xdata.general.incl_svc != undefined) {
+    if(panel.iconType != 'filtered') {
+        generalItems.push(TP.objectSearchItem(panel.iconType, panel.iconName));
+    }
+    if(panel.iconType == 'filtered') {
+        generalItems.push({
+            fieldLabel: 'Name',
+            xtype:      'textfield',
+            name:       'name',
+            value:      ''
+        });
+        generalItems.push(new TP.formFilter({
+            fieldLabel:     'Filter',
+            name:           'filter',
+            ftype:          'service'
+        }));
+    }
+    if(panel.has_hst != undefined) {
+        generalItems.push({
+            fieldLabel: 'Include Hosts',
+            xtype:      'checkbox',
+            name:       'incl_hst',
+            value:      true
+        });
+    }
+    if(panel.has_svc != undefined) {
         generalItems.push({
             fieldLabel: 'Include Services',
             xtype:      'checkbox',
@@ -152,7 +179,7 @@ TP.iconShowEditDialog = function(This) {
             value:      false
         });
     }
-    if(panel.xdata.general.incl_downtimes != undefined) {
+    if(panel.has_downtimes != undefined) {
         generalItems.push({
             fieldLabel: 'Include Downtimes',
             xtype:      'checkbox',
@@ -160,7 +187,7 @@ TP.iconShowEditDialog = function(This) {
             value:      true
         });
     }
-    if(panel.xdata.general.incl_ack != undefined) {
+    if(panel.has_ack != undefined) {
         generalItems.push({
             fieldLabel: 'Include Acknowledged',
             xtype:      'checkbox',
@@ -213,7 +240,7 @@ TP.iconShowEditDialog = function(This) {
                             { xtype: 'textfield', name:  'x', width: 40 },
                             { xtype: 'label', text:  'y:' },
                             { xtype: 'textfield', name:  'y', width: 40 },
-                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 15px;' },
+                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 15px;' }
                     ]
                 }, {
                     fieldLabel: 'Icon Set',
@@ -309,7 +336,11 @@ Ext.onReady(function() {
     var tipRenderer = function (e, el, eOpts) {
         e.stopEvent();
         var img = Ext.getCmp(el.id);
-        TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());
+        if(img.iconType == 'filtered') {
+            TP.iconTip.setTitle(img.getName());
+        } else {
+            TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());
+        }
         var d = img.getDetails();
         var details = '<table class="iconDetails">';
         for(var x=0; x<d.length; x++) {
@@ -339,7 +370,10 @@ Ext.define('TP.HostStatusIcon', {
         this.callParent();
         this.xdata.general.incl_svc       = true;
         this.xdata.general.incl_downtimes = true;
+        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
+        this.has_ack                      = true;
+        this.has_svc                      = true;
     },
     getName: function() {
         return(this.xdata.general.host);
@@ -392,8 +426,11 @@ Ext.define('TP.HostgroupStatusIcon', {
     initComponent: function() {
         this.callParent();
         this.xdata.general.incl_svc       = true;
+        this.has_svc                      = true;
         this.xdata.general.incl_downtimes = true;
+        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
+        this.has_ack                      = true;
     },
     refreshHandler: function(newStatus) {
         // calculate summarized status
@@ -446,7 +483,9 @@ Ext.define('TP.ServiceStatusIcon', {
     initComponent: function() {
         this.callParent();
         this.xdata.general.incl_downtimes = true;
+        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
+        this.has_ack                      = true;
     },
     getName: function() {
         return(this.xdata.general.host + ' - ' + this.xdata.general.service);
@@ -474,7 +513,9 @@ Ext.define('TP.ServicegroupStatusIcon', {
     initComponent: function() {
         this.callParent();
         this.xdata.general.incl_downtimes = true;
+        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
+        this.has_ack                      = true;
     },
     refreshHandler: function(newStatus) {
         // calculate summarized status
@@ -505,6 +546,68 @@ Ext.define('TP.ServicegroupStatusIcon', {
         var statename = TP.text_service_status(this.xdata.state);
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>']);
         details.push([ 'Services', TP.get_summarized_servicestatus(this.servicegroup.services)]);
+        return(details);
+    }
+});
+
+/* Custom Filter Icon */
+Ext.define('TP.FilterStatusIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'filtered',
+    initComponent: function() {
+        this.callParent();
+        this.xdata.general.name     = '';
+        this.xdata.general.incl_hst = true;
+        this.xdata.general.incl_svc = true;
+        this.has_hst                = true;
+        this.has_svc                = true;
+    },
+    refreshHandler: function(newStatus) {
+        // calculate summarized status
+        if(this.results) {
+            var s;
+                 if(this.xdata.general.incl_svc && this.results.services.unknown > 0)                                                 { s = 3; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.results.services.ack_unknown > 0)              { s = 3; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.results.services.downtimes_unknown > 0)  { s = 3; }
+            else if(this.xdata.general.incl_hst && this.results.hosts.unreachable > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_hst && this.results.hosts.down        > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_ack && this.results.hosts.ack_unreachable > 0)             { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_ack && this.results.hosts.ack_down        > 0)             { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_downtimes && this.results.hosts.downtime_down        > 0)  { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_downtimes && this.results.hosts.downtime_unreachable > 0)  { s = 2; }
+            else if(this.xdata.general.incl_svc && this.results.services.critical > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.results.services.ack_critical > 0)             { s = 2; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.results.services.downtimes_critical > 0) { s = 2; }
+            else if(this.xdata.general.incl_svc && this.results.services.warning > 0)                                                 { s = 1; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.results.services.ack_warning > 0)              { s = 1; }
+            else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.results.services.downtimes_warning > 0)  { s = 1; }
+            else                                                                                                                      { s = 0; }
+            newStatus = s;
+        }
+        this.callParent([newStatus]);
+    },
+    getName: function() {
+        return(this.xdata.general.name);
+    },
+    getDetails: function() {
+        var details = [];
+        if(!this.results) {
+            return([['Status', 'No status information available']]);
+        }
+        var statename;
+        if(this.xdata.general.incl_svc == false) {
+            statename = TP.text_host_status(this.xdata.state);
+        } else {
+            statename = TP.text_service_status(this.xdata.state);
+        }
+        details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>']);
+        if(this.xdata.general.incl_hst) {
+            details.push([ 'Hosts', TP.get_summarized_hoststatus(this.results.hosts)]);
+        }
+        if(this.xdata.general.incl_svc) {
+            details.push([ 'Services', TP.get_summarized_servicestatus(this.results.services)]);
+        }
         return(details);
     }
 });

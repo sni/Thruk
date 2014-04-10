@@ -803,15 +803,24 @@ var TP = {
     },
     updateAllIcons: function(tab, id) {
         var panels = TP.getAllPanel(tab);
-        var req    = { hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref    = { hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
+        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
         var count  = 0;
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(id && p.id != id) { continue; }
             if(p.xdata && p.xdata.general) {
+                /* custom filter */
+                if(p.xdata.general.filter) {
+                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter]);
+                    if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
+                    req.filter[filter] = 1;
+                    ref.filter[filter].push(p);
+                    count++;
+                }
+
                 /* update services */
-                if(p.xdata.general.service && p.xdata.general.host) {
+                else if(p.xdata.general.service && p.xdata.general.host) {
                     if(req.services[p.xdata.general.host] == undefined) {
                         req.services[p.xdata.general.host] = {};
                         ref.services[p.xdata.general.host] = {};
@@ -867,6 +876,16 @@ var TP = {
                 } else {
                     var data = TP.getResponse(undefined, response);
                     data = data.data;
+                    /* update custom filter */
+                    if(data.filter) {
+                        for(var key in data.filter) {
+                            for(var x=0; x<ref.filter[key].length; x++) {
+                                ref.filter[key][x].results = data.filter[key];
+                                ref.filter[key][x].refreshHandler();
+                            }
+                            delete ref.filter[key];
+                        }
+                    }
                     /* update hosts */
                     if(data.hosts) {
                         for(var x=0; x<data.hosts.length; x++) {
@@ -933,7 +952,7 @@ var TP = {
                     }
 
                     /* mark remaining as unknown */
-                    var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites'];
+                    var keys = ['hosts', 'hostgroups', 'servicegroups', 'sites', 'filter'];
                     for(var x=0; x<keys.length; x++) {
                         var name = keys[x];
                         for(var key in ref[name]) {

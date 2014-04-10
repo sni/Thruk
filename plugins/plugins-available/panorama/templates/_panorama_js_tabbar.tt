@@ -138,6 +138,10 @@ Ext.define('TP.TabBar', {
                                 icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
                                 handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
                             }, '-', {
+                                text:   'Custom Filter',
+                                icon:   '[% url_prefix %]plugins/panorama/images/page_find.png',
+                                handler: function() { TP.add_panlet_delayed({type:'TP.FilterStatusIcon'}, -8, -8) }
+                            }, '-', {
                                 text:   'Site Status',
                                 icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
                                 handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
