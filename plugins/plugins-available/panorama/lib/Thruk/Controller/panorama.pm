@@ -175,14 +175,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     if($c->request->parameters->{'clean'}) {
         my $data = Thruk::Utils::get_user_data($c);
         delete $data->{'panorama'};
-        if($c->config->{'demo_mode'}) {
-            eval {
-                Thruk::Utils::store_user_data($c, $data);
-            };
-            Thruk::Utils::Filter::get_message($c);
-        } else {
-            Thruk::Utils::store_user_data($c, $data);
-        }
+        Thruk::Utils::store_user_data($c, $data);
         return $c->response->redirect("panorama.cgi");
     }
 
@@ -283,14 +276,7 @@ sub _stateprovider {
                 $data->{'panorama'}->{'state'}->{$name} = $value;
             }
         }
-        if($c->config->{'demo_mode'}) {
-            eval {
-                Thruk::Utils::store_user_data($c, $data);
-            };
-            Thruk::Utils::Filter::get_message($c);
-        } else {
-            Thruk::Utils::store_user_data($c, $data);
-        }
+        Thruk::Utils::store_user_data($c, $data);
 
         $c->stash->{'json'} = { 'status' => 'ok' };
     }
@@ -302,14 +288,8 @@ sub _stateprovider {
             if($key eq 'tabpan') {
                 my $data = Thruk::Utils::get_user_data($c);
                 $data->{'panorama'}->{dashboards}->{$key} = $param_data;
-                if($c->config->{'demo_mode'}) {
-                    eval { Thruk::Utils::store_user_data($c, $data) };
-                    Thruk::Utils::Filter::get_message($c);
-                } else {
-                    Thruk::Utils::store_user_data($c, $data);
-                }
+                Thruk::Utils::store_user_data($c, $data);
             } else {
-                next if $c->config->{'demo_mode'};
                 # update dashboards
                 for my $k2 (keys %{$param_data}) {
                     if($k2 eq 'id') {
