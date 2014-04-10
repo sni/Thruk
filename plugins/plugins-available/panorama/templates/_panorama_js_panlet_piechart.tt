@@ -7,6 +7,7 @@
     initComponent: function() {
         this.callParent();
         this.xdata.showborder = false;
+        this.xdata.showlabel  = true;
 
         this.pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','data'],
@@ -55,6 +56,7 @@
                             this.chart.redraw();
                         } catch(e) { debug(e) }
                     }
+                    this.setShowLabel();
                 }
             }
         };
@@ -116,6 +118,9 @@
                 },
                 destroy: function(This) {
                     window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
+                },
+                resize: function(This) {
+                    This.panel.setShowLabel();
                 }
             }
         });
@@ -130,5 +135,21 @@
             xtype:      'checkbox',
             name:       'showborder'
         });
+        this.down('form').add({
+            fieldLabel: 'Show Label',
+            xtype:      'checkbox',
+            name:       'showlabel'
+        });
+    },
+    setShowLabel: function() {
+        var panel = this;
+        Ext.each(this.chart.getEl().query('text'), function(el) {
+            if(panel.xdata.showlabel == false) {
+                el.style.fill = 'transparent';
+            } else {
+                el.style.fill = '';
+            }
+        });
     }
 });
+
