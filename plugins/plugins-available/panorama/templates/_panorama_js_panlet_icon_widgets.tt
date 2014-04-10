@@ -212,7 +212,8 @@ TP.iconShowEditDialog = function(This) {
                     items: [{ xtype: 'label', text:  'x:' },
                             { xtype: 'textfield', name:  'x', width: 40 },
                             { xtype: 'label', text:  'y:' },
-                            { xtype: 'textfield', name:  'y', width: 40 }
+                            { xtype: 'textfield', name:  'y', width: 40 },
+                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 15px;' },
                     ]
                 }, {
                     fieldLabel: 'Icon Set',
@@ -269,7 +270,18 @@ TP.iconShowEditDialog = function(This) {
                     This.firstRun = false;
                  }
                }
-        ]
+        ],
+        listeners: {
+            afterRender: function () {
+                this.nav = Ext.create('Ext.util.KeyNav', this.el, {
+                    'left':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]-1, pos[1]);   },
+                    'right': function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]+1, pos[1]);   },
+                    'up':    function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]-1); },
+                    'down':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]+1); },
+                    scope: panel
+                });
+            }
+        }
     }).show();
 
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
