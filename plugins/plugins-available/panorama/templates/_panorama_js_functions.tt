@@ -891,12 +891,14 @@ var TP = {
                         for(var x=0; x<data.hosts.length; x++) {
                             var name  = data.hosts[x]['name'];
                             var state = data.hosts[x]['state'];
-                            if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
-                            for(var y=0; y<ref.hosts[name].length; y++) {
-                                ref.hosts[name][y].host = data.hosts[x];
-                                ref.hosts[name][y].refreshHandler(state);
+                            if(ref.hosts[name]) { // may be empty if we get the same host twice in a result
+                                if(data.hosts[x]['has_been_checked'] == 0) { state = 4; }
+                                for(var y=0; y<ref.hosts[name].length; y++) {
+                                    ref.hosts[name][y].host = data.hosts[x];
+                                    ref.hosts[name][y].refreshHandler(state);
+                                }
+                                delete ref.hosts[name];
                             }
-                            delete ref.hosts[name];
                         }
                     }
                     /* update hostgroups */
@@ -904,11 +906,13 @@ var TP = {
                         for(var x=0; x<data.hostgroups.length; x++) {
                             var name  = data.hostgroups[x]['name'];
                             var state = data.hostgroups[x]['state'];
-                            for(var y=0; y<ref.hostgroups[name].length; y++) {
-                                ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
-                                ref.hostgroups[name][y].refreshHandler();
+                            if(ref.hostgroups[name]) { // may be empty if we get the same hostgroup twice in a result
+                                for(var y=0; y<ref.hostgroups[name].length; y++) {
+                                    ref.hostgroups[name][y].hostgroup = data.hostgroups[x];
+                                    ref.hostgroups[name][y].refreshHandler();
+                                }
+                                delete ref.hostgroups[name];
                             }
-                            delete ref.hostgroups[name];
                         }
                     }
                     /* update servicegroups */
@@ -916,11 +920,13 @@ var TP = {
                         for(var x=0; x<data.servicegroups.length; x++) {
                             var name  = data.servicegroups[x]['name'];
                             var state = data.servicegroups[x]['state'];
-                            for(var y=0; y<ref.servicegroups[name].length; y++) {
-                                ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
-                                ref.servicegroups[name][y].refreshHandler();
+                            if(ref.servicegroups[name]) { // may be empty if we get the same servicegroup twice in a result
+                                for(var y=0; y<ref.servicegroups[name].length; y++) {
+                                    ref.servicegroups[name][y].servicegroup = data.servicegroups[x];
+                                    ref.servicegroups[name][y].refreshHandler();
+                                }
+                                delete ref.servicegroups[name];
                             }
-                            delete ref.servicegroups[name];
                         }
                     }
                     /* update services */
@@ -930,11 +936,13 @@ var TP = {
                             var svc   = data.services[x]['description'];
                             var state = data.services[x]['state'];
                             if(data.services[x]['has_been_checked'] == 0) { state = 4; }
-                            for(var y=0; y<ref.services[hst][svc].length; y++) {
-                                ref.services[hst][svc][y].service = data.services[x];
-                                ref.services[hst][svc][y].refreshHandler(state);
+                            if(ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
+                                for(var y=0; y<ref.services[hst][svc].length; y++) {
+                                    ref.services[hst][svc][y].service = data.services[x];
+                                    ref.services[hst][svc][y].refreshHandler(state);
+                                }
+                                delete ref.services[hst][svc];
                             }
-                            delete ref.services[hst][svc];
                         }
                     }
                     /* update sites */
