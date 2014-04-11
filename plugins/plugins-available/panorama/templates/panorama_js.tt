@@ -23,7 +23,6 @@ var default_dashboards = [% default_dashboard %];
 [%+ PROCESS _panorama_js_slider.tt +%]
 [%+ PROCESS _panorama_js_form_filter.tt +%]
 [%+ PROCESS _panorama_js_grid_renderer.tt +%]
-[%+ PROCESS _panorama_js_settings_global.tt +%]
 [%+ PROCESS _panorama_js_settings_tab.tt +%]
 [%+ PROCESS _panorama_js_settings_dashboards.tt +%]
 [%+ PROCESS _panorama_js_tabbar.tt +%]

@@ -275,7 +275,6 @@ TP.iconShowEditDialog = function(This) {
 
     var tabPanel = new Ext.TabPanel({
         activeTab         : 0,
-        id                : 'myTPanel',
         enableTabScroll   : true,
         items             : [
             generalTab,

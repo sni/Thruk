@@ -23,12 +23,10 @@
         },
         listeners: {
             change: function(s) {
-                var form    = s.up('form').getForm();
-                var v       = s.getValue();
-                var label   = s.up().formConf.nameL;
-                var newv    = {};
-                newv[label] = TP.sliderValue2Txt(v);
-                form.setValues(newv);
+                var v    = s.getValue();
+                var newv = {};
+                newv[s.up().formConf.nameL] = TP.sliderValue2Txt(v);
+                s.up('form').getForm().setValues(newv);
             }
         }
     }, {
@@ -37,7 +35,16 @@
         readOnly:  true,
         cellCls:   'slider_txt',
         size:      4,
-        maxLength: 7
+        maxLength: 7,
+        listeners: {
+            afterrender: function(s) {
+                var f      = s.up('form').getForm();
+                var values = f.getValues();
+                values[s.up().formConf.nameL] = TP.sliderValue2Txt(values[s.up().formConf.nameS]);
+                f.setValues(values);
+            }
+        }
+
     }],
 
     initComponent: function() {
@@ -45,7 +52,7 @@
         this.items.getAt(0).value      = this.formConf.value;
         this.items.getAt(0).name       = this.formConf.nameS;
         if(this.formConf.minValue != undefined) {
-            this.items.getAt(0).minValue   = this.formConf.minValue;
+            this.items.getAt(0).minValue = this.formConf.minValue;
         }
         this.items.getAt(1).name       = this.formConf.nameL;
     }
