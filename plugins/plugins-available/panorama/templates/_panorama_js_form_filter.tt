@@ -1,5 +1,5 @@
 ﻿Ext.define('TP.formFilter', {
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.form.FieldContainer',
 
     alias:  'widget.tp_filter',
 
@@ -12,24 +12,24 @@
         xtype:      'textfield',
         name:       'name',
         value:      '',
-        width:      100
+        width:      0
     }, {
         xtype:     'button',
         text:      'Change Filter',
         icon:      '[% url_prefix %]plugins/panorama/images/image_edit.png',
-        handler:   function() { TP.filterWindow(this.up('panel').ftype, this.up('panel').items.getAt(0)); }
+        handler:   function(This, eOpts) { TP.filterWindow(this.up().ftype, This.up().items.getAt(0)); }
     }],
 
     initComponent: function() {
         this.callParent();
-        this.items.getAt(0).fieldLabel = this.fieldLabel;
-        this.items.getAt(0).value      = this.value;
-        this.items.getAt(0).name       = this.name;
+        this.items.getAt(0).value = this.value;
+        this.items.getAt(0).name  = this.name;
         this.addListener('afterrender', function() {
             this.items.getAt(0).inputEl.hide();
         });
     }
 });
+
 Ext.define('SearchModel', {
     extend: 'Ext.data.Model',
     fields: [
@@ -55,6 +55,7 @@ var searchStore = Ext.create('Ext.data.Store', {
             if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod' || type == 'site') {
                 store.proxy.extraParams['type'] = type;
             } else {
+                store.removeAll();
                 debug("type: "+type+" not supported");
                 return false;
             }
@@ -80,14 +81,9 @@ Ext.define('TP.formFilterSelect', {
     alias:  'widget.tp_filter_select',
 
     border: false,
-    layout:     {
-            type: 'table',
-            columns: 5,
-            tableAttrs: {
-                style: {
-                    width: '100%'
-                }
-            }
+    width:  500,
+    layout: {
+        type: 'hbox'
     },
     items:      [{
         name:           'type',
@@ -116,13 +112,19 @@ Ext.define('TP.formFilterSelect', {
                          'Parent',
                          'Service',
                          'Servicegroup',
-                         '% State Change']
+                         '% State Change'],
+        listeners: {
+            change: function(This, eOpts) {
+                This.up().check_changed(This.getValue());
+            }
+        }
     }, {
         name:           'val_pre',
         xtype:          'textfield',
         width:          100,
         value:          [],
-        tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)'
+        tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)',
+        emptyText:      'variable name'
     }, {
         name:           'op',
         xtype:          'combobox',
@@ -136,7 +138,7 @@ Ext.define('TP.formFilterSelect', {
     }, {
         name:           'value',
         xtype:          'combobox',
-        width:          270,
+        flex:           1,
         queryMode:      'remote',
         store:          searchStore,
         triggerAction:  'all',
@@ -168,9 +170,14 @@ Ext.define('TP.formFilterSelect', {
         xtype:          'datetimefield',
         name:           'value_date'
     }, {
+        xtype:          'displayfield',
+        value:          '',
+        flex:            1
+    }, {
         xtype:      'panel',
         border:     false,
-        width:      14,
+        maxWidth:   14,
+        flex:       1,
         html:       '<div align="center" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
         listeners:  {
             afterrender: function(This, eOpts) { This.body.on('click', function() {
@@ -190,10 +197,12 @@ Ext.define('TP.formFilterSelect', {
             this.items.getAt(1).hide();
             this.items.getAt(3).hide();
             this.items.getAt(4).show();
+            this.items.getAt(5).show();
         } else {
             this.items.getAt(1).hide();
             this.items.getAt(3).show();
             this.items.getAt(4).hide();
+            this.items.getAt(5).hide();
         }
         if(v == 'custom variable') {
             this.items.getAt(1).show();
@@ -254,15 +263,17 @@ Ext.define('TP.formFilterSelect', {
 TP.filterWindow = function(ftype, base_el) {
 
     var form = new Ext.form.Panel({
-            bodyPadding: 3,
+            submitEmptyText: false,
+            bodyPadding:     3,
             defaults: {
-                labelWidth: 120
+                labelWidth: 135,
+                style: 'margin-top: 5px'
             },
             items: [{
                     fieldLabel: 'Host Status Types',
                     name:       'hoststatustypes',
                     xtype:      'tp_combobox_sum',
-                    width:      460,
+                    width:      485,
                     value:      [1,2,4,8],
                     sum_values: {'15': 'All', '12': 'All Problems' },
                     store:      [[2,'Up'], [4,'Down'], [8,'Unreachable'], [1,'Pending']]
@@ -270,7 +281,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Host Properties',
                     name:       'hostprops',
                     xtype:      'tp_combobox_sum',
-                    width:      460,
+                    width:      485,
                     columns:    true,
                     value:      [],
                     sum_values: {'0': 'Any' },
@@ -291,7 +302,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Service Status Types',
                     name:       'servicestatustypes',
                     xtype:      'tp_combobox_sum',
-                    width:      460,
+                    width:      485,
                     value:      [1,2,4,8,16],
                     sum_values: {'31': 'All', '28': 'All Problems' },
                     store:      [[2,'Ok'],[4,'Warning'],[8,'Unknown'],[16,'Critical'],[1,'Pending']]
@@ -299,7 +310,7 @@ TP.filterWindow = function(ftype, base_el) {
                     fieldLabel: 'Service Properties',
                     name:       'serviceprops',
                     xtype:      'tp_combobox_sum',
-                    width:      460,
+                    width:      485,
                     columns:    true,
                     value:      [],
                     sum_values: {'0': 'Any' },

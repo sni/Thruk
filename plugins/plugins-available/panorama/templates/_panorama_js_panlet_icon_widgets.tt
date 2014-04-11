@@ -85,12 +85,24 @@
             });
             if(this.xdata.general[this.iconType] == '') {
                 this.firstRun = true;
-                TP.iconShowEditDialog(This);
+                TP.suppressIconTip = true;
+                TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
+                    // show dialog delayed, so the panel has a position already
+                    TP.iconShowEditDialog(This);
+                }, 10);
             }
             [% END %]
             TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
                 This.syncShadow();
-            }, 500)
+            }, 50);
+        },
+        show: function( This, eOpts ) {
+            This.dd.addListener('dragstart', function(This, eOpts) {
+                TP.suppressIconTip = true;
+            });
+            This.dd.addListener('dragend', function(This, eOpts) {
+                TP.suppressIconTip = false;
+            });
         },
         destroy: function( This, eOpts ) {
             /* remove window from panels window ids */
@@ -139,9 +151,16 @@
     }
 });
 
+TP.iconSettingsWindow = undefined;
+TP.suppressIconTip    = false;
 TP.iconShowEditDialog = function(This) {
     var panel = This;
     panel.stateful = false;
+
+    // make sure only one window is open at a time
+    if(TP.iconSettingsWindow != undefined) {
+        TP.iconSettingsWindow.destroy();
+    }
 
     var generalItems = [];
     if(panel.iconType == 'service') {
@@ -158,9 +177,10 @@ TP.iconShowEditDialog = function(This) {
             value:      ''
         });
         generalItems.push(new TP.formFilter({
-            fieldLabel:     'Filter',
-            name:           'filter',
-            ftype:          'service'
+            fieldLabel: 'Filter',
+            name:       'filter',
+            ftype:      'service',
+            labelWidth:  130
         }));
     }
     if(panel.has_hst != undefined) {
@@ -307,13 +327,39 @@ TP.iconShowEditDialog = function(This) {
                     'down':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]+1); },
                     scope: panel
                 });
+            },
+            destroy: function() {
+                TP.suppressIconTip = false;
             }
         }
     }).show();
 
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
     settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
-    This.settingsWindow = settingsWindow;
+    This.settingsWindow   = settingsWindow;
+    TP.iconSettingsWindow = settingsWindow;
+
+    // new mouseover tips while settings are open
+    TP.iconTip.hide();
+    TP.suppressIconTip = true;
+
+    // move settings window next to panel itself
+    var panelPos     = panel.getPosition();
+    var viewPortSize = TP.viewport.getSize();
+    if(viewPortSize.width > panelPos[0] + 430) {
+        panelPos[0] = panelPos[0] + 30;
+    } else {
+        panelPos[0] = panelPos[0] - 410;
+    }
+    if(panelPos[1] - 50 < 0) {
+        panelPos[1] = 30;
+    }
+    else if(viewPortSize.height > panelPos[1] + 270) {
+        panelPos[1] = panelPos[1] - 30;
+    } else {
+        panelPos[1] = viewPortSize.height - 330;
+    }
+    This.settingsWindow.showAt(panelPos);
 };
 
 Ext.onReady(function() {
@@ -330,7 +376,15 @@ Ext.onReady(function() {
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
         shadow:   'drop',
-        html:      ''
+        html:      '',
+        listeners: {
+            show: function(This) {
+                if(TP.suppressIconTip) {
+                    This.hide();
+                    return false;
+                }
+            }
+        }
     });
 
     var tipRenderer = function (e, el, eOpts) {
