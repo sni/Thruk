@@ -758,6 +758,7 @@ plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray
 plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray/window/window-default-corners.gif
 plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray/window/window-default-sides.gif
 plugins/plugins-available/panorama/root/images/accept.png
+plugins/plugins-available/panorama/root/images/add.png
 plugins/plugins-available/panorama/root/images/application_view_columns.png
 plugins/plugins-available/panorama/root/images/arrow_refresh.png
 plugins/plugins-available/panorama/root/images/bricks.png
@@ -776,6 +777,7 @@ plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/computer.png
 plugins/plugins-available/panorama/root/images/computer_link.png
 plugins/plugins-available/panorama/root/images/cup_key.png
+plugins/plugins-available/panorama/root/images/database_go.png
 plugins/plugins-available/panorama/root/images/delete.png
 plugins/plugins-available/panorama/root/images/door_in.png
 plugins/plugins-available/panorama/root/images/down.png
@@ -787,6 +789,7 @@ plugins/plugins-available/panorama/root/images/house.png
 plugins/plugins-available/panorama/root/images/html_add.png
 plugins/plugins-available/panorama/root/images/image_edit.png
 plugins/plugins-available/panorama/root/images/information.png
+plugins/plugins-available/panorama/root/images/loading-icon.gif
 plugins/plugins-available/panorama/root/images/menu-parent.gif
 plugins/plugins-available/panorama/root/images/minemap.png
 plugins/plugins-available/panorama/root/images/minemap0.png
@@ -806,6 +809,7 @@ plugins/plugins-available/panorama/root/images/server_connect.png
 plugins/plugins-available/panorama/root/images/server_link.png
 plugins/plugins-available/panorama/root/images/sport_golf.png
 plugins/plugins-available/panorama/root/images/table_gear.png
+plugins/plugins-available/panorama/root/images/table_go.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png

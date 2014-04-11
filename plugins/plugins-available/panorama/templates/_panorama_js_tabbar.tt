@@ -241,7 +241,35 @@ Ext.define('TP.TabBar', {
         /* create new tab */
         var tabhead = this.getTabBar().items.getAt(0);
         tabhead.addListener('click', function(This, eOpts) {
-            return TP.add_pantab();
+            var menu = Ext.create('Ext.menu.Menu', {
+                margin: '0 0 10 0',
+                items: [{
+                    text:   'New Dashboard',
+                    icon:   '[% url_prefix %]plugins/panorama/images/add.png',
+                    handler: function() { TP.add_pantab() }
+                }, '-', {
+                    text: 'My Dashboards',
+                    icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                    menu: [{
+                        text:    'Loading...',
+                        icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                        disabled: true
+                    }]
+                }, {
+                    text: 'Public Dashboards',
+                    icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                    menu: [{
+                        text:    'Loading...',
+                        icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                        disabled: true
+                    }]
+                }],
+                listeners: {
+                    beforehide: function(menu, eOpts) { menu.destroy(); }
+                }
+            }).showBy(This);
+            TP.load_dashboard_menu_items(menu.items.get(2).menu, 'panorama.cgi?task=dashboard_list&list=my');
+            TP.load_dashboard_menu_items(menu.items.get(3).menu, 'panorama.cgi?task=dashboard_list&list=public');
         });
 
         this.addListener('afterrender', function(This, eOpts) {
@@ -409,3 +437,39 @@ Ext.define('TP.TabBar', {
         });
     }
 });
+
+
+TP.load_dashboard_menu_items = function(menu, url) {
+    Ext.Ajax.request({
+        url:      url,
+        method:  'POST',
+        callback: function(options, success, response) {
+            if(!success) {
+                if(response.status == 0) {
+                    TP.Msg.msg("fail_message~~adding new dashboard failed");
+                } else {
+                    TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                }
+            } else {
+                var data = TP.getResponse(undefined, response);
+                data = data.data;
+                menu.removeAll();
+                var found = 0;
+                for(var x=0; x<data.length; x++) {
+                    if(!Ext.getCmp(data[x].id)) {
+                        found++;
+                        menu.add({text:    data[x].name,
+                                  val:     data[x].id,
+                                  icon:   '[% url_prefix %]plugins/panorama/images/table_go.png',
+                                  handler: function() { TP.add_pantab(this.val) }
+                                }
+                        );
+                    }
+                }
+                if(found == 0) {
+                    menu.add({text: 'none', disabled: true});
+                }
+            }
+        }
+    });
+}

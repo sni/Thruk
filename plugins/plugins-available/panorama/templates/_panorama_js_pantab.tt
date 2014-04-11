@@ -199,7 +199,7 @@
             }
         }
         var This = this;
-        if(activeTab.xdata.refresh > 0) {
+        if(activeTab && activeTab.xdata && activeTab.xdata.refresh > 0) {
             TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, activeTab.xdata.refresh * 1000);
         }
 

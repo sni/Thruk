@@ -13,7 +13,7 @@ var ExtStateSplit = false;
 var ExtState      = [% dashboards %];
 var ExtStateSplit = true;
 [%+ END +%]
-var default_dashboards = [% default_dashboard %];
+var default_dashboard = [% default_dashboard %];
 
 [%+ PROCESS _panorama_js_functions.tt +%]
 [%+ PROCESS _panorama_js_state_provider.tt +%]
