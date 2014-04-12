@@ -53,7 +53,8 @@
                 this.applyBorderAndBackground();
                 this.addCls('gearopen');
                 // settings panel is somehow hidden below header
-                if(this.xdata.showborder == false) {
+                var global = Ext.getCmp(this.panel_id);
+                if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
                     this.items.get(0).body.dom.style.marginTop = '17px';
                 } else {
                     this.items.get(0).body.dom.style.marginTop = '';
@@ -144,7 +145,7 @@
                 }, {
                     fieldLabel: 'Backends / Sites',
                     xtype:      'combobox',
-                    emptyText : 'global settings',
+                    emptyText : 'inherited from dashboard',
                     name:       'backends',
                     multiSelect: true,
                     queryMode:  'local',

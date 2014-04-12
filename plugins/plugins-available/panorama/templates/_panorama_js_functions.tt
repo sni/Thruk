@@ -456,6 +456,13 @@ var TP = {
             }
             var baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
             delete baseParams['gridstate']; // not needed
+            // add backend settings
+            var tab = Ext.getCmp(panel.panel_id);
+            if(panel.backends && panel.backends.length > 0) {
+                baseParams['backends'] = panel.backends;
+            } else if(tab && tab.xdata && tab.xdata.select_backends) {
+                baseParams['backends'] = tab.xdata.backends;
+            }
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },
@@ -862,10 +869,16 @@ var TP = {
             }
         };
         if(count == 0) { return; }
+        var params = {
+            types: Ext.JSON.encode(req),
+        };
+        if(tab.xdata.select_backends) {
+            params['backends'] = tab.xdata.backends;
+        }
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
-            params: { types: Ext.JSON.encode(req) },
+            params: params,
             callback: function(options, success, response) {
                 if(!success) {
                     if(response.status == 0) {

@@ -26,6 +26,8 @@
             }
         }
 
+        // contains the currently active backends
+        this.active_backends = {};
         this.callParent();
     },
     listeners: {

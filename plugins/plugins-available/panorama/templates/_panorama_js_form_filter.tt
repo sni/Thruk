@@ -44,6 +44,8 @@ var searchStore = Ext.create('Ext.data.Store', {
     remoteFilter: true,
     listeners: {
         beforeload: function(store, operation, eOpts) {
+            // TODO: add extra params for backends
+            //       may require access to panel and tab
             if(!searchStore.search_type) { return false; }
             var type = searchStore.search_type.toLowerCase();
             if(type == 'check period' || type == 'notification period') {

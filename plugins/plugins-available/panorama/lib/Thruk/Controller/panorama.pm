@@ -609,6 +609,14 @@ sub _task_site_status {
 
     Thruk::Action::AddDefaults::set_processinfo($c);
 
+    my $backend_filter;
+    if($c->request->parameters->{'backends'}) {
+        $backend_filter = {};
+        for my $b (ref $c->request->parameters->{'backends'} eq 'ARRAY' ? @{$c->request->parameters->{'backends'}} : $c->request->parameters->{'backends'}) {
+            $backend_filter->{$b} = 1;
+        }
+    }
+
     my $json = {
         columns => [
             { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
@@ -640,6 +648,7 @@ sub _task_site_status {
         }
     }
     for my $key (@{$c->stash->{'backends'}}) {
+        next if($backend_filter and !defined $backend_filter->{$key});
         my $b    = $c->stash->{'backend_detail'}->{$key};
         my $d    = {};
         $d       = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
