@@ -358,6 +358,7 @@
             }
             style.display  = 'inherit';
             style.zIndex   = 20;
+            style.opacity  = '0.9';
             if(this.xdata.showborder == false) {
                 this.getEl().enableShadow(true);
             }

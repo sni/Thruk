@@ -48,6 +48,13 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     top: 0px;
 }
 
+.x-form-itemselector-add {
+    background-image: url("images/btn_add.png") !important;
+}
+.x-form-itemselector-remove {
+    background-image: url("images/btn_remove.png") !important;
+}
+
 /* make menu items align to icon */
 .x-menu-item-link {
     line-height: 11px;

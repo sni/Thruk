@@ -56,7 +56,7 @@ Ext.define('TP.TabBar', {
             closable:  false,
             tooltip:  'user menu',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     '[% remote_user %]&nbsp;&nbsp;',
+            html:     '[% remote_user %]&nbsp;&nbsp;&nbsp;',
             menu: {
                 items: [{
                         text: 'About',
@@ -97,13 +97,13 @@ Ext.define('TP.TabBar', {
         }
         [% UNLESS readonly %]
         , {
-            title:    'add new panel',
+            title:    'add new panel and widgets',
             closable: false,
             minWidth: 70,
             iconCls:  'gear-tab',
             tooltip:  'add panlets',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     'add',
+            html:     'add&nbsp;&nbsp;',
             menu: {
                 items: [{
                         text:    'Icons & Widgets',
@@ -378,7 +378,8 @@ Ext.define('TP.TabBar', {
         closable: false,
         iconCls: 'new-tab',
         tabConfig: {
-            minWidth: 28
+            minWidth: 28,
+            maxWidth: 28
         },
         tooltip: 'Add new Dashboard',
         listeners: {

@@ -15,6 +15,7 @@
         } else {
             this.xdata = TP.clone(this.xdata);
         }
+        // defaults are set in panorama.pm
 
         // fetch window ids from ExtState
         this.window_ids = [];

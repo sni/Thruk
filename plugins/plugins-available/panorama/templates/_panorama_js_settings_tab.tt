@@ -165,6 +165,54 @@ TP.tabSettingsWindow = function() {
     };
 
 
+    /* Backend Settings Tab */
+    var backends = [];
+    for(var key in initial_backends) {
+        backends.push([key, initial_backends[key].name]);
+    }
+
+    var backendsItems = [{
+            /* use backends */
+            xtype:      'checkbox',
+            fieldLabel: 'Select Backends',
+            name:       'select_backends',
+            listeners: {
+                change: function(This, newValue, oldValue, eOpts) {
+                    this.up().items.get(1).setDisabled(!newValue);
+                }
+            },
+            checked: tab.xdata.select_backends
+        }, {
+            /* backends */
+            fieldLabel: 'Backends / Sites',
+            xtype:      'itemselector',
+            name:       'backends',
+            height:     120,
+            disabled:   !tab.xdata.select_backends,
+            buttons:   ['add', 'remove'],
+            store:     backends,
+            value:     tab.xdata.backends
+    }];
+    var backendsTab = {
+        title : 'Backends',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:          'form',
+                    id:             'backendsForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:      'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 130 },
+                    items:           backendsItems
+            }]
+        }]
+    };
+
 
     /* Dashboard Settings Tab */
     var dashboardItems = [{
@@ -189,17 +237,6 @@ TP.tabSettingsWindow = function() {
             queryMode:  'local',
             displayField: 'image',
             valueField: 'path'
-        }, {
-            /* global backends */
-            fieldLabel: 'Backends / Sites',
-            xtype:      'checkboxgroup',
-            vertical:    true,
-            columns:     6,
-            style:      'padding-left: 0;',
-            defaults:   {
-                style:      'white-space: nowrap; margin-right: 6px;'
-            },
-            items:      []
         }, {
             /* auto hide panlet header */
             xtype:      'checkbox',
@@ -232,6 +269,7 @@ TP.tabSettingsWindow = function() {
         enableTabScroll   : true,
         items             : [
             dashboardTab,
+            backendsTab,
             exportTab,
             generalTab
         ]
@@ -259,25 +297,28 @@ TP.tabSettingsWindow = function() {
                     text:   'save',
                     handler: function() {
                         var win     = this.up('window');
+
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
-                        if(!d_form.isValid()) {
-                            return false;
-                        }
+                        if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
                         delete values['refresh_txt'];
                         Ext.apply(tab.xdata, values);
+
+                        var b_form  = Ext.getCmp('backendsForm').getForm();
+                        if(!b_form.isValid()) { return false; }
+                        var values = b_form.getFieldValues();
+                        Ext.apply(tab.xdata, values);
+
                         tab.applyXdata(undefined, false);
                         tab.saveState();
 
                         var g_form  = Ext.getCmp('generalForm').getForm();
-                        if(!g_form.isValid()) {
-                            return false;
-                        }
+                        if(!g_form.isValid()) { return false; }
                         var values = g_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabpan.xdata, values);
-                        tabpan.saveState();
 
+                        tabpan.saveState();
                         tabpan.startTimeouts();
 
                         tab_win_settings.destroy();

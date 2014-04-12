@@ -764,8 +764,10 @@ plugins/plugins-available/panorama/root/images/arrow_refresh.png
 plugins/plugins-available/panorama/root/images/bricks.png
 plugins/plugins-available/panorama/root/images/btn_ack.png
 plugins/plugins-available/panorama/root/images/btn_ack_remove.png
+plugins/plugins-available/panorama/root/images/btn_add.png
 plugins/plugins-available/panorama/root/images/btn_delay.png
 plugins/plugins-available/panorama/root/images/btn_downtime.png
+plugins/plugins-available/panorama/root/images/btn_remove.png
 plugins/plugins-available/panorama/root/images/bug_error.png
 plugins/plugins-available/panorama/root/images/bullet_white.png
 plugins/plugins-available/panorama/root/images/chart_bar.png
@@ -816,6 +818,8 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/panorama-1.82.css
+plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
+plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/templates/_panorama_js_elements.tt
