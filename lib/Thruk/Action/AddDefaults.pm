@@ -549,8 +549,8 @@ sub _set_enabled_backends {
         $c->{'db'}->enable_backends();
     }
 
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || $c->{'request'}->{'parameters'}->{'backends'} || '';
-    $c->stash->{'param_backend'} = $backend;
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || $c->{'request'}->{'parameters'}->{'backends'};
+    $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};
     my $num_backends      = @{$c->{'db'}->get_peers()};
 
@@ -595,7 +595,7 @@ sub _set_enabled_backends {
 
     ###############################
     # by param
-    elsif($backend ne '') {
+    elsif(defined $backend) {
         $c->log->debug('_set_enabled_backends() by param');
         # reset
         $disabled_backends = {};

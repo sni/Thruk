@@ -21,6 +21,7 @@
     }),
     [% END %]
     initComponent: function() {
+        var panel = this;
         if(this.xdata == undefined) {
             this.xdata = {};
         } else {
@@ -36,6 +37,13 @@
                 this.stateful = false;
                 this.header.show();
                 this.items.getAt(0).hide();
+
+                // add current available backends
+                var backendItem = this.gearitem.down('form').items.findBy(function(item, key) { if(item.name == 'backends') { return true; } });
+                var tab         = Ext.getCmp(this.panel_id);
+                TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
+                if(backendItem.store.count() <= 1) { backendItem.hide(); }
+
                 this.gearitem.down('form').getForm().reset();
                 if(this.has_search_button != undefined) {
                     // make filter show the same value as the main filter button
@@ -53,8 +61,7 @@
                 this.applyBorderAndBackground();
                 this.addCls('gearopen');
                 // settings panel is somehow hidden below header
-                var global = Ext.getCmp(this.panel_id);
-                if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
+                if(tab.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
                     this.items.get(0).body.dom.style.marginTop = '17px';
                 } else {
                     this.items.get(0).body.dom.style.marginTop = '';
@@ -149,11 +156,11 @@
                     name:       'backends',
                     multiSelect: true,
                     queryMode:  'local',
-                    valueField: 'key',
-                    displayField: 'text',
+                    valueField: 'name',
+                    displayField: 'value',
                     editable:   false,
                     triggerAction: 'all',
-                    store:      TP.getBackendsArray(initial_backends),
+                    store:      { fields: ['name', 'value'], data: [] },
                     listConfig : {
                         getInnerTpl: function(displayField) {
                             return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';

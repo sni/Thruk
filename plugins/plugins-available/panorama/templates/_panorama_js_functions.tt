@@ -332,17 +332,19 @@ var TP = {
         });
     },
     /* refresh all site specific panlets */
-    refreshAllSitePanel: function() {
-        var panels = TP.getAllPanel();
+    refreshAllSitePanel: function(tab) {
+        var panels = TP.getAllPanel(tab);
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(p.reloadOnSiteChanges != undefined && p.reloadOnSiteChanges == true && p.isVisible()) {
                 p.refreshHandler();
             }
         }
+        // refresh icons
+        TP.updateAllIcons(tab);
     },
-    refreshAllPanel: function() {
-        var panels = TP.getAllPanel();
+    refreshAllPanel: function(tab) {
+        var panels = TP.getAllPanel(tab);
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].refreshHandler();
         }
@@ -440,13 +442,35 @@ var TP = {
         return(Ext.JSON.decode(Ext.JSON.encode(o)));
     },
     /* convert backends into array usable by data store */
-    getBackendsArray: function(backends) {
+    getBackendsArray: function(backends, filter) {
+        var filterLookup;
+        if(filter != undefined) {
+            filterLookup = {};
+            for(var x = 0; x < filter.length; x++) {
+                filterLookup[filter[x]] = 1;
+            }
+        }
         var data = [];
         for(var key in backends) {
-            data.push([key, backends[key].name]);
+            if(filterLookup == undefined || filterLookup[key]) {
+                data.push([key, backends[key].name]);
+            }
         }
         return data;
     },
+
+    /* return backends used in panlets backend store */
+    getAvailableBackendsTab: function(tab) {
+        var backends = [];
+        if(tab.xdata.select_backends) {
+            // hide backends which are disabled
+            backends = TP.getBackendsArray(initial_backends, tab.xdata.backends);
+        } else {
+            backends = TP.getBackendsArray(initial_backends);
+        }
+        return backends;
+    },
+
     /* default refresh handler */
     defaultSiteRefreshHandler: function(panel) {
         if(panel.xdata.url != '' && panel.xdata.refresh != -2) { // -2 means temporarily disabled
@@ -458,11 +482,7 @@ var TP = {
             delete baseParams['gridstate']; // not needed
             // add backend settings
             var tab = Ext.getCmp(panel.panel_id);
-            if(panel.backends && panel.backends.length > 0) {
-                baseParams['backends'] = panel.backends;
-            } else if(tab && tab.xdata && tab.xdata.select_backends) {
-                baseParams['backends'] = tab.xdata.backends;
-            }
+            baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },
@@ -729,6 +749,19 @@ var TP = {
         // add last one to trigger some events
         store.loadRawData([[data[x]]], true);
     },
+    /* update an array store with new data with key/value */
+    updateArrayStoreKV: function(store, data) {
+        if(!store) { return; }
+        store.suspendEvents(false);
+        store.removeAll();
+        var num = data.length-1;
+        for(var x=0;x<num;x++) {
+            store.loadRawData({name:data[x][0], value:data[x][1]}, true);
+        }
+        store.resumeEvents();
+        // add last one to trigger some events
+        store.loadRawData({name:data[x][0], value:data[x][1]}, true);
+    },
     /* return location object for url */
     getLocationObject: function(url) {
         var a  = document.createElement('a');
@@ -870,11 +903,9 @@ var TP = {
         };
         if(count == 0) { return; }
         var params = {
-            types: Ext.JSON.encode(req),
+            types:    Ext.JSON.encode(req),
+            backends: TP.getActiveBackendsPanel(tab)
         };
-        if(tab.xdata.select_backends) {
-            params['backends'] = tab.xdata.backends;
-        }
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
@@ -978,6 +1009,11 @@ var TP = {
                         var name = keys[x];
                         for(var key in ref[name]) {
                             for(var y=0; y<ref[name][key].length; y++) {
+                                delete ref[name][key][y]['hostgroup'];
+                                delete ref[name][key][y]['host'];
+                                delete ref[name][key][y]['servicegroup'];
+                                delete ref[name][key][y]['site'];
+                                delete ref[name][key][y]['data'];
                                 ref[name][key][y].refreshHandler(3);
                                 delete ref[name][key][y][name];
                             }
@@ -987,6 +1023,7 @@ var TP = {
                     for(var key in ref.services) {
                         for(var key2 in ref.services[key]) {
                             for(var y=0; y<ref.services[key][key2].length; y++) {
+                                delete ref[name][key][y]['service'];
                                 ref.services[key][key2][y].refreshHandler(3);
                                 delete ref.services[key][key2][y]['service'];
                             }
@@ -1125,7 +1162,34 @@ var TP = {
             });
         }
         return false;
+    },
+
+    /* returns list of currently active backends for given panel */
+    getActiveBackendsPanel: function(tab, panel) {
+        var backends;
+        if(panel && panel.xdata && panel.xdata.backends && panel.xdata.backends.length > 0) {
+            backends = panel.xdata.backends;
+        }
+        else if(tab.xdata.select_backends) {
+            backends = tab.xdata.backends;
+        } else {
+            var available = TP.getAvailableBackendsTab(tab);
+            backends      = [];
+            for(var x=0; x<available.length; x++) {
+                backends.push(available[x][0]);
+            }
+        }
+        if((!panel || panel.filterBackends == undefined || panel.filterBackends != false) && tab.activeBackends != undefined) {
+            var newBackends = [];
+            for(var x=0; x<backends.length; x++) {
+                var key = backends[x];
+                if(tab.activeBackends[key] != false) {
+                    newBackends.push(key);
+                }
+            }
+            backends = newBackends;
+        }
+        if(backends.length == 0) { return(''); }
+        return backends;
     }
 }
-
-var a;

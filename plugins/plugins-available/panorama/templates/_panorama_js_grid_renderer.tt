@@ -20,12 +20,17 @@ TP.render_icon_log = function(v, td, item) {
 }
 
 /* render site status icon */
-TP.render_icon_site = function(v, td, item) {
+TP.render_icon_site = function(v, td, item, row, col, store, view) {
     var title="";
     if(item.data.runtime=="") {
         title="title=\""+item.data.version+"\"";
     };
-    return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
+    var panel = view.up().up();
+    var tab   = Ext.getCmp(panel.panel_id);
+    if(tab.activeBackends != undefined && tab.activeBackends[item.data.id] == false) {
+        v = 'sport_golf.png';
+    }
+    return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+panel.id+"\', \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
 }
 
 /* render enabled / disabled switch */

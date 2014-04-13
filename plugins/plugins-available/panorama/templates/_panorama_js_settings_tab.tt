@@ -22,7 +22,6 @@ TP.tabSettingsWindow = function() {
 
     backgrounds.load();
 
-
     var exportItems = [{
         xtype:      'fieldcontainer',
         fieldLabel: 'Export',
@@ -166,52 +165,50 @@ TP.tabSettingsWindow = function() {
 
 
     /* Backend Settings Tab */
-    var backends = [];
-    for(var key in initial_backends) {
-        backends.push([key, initial_backends[key].name]);
-    }
-
-    var backendsItems = [{
-            /* use backends */
-            xtype:      'checkbox',
-            fieldLabel: 'Select Backends',
-            name:       'select_backends',
-            listeners: {
-                change: function(This, newValue, oldValue, eOpts) {
-                    this.up().items.get(1).setDisabled(!newValue);
-                }
-            },
-            checked: tab.xdata.select_backends
-        }, {
-            /* backends */
-            fieldLabel: 'Backends / Sites',
-            xtype:      'itemselector',
-            name:       'backends',
-            height:     120,
-            disabled:   !tab.xdata.select_backends,
-            buttons:   ['add', 'remove'],
-            store:     backends,
-            value:     tab.xdata.backends
-    }];
-    var backendsTab = {
-        title : 'Backends',
-        type  : 'panel',
-        items: [{
-            xtype : 'panel',
-            layout: 'fit',
-            border: 0,
+    var backends = TP.getBackendsArray(initial_backends);
+    if(backends.length > 1) {
+        var backendsItems = [{
+                /* use backends */
+                xtype:      'checkbox',
+                fieldLabel: 'Select Backends',
+                name:       'select_backends',
+                listeners: {
+                    change: function(This, newValue, oldValue, eOpts) {
+                        this.up().items.get(1).setDisabled(!newValue);
+                    }
+                },
+                checked: tab.xdata.select_backends
+            }, {
+                /* backends */
+                fieldLabel: 'Backends / Sites',
+                xtype:      'itemselector',
+                name:       'backends',
+                height:     120,
+                disabled:   !tab.xdata.select_backends,
+                buttons:   ['add', 'remove'],
+                store:     backends,
+                value:     tab.xdata.backends
+        }];
+        var backendsTab = {
+            title : 'Backends',
+            type  : 'panel',
             items: [{
-                    xtype:          'form',
-                    id:             'backendsForm',
-                    bodyPadding:     2,
-                    border:          0,
-                    bodyStyle:      'overflow-y: auto;',
-                    submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: 130 },
-                    items:           backendsItems
+                xtype : 'panel',
+                layout: 'fit',
+                border: 0,
+                items: [{
+                        xtype:          'form',
+                        id:             'backendsForm',
+                        bodyPadding:     2,
+                        border:          0,
+                        bodyStyle:      'overflow-y: auto;',
+                        submitEmptyText: false,
+                        defaults:      { anchor: '-12', labelWidth: 130 },
+                        items:           backendsItems
+                }]
             }]
-        }]
-    };
+        };
+    }
 
 
     /* Dashboard Settings Tab */
@@ -321,6 +318,8 @@ TP.tabSettingsWindow = function() {
                         tabpan.saveState();
                         tabpan.startTimeouts();
 
+                        TP.refreshAllSitePanel(tab);
+
                         tab_win_settings.destroy();
                         return true;
                     }
@@ -330,27 +329,3 @@ TP.tabSettingsWindow = function() {
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('generalForm').getForm().setValues(tabpan.xdata);
 };
-
-/* set backends from list */
-TP.setBackends = function(backends) {
-    for(var key in initial_backend_states) {
-        initial_backend_states[key] = 2;
-        initial_backends[key].state = 2;
-    }
-    for(var nr=0; nr<backends.length; nr++) {
-        var b = backends[nr];
-        initial_backend_states[b] = 0;
-        initial_backends[b].state = 0;
-    }
-    TP.setBackendsCookieAndRefresh(0);
-}
-
-/* set cookie and reload panels */
-TP.setBackendsCookieAndRefresh = function(wait) {
-    /* save current selected backends in session cookie */
-    document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
-
-    /* reload panel */
-    window.clearTimeout(TP.timeouts['timeout_global_backend_refresh']);
-    TP.timeouts['timeout_global_backend_refresh'] = window.setTimeout(TP.refreshAllSitePanel, wait);
-}

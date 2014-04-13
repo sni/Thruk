@@ -27,7 +27,7 @@
         }
 
         // contains the currently active backends
-        this.active_backends = {};
+        this.activeBackends = undefined;
         this.callParent();
     },
     listeners: {

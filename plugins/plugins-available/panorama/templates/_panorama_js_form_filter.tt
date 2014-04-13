@@ -65,8 +65,9 @@ var searchStore = Ext.create('Ext.data.Store', {
         }
     },
     proxy: {
-        type: 'ajax',
-        url: 'status.cgi',
+        type:   'ajax',
+        url:    'status.cgi',
+        method: 'POST',
         extraParams: {
             format: 'search',
             hash:   1
