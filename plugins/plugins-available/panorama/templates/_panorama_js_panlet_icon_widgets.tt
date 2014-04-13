@@ -94,7 +94,7 @@
             [% END %]
             TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
                 This.syncShadow();
-            }, 150);
+            }, 250);
         },
         show: function( This, eOpts ) {
             This.dd.addListener('dragstart', function(This, eOpts) {
@@ -153,8 +153,7 @@
 
 TP.iconSettingsWindow = undefined;
 TP.suppressIconTip    = false;
-TP.iconShowEditDialog = function(This) {
-    var panel = This;
+TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
 
     // make sure only one window is open at a time
@@ -314,7 +313,7 @@ TP.iconShowEditDialog = function(This) {
                     TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
                     delete panel.settingsWindow;
                     settingsWindow.destroy();
-                    This.firstRun = false;
+                    panel.firstRun = false;
                  }
                }
         ],
@@ -336,7 +335,6 @@ TP.iconShowEditDialog = function(This) {
 
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
     settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
-    This.settingsWindow   = settingsWindow;
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -359,7 +357,7 @@ TP.iconShowEditDialog = function(This) {
     } else {
         panelPos[1] = viewPortSize.height - 330;
     }
-    This.settingsWindow.showAt(panelPos);
+    settingsWindow.showAt(panelPos);
 };
 
 Ext.onReady(function() {
