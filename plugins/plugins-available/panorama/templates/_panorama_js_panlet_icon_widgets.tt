@@ -161,61 +161,6 @@ TP.iconShowEditDialog = function(panel) {
         TP.iconSettingsWindow.destroy();
     }
 
-    var generalItems = [];
-    if(panel.iconType == 'service') {
-        generalItems.push(TP.objectSearchItem(panel, 'host', 'Hostname'));
-    }
-    if(panel.iconType != 'filtered') {
-        generalItems.push(TP.objectSearchItem(panel, panel.iconType, panel.iconName));
-    }
-    if(panel.iconType == 'filtered') {
-        generalItems.push({
-            fieldLabel: 'Name',
-            xtype:      'textfield',
-            name:       'name',
-            value:      ''
-        });
-        generalItems.push(new TP.formFilter({
-            fieldLabel: 'Filter',
-            name:       'filter',
-            ftype:      'service',
-            labelWidth:  130,
-            panel:      panel
-        }));
-    }
-    if(panel.has_hst != undefined) {
-        generalItems.push({
-            fieldLabel: 'Include Hosts',
-            xtype:      'checkbox',
-            name:       'incl_hst',
-            value:      true
-        });
-    }
-    if(panel.has_svc != undefined) {
-        generalItems.push({
-            fieldLabel: 'Include Services',
-            xtype:      'checkbox',
-            name:       'incl_svc',
-            value:      false
-        });
-    }
-    if(panel.has_downtimes != undefined) {
-        generalItems.push({
-            fieldLabel: 'Include Downtimes',
-            xtype:      'checkbox',
-            name:       'incl_downtimes',
-            value:      true
-        });
-    }
-    if(panel.has_ack != undefined) {
-        generalItems.push({
-            fieldLabel: 'Include Acknowledged',
-            xtype:      'checkbox',
-            name:       'incl_ack',
-            value:      true
-        });
-    }
-
     /* General Settings Tab */
     var generalTab = {
         title : 'General',
@@ -231,7 +176,7 @@ TP.iconShowEditDialog = function(panel) {
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
                     defaults:      { anchor: '-12', labelWidth: 130 },
-                    items: generalItems
+                    items:           panel.generalItems
             }]
         }]
     };
@@ -419,13 +364,28 @@ Ext.define('TP.HostStatusIcon', {
     iconType: 'host',
     iconName: 'Hostname',
     initComponent: function() {
+        var panel = this;
         this.callParent();
-        this.xdata.general.incl_svc       = true;
+        this.xdata.general.incl_svc       = false;
         this.xdata.general.incl_downtimes = true;
-        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
-        this.has_ack                      = true;
-        this.has_svc                      = true;
+
+        this.generalItems = [
+            TP.objectSearchItem(panel, 'host', 'Hostname'),
+            {
+                fieldLabel: 'Include Services',
+                xtype:      'checkbox',
+                name:       'incl_svc'
+            }, {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack'
+            }
+        ];
     },
     getName: function() {
         return(this.xdata.general.host);
@@ -476,13 +436,33 @@ Ext.define('TP.HostgroupStatusIcon', {
     iconType: 'hostgroup',
     iconName: 'Hostgroupname',
     initComponent: function() {
+        var panel = this;
         this.callParent();
+        this.xdata.general.incl_hst       = true;
         this.xdata.general.incl_svc       = true;
-        this.has_svc                      = true;
         this.xdata.general.incl_downtimes = true;
-        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
-        this.has_ack                      = true;
+
+        this.generalItems = [
+            generalItems.push(TP.objectSearchItem(panel, 'hostgroup', 'Hostgroupname')),
+            {
+                fieldLabel: 'Include Hosts',
+                xtype:      'checkbox',
+                name:       'incl_hst'
+            }, {
+                fieldLabel: 'Include Services',
+                xtype:      'checkbox',
+                name:       'incl_svc'
+            }, {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack'
+            }
+        ];
     },
     refreshHandler: function(newStatus) {
         // calculate summarized status
@@ -491,12 +471,12 @@ Ext.define('TP.HostgroupStatusIcon', {
                  if(this.xdata.general.incl_svc && this.hostgroup.services.unknown > 0)                                                 { s = 3; }
             else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.hostgroup.services.ack_unknown > 0)              { s = 3; }
             else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.hostgroup.services.downtimes_unknown > 0)  { s = 3; }
-            else if(this.hostgroup.hosts.unreachable > 0)                                                                               { s = 2; }
-            else if(this.hostgroup.hosts.down        > 0)                                                                               { s = 2; }
+            else if(this.xdata.general.incl_hst && this.hostgroup.hosts.unreachable > 0)                                                { s = 2; }
+            else if(this.xdata.general.incl_hst && this.hostgroup.hosts.down        > 0)                                                { s = 2; }
             else if(this.xdata.general.incl_ack && this.hostgroup.hosts.ack_unreachable > 0)                                            { s = 2; }
             else if(this.xdata.general.incl_ack && this.hostgroup.hosts.ack_down        > 0)                                            { s = 2; }
-            else if(this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_down        > 0)                                 { s = 2; }
-            else if(this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_unreachable > 0)                                 { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_down        > 0)  { s = 2; }
+            else if(this.xdata.general.incl_hst && this.xdata.general.incl_downtimes && this.hostgroup.hosts.downtime_unreachable > 0)  { s = 2; }
             else if(this.xdata.general.incl_svc && this.hostgroup.services.critical > 0)                                                { s = 2; }
             else if(this.xdata.general.incl_svc && this.xdata.general.incl_ack && this.hostgroup.services.ack_critical > 0)             { s = 2; }
             else if(this.xdata.general.incl_svc && this.xdata.general.incl_downtimes && this.hostgroup.services.downtimes_critical > 0) { s = 2; }
@@ -533,11 +513,24 @@ Ext.define('TP.ServiceStatusIcon', {
     iconType: 'service',
     iconName: 'Servicename',
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.general.incl_downtimes = true;
-        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
-        this.has_ack                      = true;
+
+        this.generalItems = [
+            generalItems.push(TP.objectSearchItem(panel, 'host', 'Hostname')),
+            generalItems.push(TP.objectSearchItem(panel, 'service', 'Servicename')),
+            {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack'
+            }
+        ];
     },
     getName: function() {
         return(this.xdata.general.host + ' - ' + this.xdata.general.service);
@@ -563,11 +556,23 @@ Ext.define('TP.ServicegroupStatusIcon', {
     iconType: 'servicegroup',
     iconName: 'Servicegroupname',
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.general.incl_downtimes = true;
-        this.has_downtimes                = true;
         this.xdata.general.incl_ack       = true;
-        this.has_ack                      = true;
+
+        this.generalItems = [
+            generalItems.push(TP.objectSearchItem(panel, 'servicegroup', 'Servicegroupname')),
+            {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack'
+            }
+        ];
     },
     refreshHandler: function(newStatus) {
         // calculate summarized status
@@ -608,12 +613,42 @@ Ext.define('TP.FilterStatusIcon', {
 
     iconType: 'filtered',
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.general.name     = '';
         this.xdata.general.incl_hst = true;
         this.xdata.general.incl_svc = true;
-        this.has_hst                = true;
-        this.has_svc                = true;
+
+        this.generalItems = [{
+                fieldLabel: 'Name',
+                xtype:      'textfield',
+                name:       'name',
+                value:      ''
+            },
+            new TP.formFilter({
+                fieldLabel: 'Filter',
+                name:       'filter',
+                ftype:      'service',
+                labelWidth: 130,
+                panel:      panel
+            }), {
+                fieldLabel: 'Include Hosts',
+                xtype:      'checkbox',
+                name:       'incl_hst'
+            }, {
+                fieldLabel: 'Include Services',
+                xtype:      'checkbox',
+                name:       'incl_svc'
+            }, {
+                fieldLabel: 'Include Downtimes',
+                xtype:      'checkbox',
+                name:       'incl_downtimes'
+            }, {
+                fieldLabel: 'Include Acknowledged',
+                xtype:      'checkbox',
+                name:       'incl_ack'
+            }
+        ];
     },
     refreshHandler: function(newStatus) {
         // calculate summarized status
@@ -671,7 +706,11 @@ Ext.define('TP.SiteStatusIcon', {
     iconType: 'site',
     iconName: 'Sitename',
     initComponent: function() {
+        var panel = this;
         this.callParent();
+        this.generalItems = [
+            TP.objectSearchItem(panel, 'site', 'Sitename')
+        ];
     },
     refreshHandler: function(newStatus) {
         // calculate site status
