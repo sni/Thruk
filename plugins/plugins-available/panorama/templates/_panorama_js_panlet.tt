@@ -93,7 +93,7 @@
                 type: 'search',
                 scope: this,
                 tooltip: 'change search filter',
-                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}); }
+                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}, panel); }
             });
         }
         [% END %]

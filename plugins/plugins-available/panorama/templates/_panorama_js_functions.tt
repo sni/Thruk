@@ -710,7 +710,8 @@ var TP = {
         This.obj_filter = new TP.formFilter({
             fieldLabel:     'Filter',
             name:           'filter',
-            ftype:          type
+            ftype:          type,
+            panel:          This
         });
         This.down('form').add(This.obj_filter);
     },
@@ -802,8 +803,9 @@ var TP = {
         panel.add(menu);
         menu.show();
     },
-    objectSearchItem: function(type, name) {
+    objectSearchItem: function(panel, type, name) {
         var handler = function() {
+            searchStore.panel = panel;
             if(searchStore.search_type != type) {
                 searchStore.search_type = type;
                 if(type == 'service') {

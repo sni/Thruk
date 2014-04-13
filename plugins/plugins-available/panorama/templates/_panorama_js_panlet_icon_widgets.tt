@@ -94,7 +94,7 @@
             [% END %]
             TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
                 This.syncShadow();
-            }, 50);
+            }, 150);
         },
         show: function( This, eOpts ) {
             This.dd.addListener('dragstart', function(This, eOpts) {
@@ -164,10 +164,10 @@ TP.iconShowEditDialog = function(This) {
 
     var generalItems = [];
     if(panel.iconType == 'service') {
-        generalItems.push(TP.objectSearchItem('host', 'Hostname'));
+        generalItems.push(TP.objectSearchItem(panel, 'host', 'Hostname'));
     }
     if(panel.iconType != 'filtered') {
-        generalItems.push(TP.objectSearchItem(panel.iconType, panel.iconName));
+        generalItems.push(TP.objectSearchItem(panel, panel.iconType, panel.iconName));
     }
     if(panel.iconType == 'filtered') {
         generalItems.push({
@@ -180,7 +180,8 @@ TP.iconShowEditDialog = function(This) {
             fieldLabel: 'Filter',
             name:       'filter',
             ftype:      'service',
-            labelWidth:  130
+            labelWidth:  130,
+            panel:      panel
         }));
     }
     if(panel.has_hst != undefined) {

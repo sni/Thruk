@@ -17,7 +17,7 @@
         xtype:     'button',
         text:      'Change Filter',
         icon:      '[% url_prefix %]plugins/panorama/images/image_edit.png',
-        handler:   function(This, eOpts) { TP.filterWindow(this.up().ftype, This.up().items.getAt(0)); }
+        handler:   function(This, eOpts) { TP.filterWindow(this.up().ftype, This.up().items.getAt(0), This.up().panel); }
     }],
 
     initComponent: function() {
@@ -27,6 +27,9 @@
         this.addListener('afterrender', function() {
             this.items.getAt(0).inputEl.hide();
         });
+        if(!this.panel) {
+            throw new Error("TP.formFilter(): no panel!");
+        }
     }
 });
 
@@ -44,8 +47,7 @@ var searchStore = Ext.create('Ext.data.Store', {
     remoteFilter: true,
     listeners: {
         beforeload: function(store, operation, eOpts) {
-            // TODO: add extra params for backends
-            //       may require access to panel and tab
+            store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
             if(!searchStore.search_type) { return false; }
             var type = searchStore.search_type.toLowerCase();
             if(type == 'check period' || type == 'notification period') {
@@ -153,18 +155,21 @@ Ext.define('TP.formFilterSelect', {
             'expand': function(field, eOpts) {
                 if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
                     searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
             },
             'change': function(This, newValue, oldValue, eOpts) {
                 if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
                     searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
             },
             'keyup': function() {
                 if(searchStore.search_type != this.up('panel').items.getAt(0).getValue()) {
                     searchStore.search_type = this.up('panel').items.getAt(0).getValue();
+                    searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
             }
@@ -260,11 +265,16 @@ Ext.define('TP.formFilterSelect', {
             // has to be hidden after renderer, otherwise show does not work
             This.check_changed(This.items.getAt(0).getValue());
         });
+        if(!this.panel) {
+            throw new Error("TP.formFilterSelect(): no panel!");
+        }
     }
 });
 
-TP.filterWindow = function(ftype, base_el) {
-
+TP.filterWindow = function(ftype, base_el, panel) {
+    if(!panel) {
+        throw new Error("TP.formFilterSelect(): no panel!");
+    }
     var form = new Ext.form.Panel({
             submitEmptyText: false,
             bodyPadding:     3,
@@ -337,7 +347,7 @@ TP.filterWindow = function(ftype, base_el) {
                     listeners:  {
                         afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
                             var form = This.up('form');
-                            form.insert(form.items.length-1, {xtype: 'tp_filter_select'});
+                            form.insert(form.items.length-1, {xtype: 'tp_filter_select', panel: panel});
                         })}
                     }
             }],
@@ -386,6 +396,7 @@ TP.filterWindow = function(ftype, base_el) {
             for(var nr=0; nr<val.type.length; nr++) {
                 form.insert(form.items.length-1, {
                     xtype:     'tp_filter_select',
+                    panel:      panel,
                     val_op:     val.op[nr],
                     val_type:   val.type[nr],
                     val_pre:    val.val_pre[nr],
@@ -396,6 +407,7 @@ TP.filterWindow = function(ftype, base_el) {
         } else {
             form.insert(form.items.length-1, {
                 xtype:     'tp_filter_select',
+                panel:      panel,
                 val_op:     val.op,
                 val_type:   val.type,
                 val_pre:    val.val_pre,
@@ -406,7 +418,7 @@ TP.filterWindow = function(ftype, base_el) {
         form.getForm().setValues(values);
     } else {
         /* add one empty search field */
-        form.insert(form.items.length-1, {xtype: 'tp_filter_select'});
+        form.insert(form.items.length-1, {xtype: 'tp_filter_select', panel: panel});
     }
 
     /* show the window */
