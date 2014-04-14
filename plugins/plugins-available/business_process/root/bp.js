@@ -923,6 +923,7 @@ function bp_render(containerId, nodes, edges) {
     } catch(e) {
         var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
         if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
+        jQuery('.bp_zoom_container').css('height','500px');
         jQuery('#inner_'+containerId).html(msg);
         return;
     }

@@ -63,6 +63,7 @@ next:
             - add livestatus result transport
             - added cli command "bpcommit" to save manually create BPs
             - fixed displaying/using wrong host template
+            - fixed display issue in latest firefox (updated dagre library)
           - Reports
             - show out of scope totals
             - added report description on cover page
