@@ -265,6 +265,7 @@ Ext.define('TP.PanletHost', {
     menusnr: 0,
     type:   'host',
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.url         = 'panorama.cgi?task=host_detail';
         if(this.xdata.host    == undefined) { this.xdata.host    = '' }
@@ -274,38 +275,9 @@ Ext.define('TP.PanletHost', {
         this.add(TP.ExtinfoPanel('host'));
 
         /* Settings */
-        this.addGearItems({
-            fieldLabel:     'Host',
-            name:           'host',
-            queryMode:      'local',
-            valueField:     'name',
-            displayField:   'name',
-            store:          { fields: ['name'], data: [] }
-        });
-
-        this.gearInitCallback = function(This) {
-            this.updateHost();
-        };
-
-        this.updateHost = function() {
-            var panel  = this;
-            var form   = this.down('form').getForm();
-            var values = form.getValues();
-            var url = 'panorama.cgi?task=host_list';
-            Ext.Ajax.request({
-                url: url,
-                method: 'POST',
-                callback: function(options, success, response) {
-                    var data  = TP.getResponse(panel, response);
-                    var host_combo = TP.getFormField(panel.gearitem.down('form'), 'host');
-                    host_combo.store.removeAll();
-                    for(var nr=0; nr<data.data.length; nr++) {
-                        host_combo.store.loadRawData(data.data[nr], true);
-                    }
-                    host_combo.setValue(panel.xdata.host);
-                }
-            });
-        };
+        this.addGearItems(
+            TP.objectSearchItem(panel, 'host', 'Hostname')
+        );
 
         /* auto load when host is set */
         this.addListener('afterrender', function() {

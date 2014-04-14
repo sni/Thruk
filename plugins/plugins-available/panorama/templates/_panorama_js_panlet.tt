@@ -380,6 +380,9 @@ Ext.define('TP.PanletGearItem', {
                     win.setTitle(win.xdata.title);
                     win.startTimeouts();
                     win.saveState();
+                    if(win.formUpdatedCallback) {
+                        win.formUpdatedCallback(win);
+                    }
                     win.manualRefresh();
                     if(win.xdata.showborder == false) {
                         TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {

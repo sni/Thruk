@@ -18,85 +18,10 @@
         this.add(TP.ExtinfoPanel('service'));
 
         /* Settings */
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Host',
-            name:           'host',
-            queryMode:      'local',
-            valueField:     'name',
-            displayField:   'name',
-            store:          { fields: ['name'], data: [] },
-            listeners: {
-                select: function( combo, records, eOpts ) {
-                    panel = combo.up('panel').up('panel').up('panel');
-                    panel.xdata.service = '';
-                    panel.updateService();
-                },
-                change: function( combo, newValue, oldValue, eOpts ) {
-                    panel = combo.up('panel').up('panel').up('panel');
-                    panel.updateService();
-                }
-            }
-        });
-
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Service',
-            name:           'service',
-            queryMode:      'local',
-            displayField:   'description',
-            valueField:     'description',
-            forceSelection: true,
-            editable:       false,
-            store:          { fields: ['description'], data :  [] }
-        });
-        this.gearInitCallback = function(This) {
-            this.updateHost();
-        };
-
-        this.updateHost = function() {
-            var panel  = this;
-            var form   = this.down('form').getForm();
-            var values = form.getValues();
-            var url = 'panorama.cgi?task=host_list';
-            Ext.Ajax.request({
-                url: url,
-                method: 'POST',
-                callback: function(options, success, response) {
-                    var data  = TP.getResponse(panel, response);
-                    var host_combo = TP.getFormField(panel.gearitem.down('form'), 'host');
-                    host_combo.store.removeAll();
-                    for(var nr=0; nr<data.data.length; nr++) {
-                        host_combo.store.loadRawData(data.data[nr], true);
-                    }
-                    host_combo.setValue(panel.xdata.host);
-                }
-            });
-        };
-
-        this.updateService = function() {
-            var panel  = this;
-            var form   = this.down('form').getForm();
-            var values = form.getValues();
-            if(values.host != this.lastHost) {
-                this.lastHost = values.host;
-                var url = 'panorama.cgi?task=service_list';
-                url = Ext.urlAppend(url, Ext.Object.toQueryString({host: values.host}));
-                Ext.Ajax.request({
-                    url: url,
-                    method: 'POST',
-                    callback: function(options, success, response) {
-                        var data  = TP.getResponse(panel, response);
-                        var service_combo = TP.getFormField(panel.gearitem.down('form'), 'service');
-                        service_combo.store.removeAll();
-                        for(var nr=0; nr<data.data.length; nr++) {
-                            service_combo.store.loadRawData(data.data[nr], true);
-                        }
-                        service_combo.setValue(panel.xdata.service);
-                    }
-                });
-            }
-        };
+        this.addGearItems([
+            TP.objectSearchItem(panel, 'host', 'Hostname'),
+            TP.objectSearchItem(panel, 'service', 'Servicename')
+        ]);
 
         /* auto load when host is set */
         this.addListener('afterrender', function() {
