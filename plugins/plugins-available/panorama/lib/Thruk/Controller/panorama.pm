@@ -1247,7 +1247,7 @@ sub _task_dashboard_list {
             { 'header' => 'Actions',     width => 100,
                       xtype => 'actioncolumn',
                       items => [{
-                            icon => '/thruk/plugins/panorama/images/delete.png',
+                            icon => '../plugins/panorama/images/delete.png',
                             handler => 'TP.dashboardActionHandler',
                             action  => 'remove'
                       }],
