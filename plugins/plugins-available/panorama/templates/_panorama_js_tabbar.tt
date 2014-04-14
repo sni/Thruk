@@ -323,6 +323,7 @@ Ext.define('TP.TabBar', {
             activeTab = this.setActiveTab(0);
         }
         activeTab = activeTab.getStateId();
+        this.open_tabs = open_tabs;
 
         return {
             open_tabs:  open_tabs,

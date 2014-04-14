@@ -31,13 +31,21 @@
         this.callParent();
     },
     listeners: {
+        beforeclose: function( This, eOpts ) {
+            var tabpan = Ext.getCmp('tabpan');
+            tabpan.saveState(); // recalculate open_tabs
+            if(tabpan.open_tabs.length <= 1) {
+                return false;
+            }
+            return true;
+        },
         destroy: function( This, eOpts ) {
+            var tabpan = Ext.getCmp('tabpan');
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 if(This.window_ids[nr].xdata == undefined) {
                     Ext.getCmp(This.window_ids[nr]).destroy();
                 }
             }
-            var tabpan = Ext.getCmp('tabpan');
             tabpan.open_tabs = TP.removeFromList(tabpan.open_tabs, This.id);
             cp.clear(This.id);
             // activate first tab or create new empty one
@@ -48,9 +56,6 @@
                         tabpan.setActiveTab(tabpan.tabs_tr[tabs[nr].id]);
                     }
                 }
-            }
-            if(!tabpan.getActiveTab()) {
-                TP.add_pantab();
             }
             tabpan.saveState();
         },
