@@ -130,6 +130,9 @@
         this.addListener('beforerender', function() {
             this.refreshHandler();
         });
+        this.addListener('show', function() {
+            this.syncShadowTimeout();
+        });
     },
     setShowLabel: function() {
         var panel = this;

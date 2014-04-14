@@ -177,12 +177,7 @@
         afterrender: function(This, eOpts) {
             /* start refresh interval */
             this.startTimeouts();
-
-            if(This.xdata && This.xdata.showborder == false) {
-                TP.timeouts['timeout_'+This.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                    This.getEl().disableShadow();
-                }, This, []), 1000);
-            }
+            this.syncShadowTimeout();
         },
         afterlayout: function(This) {
             /* make all border and background work */
@@ -300,6 +295,15 @@
     },
     /* override to set settings items */
     setGearItems: function() {
+    },
+    /* schedules shadow refresh */
+    syncShadowTimeout: function() {
+        var win = this;
+        if(win.xdata.showborder == false) {
+            TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                win.getEl().disableShadow();
+            }, win, []), 100);
+        }
     }
 });
 
@@ -387,11 +391,7 @@ Ext.define('TP.PanletGearItem', {
                         win.formUpdatedCallback(win);
                     }
                     win.manualRefresh();
-                    if(win.xdata.showborder == false) {
-                        TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                            win.getEl().disableShadow();
-                        }, win, []), 1000);
-                    }
+                    win.syncShadowTimeout();
                     win.gearHandler();
                 }
              }
@@ -448,11 +448,7 @@ TP.panletGearHandler = function() {
         this.remove(this.gearitem);
         this.gearitem.destroy();
         this.removeCls('gearopen');
-        if(this.xdata.showborder == false) {
-            TP.timeouts['timeout_'+this.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                this.getEl().disableShadow();
-            }, this, []), 1000);
-        }
+        this.syncShadowTimeout();
         delete this.gearitem;
         if(this.origSize != undefined) {
             this.setSize(this.origSize);
