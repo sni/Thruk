@@ -19,37 +19,6 @@
         panel.graphs_loaded  = 0;
 
         panel.loader = {};
-        this.addGearItems({
-            fieldLabel: 'Nagvis Base Url',
-            xtype:      'textfield',
-            name:       'base_url',
-            emptyText:  'nagvis base url, ex.: /nagvis'
-        });
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Graph',
-            name:           'graph',
-            queryMode:      'local',
-            valueField:     'id',
-            displayField:   'name',
-            store:           { fields: ['name', 'id'], data: [] },
-            emptyText:      'select a map',
-            listeners: {
-                focus: function() {
-                    panel.updateGraphs();
-                },
-                expand: function() {
-                    panel.updateGraphs();
-                }
-            }
-        });
-        this.addGearItems({
-            xtype:         'displayfield',
-            hideEmptyLabel: false,
-            name:          'grapherror',
-            activeError:    true,
-            value:         ' '
-        });
 
         /* available graphs loader */
         panel.updateGraphs = function() {
@@ -138,5 +107,40 @@
             panel.last_url = '';
             panel.refreshHandler();
         };
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems({
+            fieldLabel: 'Nagvis Base Url',
+            xtype:      'textfield',
+            name:       'base_url',
+            emptyText:  'nagvis base url, ex.: /nagvis'
+        });
+        this.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Graph',
+            name:           'graph',
+            queryMode:      'local',
+            valueField:     'id',
+            displayField:   'name',
+            store:           { fields: ['name', 'id'], data: [] },
+            emptyText:      'select a map',
+            listeners: {
+                focus: function() {
+                    panel.updateGraphs();
+                },
+                expand: function() {
+                    panel.updateGraphs();
+                }
+            }
+        });
+        this.addGearItems({
+            xtype:         'displayfield',
+            hideEmptyLabel: false,
+            name:          'grapherror',
+            activeError:    true,
+            value:         ' '
+        });
     }
 });

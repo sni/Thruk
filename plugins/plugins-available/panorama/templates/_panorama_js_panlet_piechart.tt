@@ -130,17 +130,6 @@
         this.addListener('beforerender', function() {
             this.refreshHandler();
         });
-
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
-        });
-        this.addGearItems({
-            fieldLabel: 'Show Label',
-            xtype:      'checkbox',
-            name:       'showlabel'
-        });
     },
     setShowLabel: function() {
         var panel = this;
@@ -150,6 +139,20 @@
             } else {
                 el.style.fill = '';
             }
+        });
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Label',
+            xtype:      'checkbox',
+            name:       'showlabel'
         });
     }
 });

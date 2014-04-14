@@ -9,6 +9,10 @@
         this.callParent();
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid';
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
@@ -188,7 +192,10 @@ Ext.define('TP.PanletChartGearman', {
             }]
         });
         this.add(this.chart);
-
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',

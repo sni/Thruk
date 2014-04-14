@@ -274,11 +274,6 @@ Ext.define('TP.PanletHost', {
         this.loader = TP.ExtinfoPanelLoader(this),
         this.add(TP.ExtinfoPanel('host'));
 
-        /* Settings */
-        this.addGearItems(
-            TP.objectSearchItem(panel, 'host', 'Hostname')
-        );
-
         /* auto load when host is set */
         this.addListener('afterrender', function() {
             this.setTitle(this.xdata.host);
@@ -293,6 +288,13 @@ Ext.define('TP.PanletHost', {
         this.formUpdatedCallback = function() {
             this.setTitle(this.xdata.host);
         }
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems(
+            TP.objectSearchItem(panel, 'host', 'Hostname')
+        );
     }
 });
 

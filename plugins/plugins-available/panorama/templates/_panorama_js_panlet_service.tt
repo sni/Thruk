@@ -17,12 +17,6 @@
         this.loader = TP.ExtinfoPanelLoader(this),
         this.add(TP.ExtinfoPanel('service'));
 
-        /* Settings */
-        this.addGearItems([
-            TP.objectSearchItem(panel, 'host', 'Hostname'),
-            TP.objectSearchItem(panel, 'service', 'Servicename')
-        ]);
-
         /* auto load when host is set */
         this.addListener('afterrender', function() {
             this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
@@ -37,6 +31,14 @@
         this.formUpdatedCallback = function() {
             this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
         }
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems([
+            TP.objectSearchItem(panel, 'host', 'Hostname'),
+            TP.objectSearchItem(panel, 'service', 'Servicename')
+        ]);
     }
 });
 

@@ -206,7 +206,10 @@ Ext.define('TP.PanletGrid', {
         this.addListener('afterrender', function() {
             this.grid.adjustPageSize();
         });
-
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems({
             fieldLabel: 'URL',
             xtype:      'textfield',

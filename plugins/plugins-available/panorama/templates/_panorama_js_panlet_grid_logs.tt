@@ -21,6 +21,10 @@
                 pattern: this.xdata.pattern
             };
         };
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems({
             fieldLabel: 'Time',
             xtype:      'textfield',

@@ -18,17 +18,6 @@
 
         panel.loader = {};
 
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Graph',
-            name:           'graph',
-            queryMode:      'local',
-            valueField:     'id',
-            displayField:   'name',
-            store:           { fields: ['name', 'id'], data: [] },
-            emptyText:      'select business process to display'
-        });
-
         /* available graphs loader */
         panel.updateGraphs = function() {
             var url    = 'bp.cgi?view_mode=json';
@@ -104,5 +93,19 @@
             panel.xdata.url = newUrl;
             panel.saveState();
         };
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Graph',
+            name:           'graph',
+            queryMode:      'local',
+            valueField:     'id',
+            displayField:   'name',
+            store:           { fields: ['name', 'id'], data: [] },
+            emptyText:      'select business process to display'
+        });
     }
 });

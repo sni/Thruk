@@ -8,10 +8,14 @@
     has_search_button: 'service',
     grid_sort: false,
     hideSettingsForm: ['url'],
+    reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=services';
-        this.reloadOnSiteChanges = true;
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         TP.addFormFilter(this, this.has_search_button);
     }
 });
@@ -24,10 +28,14 @@ Ext.define('TP.PanletGridServiceTotals', {
     height: 200,
     has_search_button: 'service',
     hideSettingsForm: ['url'],
+    reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=servicetotals';
-        this.reloadOnSiteChanges = true;
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         TP.addFormFilter(this, this.has_search_button);
     }
 });
@@ -42,10 +50,14 @@ Ext.define('TP.PanletGridServiceMineMap', {
     grid_sort:    false,
     grid_columns: false,
     hideSettingsForm: ['url'],
+    reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=servicesminemap';
-        this.reloadOnSiteChanges = true;
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         TP.addFormFilter(this, this.has_search_button);
     }
 });

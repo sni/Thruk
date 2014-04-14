@@ -109,7 +109,10 @@ Ext.define('TP.PanletChart', {
             // restoreZoom helps refreshing the chart after hiding
             this.chart.restoreZoom();
         });
-
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems({
             fieldLabel: 'History',
             xtype:      'textfield',

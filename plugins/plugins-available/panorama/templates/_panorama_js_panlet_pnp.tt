@@ -114,50 +114,6 @@ Ext.define('TP.PanletPNP', {
         this.add(this.imgItem);
         this.imgMask = new Ext.LoadMask(this.imgItem, {msg:"Loading..."});
 
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Graph',
-            name:           'graph',
-            queryMode:      'local',
-            valueField:     'url',
-            displayField:   'text',
-            store:          { fields: ['text', 'url'], data: [] },
-            listeners: {
-                select: function( combo, records, eOpts ) {
-                    panel = combo.up('panel').up('panel').up('panel');
-                    panel.xdata.source = 0;
-                    panel.updateSource();
-                },
-                change: function( combo, newValue, oldValue, eOpts ) {
-                    panel = combo.up('panel').up('panel').up('panel');
-                    panel.updateSource();
-                }
-            }
-        });
-
-        this.addGearItems({
-            xtype:          'combobox',
-            fieldLabel:     'Source',
-            name:           'source',
-            queryMode:      'local',
-            displayField:   'name',
-            valueField:     'source',
-            forceSelection: true,
-            editable:       false,
-            store:          { model: 'TP_Sources', data : [ {name: '0', source: 0, image_url: ''} ] }
-        });
-
-        this.addGearItems({
-            fieldLabel:     'Time Frame',
-            xtype:          'textfield',
-            name:           'time'
-        });
-        this.addGearItems({
-            fieldLabel: 'Show Border',
-            xtype:      'checkbox',
-            name:       'showborder'
-        });
-
         /* auto load when url is set */
         this.addListener('afterrender', function() {
             if(this.xdata.graph == '') {
@@ -232,5 +188,50 @@ Ext.define('TP.PanletPNP', {
                 this.size_adjustment_y += (naturalHeight - size.height);
             }
         }
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Graph',
+            name:           'graph',
+            queryMode:      'local',
+            valueField:     'url',
+            displayField:   'text',
+            store:          { fields: ['text', 'url'], data: [] },
+            listeners: {
+                select: function( combo, records, eOpts ) {
+                    panel.xdata.source = 0;
+                    panel.updateSource();
+                },
+                change: function( combo, newValue, oldValue, eOpts ) {
+                    panel.updateSource();
+                }
+            }
+        });
+
+        this.addGearItems({
+            xtype:          'combobox',
+            fieldLabel:     'Source',
+            name:           'source',
+            queryMode:      'local',
+            displayField:   'name',
+            valueField:     'source',
+            forceSelection: true,
+            editable:       false,
+            store:          { model: 'TP_Sources', data : [ {name: '0', source: 0, image_url: ''} ] }
+        });
+
+        this.addGearItems({
+            fieldLabel:     'Time Frame',
+            xtype:          'textfield',
+            name:           'time'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
+        });
     }
 });

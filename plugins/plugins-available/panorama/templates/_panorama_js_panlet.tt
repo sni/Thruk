@@ -297,6 +297,9 @@
         } else {
             panel.gearItemsExtra.push(items);
         }
+    },
+    /* override to set settings items */
+    setGearItems: function() {
     }
 });
 
@@ -403,6 +406,9 @@ TP.panletGearHandler = function() {
     if(this.gearitem == undefined) {
         this.add(Ext.create('TP.PanletGearItem', {}));
         this.gearitem = this.items.getAt(this.items.length-1);
+        if(!this.gearItemsExtra) {
+            this.setGearItems();
+        }
         if(this.gearItemsExtra) {
             this.gearitem.down('form').add(this.gearItemsExtra);
         }

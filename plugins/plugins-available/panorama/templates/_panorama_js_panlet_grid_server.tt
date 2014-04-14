@@ -59,7 +59,10 @@ Ext.define('TP.PanletGridServerStats', {
         this.xdata.cpu    = true;
         this.xdata.load   = true;
         this.xdata.memory = true;
-
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
         this.addGearItems([{
             fieldLabel: 'CPU',
             xtype:      'checkbox',
