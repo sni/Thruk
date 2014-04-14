@@ -141,7 +141,8 @@ TP.tabSettingsWindow = function() {
         /* show server time */
         xtype:      'checkbox',
         fieldLabel: 'Show Server Time',
-        name:       'server_time'
+        name:       'server_time',
+        boxLabel:   '(display server time next to the menu)'
     }];
     var generalTab = {
         title : 'General',
@@ -177,7 +178,8 @@ TP.tabSettingsWindow = function() {
                         this.up().items.get(1).setDisabled(!newValue);
                     }
                 },
-                checked: tab.xdata.select_backends
+                checked: tab.xdata.select_backends,
+                boxLabel:   '(enable to select a subset of backends)'
             }, {
                 /* backends */
                 fieldLabel: 'Backends / Sites',
@@ -213,6 +215,11 @@ TP.tabSettingsWindow = function() {
 
     /* Dashboard Settings Tab */
     var dashboardItems = [{
+            xtype:      'checkbox',
+            fieldLabel: 'Locked',
+            name:       'locked',
+            boxLabel:   '(disables dashboard editing)'
+    }, {
             /* tab title */
             xtype:      'textfield',
             name:       'title',
@@ -238,7 +245,8 @@ TP.tabSettingsWindow = function() {
             /* auto hide panlet header */
             xtype:      'checkbox',
             fieldLabel: 'Hide Panlet Header',
-            name:       'autohideheader'
+            name:       'autohideheader',
+            boxLabel:   ' (widget header will be displayed on mouse over.)'
     }];
     var dashboardTab = {
         title : 'Dashboard',
