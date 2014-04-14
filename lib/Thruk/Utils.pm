@@ -1863,9 +1863,11 @@ sub write_data_file {
     # avoid self-referential structures
     local $Data::Dumper::Deepcopy = 1;
 
+    # save some disk space
+    local $Data::Dumper::Indent   = 1;
+
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
-    $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
     open(my $fh, '>:encoding(UTF-8)', $filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $filename);
