@@ -109,7 +109,7 @@ Ext.define('TP.DashboardManagementWindow', {
         items:         [],
         tabBar:        {
             items: [{
-                xtype: 'tbfill',
+                xtype: 'tbfill'
             }, {
                 xtype:     'textfield',
                 emptyText: 'filter dashboards',
