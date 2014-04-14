@@ -177,7 +177,7 @@
         afterrender: function(This, eOpts) {
             /* start refresh interval */
             this.startTimeouts();
-            this.syncShadowTimeout();
+            this.syncShadowTimeout(100);
         },
         afterlayout: function(This) {
             /* make all border and background work */
@@ -297,12 +297,13 @@
     setGearItems: function() {
     },
     /* schedules shadow refresh */
-    syncShadowTimeout: function() {
+    syncShadowTimeout: function(delay) {
         var win = this;
+        if(delay == undefined) { delay = 100; }
         if(win.xdata.showborder == false) {
             TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
                 win.getEl().disableShadow();
-            }, win, []), 100);
+            }, win, []), delay);
         }
     }
 });
