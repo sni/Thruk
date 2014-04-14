@@ -290,7 +290,7 @@ Ext.define('TP.TabBar', {
         });
         if(!ExtState[this.id]) {
             TP.initialized = true;
-            if(TP.initMask) { TP.initMask.destroy() }
+            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         }
     },
     getState: function() {
@@ -371,7 +371,9 @@ Ext.define('TP.TabBar', {
             }
         }
         if(TP.initMask) {
-            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_active);
+            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
+                if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+            } ,TP.initial_create_delay_active);
         }
     },
     items: [{

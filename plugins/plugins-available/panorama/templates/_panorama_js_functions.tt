@@ -26,7 +26,7 @@ var TP = {
     initialized:  false,
     timeouts:     {},
     num_panels:   0,
-    cur_panels:   0,
+    cur_panels:   1,
 
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
@@ -69,6 +69,7 @@ var TP = {
                             cp.set(key, Ext.JSON.decode(data[key]));
                         }
                         if(cp.state[id]) {
+                            TP.initial_active_tab = id; // set inital tab, so panlets will be shown
                             TP.add_pantab(id);
                             if(TP.dashboardsSettingGrid) {
                                 TP.dashboardsSettingGrid.getView().refresh();
@@ -556,9 +557,7 @@ var TP = {
                     /* allow response to contain cookie messages */
                     var resp = TP.getResponse(undefined, response, false);
                     if(resp.newid) {
-                        TP.initial_create_delay_active   = 0;
-                        TP.initial_create_delay_inactive = 0;
-                        TP.initial_active_tab            = resp.newid;
+                        TP.initial_active_tab = resp.newid;
                         TP.add_pantab(resp.newid);
                     } else {
                         Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');

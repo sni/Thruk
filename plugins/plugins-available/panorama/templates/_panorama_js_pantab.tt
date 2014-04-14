@@ -26,6 +26,16 @@
             }
         }
 
+        if(TP.initial_active_tab && TP.initial_active_tab == this.id && TP.initMask == undefined && this.window_ids.length > 1) {
+            TP.initial_create_delay_active   = 0;
+            TP.initial_create_delay_inactive = 0;
+            TP.cur_panels                    = 1;
+            TP.num_panels                    = this.window_ids.length;
+            TP.initMask = new Ext.LoadMask(Ext.getBody(), {msg:"loading panel "+TP.cur_panels+'/'+TP.num_panels+"..."});
+            TP.initMask.show();
+            this.keepMask = true;
+        }
+
         // contains the currently active backends
         this.activeBackends = undefined;
         this.callParent();
@@ -41,10 +51,9 @@
         },
         destroy: function( This, eOpts ) {
             var tabpan = Ext.getCmp('tabpan');
-            for(var nr=0; nr<This.window_ids.length; nr++) {
-                if(This.window_ids[nr].xdata == undefined) {
-                    Ext.getCmp(This.window_ids[nr]).destroy();
-                }
+            var window_ids = TP.clone(This.window_ids);
+            for(var nr=0; nr<window_ids.length; nr++) {
+                Ext.getCmp(window_ids[nr]).destroy();
             }
             tabpan.open_tabs = TP.removeFromList(tabpan.open_tabs, This.id);
             cp.clear(This.id);
@@ -154,6 +163,11 @@
                 }
             };
             Ext.apply(this.xdata, state.xdata);
+            if(TP.initMask && this.keepMask) {
+                TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
+                    if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete this.keepMask; }
+                } ,TP.initial_create_delay_active);
+            }
         }
         this.applyXdata();
     },
@@ -212,7 +226,8 @@
         }
 
         TP.updateAllIcons(This);
-        if(TP.initMask) { TP.initMask.destroy() }
+
+        if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
     },
 
     /* stop all timed actions for this tab and its panels */
