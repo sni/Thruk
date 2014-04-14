@@ -431,7 +431,9 @@ TP.panletGearHandler = function() {
         }
         this.origSize = this.getSize();
         if(this.origSize.width < 450 || this.origSize.height < 250) {
-            this.setSize(450, 250);
+            this.setSize(Ext.Array.max([450, this.origSize.width]),
+                         Ext.Array.max([250, this.origSize.height])
+                        );
         }
         this.applyBorderAndBackground();
         this.addCls('gearopen');
