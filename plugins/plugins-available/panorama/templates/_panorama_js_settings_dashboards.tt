@@ -10,13 +10,6 @@ Ext.define('TP.DashboardManagementWindow', {
     initComponent: function() {
         this.xdata         = {};
         this.callParent();
-        //this.pagingToolbar = new TP.PagingToolbar();
-        this.loader        = Ext.create('TP.GridLoader', {
-            scope:       this,
-            url:        'panorama.cgi?task=dashboard_list&list=my',
-            loadMask:    true,
-            target:      this
-        });
 
         var listeners = {
             activate: function(This, eOpts) {
@@ -25,6 +18,11 @@ Ext.define('TP.DashboardManagementWindow', {
                 This.loader.xdata = panel.xdata;
                 This.loader.load();
                 TP.dashboardsSettingGrid = This;
+                // reset filter
+                if(TP.dashboardsSettingWindow) {
+                    var filterEl = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.length-2);
+                    filterEl.setValue('');
+                }
             },
             beforeselect: function(This, record, index, eOpts) {
                 /* prevent selections */
@@ -108,7 +106,66 @@ Ext.define('TP.DashboardManagementWindow', {
     items: [{
         xtype:        'tabpanel',
         height:        380,
-        items:         []
+        items:         [],
+        tabBar:        {
+            items: [{
+                xtype: 'tbfill',
+            }, {
+                xtype:     'textfield',
+                emptyText: 'filter dashboards',
+                width:      120,
+                closable:   false,
+                fieldStyle: 'border-bottom: 1px solid #EAEAEA;',
+                fieldBodyCls:   'x-form-clear-trigger',
+                listeners: {
+                    change: function(This) {
+                        var clearBtn  = This.up().items.getAt(This.up().items.length-1);
+                        var activeTab = This.up('window').items.getAt(0).getActiveTab();
+                        var store     = activeTab.store;
+                        if(This.value != undefined && This.value != '') {
+                            clearBtn.enable();
+                            var val   = This.value;
+                            store.filterBy(function(rec, id) {
+                                var found = false;
+                                for(var key in rec.data) {
+                                    if(String(rec.data[key]).match(val)) { found=true; }
+                                }
+                                return found;
+                            });
+                        } else {
+                            clearBtn.disable();
+                            store.clearFilter();
+                        }
+                    }
+                }
+            }, {
+                xtype:   'button',
+                text:    ' ',
+                width:    19,
+                border:   1,
+                style:    'padding: 0 0 5px;',
+                cls:     'x-form-clear-trigger',
+                disabled: true,
+                handler: function(This) {
+                    var searchField = This.up().items.getAt(This.up().items.length-2);
+                    searchField.reset();
+                },
+                listeners: {
+                    afterrender: function(This) {
+                        window.setTimeout(function() {
+                            var style = This.getEl().dom.style;
+                            var left  = Number(String(style.left).replace(/px$/, ''));
+                            style.top          = '-1px';
+                            style.borderBottom = '1px solid #EAEAEA';
+                            style.borderTop    = '1px solid #B5B8C8';
+                            style.borderRight  = '1px solid #B5B8C8';
+                            style.borderLeft   = '0';
+                            style.left         = left-2+'px';
+                        } , 100);
+                    }
+                }
+            }]
+        }
     }]
 });
 
@@ -116,3 +173,4 @@ TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
     TP.dashboardsSettingWindow = win;
 }
+
