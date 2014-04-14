@@ -1179,14 +1179,7 @@ sub _task_dashboard_data {
         return if $c->stash->{'readonly'};
         $dashboard = {
             tab     => {
-                xdata => {
-                    title           => 'Dashboard',
-                    refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
-                    select_backends => 0,
-                    backends        => [],
-                    background      => 'none',
-                    autohideheader  => 1,
-                }
+                xdata => $self->_get_default_tab_xdata($c)
             },
             id      => 'new'
         };
@@ -1611,6 +1604,9 @@ sub _load_dashboard {
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
+
+    if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
+    if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = $self->_get_default_tab_xdata($c) }
     return $dashboard;
 }
 
@@ -1663,6 +1659,18 @@ sub _merge_dashboard_into_hash {
     return $data;
 }
 
+##########################################################
+sub _get_default_tab_xdata {
+    my($self, $c) = @_;
+    return({
+        title           => 'Dashboard',
+        refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
+        select_backends => 0,
+        backends        => [],
+        background      => 'none',
+        autohideheader  => 1,
+    });
+}
 ##########################################################
 
 =head1 AUTHOR
