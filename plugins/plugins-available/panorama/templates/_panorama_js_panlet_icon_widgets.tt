@@ -97,12 +97,15 @@
             }, 250);
         },
         show: function( This, eOpts ) {
-            This.dd.addListener('dragstart', function(This, eOpts) {
-                TP.suppressIconTip = true;
-            });
-            This.dd.addListener('dragend', function(This, eOpts) {
-                TP.suppressIconTip = false;
-            });
+            if(This.dd && !This.dd_listener_added) {
+                This.dd.addListener('dragstart', function(This, eOpts) {
+                    TP.suppressIconTip = true;
+                });
+                This.dd.addListener('dragend', function(This, eOpts) {
+                    TP.suppressIconTip = false;
+                });
+                This.dd_listener_added = true;
+            }
         },
         destroy: function( This, eOpts ) {
             /* remove window from panels window ids */
