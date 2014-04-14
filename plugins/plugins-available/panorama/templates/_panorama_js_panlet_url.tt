@@ -56,7 +56,7 @@
                 /* replace iframe content */
                 var iframe;
                 try {
-                    iframe = this.items.getAt(1).getEl().dom;
+                    iframe = this.items.getAt(0).getEl().dom;
                 } catch(e) {
                     debug(e);
                 }
@@ -88,7 +88,7 @@
         this.refreshHandler = function() {
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
                 /* set external url as src */
-                var iframeObj = this.items.getAt(1).getEl();
+                var iframeObj = this.items.getAt(0).getEl();
                 if(iframeObj && iframeObj.dom) {
                     iframeObj.dom.onerror = this.iframeErrorHandler;
                     iframeObj.dom.src     = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
@@ -123,7 +123,7 @@
             }
         });
 
-        this.down('form').add({
+        this.addGearItems([{
             fieldLabel: 'URL',
             xtype:      'textfield',
             name:       'url',
@@ -157,7 +157,7 @@
             fieldLabel: 'Keep CSS',
             xtype:      'checkbox',
             name:       'keepcss'
-        });
+        }]);
 
         /* auto load when url is set */
         this.addListener('afterrender', function() {

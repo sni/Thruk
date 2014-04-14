@@ -13,6 +13,7 @@ Ext.define('TP.PanletPNP', {
     title: 'PNPGraph',
     height: 240,
     width:  420,
+    hideSettingsForm: ['backends'],
     //maximizable: true, // does not work stateful
     initComponent: function() {
         this.callParent();
@@ -27,10 +28,6 @@ Ext.define('TP.PanletPNP', {
         this.size_adjustment_y = 50;
 
         /* update source selector */
-        this.source_store = Ext.create('Ext.data.Store', {
-            model: 'TP_Sources',
-            data : [ {name: '0', source: 0, image_url: ''} ]
-        });
         this.updateSource = function() {
             var panel  = this;
             var form   = this.down('form').getForm();
@@ -54,11 +51,12 @@ Ext.define('TP.PanletPNP', {
                                 };
                             }
                         }
-                        panel.source_combo.store.removeAll();
+                        var source_combo = TP.getFormField(panel.gearitem.down('form'), 'source');
+                        source_combo.store.removeAll();
                         for(var nr=0; nr<data.length; nr++) {
-                            panel.source_combo.store.loadRawData(data[nr], true);
+                            source_combo.store.loadRawData(data[nr], true);
                         }
-                        panel.source_combo.setValue(panel.xdata.source);
+                        source_combo.setValue(panel.xdata.source);
                     }
                 });
             }
@@ -70,7 +68,7 @@ Ext.define('TP.PanletPNP', {
             if(this.xdata.graph == '') {
                 return;
             }
-            var imgPanel = this.items.getAt(1);
+            var imgPanel = this.items.getAt(0);
             if(!imgPanel || !imgPanel.el) { // not yet initialized
                 return;
             }
@@ -116,18 +114,14 @@ Ext.define('TP.PanletPNP', {
         this.add(this.imgItem);
         this.imgMask = new Ext.LoadMask(this.imgItem, {msg:"Loading..."});
 
-        this.graph_store = new Ext.data.Store({
-                fields: ['text', 'url'],
-                data: []
-        });
-
-        this.graph_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
             queryMode:      'local',
             valueField:     'url',
             displayField:   'text',
-            store:          this.graph_store,
+            store:          { fields: ['text', 'url'], data: [] },
             listeners: {
                 select: function( combo, records, eOpts ) {
                     panel = combo.up('panel').up('panel').up('panel');
@@ -140,9 +134,9 @@ Ext.define('TP.PanletPNP', {
                 }
             }
         });
-        this.down('form').add(this.graph_combo);
 
-        this.source_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Source',
             name:           'source',
             queryMode:      'local',
@@ -150,16 +144,15 @@ Ext.define('TP.PanletPNP', {
             valueField:     'source',
             forceSelection: true,
             editable:       false,
-            store:          this.source_store
+            store:          { model: 'TP_Sources', data : [ {name: '0', source: 0, image_url: ''} ] }
         });
-        this.down('form').add(this.source_combo);
 
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel:     'Time Frame',
             xtype:          'textfield',
             name:           'time'
         });
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
@@ -215,8 +208,9 @@ Ext.define('TP.PanletPNP', {
                             }
                         }
                     });
-                    this.graph_combo.store = this.graph_store;
-                    this.graph_combo.setValue(this.xdata.graph);
+                    var graph_combo = TP.getFormField(this.gearitem.down('form'), 'graph');
+                    graph_combo.store = this.graph_store;
+                    graph_combo.setValue(this.xdata.graph);
                 }
             }
         };
@@ -226,7 +220,7 @@ Ext.define('TP.PanletPNP', {
 
         /* adjust size of image */
         this.adjustImgSize = function() {
-            var imgPanel = this.items.getAt(1);
+            var imgPanel = this.items.getAt(0);
             if(!imgPanel || !imgPanel.el) { // not yet initialized
                 return;
             }

@@ -5,10 +5,10 @@
     height: 200,
     width:  260,
     filterBackends: false,
+    hideSettingsForm: ['url', 'backends'],
     initComponent: function() {
         this.callParent();
-        this.xdata.url       = 'panorama.cgi?task=site_status';
-        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
+        this.xdata.url = 'panorama.cgi?task=site_status';
         this.reloadOnSiteChanges = true;
     }
 });
@@ -52,28 +52,26 @@ Ext.define('TP.PanletGridServerStats', {
     title:  'Server Status',
     height: 420,
     width:  200,
+    hideSettingsForm: ['url', 'backends'],
     initComponent: function() {
         this.callParent();
         this.xdata.url    = 'panorama.cgi?task=server_stats';
         this.xdata.cpu    = true;
         this.xdata.load   = true;
         this.xdata.memory = true;
-        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
 
-        this.down('form').add({
+        this.addGearItems([{
             fieldLabel: 'CPU',
             xtype:      'checkbox',
             name:       'cpu'
-        });
-        this.down('form').add({
+        }, {
             fieldLabel: 'Load',
             xtype:      'checkbox',
             name:       'load'
-        });
-        this.down('form').add({
+        }, {
             fieldLabel: 'Memory',
             xtype:      'checkbox',
             name:       'memory'
-        });
+        }]);
     }
 });

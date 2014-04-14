@@ -5,10 +5,10 @@
     height: 200,
     width:  200,
     has_search_button: 'host',
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=hosts_pie';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }
@@ -21,10 +21,10 @@ Ext.define('TP.PanletPieChartServices', {
     height: 200,
     width:  200,
     has_search_button: 'service',
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=services_pie';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }

@@ -7,10 +7,10 @@
     //maximizable: true, // does not work stateful
     has_search_button: 'host',
     grid_sort:          false,
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=hosts';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }
@@ -23,10 +23,10 @@ Ext.define('TP.PanletGridHostTotals', {
     height: 200,
     width:  200,
     has_search_button: 'host',
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=hosttotals';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }

@@ -4,12 +4,12 @@
     title:  'Mod-Gearman Metrics',
     height: 200,
     width:  360,
+    hideSettingsForm: ['url', 'backends'],
     initComponent: function() {
         this.callParent();
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid';
-        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
             name:       'server'
@@ -35,7 +35,9 @@ Ext.define('TP.PanletChartGearman', {
     title:  'Gearman Queues',
     width:  640,
     height: 260,
+    hideSettingsForm: ['url', 'backends'],
     initComponent: function() {
+        var panel = this;
         this.callParent();
 
         this.store = new Ext.data.Store({
@@ -46,7 +48,6 @@ Ext.define('TP.PanletChartGearman', {
         this.xdata.queue  = 'service';
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=stats_gearman';
-        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
         this.formUpdatedCallback = function() {
             if(this.setTitle) {
                 this.setTitle('Mod-Gearman ' + ucfirst(this.xdata.queue) + ' Queue');
@@ -57,11 +58,11 @@ Ext.define('TP.PanletChartGearman', {
                 this.refreshHandler();
             }
         };
-        this.updateQueues = true;
         this.getData = function(data) {
             /* fill queue store, but only when not selected currently */
-            if(this.updateQueues) {
-                this.queue_store.removeAll();
+            if(panel.gearitem) {
+                var queue_store = TP.getFormField(panel.gearitem.down('form'), 'queue').store;
+                queue_store.removeAll();
                 for(var key in data) {
                     var name = ucfirst(key);
                     if(name == 'Check_results') {
@@ -69,15 +70,15 @@ Ext.define('TP.PanletChartGearman', {
                     } else{
                         name = name.replace(/_/, ' ');
                     }
-                    this.queue_store.loadRawData({name:name, value:key}, true);
+                    queue_store.loadRawData({name:name, value:key}, true);
                 }
-                this.queue_store.sort('name');
+                queue_store.sort('name');
             }
             return data[this.xdata.queue];
         };
         this.updated_callback = function(panel) {
             var chart = this.chart;
-            if(!chart.store) {
+            if(!this.store || !this.store.max || !this.store.max('date')) {
                 return;
             }
             var tabpan = Ext.getCmp('tabpan');
@@ -86,7 +87,7 @@ Ext.define('TP.PanletChartGearman', {
             if(refresh == 0)   { refresh = 60; }
             var minutes_to_show = Math.ceil(refresh * this.xdata.nr_dots / 60 * 1.5);
             /* dynamically adjust minimum/maximum and ticks */
-            var max     = chart.store.max('date').getTime() / 1000;
+            var max     = this.store.max('date').getTime() / 1000;
             var axis = chart.axes.getAt(1);
             var min = max - minutes_to_show * 60;
             if(minutes_to_show > 30) {
@@ -188,27 +189,23 @@ Ext.define('TP.PanletChartGearman', {
         });
         this.add(this.chart);
 
-        this.queue_store = new Ext.data.Store({
-                fields: ['name', 'value'],
-                data: []
-        });
-
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
             name:       'server'
         });
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel:   'Gearman Queue',
             xtype:        'combobox',
             name:         'queue',
             valueField:   'value',
             displayField: 'name',
             queryMode:    'local',
-            store:        this.queue_store,
+            store:        { fields: ['name', 'value'], data: [] },
             listeners: {
-                blur: function()  { var panel = Ext.getCmp(this.up('form').up('panel').up('panel').id); panel.updateQueues = true;  },
-                focus: function() { var panel = Ext.getCmp(this.up('form').up('panel').up('panel').id); panel.updateQueues = false; }
+                afterrender: function() {
+                    panel.refreshHandler();
+                }
             }
         });
     },

@@ -7,6 +7,7 @@
     menusnr: 0,
     type:   'service',
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.url         = 'panorama.cgi?task=service_detail';
         if(this.xdata.host    == undefined) { this.xdata.host    = '' }
@@ -17,17 +18,14 @@
         this.add(TP.ExtinfoPanel('service'));
 
         /* Settings */
-        this.hosts_store = new Ext.data.Store({
-                fields: ['name'],
-                data: []
-        });
-        this.host_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Host',
             name:           'host',
             queryMode:      'local',
             valueField:     'name',
             displayField:   'name',
-            store:          this.hosts_store,
+            store:          { fields: ['name'], data: [] },
             listeners: {
                 select: function( combo, records, eOpts ) {
                     panel = combo.up('panel').up('panel').up('panel');
@@ -40,13 +38,9 @@
                 }
             }
         });
-        this.down('form').add(this.host_combo);
 
-        this.services_store = Ext.create('Ext.data.Store', {
-            fields: ['description'],
-            data :  []
-        });
-        this.service_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Service',
             name:           'service',
             queryMode:      'local',
@@ -54,9 +48,8 @@
             valueField:     'description',
             forceSelection: true,
             editable:       false,
-            store:          this.services_store
+            store:          { fields: ['description'], data :  [] }
         });
-        this.down('form').add(this.service_combo);
         this.gearInitCallback = function(This) {
             this.updateHost();
         };
@@ -71,11 +64,12 @@
                 method: 'POST',
                 callback: function(options, success, response) {
                     var data  = TP.getResponse(panel, response);
-                    panel.host_combo.store.removeAll();
+                    var host_combo = TP.getFormField(panel.gearitem.down('form'), 'host');
+                    host_combo.store.removeAll();
                     for(var nr=0; nr<data.data.length; nr++) {
-                        panel.host_combo.store.loadRawData(data.data[nr], true);
+                        host_combo.store.loadRawData(data.data[nr], true);
                     }
-                    panel.host_combo.setValue(panel.xdata.host);
+                    host_combo.setValue(panel.xdata.host);
                 }
             });
         };
@@ -93,11 +87,12 @@
                     method: 'POST',
                     callback: function(options, success, response) {
                         var data  = TP.getResponse(panel, response);
-                        panel.service_combo.store.removeAll();
+                        var service_combo = TP.getFormField(panel.gearitem.down('form'), 'service');
+                        service_combo.store.removeAll();
                         for(var nr=0; nr<data.data.length; nr++) {
-                            panel.service_combo.store.loadRawData(data.data[nr], true);
+                            service_combo.store.loadRawData(data.data[nr], true);
                         }
-                        panel.service_combo.setValue(panel.xdata.service);
+                        service_combo.setValue(panel.xdata.service);
                     }
                 });
             }

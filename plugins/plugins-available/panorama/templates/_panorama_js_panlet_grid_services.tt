@@ -7,10 +7,10 @@
     //maximizable: true, // does not work stateful
     has_search_button: 'service',
     grid_sort: false,
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=services';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }
@@ -23,10 +23,10 @@ Ext.define('TP.PanletGridServiceTotals', {
     width:  200,
     height: 200,
     has_search_button: 'service',
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=servicetotals';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }
@@ -41,10 +41,10 @@ Ext.define('TP.PanletGridServiceMineMap', {
     has_search_button: 'service',
     grid_sort:    false,
     grid_columns: false,
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=servicesminemap';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
         TP.addFormFilter(this, this.has_search_button);
     }

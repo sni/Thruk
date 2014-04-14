@@ -4,6 +4,7 @@
     title: 'Nagvis Maps',
     height: 300,
     width:  600,
+    hideSettingsForm: ['url', 'backends', 'selector', 'keepcss'],
 
     initComponent: function() {
         var panel = this;
@@ -17,26 +18,21 @@
         panel.last_url       = '';
         panel.graphs_loaded  = 0;
 
-        TP.hideFormElements(panel.down('form').getForm(), ['url', 'backends', 'selector', 'keepcss']);
-        this.down('form').add({
+        panel.loader = {};
+        this.addGearItems({
             fieldLabel: 'Nagvis Base Url',
             xtype:      'textfield',
             name:       'base_url',
             emptyText:  'nagvis base url, ex.: /nagvis'
         });
-        panel.loader = {};
-
-        panel.graph_store = new Ext.data.Store({
-                fields: ['name', 'id'],
-                data: []
-        });
-        panel.graph_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
             queryMode:      'local',
             valueField:     'id',
             displayField:   'name',
-            store:           panel.graph_store,
+            store:           { fields: ['name', 'id'], data: [] },
             emptyText:      'select a map',
             listeners: {
                 focus: function() {
@@ -47,25 +43,25 @@
                 }
             }
         });
-        panel.down('form').add(panel.graph_combo);
-
-        panel.graph_combo_error_label = new Ext.form.field.Display({
+        this.addGearItems({
+            xtype:         'displayfield',
             hideEmptyLabel: false,
-            name:       'grapherror',
-            activeError: true,
-            value:      ' '
+            name:          'grapherror',
+            activeError:    true,
+            value:         ' '
         });
-        panel.down('form').add(panel.graph_combo_error_label);
 
         /* available graphs loader */
         panel.updateGraphs = function() {
-            var form   = this.down('form').getForm();
+            var form   = this.gearitem.down('form').getForm();
             var values = form.getValues();
             panel.xdata.base_url = values.base_url;
             if(!panel.xdata.base_url) { return; }
             if(panel.graphs_loaded)   { return; }
-            panel.graph_combo.setRawValue('loading maps...');
-            panel.graph_combo.disable();
+            var graph_combo             = TP.getFormField(this.gearitem.down('form'), 'graph');
+            var graph_combo_error_label = TP.getFormField(this.gearitem.down('form'), 'grapherror');
+            graph_combo.setRawValue('loading maps...');
+            graph_combo.disable();
             var now    = new Date();
             var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
             Ext.Ajax.request({
@@ -87,27 +83,27 @@
                                     id:   link[1]
                                 };
                             }
-                            panel.graph_combo.store.removeAll();
+                            graph_combo.store.removeAll();
                             for(var key in newdata) {
-                                panel.graph_combo.store.loadRawData(newdata[key], true);
+                                graph_combo.store.loadRawData(newdata[key], true);
                             }
-                            panel.graph_combo.setValue(panel.xdata.graph);
-                            panel.graph_combo_error_label.unsetActiveError();
-                            panel.graph_combo_error_label.setValue('');
-                            panel.graph_combo.enable();
+                            graph_combo.setValue(panel.xdata.graph);
+                            graph_combo_error_label.unsetActiveError();
+                            graph_combo_error_label.setValue('');
+                            graph_combo.enable();
                         } else {
                             success = false;
                         }
                     }
                     if(!success) {
                         panel.graphs_loaded = 0;
-                        panel.graph_combo_error_label.setActiveError('');
+                        graph_combo_error_label.setActiveError('');
                         if(response.status == 404) {
-                            panel.graph_combo_error_label.setValue('loading graphs failed, no nagvis found under this url: ' + response.status + ' - ' + response.statusText);
+                            graph_combo_error_label.setValue('loading graphs failed, no nagvis found under this url: ' + response.status + ' - ' + response.statusText);
                         } else if(response.status) {
-                            panel.graph_combo_error_label.setValue('loading graphs failed: ' + response.status + ' - ' + response.statusText);
+                            graph_combo_error_label.setValue('loading graphs failed: ' + response.status + ' - ' + response.statusText);
                         } else {
-                            panel.graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication problems.');
+                            graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication problems.');
                         }
                     }
                 }
@@ -126,7 +122,7 @@
                     panel.xdata.url = newUrl;
                     panel.saveState();
                 }
-                var iframeObj = panel.items.getAt(1).getEl();
+                var iframeObj = panel.items.getAt(0).getEl();
                 if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
                     iframeObj.dom.src = panel.xdata.url;
                     panel.last_url = panel.xdata.url;

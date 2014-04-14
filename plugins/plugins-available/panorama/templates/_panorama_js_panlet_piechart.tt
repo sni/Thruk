@@ -5,6 +5,7 @@
     width:  200,
     height: 200,
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.showborder = false;
         this.xdata.showlabel  = true;
@@ -130,12 +131,12 @@
             this.refreshHandler();
         });
 
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Show Border',
             xtype:      'checkbox',
             name:       'showborder'
         });
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Show Label',
             xtype:      'checkbox',
             name:       'showlabel'
@@ -152,4 +153,3 @@
         });
     }
 });
-

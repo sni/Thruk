@@ -102,7 +102,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
     if(data && data.data) {
         var d         = data.data;
         var downtimes = data.downtimes;
-        var panel     = this.items.getAt(1);
+        var panel     = this.items.getAt(0);
         var statename = this.type == 'host' ? TP.render_host_status(d.state, {}, data) : TP.render_service_status(d.state, {}, data) ;
         panel.getComponent('current_status').update('<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
         panel.getComponent('status_information').update(d.plugin_output+'<br>'+d.long_plugin_output);
@@ -274,19 +274,14 @@ Ext.define('TP.PanletHost', {
         this.add(TP.ExtinfoPanel('host'));
 
         /* Settings */
-        this.hosts_store = new Ext.data.Store({
-                fields: ['name'],
-                data: []
-        });
-        this.host_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
             fieldLabel:     'Host',
             name:           'host',
             queryMode:      'local',
             valueField:     'name',
             displayField:   'name',
-            store:          this.hosts_store
+            store:          { fields: ['name'], data: [] }
         });
-        this.down('form').add(this.host_combo);
 
         this.gearInitCallback = function(This) {
             this.updateHost();
@@ -302,11 +297,12 @@ Ext.define('TP.PanletHost', {
                 method: 'POST',
                 callback: function(options, success, response) {
                     var data  = TP.getResponse(panel, response);
-                    panel.host_combo.store.removeAll();
+                    var host_combo = TP.getFormField(panel.gearitem.down('form'), 'host');
+                    host_combo.store.removeAll();
                     for(var nr=0; nr<data.data.length; nr++) {
-                        panel.host_combo.store.loadRawData(data.data[nr], true);
+                        host_combo.store.loadRawData(data.data[nr], true);
                     }
-                    panel.host_combo.setValue(panel.xdata.host);
+                    host_combo.setValue(panel.xdata.host);
                 }
             });
         };

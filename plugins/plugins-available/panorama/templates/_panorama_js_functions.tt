@@ -706,14 +706,14 @@ var TP = {
         while(i<l) { n += list[i++]} ;
         return n;
     },
-    addFormFilter: function(This, type) {
-        This.obj_filter = new TP.formFilter({
+    addFormFilter: function(panel, type) {
+        panel.obj_filter = new TP.formFilter({
             fieldLabel:     'Filter',
             name:           'filter',
             ftype:          type,
-            panel:          This
+            panel:          panel
         });
-        This.down('form').add(This.obj_filter);
+        panel.addGearItems(panel.obj_filter);
     },
     /* convert number to binary list */
     dec2bin: function(dec) {
@@ -1193,5 +1193,14 @@ var TP = {
         }
         if(backends.length == 0) { return(''); }
         return backends;
+    },
+
+    /* returns form field by name */
+    getFormField: function(form, name) {
+        var item = form.items.findBy(function(item, key) {
+            if(item.name == name) { return true; }
+            return false;
+        });
+        return item;
     }
 }

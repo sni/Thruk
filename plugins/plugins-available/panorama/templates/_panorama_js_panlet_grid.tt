@@ -207,7 +207,7 @@ Ext.define('TP.PanletGrid', {
             this.grid.adjustPageSize();
         });
 
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'URL',
             xtype:      'textfield',
             name:       'url'

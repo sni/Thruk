@@ -4,6 +4,7 @@
     title: 'Business Process',
     height: 300,
     width:  600,
+    hideSettingsForm: ['url', 'backends', 'selector', 'keepcss'],
 
     initComponent: function() {
         var panel = this;
@@ -15,23 +16,18 @@
         panel.reloadOnSiteChanges = false;
         panel.last_url       = '';
 
-        TP.hideFormElements(panel.down('form').getForm(), ['url', 'backends', 'selector', 'keepcss']);
         panel.loader = {};
 
-        panel.graph_store = new Ext.data.Store({
-                fields: ['name', 'id'],
-                data: []
-        });
-        panel.graph_combo = new Ext.form.field.ComboBox({
+        this.addGearItems({
+            xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
             queryMode:      'local',
             valueField:     'id',
             displayField:   'name',
-            store:           panel.graph_store,
+            store:           { fields: ['name', 'id'], data: [] },
             emptyText:      'select business process to display'
         });
-        panel.down('form').add(panel.graph_combo);
 
         /* available graphs loader */
         panel.updateGraphs = function() {
@@ -50,11 +46,12 @@
                                 id:   row['id']
                             };
                         }
-                        panel.graph_combo.store.removeAll();
+                        var graph_combo = TP.getFormField(panel.gearitem.down('form'), 'graph');
+                        graph_combo.store.removeAll();
                         for(var key in newdata) {
-                            panel.graph_combo.store.loadRawData(newdata[key], true);
+                            graph_combo.store.loadRawData(newdata[key], true);
                         }
-                        panel.graph_combo.setValue(panel.xdata.graph);
+                        graph_combo.setValue(panel.xdata.graph);
                     }
                 }
             });
@@ -83,7 +80,7 @@
                     panel.xdata.url = newUrl;
                     panel.saveState();
                 }
-                var iframeObj = panel.items.getAt(1).getEl();
+                var iframeObj = panel.items.getAt(0).getEl();
                 if(iframeObj && iframeObj.dom && panel.last_url != panel.xdata.url) {
                     iframeObj.dom.src = panel.xdata.url;
                     panel.last_url = panel.xdata.url;
@@ -99,7 +96,7 @@
             if(!panel.xdata.graph) {
                 newUrl = 'about:blank';
             }
-            var iframeObj = panel.items.getAt(1).getEl();
+            var iframeObj = panel.items.getAt(0).getEl();
             if(iframeObj && iframeObj.dom) {
                 panel.body.mask('Loading...');
                 iframeObj.dom.src = newUrl;

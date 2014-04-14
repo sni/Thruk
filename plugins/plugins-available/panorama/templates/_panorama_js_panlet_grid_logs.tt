@@ -5,13 +5,13 @@
     height: 200,
     width:  800,
     //maximizable: true, // does not work stateful
+    hideSettingsForm: ['url'],
     initComponent: function() {
         this.callParent();
         this.xdata.url      = 'panorama.cgi?task=show_logs';
         this.xdata.pattern  = '';
         this.xdata.exclude  = '';
         this.xdata.time     = '15m';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
 
         this.formUpdatedCallback = function() {
@@ -21,18 +21,18 @@
                 pattern: this.xdata.pattern
             };
         };
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Time',
             xtype:      'textfield',
             name:       'time'
         });
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Include Pattern',
             xtype:      'textfield',
             name:       'pattern',
             emptyText:  'regular search expression'
         });
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'Exclude Pattern',
             xtype:      'textfield',
             name:       'exclude',

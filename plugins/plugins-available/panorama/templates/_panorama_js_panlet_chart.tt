@@ -110,7 +110,7 @@ Ext.define('TP.PanletChart', {
             this.chart.restoreZoom();
         });
 
-        this.down('form').add({
+        this.addGearItems({
             fieldLabel: 'History',
             xtype:      'textfield',
             name:       'nr_dots'

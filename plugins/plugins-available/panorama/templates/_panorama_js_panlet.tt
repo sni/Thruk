@@ -31,58 +31,7 @@
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
 
-        this.gearHandler = function() {
-            [% IF readonly %]return;[% END %]
-            if(this.gearitem.isHidden()) {
-                this.stateful = false;
-                this.header.show();
-                this.items.getAt(0).hide();
-
-                // add current available backends
-                var backendItem = this.gearitem.down('form').items.findBy(function(item, key) { if(item.name == 'backends') { return true; } });
-                var tab         = Ext.getCmp(this.panel_id);
-                TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
-                if(backendItem.store.count() <= 1) { backendItem.hide(); }
-
-                this.gearitem.down('form').getForm().reset();
-                if(this.has_search_button != undefined) {
-                    // make filter show the same value as the main filter button
-                    var form = this.gearitem.down('form').getForm();
-                    form.setValues({filter: this.xdata.filter});
-                }
-                if(this.gearInitCallback) {
-                    this.gearInitCallback(this);
-                }
-                this.origSize = this.getSize();
-                if(this.origSize.width < 450 || this.origSize.height < 250) {
-                    this.setSize(450, 250);
-                }
-                this.gearitem.show();
-                this.applyBorderAndBackground();
-                this.addCls('gearopen');
-                // settings panel is somehow hidden below header
-                if(tab.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
-                    this.items.get(0).body.dom.style.marginTop = '17px';
-                } else {
-                    this.items.get(0).body.dom.style.marginTop = '';
-                }
-            } else {
-                this.stateful = true;
-                if(this.origSize != undefined) {
-                    this.setSize(this.origSize);
-                    delete this.origSize;
-                }
-                this.applyBorderAndBackground();
-                this.items.getAt(0).show();
-                this.gearitem.hide();
-                this.removeCls('gearopen');
-                if(this.xdata.showborder == false) {
-                    TP.timeouts['timeout_'+this.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                        this.getEl().disableShadow();
-                    }, this, []), 1000);
-                }
-            }
-        };
+        this.gearHandler = TP.panletGearHandler;
         [% IF readonly %]
         this.tools = [];
         [% ELSE %]
@@ -119,92 +68,8 @@
         });
         this.applyBorderAndBackground();
         this.callParent();
-        this.gearitem = this.items.getAt(0);
     },
-    items: [{
-        /* Panlet Settings Panel */
-        xtype : 'panel',
-        layout: 'fit',
-        autoShow: false,
-        hidden: true,
-        border: 0,
-        items: [{
-                xtype:           'form',
-                bodyPadding:     2,
-                border:          0,
-                bodyStyle:       'overflow-y: auto;',
-                submitEmptyText: false,
-                defaults: {
-                    anchor: '-12'
-                },
-                items: [{
-                    fieldLabel: 'Title',
-                    xtype:      'textfield',
-                    name:       'title'
-                }, {
-                    xtype:      'tp_slider',
-                    fieldLabel: 'Refresh Rate',
-                    formConf: {
-                        value:      60,
-                        nameS:      'refresh',
-                        nameL:      'refresh_txt'
-                    }
-                }, {
-                    fieldLabel: 'Backends / Sites',
-                    xtype:      'combobox',
-                    emptyText : 'inherited from dashboard',
-                    name:       'backends',
-                    multiSelect: true,
-                    queryMode:  'local',
-                    valueField: 'name',
-                    displayField: 'value',
-                    editable:   false,
-                    triggerAction: 'all',
-                    store:      { fields: ['name', 'value'], data: [] },
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
-                        }
-                    }
-                }]
-        }],
-        buttonAlign: 'center',
-        fbar: [/* panlet setting cancel button */
-               { xtype:  'button',
-                 text:   'cancel',
-                 handler: function() { this.up('window').gearHandler() }
-               },
-               /* panlet setting save button */
-               { xtype : 'button',
-                 text:   'save',
-                 handler: function() {
-                    var win      = this.up('window');
-                    win.stateful = true;
-                    var form     = win.gearitem.down('form').getForm();
-                    if(form.isValid()) {
-                        if(win.origSize != undefined) {
-                            win.setSize(win.origSize);
-                            delete win.origSize;
-                        }
-                        win.removeCls('gearopen');
-                        win.gearitem.hide();
-                        win.xdata = TP.storeFormToData(form, win.xdata);
-                        win.applyBorderAndBackground();
-                        win.setTitle(win.xdata.title);
-                        win.setFormDefaults();
-                        win.startTimeouts();
-                        win.saveState();
-                        win.manualRefresh();
-                        if(win.xdata.showborder == false) {
-                            TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                                win.getEl().disableShadow();
-                            }, win, []), 1000);
-                        }
-                    }
-                 }
-               }
-        ]
-    }],
+    items:      [],
     html:       '',
     onEsc:      function() { return false; },
     startTimeouts: function() {
@@ -298,7 +163,6 @@
                 Ext.Msg.prompt('Change Title', '', function(btn, text) {
                     if(btn == 'ok') {
                         This.setTitle(text);
-                        This.setFormDefaults();
                         This.saveState();
                     }
                 }, undefined, undefined, This.title);
@@ -311,9 +175,6 @@
             div.on("mouseover", function() { This.showHeader(global); });
         },
         afterrender: function(This, eOpts) {
-            /* set initial form values */
-            this.setFormDefaults();
-
             /* start refresh interval */
             this.startTimeouts();
 
@@ -354,6 +215,7 @@
         return null;
     },
     showHeader: function(global) {
+        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
         if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
@@ -373,7 +235,7 @@
         }
     },
     hideHeader: function(global) {
-        if((this.alwaysBorderless || global.xdata.autohideheader) && this.xdata.showborder != true && this.gearitem.isHidden()) {
+        if((this.alwaysBorderless || global.xdata.autohideheader) && this.xdata.showborder != true && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
@@ -385,7 +247,7 @@
     },
     applyBorderAndBackground: function() {
         this.overCls = 'autohideheaderover';
-        if((this.alwaysBorderless || this.xdata.showborder == false) && this.gearitem.isHidden()) {
+        if((this.alwaysBorderless || this.xdata.showborder == false) && this.gearitem == undefined) {
             this.cls     = 'autohideheader';
             this.bodyCls = 'autohideheader';
             this.shadow  = false;
@@ -421,5 +283,173 @@
         if(this.xdata.showborder == true) {
             this.header.show();
         }
+    },
+    /* add item to settings form */
+    addGearItems: function(items) {
+        var panel = this;
+        if(!panel.gearItemsExtra) {
+            panel.gearItemsExtra = [];
+        }
+        if(Ext.isArray(items)) {
+            Ext.each(items, function(i) {
+                panel.gearItemsExtra.push(i);
+            });
+        } else {
+            panel.gearItemsExtra.push(items);
+        }
     }
 });
+
+/* creates the panlets settings panel */
+Ext.define('TP.PanletGearItem', {
+    extend: 'Ext.panel.Panel',
+
+    layout: 'fit',
+    border: 0,
+    listeners: {
+        afterrender: function(This, eOpts) {
+            var panel = this.up('window');
+            var tab   = Ext.getCmp(panel.panel_id);
+            // settings panel is somehow hidden below header
+            if(tab.xdata.autohideheader || panel.alwaysBorderless || panel.xdata.showborder == false) {
+                This.body.dom.style.marginTop = '17px';
+            } else {
+                This.body.dom.style.marginTop = '';
+            }
+            window.setTimeout(function() {
+                panel.header.show();
+                panel.showHeader();
+            }, 100);
+        }
+    },
+    items: [{
+            xtype:           'form',
+            bodyPadding:     2,
+            border:          0,
+            bodyStyle:       'overflow-y: auto;',
+            submitEmptyText: false,
+            defaults: {
+                anchor: '-12'
+            },
+            items: [{
+                fieldLabel: 'Title',
+                xtype:      'textfield',
+                name:       'title'
+            }, {
+                xtype:      'tp_slider',
+                fieldLabel: 'Refresh Rate',
+                formConf: {
+                    value:      60,
+                    nameS:      'refresh',
+                    nameL:      'refresh_txt'
+                }
+            }, {
+                fieldLabel: 'Backends / Sites',
+                xtype:      'combobox',
+                emptyText : 'inherited from dashboard',
+                name:       'backends',
+                multiSelect: true,
+                queryMode:  'local',
+                valueField: 'name',
+                displayField: 'value',
+                editable:   false,
+                triggerAction: 'all',
+                store:      { fields: ['name', 'value'], data: [] },
+                listConfig : {
+                    getInnerTpl: function(displayField) {
+                        return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+                    }
+                }
+            }]
+    }],
+    buttonAlign: 'center',
+    fbar: [/* panlet setting cancel button */
+           { xtype:  'button',
+             text:   'cancel',
+             handler: function() { this.up('window').gearHandler() }
+           },
+           /* panlet setting save button */
+           { xtype : 'button',
+             text:   'save',
+             handler: function() {
+                var win      = this.up('window');
+                win.stateful = true;
+                var form     = win.gearitem.down('form').getForm();
+                if(form.isValid()) {
+                    win.xdata = TP.storeFormToData(form, win.xdata);
+                    win.setTitle(win.xdata.title);
+                    win.startTimeouts();
+                    win.saveState();
+                    win.manualRefresh();
+                    if(win.xdata.showborder == false) {
+                        TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                            win.getEl().disableShadow();
+                        }, win, []), 1000);
+                    }
+                    win.gearHandler();
+                }
+             }
+           }
+    ]
+});
+
+/* called when user clicks on the gear icon in panlet header */
+TP.panletGearHandler = function() {
+    [% IF readonly %]return;[% END %]
+    var tab = Ext.getCmp(this.panel_id);
+    if(this.gearitem == undefined) {
+        this.add(Ext.create('TP.PanletGearItem', {}));
+        this.gearitem = this.items.getAt(this.items.length-1);
+        if(this.gearItemsExtra) {
+            this.gearitem.down('form').add(this.gearItemsExtra);
+        }
+        if(this.hideSettingsForm) {
+            TP.hideFormElements(this.gearitem.down('form').getForm(), this.hideSettingsForm);
+        }
+
+        /* set initial form values */
+        this.setFormDefaults();
+        this.stateful = false;
+        this.items.getAt(0).hide();
+
+        // add current available backends
+        var backendItem = TP.getFormField(this.gearitem.down('form'), 'backends');
+        TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
+        if(backendItem.store.count() <= 1) { backendItem.hide(); }
+
+        this.gearitem.down('form').getForm().reset();
+        if(this.has_search_button != undefined) {
+            // make filter show the same value as the main filter button
+            var form = this.gearitem.down('form').getForm();
+            form.setValues({filter: this.xdata.filter});
+        }
+        if(this.gearInitCallback) {
+            this.gearInitCallback(this);
+        }
+        this.origSize = this.getSize();
+        if(this.origSize.width < 450 || this.origSize.height < 250) {
+            this.setSize(450, 250);
+        }
+        this.applyBorderAndBackground();
+        this.addCls('gearopen');
+        this.showHeader(tab);
+    } else {
+        this.remove(this.gearitem);
+        this.gearitem.destroy();
+        this.removeCls('gearopen');
+        if(this.xdata.showborder == false) {
+            TP.timeouts['timeout_'+this.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
+                this.getEl().disableShadow();
+            }, this, []), 1000);
+        }
+        delete this.gearitem;
+        if(this.origSize != undefined) {
+            this.setSize(this.origSize);
+            delete this.origSize;
+        }
+        this.stateful = true;
+        this.applyBorderAndBackground();
+        this.items.getAt(0).show();
+        this.hideHeader(tab);
+    }
+}
