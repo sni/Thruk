@@ -36,6 +36,10 @@ Ext.define('TP.DashboardManagementWindow', {
                     e.record.commit();
                 }
             },
+            destroy: function(This, eOpts) {
+                delete TP.dashboardsSettingWindow;
+                delete TP.dashboardsSettingGrid;
+            },
             close: function(This, eOpts) {
                 delete TP.dashboardsSettingWindow;
                 delete TP.dashboardsSettingGrid;

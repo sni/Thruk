@@ -1220,8 +1220,7 @@ sub _task_dashboard_list {
             my $d = $self->_load_dashboard($c, $1);
             if($d) {
                 if($type eq 'all') {
-                    # pass all except our own
-                    next if $d->{'user'} eq $c->stash->{'remote_user'};
+                    # just show all
                 } elsif($type eq 'public') {
                     next if  $d->{'user'} eq $c->stash->{'remote_user'};
                     next if !$d->{'public'};
@@ -1250,7 +1249,11 @@ sub _task_dashboard_list {
             { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
             { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
             { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
-            { 'header' => 'User',        width => 120, dataIndex => 'user',         align => 'center', hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false },
+            { 'header' => 'User',        width => 120, dataIndex => 'user',         align => 'center',
+                                         editor => $c->stash->{'is_admin'} ? {} : undef,
+                                         hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false,
+                                         tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
+            },
             { 'header' => 'Public',      width => 60,  dataIndex => 'public',       align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
             { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
             { 'header' => 'Actions',     width => 100,
@@ -1298,6 +1301,9 @@ sub _task_dashboard_update {
             }
             elsif($field eq 'name') {
                 $dashboard->{'tab'}->{'xdata'}->{'title'} = $value;
+            }
+            elsif($field eq 'user' and $c->stash->{'is_admin'}) {
+                $extra_settings->{$field} = $value;
             }
             $self->_save_dashboard($c, $dashboard, $extra_settings);
         }
