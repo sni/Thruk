@@ -93,7 +93,7 @@
             }
             [% END %]
             TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
-                This.syncShadow();
+                if(This.el) { This.syncShadow(); }
             }, 250);
         },
         show: function( This, eOpts ) {
@@ -133,7 +133,7 @@
         else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
         var This = this;
         TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
-            This.syncShadow();
+            if(This.el) { This.syncShadow(); }
         }, 500)
     },
     getState: function() {
