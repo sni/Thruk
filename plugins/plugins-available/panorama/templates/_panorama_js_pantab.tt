@@ -143,9 +143,9 @@
                 TP.timeouts['timeout_' + this.window_ids[nr] + '_render'] = window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
 
                 if(autoshow) {
-                   TP.initial_create_delay_active   = TP.initial_create_delay_active   + 200;
+                   TP.initial_create_delay_active   = TP.initial_create_delay_active   + 50;
                 } else {
-                   TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 50;
+                   TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 30;
                 }
             };
             Ext.apply(this.xdata, state.xdata);

@@ -120,7 +120,7 @@ Ext.define('TP.TabBar', {
                             }, {
                                 text:   'Hosts Graph',
                                 icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                                handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
+                                handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartHosts'}, -8, -8) }
                             }, '-' ,{
                                 text:   'Service Status',
                                 icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
@@ -132,7 +132,7 @@ Ext.define('TP.TabBar', {
                             }, {
                                 text:   'Services Graph',
                                 icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                                handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
+                                handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartServices'}, -8, -8) }
                             }, '-', {
                                 text:   'Custom Filter',
                                 icon:   '[% url_prefix %]plugins/panorama/images/page_find.png',
@@ -362,7 +362,7 @@ Ext.define('TP.TabBar', {
                 this.setActiveTab(state.activeTab);
                 Ext.apply(this, state);
             }
-            TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_inactive);
+            TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
         } catch(e) {
             debug(e);
             if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
@@ -370,7 +370,7 @@ Ext.define('TP.TabBar', {
             }
         }
         if(TP.initMask) {
-            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_inactive);
+            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(Ext.bind(TP.initMask.destroy, TP.initMask, []), TP.initial_create_delay_active);
         }
     },
     items: [{
