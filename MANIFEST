@@ -154,7 +154,7 @@ plugins/plugins-available/business_process/preview.png
 plugins/plugins-available/business_process/root/bp-ie-fixes.js
 plugins/plugins-available/business_process/root/bp.css
 plugins/plugins-available/business_process/root/bp.js
-plugins/plugins-available/business_process/root/dagre-0.3.8/dagre.min.js
+plugins/plugins-available/business_process/root/dagre-0.4.6/dagre.min.js
 plugins/plugins-available/business_process/root/images/lock.png
 plugins/plugins-available/business_process/root/images/testmode_critical.png
 plugins/plugins-available/business_process/root/images/testmode_ok.png
