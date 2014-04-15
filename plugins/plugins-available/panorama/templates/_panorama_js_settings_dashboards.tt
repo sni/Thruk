@@ -101,6 +101,13 @@ Ext.define('TP.DashboardManagementWindow', {
         });
         this.items.get(0).add(this.grid_all);
         [% END %]
+
+        /* import / export */
+        var tabpan = Ext.getCmp('tabpan');
+        var tab    = tabpan.getActiveTab();
+        this.exportTab = TP.getExportTab(function() { tab_win_settings.close() });
+        this.items.get(0).add(this.exportTab);
+
         this.items.get(0).setActiveTab(0);
     },
     items: [{
@@ -173,4 +180,3 @@ TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
     TP.dashboardsSettingWindow = win;
 }
-

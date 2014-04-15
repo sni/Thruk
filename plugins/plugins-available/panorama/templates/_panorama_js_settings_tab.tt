@@ -12,16 +12,7 @@
     data : []
 });
 
-/* show settings window */
-TP.tabSettingsWindow = function() {
-    var tabpan = Ext.getCmp('tabpan');
-    var tab    = tabpan.getActiveTab();
-
-    /* stop rotation */
-    TP.stopRotatingTabs();
-
-    backgrounds.load();
-
+TP.getExportTab = function(tab, close_handler) {
     var exportItems = [{
         xtype:      'fieldcontainer',
         fieldLabel: 'Export',
@@ -78,7 +69,7 @@ TP.tabSettingsWindow = function() {
                     fn:         function(btn, text, window){
                         if(btn == 'ok') {
                             if(TP.importAllTabs(text)) {
-                                win_settings.close();
+                                if(close_handler) { close_handler(); }
                             }
                         }
                     }
@@ -94,7 +85,7 @@ TP.tabSettingsWindow = function() {
             handler: function() {
                 Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
-                        win_settings.close();
+                        if(close_handler) { close_handler(); }
                         Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
                         window.location = 'panorama.cgi?clean=1';
                     }
@@ -120,7 +111,21 @@ TP.tabSettingsWindow = function() {
             }]
         }]
     };
+    return(exportTab);
+}
 
+
+/* show settings window */
+TP.tabSettingsWindow = function() {
+    var tabpan = Ext.getCmp('tabpan');
+    var tab    = tabpan.getActiveTab();
+
+    /* stop rotation */
+    TP.stopRotatingTabs();
+
+    backgrounds.load();
+
+    var exportTab = TP.getExportTab(tab, function() { tab_win_settings.close() });
 
     var generalItems = [{
         xtype:   'panel',
