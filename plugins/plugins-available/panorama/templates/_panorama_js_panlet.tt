@@ -248,7 +248,7 @@
             this.shadow  = false;
             if(this.rendered) {
                 this.addCls('autohideheader');
-                this.body.addCls('autohideheader');
+                if(this.body) { this.body.addCls('autohideheader'); }
                 this.getEl().disableShadow();
                 this.getEl().setStyle('background-color', 'transparent');
                 if(this.chart) {
@@ -448,6 +448,7 @@ TP.panletGearHandler = function() {
     } else {
         this.remove(this.gearitem);
         this.gearitem.destroy();
+        delete this.gearItemsExtra;
         this.removeCls('gearopen');
         this.syncShadowTimeout();
         delete this.gearitem;
