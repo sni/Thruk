@@ -150,6 +150,7 @@ sub process {
                 delete $sessioncache->{$auth};
                 return $loginurl."?invalid&".$path."\n";
             }
+            utime($now, $now, $sessionfile);
         }
 
         # clean old session cache every hour
