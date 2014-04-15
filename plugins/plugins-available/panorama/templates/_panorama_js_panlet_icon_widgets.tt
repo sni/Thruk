@@ -129,11 +129,19 @@
             this.saveState();
         }
         iconset = this.xdata.layout.iconset;
-        if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
-        else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
-        else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
-        else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
-        else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+        if(this.host) {
+            if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/up.png');          }
+            else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/down.png');        }
+            else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/unreachable.png'); }
+            else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');     }
+            else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');     }
+        } else {
+            if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
+            else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
+            else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
+            else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
+            else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+        }
         var This = this;
         TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
             if(This.el) { This.syncShadow(); }

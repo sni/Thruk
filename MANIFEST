@@ -1030,9 +1030,12 @@ root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
 root/thruk/usercontent/images/status/default/critical.png
+root/thruk/usercontent/images/status/default/down.png
 root/thruk/usercontent/images/status/default/ok.png
 root/thruk/usercontent/images/status/default/pending.png
 root/thruk/usercontent/images/status/default/unknown.png
+root/thruk/usercontent/images/status/default/unreachable.png
+root/thruk/usercontent/images/status/default/up.png
 root/thruk/usercontent/images/status/default/warning.png
 root/thruk/usercontent/images/world.png
 script/append.make
