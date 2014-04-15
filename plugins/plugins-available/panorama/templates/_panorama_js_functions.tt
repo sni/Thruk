@@ -537,9 +537,11 @@ var TP = {
         if(decoded.tabpan) {
             /* old export with all tabs*/
             // REMOVE AFTER: 01.01.2016
+            cp.saveChanges(false);
             cp.loadData(decoded);
             cp.saveChanges(false);
             Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...');
+            TP.initialized = false; // prevents onUnload saving over our imported tabs
             TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
         } else {
             /* new single tab export */
@@ -1074,9 +1076,9 @@ var TP = {
             callback: function(options, success, response) {
                 if(!success) {
                     if(response.status == 0) {
-                        TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        TP.Msg.msg("fail_message~~adding dashboard failed");
                     } else {
-                        TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        TP.Msg.msg("fail_message~~adding dashboard failed: "+response.status+' - '+response.statusText);
                     }
                 } else {
                     if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
@@ -1108,9 +1110,9 @@ var TP = {
             callback: function(options, success, response) {
                 if(!success) {
                     if(response.status == 0) {
-                        TP.Msg.msg("fail_message~~adding new dashboard failed");
+                        TP.Msg.msg("fail_message~~adding dashboard failed");
                     } else {
-                        TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                        TP.Msg.msg("fail_message~~adding dashboard failed: "+response.status+' - '+response.statusText);
                     }
                 } else {
                     var data = TP.getResponse(undefined, response);
@@ -1121,7 +1123,7 @@ var TP = {
                     if(cp.state[nr]) {
                         tab.applyXdata(cp.state[nr].xdata);
                     } else {
-                        TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                        TP.Msg.msg("fail_message~~adding dashboard failed, no such dashboard");
                     }
                 }
             }

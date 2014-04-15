@@ -12,7 +12,7 @@
     data : []
 });
 
-TP.getExportTab = function(tab, close_handler) {
+TP.getExportTab = function(options) {
     var exportItems = [{
         xtype:      'fieldcontainer',
         fieldLabel: 'Export',
@@ -25,7 +25,7 @@ TP.getExportTab = function(tab, close_handler) {
                     multiline:  true,
                     width:      600,
                     msg:        'Copy this string and use it for later import:',
-                    value:      '# Thruk Panorama Dashboard Export: '+tab.title+'\n'+encode64(cp.lastdata[tab.id]).match(/.{1,65}/g).join("\n")+"\n# End Export",
+                    value:      '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(cp.lastdata[options.tab.id]).match(/.{1,65}/g).join("\n")+"\n# End Export",
                     buttons:    Ext.MessageBox.OK,
                     icon:       Ext.MessageBox.INFO
                 });
@@ -69,7 +69,7 @@ TP.getExportTab = function(tab, close_handler) {
                     fn:         function(btn, text, window){
                         if(btn == 'ok') {
                             if(TP.importAllTabs(text)) {
-                                if(close_handler) { close_handler(); }
+                                if(options.close_handler) { options.close_handler(); }
                             }
                         }
                     }
@@ -85,7 +85,7 @@ TP.getExportTab = function(tab, close_handler) {
             handler: function() {
                 Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
-                        if(close_handler) { close_handler(); }
+                        if(options.close_handler) { options.close_handler(); }
                         Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
                         window.location = 'panorama.cgi?clean=1';
                     }
@@ -96,6 +96,7 @@ TP.getExportTab = function(tab, close_handler) {
     var exportTab = {
         title : 'Import/Export',
         type  : 'panel',
+        listeners: options.listeners,
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -125,7 +126,7 @@ TP.tabSettingsWindow = function() {
 
     backgrounds.load();
 
-    var exportTab = TP.getExportTab(tab, function() { tab_win_settings.close() });
+    var exportTab = TP.getExportTab({tab: tab, close_handler: function() { tab_win_settings.close() }});
 
     var generalItems = [{
         xtype:   'panel',

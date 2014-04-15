@@ -14,14 +14,27 @@ Ext.define('TP.DashboardManagementWindow', {
         var listeners = {
             activate: function(This, eOpts) {
                 var panel = This.up('panel').up('panel');
-                This.loader.grid  = This;
-                This.loader.xdata = panel.xdata;
-                This.loader.load();
+                // update grid content
+                if(This.loader) {
+                    This.loader.grid  = This;
+                    This.loader.xdata = panel.xdata;
+                    This.loader.load();
+                }
                 TP.dashboardsSettingGrid = This;
                 // reset filter
                 if(TP.dashboardsSettingWindow) {
                     var filterEl = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.length-2);
-                    filterEl.setValue('');
+                    var resetEl  = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.length-1);
+                    if(   (TP.dashboardsSettingGrid.tabConfig && TP.dashboardsSettingGrid.tabConfig.title.match(/Import/))
+                       || (TP.dashboardsSettingGrid.title && TP.dashboardsSettingGrid.title.match(/Import/))
+                       ) {
+                        filterEl.hide();
+                        resetEl.hide();
+                    } else {
+                        filterEl.show();
+                        resetEl.show();
+                        filterEl.setValue('');
+                    }
                 }
             },
             beforeselect: function(This, record, index, eOpts) {
@@ -105,7 +118,7 @@ Ext.define('TP.DashboardManagementWindow', {
         /* import / export */
         var tabpan = Ext.getCmp('tabpan');
         var tab    = tabpan.getActiveTab();
-        this.exportTab = TP.getExportTab(function() { tab_win_settings.close() });
+        this.exportTab = TP.getExportTab({listeners: listeners, tab: tab});
         this.items.get(0).add(this.exportTab);
 
         this.items.get(0).setActiveTab(0);
