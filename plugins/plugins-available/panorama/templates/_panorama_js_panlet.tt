@@ -461,6 +461,7 @@ TP.panletGearHandler = function() {
         this.gearitem.destroy();
         delete this.gearItemsExtra;
         this.removeCls('gearopen');
+        this.removeCls('autohideheaderover');
         delete this.gearitem;
         if(this.origSize != undefined) {
             this.setSize(this.origSize);
