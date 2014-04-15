@@ -266,7 +266,7 @@ sub _stateprovider {
         my $data = Thruk::Utils::get_user_data($c);
         if($task eq 'update') {
             $c->log->debug("panorama: update users data");
-            $data->{'panorama'}->{'state'} = $param;
+            $data->{'panorama'} = { 'state' => $param };
         } else {
             if($value eq 'null') {
                 $c->log->debug("panorama: removed ".$name);
@@ -282,7 +282,9 @@ sub _stateprovider {
     }
     elsif(defined $task and $task eq 'update2') {
         $c->stash->{'json'} = { 'status' => 'ok' };
-        my $newid = delete $param->{'nr'} || '';
+        my $replace = delete $param->{'replace'} || 0;
+        my $newids  = [];
+        my $newid   = delete $param->{'nr'} || '';
         for my $key (keys %{$param}) {
             my $param_data = decode_json($param->{$key});
             if($key eq 'tabpan') {
@@ -303,9 +305,17 @@ sub _stateprovider {
                 if(!$self->_save_dashboard($c, $param_data)) {
                     $c->stash->{'json'} = { 'status' => 'failed' };
                 } else {
-                    $c->stash->{'json'}->{'newid'} = $param_data->{'id'} if $newid;
+                    if($newid) {
+                        $c->stash->{'json'}->{'newid'} = $param_data->{'id'};
+                        push @{$newids}, $param_data->{'id'};
+                    }
                 }
             }
+        }
+        if($replace) {
+            my $data = Thruk::Utils::get_user_data($c);
+            $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} = $newids;
+            Thruk::Utils::store_user_data($c, $data);
         }
     } else {
         $c->stash->{'json'} = { 'status' => 'failed' };

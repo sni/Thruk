@@ -120,13 +120,16 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     /* set state from object */
-    loadData: function(data) {
+    loadData: function(data, save) {
+        if(save == undefined) { save = true; }
         ExtState = {};
         for(var key in data) {
             this.set(key, data[key]);
             ExtState[key] = Ext.JSON.encode(data[key]);
         }
-        this.saveChanges();
+        if(save) {
+            this.saveChanges();
+        }
     },
 
     /* queue save changes */
@@ -136,7 +139,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     /* send changes back to server */
-    saveChanges: function(async) {
+    saveChanges: function(async, extraParams) {
         [% IF readonly %]return;[% END %]
         if(!TP.initialized) { return; }
         if(async == undefined) { async = true; }
@@ -171,6 +174,9 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         if(changed == 0) { return; }
         this.lastdata = data;
         params.task   = 'update2';
+        if(extraParams) {
+            Ext.apply(params, extraParams);
+        }
         var conn      = new Ext.data.Connection();
         conn.request({
             url:    this.url,
