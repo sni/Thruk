@@ -177,7 +177,7 @@
         afterrender: function(This, eOpts) {
             /* start refresh interval */
             this.startTimeouts();
-            this.syncShadowTimeout(100);
+            this.syncShadowTimeout();
         },
         afterlayout: function(This) {
             /* make all border and background work */
@@ -232,6 +232,7 @@
         }
     },
     hideHeader: function(global) {
+        if(global == undefined) { global = Ext.getCmp(this.panel_id); }
         if((this.alwaysBorderless || global.xdata.autohideheader) && this.xdata.showborder != true && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
@@ -460,7 +461,6 @@ TP.panletGearHandler = function() {
         this.gearitem.destroy();
         delete this.gearItemsExtra;
         this.removeCls('gearopen');
-        this.syncShadowTimeout();
         delete this.gearitem;
         if(this.origSize != undefined) {
             this.setSize(this.origSize);
@@ -470,5 +470,6 @@ TP.panletGearHandler = function() {
         this.applyBorderAndBackground();
         this.items.getAt(0).show();
         this.hideHeader(tab);
+        this.syncShadowTimeout();
     }
 }
