@@ -178,7 +178,7 @@ sub read_downtime {
 
     # convert attributes to array
     for my $t (qw/host hostgroup servicegroup/) {
-        next unless $d->{$t};
+        $d->{$t} = [] unless defined $d->{$t};
         $d->{$t} = [split/\s*,\s*/mx,$d->{$t}] unless ref $d->{$t} eq 'ARRAY';
         $d->{$t} = [sort @{$d->{$t}}];
     }
