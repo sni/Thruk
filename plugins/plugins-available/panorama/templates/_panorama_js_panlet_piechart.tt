@@ -108,9 +108,6 @@
                     div.on("mouseout", function()  {
                         TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
                             panel.chart.redraw();
-                            if(panel.xdata && panel.xdata.showborder == false) {
-                                panel.getEl().disableShadow();
-                            }
                         }, panel, []), 1000);
                     });
                     div.on("mouseover", function()  {

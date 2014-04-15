@@ -225,7 +225,9 @@
             style.zIndex   = 20;
             style.opacity  = '0.9';
             if(this.xdata.showborder == false) {
-                this.getEl().enableShadow(true);
+                if(this.getEl().shadow.el) {
+                    this.getEl().shadow.el.removeCls('hidden');
+                }
             }
         }
     },
@@ -236,7 +238,9 @@
             style.opacity  = '';
             style.zIndex   = '';
             if(this.xdata.showborder == false) {
-                this.getEl().disableShadow();
+                if(this.getEl().shadow.el) {
+                    this.getEl().shadow.el.addCls('hidden');
+                }
             }
         }
     },
@@ -249,7 +253,9 @@
             if(this.rendered) {
                 this.addCls('autohideheader');
                 if(this.body) { this.body.addCls('autohideheader'); }
-                this.getEl().disableShadow();
+                if(this.getEl().shadow.el) {
+                    this.getEl().shadow.el.addCls('hidden');
+                }
                 this.getEl().setStyle('background-color', 'transparent');
                 if(this.chart) {
                     this.chart.getEl().setStyle('background-color', 'transparent');
@@ -262,7 +268,9 @@
             if(this.rendered) {
                 this.removeCls('autohideheader');
                 this.body.removeCls('autohideheader');
-                this.getEl().enableShadow();
+                if(this.getEl().shadow.el) {
+                    this.getEl().shadow.el.removeCls('hidden');
+                }
                 this.getEl().setStyle('background-color', '');
                 if(this.chart) {
                     this.chart.getEl().setStyle('background-color', '#FFFFFF');
@@ -302,7 +310,9 @@
         if(delay == undefined) { delay = 100; }
         if(win.xdata.showborder == false) {
             TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                win.getEl().disableShadow();
+                if(win.getEl().shadow.el) {
+                    win.getEl().shadow.el.addCls('hidden');
+                }
             }, win, []), delay);
         }
     }

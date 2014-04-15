@@ -441,3 +441,7 @@ TABLE.ministatus TH {
     font-size: smaller;
     color: #6F6F6F;
 }
+
+.hidden {
+  visibility: hidden;
+}
