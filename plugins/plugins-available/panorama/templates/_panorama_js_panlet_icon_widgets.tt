@@ -10,6 +10,7 @@
     floating:  true,
     cls: 'iconWidget',
     initComponent: function() {
+        this.callParent();
         this.stateId = this.id;
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -21,7 +22,12 @@
         this.xdata.general  = {};
         this.xdata.layout   = { iconset: 'default' };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
-        this.callParent();
+        this.autoEl = {
+            tag:     'a',
+            href:    '#',
+            target:  '',
+            onclick: "TP.iconClickHandler('"+this.id+"'); return false;"
+        };
     },
     listeners: {
         afterrender: function(This, eOpts) {
@@ -29,6 +35,7 @@
             This.saveState();
             /* open edit box on double or right click */
             this.el.on("dblclick", function(e) {
+                window.clearTimeout(TP.timeouts['click'+This.id]);
                 TP.iconShowEditDialog(This);
             });
             /* right click context menu on icon widgets */
@@ -156,8 +163,31 @@
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
-            this.setPosition([Number(state.xdata.layout.x), Number(state.xdata.layout.y)]);
-            this.refreshHandler();
+            this.applyXdata(state.xdata);
+        }
+    },
+    applyXdata: function(xdata) {
+        if(xdata == undefined) { xdata = this.xdata; }
+
+        // position
+        if(xdata.layout) {
+            this.setPosition([Number(xdata.layout.x), Number(xdata.layout.y)]);
+        }
+
+        // recalculate state
+        this.refreshHandler();
+
+        // add link
+        if(xdata.link && xdata.link.link) {
+            this.addCls('clickable');
+            this.removeCls('notclickable');
+            if(this.el) { this.el.dom.href=xdata.link.link; }
+            this.autoEl.href=xdata.link.link;
+        } else {
+            this.removeCls('clickable');
+            this.addCls('notclickable');
+            if(this.el) { this.el.dom.href='#'; }
+            this.autoEl.href='#';
         }
     }
 });
@@ -186,7 +216,7 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: 130 },
+                    defaults:      { anchor: '-12', labelWidth: 132 },
                     items:           panel.getGeneralItems()
             }]
         }]
@@ -206,7 +236,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 130 },
+                defaults:      { anchor: '-12', labelWidth: 132 },
                 items: [{
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
@@ -229,12 +259,70 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
+    /* Link Settings Tab */
+    var linkTab = {
+        title: 'Link',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 132 },
+                items: [{
+                    fieldLabel: 'Hyperlink',
+                    xtype:      'textfield',
+                    name:       'link'
+                }, {
+                    fieldLabel: 'Link another Dashboard',
+                    xtype:      'fieldcontainer',
+                    items:      [{
+                        xtype:      'button',
+                        text:       'Choose',
+                        icon:       '[% url_prefix %]plugins/panorama/images/world.png',
+                        menu:       {
+                            items: [{
+                                text: 'My Dashboards',
+                                icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                                menu: [{
+                                    text:    'Loading...',
+                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    disabled: true
+                                }]
+                            }, {
+                                text: 'Public Dashboards',
+                                icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                                menu: [{
+                                    text:    'Loading...',
+                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    disabled: true
+                                }]
+                            }],
+                            listeners: {
+                                afterrender: function(This, eOpts) {
+                                    TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
+                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { debug(val)}, true);
+                                }
+                            }
+                        }
+                    }]
+                }]
+            }]
+        }]
+    };
+
     var tabPanel = new Ext.TabPanel({
         activeTab         : 0,
         enableTabScroll   : true,
         items             : [
             generalTab,
-            layoutTab
+            layoutTab,
+            linkTab
         ]
     });
     var settingsWindow = new Ext.Window({
@@ -264,12 +352,14 @@ TP.iconShowEditDialog = function(panel) {
                     panel.stateful = true;
                     panel.xdata.general = settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues();
                     panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
+                    panel.xdata.link    = settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues();
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
                     TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
                     delete panel.settingsWindow;
                     settingsWindow.destroy();
                     panel.firstRun = false;
+                    panel.applyXdata();
                  }
                }
         ],
@@ -291,6 +381,7 @@ TP.iconShowEditDialog = function(panel) {
 
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
     settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
+    settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues(panel.xdata.link);
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -656,7 +747,7 @@ Ext.define('TP.FilterStatusIcon', {
                 fieldLabel: 'Filter',
                 name:       'filter',
                 ftype:      'service',
-                labelWidth: 130,
+                labelWidth: 132,
                 panel:      panel
             }), {
                 fieldLabel: 'Include Hosts',
@@ -772,3 +863,32 @@ Ext.define('TP.SiteStatusIcon', {
         return(details);
     }
 });
+
+/* delay link opening to allow double click menu */
+TP.iconClickHandler = function(id) {
+    window.clearTimeout(TP.timeouts['click'+id]);
+    TP.timeouts['click'+id] = window.setTimeout(function() {
+        TP.iconClickHandlerDo(id);
+    }, 500);
+}
+/* actually open the clicked link */
+TP.iconClickHandlerDo = function(id) {
+    var panel = Ext.getCmp(id);
+    if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
+        return;
+    }
+    var link  = panel.xdata.link.link;
+    var matches = link.match(/dashboard:\/\/(\d+)$/);
+    if(matches && matches[1]) {
+        // is that tab already open?
+        var tab_id = "tabpan-tab_"+matches[1];
+        var tab    = Ext.getCmp(tab_id);
+        if(tab) {
+            Ext.getCmp('tabpan').setActiveTab(tab);
+        } else {
+            TP.add_pantab(tab_id);
+        }
+    } else {
+        window.location = link;
+    }
+};

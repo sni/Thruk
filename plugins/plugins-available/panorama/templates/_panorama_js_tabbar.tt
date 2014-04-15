@@ -268,8 +268,8 @@ Ext.define('TP.TabBar', {
                     beforehide: function(menu, eOpts) { menu.destroy(); }
                 }
             }).showBy(This);
-            TP.load_dashboard_menu_items(menu.items.get(2).menu, 'panorama.cgi?task=dashboard_list&list=my');
-            TP.load_dashboard_menu_items(menu.items.get(3).menu, 'panorama.cgi?task=dashboard_list&list=public');
+            TP.load_dashboard_menu_items(menu.items.get(2).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(3).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
         });
 
         this.addListener('afterrender', function(This, eOpts) {
@@ -443,7 +443,7 @@ Ext.define('TP.TabBar', {
 });
 
 
-TP.load_dashboard_menu_items = function(menu, url) {
+TP.load_dashboard_menu_items = function(menu, url, handler, all) {
     Ext.Ajax.request({
         url:      url,
         method:  'POST',
@@ -460,12 +460,12 @@ TP.load_dashboard_menu_items = function(menu, url) {
                 menu.removeAll();
                 var found = 0;
                 for(var x=0; x<data.length; x++) {
-                    if(!Ext.getCmp(data[x].id)) {
+                    if(all || !Ext.getCmp(data[x].id)) {
                         found++;
                         menu.add({text:    data[x].name,
                                   val:     data[x].id,
                                   icon:   '[% url_prefix %]plugins/panorama/images/table_go.png',
-                                  handler: function() { TP.add_pantab(this.val) }
+                                  handler: function() { handler(this.val); }
                                 }
                         );
                     }
