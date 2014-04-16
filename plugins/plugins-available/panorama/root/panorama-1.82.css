@@ -451,3 +451,11 @@ TABLE.ministatus TH {
 .hidden {
   visibility: hidden;
 }
+
+/* disabled add button is slightly pink otherwise */
+.x-tab-top-disabled {
+  background: -moz-linear-gradient(center top , #DDDDDD, #DDDDDD) repeat scroll 0 0 #DDDDDD;
+}
+.x-tab.x-tab-top-disabled, .x-tab.x-tab-default-disabled {
+    background-color: #CEC7C7;
+}

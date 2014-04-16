@@ -1661,7 +1661,7 @@ sub _merge_dashboard_into_hash {
         elsif($key eq 'tab') {
             # add some values to the tab
             for my $k (qw/user public readonly/) {
-                $dashboard->{$k} = $dashboard->{$k};
+                $dashboard->{'tab'}->{$k} = $dashboard->{$k};
             }
             $data->{$id} = encode_json($dashboard->{$key});
         }

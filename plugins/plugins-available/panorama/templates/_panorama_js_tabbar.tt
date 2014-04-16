@@ -100,6 +100,7 @@ Ext.define('TP.TabBar', {
             title:    'add new panel and widgets',
             closable: false,
             minWidth: 70,
+            id:       'tabbar_addbtn',
             iconCls:  'gear-tab',
             tooltip:  'add panlets',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
@@ -342,6 +343,9 @@ Ext.define('TP.TabBar', {
             TP.initial_create_delay_active   = 0;    // initial delay of placing panlets (will be incremented in pantabs applyState)
             TP.initial_create_delay_inactive = 1000; // placement of inactive panlet starts delayed
             if(state) {
+                if(TP.initial_active_tab == undefined && get_hash(1)) {
+                    TP.initial_active_tab = "tabpan-tab_"+get_hash(1);
+                }
                 if(state.activeTab && TP.initial_active_tab == undefined) {
                     TP.initial_active_tab = state.activeTab;
                 }
@@ -360,6 +364,13 @@ Ext.define('TP.TabBar', {
                         TP.add_pantab(state.open_tabs[nr]);
                     };
                 }
+
+                /* open tab from url */
+                if(!Ext.getCmp(TP.initial_active_tab)) {
+                    TP.add_pantab(TP.initial_active_tab);
+                    state.activeTab = TP.initial_active_tab;
+                }
+
                 this.setActiveTab(state.activeTab);
                 Ext.apply(this, state);
             }
@@ -377,7 +388,7 @@ Ext.define('TP.TabBar', {
         }
     },
     items: [{
-        title: '',
+        title:   '',
         closable: false,
         iconCls: 'new-tab',
         tabConfig: {

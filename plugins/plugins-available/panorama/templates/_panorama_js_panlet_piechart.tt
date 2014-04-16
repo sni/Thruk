@@ -133,13 +133,15 @@
     },
     setShowLabel: function() {
         var panel = this;
-        Ext.each(this.chart.getEl().query('text'), function(el) {
-            if(panel.xdata.showlabel == false) {
-                el.style.fill = 'transparent';
-            } else {
-                el.style.fill = '';
-            }
-        });
+        if(this.chart.getEl()) {
+            Ext.each(this.chart.getEl().query('text'), function(el) {
+                if(panel.xdata.showlabel == false) {
+                    el.style.fill = 'transparent';
+                } else {
+                    el.style.fill = '';
+                }
+            });
+        }
     },
     setGearItems: function() {
         var panel = this;

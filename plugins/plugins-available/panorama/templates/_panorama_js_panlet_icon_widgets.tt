@@ -2,15 +2,11 @@
     extend: 'Ext.Img',
 
     src: '../usercontent/images/status/default/pending.png',
-    [% UNLESS readonly %]
-    stateful:  true,
-    stateEvents: ['reconfigure', 'afterlayout', 'move'],
-    draggable: true,
     width: 16,
     height: 16,
-    [% END %]
     floating:  true,
     cls: 'iconWidget',
+    stateful: true,
     initComponent: function() {
         this.callParent();
         this.stateId = this.id;
@@ -19,6 +15,13 @@
         } else {
             this.xdata = TP.clone(this.xdata);
         }
+        var tab     = Ext.getCmp(this.panel_id);
+        this.locked = tab.xdata.locked;
+        [% IF readonly %]
+        this.locked = true;
+        [% END %]
+        this.redraw = false;
+
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
         this.xdata.general  = {};
@@ -30,6 +33,11 @@
             target:  '',
             onclick: "return(TP.iconClickHandler('"+this.id+"'));"
         };
+
+        if(!this.locked) {
+            this.stateEvents = ['reconfigure', 'afterlayout', 'move'];
+            this.draggable   = true;
+        }
     },
     listeners: {
         afterrender: function(This, eOpts) {
@@ -37,8 +45,10 @@
             This.saveState();
             /* open edit box on double or right click */
             this.el.on("dblclick", function(e) {
-                window.clearTimeout(TP.timeouts['click'+This.id]);
-                TP.iconShowEditDialog(This);
+                if(!This.locked) {
+                    window.clearTimeout(TP.timeouts['click'+This.id]);
+                    TP.iconShowEditDialog(This);
+                }
             });
             this.el.down('img').on("load", function (evt, ele, opts) {
                 This.setSize(This.el.down('img').getSize());
@@ -52,7 +62,8 @@
                     items: [{
                         text:   'Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
-                        handler: function() { TP.iconShowEditDialog(This) }
+                        handler: function() { TP.iconShowEditDialog(This) },
+                        disabled: This.locked
                     }, {
                         text:   'Refresh',
                         icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
@@ -60,10 +71,12 @@
                     },'-',{
                         text:   'Clone',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
-                        handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) }
+                        handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) },
+                        disabled: This.locked
                     },{
                         text:   'Remove',
                         icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
+                        disabled: This.locked,
                         handler: function(me, eOpts) {
                             var menu = me.parentMenu;
                             var i = menu.items.findIndexBy(function(e) { if(e.text == 'Remove') {return true;} });
@@ -96,13 +109,15 @@
                     }
                 }).showBy(This);
             });
-            if(this.xdata.general[this.iconType] == '') {
-                this.firstRun = true;
-                TP.suppressIconTip = true;
-                TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
-                    // show dialog delayed, so the panel has a position already
-                    TP.iconShowEditDialog(This);
-                }, 10);
+            if(!this.locked) {
+                if(this.xdata.general[this.iconType] == '') {
+                    this.firstRun = true;
+                    TP.suppressIconTip = true;
+                    TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
+                        // show dialog delayed, so the panel has a position already
+                        TP.iconShowEditDialog(This);
+                    }, 10);
+                }
             }
             [% END %]
             TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
@@ -112,19 +127,26 @@
         show: function( This, eOpts ) {
             if(This.dd && !This.dd_listener_added) {
                 This.dd.addListener('dragstart', function(This, eOpts) {
+                    window.clearTimeout(TP.timeouts['click'+This.el.id]);
                     TP.suppressIconTip = true;
                 });
                 This.dd.addListener('dragend', function(This, eOpts) {
+                    /* prevents opening link after draging */
+                    window.setTimeout(function() {
+                        window.clearTimeout(TP.timeouts['click'+This.el.id]);
+                    }, 100);
                     TP.suppressIconTip = false;
                 });
                 This.dd_listener_added = true;
             }
         },
         destroy: function( This, eOpts ) {
-            /* remove window from panels window ids */
-            TP.removeWindowFromPanels(this.id);
-            /* clear state information */
-            cp.clear(this.id);
+            if(!this.redraw) {
+                /* remove window from panels window ids */
+                TP.removeWindowFromPanels(this.id);
+                /* clear state information */
+                cp.clear(this.id);
+            }
         },
         move: function(This, x, y, eOpts) {
             this.xdata.layout.x = x;
@@ -194,6 +216,16 @@
             this.addCls('notclickable');
             if(this.el) { this.el.dom.href='#'; }
             this.autoEl.href='#';
+        }
+    },
+    /* enable / disable editing of this panlet */
+    setLock: function(val) {
+        var tab = Ext.getCmp(this.panel_id);
+        if(this.locked != val) {
+            this.saveState();
+            this.redraw = true;
+            this.destroy();
+            TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
         }
     }
 });
@@ -424,7 +456,7 @@ Ext.onReady(function() {
         title:    'Details:',
         itemId:   'iconTip',
         target:    Ext.getBody(),
-        delegate: 'IMG.iconWidget', // the cell class in which the tooltip has to be triggered
+        delegate: 'A.iconWidget', // the cell class in which the tooltip has to be triggered
         showDelay: 50,
         dismissDelay: 0,
         width:     400,
@@ -467,7 +499,7 @@ Ext.onReady(function() {
 
     Ext.getBody().on('mouseover', function(e,t,a) {
         tipRenderer(e,t,a);
-    }, null, {delegate:'IMG.iconWidget'});
+    }, null, {delegate:'A.iconWidget'});
 });
 
 

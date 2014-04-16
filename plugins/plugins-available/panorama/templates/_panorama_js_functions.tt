@@ -91,6 +91,18 @@ var TP = {
         /* move new-tab button at the end */
         tabpan.getTabBar().move(size-1, size);
 
+        /* make tab title editable */
+        [% UNLESS readonly %]
+        var tabhead = tabpan.getTabBar().items.getAt(size-1);
+        if(tabhead.rendered == false) {
+            tabhead.addListener('afterrender', function(This, eOpts) {
+                TP.addDblClickRename(This.getEl(), tabhead, id);
+            });
+        } else {
+            TP.addDblClickRename(tabhead.getEl(), tabhead, id);
+        }
+        [% END %]
+
         /* replace existing tab with current one */
         if(replace_id) {
             var replace_nr;
@@ -105,18 +117,6 @@ var TP = {
                 Ext.getCmp(replace_id).destroy();
             }
         }
-
-        /* make tab title editable */
-        [% UNLESS readonly %]
-        var tabhead = tabpan.getTabBar().items.getAt(size-1);
-        if(tabhead.rendered == false) {
-            tabhead.addListener('afterrender', function(This, eOpts) {
-                TP.addDblClickRename(This.getEl(), tabhead, id);
-            });
-        } else {
-            TP.addDblClickRename(tabhead.getEl(), tabhead, id);
-        }
-        [% END %]
 
         /* save tabs state */
         Ext.getCmp('tabpan').saveState();
@@ -169,6 +169,7 @@ var TP = {
             config.type = state[config.conf.id].xdata.cls;
         }
         if(config.type == undefined) {
+            debug(config);
             throw new Error("TP.add_panlet(): no type! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
         // fake state (probably cloned)

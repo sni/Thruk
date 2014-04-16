@@ -82,6 +82,7 @@
             if(tabpan.xdata.rotate_tabs <= 0) {
                 tabpan.saveState();
             }
+            set_hash(this.id.replace(/^tabpan-tab_/, ''), 1);
         },
         hide: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -175,6 +176,10 @@
         if(xdata == undefined) {
             xdata = this.xdata;
         }
+        if(this.readonly == 1) {
+            xdata.locked = true;
+        }
+        this.setLock(xdata.locked);
         this.setTitle(xdata.title);
         this.setBackground(xdata.background);
         if(TP.initialized && startTimeouts != false) {
@@ -248,6 +253,42 @@
             this.setBodyStyle("background-repeat:no-repeat;");
         } else {
             this.setBodyStyle("background:#ffffff");
+        }
+    },
+    /* enable or disable locking for this tab and all panlet below */
+    setLock: function(val) {
+        var tab = this;
+        tab.xdata.locked = val;
+
+        /* disable add button */
+        Ext.getCmp('tabbar_addbtn').setDisabled(val);
+
+        /* apply to settings window */
+        var dashboardForm = Ext.getCmp('dashboardForm');
+        if(dashboardForm) {
+            dashboardForm.items.each(function(item, idx, len) {
+                if(item.name != 'locked') {
+                    item.setDisabled(val);
+                }
+                if(tab.readonly == 1) {
+                    item.setDisabled(true);
+                }
+            });
+        }
+        var backendsForm = Ext.getCmp('backendsForm');
+        if(backendsForm) {
+            backendsForm.items.each(function(item, idx, len) {
+                item.setDisabled(val);
+                if(item.name == "backends" && !tab.xdata.select_backends) {
+                    item.setDisabled(true);
+                }
+            });
+        }
+
+        /* apply to all widgets and panels */
+        var panels = TP.getAllPanel(this);
+        for(var nr=0; nr<panels.length; nr++) {
+            panels[nr].setLock(val);
         }
     }
 });

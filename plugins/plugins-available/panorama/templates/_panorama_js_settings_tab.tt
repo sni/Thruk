@@ -224,7 +224,8 @@ TP.tabSettingsWindow = function() {
             xtype:      'checkbox',
             fieldLabel: 'Locked',
             name:       'locked',
-            boxLabel:   '(disables dashboard editing)'
+            boxLabel:   '(disables dashboard editing)',
+            handler:    function(el, checked) { tab.setLock(checked); tab_win_settings.toFront(); }
     }, {
             /* tab title */
             xtype:      'textfield',
@@ -338,7 +339,13 @@ TP.tabSettingsWindow = function() {
                         return true;
                     }
                }
-        ]
+        ],
+        listeners: {
+            destroy: function() {
+                // restore locked setting
+                tab.setLock(tab.xdata.locked);
+            }
+        },
     });
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('generalForm').getForm().setValues(tabpan.xdata);

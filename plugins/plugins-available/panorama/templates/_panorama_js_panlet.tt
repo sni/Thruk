@@ -10,16 +10,6 @@
     hideMode:  'visibility',
     autoShow:  false,
     stateful:  true,
-    [% IF readonly %]
-    resizable: false,
-    closable: false,
-    draggable: false,
-    [% ELSE %]
-    resizable: new Ext.Panel({   // make resize snap to grid
-        widthIncrement:  TP.snap_x,
-        heightIncrement: TP.snap_y
-    }),
-    [% END %]
     initComponent: function() {
         var panel = this;
         if(this.xdata == undefined) {
@@ -31,35 +21,54 @@
         this.xdata.cls      = this.$className;
         this.xdata.backends = [];
 
-        this.gearHandler = TP.panletGearHandler;
+        var tab     = Ext.getCmp(this.panel_id);
+        this.locked = tab.xdata.locked;
         [% IF readonly %]
-        this.tools = [];
-        [% ELSE %]
-        this.tools = [];
-        if(this.has_search_button != undefined) {
-            var This = this;
-            this.tools.push({
-                type: 'search',
-                scope: this,
-                tooltip: 'change search filter',
-                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}, panel); }
+        this.locked = true;
+        [% END %]
+        this.redraw = false;
+
+        if(this.locked) {
+            this.resizable = false;
+            this.closable  = false;
+            this.draggable = false;
+        } else {
+            this.resizable = new Ext.Panel({   // make resize snap to grid
+                widthIncrement:  TP.snap_x,
+                heightIncrement: TP.snap_y
             });
         }
-        [% END %]
+
+
+        this.gearHandler = TP.panletGearHandler;
+        if(this.locked) {
+            this.tools = [];
+        } else {
+            this.tools = [];
+            if(this.has_search_button != undefined) {
+                var This = this;
+                this.tools.push({
+                    type: 'search',
+                    scope: this,
+                    tooltip: 'change search filter',
+                    handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}, panel); }
+                });
+            }
+        }
         this.tools.push(new Ext.panel.Tool({
             type:    'refresh',
             scope:    this,
             tooltip: 'reload content of this panlet',
             handler:  function() { this.manualRefresh() }
         }));
-        [% UNLESS readonly %]
-        this.tools.push({
-            type: 'gear',
-            scope: this,
-            tooltip: 'settings',
-            handler: function() { this.gearHandler() }
-        });
-        [% END %]
+        if(!this.locked) {
+            this.tools.push({
+                type: 'gear',
+                scope: this,
+                tooltip: 'settings',
+                handler: function() { this.gearHandler() }
+            });
+        }
         this.shadow_id = this.id + '_shadow';
         this.win_shadow = new Ext.create('Ext.Layer', {
             shadow: 'drop',
@@ -117,13 +126,16 @@
             /* remove shadow */
             This.win_shadow.destroy();
 
-            /* remove window from panels window ids */
-            TP.removeWindowFromPanels(this.id);
-
             /* stop refreshing */
             this.stopTimeouts();
-            /* clear state information */
-            cp.clear(this.id);
+
+            if(!this.redraw) {
+                /* remove window from panels window ids */
+                TP.removeWindowFromPanels(this.id);
+
+                /* clear state information */
+                cp.clear(this.id);
+            }
         },
         show: function(This, eOpts) {
             // make move show snap shadow
@@ -157,17 +169,17 @@
         },
         render: function(This, eOpts) {
             /* make title editable */
-            [% UNLESS readonly %]
-            var head = Ext.get(This.id + '_header_hd');
-            head.on("dblclick", function() {
-                Ext.Msg.prompt('Change Title', '', function(btn, text) {
-                    if(btn == 'ok') {
-                        This.setTitle(text);
-                        This.saveState();
-                    }
-                }, undefined, undefined, This.title);
-            });
-            [%+ END +%]
+            if(this.locked) {
+                var head = Ext.get(This.id + '_header_hd');
+                head.on("dblclick", function() {
+                    Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                        if(btn == 'ok') {
+                            This.setTitle(text);
+                            This.saveState();
+                        }
+                    }, undefined, undefined, This.title);
+                });
+            }
             /* make header show on mouseover only */
             var div    = This.getEl();
             var global = Ext.getCmp(This.panel_id);
@@ -258,7 +270,7 @@
                     this.getEl().shadow.el.addCls('hidden');
                 }
                 this.getEl().setStyle('background-color', 'transparent');
-                if(this.chart) {
+                if(this.chart && this.chart.getEl()) {
                     this.chart.getEl().setStyle('background-color', 'transparent');
                 }
             }
@@ -273,7 +285,7 @@
                     this.getEl().shadow.el.removeCls('hidden');
                 }
                 this.getEl().setStyle('background-color', '');
-                if(this.chart) {
+                if(this.chart && this.chart.getEl()) {
                     this.chart.getEl().setStyle('background-color', '#FFFFFF');
                 }
             }
@@ -315,6 +327,16 @@
                     win.getEl().shadow.el.addCls('hidden');
                 }
             }, win, []), delay);
+        }
+    },
+    /* enable / disable editing of this panlet */
+    setLock: function(val) {
+        var tab = Ext.getCmp(this.panel_id);
+        if(this.locked != val) {
+            this.saveState();
+            this.redraw = true;
+            this.destroy();
+            TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
         }
     }
 });
@@ -413,7 +435,7 @@ Ext.define('TP.PanletGearItem', {
 
 /* called when user clicks on the gear icon in panlet header */
 TP.panletGearHandler = function() {
-    [% IF readonly %]return;[% END %]
+    if(this.locked) { return; }
     var tab = Ext.getCmp(this.panel_id);
     if(this.gearitem == undefined) {
         this.add(Ext.create('TP.PanletGearItem', {}));
