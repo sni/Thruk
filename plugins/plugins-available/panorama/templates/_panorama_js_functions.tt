@@ -37,9 +37,8 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id) {
+    add_pantab: function(id, replace_id) {
         var tabpan = Ext.getCmp('tabpan');
-        var size   = tabpan.items.length;
 
         if(id == undefined) {
             TP.initialized = true;
@@ -70,7 +69,7 @@ var TP = {
                         }
                         if(cp.state[id]) {
                             TP.initial_active_tab = id; // set inital tab, so panlets will be shown
-                            TP.add_pantab(id);
+                            TP.add_pantab(id, replace_id);
                             if(TP.dashboardsSettingGrid) {
                                 TP.dashboardsSettingGrid.getView().refresh();
                                 TP.dashboardsSettingWindow.toFront();
@@ -84,11 +83,28 @@ var TP = {
             return;
         }
 
+        var size = tabpan.items.length;
+
         /* add new tab panel */
         tabpan.add(new TP.Pantab({id: id})).show();
 
         /* move new-tab button at the end */
         tabpan.getTabBar().move(size-1, size);
+
+        /* replace existing tab with current one */
+        if(replace_id) {
+            var replace_nr;
+            var tabState = tabpan.getState();
+            for(var x=0; x<tabState.open_tabs.length; x++) {
+                if(tabState.open_tabs[x] == replace_id) {
+                    replace_nr = x+1;
+                }
+            }
+            if(replace_nr != undefined) {
+                tabpan.getTabBar().move(size-1, replace_nr);
+                Ext.getCmp(replace_id).destroy();
+            }
+        }
 
         /* make tab title editable */
         [% UNLESS readonly %]

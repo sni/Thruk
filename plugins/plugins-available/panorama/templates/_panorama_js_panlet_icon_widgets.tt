@@ -881,12 +881,13 @@ TP.iconClickHandlerDo = function(id) {
     var matches = link.match(/dashboard:\/\/(\d+)$/);
     if(matches && matches[1]) {
         // is that tab already open?
+        var tabpan = Ext.getCmp('tabpan');
         var tab_id = "tabpan-tab_"+matches[1];
         var tab    = Ext.getCmp(tab_id);
         if(tab) {
-            Ext.getCmp('tabpan').setActiveTab(tab);
+            tabpan.setActiveTab(tab);
         } else {
-            TP.add_pantab(tab_id);
+            TP.add_pantab(tab_id, tabpan.getActiveTab().id);
         }
     } else {
         window.location = link;
