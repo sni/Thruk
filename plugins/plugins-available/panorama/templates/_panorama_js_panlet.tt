@@ -245,7 +245,7 @@
     },
     hideHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if((this.alwaysBorderless || global.xdata.autohideheader) && this.xdata.showborder != true && this.gearitem == undefined) {
+        if((this.alwaysBorderless || global.xdata.autohideheader || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
@@ -291,7 +291,7 @@
             }
         }
         var global = Ext.getCmp(this.panel_id);
-        if((global.xdata.autohideheader || this.alwaysBorderless) && this.xdata.showborder != true) {
+        if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
             if(this.header) {
                 this.header.hide();
             }
