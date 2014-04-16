@@ -381,6 +381,7 @@ TP.iconShowEditDialog = function(panel) {
                     'right': function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]+1, pos[1]);   },
                     'up':    function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]-1); },
                     'down':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]+1); },
+                    ignoreInputFields: true,
                     scope: panel
                 });
             },
