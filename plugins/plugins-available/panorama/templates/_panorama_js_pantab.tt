@@ -83,6 +83,9 @@
                 tabpan.saveState();
             }
             set_hash(this.id.replace(/^tabpan-tab_/, ''), 1);
+
+            /* disable add button */
+            Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
         },
         hide: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -262,28 +265,6 @@
 
         /* disable add button */
         Ext.getCmp('tabbar_addbtn').setDisabled(val);
-
-        /* apply to settings window */
-        var dashboardForm = Ext.getCmp('dashboardForm');
-        if(dashboardForm) {
-            dashboardForm.items.each(function(item, idx, len) {
-                if(item.name != 'locked') {
-                    item.setDisabled(val);
-                }
-                if(tab.readonly == 1) {
-                    item.setDisabled(true);
-                }
-            });
-        }
-        var backendsForm = Ext.getCmp('backendsForm');
-        if(backendsForm) {
-            backendsForm.items.each(function(item, idx, len) {
-                item.setDisabled(val);
-                if(item.name == "backends" && !tab.xdata.select_backends) {
-                    item.setDisabled(true);
-                }
-            });
-        }
 
         /* apply to all widgets and panels */
         var panels = TP.getAllPanel(this);

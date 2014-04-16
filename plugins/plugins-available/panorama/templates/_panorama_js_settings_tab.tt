@@ -225,7 +225,7 @@ TP.tabSettingsWindow = function() {
             fieldLabel: 'Locked',
             name:       'locked',
             boxLabel:   '(disables dashboard editing)',
-            handler:    function(el, checked) { tab.setLock(checked); tab_win_settings.toFront(); }
+            handler:    function(el, checked) { TP.tabSettingsWindowLocked(tab, checked); }
     }, {
             /* tab title */
             xtype:      'textfield',
@@ -339,14 +339,33 @@ TP.tabSettingsWindow = function() {
                         return true;
                     }
                }
-        ],
-        listeners: {
-            destroy: function() {
-                // restore locked setting
-                tab.setLock(tab.xdata.locked);
-            }
-        },
+        ]
     });
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('generalForm').getForm().setValues(tabpan.xdata);
+};
+
+TP.tabSettingsWindowLocked = function(tab, val) {
+    /* apply to general tab */
+    var dashboardForm = Ext.getCmp('dashboardForm');
+    if(dashboardForm) {
+        dashboardForm.items.each(function(item, idx, len) {
+            if(item.name != 'locked') {
+                item.setDisabled(val);
+            }
+            if(tab.readonly == 1) {
+                item.setDisabled(true);
+            }
+        });
+    }
+    /* change backends tab */
+    var backendsForm = Ext.getCmp('backendsForm');
+    if(backendsForm) {
+        backendsForm.items.each(function(item, idx, len) {
+            item.setDisabled(val);
+            if(item.name == "backends" && !tab.xdata.select_backends) {
+                item.setDisabled(true);
+            }
+        });
+    }
 };
