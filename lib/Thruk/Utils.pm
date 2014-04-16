@@ -1088,7 +1088,7 @@ sub store_user_data {
 
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
-        Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings disabled in demo mode');
+        Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings is disabled in demo mode');
         return;
     }
 

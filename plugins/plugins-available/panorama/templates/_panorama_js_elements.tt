@@ -289,10 +289,22 @@ TP.Msg = function() {
             if(!msgCt){
                 msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
             }
+            // show demo mode errors as warnings and only once
+            if(s.match(/disabled in demo mode/)) {
+                s = s.replace(/^fail_message/, 'info_message');
+                if(TP.demo_warnings_shown == undefined) { TP.demo_warnings_shown = 0;}
+                TP.demo_warnings_shown++;
+                if(TP.demo_warnings_shown > 1) {
+                    return;
+                }
+            }
             var p = s.split('~~', 2);
             var title = 'Success';
             if(p[0] == 'fail_message') {
                 title = 'Error';
+            }
+            if(p[0] == 'info_message') {
+                title = 'Information';
             }
             var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
@@ -302,7 +314,7 @@ TP.Msg = function() {
             m.show();
             m.hide();
             m.slideIn('t');
-            if(p[0] == 'fail_message') {
+            if(p[0] == 'fail_message' || p[0] == 'info_message') {
                 debug(title + ': ' + p[1]);
                 delay = 30000;
             } else {

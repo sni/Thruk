@@ -283,6 +283,9 @@ DIV.success_message h3 {
 DIV.fail_message h3 {
     color: #FF0000;
 }
+DIV.info_message h3 {
+    color: #EDBE29;
+}
 
 /* show close button on fail messages */
 DIV.msg A.x-tab-close-btn {
