@@ -136,7 +136,7 @@
             this.saveState();
         }
         iconset = this.xdata.layout.iconset;
-        if(this.host) {
+        if(this.iconType == 'host') {
             if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/up.png');          }
             else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/down.png');        }
             else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/unreachable.png'); }
