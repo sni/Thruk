@@ -28,7 +28,7 @@
             tag:     'a',
             href:    '#',
             target:  '',
-            onclick: "TP.iconClickHandler('"+this.id+"'); return false;"
+            onclick: "return(TP.iconClickHandler('"+this.id+"'));"
         };
     },
     listeners: {
@@ -317,6 +317,11 @@ TP.iconShowEditDialog = function(panel) {
                             }
                         }
                     }]
+                }, {
+                    fieldLabel: 'New Tab',
+                    xtype:      'checkbox',
+                    name:       'newtab',
+                    boxLabel:   '(opens links in new tab or window)'
                 }]
             }]
         }]
@@ -872,10 +877,12 @@ Ext.define('TP.SiteStatusIcon', {
 
 /* delay link opening to allow double click menu */
 TP.iconClickHandler = function(id) {
+    if(Ext.getCmp(id).passClick) { return true; }
     window.clearTimeout(TP.timeouts['click'+id]);
     TP.timeouts['click'+id] = window.setTimeout(function() {
         TP.iconClickHandlerDo(id);
     }, 500);
+    return false;
 }
 /* actually open the clicked link */
 TP.iconClickHandlerDo = function(id) {
@@ -883,7 +890,8 @@ TP.iconClickHandlerDo = function(id) {
     if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
         return;
     }
-    var link  = panel.xdata.link.link;
+    var link   = panel.xdata.link.link;
+    var newTab = panel.xdata.link.newtab;
     var matches = link.match(/dashboard:\/\/(\d+)$/);
     if(matches && matches[1]) {
         // is that tab already open?
@@ -893,9 +901,21 @@ TP.iconClickHandlerDo = function(id) {
         if(tab) {
             tabpan.setActiveTab(tab);
         } else {
-            TP.add_pantab(tab_id, tabpan.getActiveTab().id);
+            var replace;
+            if(!newTab) {
+                replace = tabpan.getActiveTab().id;
+            }
+            TP.add_pantab(tab_id, replace);
         }
     } else {
-        window.location = link;
+        panel.el.dom.href=link;
+        panel.passClick = true;
+        if(newTab) {
+            panel.el.dom.target='_blank';
+        }
+        panel.el.dom.click();
+        window.setTimeout(function() {
+            panel.passClick = false;
+        }, 300);
     }
 };
