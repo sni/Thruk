@@ -324,14 +324,19 @@ TP.tabSettingsWindow = function() {
                         tab.applyXdata(undefined, false);
                         tab.saveState();
 
+                        /* general settings */
+                        var oldstate = Ext.JSON.encode(tabpan.getState());
                         var g_form  = Ext.getCmp('generalForm').getForm();
                         if(!g_form.isValid()) { return false; }
                         var values = g_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabpan.xdata, values);
-
-                        tabpan.saveState();
-                        tabpan.startTimeouts();
+                        var newstate = Ext.JSON.encode(tabpan.getState());
+                        /* avoid useless updates */
+                        if(oldstate != newstate) {
+                            tabpan.saveState();
+                            tabpan.startTimeouts();
+                        }
 
                         TP.refreshAllSitePanel(tab);
 

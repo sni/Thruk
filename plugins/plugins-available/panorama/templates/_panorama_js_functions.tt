@@ -871,6 +871,17 @@ var TP = {
         }
     },
     updateAllIcons: function(tab, id) {
+        if(id != undefined) {
+            TP.updateAllIconsDo(tab, id);
+        } else {
+            /* avoid duplicate updates */
+            window.clearTimeout(TP.timeouts['timeout_global_icon_update'+tab.id]);
+            TP.timeouts['timeout_global_icon_update'+tab.id] = window.setTimeout(function() {
+                TP.updateAllIconsDo(tab);
+            }, 100);
+        }
+    },
+    updateAllIconsDo: function(tab, id) {
         var panels = TP.getAllPanel(tab);
         var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
         var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
