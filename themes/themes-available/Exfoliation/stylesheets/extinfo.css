@@ -42,8 +42,8 @@ table.perfdata_human .statusEven  { font-size: 9pt; background-color: #f4f2f2; }
 div.commentNav { font-size: 10pt; text-align: center; }
 a.commentNav   { font-size: 10pt; }
 
-table.comment { font-size: 10pt; background-color: white; padding: 2px; max-width: 900px; }
-th.comment    { font-size: 9pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
+table.comment { font-size: 10pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
+th.comment    { font-size: 9pt; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
 .commentOdd   { font-size: 9pt; background-color: #e7e7e7; }
 .commentEven  { font-size: 9pt; background-color: #f4f2f2; }
 div.comment,a.comment { font-size: 10pt; background-color: white; text-align: center; }
@@ -52,8 +52,8 @@ div.comment,a.comment { font-size: 10pt; background-color: white; text-align: ce
 div.downtimeNav { font-size: 10pt; text-align: center; }
 a.downtimeNav   { font-size: 10pt; }
 
-table.downtime { font-size: 10pt; background-color: white; padding: 2px; max-width: 900px; }
-th.downtime    { font-size: 10pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
+table.downtime { font-size: 10pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
+th.downtime    { font-size: 9pt; center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
 .downtimeOdd   { font-size: 9pt; background-color: #e7e7e7; }
 .downtimeEven  { font-size: 9pt; background-color: #f4f2f2; }
 
@@ -100,8 +100,5 @@ table.blockHeadBorder, div.blockHeadBorder {
   border: 1px #b2a0a0 outset;
   text-align:center;
   line-height: 18px;
-  height: 20px;
-  font-size: 16px;
-  font-weight: bold;
   white-space: nowrap;
 }
