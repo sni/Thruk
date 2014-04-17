@@ -809,6 +809,7 @@ plugins/plugins-available/panorama/root/images/s.gif
 plugins/plugins-available/panorama/root/images/server.png
 plugins/plugins-available/panorama/root/images/server_connect.png
 plugins/plugins-available/panorama/root/images/server_link.png
+plugins/plugins-available/panorama/root/images/sound.png
 plugins/plugins-available/panorama/root/images/sport_golf.png
 plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_go.png
@@ -1038,6 +1039,10 @@ root/thruk/usercontent/images/status/default/unreachable.png
 root/thruk/usercontent/images/status/default/up.png
 root/thruk/usercontent/images/status/default/warning.png
 root/thruk/usercontent/images/world.png
+root/thruk/usercontent/sounds/critical.mp3
+root/thruk/usercontent/sounds/ok.mp3
+root/thruk/usercontent/sounds/unknown.mp3
+root/thruk/usercontent/sounds/warning.mp3
 script/append.make
 script/nagexp
 script/nagimp

@@ -148,7 +148,7 @@ TP.tabSettingsWindow = function() {
         style:   'text-align: center;',
         padding: '0 0 10 0',
         border:   0
-    },{
+    }, {
         /* rotating tabs */
         xtype:      'tp_slider',
         fieldLabel: 'Rotate Tabs',
@@ -189,6 +189,12 @@ TP.tabSettingsWindow = function() {
     var backends = TP.getBackendsArray(initial_backends);
     if(backends.length > 1) {
         var backendsItems = [{
+                xtype:   'panel',
+                html:    'Filter backends masterset for this dashboard',
+                style:   'text-align: center;',
+                padding: '0 0 10 0',
+                border:   0
+            },{
                 /* use backends */
                 xtype:      'checkbox',
                 fieldLabel: 'Select Backends',
@@ -205,7 +211,7 @@ TP.tabSettingsWindow = function() {
                 fieldLabel: 'Backends / Sites',
                 xtype:      'itemselector',
                 name:       'backends',
-                height:     120,
+                height:     160,
                 disabled:   !tab.xdata.select_backends,
                 buttons:   ['add', 'remove'],
                 store:     backends,
@@ -267,7 +273,7 @@ TP.tabSettingsWindow = function() {
             xtype:      'checkbox',
             fieldLabel: 'Hide Panlet Header',
             name:       'autohideheader',
-            boxLabel:   ' (widget header will be displayed on mouse over.)'
+            boxLabel:   ' (widget header will be displayed on mouse over)'
     }];
     var dashboardTab = {
         title : 'Dashboard',
@@ -320,10 +326,23 @@ TP.tabSettingsWindow = function() {
         nameV:      'unknown_sound',
         nameR:      'unknown_repeat',
         store:       sounds
+    },{
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Down',
+        nameV:      'down_sound',
+        nameR:      'down_repeat',
+        store:       sounds
+    },{
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Unreachable',
+        nameV:      'unreachable_sound',
+        nameR:      'unreachable_repeat',
+        store:       sounds
     }, {
         xtype:      'panel',
         html:       'Place sound files in: [% usercontent_folder %]/sounds/',
         style:      'text-align: center;',
+        bodyCls:    'form-hint',
         padding:    '10 0 0 0',
         border:      0
     }];
@@ -371,7 +390,7 @@ TP.tabSettingsWindow = function() {
         autoShow:    true,
         modal:       true,
         width:       500,
-        height:      250,
+        height:      320,
         title:       'Settings',
         layout :     'fit',
         buttonAlign: 'center',

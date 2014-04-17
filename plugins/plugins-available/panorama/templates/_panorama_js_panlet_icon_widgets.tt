@@ -296,6 +296,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'panel',
                     html:       'Place image sets in: [% usercontent_folder %]/images/status/',
                     style:      'text-align: center;',
+                    bodyCls:    'form-hint',
                     padding:    '10 0 0 0',
                     border:      0
                 }]

@@ -442,7 +442,7 @@ TABLE.ministatus TH {
 }
 
 /* checkbox label */
-.x-form-cb-label-after {
+.x-form-cb-label-after, .form-hint {
     margin-left: 5px;
     font-size: smaller;
     color: #6F6F6F;
