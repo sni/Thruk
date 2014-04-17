@@ -1240,5 +1240,16 @@ var TP = {
             return false;
         });
         return item;
+    },
+
+    /* play a wave file*/
+    playWave: function(url, endedCallback) {
+        var el = Ext.DomHelper.insertFirst(document.body, '<audio src="'+url+'" />' , true);
+        el.dom.play();
+        el.dom.addEventListener('ended', function() {
+            if(endedCallback) {
+                endedCallback();
+            }
+        });
     }
 }

@@ -2,7 +2,20 @@
     fields: ['path', 'image'],
     proxy: {
         type: 'ajax',
-        url: 'panorama.cgi?task=userdata_images',
+        url:  'panorama.cgi?task=userdata_images',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: false,
+    data : []
+});
+var sounds = Ext.create('Ext.data.Store', {
+    fields: ['path', 'name'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=userdata_sounds',
         reader: {
             type: 'json',
             root: 'data'
@@ -125,6 +138,7 @@ TP.tabSettingsWindow = function() {
     TP.stopRotatingTabs();
 
     backgrounds.load();
+    sounds.load();
 
     var exportTab = TP.getExportTab({tab: tab, close_handler: function() { tab_win_settings.close() }});
 
@@ -226,7 +240,7 @@ TP.tabSettingsWindow = function() {
             name:       'locked',
             boxLabel:   '(disables dashboard editing)',
             handler:    function(el, checked) { TP.tabSettingsWindowLocked(tab, checked); }
-    }, {
+        }, {
             /* tab title */
             xtype:      'textfield',
             name:       'title',
@@ -275,6 +289,70 @@ TP.tabSettingsWindow = function() {
         }]
     };
 
+
+    /* Sound Settings Tab */
+    var soundItems = [{
+        xtype:      'panel',
+        html:       'Sounds apply to all icon widgets',
+        style:      'text-align: center;',
+        padding:    '0 0 10 0',
+        border:      0
+    }, {
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Recovery',
+        nameV:      'recovery_sound',
+        store:       sounds
+    }, {
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Warning',
+        nameV:      'warning_sound',
+        nameR:      'warning_repeat',
+        store:       sounds
+    }, {
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Critical',
+        nameV:      'critical_sound',
+        nameR:      'critical_repeat',
+        store:       sounds
+    }, {
+        xtype:      'tp_soundfield',
+        fieldLabel: 'Unknown',
+        nameV:      'unknown_sound',
+        nameR:      'unknown_repeat',
+        store:       sounds
+    }, {
+        xtype:      'panel',
+        html:       'Place sound files in: [% usercontent_folder %]/sounds/',
+        style:      'text-align: center;',
+        padding:    '10 0 0 0',
+        border:      0
+    }];
+    var soundsTab = {
+        title : 'Sounds',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:          'form',
+                    id:             'soundForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:      'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 70 },
+                    items:           soundItems
+            }],
+            listeners: {
+                afterrender: function() {
+                    Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
+                }
+            }
+        }]
+    };
+
+
     /* tab layout for settings window */
     var tabPanel = new Ext.TabPanel({
         activeTab         : 0,
@@ -282,6 +360,7 @@ TP.tabSettingsWindow = function() {
         items             : [
             dashboardTab,
             backendsTab,
+            soundsTab,
             exportTab,
             generalTab
         ]
@@ -316,6 +395,11 @@ TP.tabSettingsWindow = function() {
                         delete values['refresh_txt'];
                         Ext.apply(tab.xdata, values);
 
+                        var s_form  = Ext.getCmp('soundForm').getForm();
+                        if(!s_form.isValid()) { return false; }
+                        var values = s_form.getFieldValues();
+                        Ext.apply(tab.xdata, values);
+
                         var b_form  = Ext.getCmp('backendsForm').getForm();
                         if(!b_form.isValid()) { return false; }
                         var values = b_form.getFieldValues();
@@ -347,6 +431,7 @@ TP.tabSettingsWindow = function() {
         ]
     });
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
+    Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('generalForm').getForm().setValues(tabpan.xdata);
 };
 
@@ -358,6 +443,15 @@ TP.tabSettingsWindowLocked = function(tab, val) {
             if(item.name != 'locked') {
                 item.setDisabled(val);
             }
+            if(tab.readonly == 1) {
+                item.setDisabled(true);
+            }
+        });
+    }
+    var soundForm = Ext.getCmp('soundForm');
+    if(soundForm) {
+        soundForm.items.each(function(item, idx, len) {
+            item.setDisabled(val);
             if(tab.readonly == 1) {
                 item.setDisabled(true);
             }

@@ -324,3 +324,52 @@ TP.Msg = function() {
         }
     };
 }();
+
+
+Ext.define('TP.SoundField', {
+    extend:'Ext.form.FieldContainer',
+
+    alias:  'widget.tp_soundfield',
+
+    layout:    { type: 'hbox', align: 'stretch', defaultMargins: {top: 0, right: 0, bottom: 0, left: 5} },
+    items:    [{
+        xtype:        'combobox',
+        queryMode:    'local',
+        displayField: 'name',
+        valueField:   'path',
+        flex:          1,
+        typeAhead:     true,
+        name:         'sound'
+    }, {
+        xtype:        'label',
+        text:         'repeat:'
+    }, {
+        xtype:        'numberfield',
+        value:        0,
+        maxValue:     9999,
+        minValue:     0,
+        width:        65,
+        allowDecimals: false,
+        valueToRaw:   function(value) { if(value == 0) { return('forever') }; return(String(value)); },
+        rawToValue:   function(value) { if(value == 'forever') { return(Number(0)) }; return(Number(value)); },
+        getErrors:    function(value) { if(value != 'forever' && !Ext.isNumeric(value)) { return([value + " is not a valid number"]); } return([]); },
+        name:         'repeat'
+    }, {
+        xtype:       'button',
+        text:        'Test',
+        icon:        '[% url_prefix %]plugins/panorama/images/sound.png',
+        handler:      function(btn, e) { var wav = btn.up().items.getAt(0).getValue(); if(wav != "") { btn.disable(); TP.playWave(wav, function() { btn.enable() }); } }
+    }],
+    initComponent: function() {
+        this.callParent();
+        this.items.getAt(0).name  = this.nameV;
+        this.items.getAt(0).store = this.store;
+        if(this.nameR == undefined) {
+            this.items.getAt(1).style = 'visibility: hidden;';
+            this.items.getAt(2).style = 'visibility: hidden;';
+            this.items.getAt(2).name = '';
+        } else {
+            this.items.getAt(2).name = this.nameR;
+        }
+    }
+});

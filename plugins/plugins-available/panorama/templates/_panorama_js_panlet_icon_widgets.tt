@@ -292,6 +292,12 @@ TP.iconShowEditDialog = function(panel) {
                     name:       'iconset',
                     store:     ['default'],
                     value:      'default'
+                }, {
+                    xtype:      'panel',
+                    html:       'Place image sets in: [% usercontent_folder %]/images/status/',
+                    style:      'text-align: center;',
+                    padding:    '10 0 0 0',
+                    border:      0
                 }]
             }]
         }]

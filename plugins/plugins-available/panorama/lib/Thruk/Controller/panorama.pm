@@ -158,6 +158,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'userdata_images') {
             return($self->_task_userdata_images($c));
         }
+        elsif($task eq 'userdata_sounds') {
+            return($self->_task_userdata_sounds($c));
+        }
     }
 
     # find images for preloader
@@ -1105,6 +1108,27 @@ sub _task_userdata_images {
     $images = Thruk::Backend::Manager::_sort({}, $images, 'image');
     unshift @{$images}, { path => '', image => 'none'};
     $c->stash->{'json'} = { data => $images };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_userdata_sounds {
+    my($self, $c) = @_;
+    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/sounds/';
+    my $sounds = [];
+    for my $file (glob("$folder/*.mp3 $folder/*/*.mp3")) {
+        my $path = $file;
+        $path    =~ s/^\Q$folder\E//gmx;
+        my $name = $path;
+        $name    =~ s/^.*\///gmx;
+        push @{$sounds}, {
+            path  => '../usercontent/sounds'.$path,
+            name  => $name,
+        };
+    }
+    $sounds = Thruk::Backend::Manager::_sort({}, $sounds, 'name');
+    unshift @{$sounds}, { path => '', name => 'none'};
+    $c->stash->{'json'} = { data => $sounds };
     return $c->forward('Thruk::View::JSON');
 }
 

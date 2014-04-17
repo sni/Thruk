@@ -280,6 +280,10 @@ sub begin : Private {
     $ENV{'THRUK_USE_SHADOW'} = 1;
     $ENV{'THRUK_USE_SHADOW'} = 0 if $c->{'request'}->{'parameters'}->{'nocache'};
 
+    $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
+    $c->stash->{'usercontent_folder'} = $ENV{'CATALYST_CONFIG'}.'/usercontent' if $ENV{'CATALYST_CONFIG'};
+    $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }
