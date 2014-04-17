@@ -305,14 +305,15 @@ TP.tabSettingsWindow = function() {
         border:      0
     }, {
         xtype:      'tp_soundfield',
-        fieldLabel: 'Recovery',
-        nameV:      'recovery_sound',
+        fieldLabel: 'Unreachable',
+        nameV:      'unreachable_sound',
+        nameR:      'unreachable_repeat',
         store:       sounds
     }, {
         xtype:      'tp_soundfield',
-        fieldLabel: 'Warning',
-        nameV:      'warning_sound',
-        nameR:      'warning_repeat',
+        fieldLabel: 'Down',
+        nameV:      'down_sound',
+        nameR:      'down_repeat',
         store:       sounds
     }, {
         xtype:      'tp_soundfield',
@@ -322,21 +323,20 @@ TP.tabSettingsWindow = function() {
         store:       sounds
     }, {
         xtype:      'tp_soundfield',
+        fieldLabel: 'Warning',
+        nameV:      'warning_sound',
+        nameR:      'warning_repeat',
+        store:       sounds
+    }, {
+        xtype:      'tp_soundfield',
         fieldLabel: 'Unknown',
         nameV:      'unknown_sound',
         nameR:      'unknown_repeat',
         store:       sounds
-    },{
+    }, {
         xtype:      'tp_soundfield',
-        fieldLabel: 'Down',
-        nameV:      'down_sound',
-        nameR:      'down_repeat',
-        store:       sounds
-    },{
-        xtype:      'tp_soundfield',
-        fieldLabel: 'Unreachable',
-        nameV:      'unreachable_sound',
-        nameR:      'unreachable_repeat',
+        fieldLabel: 'Recovery',
+        nameV:      'recovery_sound',
         store:       sounds
     }, {
         xtype:      'panel',
