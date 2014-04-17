@@ -1272,15 +1272,17 @@ var TP = {
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(p.iconType && p.xdata) {
+                var alertState = p.xdata.state;
+                if(p.acknowledged || p.downtime) { alertState = 0; }
                 if(p.iconType == 'host') {
-                    if(p.xdata.state == 0) { totals.recovery++    }
-                    if(p.xdata.state == 1) { totals.down++        }
-                    if(p.xdata.state == 2) { totals.unreachable++ }
+                    if(alertState == 0) { totals.recovery++    }
+                    if(alertState == 1) { totals.down++        }
+                    if(alertState == 2) { totals.unreachable++ }
                 } else {
-                    if(p.xdata.state == 0) { totals.recovery++    }
-                    if(p.xdata.state == 1) { totals.warning++     }
-                    if(p.xdata.state == 2) { totals.critical++    }
-                    if(p.xdata.state == 3) { totals.unknown++     }
+                    if(alertState == 0) { totals.recovery++    }
+                    if(alertState == 1) { totals.warning++     }
+                    if(alertState == 2) { totals.critical++    }
+                    if(alertState == 3) { totals.unknown++     }
                 }
             }
         }
