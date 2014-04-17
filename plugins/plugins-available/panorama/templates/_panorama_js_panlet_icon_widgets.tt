@@ -209,9 +209,9 @@
         }, 500)
     },
     getState: function() {
-        var state      = {};
-        var pos        = this.getPosition();
-        state.xdata    = this.xdata;
+        var state      = {
+            xdata: this.xdata
+        };
         return state;
     },
     applyState: function(state) {
@@ -225,7 +225,7 @@
 
         // position
         if(xdata.layout) {
-            this.setPosition([Number(xdata.layout.x), Number(xdata.layout.y)]);
+            this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
         }
 
         // recalculate state
