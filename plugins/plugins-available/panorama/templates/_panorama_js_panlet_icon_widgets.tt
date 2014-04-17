@@ -519,7 +519,6 @@ Ext.define('TP.HostStatusIcon', {
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.xdata.general.incl_svc       = false;
         this.xdata.general.incl_downtimes = true;
         this.xdata.general.incl_ack       = true;
     },
@@ -528,10 +527,6 @@ Ext.define('TP.HostStatusIcon', {
         return([
             TP.objectSearchItem(panel, 'host', 'Hostname'),
             {
-                fieldLabel: 'Include Services',
-                xtype:      'checkbox',
-                name:       'incl_svc'
-            }, {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
                 name:       'incl_downtimes'
