@@ -207,7 +207,7 @@ TP.tabSettingsWindow = function() {
                 name:       'select_backends',
                 listeners: {
                     change: function(This, newValue, oldValue, eOpts) {
-                        this.up().items.get(1).setDisabled(!newValue);
+                        this.up().items.get(2).setDisabled(!newValue);
                     }
                 },
                 checked: tab.xdata.select_backends,
