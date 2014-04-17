@@ -142,9 +142,9 @@ TP.tabSettingsWindow = function() {
 
     var exportTab = TP.getExportTab({tab: tab, close_handler: function() { tab_win_settings.close() }});
 
-    var generalItems = [{
+    var usersettingsItems = [{
         xtype:   'panel',
-        html:    'These settings apply to all dashboards:',
+        html:    'These settings apply to all dashboards and are saved with the user account.',
         style:   'text-align: center;',
         padding: '0 0 10 0',
         border:   0
@@ -163,9 +163,15 @@ TP.tabSettingsWindow = function() {
         fieldLabel: 'Show Server Time',
         name:       'server_time',
         boxLabel:   '(display server time next to the menu)'
+    }, {
+        /* sounds enabled */
+        xtype:      'checkbox',
+        fieldLabel: 'Enable Sounds',
+        name:       'sounds_enabled',
+        boxLabel:   '(enable sounds if configured for a dashboard)'
     }];
-    var generalTab = {
-        title : 'General',
+    var usersettingsTab = {
+        title : 'User Settings',
         type  : 'panel',
         items: [{
             xtype : 'panel',
@@ -173,13 +179,13 @@ TP.tabSettingsWindow = function() {
             border: 0,
             items: [{
                     xtype:           'form',
-                    id:             'generalForm',
+                    id:             'usersettingsForm',
                     bodyPadding:     2,
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
                     defaults:      { anchor: '-12', labelWidth: 130 },
-                    items:           generalItems
+                    items:           usersettingsItems
             }]
         }]
     };
@@ -381,7 +387,7 @@ TP.tabSettingsWindow = function() {
             backendsTab,
             soundsTab,
             exportTab,
-            generalTab
+            usersettingsTab
         ]
     });
 
@@ -427,11 +433,11 @@ TP.tabSettingsWindow = function() {
                         tab.applyXdata(undefined, false);
                         tab.saveState();
 
-                        /* general settings */
+                        /* user settings */
                         var oldstate = Ext.JSON.encode(tabpan.getState());
-                        var g_form  = Ext.getCmp('generalForm').getForm();
-                        if(!g_form.isValid()) { return false; }
-                        var values = g_form.getFieldValues();
+                        var u_form  = Ext.getCmp('usersettingsForm').getForm();
+                        if(!u_form.isValid()) { return false; }
+                        var values = u_form.getFieldValues();
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabpan.xdata, values);
                         var newstate = Ext.JSON.encode(tabpan.getState());
@@ -451,11 +457,11 @@ TP.tabSettingsWindow = function() {
     });
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
-    Ext.getCmp('generalForm').getForm().setValues(tabpan.xdata);
+    Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {
-    /* apply to general tab */
+    /* apply to dashboard tab */
     var dashboardForm = Ext.getCmp('dashboardForm');
     if(dashboardForm) {
         dashboardForm.items.each(function(item, idx, len) {
@@ -467,6 +473,7 @@ TP.tabSettingsWindowLocked = function(tab, val) {
             }
         });
     }
+    /* apply to sounds tab */
     var soundForm = Ext.getCmp('soundForm');
     if(soundForm) {
         soundForm.items.each(function(item, idx, len) {

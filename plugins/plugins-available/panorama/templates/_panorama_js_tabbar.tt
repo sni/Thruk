@@ -236,7 +236,8 @@ Ext.define('TP.TabBar', {
         /* global default setttings */
         this.xdata = {
             rotate_tabs:     0,
-            server_time:    true
+            server_time:    true,
+            sounds_enabled: false
         }
 
         /* create new tab */

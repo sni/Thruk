@@ -1303,8 +1303,11 @@ var TP = {
                    || tab.xdata[name+'_repeat'] == 0
                    || tab.xdata[name+'_repeat'] > TP.alertNumbers[tab_id][name])
                 {
+                    var tabpan = Ext.getCmp('tabpan');
+                    if(tabpan.xdata.sounds_enabled) {
                         TP.playWave(tab.xdata[name+'_sound']);
                         TP.alertNumbers[tab_id][name]++;
+                    }
                 }
                 break;
             } else {
