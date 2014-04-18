@@ -110,6 +110,7 @@ Ext.define('TP.TabBar', {
                         text:    'Icons & Widgets',
                         icon:   '[% url_prefix %]plugins/panorama/images/menu-parent.gif',
                         cls:    'hideRightArrow',
+                        hideOnClick: false,
                         menu:    [{
                                 text:   'Host Status',
                                 icon:   '[% url_prefix %]plugins/panorama/images/server.png',
@@ -252,6 +253,7 @@ Ext.define('TP.TabBar', {
                 }, '-', {
                     text: 'My Dashboards',
                     icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                    hideOnClick: false,
                     menu: [{
                         text:    'Loading...',
                         icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
@@ -260,6 +262,7 @@ Ext.define('TP.TabBar', {
                 }, {
                     text: 'Public Dashboards',
                     icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                    hideOnClick: false,
                     menu: [{
                         text:    'Loading...',
                         icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
