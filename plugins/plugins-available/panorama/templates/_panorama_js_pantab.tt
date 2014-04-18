@@ -104,6 +104,28 @@
             }
             var header = This.getDockedItems()[0];
             if(header) { header.hide() }
+            this.el.on("contextmenu", function(e) {
+                /* right click context menu on tab body */
+                e.preventDefault();
+                var pos = [e.getX()-2, e.getY()-2];
+                Ext.create('Ext.menu.Menu', {
+                    margin: '0 0 10 0',
+                    items: [{
+                        text:   'Paste',
+                        icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
+                        handler: function() {
+                            var config = TP.clone(TP.clipboard);
+                            if(config.conf == undefined) { config.conf = {} }
+                            config.conf.pos = pos;
+                            TP.add_panlet(config);
+                        },
+                        disabled: (This.locked || TP.clipboard == undefined)
+                    }],
+                    listeners: {
+                        beforehide: function(menu, eOpts) { menu.destroy(); }
+                    }
+                }).showAt(e.getXY());
+            });
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
