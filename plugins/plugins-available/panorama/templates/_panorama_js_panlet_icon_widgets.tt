@@ -60,20 +60,20 @@
                 Ext.create('Ext.menu.Menu', {
                     margin: '0 0 10 0',
                     items: [{
+                        text:   'Refresh',
+                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                        handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) }
+                    }, {
                         text:   'Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.iconShowEditDialog(This) },
                         disabled: This.locked
                     }, {
-                        text:   'Refresh',
-                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
-                        handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) }
-                    },'-',{
                         text:   'Clone',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
                         handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) },
                         disabled: This.locked
-                    },{
+                    }, '-', {
                         text:   'Remove',
                         icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
                         disabled: This.locked,
