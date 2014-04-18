@@ -668,7 +668,7 @@ TP.get_group_status = function(options) {
         else if(incl_hst && group.hosts.downtime_down        > 0) { d = 2; downtime     = true; }
         else if(incl_svc && group.services.downtime_critical > 0) { d = 2; downtime     = true; }
         else if(incl_svc && group.services.downtime_warning  > 0) { d = 1; downtime     = true; }
-        s = Ext.Array.max(a,s,d);
+        s = Ext.Array.max([a,s,d]);
     }
     return({state: s, downtime: downtime, acknowledged: acknowledged});
 }
