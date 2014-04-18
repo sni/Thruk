@@ -132,7 +132,7 @@ DIV.TP_PanletGridHosts TD.x-grid-cell, DIV.TP_PanletGridServices TD.x-grid-cell 
 }
 
 /* vertical column header for minemap */
-DIV.x-grid-header-ct DIV.vertical {
+DIV.x-grid-header-ct DIV.vertical, DIV.vertical {
   position: relative;
   text-align: left;
   -webkit-transform: rotate(-90deg);
@@ -458,4 +458,9 @@ TABLE.ministatus TH {
 }
 .x-tab.x-tab-top-disabled, .x-tab.x-tab-default-disabled {
     background-color: #CEC7C7;
+}
+
+DIV.iconlabel {
+  text-decoration: none;
+  position: absolute;
 }

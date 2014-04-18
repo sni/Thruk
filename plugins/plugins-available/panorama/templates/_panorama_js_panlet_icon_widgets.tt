@@ -1,12 +1,12 @@
 ﻿Ext.define('TP.IconWidget', {
     extend: 'Ext.Img',
 
-    src: '../usercontent/images/status/default/pending.png',
-    width: 16,
-    height: 16,
+    src:      '../usercontent/images/status/default/pending.png',
     floating:  true,
-    cls: 'iconWidget',
+    cls:      'iconWidget',
     stateful: true,
+    width:    16,
+    height:   16,
     initComponent: function() {
         this.callParent();
         this.stateId = this.id;
@@ -26,6 +26,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { iconset: 'default' };
+        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0 };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
@@ -54,6 +55,7 @@
                 This.setSize(This.el.down('img').getSize());
                 This.el.shadow.el.removeCls('hidden');
             });
+
             /* right click context menu on icon widgets */
             this.el.on("contextmenu", function(e) {
                 e.preventDefault();
@@ -133,6 +135,7 @@
             }, 250);
         },
         show: function( This, eOpts ) {
+            var panel = This;
             if(This.dd && !This.dd_listener_added) {
                 This.dd.addListener('dragstart', function(This, eOpts) {
                     window.clearTimeout(TP.timeouts['click'+This.el.id]);
@@ -144,9 +147,12 @@
                         window.clearTimeout(TP.timeouts['click'+This.el.id]);
                     }, 100);
                     TP.suppressIconTip = false;
+                    panel.setIconLabel();
                 });
                 This.dd_listener_added = true;
             }
+            /* update label */
+            this.setIconLabel();
         },
         destroy: function( This, eOpts ) {
             if(!this.redraw) {
@@ -163,6 +169,12 @@
             if(this.settingsWindow) {
                 this.settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
             }
+            /* update label */
+            this.setIconLabel();
+        },
+        resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
+            /* update label */
+            this.setIconLabel();
         }
     },
     refreshHandler: function(newStatus) {
@@ -231,15 +243,20 @@
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
 
-        // position
+        /* restore position */
         if(xdata.layout) {
             this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
         }
 
-        // recalculate state
+        /* set label */
+        if(xdata.label) {
+            this.setIconLabel(xdata.label);
+        }
+
+        /* recalculate state */
         this.refreshHandler();
 
-        // add link
+        /* add link */
         if(xdata.link && xdata.link.link) {
             this.addCls('clickable');
             this.removeCls('notclickable');
@@ -261,6 +278,63 @@
             this.destroy();
             TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
         }
+    },
+    setIconLabel: function(cfg) {
+        if(cfg == undefined)          { cfg = this.xdata.label; }
+        if(cfg == undefined)          { return; }
+        if(!this.el || !this.el.dom)  { return; }
+        if(!this.el.dom.style.zIndex) { return; }
+        if(!cfg.labeltext) {
+            if(this.labelEl) { this.labelEl.remove(); this.labelEl = undefined; }
+            return;
+        }
+        if(!this.labelEl) {
+            this.labelEl = Ext.DomHelper.insertAfter(this.el, "<div><\/div>", true);
+        }
+        var el = this.labelEl.dom;
+        el.style.zIndex     = this.el.dom.style.zIndex-1; /* keep behind icon, otherwise drag/drop wont work */
+        el.innerHTML        = cfg.labeltext;
+        el.style.color      = cfg.fontcolor;
+        el.style.fontFamily = cfg.fontfamily;
+        this.labelEl.addCls('iconlabel');
+        if(cfg.orientation == 'vertical') {
+            this.labelEl.addCls('vertical');
+        } else {
+            this.labelEl.removeCls('vertical');
+        }
+        var left = Number(this.el.dom.style.left.replace('px', ''));
+        var top  = Number(this.el.dom.style.top.replace('px', ''));
+        el.style.top    = this.el.dom.style.top;
+        var offset   = Number(cfg.offset.replace(' px', ''));
+        var fontsize = Number(cfg.fontsize.replace(' px', ''));
+        el.style.fontSize = fontsize+'px';
+        var size = this.labelEl.getSize();
+        if(cfg.position == 'above') {
+            top = top - offset - size.height;
+            if(cfg.orientation == 'horizontal') {
+                left = left + (this.width / 2) - (size.width / 2) + 2;
+            }
+        }
+        if(cfg.position == 'below') {
+            top = top + offset + this.height;
+            if(cfg.orientation == 'horizontal') {
+                left = left + (this.width / 2) - (size.width / 2) + 2;
+            }
+        }
+        if(cfg.position == 'right') {
+            left = left + offset + this.width + 2;
+            if(cfg.orientation == 'horizontal') {
+                top  = top + this.height/2 - size.height/2;
+            }
+        }
+        if(cfg.position == 'left') {
+            left = left - offset - size.width - 2;
+            if(cfg.orientation == 'horizontal') {
+                top  = top + this.height/2 - size.height/2;
+            }
+        }
+        el.style.left = left+"px";
+        el.style.top  = top+"px";
     }
 });
 
@@ -400,13 +474,89 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
+    /* Label Settings Tab */
+    var labelUpdate = function() { panel.setIconLabel(settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues()) };
+    var labelTab = {
+        title: 'Label',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: labelUpdate } },
+                items: [{
+                    fieldLabel:   'Labeltext',
+                    xtype:        'textfield',
+                    name:         'labeltext'
+                }, {
+                    fieldLabel:   'Color',
+                    xtype:        'colorcbo',
+                    name:         'fontcolor',
+                    value:        '#000000'
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Font',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        name:         'fontfamily',
+                        xtype:        'fontcbo',
+                        value:        '',
+                        flex:          1,
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'fontsize',
+                        width:         60,
+                        unit:         'px'
+                    }]
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Position',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        name:         'position',
+                        xtype:        'combobox',
+                        store:        ['below', 'above', 'left', 'right'],
+                        value:        'below',
+                        flex:          1
+                    }, {
+                        xtype:        'label',
+                        text:         'Offset:',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'offset',
+                        width:         60,
+                        unit:         'px'
+                    }]
+                }, {
+                    fieldLabel:   'Orientation',
+                    name:         'orientation',
+                    xtype:        'combobox',
+                    store:        ['horizontal', 'vertical'],
+                    value:        'horizontal'
+                }]
+            }]
+        }]
+    };
+
     var tabPanel = new Ext.TabPanel({
         activeTab         : 0,
         enableTabScroll   : true,
         items             : [
             generalTab,
             layoutTab,
-            linkTab
+            linkTab,
+            labelTab
         ]
     });
     var settingsWindow = new Ext.Window({
@@ -437,6 +587,7 @@ TP.iconShowEditDialog = function(panel) {
                     panel.xdata.general = settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues();
                     panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
                     panel.xdata.link    = settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues();
+                    panel.xdata.label   = settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues();
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
                     TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
@@ -460,6 +611,7 @@ TP.iconShowEditDialog = function(panel) {
             },
             destroy: function() {
                 TP.suppressIconTip = false;
+                panel.setIconLabel();
             }
         }
     }).show();
@@ -467,6 +619,7 @@ TP.iconShowEditDialog = function(panel) {
     settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
     settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
     settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues(panel.xdata.link);
+    settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().setValues(panel.xdata.label);
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
