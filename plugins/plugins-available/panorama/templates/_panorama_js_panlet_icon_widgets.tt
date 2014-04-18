@@ -53,7 +53,9 @@
             });
             this.el.down('img').on("load", function (evt, ele, opts) {
                 This.setSize(This.el.down('img').getSize());
-                This.el.shadow.el.removeCls('hidden');
+                if(This.el.shadow.el) {
+                    This.el.shadow.el.removeCls('hidden');
+                }
             });
 
             /* right click context menu on icon widgets */
@@ -153,6 +155,10 @@
             }
             /* update label */
             this.setIconLabel();
+            if(this.labelEl) { this.labelEl.show(); }
+        },
+        hide: function(This, eOpts) {
+            if(this.labelEl) { this.labelEl.hide(); }
         },
         destroy: function( This, eOpts ) {
             if(!this.redraw) {
