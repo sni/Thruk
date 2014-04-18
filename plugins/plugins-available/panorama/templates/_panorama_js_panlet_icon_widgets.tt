@@ -508,7 +508,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'fontfamily',
                         xtype:        'fontcbo',
                         value:        '',
-                        flex:          1,
+                        flex:          1
                     }, {
                         xtype:        'numberunit',
                         allowDecimals: false,
