@@ -64,6 +64,14 @@
                         icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                         handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) }
                     }, {
+                        text:       'Show Details',
+                        icon:       '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                        href:       'status.cgi',
+                        hrefTarget: '_blank',
+                        listeners: {
+                            afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
+                        }
+                    }, {
                         text:   'Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                         handler: function() { TP.iconShowEditDialog(This) },
@@ -1055,3 +1063,42 @@ TP.iconClickHandlerDo = function(id) {
         }, 300);
     }
 };
+
+/* return link representing the data for this icon */
+TP.getIconDetailsLink = function(panel) {
+    if(!panel.xdata || !panel.xdata.general) {
+        return('#');
+    }
+    var cfg = panel.xdata.general;
+    var options = {
+        backends: TP.getActiveBackendsPanel(Ext.getCmp(panel.panel_id))
+    };
+    var base = "status.cgi";
+    if(cfg.hostgroup) {
+        options.hostgroup = cfg.hostgroup;
+    }
+    else if(cfg.service) {
+        options.host    = cfg.host;
+        options.service = cfg.service;
+        options.type    = 2;
+        base            = "extinfo.cgi";
+    }
+    else if(cfg.servicegroup) {
+        options.servicegroup = cfg.servicegroup;
+    }
+    else if(cfg.host) {
+        options.host = cfg.host;
+    }
+    else if(cfg.filter) {
+        options.filter = cfg.filter;
+        options.task   = 'redirect_status';
+        base           = 'panorama.cgi';
+    } else {
+        return('#');
+    }
+    [%+ IF use_frames +%]
+        return("[% url_prefix %]#cgi-bin/"+base+"?"+Ext.Object.toQueryString(options));
+    [% ELSE %]
+        return(base+"?"+Ext.Object.toQueryString(options));
+    [% END %]
+}

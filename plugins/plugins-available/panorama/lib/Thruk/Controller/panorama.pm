@@ -161,6 +161,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'userdata_sounds') {
             return($self->_task_userdata_sounds($c));
         }
+        elsif($task eq 'redirect_status') {
+            return($self->_task_redirect_status($c));
+        }
     }
 
     # find images for preloader
@@ -411,6 +414,22 @@ sub _task_status {
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_redirect_status {
+    my($self, $c) = @_;
+    my $types = {};
+    if($c->request->parameters->{'filter'}) {
+        $self->_do_filter($c);
+        my $url = Thruk::Utils::Filter::uri_with($c, $c->request->parameters);
+        $url    =~ s/^panorama.cgi/status.cgi/gmx;
+        $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
+        $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
+        $url    =~ s/\&amp;/&/gmx;
+        return $c->response->redirect($url);
+    }
+    return $c->response->redirect("status.cgi");
 }
 
 ##########################################################

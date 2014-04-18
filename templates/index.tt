@@ -83,7 +83,6 @@
     var oldurl = new String(window.location);
     oldurl     = oldurl.replace(/#.*$/, '');
     if(window.location.pathname.match(/\/[% product_prefix %]\/$/) && newurl != 'main.html' && newurl != '') {
-        //debug('go -> '+ newurl);
         if(newurl.match(/^\w+:\/\//)) {
             framesrc = newurl;
         }
@@ -132,10 +131,13 @@
     [% END +%]
     document.write('<frameset cols="172,*" frameborder="0" framespacing="0" border="0">');
     document.write('<frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />');
-    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash()" />');
+    document.write('<frame src="#" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash()" />');
     [%+ FOR line = index_content.split("\n") %]
     document.write('[% line.replace('/', '\\/') %]');
     [%+ END +%]
+
+    // set src by js to avoid problem with quotes
+    document.getElementById('main').src = framesrc;
     -->
     </script>
   </head>
