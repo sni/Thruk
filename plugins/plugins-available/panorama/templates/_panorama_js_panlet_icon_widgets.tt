@@ -694,7 +694,7 @@ Ext.onReady(function() {
         itemId:   'iconTip',
         target:    Ext.getBody(),
         delegate: 'A.iconWidget', // the cell class in which the tooltip has to be triggered
-        showDelay: 50,
+        showDelay: 500,
         dismissDelay: 0,
         width:     400,
         maxWidth:  400,

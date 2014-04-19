@@ -108,7 +108,7 @@
             this.el.on("contextmenu", function(e) {
                 /* right click context menu on tab body */
                 e.preventDefault();
-                var pos = [e.getX()-2, e.getY()-2];
+                var pos = [e.getX(), e.getY()];
                 Ext.create('Ext.menu.Menu', {
                     margin: '0 0 10 0',
                     items: [{
@@ -126,7 +126,7 @@
                         handler: function() {
                             var config = TP.clone(TP.clipboard);
                             if(config.conf == undefined) { config.conf = {} }
-                            config.conf.pos = pos;
+                            config.conf.pos = [pos[0]-8, pos[1] -8];
                             TP.add_panlet(config);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
