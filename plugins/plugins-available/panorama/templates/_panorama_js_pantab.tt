@@ -255,6 +255,7 @@
             for(var nr=0; nr<panels.length; nr++) {
                 var p = panels[nr];
                 if(p.startTimeouts) {
+                    window.clearTimeout(TP.timeouts['timeout_' + p.id + '_delayed_start']);
                     TP.timeouts['timeout_' + p.id + '_delayed_start'] = window.setTimeout(Ext.bind(p.startTimeouts, p, []), delay);
                     delay = delay + Math.round(interval*1000);
                 }
