@@ -199,7 +199,7 @@
     refreshHandler: function(newStatus) {
         if(newStatus != undefined && this.xdata.state != newStatus) {
             this.xdata.state = newStatus;
-            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.id), 200);
+            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.el.down('img').id, this.id), 200);
             this.saveState();
         }
         iconset = this.xdata.layout.iconset;

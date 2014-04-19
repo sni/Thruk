@@ -1075,14 +1075,14 @@ var TP = {
         });
     },
     /* let this element flicker and make it a little bit bigger */
-    flickerImg: function(id) {
-        var el     = Ext.ComponentManager.get(id);
+    flickerImg: function(dom_id, component_id) {
+        var c      = Ext.ComponentManager.get(component_id);
+        var el     = Ext.get(dom_id);
         var size   = el.getSize();
         var factor = 1.2;
-        var origLeft = el.getEl().dom.style.left;
-        var origTop  = el.getEl().dom.style.top;
-        el.getEl().dom.style.left = Number(el.getEl().dom.style.left.replace(/px$/, '')) - (size.width*(factor*0.25))+"px";
-        el.getEl().dom.style.top  = Number(el.getEl().dom.style.top.replace(/px$/, ''))  - (size.height*(factor*0.25))+"px";
+        var offset = Math.floor(((size.width*factor)-size.width)/2);
+        var origPos = c.getPosition();
+        c.setPosition([origPos[0]-offset, origPos[1]-offset]);
         el.setSize({width: size.width*factor, height: size.height*factor});
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
@@ -1094,12 +1094,12 @@ var TP = {
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
-        el.syncShadow();
-        TP.timeouts['timeout_sync_shadow'+el.id] = window.setTimeout(function() {
+        c.syncShadow();
+        TP.timeouts['timeout_sync_shadow'+dom_id] = window.setTimeout(function() {
             el.setSize({width: size.width, height: size.height});
-            el.getEl().dom.style.left = origLeft;
-            el.getEl().dom.style.top  = origTop;
-            el.syncShadow();
+            c.setPosition(origPos);
+            c.setSize({width: size.width, height: size.height});
+            c.syncShadow();
         }, 2500);
     },
 
