@@ -13,6 +13,7 @@ var ExtStateSplit = true;
 var default_dashboard = [% default_dashboard %];
 
 [%+ PROCESS _panorama_js_functions.tt +%]
+[%+ PROCESS _panorama_js_menu_add.tt +%]
 [%+ PROCESS _panorama_js_state_provider.tt +%]
 [%+ PROCESS _panorama_js_tab_reorder.tt +%]
 [%+ PROCESS _panorama_js_elements.tt +%]

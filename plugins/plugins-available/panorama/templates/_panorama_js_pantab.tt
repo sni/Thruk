@@ -104,6 +104,7 @@
             }
             var header = This.getDockedItems()[0];
             if(header) { header.hide() }
+            var tab = This;
             this.el.on("contextmenu", function(e) {
                 /* right click context menu on tab body */
                 e.preventDefault();
@@ -111,6 +112,15 @@
                 Ext.create('Ext.menu.Menu', {
                     margin: '0 0 10 0',
                     items: [{
+                        text:   'Refresh',
+                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                        handler: function() { TP.refreshAllSitePanel(tab) }
+                    }, {
+                        text:   'New',
+                        icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
+                        hideOnClick: false,
+                        menu:    TP.addPanletsMenu()
+                    }, {
                         text:   'Paste',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
                         handler: function() {

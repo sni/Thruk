@@ -1,0 +1,125 @@
+﻿TP.addPanletsMenu = function() {
+    var menu = {
+        items: [{
+                text:    'Icons & Widgets',
+                icon:   '[% url_prefix %]plugins/panorama/images/menu-parent.gif',
+                cls:    'hideRightArrow',
+                hideOnClick: false,
+                menu:    [{
+                        text:   'Host Status',
+                        icon:   '[% url_prefix %]plugins/panorama/images/server.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.HostStatusIcon'}, -8, -8) }
+                    }, {
+                        text:   'Hostgroup Status',
+                        icon:   '[% url_prefix %]plugins/panorama/images/server_link.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.HostgroupStatusIcon'}, -8, -8) }
+                    }, {
+                        text:   'Hosts Graph',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartHosts'}, -8, -8) }
+                    }, '-' ,{
+                        text:   'Service Status',
+                        icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon'}, -8, -8) }
+                    }, {
+                        text:   'Servicegroup Status',
+                        icon:   '[% url_prefix %]plugins/panorama/images/computer_link.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.ServicegroupStatusIcon'}, -8, -8) }
+                    }, {
+                        text:   'Services Graph',
+                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartServices'}, -8, -8) }
+                    }, '-', {
+                        text:   'Custom Filter',
+                        icon:   '[% url_prefix %]plugins/panorama/images/page_find.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.FilterStatusIcon'}, -8, -8) }
+                    }, '-', {
+                        text:   'Site Status',
+                        icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
+                    }
+                ]
+            },
+            /* Server */
+            '-', {
+                text:   'Site Status',
+                icon:   '[% url_prefix %]plugins/panorama/images/server.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
+            }, {
+                text:   'Server Status',
+                icon:   '[% url_prefix %]plugins/panorama/images/bricks.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridServerStats'}) }
+            }, {
+                text:   'Core Performance Metrics',
+                icon:   '[% url_prefix %]plugins/panorama/images/table_lightning.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }
+            }, {
+                text:   'Host / Service Performance',
+                icon:   '[% url_prefix %]plugins/panorama/images/table_gear.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridCheckMetrics'}) }
+            },
+            /* Hosts */
+            '-', {
+                text:   'Hosts',
+                icon:   '[% url_prefix %]plugins/panorama/images/server.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridHosts'}) }
+            }, {
+                text:   'Hosts Totals',
+                icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
+            },
+            /* Services */
+            '-', {
+                text:   'Services',
+                icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridServices'}) }
+            }, {
+                text:   'Services Totals',
+                icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
+            }, {
+                text:   'Mine Map',
+                icon:   '[% url_prefix %]plugins/panorama/images/minemap.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridServiceMineMap'}) }
+            },
+            /* Misc */
+            '-', {
+                text:   'Logfile',
+                icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
+            }, {
+                text:   'PNP Graph',
+                icon:   '[% url_prefix %]plugins/panorama/images/chart_curve.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
+            }, {
+                text:   'Nagvis Map',
+                icon:   '[% url_prefix %]plugins/panorama/images/world.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
+            }
+            [% IF use_feature_bp %]
+            , {
+                text:   'Business Process Map',
+                icon:   '[% url_prefix %]plugins/panorama/images/chart_organisation.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletBP'}) }
+            }
+            [% END %]
+            /* Mod-Gearman */
+            ,'-', {
+                text:   'Mod-Gearman Metrics',
+                icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
+            }, {
+                text:   'Mod-Gearman Charts',
+                icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
+            },
+            /* Generics */
+            '-', {
+                text:    'Generic Url Panlet',
+                icon:    '[% url_prefix %]plugins/panorama/images/html_add.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
+            }
+        ]
+    }
+    return(menu);
+}

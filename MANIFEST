@@ -830,6 +830,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_form_filter.tt
 plugins/plugins-available/panorama/templates/_panorama_js_functions.tt
 plugins/plugins-available/panorama/templates/_panorama_js_globals.tt
 plugins/plugins-available/panorama/templates/_panorama_js_grid_renderer.tt
+plugins/plugins-available/panorama/templates/_panorama_js_menu_add.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.tt

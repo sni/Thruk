@@ -52,7 +52,10 @@
                 }
             });
             this.el.down('img').on("load", function (evt, ele, opts) {
-                This.setSize(This.el.down('img').getSize());
+                var size = This.el.down('img').getSize();
+                if(size.width > 0 && size.height > 0) {
+                    This.setSize(size);
+                }
                 if(This.el.shadow.el) {
                     This.el.shadow.el.removeCls('hidden');
                 }
