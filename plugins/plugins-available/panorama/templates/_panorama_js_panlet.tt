@@ -142,14 +142,17 @@
             This.win_shadow.destroy();
 
             /* stop refreshing */
-            this.stopTimeouts();
+            This.stopTimeouts();
 
-            if(!this.redraw) {
+            if(!This.redraw) {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
 
+                // make sure timer is not started again
+                this.xdata.refresh = 0;
+
                 /* clear state information */
-                cp.clear(this.id);
+                cp.clear(This.id);
             }
         },
         show: function(This, eOpts) {
