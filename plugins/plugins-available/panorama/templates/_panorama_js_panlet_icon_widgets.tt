@@ -117,7 +117,7 @@
                                 },{
                                     xtype:  'button',
                                     text:   'No',
-                                    width:  50,
+                                    width:  30,
                                     handler: function() { menu.destroy(); }
                                 }, {
                                     xtype: 'button',

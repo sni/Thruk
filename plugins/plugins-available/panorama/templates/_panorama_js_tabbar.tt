@@ -28,7 +28,7 @@ Ext.define('TP.TabBar', {
             iconCls:  'debug-tab',
             tooltip:  'Debug Information',
             handler:  thruk_debug_window_handler,
-            margin:   '0 15 0 0',
+            margin:   '0 15 0 0'
         }, {
             xtype:    'label',
             text:     '[% date_format(c, date.now, "%H:%M") %]',

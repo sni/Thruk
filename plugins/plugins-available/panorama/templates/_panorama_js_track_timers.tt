@@ -1,4 +1,4 @@
-var timers    = {};
+﻿var timers    = {};
 var intervals = {};
 var originalSetTimeout    = window.setTimeout;
 var originalClearTimeout  = window.clearTimeout;
@@ -129,7 +129,7 @@ thruk_debug_window_handler = function() {
                     { text: 'Created',  dataIndex: 'setAt',    width:  60, renderer: TP.render_real_date },
                     { text: 'Timeout',  dataIndex: 'timeout',  width:  60 },
                     { text: 'Callback', dataIndex: 'callback', flex: 1,    renderer: TP.add_title    },
-                    { text: 'Caller',   dataIndex: 'caller',   flex: 1,    renderer: TP.add_title    },
+                    { text: 'Caller',   dataIndex: 'caller',   flex: 1,    renderer: TP.add_title    }
                 ]
             }],
             dockedItems: [{
@@ -203,7 +203,7 @@ thruk_debug_window_handler = function() {
                     { text: 'Last Run', dataIndex: 'lastRun',  width:  60, renderer: TP.render_real_date },
                     { text: 'Interval', dataIndex: 'interval', width:  60 },
                     { text: 'Callback', dataIndex: 'callback', flex: 1,    renderer: TP.add_title    },
-                    { text: 'Caller',   dataIndex: 'caller',   flex: 1,    renderer: TP.add_title    },
+                    { text: 'Caller',   dataIndex: 'caller',   flex: 1,    renderer: TP.add_title    }
                 ]
             }],
             dockedItems: [{
