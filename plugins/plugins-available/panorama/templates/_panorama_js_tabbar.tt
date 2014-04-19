@@ -97,7 +97,7 @@ Ext.define('TP.TabBar', {
             tooltip:  'add panlets',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
             html:     'add&nbsp;&nbsp;',
-            menu:      TP.addPanletsMenu()
+            menu:      TP.addPanletsMenu({open: 'left'})
         }
         [% END %]
         ]

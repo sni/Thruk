@@ -119,7 +119,7 @@
                         text:   'New',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
                         hideOnClick: false,
-                        menu:    TP.addPanletsMenu()
+                        menu:    TP.addPanletsMenu({open: 'right'})
                     }, {
                         text:   'Paste',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
