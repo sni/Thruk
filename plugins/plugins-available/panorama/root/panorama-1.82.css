@@ -37,8 +37,8 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     left: 4px;
     top: 3px;
 }
-.test-tab {
-    background-image: url("images/new.png") !important;
+.debug-tab {
+    background-image: url("images/information.png") !important;
     left: -4px;
     top: 0px;
 }

@@ -856,6 +856,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_slider.tt
 plugins/plugins-available/panorama/templates/_panorama_js_state_provider.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tab_reorder.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tabbar.tt
+plugins/plugins-available/panorama/templates/_panorama_js_track_timers.tt
 plugins/plugins-available/panorama/templates/_panorama_js_utils_base64.tt
 plugins/plugins-available/panorama/templates/panorama.tt
 plugins/plugins-available/panorama/templates/panorama_js.tt

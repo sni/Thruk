@@ -4,6 +4,13 @@ TP.render_date = function(v, td, item) {
     return TP.date_format(v);
 }
 
+/* render real date */
+TP.render_real_date = function(v, td, item) {
+    if(v == null) { return 'never'; }
+    // convert to timestamp first
+    return "<div title='"+v+"'>"+TP.date_format(v.getTime() / 1000)+"<\/div>";
+}
+
 /* just add title */
 TP.add_title  = function(v, td, item, row, col, store, view) {
     return "<div title='"+v+"'>"+v+"<\/div>";

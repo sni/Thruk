@@ -1,6 +1,9 @@
 ﻿Ext.BLANK_IMAGE_URL        = '[% url_prefix %]plugins/panorama/images/s.gif';
 
 [%+ PROCESS _common_js_bugs.tt +%]
+[% IF thruk_debug %]
+[%+ PROCESS _panorama_js_track_timers.tt +%]
+[% END %]
 
 Ext.namespace("TP");
 [%+ IF state +%]
@@ -70,7 +73,9 @@ Ext.onReady(function() {
         items:    [ new TP.TabBar() ]
     });
     Ext.getCmp('bug_report').hide();
-    Ext.getCmp('test_tab').hide();
+    [% IF !thruk_debug %]
+    Ext.getCmp('debug_tab').hide();
+    [% END %]
 
     [% IF readonly %]
     var icon = Ext.query('SPAN.new-tab')[0];

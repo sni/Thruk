@@ -21,12 +21,14 @@ Ext.define('TP.TabBar', {
     stateful:       true,
     tabBar:{
         items:[{ xtype: 'tbfill' },{
-            id:       'test_tab',
+            id:       'debug_tab',
             closable: false,
-            minWidth: 28,
-            iconCls:  'test-tab',
-            tooltip:  'Test',
-            handler:  TP.test
+            minWidth: 38,
+            html:     'Debug',
+            iconCls:  'debug-tab',
+            tooltip:  'Debug Information',
+            handler:  thruk_debug_window_handler,
+            margin:   '0 15 0 0',
         }, {
             xtype:    'label',
             text:     '[% date_format(c, date.now, "%H:%M") %]',
@@ -363,4 +365,3 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
         }
     });
 }
-
