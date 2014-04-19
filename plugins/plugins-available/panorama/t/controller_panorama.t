@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 156;
+    plan tests => 183;
 }
 
 BEGIN {
@@ -47,6 +47,9 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=stats_gearman',
     '/thruk/cgi-bin/panorama.cgi?task=stats_gearman_grid',
     '/thruk/cgi-bin/panorama.cgi?task=pnp_graphs',
+    '/thruk/cgi-bin/panorama.cgi?task=dashboard_list',
+    '/thruk/cgi-bin/panorama.cgi?task=userdata_images',
+    '/thruk/cgi-bin/panorama.cgi?task=userdata_sounds',
 ];
 
 for my $url (@{$pages}) {

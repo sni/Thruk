@@ -1114,6 +1114,9 @@ sub store_user_data {
     Thruk::Utils::IO::close($fh, $file.'.new');
     Thruk::Utils::IO::ensure_permissions('file', $file);
 
+    # update cached data
+    $c->stash->{'user_data_cached'} = $data;
+
     move($file.'.new', $file) or do {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
         return;

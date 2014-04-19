@@ -88,10 +88,6 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             this.lastdata = Ext.JSON.encode(ExtState);
         }
 
-        else {
-            /* set initial data which we can later check against to reduce number of update querys */
-            this.lastdata = setStateByTab(ExtState);
-        }
         return state;
     },
 
@@ -163,6 +159,11 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
         /* seperate state by dashboards */
         var data    = setStateByTab(ExtState);
+        if(!this.lastdata) {
+            /* set initial data which we can later check against to reduce number of update querys */
+            this.lastdata = data;
+            return;
+        }
         var params  = {};
         var changed = 0;
         for(var key in data) {

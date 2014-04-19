@@ -327,6 +327,7 @@ sub _stateprovider {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
 
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -407,12 +408,11 @@ sub _task_status {
 
     $data->{backends} = $c->stash->{'backend_detail'};
 
-    my $json = {
-        data        => $data,
-        pi_detail   => $c->stash->{pi_detail},
-    };
+    my $json = { data => $data };
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_json_pi_detail($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -454,6 +454,7 @@ sub _task_stats_core_metrics {
     };
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -479,6 +480,7 @@ sub _task_stats_check_metrics {
     };
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -551,6 +553,7 @@ sub _task_server_stats {
             { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' };
     }
 
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -558,6 +561,7 @@ sub _task_server_stats {
 sub _task_stats_gearman {
     my($self, $c) = @_;
     $c->stash->{'json'} = $self->_get_gearman_stats($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -588,6 +592,7 @@ sub _task_stats_gearman_grid {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -632,6 +637,7 @@ sub _task_show_logs {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -707,6 +713,7 @@ sub _task_site_status {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -767,7 +774,6 @@ sub _task_hosts {
         totalCount  => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
-        pi_detail   => $c->stash->{pi_detail},
     };
 
     if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
@@ -778,6 +784,8 @@ sub _task_hosts {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -859,7 +867,6 @@ sub _task_services {
         totalCount  => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
-        pi_detail   => $c->stash->{pi_detail},
     };
 
     if($c->stash->{'escape_html_tags'} or $c->stash->{'show_long_plugin_output'} eq 'inline') {
@@ -870,6 +877,8 @@ sub _task_services {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -888,7 +897,6 @@ sub _task_hosttotals {
             { 'header' => 'State', flex  => 1,  dataIndex => 'state' },
         ],
         data      => [],
-        pi_detail => $c->stash->{pi_detail},
     };
 
     for my $state (qw/up down unreachable pending/) {
@@ -899,6 +907,8 @@ sub _task_hosttotals {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -917,7 +927,6 @@ sub _task_servicetotals {
             { 'header' => 'State', flex  => 1,  dataIndex => 'state' },
         ],
         data      => [],
-        pi_detail => $c->stash->{pi_detail},
     };
 
     for my $state (qw/ok warning unknown critical pending/) {
@@ -928,6 +937,8 @@ sub _task_servicetotals {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -947,7 +958,6 @@ sub _task_hosts_pie {
         ],
         colors    => [ ],
         data      => [],
-        pi_detail => $c->stash->{pi_detail},
     };
     my $colors = {
         up          => '#00FF33',
@@ -966,6 +976,8 @@ sub _task_hosts_pie {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -985,7 +997,6 @@ sub _task_services_pie {
         ],
         colors    => [],
         data      => [],
-        pi_detail => $c->stash->{pi_detail},
     };
     my $colors = {
         ok       => '#00FF33',
@@ -1005,6 +1016,8 @@ sub _task_services_pie {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1033,7 +1046,6 @@ sub _task_servicesminemap {
             { 'header' => '<div class="minemap_first_col" style="top: '.($height/2-10).'px;">Hostname</div>', width => 120, height => $height, dataIndex => 'host_display_name' },
         ],
         data        => [],
-        pi_detail   => $c->stash->{pi_detail},
     };
 
     my $x=0;
@@ -1074,6 +1086,8 @@ sub _task_servicesminemap {
     }
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1183,6 +1197,7 @@ sub _task_host_detail {
         }
         $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
     }
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1220,6 +1235,7 @@ sub _task_service_detail {
         }
         $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
     }
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1313,10 +1329,11 @@ sub _task_dashboard_list {
             },
         ],
         data        => $dashboards,
-        pi_detail   => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;
+    $self->_add_json_pi_detail($c);
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1354,6 +1371,7 @@ sub _task_dashboard_update {
             $self->_save_dashboard($c, $dashboard, $extra_settings);
         }
     }
+    $self->_add_json_dashboard_timestamps($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1654,6 +1672,8 @@ sub _load_dashboard {
     } elsif($permission == 1) {
         $dashboard->{'readonly'} = 0;
     }
+    my @stat = stat($file);
+    $dashboard->{'ts'}   = $stat[9];
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
@@ -1703,7 +1723,7 @@ sub _merge_dashboard_into_hash {
         }
         elsif($key eq 'tab') {
             # add some values to the tab
-            for my $k (qw/user public readonly/) {
+            for my $k (qw/user public readonly ts/) {
                 $dashboard->{'tab'}->{$k} = $dashboard->{$k};
             }
             $data->{$id} = encode_json($dashboard->{$key});
@@ -1724,6 +1744,32 @@ sub _get_default_tab_xdata {
         autohideheader  => 1,
     });
 }
+
+##########################################################
+sub _add_json_dashboard_timestamps {
+    my($self, $c) = @_;
+    my $data = Thruk::Utils::get_user_data($c);
+    if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'open_tabs'}) {
+        $c->stash->{'json'}->{'dashboard_ts'} = {};
+        my $open_tabs = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'open_tabs'};
+        for my $tab (@{$open_tabs}) {
+            my $nr = $tab;
+            $nr =~ s/^tabpan-tab_//gmx;
+            my $file  = $self->{'var'}.'/'.$nr.'.tab';
+            my @stat = stat($file);
+            $c->stash->{'json'}->{'dashboard_ts'}->{$tab} = $stat[9];
+        }
+    }
+    return;
+}
+
+##########################################################
+sub _add_json_pi_detail {
+    my($self, $c) = @_;
+    $c->stash->{'json'}->{'pi_detail'} = $c->stash->{pi_detail};
+    return;
+}
+
 ##########################################################
 
 =head1 AUTHOR
