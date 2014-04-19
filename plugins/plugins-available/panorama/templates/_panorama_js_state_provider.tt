@@ -1,4 +1,39 @@
-﻿/* combine settings by tab */
+﻿Object.my_equals = function( x, y ) {
+    if ( x === y ) return true;
+    // if both x and y are null or undefined and exactly the same
+
+    if ( ! ( x instanceof Object ) || ! ( y instanceof Object ) ) return false;
+    // if they are not strictly equal, they both need to be Objects
+
+    if ( x.constructor !== y.constructor ) return false;
+    // they must have the exact same prototype chain, the closest we can do is
+    // test there constructor.
+
+    for ( var p in x ) {
+        if ( ! x.hasOwnProperty( p ) ) continue;
+        // other properties were tested using x.constructor === y.constructor
+
+        if ( ! y.hasOwnProperty( p ) ) return false;
+        // allows to compare x[ p ] and y[ p ] when set to undefined
+
+        if ( x[ p ] === y[ p ] ) continue;
+        // if they have the same strict value or identity then they are equal
+
+        if ( typeof( x[ p ] ) !== "object" ) return false;
+        // Numbers, Strings, Functions, Booleans must be strictly equal
+
+        if ( ! Object.my_equals( x[ p ],  y[ p ] ) ) return false;
+        // Objects and Arrays must be tested recursively
+    }
+
+    for ( p in y ) {
+        if ( y.hasOwnProperty( p ) && ! x.hasOwnProperty( p ) ) return false;
+        // allows x[ p ] to be set to undefined
+    }
+    return true;
+}
+
+/* combine settings by tab */
 function setStateByTab(state) {
     state = TP.clone(state);
     var data = {};
@@ -158,7 +193,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         }
 
         /* seperate state by dashboards */
-        var data    = setStateByTab(ExtState);
+        var data = setStateByTab(ExtState);
         if(!this.lastdata) {
             /* set initial data which we can later check against to reduce number of update querys */
             this.lastdata = data;
@@ -167,7 +202,25 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var params  = {};
         var changed = 0;
         for(var key in data) {
-            if(!this.lastdata[key] || data[key] != this.lastdata[key]) {
+            var equal = true;
+            if(!this.lastdata[key]) {
+                equal = false;
+            }
+            if(equal && data[key] != this.lastdata[key]) {
+                if(this.lastdata[key].length != data[key].length) {
+                    equal = false;
+                }
+                if(equal) {
+                    var dec1 = Ext.JSON.decode(this.lastdata[key]);
+                    var dec2 = Ext.JSON.decode(data[key]);
+                    for(var key2 in dec1) {
+                        if(!Object.my_equals(Ext.JSON.decode(dec1[key2]), Ext.JSON.decode(dec2[key2]))) {
+                            equal = false;
+                        }
+                    }
+                }
+            }
+            if(!equal) {
                 params[key] = data[key];
                 changed++;
             }
@@ -185,7 +238,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             async:  async,
             success: function(response, opts) {
                 // allow response to contain cookie messages
-                TP.getResponse(undefined, response, false);
+                TP.getResponse(undefined, response, false, true);
             }
         });
     }

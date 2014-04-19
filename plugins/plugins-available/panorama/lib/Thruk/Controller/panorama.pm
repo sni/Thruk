@@ -1749,16 +1749,14 @@ sub _get_default_tab_xdata {
 sub _add_json_dashboard_timestamps {
     my($self, $c) = @_;
     my $data = Thruk::Utils::get_user_data($c);
-    if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'open_tabs'}) {
+    if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
         $c->stash->{'json'}->{'dashboard_ts'} = {};
-        my $open_tabs = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'open_tabs'};
-        for my $tab (@{$open_tabs}) {
-            my $nr = $tab;
-            $nr =~ s/^tabpan-tab_//gmx;
-            my $file  = $self->{'var'}.'/'.$nr.'.tab';
-            my @stat = stat($file);
-            $c->stash->{'json'}->{'dashboard_ts'}->{$tab} = $stat[9];
-        }
+        my $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
+        my $nr = $tab;
+        $nr =~ s/^tabpan-tab_//gmx;
+        my $file  = $self->{'var'}.'/'.$nr.'.tab';
+        my @stat = stat($file);
+        $c->stash->{'json'}->{'dashboard_ts'}->{$tab} = $stat[9];
     }
     return;
 }

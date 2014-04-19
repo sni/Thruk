@@ -597,7 +597,7 @@ var TP = {
         return(true);
     },
     /* eval response data */
-    getResponse: function(panlet, response, no_json) {
+    getResponse: function(panlet, response, no_json, no_ts) {
         var refresh = {setType: Ext.emptyFn };
         if(panlet != undefined && panlet.getTool) {
             refresh = panlet.getTool('refresh') || panlet.getTool('broken');
@@ -628,6 +628,13 @@ var TP = {
                             debug(e);
                         }
                     }
+                }
+            }
+            var tab = Ext.getCmp('tabpan').getActiveTab();
+            if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
+                tab.ts = data.dashboard_ts[tab.id];
+                if(no_ts == undefined || no_ts == false) {
+                    TP.renewDashboard(tab);
                 }
             }
             /* contains a message? */
@@ -941,7 +948,8 @@ var TP = {
                 }
             }
         };
-        if(count == 0) { return; }
+        var tabpan = Ext.getCmp('tabpan');
+        if(count == 0 && tab != tabpan.getActiveTab()) { return; }
         var params = {
             types:    Ext.JSON.encode(req),
             backends: TP.getActiveBackendsPanel(tab)
@@ -1316,5 +1324,69 @@ var TP = {
                 TP.alertNumbers[tab_id].name = 0;
             }
         }
+    },
+    /* renew dashboards on the fly, delayed */
+    renewDashboard: function(tab) {
+        if(tab.renewInProgress) { return; }
+        window.clearTimeout(TP.timeouts['timeout_global_renewdashboard'+tab.id]);
+        TP.timeouts['timeout_global_renewdashboard'+tab.id] = window.setTimeout(function() {
+            TP.renewDashboardDo(tab);
+        });
+    },
+
+    /* renew dashboards on the fly */
+    renewDashboardDo: function(tab) {
+        var duration = 1000;
+        tab.renewInProgress = true;
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=dashboard_data',
+            method: 'POST',
+            params: { nr: tab.id },
+            async: true,
+            callback: function(options, success, response) {
+                if(success) {
+                    var data = TP.getResponse(undefined, response);
+                    data = data.data;
+                    var old_window_ids = TP.clone(tab.window_ids);
+                    for(var key in data) {
+                        var cfg = Ext.JSON.decode(data[key]);
+                        if(key.search(/tabpan-tab_\d+$/) != -1) {
+                            var p = Ext.getCmp(key);
+                            Ext.apply(p, cfg);
+                            delete cfg['readonly'];
+                            delete cfg['user'];
+                            delete cfg['ts'];
+                            delete cfg['public'];
+                            p.applyXdata();
+                            cp.set(key, cfg);
+                        }
+                        if(ExtState[key] == undefined) {
+                            cp.set(key, cfg);
+                            TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
+                            tab.saveState();
+                        }
+                        else if(data[key] != ExtState[key]) {
+                            // position and size changes can be applied by animation
+                            var p = Ext.getCmp(key);
+                            Ext.apply(p, cfg);
+                            cp.set(key, cfg);
+                            if(p.applyAnimated) {
+                                p.applyAnimated({duration:duration});
+                            }
+                        }
+                    }
+                    /* remove no longer existing panlets */
+                    for(var x=0; x<old_window_ids.length; x++) {
+                        var id = old_window_ids[x];
+                        if(data[id] == undefined) {
+                            Ext.getCmp(id).destroy();
+                        }
+                    }
+                    /* update stateproviders last data to prevent useless updates */
+                    cp.lastdata = setStateByTab(ExtState);
+                    tab.renewInProgress = false;
+                }
+            }
+        });
     }
 }

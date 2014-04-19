@@ -20,7 +20,8 @@
         [% IF readonly %]
         this.locked = true;
         [% END %]
-        this.redraw = false;
+        this.redraw     = false;
+        this.animations = 0;
 
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
@@ -134,7 +135,11 @@
                 }).showBy(This);
             });
             if(!this.locked) {
-                if(this.xdata.general[this.iconType] == '') {
+                var pos = this.getPosition();
+                this.xdata.layout.x = pos[0];
+                this.xdata.layout.y = pos[1];
+                this.saveState();
+                if(this.xdata.general[this.iconType] == '' && this.firstRun != false) {
                     this.firstRun = true;
                     TP.suppressIconTip = true;
                     TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
@@ -182,11 +187,15 @@
             }
         },
         move: function(This, x, y, eOpts) {
-            this.xdata.layout.x = x;
-            this.xdata.layout.y = y;
+            if(x != undefined) {
+                this.xdata.layout.x = Math.floor(x);
+            }
+            if(y != undefined) {
+                this.xdata.layout.y = Math.floor(y);
+            }
             // update settings window
             if(this.settingsWindow) {
-                this.settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+                this.settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:this.xdata.layout.x, y:this.xdata.layout.y});
             }
             /* update label */
             this.setIconLabel();
@@ -287,6 +296,21 @@
             if(this.el) { this.el.dom.href='#'; }
             this.autoEl.href='#';
         }
+    },
+    /* change size and position animated */
+    applyAnimated: function(animated) {
+        var win = this;
+        win.animations++;
+        win.stateful = false;
+        var delay = (animated.duration ? animated.duration : 250) + 250;
+        window.setTimeout(Ext.bind(function() {
+            win.animations--;
+            if(win.animations == 0) { win.stateful = true; }
+        }, win, []), delay);
+
+        layout = this.xdata.layout;
+        animated.to = {x:layout.x, y:layout.y};
+        this.animate(animated);
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {

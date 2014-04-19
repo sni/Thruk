@@ -26,7 +26,8 @@
         [% IF readonly %]
         this.locked = true;
         [% END %]
-        this.redraw = false;
+        this.redraw     = false;
+        this.animations = 0;
 
         if(this.locked) {
             this.resizable = false;
@@ -110,15 +111,29 @@
             this.setTitle(state.title);
         }
     },
+    /* change size and position animated */
+    applyAnimated: function(animated) {
+        var win = this;
+        win.animations++;
+        win.stateful = false;
+        var delay = (animated.duration ? animated.duration : 250) + 250;
+        window.setTimeout(Ext.bind(function() {
+            win.animations--;
+            if(win.animations == 0) { win.stateful = true; }
+        }, win, []), delay);
+        animated.to = {x:win.pos[0], y:win.pos[1], width: win.width, height: win.height};
+        win.animate(animated);
+    },
     listeners:  {
         /* make shadow snap to grid */
         move: function( This, x, y, eOpts ) {
-            var newpos = TP.get_snap(x, y);
-            if(newpos[0] != x || newpos[1] != y) {
-                if(this.snap != false) {
+            if(This.snap != false && This.animations == 0) {
+                var newpos = TP.get_snap(x, y);
+                if(newpos[0] != x || newpos[1] != y) {
                     This.setPosition( newpos[0], newpos[1], false );
                 }
             }
+            /* hide drop shadow */
             var shadow = Ext.get(This.id + '_shadow');
             if(shadow != undefined) { shadow.hide(); }
         },
