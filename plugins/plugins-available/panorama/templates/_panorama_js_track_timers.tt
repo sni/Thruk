@@ -79,6 +79,15 @@ function getIntervalStoreData() {
     return(intervalData);
 }
 
+/* return components in a form which can be used by a store */
+function getComponentsStoreData() {
+    var componentData = [];
+    Ext.ComponentMgr.all.each(function (name, item) {
+        componentData.push(item);
+    });
+    return(componentData);
+}
+
 /* show debug window */
 thruk_debug_window_handler = function() {
 
@@ -95,7 +104,13 @@ thruk_debug_window_handler = function() {
     });
     var timerStore = Ext.create('Ext.data.Store', {
         model: 'TimerModel',
-        data:   getTimerStoreData()
+        data:   getTimerStoreData(),
+        listeners: {
+            datachanged: function(store, eOpts) {
+                var label = Ext.getCmp('timerNr');
+                if(label) { label.update(store.count()+" Timer"); }
+            }
+        }
     });
     var timersTab = {
         title : 'Timers',
@@ -109,7 +124,7 @@ thruk_debug_window_handler = function() {
                 xtype:   'grid',
                 store:   timerStore,
                 columns: [
-                    { text: 'Id',       dataIndex: 'id',       width:  40 },
+                    { text: 'Id',       dataIndex: 'id',       width:  60 },
                     { text: 'Name',     dataIndex: 'name',     width: 170, renderer: TP.add_title    },
                     { text: 'Created',  dataIndex: 'setAt',    width:  60, renderer: TP.render_real_date },
                     { text: 'Timeout',  dataIndex: 'timeout',  width:  60 },
@@ -137,6 +152,12 @@ thruk_debug_window_handler = function() {
                             window.clearInterval(TP.timeouts['debug_timer_refresh']);
                         }
                     }
+                }, {
+                    xtype: 'tbfill'
+                }, {
+                    xtype:  'label',
+                    id:     'timerNr',
+                    text:    timerStore.count()+' Timer'
                 }]
             }]
         }]
@@ -156,7 +177,13 @@ thruk_debug_window_handler = function() {
     });
     var intervalStore = Ext.create('Ext.data.Store', {
         model: 'IntervalModel',
-        data:   getIntervalStoreData()
+        data:   getIntervalStoreData(),
+        listeners: {
+            datachanged: function(store, eOpts) {
+                var label = Ext.getCmp('intervalNr');
+                if(label) { label.update(store.count()+" Intervals"); }
+            }
+        }
     });
     var intervalsTab = {
         title : 'Intervals',
@@ -170,7 +197,7 @@ thruk_debug_window_handler = function() {
                 xtype:   'grid',
                 store:   intervalStore,
                 columns: [
-                    { text: 'Id',       dataIndex: 'id',       width:  40 },
+                    { text: 'Id',       dataIndex: 'id',       width:  60 },
                     { text: 'Name',     dataIndex: 'name',     width: 170, renderer: TP.add_title    },
                     { text: 'Created',  dataIndex: 'setAt',    width:  60, renderer: TP.render_real_date },
                     { text: 'Last Run', dataIndex: 'lastRun',  width:  60, renderer: TP.render_real_date },
@@ -199,10 +226,88 @@ thruk_debug_window_handler = function() {
                             window.clearInterval(TP.timeouts['debug_interval_refresh']);
                         }
                     }
+                }, {
+                    xtype: 'tbfill'
+                }, {
+                    xtype:  'label',
+                    id:     'intervalNr',
+                    text:    intervalStore.count()+' Intervals'
                 }]
             }]
         }]
     };
+
+
+    Ext.define('ComponentsModel', {
+        extend: 'Ext.data.Model',
+        fields: [
+            { name: 'id',         type: 'string' },
+            { name: 'name',       type: 'string' },
+            { name: 'xtype',      type: 'string' },
+            { name: '$className', type: 'string' },
+            { name: 'rendered',   type: 'bool'   }
+        ]
+    });
+    var componentsStore = Ext.create('Ext.data.Store', {
+        model: 'ComponentsModel',
+        data:   getComponentsStoreData(),
+        listeners: {
+            datachanged: function(store, eOpts) {
+                var label = Ext.getCmp('componentNr');
+                if(label) { label.update(store.count()+" Components"); }
+            }
+        }
+    });
+    var componentsTab = {
+        title : 'Components',
+        type  : 'panel',
+        layout: 'fit',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:   'grid',
+                store:   componentsStore,
+                columns: [
+                    { text: 'Id',       dataIndex: 'id',         width: 200, renderer: TP.add_title    },
+                    { text: 'Name',     dataIndex: 'name',       width: 200, renderer: TP.add_title    },
+                    { text: 'Type',     dataIndex: 'xtype',      width: 100 },
+                    { text: 'Class',    dataIndex: '$className', width: 150 },
+                    { text: 'Rendered', dataIndex: 'rendered',   width:  60 }
+                ]
+            }],
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'bottom',
+                items: [{
+                    xtype:  'button',
+                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    text:   'Refresh',
+                    handler: function(This) { This.up('panel').items.getAt(0).store.loadRawData(getComponentsStoreData(), false) }
+                }, {
+                    xtype:    'checkbox',
+                    boxLabel: 'Automatically Refresh',
+                    handler:  function(This) {
+                        if(This.checked) {
+                            TP.timeouts['debug_component_refresh'] = window.setInterval(function() {
+                                This.up('panel').items.getAt(0).store.loadRawData(getComponentsStoreData(), false);
+                            }, 1000);
+                        } else {
+                            window.clearInterval(TP.timeouts['debug_component_refresh']);
+                        }
+                    }
+                }, {
+                    xtype: 'tbfill'
+                }, {
+                    xtype:  'label',
+                    id:     'componentNr',
+                    text:    componentsStore.count()+' Components'
+                }]
+            }]
+        }]
+    };
+
 
     /* tab layout for settings window */
     var tabPanel = new Ext.TabPanel({
@@ -210,7 +315,8 @@ thruk_debug_window_handler = function() {
         enableTabScroll   : true,
         items             : [
             intervalsTab,
-            timersTab
+            timersTab,
+            componentsTab
         ]
     });
 
@@ -230,6 +336,13 @@ thruk_debug_window_handler = function() {
                     handler: function(This) {
                         debug_win.destroy();
                     }
-        }]
+        }],
+        listeners: {
+            destroy: function(This, eOpts) {
+                window.clearInterval(TP.timeouts['debug_interval_refresh']);
+                window.clearInterval(TP.timeouts['debug_timer_refresh']);
+                window.clearInterval(TP.timeouts['debug_component_refresh']);
+            }
+        }
     });
 };
