@@ -83,6 +83,7 @@ next:
             - fixed init script which did not stop/restart are fcgi processes
             - fixed displaying performance data with negative ranges
             - fixed duplicate bookmark handling
+            - fixed problem with sound alerts
 
 1.80-3   Sat Dec  7 18:26:15 CET 2013
           - optional guest account when using cookie authentication

@@ -1716,6 +1716,7 @@ sub set_audio_file {
             next if $h->{'acknowledged'} == 1;
             next if $h->{'notifications_enabled'} == 0;
             $worst_host = $h->{'state'} if $worst_host < $h->{'state'};
+            last if $worst_host >= 2;
         }
         if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'host_unreachable_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_unreachable_sound'};
@@ -1731,9 +1732,9 @@ sub set_audio_file {
             next if $s->{'scheduled_downtime_depth'} >= 1;
             next if $s->{'acknowledged'} == 1;
             next if $s->{'notifications_enabled'} == 0;
-            my $state = $s->{'state'} + 1;
-            $state = $state - 3 if $state == 4;
-            $worst_service = $state if $worst_service < $state;
+            next if $s->{'state'} == 4;
+            $worst_service = $s->{'state'} if $worst_service < $s->{'state'};
+            last if $worst_service == 3;
         }
         if($worst_service == 1 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
