@@ -460,7 +460,7 @@ TABLE.ministatus TH {
     background-color: #CEC7C7;
 }
 
-DIV.iconlabel {
+DIV.iconlabel, A.iconlabel {
   text-decoration: none;
   position: absolute;
 }

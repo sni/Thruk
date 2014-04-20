@@ -77,25 +77,10 @@
             }, 250);
         },
         show: function( This, eOpts ) {
-            var panel = This;
+            This.addDDListener(This);
             /* update label */
             this.setIconLabel();
             if(this.labelEl) { this.labelEl.show(); }
-            if(This.dd && !This.dd_listener_added) {
-                This.dd.addListener('dragstart', function(This, eOpts) {
-                    window.clearTimeout(TP.timeouts['click'+This.el.id]);
-                    TP.suppressIconTip = true;
-                });
-                This.dd.addListener('dragend', function(This, eOpts) {
-                    /* prevents opening link after draging */
-                    window.setTimeout(function() {
-                        window.clearTimeout(TP.timeouts['click'+This.el.id]);
-                    }, 100);
-                    TP.suppressIconTip = false;
-                    panel.setIconLabel();
-                });
-                This.dd_listener_added = true;
-            }
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -150,11 +135,21 @@
             this.removeCls('notclickable');
             if(this.el) { this.el.dom.href=xdata.link.link; }
             this.autoEl.href=xdata.link.link;
+            if(this.labelEl) {
+                this.labelEl.el.dom.href=xdata.link.link;
+                this.labelEl.removeCls('notclickable');
+                this.labelEl.addCls('clickable');
+            }
         } else {
             this.removeCls('clickable');
             this.addCls('notclickable');
             if(this.el) { this.el.dom.href='#'; }
             this.autoEl.href='#';
+            if(this.labelEl) {
+                this.labelEl.el.dom.href='#';
+                this.labelEl.removeCls('clickable');
+                this.labelEl.addCls('notclickable');
+            }
         }
     },
     /* change size and position animated */
@@ -200,7 +195,13 @@
                 autoShow:   true,
                 floating:   true,
                 shadow:     false,
-                cls:        'notclickable', // defaults to text cursor otherwise
+                cls:        (panel.xdata.link.link ? '' : 'not') +'clickable iconlabel', // defaults to text cursor otherwise
+                autoEl: {
+                    tag:     'a',
+                    href:    panel.xdata.link.link,
+                    target:  '',
+                    onclick: "return(TP.iconClickHandler('"+panel.id+"'));"
+                },
                 listeners: {
                     /* move parent element according to our drag / drop */
                     move: function(This, x, y, eOpts) {
@@ -216,6 +217,9 @@
                     },
                     afterrender: function(This, eOpts) {
                         panel.addClickEventhandler(This.el);
+                    },
+                    show: function( This, eOpts ) {
+                        panel.addDDListener(This);
                     }
                 }
             });
@@ -225,7 +229,6 @@
         this.labelEl.update(cfg.labeltext);
         el.style.color      = cfg.fontcolor;
         el.style.fontFamily = cfg.fontfamily;
-        this.labelEl.addCls('iconlabel');
         if(cfg.orientation == 'vertical') {
             this.labelEl.addCls('vertical');
         } else {
@@ -356,6 +359,24 @@
                 }
             }).showBy(This);
         });
+    },
+    addDDListener: function(el) {
+        var panel = this;
+        if(el.dd && !el.dd_listener_added) {
+            el.dd.addListener('dragstart', function(This, eOpts) {
+                window.clearTimeout(TP.timeouts['click'+panel.id]);
+                TP.suppressIconTip = true;
+            });
+            el.dd.addListener('dragend', function(This, eOpts) {
+                /* prevents opening link after draging */
+                window.setTimeout(function() {
+                    window.clearTimeout(TP.timeouts['click'+panel.id]);
+                }, 100);
+                TP.suppressIconTip = false;
+                panel.setIconLabel();
+            });
+            el.dd_listener_added = true;
+        }
     }
 });
 
