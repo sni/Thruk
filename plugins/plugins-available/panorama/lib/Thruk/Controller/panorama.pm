@@ -158,6 +158,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'userdata_images') {
             return($self->_task_userdata_images($c));
         }
+        elsif($task eq 'userdata_iconsets') {
+            return($self->_task_userdata_iconsets($c));
+        }
         elsif($task eq 'userdata_sounds') {
             return($self->_task_userdata_sounds($c));
         }
@@ -1139,8 +1142,25 @@ sub _task_userdata_images {
         };
     }
     $images = Thruk::Backend::Manager::_sort({}, $images, 'image');
-    unshift @{$images}, { path => '', image => 'none'};
+    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'/plugins/panorama/images/s.gif', image => 'none'};
     $c->stash->{'json'} = { data => $images };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_userdata_iconsets {
+    my($self, $c) = @_;
+    my $folder  = $c->config->{'home'}.'/root/thruk/usercontent/images/status';
+    my $folders = [];
+    for my $f (glob("$folder/*/up.png")) {
+        my $name = $f;
+        $name    =~ s/^\Q$folder\E//gmx;
+        $name    =~ s/^\///gmx;
+        $name    =~ s/\/up\.png$//gmx;
+        push @{$folders}, { name => $name };
+    }
+    $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
+    $c->stash->{'json'} = { data => $folders };
     return $c->forward('Thruk::View::JSON');
 }
 

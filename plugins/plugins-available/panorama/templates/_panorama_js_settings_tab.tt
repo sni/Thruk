@@ -273,7 +273,12 @@ TP.tabSettingsWindow = function() {
             store:       backgrounds,
             queryMode:  'local',
             displayField: 'image',
-            valueField: 'path'
+            valueField: 'path',
+            listConfig : {
+                getInnerTpl: function(displayField) {
+                    return '<div class="x-combo-list-item"><img src="{path}" height=16 width=16>{image}<\/div>';
+                }
+            }
         }, {
             /* auto hide panlet header */
             xtype:      'checkbox',

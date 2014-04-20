@@ -511,6 +511,19 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Layout Settings Tab */
+    var iconsetsStore = Ext.create('Ext.data.Store', {
+        fields: ['name'],
+        proxy: {
+            type: 'ajax',
+            url:  'panorama.cgi?task=userdata_iconsets',
+            reader: {
+                type: 'json',
+                root: 'data'
+            }
+        },
+        autoLoad: true,
+        data : []
+    });
     var layoutTab = {
         title: 'Layout',
         type:  'panel',
@@ -550,12 +563,19 @@ TP.iconShowEditDialog = function(panel) {
                         }
                     }
                 }, {
-                    fieldLabel: 'Icon Set',
-                    xtype:      'combobox',
-                    name:       'iconset',
-                    store:     ['default'],
-                    value:      'default',
-                    hidden:     panel.iconType == 'text' ? true : false
+                    fieldLabel:   'Icon Set',
+                    xtype:        'combobox',
+                    name:         'iconset',
+                    store:         iconsetsStore,
+                    value:        'default',
+                    valueField:   'name',
+                    displayField: 'name',
+                    hidden:        panel.iconType == 'text' ? true : false,
+                    listConfig : {
+                        getInnerTpl: function(displayField) {
+                            return '<div class="x-combo-list-item"><img src="../usercontent/images/status/{name}/ok.png" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                        }
+                    }
                 }, {
                     xtype:      'panel',
                     html:       'Place image sets in: [% usercontent_folder %]/images/status/',
