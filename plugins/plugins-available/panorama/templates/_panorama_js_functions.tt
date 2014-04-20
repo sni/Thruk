@@ -1342,7 +1342,6 @@ var TP = {
             url: 'panorama.cgi?task=dashboard_data',
             method: 'POST',
             params: { nr: tab.id },
-            async: true,
             callback: function(options, success, response) {
                 if(success) {
                     var data = TP.getResponse(undefined, response);
@@ -1384,6 +1383,8 @@ var TP = {
                     }
                     /* update stateproviders last data to prevent useless updates */
                     cp.lastdata = setStateByTab(ExtState);
+                    tab.renewInProgress = false;
+                } else {
                     tab.renewInProgress = false;
                 }
             }
