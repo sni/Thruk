@@ -53,12 +53,19 @@
       [% SET peer_key      = s.peer_key %]
       [% SET program_start = pi_detail.$peer_key.program_start %]
 
+      [% rowclasses = "" %]
+      [% IF s.state_type == 1 %]
+        [% rowclasses = "hard_state" %]
+      [% ELSE %]
+        [% rowclasses = "soft_state" %]
+      [% END%]
+
       [% IF lasthost != '' && lasthost != s.host_name %]
       <tr><td colspan="6"></td></tr>
       <tr><td colspan="6"></td></tr>
       [% END %]
 
-      <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %]>
+      <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
@@ -89,14 +96,14 @@
           </table>
         </td>
         <td class='status[% state %]'>[% state %]</td>
-        <td class='[% serviceclass %]' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
-        <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-        <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
+        <td class='[% serviceclass %] last_check' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
+        <td class='[% serviceclass %] duration' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
+        <td class='[% serviceclass %] attempt' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</td>
         [% IF show_backends_in_table == 1 %]
-        <td class='[% serviceclass %] backend_[% peer_key %]' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
+        <td class='[% serviceclass %] backend_[% peer_key %] site' align="center" nowrap>[% pi_detail.$peer_key.peer_name %]</td>
         [% END %]
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %]' align="left">
+            <td class='[% serviceclass %] output' align="left">
               [% IF s.active_checks_enabled == 0 %]
               Service is not scheduled to be checked...
               [% ELSE %]
@@ -104,7 +111,7 @@
               [% END %]
             </td>
           [% ELSE %]
-            <td align="left" class='[% serviceclass %]'
+            <td align="left" class='[% serviceclass %] output'
             [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]

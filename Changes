@@ -12,6 +12,7 @@ next:
           - optionally disable session revalidation in cookie auth
           - added csrf protection
           - added sorting of comments/downtimes on host/service pages
+          - added more css classes to status page, hard, sort, attempt, duration...
           - Business Process
             - added support for custom functions
           - Reports
