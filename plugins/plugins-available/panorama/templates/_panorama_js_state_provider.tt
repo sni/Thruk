@@ -123,6 +123,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             this.lastdata = Ext.JSON.encode(ExtState);
         }
 
+        this.queueChanges();
         return state;
     },
 
@@ -172,7 +173,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     /* send changes back to server */
     saveChanges: function(async, extraParams) {
         [% IF readonly %]return;[% END %]
-        if(!TP.initialized) { return; }
+        if(!TP.initialized) { this.queueChanges(); return; }
         if(async == undefined) { async = true; }
 
         // REMOVE AFTER: 01.01.2016

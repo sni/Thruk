@@ -3,6 +3,7 @@
         var me = this;
         Ext.apply(me, config);
 
+        this.shadow   = false;
         this.floating = true;
         this.stateful = true;
         this.stateId  = this.id;
@@ -22,7 +23,7 @@
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
         this.xdata.general  = {};
-        this.xdata.layout   = {};
+        this.xdata.layout   = { rotation:0 };
         this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0 };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
@@ -72,9 +73,7 @@
                 }
             }
             [% END %]
-            TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
-                if(This.el) { This.syncShadow(); }
-            }, 250);
+            This.applyRotation(This.xdata.layout.rotation);
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -95,18 +94,19 @@
             }
         },
         move: function(This, x, y, eOpts) {
-            if(x != undefined) {
-                this.xdata.layout.x = Math.floor(x);
-            }
-            if(y != undefined) {
-                this.xdata.layout.y = Math.floor(y);
-            }
+            var pos = This.getPosition();
+            if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
+            if(y != undefined) { y = Math.floor(y); } else { y = pos[1]; }
             // update settings window
-            if(this.settingsWindow) {
-                this.settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:this.xdata.layout.x, y:this.xdata.layout.y});
+            if(TP.iconSettingsWindow) {
+                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
             }
             /* update label */
             this.setIconLabel();
+            if(This.stateful) {
+                this.xdata.layout.x = Math.floor(x);
+                this.xdata.layout.y = Math.floor(y);
+            }
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
@@ -119,6 +119,7 @@
         /* restore position */
         if(xdata.layout) {
             this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
+            this.applyRotation(Number(xdata.layout.rotation));
         }
 
         /* set label */
@@ -167,6 +168,18 @@
         animated.to = {x:layout.x, y:layout.y};
         this.animate(animated);
     },
+    /* rotates this thing */
+    applyRotation: function(value) {
+        if(value == undefined) { return; }
+        value = value*-1;
+        var el = this.el;
+        if(this.rotateEl) { el = this.rotateEl; }
+        if(!el || !el.dom) { return; }
+        el.setStyle("-webkit-transform", "rotate("+value+"deg)");
+        el.setStyle("-moz-transform", "rotate("+value+"deg)");
+        el.setStyle("-o-transform", "rotate("+value+"deg)");
+        el.setStyle("-ms-transform", "rotate("+value+"deg)");
+    },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
         var tab = Ext.getCmp(this.panel_id);
@@ -213,6 +226,10 @@
                         if(diffX != 0 || diffY != 0) {
                             var pos = panel.getPosition();
                             panel.setPosition(pos[0]+diffX, pos[1]+diffY);
+                            // update settings window
+                            if(TP.iconSettingsWindow) {
+                                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:pos[0]+diffX, y:pos[1]+diffY});
+                            }
                         }
                     },
                     afterrender: function(This, eOpts) {
@@ -223,6 +240,9 @@
                     }
                 }
             });
+            if(panel.rotateLabel) {
+                panel.rotateEl = panel.labelEl.el; }
+                panel.applyRotation(panel.xdata.layout.rotation);
         }
         var el = this.labelEl.el.dom;
         el.style.zIndex     = this.el.dom.style.zIndex-1; /* keep behind icon, otherwise drag/drop wont work */
@@ -405,9 +425,6 @@ Ext.define('TP.IconWidget', {
                 if(size.width > 0 && size.height > 0) {
                     This.setSize(size);
                 }
-                if(This.el.shadow.el) {
-                    This.el.shadow.el.removeCls('hidden');
-                }
             });
         });
     },
@@ -457,10 +474,6 @@ Ext.define('TP.IconWidget', {
                 else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
             }
         }
-        var This = this;
-        TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
-            if(This.el) { This.syncShadow(); }
-        }, 500)
     }
 });
 
@@ -516,13 +529,26 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
                     layout:     'table',
-                    defaults:  { style: 'margin-left: 5px;' },
-                    items: [{ xtype: 'label', text:  'x:' },
-                            { xtype: 'textfield', name:  'x', width: 40 },
-                            { xtype: 'label', text:  'y:' },
-                            { xtype: 'textfield', name:  'y', width: 40 },
-                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 15px;' }
+                    items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'x', width: 55, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(This.value, pos[1]); }} },
+                            { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'y', width: 55, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(pos[0], This.value); }} },
+                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint' }
                     ]
+                }, {
+                    fieldLabel:   'Rotation',
+                    xtype:        'numberunit',
+                    allowDecimals: false,
+                    name:         'rotation',
+                    unit:         '°',
+                    minValue:     -360,
+                    maxValue:      360,
+                    step:           15,
+                    listeners: {
+                        change: function(This) {
+                            panel.applyRotation(This.value);
+                        }
+                    }
                 }, {
                     fieldLabel: 'Icon Set',
                     xtype:      'combobox',
@@ -691,27 +717,29 @@ TP.iconShowEditDialog = function(panel) {
         ]
     });
     var settingsWindow = new Ext.Window({
-        height : 300,
-        width  : 400,
-        layout : 'fit',
-        items  : tabPanel,
-        title  : 'Icon Settings',
+        height:  300,
+        width:   400,
+        layout: 'fit',
+        items:   tabPanel,
+        title:  'Icon Settings',
         buttonAlign: 'center',
         fbar: [/* panlet setting cancel button */
                { xtype:  'button',
                  text:   'cancel',
                  handler: function(This) {
-                    delete panel.settingsWindow;
+                    delete TP.iconSettingsWindow;
                     panel.stateful = true;
                     // if we cancel directly after adding a new icon, destroy it
                     if(panel.firstRun) {
                         panel.destroy();
                     }
                     settingsWindow.destroy();
+                    // restore position any layout
+                    panel.applyXdata();
                  }
                },
                /* panlet setting save button */
-               { xtype : 'button',
+               { xtype:  'button',
                  text:   'save',
                  handler: function() {
                     panel.stateful = true;
@@ -722,7 +750,7 @@ TP.iconShowEditDialog = function(panel) {
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
                     TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
-                    delete panel.settingsWindow;
+                    delete TP.iconSettingsWindow;
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();
@@ -1309,9 +1337,10 @@ Ext.define('TP.TextLabelWidget', {
     mixins: {
         smallWidget: 'TP.SmallWidget'
     },
-    iconType: 'text',
-    html:     '',
+    iconType:           'text',
+    html:               '',
     initialSettingsTab: 3,
+    rotateLabel:        true,
     constructor: function (config) {
         this.mixins.smallWidget.constructor.call(this, config);
         this.callParent();

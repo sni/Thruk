@@ -419,10 +419,11 @@ Ext.define('Ext.ux.FontPickerCombo', {
 });
 
 Ext.define('Ext.ux.NumberFieldUnit', {
-    extend:      'Ext.form.field.Number',
-    alias:       'widget.numberunit',
-    value:        0,
-    valueToRaw:   function(value) { return(String(value).replace(' '+this.unit, '')+' '+this.unit); },
-    rawToValue:   function(value) { return(Number(String(value).replace(' '+this.unit, ''))); },
-    getErrors:    function(value) { if(!Ext.isNumeric(String(value).replace(' '+this.unit, ''))) { return([value + " is not a valid number"]); } return([]); }
+    extend:        'Ext.form.field.Number',
+    alias:         'widget.numberunit',
+    value:          0,
+    valueToRaw:     function(value) { return(String(value).replace(' '+this.unit, '')+' '+this.unit); },
+    rawToValue:     function(value) { return(Number(String(value).replace(' '+this.unit, ''))); },
+    getErrors:      function(value) { if(!Ext.isNumeric(String(value).replace(' '+this.unit, ''))) { return([value + " is not a valid number"]); } return([]); },
+    getSubmitValue: function()      { var value = Number(this.rawToValue(this.callParent())); return(value); }
 });
