@@ -37,6 +37,10 @@
                         text:   'Site Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
+                    }, '-', {
+                        text:   'Text Label',
+                        icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.TextLabelWidget'}, -8, -8) }
                     }
                 ]
             },

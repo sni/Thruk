@@ -1,15 +1,11 @@
-﻿Ext.define('TP.IconWidget', {
-    extend: 'Ext.Img',
+﻿Ext.define('TP.SmallWidget', {
+    constructor: function(config) {
+        var me = this;
+        Ext.apply(me, config);
 
-    src:      '../usercontent/images/status/default/pending.png',
-    floating:  true,
-    cls:      'iconWidget',
-    stateful: true,
-    width:    16,
-    height:   16,
-    initComponent: function() {
-        this.callParent();
-        this.stateId = this.id;
+        this.floating = true;
+        this.stateful = true;
+        this.stateId  = this.id;
         if(this.xdata == undefined) {
             this.xdata = {};
         } else {
@@ -26,7 +22,7 @@
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
         this.xdata.general  = {};
-        this.xdata.layout   = { iconset: 'default' };
+        this.xdata.layout   = {};
         this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0 };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
@@ -40,100 +36,27 @@
             this.stateEvents = ['reconfigure', 'afterlayout', 'move'];
             this.draggable   = true;
         }
+
+        this.getState = function() {
+            var state      = {
+                xdata: this.xdata
+            };
+            return state;
+        };
+        this.origApplyState = this.applyState;
+        this.applyState = function(state) {
+            this.origApplyState(state);
+            if(state) {
+                this.applyXdata(state.xdata);
+            }
+        };
     },
     listeners: {
         afterrender: function(This, eOpts) {
             [% UNLESS readonly %]
             This.saveState();
-            /* open edit box on double or right click */
-            this.el.on("dblclick", function(e) {
-                if(!This.locked) {
-                    window.clearTimeout(TP.timeouts['click'+This.id]);
-                    TP.iconShowEditDialog(This);
-                }
-            });
-            this.el.down('img').on("load", function (evt, ele, opts) {
-                var size = This.el.down('img').getSize();
-                if(size.width > 0 && size.height > 0) {
-                    This.setSize(size);
-                }
-                if(This.el.shadow.el) {
-                    This.el.shadow.el.removeCls('hidden');
-                }
-            });
+            This.addClickEventhandler(This.el);
 
-            /* right click context menu on icon widgets */
-            this.el.on("contextmenu", function(e) {
-                e.preventDefault();
-                Ext.create('Ext.menu.Menu', {
-                    margin: '0 0 10 0',
-                    items: [{
-                        text:   'Refresh',
-                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
-                        handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) }
-                    }, {
-                        text:       'Show Details',
-                        icon:       '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
-                        href:       'status.cgi',
-                        hrefTarget: '_blank',
-                        listeners: {
-                            afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
-                        }
-                    }, {
-                        text:   'Settings',
-                        icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
-                        handler: function() { TP.iconShowEditDialog(This) },
-                        disabled: This.locked
-                    }, '-', {
-                        text:   'Copy',
-                        icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
-                        handler: function() { TP.clipboard = {type:This.xdata.cls, state:TP.clone_panel_config(This)} }
-                    }, {
-                        text:   'Paste',
-                        icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
-                        handler: function() { TP.add_panlet_delayed(TP.clipboard, -8, -8) },
-                        disabled: (This.locked || TP.clipboard == undefined)
-                    }, {
-                        text:   'Clone',
-                        icon:   '[% url_prefix %]plugins/panorama/images/page_lightning.png',
-                        handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) },
-                        disabled: This.locked
-                    }, '-', {
-                        text:   'Remove',
-                        icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
-                        disabled: This.locked,
-                        handler: function(me, eOpts) {
-                            var menu = me.parentMenu;
-                            var i = menu.items.findIndexBy(function(e) { if(e.text == 'Remove') {return true;} });
-                            menu.remove(i);
-                            menu.add({
-                                xtype: 'panel',
-                                border: false,
-                                bodyStyle: 'background: #F0F0F0;',
-                                items: [{
-                                    xtype:  'label',
-                                    text:   'Remove? ',
-                                    style:  'top: 3px; position: relative; color: red; font-weight: bold;'
-                                },{
-                                    xtype:  'button',
-                                    text:   'No',
-                                    width:  30,
-                                    handler: function() { menu.destroy(); }
-                                }, {
-                                    xtype: 'button',
-                                    text:  'Yes',
-                                    width:  30,
-                                    handler: function() { This.destroy(); menu.destroy(); }
-                                }]
-                            });
-                            menu.move(menu.items.length, i);
-                        }
-                    }],
-                    listeners: {
-                        beforehide: function(menu, eOpts) { menu.destroy(); }
-                    }
-                }).showBy(This);
-            });
             if(!this.locked) {
                 var pos = this.getPosition();
                 this.xdata.layout.x = pos[0];
@@ -155,6 +78,9 @@
         },
         show: function( This, eOpts ) {
             var panel = This;
+            /* update label */
+            this.setIconLabel();
+            if(this.labelEl) { this.labelEl.show(); }
             if(This.dd && !This.dd_listener_added) {
                 This.dd.addListener('dragstart', function(This, eOpts) {
                     window.clearTimeout(TP.timeouts['click'+This.el.id]);
@@ -170,9 +96,6 @@
                 });
                 This.dd_listener_added = true;
             }
-            /* update label */
-            this.setIconLabel();
-            if(this.labelEl) { this.labelEl.show(); }
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -203,69 +126,6 @@
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
             this.setIconLabel();
-        }
-    },
-    refreshHandler: function(newStatus) {
-        if(newStatus != undefined && this.xdata.state != newStatus) {
-            this.xdata.state = newStatus;
-            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.el.down('img').id, this.id), 200);
-            this.saveState();
-        }
-        iconset = this.xdata.layout.iconset;
-        if(this.iconType == 'host') {
-            if(this.acknowledged) {
-                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'); }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');     }
-            }
-            else if(this.downtime) {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_up.png');          }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unreachable.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');     }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');     }
-            } else {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/up.png');          }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/unreachable.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');     }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');     }
-            }
-        } else {
-            if(this.acknowledged) {
-                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_critical.png'); }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');  }
-            }
-            else if(this.downtime) {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_ok.png');       }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_critical.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');  }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');  }
-            } else {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
-            }
-        }
-        var This = this;
-        TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
-            if(This.el) { This.syncShadow(); }
-        }, 500)
-    },
-    getState: function() {
-        var state      = {
-            xdata: this.xdata
-        };
-        return state;
-    },
-    applyState: function(state) {
-        this.callParent(arguments);
-        if(state) {
-            this.applyXdata(state.xdata);
         }
     },
     applyXdata: function(xdata) {
@@ -328,15 +188,41 @@
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex) { return; }
         if(!cfg.labeltext) {
-            if(this.labelEl) { this.labelEl.remove(); this.labelEl = undefined; }
+            if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
             return;
         }
         if(!this.labelEl) {
-            this.labelEl = Ext.DomHelper.insertAfter(this.el, "<div><\/div>", true);
+            var panel = this;
+            this.labelEl = Ext.create('Ext.Component', {
+                'html':     ' ',
+                draggable:  true,
+                autoRender: true,
+                autoShow:   true,
+                floating:   true,
+                shadow:     false,
+                cls:        'notclickable', // defaults to text cursor otherwise
+                listeners: {
+                    /* move parent element according to our drag / drop */
+                    move: function(This, x, y, eOpts) {
+                        var diffX = 0, diffY = 0;
+                        if(x != undefined && This.oldX != undefined) { diffX = x - This.oldX; }
+                        if(y != undefined && This.oldY != undefined) { diffY = y - This.oldY; }
+                        if(x != undefined) { This.oldX = x; }
+                        if(y != undefined) { This.oldY = y; }
+                        if(diffX != 0 || diffY != 0) {
+                            var pos = panel.getPosition();
+                            panel.setPosition(pos[0]+diffX, pos[1]+diffY);
+                        }
+                    },
+                    afterrender: function(This, eOpts) {
+                        panel.addClickEventhandler(This.el);
+                    }
+                }
+            });
         }
-        var el = this.labelEl.dom;
+        var el = this.labelEl.el.dom;
         el.style.zIndex     = this.el.dom.style.zIndex-1; /* keep behind icon, otherwise drag/drop wont work */
-        el.innerHTML        = cfg.labeltext;
+        this.labelEl.update(cfg.labeltext);
         el.style.color      = cfg.fontcolor;
         el.style.fontFamily = cfg.fontfamily;
         this.labelEl.addCls('iconlabel');
@@ -348,41 +234,218 @@
         var left = Number(this.el.dom.style.left.replace('px', ''));
         var top  = Number(this.el.dom.style.top.replace('px', ''));
         el.style.top    = this.el.dom.style.top;
-        var offset   = Number(cfg.offset.replace(' px', ''));
-        var fontsize = Number(cfg.fontsize.replace(' px', ''));
+        var offset   = Number(String(cfg.offset).replace(' px', ''));
+        var fontsize = Number(String(cfg.fontsize).replace(' px', ''));
         el.style.fontSize = fontsize+'px';
         var size = this.labelEl.getSize();
+        var elWidth = this.width;
+        if(!elWidth) { elWidth = 0 }
+        var elHeight = this.height;
+        if(!elHeight) { elHeight = 0 }
         if(cfg.position == 'above') {
             top = top - offset - size.height;
             if(cfg.orientation == 'horizontal') {
-                left = left + (this.width / 2) - (size.width / 2) + 2;
+                left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
         }
         if(cfg.position == 'below') {
-            top = top + offset + this.height;
+            top = top + offset + elHeight;
             if(cfg.orientation == 'horizontal') {
-                left = left + (this.width / 2) - (size.width / 2) + 2;
+                left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
         }
         if(cfg.position == 'right') {
-            left = left + offset + this.width + 2;
+            left = left + offset + elWidth + 2;
             if(cfg.orientation == 'horizontal') {
-                top  = top + this.height/2 - size.height/2;
+                top  = top + elHeight/2 - size.height/2;
             }
         }
         if(cfg.position == 'left') {
             left = left - offset - size.width - 2;
             if(cfg.orientation == 'horizontal') {
-                top  = top + this.height/2 - size.height/2;
+                top  = top + elHheight/2 - size.height/2;
             }
         }
         el.style.left = left+"px";
         el.style.top  = top+"px";
+        this.labelEl.oldX = left;
+        this.labelEl.oldY = top;
+    },
+    /* add dbl click and context menu events */
+    addClickEventhandler: function(el) {
+        var This = this;
+        /* open edit box on double or right click */
+        el.on("dblclick", function(e) {
+            if(!This.locked) {
+                window.clearTimeout(TP.timeouts['click'+This.id]);
+                TP.iconShowEditDialog(This);
+            }
+        });
+
+        /* right click context menu on icon widgets */
+        el.on("contextmenu", function(e) {
+            e.preventDefault();
+            Ext.create('Ext.menu.Menu', {
+                margin: '0 0 10 0',
+                items: [{
+                    text:   'Refresh',
+                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) },
+                    hidden:  this.state == undefined ? true : false
+                }, {
+                    text:       'Show Details',
+                    icon:       '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                    href:       'status.cgi',
+                    hrefTarget: '_blank',
+                    listeners: {
+                        afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
+                    },
+                    hidden:  this.state == undefined ? true : false
+                }, {
+                    text:   'Settings',
+                    icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                    handler: function() { TP.iconShowEditDialog(This) },
+                    disabled: This.locked
+                }, '-', {
+                    text:   'Copy',
+                    icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
+                    handler: function() { TP.clipboard = {type:This.xdata.cls, state:TP.clone_panel_config(This)} }
+                }, {
+                    text:   'Paste',
+                    icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
+                    handler: function() { TP.add_panlet_delayed(TP.clipboard, -8, -8) },
+                    disabled: (This.locked || TP.clipboard == undefined)
+                }, {
+                    text:   'Clone',
+                    icon:   '[% url_prefix %]plugins/panorama/images/page_lightning.png',
+                    handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) },
+                    disabled: This.locked
+                }, '-', {
+                    text:   'Remove',
+                    icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
+                    disabled: This.locked,
+                    handler: function(me, eOpts) {
+                        var menu = me.parentMenu;
+                        var i = menu.items.findIndexBy(function(e) { if(e.text == 'Remove') {return true;} });
+                        menu.remove(i);
+                        menu.add({
+                            xtype: 'panel',
+                            border: false,
+                            bodyStyle: 'background: #F0F0F0;',
+                            items: [{
+                                xtype:  'label',
+                                text:   'Remove? ',
+                                style:  'top: 3px; position: relative; color: red; font-weight: bold;'
+                            },{
+                                xtype:  'button',
+                                text:   'No',
+                                width:  30,
+                                handler: function() { menu.destroy(); }
+                            }, {
+                                xtype: 'button',
+                                text:  'Yes',
+                                width:  30,
+                                handler: function() { This.destroy(); menu.destroy(); }
+                            }]
+                        });
+                        menu.move(menu.items.length, i);
+                    }
+                }],
+                listeners: {
+                    beforehide: function(menu, eOpts) { menu.destroy(); }
+                }
+            }).showBy(This);
+        });
+    }
+});
+
+Ext.define('TP.IconWidget', {
+    extend: 'Ext.Img',
+    mixins: {
+        smallWidget: 'TP.SmallWidget'
+    },
+
+    src:      '../usercontent/images/status/default/pending.png',
+    cls:      'iconWidget',
+    width:    16,
+    height:   16,
+
+    constructor: function (config) {
+        this.mixins.smallWidget.constructor.call(this, config);
+        this.callParent();
+    },
+    initComponent: function() {
+        this.callParent();
+        this.xdata.layout.iconset = 'default';
+
+        this.addListener('afterrender', function(This, eOpts) {
+            this.el.down('img').on("load", function (evt, ele, opts) {
+                var size = This.el.down('img').getSize();
+                if(size.width > 0 && size.height > 0) {
+                    This.setSize(size);
+                }
+                if(This.el.shadow.el) {
+                    This.el.shadow.el.removeCls('hidden');
+                }
+            });
+        });
+    },
+    refreshHandler: function(newStatus) {
+        if(newStatus != undefined && this.xdata.state != newStatus) {
+            this.xdata.state = newStatus;
+            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.el.down('img').id, this.id), 200);
+            this.saveState();
+        }
+        iconset = this.xdata.layout.iconset;
+        if(this.iconType == 'host') {
+            if(this.acknowledged) {
+                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_down.png');        }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'); }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');     }
+            }
+            else if(this.downtime) {
+                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_up.png');          }
+                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_down.png');        }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unreachable.png'); }
+                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');     }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');     }
+            } else {
+                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/up.png');          }
+                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/down.png');        }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/unreachable.png'); }
+                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');     }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');     }
+            }
+        } else {
+            if(this.acknowledged) {
+                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_warning.png');  }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_critical.png'); }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');  }
+            }
+            else if(this.downtime) {
+                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_ok.png');       }
+                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_warning.png');  }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_critical.png'); }
+                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');  }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');  }
+            } else {
+                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
+                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
+                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
+                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
+                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+            }
+        }
+        var This = this;
+        TP.timeouts['timeout_' + this.id + '_sync_shadow'] = window.setTimeout(function() {
+            if(This.el) { This.syncShadow(); }
+        }, 500)
     }
 });
 
 TP.iconSettingsWindow = undefined;
 TP.suppressIconTip    = false;
+
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
 
@@ -392,9 +455,11 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     /* General Settings Tab */
+    var generalItems = panel.getGeneralItems();
     var generalTab = {
         title : 'General',
         type  : 'panel',
+        hidden: generalItems != undefined ? false : true,
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -406,7 +471,7 @@ TP.iconShowEditDialog = function(panel) {
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
                     defaults:      { anchor: '-12', labelWidth: 132 },
-                    items:           panel.getGeneralItems()
+                    items:           generalItems
             }]
         }]
     };
@@ -442,14 +507,16 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'combobox',
                     name:       'iconset',
                     store:     ['default'],
-                    value:      'default'
+                    value:      'default',
+                    hidden:     panel.iconType == 'text' ? true : false
                 }, {
                     xtype:      'panel',
                     html:       'Place image sets in: [% usercontent_folder %]/images/status/',
                     style:      'text-align: center;',
                     bodyCls:    'form-hint',
                     padding:    '10 0 0 0',
-                    border:      0
+                    border:      0,
+                    hidden:     panel.iconType == 'text' ? true : false
                 }]
             }]
         }]
@@ -593,7 +660,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     var tabPanel = new Ext.TabPanel({
-        activeTab         : 0,
+        activeTab         : panel.initialSettingsTab ? panel.initialSettingsTab : 0,
         enableTabScroll   : true,
         items             : [
             generalTab,
@@ -1213,6 +1280,28 @@ Ext.define('TP.SiteStatusIcon', {
         }
         return(details);
     }
+});
+
+/* TextLabel Widget */
+Ext.define('TP.TextLabelWidget', {
+    extend: 'Ext.Component',
+    mixins: {
+        smallWidget: 'TP.SmallWidget'
+    },
+    iconType: 'text',
+    html:     '',
+    initialSettingsTab: 3,
+    constructor: function (config) {
+        this.mixins.smallWidget.constructor.call(this, config);
+        this.callParent();
+    },
+    initComponent: function() {
+        this.callParent();
+        var panel = this;
+        panel.xdata.label.labeltext = 'Label';
+    },
+    getGeneralItems: function() { return; },
+    refreshHandler: function()  { return; }
 });
 
 /* delay link opening to allow double click menu */
