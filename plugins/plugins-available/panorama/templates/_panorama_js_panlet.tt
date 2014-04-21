@@ -211,7 +211,10 @@
         },
         afterlayout: function(This) {
             /* make all border and background work */
-            this.applyBorderAndBackground();
+            if(this.xdata.showborder != true) {
+                // results in endless loop otherwise
+                this.applyBorderAndBackground();
+            }
         }
     },
     setFormDefaults: function() {
@@ -349,13 +352,17 @@
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
-        var tab = Ext.getCmp(this.panel_id);
         if(this.locked != val) {
-            this.saveState();
-            this.redraw = true;
-            this.destroy();
-            TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
+            this.redrawPanlet();
         }
+    },
+    /* destroys and redraws everything */
+    redrawPanlet: function() {
+        var tab = Ext.getCmp(this.panel_id);
+        this.saveState();
+        this.redraw = true;
+        this.destroy();
+        TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
     }
 });
 

@@ -444,6 +444,7 @@ TP.tabSettingsWindow = function() {
                     text:   'save',
                     handler: function() {
                         var win     = this.up('window');
+                        var oldautohideheader = tab.xdata.autohideheader;
 
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
                         if(!d_form.isValid()) { return false; }
@@ -479,6 +480,17 @@ TP.tabSettingsWindow = function() {
                         }
 
                         TP.refreshAllSitePanel(tab);
+
+                        /* border setting may have changed */
+                        if(oldautohideheader != tab.xdata.autohideheader) {
+                            var panels = TP.getAllPanel(tab);
+                            for(var nr=0; nr<panels.length; nr++) {
+                                var p = panels[nr];
+                                if(p.redrawPanlet) {
+                                    p.redrawPanlet();
+                                }
+                            }
+                        }
 
                         tab_win_settings.destroy();
                         return true;
