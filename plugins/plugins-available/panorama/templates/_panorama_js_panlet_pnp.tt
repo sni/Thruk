@@ -7,6 +7,30 @@
     ]
 });
 
+Ext.define('TP_GraphModell', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'text', type: 'string'},
+        {name: 'url',  type: 'string'},
+    ]
+});
+
+TP.graphStore = Ext.create('Ext.data.Store', {
+    pageSize: 10,
+    model: 'TP_GraphModell',
+    remoteSort: true,
+    remoteFilter: true,
+    proxy: {
+        type:   'ajax',
+        url:    'panorama.cgi?task=pnp_graphs',
+        method: 'POST',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    }
+});
+
 Ext.define('TP.PanletPNP', {
     extend: 'TP.Panlet',
 
@@ -22,7 +46,7 @@ Ext.define('TP.PanletPNP', {
         this.xdata.source     = 0;
         this.xdata.time       = '1h';
         this.xdata.showborder = true;
-        this.lastGraph      = '';
+        this.lastGraph        = '';
 
         this.size_adjustment_x = 97;
         this.size_adjustment_y = 50;
@@ -132,48 +156,6 @@ Ext.define('TP.PanletPNP', {
             this.refreshHandler();
         });
 
-        /* available graphs loader */
-        this.loader = {
-            autoLoad: false,
-            renderer: 'data',
-            scope:    this,
-            url:      'panorama.cgi?task=pnp_graphs',
-            ajaxOptions: { method: 'POST' },
-            loading:  false,
-            listeners: {
-                'beforeload': function(This, options, eOpts) {
-                    if(this.loading) {
-                        return false;
-                    }
-                    this.loading = true;
-                    return true;
-                }
-            },
-            callback: function(This, success, response, options) {
-                This.loading = false;
-                var data  = TP.getResponse(this, response);
-                if(data) {
-                    this.graph_store = Ext.create('Ext.data.Store', {
-                        data:  data,
-                        fields: ['text', 'url'],
-                        proxy: {
-                            type: 'memory',
-                            reader: {
-                                type: 'json',
-                                root: 'data'
-                            }
-                        }
-                    });
-                    var graph_combo = TP.getFormField(this.gearitem.down('form'), 'graph');
-                    graph_combo.store = this.graph_store;
-                    graph_combo.setValue(this.xdata.graph);
-                }
-            }
-        };
-        this.gearInitCallback = function(This) {
-            this.loader.load({});
-        };
-
         /* adjust size of image */
         this.adjustImgSize = function() {
             var imgPanel = this.items.getAt(0);
@@ -196,10 +178,13 @@ Ext.define('TP.PanletPNP', {
             xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
-            queryMode:      'local',
+            queryMode:      'remove',
             valueField:     'url',
             displayField:   'text',
-            store:          { fields: ['text', 'url'], data: [] },
+            typeAhead:       true,
+            minChars:        3,
+            pageSize:        10,
+            store:          TP.graphStore,
             listeners: {
                 select: function( combo, records, eOpts ) {
                     panel.xdata.source = 0;

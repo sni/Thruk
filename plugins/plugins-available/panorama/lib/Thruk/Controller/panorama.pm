@@ -1098,13 +1098,18 @@ sub _task_servicesminemap {
 sub _task_pnp_graphs {
     my($self, $c) = @_;
 
+    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
+    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
+    my $search = $c->{'request'}->{'parameters'}->{'query'};
     my $graphs = [];
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
         my $url = Thruk::Utils::get_pnp_url($c, $hst, 1);
         if($url ne '') {
+            my $text = $hst->{'name'}.';_HOST_';
+            next if($search and $text !~ m/$search/mxi);
             push @{$graphs}, {
-                text => $hst->{'name'}.';_HOST_',
+                text => $text,
                 url  => $url.'/image?host='.$hst->{'name'}.'&srv=_HOST_',
             };
         }
@@ -1114,15 +1119,24 @@ sub _task_pnp_graphs {
     for my $svc (@{$data}) {
         my $url = Thruk::Utils::get_pnp_url($c, $svc, 1);
         if($url ne '') {
+            my $text = $svc->{'host_name'}.';'.$svc->{'description'};
+            next if($search and $text !~ m/$search/mxi);
             push @{$graphs}, {
-                text => $svc->{'host_name'}.';'.$svc->{'description'},
+                text => $text,
                 url  => $url.'/image?host='.$svc->{'host_name'}.'&srv='.$svc->{'description'},
             };
         }
     }
-    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+    $c->{'db'}->_page_data($c, $graphs);
+    $graphs = Thruk::Backend::Manager::_sort({}, $c->stash->{'data'}, 'text');
 
-    $c->stash->{'json'} = { data => $graphs };
+    $c->stash->{'json'} = {
+        data        => $graphs,
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+    };
+
     return $c->forward('Thruk::View::JSON');
 }
 
