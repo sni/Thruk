@@ -122,6 +122,15 @@
                 }
             }
         });
+
+        /* auto load when url is set */
+        this.addListener('afterrender', function() {
+            if(this.xdata.url == '' || this.xdata.url == 'about:blank') {
+                this.gearHandler();
+            } else {
+                this.refreshHandler();
+            }
+        });
     },
     setGearItems: function() {
         var panel = this;
@@ -161,14 +170,5 @@
             xtype:      'checkbox',
             name:       'keepcss'
         }]);
-
-        /* auto load when url is set */
-        this.addListener('afterrender', function() {
-            if(this.xdata.url == '' || this.xdata.url == 'about:blank') {
-                this.gearHandler();
-            } else {
-                this.refreshHandler();
-            }
-        });
     }
 });
