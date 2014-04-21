@@ -1157,9 +1157,12 @@ sub _task_userdata_iconsets {
         $name    =~ s/^\Q$folder\E//gmx;
         $name    =~ s/^\///gmx;
         $name    =~ s/\/up\.png$//gmx;
-        push @{$folders}, { name => $name };
+        push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/ok.png", value => $name };
     }
     $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
+    if($c->request->parameters->{'withempty'}) {
+        unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' }
+    }
     $c->stash->{'json'} = { data => $folders };
     return $c->forward('Thruk::View::JSON');
 }
@@ -1762,6 +1765,7 @@ sub _get_default_tab_xdata {
         backends        => [],
         background      => 'none',
         autohideheader  => 1,
+        defaulticonset  => 'default',
     });
 }
 

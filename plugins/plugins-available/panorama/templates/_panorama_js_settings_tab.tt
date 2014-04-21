@@ -246,6 +246,19 @@ TP.tabSettingsWindow = function() {
 
 
     /* Dashboard Settings Tab */
+    var iconsetsStore = Ext.create('Ext.data.Store', {
+        fields: ['name', 'sample', 'value'],
+        proxy: {
+            type: 'ajax',
+            url:  'panorama.cgi?task=userdata_iconsets',
+            reader: {
+                type: 'json',
+                root: 'data'
+            }
+        },
+        autoLoad: true,
+        data : []
+    });
     var dashboardItems = [{
             xtype:      'checkbox',
             fieldLabel: 'Locked',
@@ -277,6 +290,19 @@ TP.tabSettingsWindow = function() {
             listConfig : {
                 getInnerTpl: function(displayField) {
                     return '<div class="x-combo-list-item"><img src="{path}" height=16 width=16>{image}<\/div>';
+                }
+            }
+        }, {
+            fieldLabel:   'Default Icon Set',
+            xtype:        'combobox',
+            name:         'defaulticonset',
+            store:         iconsetsStore,
+            value:        'default',
+            displayField: 'name',
+            valueField:   'value',
+            listConfig : {
+                getInnerTpl: function(displayField) {
+                    return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
                 }
             }
         }, {

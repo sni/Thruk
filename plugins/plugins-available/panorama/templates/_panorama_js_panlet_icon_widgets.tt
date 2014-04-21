@@ -417,7 +417,7 @@ Ext.define('TP.IconWidget', {
     },
     initComponent: function() {
         this.callParent();
-        this.xdata.layout.iconset = 'default';
+        this.xdata.layout.iconset = '';
 
         this.addListener('afterrender', function(This, eOpts) {
             this.el.down('img').on("load", function (evt, ele, opts) {
@@ -429,12 +429,16 @@ Ext.define('TP.IconWidget', {
         });
     },
     refreshHandler: function(newStatus) {
+        var tab = Ext.getCmp(this.panel_id);
         if(newStatus != undefined && this.xdata.state != newStatus) {
             this.xdata.state = newStatus;
             TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.el.down('img').id, this.id), 200);
             this.saveState();
         }
         iconset = this.xdata.layout.iconset;
+        if(iconset == '' || iconset == undefined) {
+            iconset = tab.xdata.defaulticonset;
+        }
         if(this.iconType == 'host') {
             if(this.acknowledged) {
                      if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_down.png');        }
@@ -512,10 +516,10 @@ TP.iconShowEditDialog = function(panel) {
 
     /* Layout Settings Tab */
     var iconsetsStore = Ext.create('Ext.data.Store', {
-        fields: ['name'],
+        fields: ['name', 'sample', 'value'],
         proxy: {
             type: 'ajax',
-            url:  'panorama.cgi?task=userdata_iconsets',
+            url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
             reader: {
                 type: 'json',
                 root: 'data'
@@ -567,13 +571,14 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'combobox',
                     name:         'iconset',
                     store:         iconsetsStore,
-                    value:        'default',
-                    valueField:   'name',
+                    value:        '',
+                    emptyText:    'use dashboards default icon set',
                     displayField: 'name',
+                    valueField:   'value',
                     hidden:        panel.iconType == 'text' ? true : false,
                     listConfig : {
                         getInnerTpl: function(displayField) {
-                            return '<div class="x-combo-list-item"><img src="../usercontent/images/status/{name}/ok.png" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
                         }
                     }
                 }, {
