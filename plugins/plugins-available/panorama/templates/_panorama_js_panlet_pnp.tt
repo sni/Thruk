@@ -11,7 +11,7 @@ Ext.define('TP_GraphModell', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'text', type: 'string'},
-        {name: 'url',  type: 'string'},
+        {name: 'url',  type: 'string'}
     ]
 });
 
