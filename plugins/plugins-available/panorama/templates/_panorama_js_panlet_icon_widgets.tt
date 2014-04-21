@@ -286,7 +286,7 @@
         if(cfg.position == 'left') {
             left = left - offset - size.width - 2;
             if(cfg.orientation == 'horizontal') {
-                top  = top + elHheight/2 - size.height/2;
+                top  = top + elHeight/2 - size.height/2;
             }
         }
         el.style.left = left+"px";
