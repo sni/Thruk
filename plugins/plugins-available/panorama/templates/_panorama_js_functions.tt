@@ -1071,7 +1071,6 @@ var TP = {
                     for(var key in ref.services) {
                         for(var key2 in ref.services[key]) {
                             for(var y=0; y<ref.services[key][key2].length; y++) {
-                                delete ref[name][key][y]['service'];
                                 ref.services[key][key2][y].refreshHandler(3);
                                 delete ref.services[key][key2][y]['service'];
                             }
