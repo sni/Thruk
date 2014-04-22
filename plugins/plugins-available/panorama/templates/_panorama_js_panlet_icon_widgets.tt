@@ -299,8 +299,8 @@
         var This = this;
         /* open edit box on double or right click */
         el.on("dblclick", function(e) {
+            window.clearTimeout(TP.timeouts['click'+This.id]);
             if(!This.locked) {
-                window.clearTimeout(TP.timeouts['click'+This.id]);
                 TP.iconShowEditDialog(This);
             }
         });
@@ -314,7 +314,7 @@
                     text:   'Refresh',
                     icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                     handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) },
-                    hidden:  this.state == undefined ? true : false
+                    hidden:  This.xdata.state == undefined ? true : false
                 }, {
                     text:       'Show Details',
                     icon:       '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
@@ -323,7 +323,7 @@
                     listeners: {
                         afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
                     },
-                    hidden:  this.state == undefined ? true : false
+                    hidden:  This.xdata.state == undefined ? true : false
                 }, {
                     text:   'Settings',
                     icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
