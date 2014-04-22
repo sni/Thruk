@@ -24,7 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:0 };
-        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0, bgcolor:'' };
+        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offsetx: 0, offsety: 0, bgcolor:'' };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
@@ -259,38 +259,43 @@
         }
         var left = Number(this.el.dom.style.left.replace('px', ''));
         var top  = Number(this.el.dom.style.top.replace('px', ''));
-        el.style.top    = this.el.dom.style.top;
-        var offset   = Number(String(cfg.offset).replace(' px', ''));
-        var fontsize = Number(String(cfg.fontsize).replace(' px', ''));
+        el.style.top      = this.el.dom.style.top;
+        var offsetx       = Number(String(cfg.offsetx).replace(' px', ''));
+        var offsety       = Number(String(cfg.offsety).replace(' px', ''));
+        var fontsize      = Number(String(cfg.fontsize).replace(' px', ''));
         el.style.fontSize = fontsize+'px';
-        var size = this.labelEl.getSize();
-        var elWidth = this.width;
+        var size          = this.labelEl.getSize();
+        var elWidth       = this.width;
+        var elHeight      = this.height;
         if(!elWidth) { elWidth = 0 }
-        var elHeight = this.height;
         if(!elHeight) { elHeight = 0 }
         if(cfg.position == 'above') {
-            top = top - offset - size.height;
+            top = top - offsetx - size.height;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
+            left = left - offsety;
         }
         if(cfg.position == 'below') {
-            top = top + offset + elHeight;
+            top = top + offsetx + elHeight;
             if(cfg.orientation == 'horizontal') {
                 left = left + (elWidth / 2) - (size.width / 2) + 2;
             }
+            left = left - offsety;
         }
         if(cfg.position == 'right') {
-            left = left + offset + elWidth + 2;
+            left = left + offsetx + elWidth + 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
+            top = top - offsety;
         }
         if(cfg.position == 'left') {
-            left = left - offset - size.width - 2;
+            left = left - offsetx - size.width - 2;
             if(cfg.orientation == 'horizontal') {
                 top  = top + elHeight/2 - size.height/2;
             }
+            top = top - offsety;
         }
         el.style.left = left+"px";
         el.style.top  = top+"px";
@@ -696,7 +701,8 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'fontfamily',
                         xtype:        'fontcbo',
                         value:        '',
-                        flex:          1
+                        flex:          1,
+                        editable:      false
                     }, {
                         xtype:        'numberunit',
                         allowDecimals: false,
@@ -714,15 +720,26 @@ TP.iconShowEditDialog = function(panel) {
                         xtype:        'combobox',
                         store:        ['below', 'above', 'left', 'right'],
                         value:        'below',
-                        flex:          1
+                        flex:          1,
+                        editable:      false
                     }, {
                         xtype:        'label',
-                        text:         'Offset:',
+                        text:         'Offset: x',
                         margins:      {top: 3, right: 2, bottom: 0, left: 7}
                     }, {
                         xtype:        'numberunit',
                         allowDecimals: false,
-                        name:         'offset',
+                        name:         'offsetx',
+                        width:         60,
+                        unit:         'px'
+                    }, {
+                        xtype:        'label',
+                        text:         'y',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'offsety',
                         width:         60,
                         unit:         'px'
                     }]
@@ -731,7 +748,8 @@ TP.iconShowEditDialog = function(panel) {
                     name:         'orientation',
                     xtype:        'combobox',
                     store:        ['horizontal', 'vertical'],
-                    value:        'horizontal'
+                    value:        'horizontal',
+                    editable:      false
                 }, {
                     fieldLabel:   'Background',
                     xtype:        'colorcbo',

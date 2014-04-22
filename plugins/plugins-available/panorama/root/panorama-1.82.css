@@ -132,7 +132,7 @@ DIV.TP_PanletGridHosts TD.x-grid-cell, DIV.TP_PanletGridServices TD.x-grid-cell 
 }
 
 /* vertical column header for minemap */
-DIV.x-grid-header-ct DIV.vertical, DIV.vertical {
+DIV.x-grid-header-ct DIV.vertical, DIV.vertical, A.vertical {
   position: relative;
   text-align: left;
   -webkit-transform: rotate(-90deg);
