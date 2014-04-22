@@ -259,9 +259,13 @@
         }
         var left = Number(this.el.dom.style.left.replace('px', ''));
         var top  = Number(this.el.dom.style.top.replace('px', ''));
+        if(!Ext.isNumber(top))  { top  = 0; }
+        if(!Ext.isNumber(left)) { left = 0; }
         el.style.top      = this.el.dom.style.top;
         var offsetx       = Number(String(cfg.offsetx).replace(' px', ''));
         var offsety       = Number(String(cfg.offsety).replace(' px', ''));
+        if(!Ext.isNumber(offsetx)) { offsetx = 0; }
+        if(!Ext.isNumber(offsety)) { offsety = 0; }
         var fontsize      = Number(String(cfg.fontsize).replace(' px', ''));
         el.style.fontSize = fontsize+'px';
         var size          = this.labelEl.getSize();
