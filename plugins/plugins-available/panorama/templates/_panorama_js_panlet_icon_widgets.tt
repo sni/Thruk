@@ -429,11 +429,14 @@ Ext.define('TP.IconWidget', {
         });
     },
     refreshHandler: function(newStatus) {
-        var tab = Ext.getCmp(this.panel_id);
-        if(newStatus != undefined && this.xdata.state != newStatus) {
-            this.xdata.state = newStatus;
-            TP.timeouts['timeout_' + this.id + '_flicker'] = window.setTimeout(TP.flickerImg(this.el.down('img').id, this.id), 200);
-            this.saveState();
+        var tab   = Ext.getCmp(this.panel_id);
+        var panel = this;
+        if(newStatus != undefined && panel.xdata.state != newStatus) {
+            panel.xdata.state = newStatus;
+            if(panel.el) {
+                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.down('img').id, panel.id]), 200);
+            }
+            panel.saveState();
         }
         iconset = this.xdata.layout.iconset;
         if(iconset == '' || iconset == undefined) {
