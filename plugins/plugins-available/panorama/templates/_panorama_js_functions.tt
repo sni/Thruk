@@ -782,7 +782,9 @@ var TP = {
         }
         store.resumeEvents();
         // add last one to trigger some events
-        store.loadRawData([[data[x]]], true);
+        if(data.length > 0) {
+            store.loadRawData([[data[x]]], true);
+        }
     },
     /* update an array store with new data with key/value */
     updateArrayStoreKV: function(store, data) {
@@ -795,7 +797,9 @@ var TP = {
         }
         store.resumeEvents();
         // add last one to trigger some events
-        store.loadRawData({name:data[x][0], value:data[x][1]}, true);
+        if(data.length > 0) {
+            store.loadRawData({name:data[x][0], value:data[x][1]}, true);
+        }
     },
     /* return location object for url */
     getLocationObject: function(url) {
