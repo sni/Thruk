@@ -267,6 +267,7 @@
         if(!Ext.isNumber(offsetx)) { offsetx = 0; }
         if(!Ext.isNumber(offsety)) { offsety = 0; }
         var fontsize      = Number(String(cfg.fontsize).replace(' px', ''));
+        if(!Ext.isNumber(fontsize)) { fontsize = 14; }
         el.style.fontSize = fontsize+'px';
         var size          = this.labelEl.getSize();
         var elWidth       = this.width;
