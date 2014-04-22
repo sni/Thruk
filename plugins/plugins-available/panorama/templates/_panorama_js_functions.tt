@@ -1377,7 +1377,9 @@ var TP = {
                             if(p.applyAnimated) {
                                 p.applyAnimated({duration:duration});
                             }
-                            window.setTimeout(Ext.bind(p.applyXdata, p, [cfg.xdata]), duration+100);
+                            if(p.applyXdata) {
+                                window.setTimeout(Ext.bind(p.applyXdata, p, [cfg.xdata]), duration+100);
+                            }
                         }
                     }
                     /* remove no longer existing panlets */

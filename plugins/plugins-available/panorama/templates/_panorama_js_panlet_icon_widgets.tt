@@ -556,6 +556,7 @@ Ext.define('TP.IconWidget', {
             this.xdata.size  = size;
             this.xdata.nsize = [naturalWidth, naturalHeight];
             panel.surface.items.getAt(0).animate({to:{translation:{x:0, y:0}}, duration: 0});
+            this.setIconLabel();
             this.saveState();
         }
     },
