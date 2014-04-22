@@ -575,9 +575,9 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:     'table',
                     items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'x', width: 55, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(This.value, pos[1]); }} },
+                            { xtype: 'numberfield', name:  'x', width: 55, value: panel.xdata.layout.x, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(This.value, pos[1]); }} },
                             { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'y', width: 55, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(pos[0], This.value); }} },
+                            { xtype: 'numberfield', name:  'y', width: 55, value: panel.xdata.layout.y, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(pos[0], This.value); }} },
                             { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint' }
                     ]
                 }, {
