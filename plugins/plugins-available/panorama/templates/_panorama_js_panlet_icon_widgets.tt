@@ -24,7 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:0 };
-        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offsetx: 0, offsety: 0, bgcolor:'' };
+        this.xdata.label    = { fontfamily: '', fontsize: 14, fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offsetx: 0, offsety: 0, bgcolor:'' };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
@@ -252,28 +252,18 @@
         el.style.background   = cfg.bgcolor;
         el.style.paddingLeft  = "3px";
         el.style.paddingRight = "3px";
-        if(cfg.orientation == 'vertical') {
-            this.labelEl.addCls('vertical');
-        } else {
-            this.labelEl.removeCls('vertical');
-        }
-        var left = Number(this.el.dom.style.left.replace('px', ''));
-        var top  = Number(this.el.dom.style.top.replace('px', ''));
-        if(!Ext.isNumber(top))  { top  = 0; }
-        if(!Ext.isNumber(left)) { left = 0; }
-        el.style.top      = this.el.dom.style.top;
-        var offsetx       = Number(String(cfg.offsetx).replace(' px', ''));
-        var offsety       = Number(String(cfg.offsety).replace(' px', ''));
-        if(!Ext.isNumber(offsetx)) { offsetx = 0; }
-        if(!Ext.isNumber(offsety)) { offsety = 0; }
-        var fontsize      = Number(String(cfg.fontsize).replace(' px', ''));
-        if(!Ext.isNumber(fontsize)) { fontsize = 14; }
-        el.style.fontSize = fontsize+'px';
+        if(cfg.orientation == 'vertical') { this.labelEl.addCls('vertical');    }
+        else                              { this.labelEl.removeCls('vertical'); }
+
         var size          = this.labelEl.getSize();
-        var elWidth       = this.width;
-        var elHeight      = this.height;
-        if(!elWidth) { elWidth = 0 }
-        if(!elHeight) { elHeight = 0 }
+        var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px', floor: true, default: 100 });
+        var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px', floor: true, default: 100 });
+        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,  unit:' px', floor: true, default:   0 });
+        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,  unit:' px', floor: true, default:   0 });
+        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize, unit:' px', floor: true, default:  14 });
+        var elWidth       = TP.extract_number_with_unit({ value: this.width,  unit:'', floor: true, default: 0 });
+        var elHeight      = TP.extract_number_with_unit({ value: this.height, unit:'', floor: true, default: 0 });
+        el.style.fontSize = fontsize+'px';
         if(cfg.position == 'above') {
             top = top - offsetx - size.height;
             if(cfg.orientation == 'horizontal') {
