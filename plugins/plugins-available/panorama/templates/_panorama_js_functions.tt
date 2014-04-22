@@ -1396,11 +1396,11 @@ var TP = {
             }
         });
     },
-    /* convert string number into real number: { value: '14px', unit: 'px', floor: true, default: 10 } */
+    /* convert string number into real number: { value: '14px', unit: 'px', floor: true, defaultValue: 10 } */
     extract_number_with_unit: function(options) {
         var val = String(options.value);
         var nr  = Number(val.replace(options.unit, ''));
-        if(!Ext.isNumber(nr)) { nr = options.default; }
+        if(!Ext.isNumber(nr)) { nr = options.defaultValue; }
         if(options.floor)     { nr = Math.floor(nr);  }
         return(nr);
     }

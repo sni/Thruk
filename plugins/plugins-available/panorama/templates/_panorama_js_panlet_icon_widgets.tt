@@ -17,7 +17,7 @@
         [% IF readonly %]
         this.locked = true;
         [% END %]
-        this.redraw     = false;
+        this.redrawOnly = false;
         this.animations = 0;
 
         this.xdata.cls      = this.$className;
@@ -85,7 +85,7 @@
             if(this.labelEl) { this.labelEl.hide(); }
         },
         destroy: function( This, eOpts ) {
-            if(!this.redraw) {
+            if(!this.redrawOnly) {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
@@ -142,8 +142,10 @@
                 this.labelEl.addCls('clickable');
             }
         } else {
-            this.removeCls('clickable');
-            this.addCls('notclickable');
+            if(this.el) {
+                this.removeCls('clickable');
+                this.addCls('notclickable');
+            }
             if(this.el) { this.el.dom.href='#'; }
             this.autoEl.href='#';
             if(this.labelEl) {
@@ -185,7 +187,7 @@
         var tab = Ext.getCmp(this.panel_id);
         if(this.locked != val) {
             this.saveState();
-            this.redraw = true;
+            this.redrawOnly = true;
             this.destroy();
             TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
         }
@@ -206,7 +208,6 @@
                 draggable:  true,
                 autoRender: true,
                 autoShow:   true,
-                floating:   true,
                 shadow:     false,
                 cls:        (panel.xdata.link.link ? '' : 'not') +'clickable iconlabel', // defaults to text cursor otherwise
                 autoEl: {
@@ -241,11 +242,12 @@
                 }
             });
             if(panel.rotateLabel) {
-                panel.rotateEl = panel.labelEl.el; }
-                panel.applyRotation(panel.xdata.layout.rotation);
+                panel.rotateEl = panel.labelEl.el;
+            }
+            panel.applyRotation(panel.xdata.layout.rotation);
         }
         var el = this.labelEl.el.dom;
-        el.style.zIndex       = this.el.dom.style.zIndex-1; /* keep behind icon */
+        el.style.zIndex       = Number(this.el.dom.style.zIndex)+1; /* keep above icon */
         this.labelEl.update(cfg.labeltext);
         el.style.color        = cfg.fontcolor;
         el.style.fontFamily   = cfg.fontfamily;
@@ -256,13 +258,15 @@
         else                              { this.labelEl.removeCls('vertical'); }
 
         var size          = this.labelEl.getSize();
-        var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px', floor: true, default: 100 });
-        var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px', floor: true, default: 100 });
-        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,  unit:' px', floor: true, default:   0 });
-        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,  unit:' px', floor: true, default:   0 });
-        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize, unit:' px', floor: true, default:  14 });
-        var elWidth       = TP.extract_number_with_unit({ value: this.width,  unit:'', floor: true, default: 0 });
-        var elHeight      = TP.extract_number_with_unit({ value: this.height, unit:'', floor: true, default: 0 });
+        if(size.width == 0) { return; }
+        var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
+        var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
+        var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,            unit:' px', floor: true, defaultValue:   0 });
+        var offsety       = TP.extract_number_with_unit({ value: cfg.offsety,            unit:' px', floor: true, defaultValue:   0 });
+        var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,           unit:' px', floor: true, defaultValue:  14 });
+        var elWidth       = TP.extract_number_with_unit({ value: this.width,             unit:'',    floor: true, defaultValue:   0 });
+        var elHeight      = TP.extract_number_with_unit({ value: this.height,            unit:'',    floor: true, defaultValue:   0 });
+
         el.style.fontSize = fontsize+'px';
         if(cfg.position == 'above') {
             top = top - offsetx - size.height;
@@ -404,15 +408,16 @@
 });
 
 Ext.define('TP.IconWidget', {
-    extend: 'Ext.Img',
+    extend: 'Ext.draw.Component',
     mixins: {
         smallWidget: 'TP.SmallWidget'
     },
 
-    src:      '../usercontent/images/status/default/pending.png',
+    viewBox:   false,
     cls:      'iconWidget',
-    width:    16,
-    height:   16,
+    floating:  true,
+    width:     22,
+    height:    22,
 
     constructor: function (config) {
         this.mixins.smallWidget.constructor.call(this, config);
@@ -422,12 +427,36 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         this.callParent();
         this.xdata.layout.iconset = '';
-
         this.addListener('afterrender', function(This, eOpts) {
-            this.el.down('img').on("load", function (evt, ele, opts) {
+            this.el.down('image').on("load", function (evt, ele, opts) {
                 This.fixSize();
             });
         });
+    },
+    items: [{
+        type:      'image',
+        src:        Ext.BLANK_IMAGE_URL,
+        width:      16,
+        height:     16,
+        x:          0,
+        y:          0,
+        group:     'img',
+        rotation: { degrees: 0 }
+    }],
+    applyXdata: function(xdata) {
+        if(xdata == undefined) { xdata = this.xdata; }
+        this.mixins.smallWidget.applyXdata.call(this, xdata);
+        if(xdata.nsize && xdata.size) {
+            this.items[0].x      = (xdata.size - xdata.nsize[0]) / 2;
+            this.items[0].y      = (xdata.size - xdata.nsize[1]) / 2;
+            var size = Math.ceil(Math.sqrt(Math.pow(xdata.nsize[0], 2) + Math.pow(xdata.nsize[1], 2)));
+            this.setSize(size, size);
+            this.items[0].width  = xdata.nsize[0];
+            this.items[0].height = xdata.nsize[1];
+            if(xdata.layout.rotation) {
+                this.items[0].rotation = { degrees: -1*xdata.layout.rotation };
+            }
+        }
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);
@@ -435,7 +464,7 @@ Ext.define('TP.IconWidget', {
         if(newStatus != undefined && panel.xdata.state != newStatus) {
             panel.xdata.state = newStatus;
             if(panel.el) {
-                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.down('img').id, panel.id]), 200);
+                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id, panel.id]), 200);
             }
             panel.saveState();
         }
@@ -483,19 +512,62 @@ Ext.define('TP.IconWidget', {
                 else                           { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
             }
         }
-        if(newSrc != this.src) {
-            this.src = newSrc;
-            this.setSrc(newSrc);
+        if(newSrc != panel.src) {
+            panel.src = newSrc;
+            if(panel.surface && panel.surface.items.getAt(0)) {
+                // already rendered
+                panel.surface.items.getAt(0).setAttributes({src: newSrc}).redraw();
+            } else {
+                // set initial config
+                panel.items[0].src = newSrc;
+            }
         }
     },
     fixSize: function() {
-        if(!this.el || !this.el.down('img')) { return; }
-        var naturalWidth  = this.el.down('img').dom.naturalWidth;
-        var naturalHeight = this.el.down('img').dom.naturalHeight;
-        if(naturalWidth > 0 && naturalHeight > 0) {
-            this.setSize(naturalWidth, naturalHeight);
-            this.el.down('img').setSize(naturalWidth, naturalHeight);
+        var panel = this;
+        if(!this.el || !this.el.down('image')) { return; }
+        if(TP.imageSizes == undefined) { TP.imageSizes = {} }
+        var src = this.el.down('image').dom.href.baseVal;
+        if(TP.imageSizes[src] == undefined) {
+            var img = Ext.create('Ext.Img', {
+                src:       Ext.BLANK_IMAGE_URL,
+                width:     1,
+                height:    1,
+                style:    "position: absolute; top: -1px;",
+                floating:  true,
+                listeners: {
+                    afterrender: function(This, eOpts) {
+                        This.setSrc(src);
+                        This.el.on("load", function (evt, ele, opts) {
+                            var naturalWidth  = This.el.dom.naturalWidth;
+                            var naturalHeight = This.el.dom.naturalHeight;
+                            TP.imageSizes[src] = [naturalWidth, naturalHeight];
+                            panel.fixSize();
+                            This.destroy();
+                        });
+                    }
+                }
+            }).show();
+            return;
         }
+        var naturalWidth  = TP.imageSizes[src][0];
+        var naturalHeight = TP.imageSizes[src][1];
+        if(naturalWidth > 0 && naturalHeight > 0) {
+            var size = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
+            this.setSize(size, size);
+            this.xdata.size  = size;
+            this.xdata.nsize = [naturalWidth, naturalHeight];
+            panel.surface.items.getAt(0).animate({to:{translation:{x:0, y:0}}, duration: 0});
+            this.saveState();
+        }
+    },
+    /* rotates this thing */
+    applyRotation: function(value) {
+        if(value        == undefined) { return; }
+        if(this.surface == undefined) { return; }
+        if(this.surface.items.getAt(0) == undefined) { return; }
+        value = value*-1;
+        this.surface.items.getAt(0).animate({to:{rotation:{degrees: value}}, duration: 0 });
     }
 });
 
@@ -579,10 +651,8 @@ TP.iconShowEditDialog = function(panel) {
                     minValue:     -360,
                     maxValue:      360,
                     step:           15,
-                    listeners: {
-                        change: function(This) {
-                            panel.applyRotation(This.value);
-                        }
+                    value:         panel.xdata.layout.rotation,
+                    listeners:   { change: function(This) { panel.applyRotation(This.value); }
                     }
                 }, {
                     fieldLabel:   'Icon Set',
@@ -862,7 +932,9 @@ TP.iconShowEditDialog = function(panel) {
     } else {
         panelPos[1] = viewPortSize.height - 330;
     }
+    panel.setIconLabel();
     settingsWindow.showAt(panelPos);
+    settingsWindow.toFront();
 };
 
 Ext.onReady(function() {
