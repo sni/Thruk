@@ -512,15 +512,13 @@ Ext.define('TP.IconWidget', {
                 else                           { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
             }
         }
-        if(newSrc != panel.src) {
-            panel.src = newSrc;
-            if(panel.surface && panel.surface.items.getAt(0)) {
-                // already rendered
-                panel.surface.items.getAt(0).setAttributes({src: newSrc}).redraw();
-            } else {
-                // set initial config
-                panel.items[0].src = newSrc;
-            }
+        panel.src = newSrc;
+        if(panel.surface && panel.surface.items.getAt(0)) {
+            // already rendered
+            panel.surface.items.getAt(0).setAttributes({src: newSrc}).redraw();
+        } else {
+            // set initial config
+            panel.items[0].src = newSrc;
         }
     },
     fixSize: function() {
@@ -652,8 +650,7 @@ TP.iconShowEditDialog = function(panel) {
                     maxValue:      360,
                     step:           15,
                     value:         panel.xdata.layout.rotation,
-                    listeners:   { change: function(This) { panel.applyRotation(This.value); }
-                    }
+                    listeners:   { change: function(This) { panel.applyRotation(This.value); } }
                 }, {
                     fieldLabel:   'Icon Set',
                     xtype:        'combobox',
