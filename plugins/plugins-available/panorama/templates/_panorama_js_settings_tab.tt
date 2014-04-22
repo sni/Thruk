@@ -481,13 +481,15 @@ TP.tabSettingsWindow = function() {
 
                         TP.refreshAllSitePanel(tab);
 
-                        /* border setting may have changed */
+                        /* border setting may have changed, so redraw all panlets with some small delay */
                         if(oldautohideheader != tab.xdata.autohideheader) {
                             var panels = TP.getAllPanel(tab);
+                            var delay  = 30;
                             for(var nr=0; nr<panels.length; nr++) {
                                 var p = panels[nr];
                                 if(p.redrawPanlet) {
-                                    p.redrawPanlet();
+                                    window.setTimeout(Ext.bind(p.redrawPanlet, p, []), delay);
+                                    delay = delay + 30;
                                 }
                             }
                         }
