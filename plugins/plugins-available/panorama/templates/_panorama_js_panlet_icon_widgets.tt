@@ -24,7 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:0 };
-        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0 };
+        this.xdata.label    = { fontfamily: '', fontsize: '14', fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offset: 0, bgcolor:'' };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
@@ -245,10 +245,13 @@
                 panel.applyRotation(panel.xdata.layout.rotation);
         }
         var el = this.labelEl.el.dom;
-        el.style.zIndex     = this.el.dom.style.zIndex-1; /* keep behind icon, otherwise drag/drop wont work */
+        el.style.zIndex       = this.el.dom.style.zIndex-1; /* keep behind icon */
         this.labelEl.update(cfg.labeltext);
-        el.style.color      = cfg.fontcolor;
-        el.style.fontFamily = cfg.fontfamily;
+        el.style.color        = cfg.fontcolor;
+        el.style.fontFamily   = cfg.fontfamily;
+        el.style.background   = cfg.bgcolor;
+        el.style.paddingLeft  = "3px";
+        el.style.paddingRight = "3px";
         if(cfg.orientation == 'vertical') {
             this.labelEl.addCls('vertical');
         } else {
@@ -729,6 +732,11 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'combobox',
                     store:        ['horizontal', 'vertical'],
                     value:        'horizontal'
+                }, {
+                    fieldLabel:   'Background',
+                    xtype:        'colorcbo',
+                    name:         'bgcolor',
+                    value:        ''
                 }]
             }]
         }]
