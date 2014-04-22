@@ -1095,6 +1095,7 @@ var TP = {
         var origPos = c.getPosition();
         c.setPosition([origPos[0]-offset, origPos[1]-offset]);
         el.setSize({width: size.width*factor, height: size.height*factor});
+        if(c.fixSize) { c.fixSize(); }
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
@@ -1110,6 +1111,7 @@ var TP = {
             el.setSize({width: size.width, height: size.height});
             c.setPosition(origPos);
             c.setSize({width: size.width, height: size.height});
+            if(c.fixSize) { c.fixSize(); }
             c.syncShadow();
         }, 2500);
     },

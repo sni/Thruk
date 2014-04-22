@@ -429,15 +429,13 @@ Ext.define('TP.IconWidget', {
         this.callParent();
     },
     initComponent: function() {
+        var panel = this;
         this.callParent();
         this.xdata.layout.iconset = '';
 
         this.addListener('afterrender', function(This, eOpts) {
             this.el.down('img').on("load", function (evt, ele, opts) {
-                var size = This.el.down('img').getSize();
-                if(size.width > 0 && size.height > 0) {
-                    This.setSize(size);
-                }
+                This.fixSize();
             });
         });
     },
@@ -455,44 +453,58 @@ Ext.define('TP.IconWidget', {
         if(iconset == '' || iconset == undefined) {
             iconset = tab.xdata.defaulticonset;
         }
+        var newSrc;
         if(this.iconType == 'host') {
             if(this.acknowledged) {
-                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'); }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');     }
+                     if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_down.png';        }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'; }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';     }
             }
             else if(this.downtime) {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_up.png');          }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unreachable.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');     }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');     }
+                if(     this.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_up.png';          }
+                else if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_down.png';        }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unreachable.png'; }
+                else if(this.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';     }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';     }
             } else {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/up.png');          }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/down.png');        }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/unreachable.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');     }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');     }
+                if(     this.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/up.png';          }
+                else if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/down.png';        }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/unreachable.png'; }
+                else if(this.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';     }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';     }
             }
         } else {
             if(this.acknowledged) {
-                     if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_critical.png'); }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/acknowledged_unknown.png');  }
+                     if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_warning.png';  }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_critical.png'; }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';  }
             }
             else if(this.downtime) {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_ok.png');       }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_critical.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_pending.png');  }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/downtime_unknown.png');  }
+                if(     this.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_ok.png';       }
+                else if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_warning.png';  }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_critical.png'; }
+                else if(this.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';  }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';  }
             } else {
-                if(     this.xdata.state == 0) { this.setSrc('../usercontent/images/status/'+iconset+'/ok.png');       }
-                else if(this.xdata.state == 1) { this.setSrc('../usercontent/images/status/'+iconset+'/warning.png');  }
-                else if(this.xdata.state == 2) { this.setSrc('../usercontent/images/status/'+iconset+'/critical.png'); }
-                else if(this.xdata.state == 4) { this.setSrc('../usercontent/images/status/'+iconset+'/pending.png');  }
-                else                           { this.setSrc('../usercontent/images/status/'+iconset+'/unknown.png');  }
+                if(     this.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/ok.png';       }
+                else if(this.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/warning.png';  }
+                else if(this.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/critical.png'; }
+                else if(this.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';  }
+                else                           { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
             }
+        }
+        if(newSrc != this.src) {
+            this.src = newSrc;
+            this.setSrc(newSrc);
+        }
+    },
+    fixSize: function() {
+        if(!this.el || !this.el.down('img')) { return; }
+        var naturalWidth  = this.el.down('img').dom.naturalWidth;
+        var naturalHeight = this.el.down('img').dom.naturalHeight;
+        if(naturalWidth > 0 && naturalHeight > 0) {
+            this.setSize(naturalWidth, naturalHeight);
+            this.el.down('img').setSize(naturalWidth, naturalHeight);
         }
     }
 });
