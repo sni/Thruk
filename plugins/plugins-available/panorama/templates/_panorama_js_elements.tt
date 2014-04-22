@@ -380,7 +380,12 @@ Ext.define('Ext.ux.ColorPickerCombo', {
     triggerTip: 'Please select a color.',
     onTriggerClick: function() {
         var me = this;
-        picker = Ext.create('Ext.picker.Color', {
+        if(me.picker) {
+            me.picker.destroy();
+            me.picker = undefined;
+            return;
+        }
+        me.picker = Ext.create('Ext.picker.Color', {
             pickerField: this,
             ownerCt: this,
             renderTo: document.body,
@@ -393,15 +398,16 @@ Ext.define('Ext.ux.ColorPickerCombo', {
                 select: function(field, value, opts){
                     me.setValue('#' + value);
                     me.inputEl.setStyle({backgroundColor:value});
-                    picker.hide();
+                    me.picker.destroy();
+                    me.picker = undefined;
                 },
                 show: function(field,opts){
                     field.getEl().monitorMouseLeave(500, field.hide, field);
                 }
             }
         });
-        picker.alignTo(me.inputEl, 'tl-bl?');
-        picker.show(me.inputEl);
+        me.picker.alignTo(me.inputEl, 'tl-bl?');
+        me.picker.show(me.inputEl);
     }
 });
 
