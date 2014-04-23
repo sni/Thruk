@@ -23,8 +23,18 @@
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
         this.xdata.general  = {};
-        this.xdata.layout   = { rotation:0 };
-        this.xdata.label    = { fontfamily: '', fontsize: 14, fontcolor: '#000000', position: 'below', 'orientation': 'horizontal', offsetx: 0, offsety: 0, bgcolor:'' };
+        this.xdata.layout   = { rotation:     0 };
+        this.xdata.label    = { fontfamily:  '',
+                                fontsize:     14,
+                                fontcolor:   '#000000',
+                                position:    'below',
+                                orientation: 'horizontal',
+                                offsetx:      0,
+                                offsety:      0,
+                                bgcolor:     '',
+                                fontitalic:   false,
+                                fontbold:     false,
+                            };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
@@ -252,6 +262,8 @@
         el.style.color        = cfg.fontcolor;
         el.style.fontFamily   = cfg.fontfamily;
         el.style.background   = cfg.bgcolor;
+        el.style.fontWeight   = cfg.fontbold   ? 'bold'   : 'normal';
+        el.style.fontStyle    = cfg.fontitalic ? 'italic' : 'normal';
         el.style.paddingLeft  = "3px";
         el.style.paddingRight = "3px";
         if(cfg.orientation == 'vertical') { this.labelEl.addCls('vertical');    }
@@ -785,7 +797,36 @@ TP.iconShowEditDialog = function(panel) {
                         allowDecimals: false,
                         name:         'fontsize',
                         width:         60,
-                        unit:         'px'
+                        unit:         'px',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3}
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontitalic',
+                        value:         panel.xdata.label.fontitalic
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontitalic',
+                        icon:         '[% url_prefix %]plugins/panorama/images/text_italic.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontitalic) { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontbold',
+                        value:         panel.xdata.label.fontbold
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontbold',
+                        icon:         '[% url_prefix %]plugins/panorama/images/text_bold.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().setValues({fontbold: state ? '1' : ''}); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
+                        }
                     }]
                 }, {
                     xtype:        'fieldcontainer',
