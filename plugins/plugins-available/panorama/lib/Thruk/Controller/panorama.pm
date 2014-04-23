@@ -164,6 +164,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'userdata_sounds') {
             return($self->_task_userdata_sounds($c));
         }
+        elsif($task eq 'userdata_shapes') {
+            return($self->_task_userdata_shapes($c));
+        }
         elsif($task eq 'redirect_status') {
             return($self->_task_redirect_status($c));
         }
@@ -1199,6 +1202,27 @@ sub _task_userdata_sounds {
     $sounds = Thruk::Backend::Manager::_sort({}, $sounds, 'name');
     unshift @{$sounds}, { path => '', name => 'none'};
     $c->stash->{'json'} = { data => $sounds };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_userdata_shapes {
+    my($self, $c) = @_;
+    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/shapes/';
+    my $shapes = [];
+    for my $file (glob("$folder/*.js $folder/*/*.js")) {
+        my $path = $file;
+        $path    =~ s/^\Q$folder\E//gmx;
+        my $name = $path;
+        $name    =~ s/^.*\///gmx;
+        $name    =~ s/\.js$//gmx;
+        push @{$shapes}, {
+            path  => '../usercontent/shapes'.$path,
+            name  => $name,
+        };
+    }
+    $shapes = Thruk::Backend::Manager::_sort({}, $shapes, 'name');
+    $c->stash->{'json'} = { data => $shapes };
     return $c->forward('Thruk::View::JSON');
 }
 
