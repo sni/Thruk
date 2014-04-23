@@ -34,7 +34,7 @@
                                 offsety:      0,
                                 bgcolor:     '',
                                 fontitalic:  '',
-                                fontbold:    '',
+                                fontbold:    ''
                             };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
