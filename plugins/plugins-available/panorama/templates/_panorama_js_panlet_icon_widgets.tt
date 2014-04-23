@@ -766,7 +766,9 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel:   'Color',
                     xtype:        'colorcbo',
                     name:         'fontcolor',
-                    value:        '#000000'
+                    value:        '#000000',
+                    mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                    mouseout:      function(color) { labelUpdate(); }
                 }, {
                     xtype:        'fieldcontainer',
                     fieldLabel:   'Font',
@@ -829,7 +831,9 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel:   'Background',
                     xtype:        'colorcbo',
                     name:         'bgcolor',
-                    value:        ''
+                    value:        '',
+                    mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                    mouseout:      function(color) { labelUpdate(); }
                 }]
             }]
         }]
