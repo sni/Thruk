@@ -15,6 +15,7 @@ var ExtState      = [% dashboards %];
 var ExtStateSplit = true;
 [%+ END +%]
 var default_dashboard = [% default_dashboard %];
+var initial_shapes = [% json_encode(shapes) %];
 
 [%+ PROCESS _panorama_js_functions.tt +%]
 [%+ PROCESS _panorama_js_menu_add.tt +%]

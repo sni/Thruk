@@ -199,6 +199,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 sub _js {
     my ( $self, $c, $only_data ) = @_;
 
+    $c->stash->{shapes} = {};
     my $data = Thruk::Utils::get_user_data($c);
     # split old format into new separated format
     # REMOVE AFTER: 01.01.2016
@@ -244,11 +245,26 @@ sub _js {
 
     # merge open dashboards into state
     if($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
+        my $shapes = {};
         $c->stash->{state} = '';
         for my $nr (@{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}}) {
             my $dashboard = $self->_load_dashboard($c, $nr);
             $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
+            # add shapes data
+            for my $key (keys %{$dashboard}) {
+                if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'shapes'} && $dashboard->{$key}->{'xdata'}->{'shapes'}->{'shape'}) {
+                    my $shape = $dashboard->{$key}->{'xdata'}->{'shapes'}->{'shape'};
+                    if(!exists $shapes->{$shape}) {
+                        if(-e $c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js') {
+                            $shapes->{$shape} = scalar read_file($c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js');
+                        } else {
+                            $shapes->{$shape} = undef;
+                        }
+                    }
+                }
+            }
         }
+        $c->stash->{shapes} = $shapes;
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'});
     }
 
@@ -1211,14 +1227,13 @@ sub _task_userdata_shapes {
     my $folder = $c->config->{'home'}.'/root/thruk/usercontent/shapes/';
     my $shapes = [];
     for my $file (glob("$folder/*.js $folder/*/*.js")) {
-        my $path = $file;
-        $path    =~ s/^\Q$folder\E//gmx;
-        my $name = $path;
+        my $name = $file;
+        $name    =~ s/^\Q$folder\E//gmx;
         $name    =~ s/^.*\///gmx;
         $name    =~ s/\.js$//gmx;
         push @{$shapes}, {
-            path  => '../usercontent/shapes'.$path,
             name  => $name,
+            data  => scalar read_file($file),
         };
     }
     $shapes = Thruk::Backend::Manager::_sort({}, $shapes, 'name');

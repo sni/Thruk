@@ -1,3 +1,17 @@
+/* Shape Settings Tab */
+TP.shapesStore = Ext.create('Ext.data.Store', {
+    fields: ['name', 'data'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=userdata_shapes',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    data : []
+});
+
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
@@ -77,7 +91,7 @@ TP.iconShowEditDialog = function(panel) {
                     maxValue:      360,
                     step:           15,
                     value:         panel.xdata.layout.rotation,
-                    listeners:   { change: function(This) { panel.applyRotation(This.value); } }
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.shapes.use_shape) { panel.renderShape(xdata) } else { panel.applyRotation(This.value); } } }
                 }, {
                     fieldLabel:   'Icon Set',
                     xtype:        'combobox',
@@ -106,20 +120,8 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
-    /* Shape Settings Tab */
-    var shapesStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'path'],
-        proxy: {
-            type: 'ajax',
-            url:  'panorama.cgi?task=userdata_shapes',
-            reader: {
-                type: 'json',
-                root: 'data'
-            }
-        },
-        data : []
-    });
-    shapesStore.load();
+    TP.shapesStore.load();
+    var shapeUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata) };
     var shapesTab = {
         title: 'Shapes',
         type:  'panel',
@@ -134,7 +136,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 100 },
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: shapeUpdate } },
                 items: [{
                     /* use shapes */
                     xtype:      'checkbox',
@@ -144,6 +146,8 @@ TP.iconShowEditDialog = function(panel) {
                         change: function(This, newValue, oldValue, eOpts) {
                             this.up().items.get(1).setDisabled(!newValue);
                             this.up().items.get(2).setDisabled(!newValue);
+                            this.up().items.get(3).setDisabled(!newValue);
+                            this.up().items.get(4).setDisabled(!newValue);
                         }
                     },
                     checked:     panel.xdata.shapes.use_shape,
@@ -152,22 +156,24 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel:   'Shape',
                     xtype:        'combobox',
                     name:         'shape',
-                    store:         shapesStore,
+                    store:         TP.shapesStore,
                     displayField: 'name',
-                    valueField:   'path'
+                    valueField:   'name'
                 }, {
                     fieldLabel: 'Size',
                     xtype:      'fieldcontainer',
                     layout:     'table',
+                    defaults: { listeners: { change: shapeUpdate } },
                     items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'width', unit: 'px', width: 55, value: panel.xdata.shapes.width },
+                            { xtype: 'numberunit', name: 'width', unit: 'px', width: 65, value: panel.xdata.shapes.width },
                             { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 55, value: panel.xdata.shapes.height }
+                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 65, value: panel.xdata.shapes.height }
                     ]
                 }, {
                     fieldLabel: 'Colors',
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
+                    defaults:    { listeners: { change: shapeUpdate } },
                     items: [
                         { xtype: 'label', text: 'ok: ' },
                         {
@@ -280,7 +286,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { panel.setIconLabel(settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues()) };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label) };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -463,11 +469,8 @@ TP.iconShowEditDialog = function(panel) {
                  text:   'save',
                  handler: function() {
                     panel.stateful = true;
-                    panel.xdata.general = settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues();
-                    panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
-                    panel.xdata.shapes  = settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues();
-                    panel.xdata.link    = settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues();
-                    panel.xdata.label   = settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues();
+                    var xdata = TP.get_icon_form_xdata(settingsWindow);
+                    for(var key in xdata) { panel.xdata[key] = xdata[key]; }
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
                     TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
@@ -527,3 +530,14 @@ TP.iconShowEditDialog = function(panel) {
     settingsWindow.showAt(panelPos);
     settingsWindow.toFront();
 };
+
+TP.get_icon_form_xdata = function(settingsWindow) {
+    var xdata = {
+        general: settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues(),
+        layout:  settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues(),
+        shapes:  settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues(),
+        link:    settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues(),
+        label:   settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues()
+    }
+    return(xdata);
+}
