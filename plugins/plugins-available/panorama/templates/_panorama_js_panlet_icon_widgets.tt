@@ -66,14 +66,12 @@
     listeners: {
         afterrender: function(This, eOpts) {
             [% UNLESS readonly %]
-            This.saveState();
             This.addClickEventhandler(This.el);
 
             if(!this.locked) {
                 var pos = this.getPosition();
                 this.xdata.layout.x = pos[0];
                 this.xdata.layout.y = pos[1];
-                this.saveState();
                 if(this.xdata.general[this.iconType] == '' && this.firstRun != false) {
                     this.firstRun = true;
                     TP.suppressIconTip = true;
@@ -487,7 +485,6 @@ Ext.define('TP.IconWidget', {
             if(panel.el) {
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id, panel.id]), 200);
             }
-            panel.saveState();
         }
         iconset = this.xdata.layout.iconset;
         if(iconset == '' || iconset == undefined) {
@@ -578,7 +575,6 @@ Ext.define('TP.IconWidget', {
             this.xdata.nsize = [naturalWidth, naturalHeight];
             panel.surface.items.getAt(0).animate({to:{translation:{x:0, y:0}}, duration: 0});
             this.setIconLabel();
-            this.saveState();
         }
     },
     /* rotates this thing */
