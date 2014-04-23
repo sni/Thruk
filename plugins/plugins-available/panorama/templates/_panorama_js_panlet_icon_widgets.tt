@@ -269,8 +269,6 @@
         if(cfg.orientation == 'vertical') { this.labelEl.addCls('vertical');    }
         else                              { this.labelEl.removeCls('vertical'); }
 
-        var size          = this.labelEl.getSize();
-        if(size.width == 0) { return; }
         var left          = TP.extract_number_with_unit({ value: this.el.dom.style.left, unit:'px',  floor: true, defaultValue: 100 });
         var top           = TP.extract_number_with_unit({ value: this.el.dom.style.top,  unit:'px',  floor: true, defaultValue: 100 });
         var offsetx       = TP.extract_number_with_unit({ value: cfg.offsetx,            unit:' px', floor: true, defaultValue:   0 });
@@ -287,6 +285,9 @@
         }
 
         el.style.fontSize = fontsize+'px';
+        var size          = this.labelEl.getSize();
+        if(size.width == 0) { return; }
+
         if(cfg.position == 'above') {
             top = top - offsetx - size.height;
             if(cfg.orientation == 'horizontal') {
