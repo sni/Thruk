@@ -24,6 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:     0 };
+        this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
                                 fontcolor:   '#000000',
@@ -32,8 +33,8 @@
                                 offsetx:      0,
                                 offsety:      0,
                                 bgcolor:     '',
-                                fontitalic:   false,
-                                fontbold:     false,
+                                fontitalic:  '',
+                                fontbold:    '',
                             };
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
@@ -146,7 +147,7 @@
             this.removeCls('notclickable');
             if(this.el) { this.el.dom.href=xdata.link.link; }
             this.autoEl.href=xdata.link.link;
-            if(this.labelEl) {
+            if(this.labelEl && this.labelEl.el) {
                 this.labelEl.el.dom.href=xdata.link.link;
                 this.labelEl.removeCls('notclickable');
                 this.labelEl.addCls('clickable');
@@ -158,7 +159,7 @@
             }
             if(this.el) { this.el.dom.href='#'; }
             this.autoEl.href='#';
-            if(this.labelEl) {
+            if(this.labelEl && this.labelEl.el) {
                 this.labelEl.el.dom.href='#';
                 this.labelEl.removeCls('clickable');
                 this.labelEl.addCls('notclickable');
