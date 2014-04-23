@@ -46,6 +46,7 @@ var default_dashboard = [% default_dashboard %];
 [%+ PROCESS _panorama_js_panlet_service.tt +%]
 [%+ PROCESS _panorama_js_panlet_url_bp.tt +%]
 [%+ PROCESS _panorama_js_panlet_url_nagvis.tt +%]
+[%+ PROCESS _panorama_js_panlet_icon_widgets_settings.tt +%]
 [%+ PROCESS _panorama_js_panlet_icon_widgets.tt +%]
 
 Ext.onReady(function() {

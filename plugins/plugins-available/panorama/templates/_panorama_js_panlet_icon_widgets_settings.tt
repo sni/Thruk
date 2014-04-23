@@ -1,0 +1,529 @@
+TP.iconSettingsWindow = undefined;
+TP.iconShowEditDialog = function(panel) {
+    panel.stateful = false;
+
+    // make sure only one window is open at a time
+    if(TP.iconSettingsWindow != undefined) {
+        TP.iconSettingsWindow.destroy();
+    }
+
+    /* General Settings Tab */
+    var generalItems = panel.getGeneralItems();
+    var generalTab = {
+        title : 'General',
+        type  : 'panel',
+        hidden: generalItems != undefined ? false : true,
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:           'form',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:       'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 132 },
+                    items:           generalItems
+            }]
+        }]
+    };
+
+    /* Layout Settings Tab */
+    var iconsetsStore = Ext.create('Ext.data.Store', {
+        fields: ['name', 'sample', 'value'],
+        proxy: {
+            type: 'ajax',
+            url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
+            reader: {
+                type: 'json',
+                root: 'data'
+            }
+        },
+        autoLoad: true,
+        data : []
+    });
+    var layoutTab = {
+        title: 'Layout',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 132 },
+                items: [{
+                    fieldLabel: 'Position',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'x', width: 55, value: panel.xdata.layout.x, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(This.value, pos[1]); }} },
+                            { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'y', width: 55, value: panel.xdata.layout.y, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(pos[0], This.value); }} },
+                            { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint' }
+                    ]
+                }, {
+                    fieldLabel:   'Rotation',
+                    xtype:        'numberunit',
+                    allowDecimals: false,
+                    name:         'rotation',
+                    unit:         '°',
+                    minValue:     -360,
+                    maxValue:      360,
+                    step:           15,
+                    value:         panel.xdata.layout.rotation,
+                    listeners:   { change: function(This) { panel.applyRotation(This.value); } }
+                }, {
+                    fieldLabel:   'Icon Set',
+                    xtype:        'combobox',
+                    name:         'iconset',
+                    store:         iconsetsStore,
+                    value:        '',
+                    emptyText:    'use dashboards default icon set',
+                    displayField: 'name',
+                    valueField:   'value',
+                    hidden:        panel.iconType == 'text' ? true : false,
+                    listConfig : {
+                        getInnerTpl: function(displayField) {
+                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                        }
+                    }
+                }, {
+                    xtype:      'panel',
+                    html:       'Place image sets in: [% usercontent_folder %]/images/status/',
+                    style:      'text-align: center;',
+                    bodyCls:    'form-hint',
+                    padding:    '10 0 0 0',
+                    border:      0,
+                    hidden:     panel.iconType == 'text' ? true : false
+                }]
+            }]
+        }]
+    };
+
+    /* Shape Settings Tab */
+    var shapesStore = Ext.create('Ext.data.Store', {
+        fields: ['name', 'path'],
+        proxy: {
+            type: 'ajax',
+            url:  'panorama.cgi?task=userdata_shapes',
+            reader: {
+                type: 'json',
+                root: 'data'
+            }
+        },
+        data : []
+    });
+    shapesStore.load();
+    var shapesTab = {
+        title: 'Shapes',
+        type:  'panel',
+        hidden: panel.iconType != 'text' ? false : true,
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 100 },
+                items: [{
+                    /* use shapes */
+                    xtype:      'checkbox',
+                    fieldLabel: 'Use Shape',
+                    name:       'use_shape',
+                    listeners: {
+                        change: function(This, newValue, oldValue, eOpts) {
+                            this.up().items.get(1).setDisabled(!newValue);
+                            this.up().items.get(2).setDisabled(!newValue);
+                        }
+                    },
+                    checked:     panel.xdata.shapes.use_shape,
+                    boxLabel:   '(enable to use shapes instead of icons)'
+                }, {
+                    fieldLabel:   'Shape',
+                    xtype:        'combobox',
+                    name:         'shape',
+                    store:         shapesStore,
+                    displayField: 'name',
+                    valueField:   'path'
+                }, {
+                    fieldLabel: 'Size',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberunit', name: 'width', unit: 'px', width: 55, value: panel.xdata.shapes.width },
+                            { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 55, value: panel.xdata.shapes.height }
+                    ]
+                }, {
+                    fieldLabel: 'Colors',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
+                    items: [
+                        { xtype: 'label', text: 'ok: ' },
+                        {
+                            xtype:        'colorcbo',
+                            name:         'color_ok',
+                            value:        '#339966',
+                            width:        80,
+                            tdAttrs:     {style: 'padding-right: 10px;'}
+                        },
+                        { xtype: 'label', text: 'warning: ' },
+                        {
+                            xtype:        'colorcbo',
+                            name:         'color_warning',
+                            value:        '#FFFF00',
+                            width:        80
+                        },
+                        { xtype: 'label', text: 'critical: ' },
+                        {
+                            xtype:        'colorcbo',
+                            name:         'color_critical',
+                            value:        '#FF0000',
+                            width:        80
+                        },
+                        { xtype: 'label', text: 'unknown: ' },
+                        {
+                            xtype:        'colorcbo',
+                            name:         'color_unknown',
+                            value:        '#FF9900',
+                            width:        80
+                    }]
+                }, {
+                    fieldLabel:   'Gradient',
+                    xtype:        'combobox',
+                    name:         'gradient',
+                    store:         ['no gradient'],
+                    displayField: 'name',
+                    valueField:   'path'
+                }, {
+                    xtype:      'panel',
+                    html:       'Place shapes in: [% usercontent_folder %]/shapes/',
+                    style:      'text-align: center;',
+                    bodyCls:    'form-hint',
+                    padding:    '10 0 0 0',
+                    border:      0
+                }]
+            }]
+        }]
+    };
+
+    /* Link Settings Tab */
+    var linkTab = {
+        title: 'Link',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 132 },
+                items: [{
+                    fieldLabel: 'Hyperlink',
+                    xtype:      'textfield',
+                    name:       'link'
+                }, {
+                    fieldLabel: 'Link another Dashboard',
+                    xtype:      'fieldcontainer',
+                    items:      [{
+                        xtype:      'button',
+                        text:       'Choose',
+                        icon:       '[% url_prefix %]plugins/panorama/images/world.png',
+                        menu:       {
+                            items: [{
+                                text: 'My Dashboards',
+                                icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                                menu: [{
+                                    text:    'Loading...',
+                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    disabled: true
+                                }]
+                            }, {
+                                text: 'Public Dashboards',
+                                icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                                menu: [{
+                                    text:    'Loading...',
+                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    disabled: true
+                                }]
+                            }],
+                            listeners: {
+                                afterrender: function(This, eOpts) {
+                                    TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
+                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { debug(val)}, true);
+                                }
+                            }
+                        }
+                    }]
+                }, {
+                    fieldLabel: 'New Tab',
+                    xtype:      'checkbox',
+                    name:       'newtab',
+                    boxLabel:   '(opens links in new tab or window)'
+                }]
+            }]
+        }]
+    };
+
+    /* Label Settings Tab */
+    var labelUpdate = function() { panel.setIconLabel(settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues()) };
+    var labelTab = {
+        title: 'Label',
+        type:  'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: labelUpdate } },
+                items: [{
+                    fieldLabel:   'Labeltext',
+                    xtype:        'textfield',
+                    name:         'labeltext'
+                }, {
+                    fieldLabel:   'Color',
+                    xtype:        'colorcbo',
+                    name:         'fontcolor',
+                    value:        '#000000',
+                    mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                    mouseout:      function(color) { labelUpdate(); }
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Font',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        name:         'fontfamily',
+                        xtype:        'fontcbo',
+                        value:        '',
+                        flex:          1,
+                        editable:      false
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'fontsize',
+                        width:         60,
+                        unit:         'px',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3}
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontitalic',
+                        value:         panel.xdata.label.fontitalic
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontitalic',
+                        icon:         '[% url_prefix %]plugins/panorama/images/text_italic.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontitalic) { this.toggle(); } }
+                        }
+                    }, {
+                        xtype:        'hiddenfield',
+                        name:         'fontbold',
+                        value:         panel.xdata.label.fontbold
+                    }, {
+                        xtype:        'button',
+                        enableToggle:  true,
+                        name:         'fontbold',
+                        icon:         '[% url_prefix %]plugins/panorama/images/text_bold.png',
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues({fontbold: state ? '1' : ''}); },
+                        listeners: {
+                            afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
+                        }
+                    }]
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Position',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        name:         'position',
+                        xtype:        'combobox',
+                        store:        ['below', 'above', 'left', 'right'],
+                        value:        'below',
+                        flex:          1,
+                        editable:      false
+                    }, {
+                        xtype:        'label',
+                        text:         'Offset: x',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'offsetx',
+                        width:         60,
+                        unit:         'px'
+                    }, {
+                        xtype:        'label',
+                        text:         'y',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'offsety',
+                        width:         60,
+                        unit:         'px'
+                    }]
+                }, {
+                    fieldLabel:   'Orientation',
+                    name:         'orientation',
+                    xtype:        'combobox',
+                    store:        ['horizontal', 'vertical'],
+                    value:        'horizontal',
+                    editable:      false
+                }, {
+                    fieldLabel:   'Background',
+                    xtype:        'colorcbo',
+                    name:         'bgcolor',
+                    value:        '',
+                    mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                    mouseout:      function(color) { labelUpdate(); }
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Border',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        xtype:        'colorcbo',
+                        name:         'bordercolor',
+                        value:        '',
+                        mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                        mouseout:      function(color) { labelUpdate(); },
+                        flex:          1,
+                        margins:      {top: 0, right: 3, bottom: 0, left: 0}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'bordersize',
+                        width:         60,
+                        unit:         'px'
+                    }]
+                }]
+            }]
+        }]
+    };
+
+    var tabPanel = new Ext.TabPanel({
+        activeTab         : panel.initialSettingsTab ? panel.initialSettingsTab : 0,
+        enableTabScroll   : true,
+        items             : [
+            generalTab,
+            layoutTab,
+            shapesTab,
+            linkTab,
+            labelTab
+        ]
+    });
+    var settingsWindow = new Ext.Window({
+        height:  300,
+        width:   400,
+        layout: 'fit',
+        items:   tabPanel,
+        title:  'Icon Settings',
+        buttonAlign: 'center',
+        fbar: [/* panlet setting cancel button */
+               { xtype:  'button',
+                 text:   'cancel',
+                 handler: function(This) {
+                    delete TP.iconSettingsWindow;
+                    panel.stateful = true;
+                    // if we cancel directly after adding a new icon, destroy it
+                    if(panel.firstRun) {
+                        panel.destroy();
+                    }
+                    settingsWindow.destroy();
+                    // restore position any layout
+                    panel.applyXdata();
+                 }
+               },
+               /* panlet setting save button */
+               { xtype:  'button',
+                 text:   'save',
+                 handler: function() {
+                    panel.stateful = true;
+                    panel.xdata.general = settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues();
+                    panel.xdata.layout  = settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues();
+                    panel.xdata.shapes  = settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues();
+                    panel.xdata.link    = settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues();
+                    panel.xdata.label   = settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues();
+                    panel.applyState({xdata: panel.xdata});
+                    panel.saveState();
+                    TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+                    delete TP.iconSettingsWindow;
+                    settingsWindow.destroy();
+                    panel.firstRun = false;
+                    panel.applyXdata();
+                 }
+               }
+        ],
+        listeners: {
+            afterRender: function () {
+                this.nav = Ext.create('Ext.util.KeyNav', this.el, {
+                    'left':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]-1, pos[1]);   },
+                    'right': function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]+1, pos[1]);   },
+                    'up':    function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]-1); },
+                    'down':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]+1); },
+                    ignoreInputFields: true,
+                    scope: panel
+                });
+            },
+            destroy: function() {
+                TP.suppressIconTip = false;
+                panel.setIconLabel();
+            }
+        }
+    }).show();
+
+    settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
+    settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
+    settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues(panel.xdata.shapes);
+    settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().setValues(panel.xdata.link);
+    settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues(panel.xdata.label);
+    TP.iconSettingsWindow = settingsWindow;
+
+    // new mouseover tips while settings are open
+    TP.iconTip.hide();
+    TP.suppressIconTip = true;
+
+    // move settings window next to panel itself
+    var panelPos     = panel.getPosition();
+    var viewPortSize = TP.viewport.getSize();
+    if(viewPortSize.width > panelPos[0] + 430) {
+        panelPos[0] = panelPos[0] + 30;
+    } else {
+        panelPos[0] = panelPos[0] - 410;
+    }
+    if(panelPos[1] - 50 < 0) {
+        panelPos[1] = 30;
+    }
+    else if(viewPortSize.height > panelPos[1] + 270) {
+        panelPos[1] = panelPos[1] - 30;
+    } else {
+        panelPos[1] = viewPortSize.height - 330;
+    }
+    panel.setIconLabel();
+    settingsWindow.showAt(panelPos);
+    settingsWindow.toFront();
+};
