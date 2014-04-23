@@ -278,6 +278,13 @@
         var fontsize      = TP.extract_number_with_unit({ value: cfg.fontsize,           unit:' px', floor: true, defaultValue:  14 });
         var elWidth       = TP.extract_number_with_unit({ value: this.width,             unit:'',    floor: true, defaultValue:   0 });
         var elHeight      = TP.extract_number_with_unit({ value: this.height,            unit:'',    floor: true, defaultValue:   0 });
+        var bordersize    = TP.extract_number_with_unit({ value: cfg.bordersize,         unit:' px', floor: true, defaultValue:   0 });
+
+        if(cfg.bordercolor && bordersize > 0) {
+            el.style.border = bordersize+"px solid "+cfg.bordercolor;
+        } else {
+            el.style.border = "";
+        }
 
         el.style.fontSize = fontsize+'px';
         if(cfg.position == 'above') {
@@ -875,6 +882,26 @@ TP.iconShowEditDialog = function(panel) {
                     value:        '',
                     mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
                     mouseout:      function(color) { labelUpdate(); }
+                }, {
+                    xtype:        'fieldcontainer',
+                    fieldLabel:   'Border',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    defaults:    { listeners: { change: labelUpdate } },
+                    items:        [{
+                        xtype:        'colorcbo',
+                        name:         'bordercolor',
+                        value:        '',
+                        mouseover:     function(color) { var oldValue=this.getValue(); this.setValue(color); labelUpdate(); this.setRawValue(oldValue); },
+                        mouseout:      function(color) { labelUpdate(); },
+                        flex:          1,
+                        margins:      {top: 0, right: 3, bottom: 0, left: 0}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'bordersize',
+                        width:         60,
+                        unit:         'px'
+                    }]
                 }]
             }]
         }]
