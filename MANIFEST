@@ -1059,7 +1059,15 @@ root/thruk/usercontent/images/status/default/unreachable.png
 root/thruk/usercontent/images/status/default/up.png
 root/thruk/usercontent/images/status/default/warning.png
 root/thruk/usercontent/images/world.png
+root/thruk/usercontent/shapes/arrow-double.js
 root/thruk/usercontent/shapes/arrow.js
+root/thruk/usercontent/shapes/circle.js
+root/thruk/usercontent/shapes/square-round-edges.js
+root/thruk/usercontent/shapes/square.js
+root/thruk/usercontent/shapes/star4.js
+root/thruk/usercontent/shapes/star5.js
+root/thruk/usercontent/shapes/star6.js
+root/thruk/usercontent/shapes/triangle.js
 root/thruk/usercontent/sounds/critical.mp3
 root/thruk/usercontent/sounds/ok.mp3
 root/thruk/usercontent/sounds/unknown.mp3

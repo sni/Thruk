@@ -503,15 +503,19 @@ Ext.define('TP.IconWidget', {
                     return;
                 }
             }
+
             shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-            var state = xdata.state;
+            var state = xdata.state, fillcolor;
             if(state == undefined) { state = panel.xdata.state; }
-            if(forceColor != undefined) { shapeData += ",fill:'"+forceColor+"'"; }
-            else if(state == 0)         { shapeData += ",fill:'"+xdata.shapes.color_ok+"'"; }
-            else if(state == 1)         { shapeData += ",fill:'"+xdata.shapes.color_warning+"'"; }
-            else if(state == 2)         { shapeData += ",fill:'"+xdata.shapes.color_critical+"'"; }
-            else if(state == 3)         { shapeData += ",fill:'"+xdata.shapes.color_unknown+"'"; }
-            else if(state == 4)         { shapeData += ",fill:'#777777'"; }
+            if(forceColor != undefined) { fillcolor = forceColor; }
+            else if(state == 0)         { fillcolor = xdata.shapes.color_ok; }
+            else if(state == 1)         { fillcolor = xdata.shapes.color_warning; }
+            else if(state == 2)         { fillcolor = xdata.shapes.color_critical; }
+            else if(state == 3)         { fillcolor = xdata.shapes.color_unknown; }
+            else if(state == 4)         { fillcolor = "#777777"; }
+            fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
+            //shapeData += ",fill:'#"+fillcolor+"'";
+            shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
             var spriteData;
             try {
                 eval("spriteData = {"+shapeData+"};");
@@ -522,6 +526,18 @@ Ext.define('TP.IconWidget', {
                 return;
             }
             if(panel.surface) {
+                if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+                if(panel.surface.existingGradients[fillcolor] == undefined) {
+                    panel.surface.addGradient({
+                       id: 'fillGradient'+fillcolor,
+                       angle: 45,
+                       stops: {
+                           0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
+                           100: { color: '#'+fillcolor }
+                       }
+                    });
+                    panel.surface.existingGradients[fillcolor] = true;
+                }
                 if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
                 sprite = panel.surface.add(spriteData);
                 var box = sprite.getBBox();
