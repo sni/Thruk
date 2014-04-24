@@ -154,6 +154,7 @@ TP.iconShowEditDialog = function(panel) {
                             this.up().items.get(2).setDisabled(!newValue);
                             this.up().items.get(3).setDisabled(!newValue);
                             this.up().items.get(4).setDisabled(!newValue);
+                            shapeUpdate();
                         }
                     },
                     checked:     panel.xdata.shapes.use_shape,
@@ -550,7 +551,9 @@ TP.iconShowEditDialog = function(panel) {
     Ext.getCmp('shapesForm').getForm().setValues(panel.xdata.shapes);
     Ext.getCmp('linkForm').getForm().setValues(panel.xdata.link);
     Ext.getCmp('labelForm').getForm().setValues(panel.xdata.label);
+    panel.skipShapeRender = true;
     Ext.getCmp('use_shape_toogle').setValue(!panel.xdata.shapes.use_shape).setValue(panel.xdata.shapes.use_shape);
+    panel.skipShapeRender = false;
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open

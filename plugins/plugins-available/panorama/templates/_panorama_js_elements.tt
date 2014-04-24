@@ -396,9 +396,10 @@ Ext.define('Ext.ux.ColorPickerCombo', {
             initComponent: function() {
                 if(this.pickerField.colors) { this.colors = this.pickerField.colors; }
                 if(this.pickerField.colorGradient) {
-                    this.colors = [];
                     var start = Ext.draw.Color.fromString(this.pickerField.colorGradient.start);
                     var stop  = Ext.draw.Color.fromString(this.pickerField.colorGradient.stop);
+                    if(!start || !stop) { return; }
+                    this.colors = [];
                     start = start.getLighter(0.20);
                     stop  = stop.getLighter(0.20);
                     for(var x=0; x<5; x++) {
