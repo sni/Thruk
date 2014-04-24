@@ -1086,16 +1086,8 @@ var TP = {
         });
     },
     /* let this element flicker and make it a little bit bigger */
-    flickerImg: function(dom_id, component_id) {
-        var c      = Ext.ComponentManager.get(component_id);
+    flickerImg: function(dom_id) {
         var el     = Ext.get(dom_id);
-        var size   = el.getSize();
-        var factor = 1.2;
-        var offset = Math.floor(((size.width*factor)-size.width)/2);
-        var origPos = c.getPosition();
-        c.setPosition([origPos[0]-offset, origPos[1]-offset]);
-        el.setSize({width: size.width*factor, height: size.height*factor});
-        if(c.fixSize) { c.fixSize(); }
         el.animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
@@ -1106,14 +1098,6 @@ var TP = {
           .animate({ to: { opacity: 100 } })
           .animate({ to: { opacity: 0   } })
           .animate({ to: { opacity: 100 } })
-        c.syncShadow();
-        TP.timeouts['timeout_sync_shadow'+dom_id] = window.setTimeout(function() {
-            el.setSize({width: size.width, height: size.height});
-            c.setPosition(origPos);
-            c.setSize({width: size.width, height: size.height});
-            if(c.fixSize) { c.fixSize(); }
-            c.syncShadow();
-        }, 2500);
     },
 
     /* toggle or set a dashboard option */

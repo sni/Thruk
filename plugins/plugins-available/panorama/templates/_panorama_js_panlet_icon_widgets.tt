@@ -561,7 +561,7 @@ Ext.define('TP.IconWidget', {
             panel.xdata.state = newStatus;
             if(this.renderShape) { this.renderShape(); }
             if(panel.el) {
-                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id, panel.id]), 200);
+                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
         iconset = this.xdata.layout.iconset;
