@@ -1,4 +1,4 @@
-/* Shape Settings Tab */
+﻿/* Shape Settings Tab */
 TP.shapesStore = Ext.create('Ext.data.Store', {
     fields: ['name', 'data'],
     proxy: {
