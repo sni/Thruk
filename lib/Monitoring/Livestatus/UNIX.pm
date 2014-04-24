@@ -61,17 +61,29 @@ sub _open {
         $Monitoring::Livestatus::ErrorMessage = $msg;
         return;
     }
-    my $sock = IO::Socket::UNIX->new(
+    my $sock;
+    eval {
+        local $SIG{'ALRM'} = sub { die("connection timeout"); };
+        alarm($self->{'connect_timeout'});
+        $sock = IO::Socket::UNIX->new(
                                         Peer     => $self->{'peer'},
                                         Type     => SOCK_STREAM,
-                                     );
-    if(!defined $sock or !$sock->connected()) {
-        my $msg = "failed to connect to $self->{'peer'}: $!";
-        if($self->{'errors_are_fatal'}) {
-            croak($msg);
+                                    );
+        if(!defined $sock or !$sock->connected()) {
+            my $msg = "failed to connect to $self->{'peer'}: $!";
+            if($self->{'errors_are_fatal'}) {
+                croak($msg);
+            }
+            $Monitoring::Livestatus::ErrorCode    = 500;
+            $Monitoring::Livestatus::ErrorMessage = $msg;
+            return;
         }
+    };
+    alarm(0);
+
+    if($@) {
         $Monitoring::Livestatus::ErrorCode    = 500;
-        $Monitoring::Livestatus::ErrorMessage = $msg;
+        $Monitoring::Livestatus::ErrorMessage = $@;
         return;
     }
 
