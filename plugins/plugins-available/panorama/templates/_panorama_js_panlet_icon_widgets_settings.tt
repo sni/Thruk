@@ -511,20 +511,27 @@ TP.iconShowEditDialog = function(panel) {
     TP.suppressIconTip = true;
 
     // move settings window next to panel itself
+    var sizes = [];
+    sizes.push(panel.getSize().width);
+    if(panel.labelEl) {
+        sizes.push(panel.labelEl.getSize().width);
+    }
+    var offsetX = Ext.Array.max(sizes) + 10;
+    var offsetY = 40;
     var panelPos     = panel.getPosition();
     var viewPortSize = TP.viewport.getSize();
-    if(viewPortSize.width > panelPos[0] + 430) {
-        panelPos[0] = panelPos[0] + 30;
+    if(viewPortSize.width > panelPos[0] + settingsWindow.width+offsetX) {
+        panelPos[0] = panelPos[0] + offsetX;
     } else {
-        panelPos[0] = panelPos[0] - 410;
+        panelPos[0] = panelPos[0] - settingsWindow.width - 10 - offsetX;
     }
     if(panelPos[1] - 50 < 0) {
-        panelPos[1] = 30;
+        panelPos[1] = offsetY;
     }
-    else if(viewPortSize.height > panelPos[1] + 270) {
-        panelPos[1] = panelPos[1] - 30;
+    else if(viewPortSize.height > panelPos[1] + settingsWindow.height - offsetY) {
+        panelPos[1] = panelPos[1] - offsetY;
     } else {
-        panelPos[1] = viewPortSize.height - 330;
+        panelPos[1] = viewPortSize.height - settingsWindow.height - offsetY;
     }
     panel.setIconLabel();
     settingsWindow.showAt(panelPos);
