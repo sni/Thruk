@@ -387,12 +387,37 @@ Ext.define('Ext.ux.ColorPickerCombo', {
         }
         me.picker = Ext.create('Ext.picker.Color', {
             pickerField: this,
-            ownerCt: this,
-            renderTo: document.body,
-            floating: true,
-            hidden: true,
+            ownerCt:     this,
+            renderTo:    document.body,
+            floating:    true,
+            hidden:      true,
             focusOnShow: true,
-            style: { backgroundColor: "#fff" } ,
+            style:     { backgroundColor: "#fff" } ,
+            initComponent: function() {
+                if(this.pickerField.colors) { this.colors = this.pickerField.colors; }
+                if(this.pickerField.colorGradient) {
+                    this.colors = [];
+                    var start = Ext.draw.Color.fromString(this.pickerField.colorGradient.start);
+                    var stop  = Ext.draw.Color.fromString(this.pickerField.colorGradient.stop);
+                    start = start.getLighter(0.20);
+                    stop  = stop.getLighter(0.20);
+                    for(var x=0; x<5; x++) {
+                        this.colors.push(start.toString().replace(/^\#/, '').toUpperCase());
+                        var rgbStart = start.getRGB();
+                        var rgbStop  = stop.getRGB();
+                        var r = (rgbStart[0] - rgbStop[0]) / 7,
+                            g = (rgbStart[1] - rgbStop[1]) / 7,
+                            b = (rgbStart[2] - rgbStop[2]) / 7;
+                        for(var y=0; y<7; y++) {
+                            var color = 'rgb('+Math.floor(rgbStart[0] - r*y)+','+Math.floor(rgbStart[1] - g*y)+','+Math.floor(rgbStart[2] - b*y)+')';
+                            this.colors.push(Ext.draw.Color.fromString(color).toString().replace(/^\#/, '').toUpperCase());
+                        }
+                        start = start.getDarker(0.10);
+                        stop  = stop.getDarker(0.10);
+                    }
+                }
+                this.callParent();
+            },
             listeners: {
                 scope:this,
                 select: function(field, value, opts){
