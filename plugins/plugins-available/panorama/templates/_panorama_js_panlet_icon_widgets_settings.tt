@@ -124,7 +124,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata, forceColor) };
+    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata, forceColor); labelUpdate(); };
     var shapesTab = {
         title: 'Shapes',
         type:  'panel',
@@ -164,7 +164,34 @@ TP.iconShowEditDialog = function(panel) {
                     name:         'shape',
                     store:         TP.shapesStore,
                     displayField: 'name',
-                    valueField:   'name'
+                    valueField:   'name',
+                    listConfig : {
+                        getInnerTpl: function(displayField) {
+                            TP.tmpid = 0;
+                            return '<div class="x-combo-list-item"><span name="{name}" height=16 width=16 style="vertical-align:top; margin-right: 3px;"></span>{name}<\/div>';
+                        }
+                    },
+                    listeners: {
+                        afterrender: function(This) {
+                            var me = This;
+                            me.shapes = [];
+                            This.getPicker().addListener('show', function(This) {
+                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
+                                    TP.show_shape_preview(item, panel, me.shapes);
+                                });
+                            });
+                            This.getPicker().addListener('refresh', function(This) {
+                                Ext.Array.each(This.el.dom.getElementsByTagName('SPAN'), function(item, idx) {
+                                    TP.show_shape_preview(item, panel, me.shapes);
+                                });
+                            });
+                        },
+                        destroy: function(This) {
+                            // clean up
+                            Ext.Array.each(This.shapes, function(item, idx) { item.destroy() });
+                        },
+                        change: function(This) { shapeUpdate(); }
+                    }
                 }, {
                     fieldLabel: 'Size',
                     xtype:      'fieldcontainer',
@@ -225,7 +252,9 @@ TP.iconShowEditDialog = function(panel) {
                     name:         'gradient',
                     store:         ['no gradient'],
                     displayField: 'name',
-                    valueField:   'path'
+                    valueField:   'path',
+                    disabled:      true,
+                    emptyText:    'not yet implemented'
                 }, {
                     xtype:      'panel',
                     html:       'Place shapes in: [% usercontent_folder %]/shapes/',

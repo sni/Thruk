@@ -1405,5 +1405,26 @@ var TP = {
         if(!Ext.isNumber(nr)) { nr = options.defaultValue; }
         if(options.floor)     { nr = Math.floor(nr);  }
         return(nr);
+    },
+    show_shape_preview: function(item, panel, list) {
+        var name = item.getAttribute('name');
+        if(item.innerHTML != "") { return; }
+        item.id = 'tmpid'+TP.tmpid++;
+        var tmppanel = Ext.create('Ext.draw.Component', {
+            renderTo: item.id,
+            width:    16,
+            height:   16,
+            viewBox:  false,
+            shadow:   false,
+            items:    [],
+            xdata: {
+                state: 0,
+                shapes: { use_shape: true, shape: name, height: 16, width: 16 },
+                layout: { rotation: 0 }
+            }
+        }).show(true);
+        tmppanel.setFloatParent(item.el);
+        panel.renderShape(tmppanel.xdata, panel.xdata.shapes.color_ok, tmppanel);
+        list.push(tmppanel);
     }
 }

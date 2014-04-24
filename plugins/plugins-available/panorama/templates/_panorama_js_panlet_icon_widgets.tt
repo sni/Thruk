@@ -485,9 +485,9 @@ Ext.define('TP.IconWidget', {
         this.renderShape(xdata);
     },
     /* renders shape */
-    renderShape: function(xdata, forceColor) {
-        var panel = this;
-        if(xdata == undefined) { xdata = this.xdata; }
+    renderShape: function(xdata, forceColor, panel) {
+        if(panel == undefined) { panel = this; }
+        if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.shapes && xdata.shapes.use_shape) {
             var shapeData;
             TP.shapesStore.findBy(function(rec, id) {
@@ -521,7 +521,7 @@ Ext.define('TP.IconWidget', {
                 debug(e);
                 return;
             }
-            if(this.surface) {
+            if(panel.surface) {
                 if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
                 sprite = panel.surface.add(spriteData);
                 var box = sprite.getBBox();
@@ -534,7 +534,7 @@ Ext.define('TP.IconWidget', {
                 panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
                 sprite.show(true);
             } else {
-                this.items = [spriteData];
+                panel.items = [spriteData];
             }
         }
     },
