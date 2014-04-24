@@ -23,8 +23,16 @@
         this.xdata.cls      = this.$className;
         this.xdata.state    = 4;
         this.xdata.general  = {};
-        this.xdata.layout   = { rotation:     0 };
-        this.xdata.shapes   = { width: 16, height: 16, color_ok: '#339966', color_warning: '#FFFF00', color_critical: '#FF0000', color_unknown: '#FF9900', gradient: 'normal' };
+        this.xdata.layout   = { rotation:         0 };
+        this.xdata.shapes   = { width:           16,
+                                height:          16,
+                                linked:          true,
+                                color_ok:       '#339966',
+                                color_warning:  '#FFFF00',
+                                color_critical: '#FF0000',
+                                color_unknown:  '#FF9900',
+                                gradient:       'normal'
+                            };
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -489,6 +497,7 @@ Ext.define('TP.IconWidget', {
         if(panel == undefined) { panel = this; }
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.shapes && xdata.shapes.use_shape) {
+            if(xdata.shapes.shape == undefined) { return; }
             var shapeData;
             TP.shapesStore.findBy(function(rec, id) {
                 if(rec.data.name == xdata.shapes.shape) {
@@ -548,6 +557,7 @@ Ext.define('TP.IconWidget', {
                 var box = sprite.getBBox();
                 var xScale = xdata.shapes.width/box.width;
                 var yScale = xdata.shapes.height/box.height;
+                if(xdata.shapes.locked) { yScale = xScale; }
                 sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
                 sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
                 box = sprite.getBBox();

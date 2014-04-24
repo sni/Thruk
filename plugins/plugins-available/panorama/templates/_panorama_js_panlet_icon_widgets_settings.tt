@@ -44,6 +44,11 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
+    var updateDisabledFields = function(xdata) {
+        Ext.getCmp('shapeheightfield').setDisabled(xdata.shapes.locked);
+        Ext.getCmp('iconset_field').setDisabled(xdata.shapes.use_shape);
+    };
+
     /* Layout Settings Tab */
     var iconsetsStore = Ext.create('Ext.data.Store', {
         fields: ['name', 'sample', 'value'],
@@ -124,7 +129,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata, forceColor); labelUpdate(); };
+    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata, forceColor); labelUpdate(); updateDisabledFields(xdata); };
     var shapesTab = {
         title: 'Shapes',
         type:  'panel',
@@ -149,7 +154,6 @@ TP.iconShowEditDialog = function(panel) {
                     id:         'use_shape_toogle',
                     listeners: {
                         change: function(This, newValue, oldValue, eOpts) {
-                            Ext.getCmp('iconset_field').setDisabled(newValue);
                             this.up().items.get(1).setDisabled(!newValue);
                             this.up().items.get(2).setDisabled(!newValue);
                             this.up().items.get(3).setDisabled(!newValue);
@@ -201,7 +205,12 @@ TP.iconShowEditDialog = function(panel) {
                     items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'width', unit: 'px', width: 65, value: panel.xdata.shapes.width },
                             { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 65, value: panel.xdata.shapes.height }
+                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 65, value: panel.xdata.shapes.height, id: 'shapeheightfield' },
+                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;',
+                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({locked: state ? '1' : '' }); },
+                                listeners: { afterrender: function() { if(panel.xdata.shapes.locked) { this.toggle(); } } }
+                            },
+                            { xtype: 'hidden', name: 'locked' }
                     ]
                 }, {
                     fieldLabel: 'Colors',
@@ -329,7 +338,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label) };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label); updateDisabledFields(xdata); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
