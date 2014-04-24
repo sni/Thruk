@@ -33,6 +33,7 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                     xtype:           'form',
+                    id:              'generalForm',
                     bodyPadding:     2,
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
@@ -66,6 +67,7 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                 xtype:           'form',
+                id:              'layoutForm',
                 bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
@@ -94,6 +96,7 @@ TP.iconShowEditDialog = function(panel) {
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.shapes.use_shape) { panel.renderShape(xdata) } else { panel.applyRotation(This.value); } } }
                 }, {
                     fieldLabel:   'Icon Set',
+                    id:           'iconset_field',
                     xtype:        'combobox',
                     name:         'iconset',
                     store:         iconsetsStore,
@@ -121,7 +124,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata) };
+    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.renderShape(xdata, forceColor) };
     var shapesTab = {
         title: 'Shapes',
         type:  'panel',
@@ -132,18 +135,21 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                 xtype:           'form',
+                id:              'shapesForm',
                 bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: shapeUpdate } },
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { shapeUpdate() } } },
                 items: [{
                     /* use shapes */
                     xtype:      'checkbox',
                     fieldLabel: 'Use Shape',
                     name:       'use_shape',
+                    id:         'use_shape_toogle',
                     listeners: {
                         change: function(This, newValue, oldValue, eOpts) {
+                            Ext.getCmp('iconset_field').setDisabled(newValue);
                             this.up().items.get(1).setDisabled(!newValue);
                             this.up().items.get(2).setDisabled(!newValue);
                             this.up().items.get(3).setDisabled(!newValue);
@@ -173,13 +179,17 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Colors',
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
-                    defaults:    { listeners: { change: shapeUpdate } },
+                    defaults:    {
+                        listeners: { change: shapeUpdate },
+                        mouseover:   function(color) { shapeUpdate(color); },
+                        mouseout:    function(color) { shapeUpdate();      }
+                    },
                     items: [
                         { xtype: 'label', text: 'ok: ' },
                         {
                             xtype:        'colorcbo',
                             name:         'color_ok',
-                            value:        '#339966',
+                            value:        panel.xdata.shapes.color_ok,
                             width:        80,
                             tdAttrs:     {style: 'padding-right: 10px;'}
                         },
@@ -187,21 +197,21 @@ TP.iconShowEditDialog = function(panel) {
                         {
                             xtype:        'colorcbo',
                             name:         'color_warning',
-                            value:        '#FFFF00',
+                            value:        panel.xdata.shapes.color_warning,
                             width:        80
                         },
                         { xtype: 'label', text: 'critical: ' },
                         {
                             xtype:        'colorcbo',
                             name:         'color_critical',
-                            value:        '#FF0000',
+                            value:        panel.xdata.shapes.color_critical,
                             width:        80
                         },
                         { xtype: 'label', text: 'unknown: ' },
                         {
                             xtype:        'colorcbo',
                             name:         'color_unknown',
-                            value:        '#FF9900',
+                            value:        panel.xdata.shapes.color_unknown,
                             width:        80
                     }]
                 }, {
@@ -233,6 +243,7 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                 xtype:           'form',
+                id:              'linkForm',
                 bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
@@ -296,6 +307,7 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                 xtype:           'form',
+                id:              'labelForm',
                 bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
@@ -340,7 +352,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'fontitalic',
                         icon:         '[% url_prefix %]plugins/panorama/images/text_italic.png',
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
-                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
+                        toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
                         listeners: {
                             afterrender: function() { if(panel.xdata.label.fontitalic) { this.toggle(); } }
                         }
@@ -354,7 +366,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'fontbold',
                         icon:         '[% url_prefix %]plugins/panorama/images/text_bold.png',
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
-                        toggleHandler: function(btn, state) { settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues({fontbold: state ? '1' : ''}); },
+                        toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontbold: state ? '1' : ''}); },
                         listeners: {
                             afterrender: function() { if(panel.xdata.label.fontbold) { this.toggle(); } }
                         }
@@ -499,11 +511,12 @@ TP.iconShowEditDialog = function(panel) {
         }
     }).show();
 
-    settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().setValues(panel.xdata.general);
-    settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues(panel.xdata.layout);
-    settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues(panel.xdata.shapes);
-    settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().setValues(panel.xdata.link);
-    settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().setValues(panel.xdata.label);
+    Ext.getCmp('generalForm').getForm().setValues(panel.xdata.general);
+    Ext.getCmp('layoutForm').getForm().setValues(panel.xdata.layout);
+    Ext.getCmp('shapesForm').getForm().setValues(panel.xdata.shapes);
+    Ext.getCmp('linkForm').getForm().setValues(panel.xdata.link);
+    Ext.getCmp('labelForm').getForm().setValues(panel.xdata.label);
+    Ext.getCmp('use_shape_toogle').setValue(!panel.xdata.shapes.use_shape).setValue(panel.xdata.shapes.use_shape);
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -540,11 +553,11 @@ TP.iconShowEditDialog = function(panel) {
 
 TP.get_icon_form_xdata = function(settingsWindow) {
     var xdata = {
-        general: settingsWindow.items.getAt(0).items.getAt(0).down('form').getForm().getValues(),
-        layout:  settingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().getValues(),
-        shapes:  settingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().getValues(),
-        link:    settingsWindow.items.getAt(0).items.getAt(3).down('form').getForm().getValues(),
-        label:   settingsWindow.items.getAt(0).items.getAt(4).down('form').getForm().getValues()
+        general: Ext.getCmp('generalForm').getForm().getValues(),
+        layout:  Ext.getCmp('layoutForm').getForm().getValues(),
+        shapes:  Ext.getCmp('shapesForm').getForm().getValues(),
+        link:    Ext.getCmp('linkForm').getForm().getValues(),
+        label:   Ext.getCmp('labelForm').getForm().getValues()
     }
     return(xdata);
 }

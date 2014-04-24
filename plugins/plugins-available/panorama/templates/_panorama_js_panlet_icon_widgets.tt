@@ -24,7 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:     0 };
-        this.xdata.shapes   = { width: 16, height: 16 };
+        this.xdata.shapes   = { width: 16, height: 16, color_ok: '#339966', color_warning: '#FFFF00', color_critical: '#FF0000', color_unknown: '#FF9900' };
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -485,7 +485,7 @@ Ext.define('TP.IconWidget', {
         this.renderShape(xdata);
     },
     /* renders shape */
-    renderShape: function(xdata) {
+    renderShape: function(xdata, forceColor) {
         var panel = this;
         if(xdata == undefined) { xdata = this.xdata; }
         if(xdata.shapes && xdata.shapes.use_shape) {
@@ -507,11 +507,12 @@ Ext.define('TP.IconWidget', {
             var state = xdata.state;
             if(state == undefined) { state = panel.xdata.state; }
             if(this.iconType == 'host' && state == 1) { state == 2; } // translate host state
-                 if(state == 0) { shapeData += ",fill:'"+xdata.shapes.color_ok+"'"; }
-            else if(state == 1) { shapeData += ",fill:'"+xdata.shapes.color_warning+"'"; }
-            else if(state == 2) { shapeData += ",fill:'"+xdata.shapes.color_critical+"'"; }
-            else if(state == 3) { shapeData += ",fill:'"+xdata.shapes.color_unknown+"'"; }
-            else if(state == 4) { shapeData += ",fill:'#777777'"; }
+            if(forceColor != undefined) { shapeData += ",fill:'"+forceColor+"'"; }
+            else if(state == 0)         { shapeData += ",fill:'"+xdata.shapes.color_ok+"'"; }
+            else if(state == 1)         { shapeData += ",fill:'"+xdata.shapes.color_warning+"'"; }
+            else if(state == 2)         { shapeData += ",fill:'"+xdata.shapes.color_critical+"'"; }
+            else if(state == 3)         { shapeData += ",fill:'"+xdata.shapes.color_unknown+"'"; }
+            else if(state == 4)         { shapeData += ",fill:'#777777'"; }
             var spriteData;
             try {
                 eval("spriteData = {"+shapeData+"};");
