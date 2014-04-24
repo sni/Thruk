@@ -185,16 +185,16 @@ TP.iconShowEditDialog = function(panel) {
                         mouseout:    function(color) { shapeUpdate();      }
                     },
                     items: [
-                        { xtype: 'label', text: 'ok: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'up: ' : 'ok: ' },
                         {
-                            xtype:        'colorcbo',
-                            name:         'color_ok',
-                            value:        panel.xdata.shapes.color_ok,
-                            width:        80,
-                            tdAttrs:     {style: 'padding-right: 10px;'},
+                            xtype:          'colorcbo',
+                            name:           'color_ok',
+                            value:           panel.xdata.shapes.color_ok,
+                            width:           80,
+                            tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: 'warning: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'unreachable: ' : 'warning: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'color_warning',
@@ -202,21 +202,22 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
-                        { xtype: 'label', text: 'critical: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'down: ' : 'critical: ' },
                         {
-                            xtype:        'colorcbo',
-                            name:         'color_critical',
-                            value:        panel.xdata.shapes.color_critical,
-                            width:        80,
+                            xtype:          'colorcbo',
+                            name:           'color_critical',
+                            value:           panel.xdata.shapes.color_critical,
+                            width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
-                        { xtype: 'label', text: 'unknown: ' },
+                        { xtype: 'label', text: 'unknown: ', hidden: panel.iconType == 'host' ? true : false },
                         {
-                            xtype:        'colorcbo',
-                            name:         'color_unknown',
-                            value:        panel.xdata.shapes.color_unknown,
-                            width:        80,
-                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
+                            xtype:          'colorcbo',
+                            name:           'color_unknown',
+                            value:           panel.xdata.shapes.color_unknown,
+                            width:           80,
+                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
+                            hidden:          panel.iconType == 'host' ? true : false
                     }]
                 }, {
                     fieldLabel:   'Gradient',

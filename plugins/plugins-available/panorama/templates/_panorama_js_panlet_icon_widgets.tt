@@ -506,7 +506,6 @@ Ext.define('TP.IconWidget', {
             shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
             var state = xdata.state;
             if(state == undefined) { state = panel.xdata.state; }
-            if(this.iconType == 'host' && state == 1) { state == 2; } // translate host state
             if(forceColor != undefined) { shapeData += ",fill:'"+forceColor+"'"; }
             else if(state == 0)         { shapeData += ",fill:'"+xdata.shapes.color_ok+"'"; }
             else if(state == 1)         { shapeData += ",fill:'"+xdata.shapes.color_warning+"'"; }
