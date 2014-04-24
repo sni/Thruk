@@ -24,7 +24,7 @@
         this.xdata.state    = 4;
         this.xdata.general  = {};
         this.xdata.layout   = { rotation:     0 };
-        this.xdata.shapes   = { width: 16, height: 16, color_ok: '#339966', color_warning: '#FFFF00', color_critical: '#FF0000', color_unknown: '#FF9900' };
+        this.xdata.shapes   = { width: 16, height: 16, color_ok: '#339966', color_warning: '#FFFF00', color_critical: '#FF0000', color_unknown: '#FF9900', gradient: 'normal' };
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -515,8 +515,12 @@ Ext.define('TP.IconWidget', {
             else if(state == 4)         { fillcolor = "#777777"; }
             if(!fillcolor) { fillcolor = '#333333'; }
             fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
-            //shapeData += ",fill:'#"+fillcolor+"'";
-            shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
+            if(xdata.shapes.gradient == undefined) { xdata.shapes.gradient = 'normal'; }
+            if(xdata.shapes.gradient == 'off') {
+                shapeData += ",fill:'#"+fillcolor+"'";
+            } else if(xdata.shapes.gradient == 'normal') {
+                shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
+            }
             var spriteData;
             try {
                 eval("spriteData = {"+shapeData+"};");

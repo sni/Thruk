@@ -251,11 +251,8 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel:   'Gradient',
                     xtype:        'combobox',
                     name:         'gradient',
-                    store:         ['no gradient'],
-                    displayField: 'name',
-                    valueField:   'path',
-                    disabled:      true,
-                    emptyText:    'not yet implemented'
+                    store:       ['off', 'normal'],
+                    value:        panel.xdata.shapes.gradient
                 }, {
                     xtype:      'panel',
                     html:       'Place shapes in: [% usercontent_folder %]/shapes/',
