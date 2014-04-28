@@ -460,10 +460,10 @@ Ext.define('TP.IconWidget', {
         this.addListener('afterrender', function(This, eOpts) {
             if(this.el.down('image')) {
                 this.el.down('image').on("load", function (evt, ele, opts) {
-                    This.fixSize();
+                    This.iconFixSize();
                 });
             } else {
-                this.renderShape();
+                this.shapeRender();
             }
         });
     },
@@ -490,10 +490,32 @@ Ext.define('TP.IconWidget', {
                 this.items[0].rotation = { degrees: -1*xdata.layout.rotation };
             }
         }
-        this.renderShape(xdata);
+        this.shapeRender(xdata);
     },
+    refreshHandler: function(newStatus) {
+        var tab   = Ext.getCmp(this.panel_id);
+        var panel = this;
+        if(newStatus != undefined && panel.xdata.state != newStatus) {
+            panel.xdata.state = newStatus;
+            this.shapeRender();
+            if(panel.el) {
+                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
+            }
+        }
+
+        if(panel.xdata.shapes.use_shape) { return; }
+        this.iconSetSourceFromState();
+    },
+    /* rotates this thing */
+    applyRotation: function(value) {
+        if(value        == undefined) { return; }
+        if(this.surface == undefined) { return; }
+        if(this.surface.items.getAt(0) == undefined) { return; }
+        this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
+    },
+
     /* renders shape */
-    renderShape: function(xdata, forceColor, panel) {
+    shapeRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this; }
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.shapes && xdata.shapes.use_shape) {
@@ -583,27 +605,13 @@ Ext.define('TP.IconWidget', {
                 });
                 sprite.show(true);
                 panel.el.down('image').on("load", function (evt, ele, opts) {
-                    panel.fixSize();
+                    panel.iconFixSize();
                 });
-                panel.setSrcFromState();
+                panel.iconSetSourceFromState();
             }
         }
     },
-    refreshHandler: function(newStatus) {
-        var tab   = Ext.getCmp(this.panel_id);
-        var panel = this;
-        if(newStatus != undefined && panel.xdata.state != newStatus) {
-            panel.xdata.state = newStatus;
-            if(this.renderShape) { this.renderShape(); }
-            if(panel.el) {
-                TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
-            }
-        }
-
-        if(panel.xdata.shapes.use_shape) { return; }
-        this.setSrcFromState();
-    },
-    setSrcFromState: function() {
+    iconSetSourceFromState: function() {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         iconset = panel.xdata.layout.iconset;
@@ -659,7 +667,7 @@ Ext.define('TP.IconWidget', {
             panel.items[0].src = newSrc;
         }
     },
-    fixSize: function() {
+    iconFixSize: function() {
         var panel = this;
         if(!this.el || !this.el.down('image')) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
@@ -678,7 +686,7 @@ Ext.define('TP.IconWidget', {
                             var naturalWidth  = This.el.dom.naturalWidth;
                             var naturalHeight = This.el.dom.naturalHeight;
                             TP.imageSizes[src] = [naturalWidth, naturalHeight];
-                            panel.fixSize();
+                            panel.iconFixSize();
                             This.destroy();
                         });
                     }
@@ -696,13 +704,6 @@ Ext.define('TP.IconWidget', {
             panel.surface.items.getAt(0).setAttributes({translation:{x:0, y:0}}, true);
             this.setIconLabel();
         }
-    },
-    /* rotates this thing */
-    applyRotation: function(value) {
-        if(value        == undefined) { return; }
-        if(this.surface == undefined) { return; }
-        if(this.surface.items.getAt(0) == undefined) { return; }
-        this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
     }
 });
 
