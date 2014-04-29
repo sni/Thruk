@@ -23,7 +23,8 @@
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
         this.xdata.general    = {};
-        this.xdata.layout     = { rotation:              0 };
+        this.xdata.layout     = { rotation:   0 };
+        this.xdata.appearance = { type: 'icon' };
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -430,12 +431,11 @@
 });
 
 Ext.define('TP.IconWidget', {
-    extend: 'Ext.draw.Component',
+    extend: 'Ext.container.Container',
     mixins: {
         smallWidget: 'TP.SmallWidget'
     },
 
-    viewBox:   false,
     cls:      'iconWidget',
     floating:  true,
     width:     22,
@@ -448,38 +448,14 @@ Ext.define('TP.IconWidget', {
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.addListener('afterrender', function(This, eOpts) {
-            if(this.el.down('image')) {
-                this.el.down('image').on("load", function (evt, ele, opts) {
-                    This.iconFixSize();
-                });
-            } else {
-                this.shapeRender();
-            }
-        });
     },
-    items: [{
-        type:      'image',
-        src:        Ext.BLANK_IMAGE_URL,
-        width:      16,
-        height:     16,
-        x:          0,
-        y:          0,
-        rotation: { degrees: 0 }
-    }],
+    items: [],
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         this.mixins.smallWidget.applyXdata.call(this, xdata);
         if(xdata.nsize && xdata.size) {
-            this.items[0].x      = (xdata.size - xdata.nsize[0]) / 2;
-            this.items[0].y      = (xdata.size - xdata.nsize[1]) / 2;
             var size = Math.ceil(Math.sqrt(Math.pow(xdata.nsize[0], 2) + Math.pow(xdata.nsize[1], 2)));
             this.setSize(size, size);
-            this.items[0].width  = xdata.nsize[0];
-            this.items[0].height = xdata.nsize[1];
-            if(xdata.layout.rotation) {
-                this.items[0].rotation = { degrees: -1*xdata.layout.rotation };
-            }
         }
         this.shapeRender(xdata);
     },
@@ -487,9 +463,10 @@ Ext.define('TP.IconWidget', {
         var tab   = Ext.getCmp(this.panel_id);
         var panel = this;
         if(newStatus != undefined && panel.xdata.state != newStatus) {
+            var lastState = panel.xdata.state;
             panel.xdata.state = newStatus;
             if(panel.xdata.appearance.type == 'shape') { this.shapeRender(); }
-            if(panel.el) {
+            if(panel.el && lastState != 4) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
@@ -504,12 +481,77 @@ Ext.define('TP.IconWidget', {
         this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
     },
 
+    /* set main render item*/
+    setRenderItem: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        panel.removeAll();
+        panel.surface = undefined;
+        panel.icon    = undefined;
+
+        var x       = 0;
+        var y       = 0;
+        var width   = 16;
+        var height  = 16;
+        var size    = 16;
+        if(xdata.nsize && xdata.size) {
+            x        = (xdata.size - xdata.nsize[0]) / 2;
+            y        = (xdata.size - xdata.nsize[1]) / 2;
+            width    = xdata.nsize[0];
+            height   = xdata.nsize[1];
+            size     = xdata.size;
+            panel.setSize(width,height);
+        }
+
+        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
+            var items = [];
+            if(xdata.appearance.type == 'icon') {
+                items = [{
+                    type:      'image',
+                    src:        Ext.BLANK_IMAGE_URL,
+                    width:      width,
+                    height:     height,
+                    x:          x,
+                    y:          y,
+                    rotation: { degrees: -1*xdata.layout.rotation }
+                }];
+            }
+            panel.add({
+                viewBox:   false,
+                xtype:    'draw',
+                width:     size,
+                height:    size,
+                items:     items,
+                style:     'vertical-align:inherit;',
+                listeners: {
+                    afterrender: function(This, eOpts) {
+                        panel.surface = panel.items.getAt(0).surface;
+                        if(xdata.appearance.type == 'icon') {
+                            This.el.down('image').on("load", function (evt, ele, opts) {
+                                panel.iconFixSize();
+                            });
+                            panel.icon = panel.items.getAt(0).surface.items.getAt(0);
+                            panel.iconSetSourceFromState();
+                        }
+                        if(xdata.appearance.type == 'shape') {
+                            panel.shapeRender(xdata);
+                        }
+                    }
+                }
+            });
+        }
+    },
+
     /* renders shape */
     shapeRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this; }
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type == 'shape') {
             if(xdata.appearance.shapename == undefined) { return; }
+            if(!panel.surface) {
+                panel.setRenderItem(xdata);
+                return;
+            }
             var shapeData;
             TP.shapesStore.findBy(function(rec, id) {
                 if(rec.data.name == xdata.appearance.shapename) {
@@ -551,60 +593,40 @@ Ext.define('TP.IconWidget', {
                 debug(e);
                 return;
             }
-            if(panel.surface) {
-                if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-                if(panel.surface.existingGradients[fillcolor] == undefined) {
-                    panel.surface.addGradient({
-                       id: 'fillGradient'+fillcolor,
-                       angle: 45,
-                       stops: {
-                           0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
-                           100: { color: '#'+fillcolor }
-                       }
-                    });
-                    panel.surface.existingGradients[fillcolor] = true;
-                }
-                if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
-                sprite = panel.surface.add(spriteData);
-                var box = sprite.getBBox();
-                var xScale = xdata.appearance.shapewidth/box.width;
-                var yScale = xdata.appearance.shapeheight/box.height;
-                if(xdata.appearance.shapelocked) { yScale = xScale; }
-                sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
-                sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
-                box = sprite.getBBox();
-                sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
-                panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
-                sprite.show(true);
-            } else {
-                panel.items = [spriteData];
-            }
-        }
-        else if(panel.el) {
-            // TODO: do that in icon renderer
-            if(!panel.el.down('image')) {
-                // switching back from shape?
-                if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
-                var sprite = panel.surface.add({
-                    type:      'image',
-                    src:        Ext.BLANK_IMAGE_URL,
-                    width:      16,
-                    height:     16,
-                    x:          0,
-                    y:          0,
-                    rotation: { degrees: 0 }
+            if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+            if(panel.surface.existingGradients[fillcolor] == undefined) {
+                panel.surface.addGradient({
+                   id: 'fillGradient'+fillcolor,
+                   angle: 45,
+                   stops: {
+                       0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
+                       100: { color: '#'+fillcolor }
+                   }
                 });
-                sprite.show(true);
-                panel.el.down('image').on("load", function (evt, ele, opts) {
-                    panel.iconFixSize();
-                });
-                panel.iconSetSourceFromState();
+                panel.surface.existingGradients[fillcolor] = true;
             }
+            panel.surface.removeAll();
+            sprite = panel.surface.add(spriteData);
+            var box = sprite.getBBox();
+            var xScale = xdata.appearance.shapewidth/box.width;
+            var yScale = xdata.appearance.shapeheight/box.height;
+            if(xdata.appearance.shapelocked) { yScale = xScale; }
+            sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
+            sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
+            box = sprite.getBBox();
+            sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
+            panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
+            panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
+            sprite.show(true);
         }
     },
     iconSetSourceFromState: function() {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
+        if(!panel.icon) {
+            panel.setRenderItem();
+            return;
+        }
         iconset = panel.xdata.appearance.iconset;
         if(iconset == '' || iconset == undefined) {
             iconset = tab.xdata.defaulticonset;
@@ -650,19 +672,13 @@ Ext.define('TP.IconWidget', {
             }
         }
         panel.src = newSrc;
-        if(panel.surface && panel.surface.items.getAt(0)) {
-            // already rendered
-            panel.surface.items.getAt(0).setAttributes({src: newSrc}).redraw();
-        } else {
-            // set initial config
-            panel.items[0].src = newSrc;
-        }
+        panel.icon.setAttributes({src: newSrc}).redraw();
     },
     iconFixSize: function() {
         var panel = this;
-        if(!this.el || !this.el.down('image')) { return; }
+        if(!panel.icon) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
-        var src = this.el.down('image').dom.href.baseVal;
+        var src = panel.icon.el.dom.href.baseVal;
         if(TP.imageSizes[src] == undefined) {
             var img = Ext.create('Ext.Img', {
                 src:       Ext.BLANK_IMAGE_URL,
@@ -692,7 +708,7 @@ Ext.define('TP.IconWidget', {
             this.setSize(size, size);
             this.xdata.size  = size;
             this.xdata.nsize = [naturalWidth, naturalHeight];
-            panel.surface.items.getAt(0).setAttributes({translation:{x:0, y:0}}, true);
+            panel.icon.setAttributes({translation:{x:0, y:0}}, true);
             this.setIconLabel();
         }
     }

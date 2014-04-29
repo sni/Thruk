@@ -252,9 +252,9 @@ sub _js {
             $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
             for my $key (keys %{$dashboard}) {
-                if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'shapes'} && $dashboard->{$key}->{'xdata'}->{'shapes'}->{'shape'}) {
-                    my $shape = $dashboard->{$key}->{'xdata'}->{'shapes'}->{'shape'};
-                    if(!exists $shapes->{$shape}) {
+                if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
+                    my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
+                    if($shape && !exists $shapes->{$shape}) {
                         if(-e $c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js') {
                             $shapes->{$shape} = scalar read_file($c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js');
                         } else {

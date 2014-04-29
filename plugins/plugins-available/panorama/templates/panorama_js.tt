@@ -76,7 +76,7 @@ Ext.onReady(function() {
         items:    [ new TP.TabBar() ]
     });
     Ext.getCmp('bug_report').hide();
-    [% IF !thruk_debug %]
+    [% IF !thruk_debug || c.config.demo_mode %]
     Ext.getCmp('debug_tab').hide();
     [% END %]
 

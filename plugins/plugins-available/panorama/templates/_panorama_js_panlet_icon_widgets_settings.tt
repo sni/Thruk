@@ -11,6 +11,7 @@ TP.shapesStore = Ext.create('Ext.data.Store', {
     },
     data : []
 });
+TP.shapesStore.load();
 
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
@@ -77,7 +78,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 132 },
+                defaults:      { anchor: '-12', labelWidth: 80 },
                 items: [{
                     fieldLabel: 'Position',
                     xtype:      'fieldcontainer',
@@ -105,7 +106,12 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(panel.shapeRender) { panel.shapeRender(xdata, forceColor); }; labelUpdate(); updateDisabledFields(xdata); }
+    var shapeUpdate = function(forceColor) {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        if(panel.setRenderItem) { panel.setRenderItem(xdata); }
+        labelUpdate();
+        updateDisabledFields(xdata);
+    }
     var appearanceTab = {
         title: 'Appearance',
         type:  'panel',
@@ -351,7 +357,7 @@ TP.iconShowEditDialog = function(panel) {
                             listeners: {
                                 afterrender: function(This, eOpts) {
                                     TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
-                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { debug(val)}, true);
+                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) {}, true);
                                 }
                             }
                         }
