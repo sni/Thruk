@@ -45,8 +45,8 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     var updateDisabledFields = function(xdata) {
-        Ext.getCmp('shapeheightfield').setDisabled(xdata.shapes.locked);
-        Ext.getCmp('iconset_field').setDisabled(xdata.shapes.use_shape);
+        Ext.getCmp('shapeheightfield').setDisabled(xdata.appearance.shapelocked);
+        Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
     };
 
     /* Layout Settings Tab */
@@ -98,40 +98,16 @@ TP.iconShowEditDialog = function(panel) {
                     maxValue:      360,
                     step:           15,
                     value:         panel.xdata.layout.rotation,
-                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.shapes.use_shape) { panel.shapeRender(xdata) } else { panel.applyRotation(This.value); } } }
-                }, {
-                    fieldLabel:   'Icon Set',
-                    id:           'iconset_field',
-                    xtype:        'combobox',
-                    name:         'iconset',
-                    store:         iconsetsStore,
-                    value:        '',
-                    emptyText:    'use dashboards default icon set',
-                    displayField: 'name',
-                    valueField:   'value',
-                    hidden:        panel.iconType == 'text' ? true : false,
-                    listConfig : {
-                        getInnerTpl: function(displayField) {
-                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
-                        }
-                    }
-                }, {
-                    xtype:      'panel',
-                    html:       'Place image sets in: [% usercontent_folder %]/images/status/',
-                    style:      'text-align: center;',
-                    bodyCls:    'form-hint',
-                    padding:    '10 0 0 0',
-                    border:      0,
-                    hidden:     panel.iconType == 'text' ? true : false
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata) } else { panel.applyRotation(This.value); } } }
                 }]
             }]
         }]
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.shapeRender(xdata, forceColor); labelUpdate(); updateDisabledFields(xdata); };
-    var shapesTab = {
-        title: 'Shapes',
+    var shapeUpdate = function(forceColor) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(panel.shapeRender) { panel.shapeRender(xdata, forceColor); }; labelUpdate(); updateDisabledFields(xdata); }
+    var appearanceTab = {
+        title: 'Appearance',
         type:  'panel',
         hidden: panel.iconType != 'text' ? false : true,
         items: [{
@@ -140,33 +116,82 @@ TP.iconShowEditDialog = function(panel) {
             border: 0,
             items: [{
                 xtype:           'form',
-                id:              'shapesForm',
+                id:              'appearanceForm',
                 bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
                 defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { shapeUpdate() } } },
                 items: [{
-                    /* use shapes */
-                    xtype:      'checkbox',
-                    fieldLabel: 'Use Shape',
-                    name:       'use_shape',
-                    id:         'use_shape_toogle',
+                    /* appearance type */
+                    xtype:      'combobox',
+                    fieldLabel: 'Type',
+                    name:       'type',
+                    store:      [['icon','Icon'], ['shape', 'Shape'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer']],
+                    editable:    false,
                     listeners: {
                         change: function(This, newValue, oldValue, eOpts) {
-                            this.up().items.get(1).setDisabled(!newValue);
-                            this.up().items.get(2).setDisabled(!newValue);
-                            this.up().items.get(3).setDisabled(!newValue);
-                            this.up().items.get(4).setDisabled(!newValue);
+                            Ext.getCmp('appearanceForm').items.each(function(f, i) {
+                                if(f.cls != undefined) {
+                                    if(f.cls.match(newValue)) {
+                                        f.show();
+                                    } else {
+                                        f.hide();
+                                    }
+                                }
+                            });
+                            if(newValue == 'shape') {
+                                // fill in defaults
+                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
+                                if(!values['shapename'])      { values['shapename']      = 'arrow'; values['shapelocked'] = true; }
+                                if(!values['shapewidth'])     { values['shapewidth']     = 16; }
+                                if(!values['shapeheight'])    { values['shapeheight']    = 16; }
+                                if(!values['color_ok'])       { values['color_ok']       = '#199C0F'; }
+                                if(!values['color_warning'])  { values['color_warning']  = '#CDCD0A'; }
+                                if(!values['color_critical']) { values['color_critical'] = '#CA1414'; }
+                                if(!values['color_unknown'])  { values['color_unknown']  = '#CC740F'; }
+                                if(!values['shapegradient'])  { values['shapegradient']  = 'normal'; }
+                                var originalShapeUpdate = shapeUpdate;
+                                shapeUpdate = Ext.emptyFn;
+                                Ext.getCmp('appearanceForm').getForm().setValues(values);
+                                shapeUpdate = originalShapeUpdate;
+                            }
                             shapeUpdate();
                         }
-                    },
-                    checked:     panel.xdata.shapes.use_shape,
-                    boxLabel:   '(enable to use shapes instead of icons)'
+                    }
+                },
+                /* Icons */
+                {
+                    fieldLabel:   'Icon Set',
+                    id:           'iconset_field',
+                    xtype:        'combobox',
+                    name:         'iconset',
+                    cls:          'icon',
+                    store:         iconsetsStore,
+                    value:        '',
+                    emptyText:    'use dashboards default icon set',
+                    displayField: 'name',
+                    valueField:   'value',
+                    listConfig : {
+                        getInnerTpl: function(displayField) {
+                            return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+                        }
+                    }
                 }, {
+                    xtype:      'panel',
+                    cls:        'icon',
+                    html:       'Place image sets in: [% usercontent_folder %]/images/status/',
+                    style:      'text-align: center;',
+                    bodyCls:    'form-hint',
+                    padding:    '10 0 0 0',
+                    border:      0
+                },
+                /* Shapes */
+                {
                     fieldLabel:   'Shape',
                     xtype:        'combobox',
-                    name:         'shape',
+                    name:         'shapename',
+                    cls:          'shape',
                     store:         TP.shapesStore,
                     displayField: 'name',
                     valueField:   'name',
@@ -200,20 +225,22 @@ TP.iconShowEditDialog = function(panel) {
                 }, {
                     fieldLabel: 'Size',
                     xtype:      'fieldcontainer',
+                    name:       'shapesize',
+                    cls:        'shape',
                     layout:     'table',
                     defaults: { listeners: { change: function() { shapeUpdate() } } },
                     items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'width', unit: 'px', width: 65, value: panel.xdata.shapes.width },
+                            { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
                             { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'height', unit: 'px', width: 65, value: panel.xdata.shapes.height, id: 'shapeheightfield' },
-                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({locked: state ? '1' : '' }); },
-                                listeners: { afterrender: function() { if(panel.xdata.shapes.locked) { this.toggle(); } } }
+                            { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
+                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
+                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); shapeUpdate(); }
                             },
-                            { xtype: 'hidden', name: 'locked' }
+                            { xtype: 'hidden', name: 'shapelocked' }
                     ]
                 }, {
                     fieldLabel: 'Colors',
+                    cls:        'shape',
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
@@ -226,7 +253,7 @@ TP.iconShowEditDialog = function(panel) {
                         {
                             xtype:          'colorcbo',
                             name:           'color_ok',
-                            value:           panel.xdata.shapes.color_ok,
+                            value:           panel.xdata.appearance.shapecolor_ok,
                             width:           80,
                             tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
@@ -235,7 +262,7 @@ TP.iconShowEditDialog = function(panel) {
                         {
                             xtype:          'colorcbo',
                             name:           'color_warning',
-                            value:           panel.xdata.shapes.color_warning,
+                            value:           panel.xdata.appearance.shapecolor_warning,
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
@@ -243,7 +270,7 @@ TP.iconShowEditDialog = function(panel) {
                         {
                             xtype:          'colorcbo',
                             name:           'color_critical',
-                            value:           panel.xdata.shapes.color_critical,
+                            value:           panel.xdata.appearance.shapecolor_critical,
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
@@ -251,7 +278,7 @@ TP.iconShowEditDialog = function(panel) {
                         {
                             xtype:          'colorcbo',
                             name:           'color_unknown',
-                            value:           panel.xdata.shapes.color_unknown,
+                            value:           panel.xdata.appearance.shapecolor_unknown,
                             width:           80,
                             colorGradient: { start: '#DAB891', stop: '#FF8900' },
                             hidden:          panel.iconType == 'host' ? true : false
@@ -259,11 +286,13 @@ TP.iconShowEditDialog = function(panel) {
                 }, {
                     fieldLabel:   'Gradient',
                     xtype:        'combobox',
-                    name:         'gradient',
+                    name:         'shapegradient',
+                    cls:          'shape',
                     store:       ['off', 'normal'],
-                    value:        panel.xdata.shapes.gradient
+                    value:        panel.xdata.appearance.shapegradient
                 }, {
                     xtype:      'panel',
+                    cls:        'shape',
                     html:       'Place shapes in: [% usercontent_folder %]/shapes/',
                     style:      'text-align: center;',
                     bodyCls:    'form-hint',
@@ -338,7 +367,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label); updateDisabledFields(xdata); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -490,7 +519,7 @@ TP.iconShowEditDialog = function(panel) {
         items             : [
             generalTab,
             layoutTab,
-            shapesTab,
+            appearanceTab,
             linkTab,
             labelTab
         ]
@@ -554,12 +583,9 @@ TP.iconShowEditDialog = function(panel) {
 
     Ext.getCmp('generalForm').getForm().setValues(panel.xdata.general);
     Ext.getCmp('layoutForm').getForm().setValues(panel.xdata.layout);
-    Ext.getCmp('shapesForm').getForm().setValues(panel.xdata.shapes);
+    Ext.getCmp('appearanceForm').getForm().setValues(panel.xdata.appearance);
     Ext.getCmp('linkForm').getForm().setValues(panel.xdata.link);
     Ext.getCmp('labelForm').getForm().setValues(panel.xdata.label);
-    panel.skipShapeRender = true;
-    Ext.getCmp('use_shape_toogle').setValue(!panel.xdata.shapes.use_shape).setValue(panel.xdata.shapes.use_shape);
-    panel.skipShapeRender = false;
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -596,11 +622,11 @@ TP.iconShowEditDialog = function(panel) {
 
 TP.get_icon_form_xdata = function(settingsWindow) {
     var xdata = {
-        general: Ext.getCmp('generalForm').getForm().getValues(),
-        layout:  Ext.getCmp('layoutForm').getForm().getValues(),
-        shapes:  Ext.getCmp('shapesForm').getForm().getValues(),
-        link:    Ext.getCmp('linkForm').getForm().getValues(),
-        label:   Ext.getCmp('labelForm').getForm().getValues()
+        general:    Ext.getCmp('generalForm').getForm().getValues(),
+        layout:     Ext.getCmp('layoutForm').getForm().getValues(),
+        appearance: Ext.getCmp('appearanceForm').getForm().getValues(),
+        link:       Ext.getCmp('linkForm').getForm().getValues(),
+        label:      Ext.getCmp('labelForm').getForm().getValues()
     }
     return(xdata);
 }

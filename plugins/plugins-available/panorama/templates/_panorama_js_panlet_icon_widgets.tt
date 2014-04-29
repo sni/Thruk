@@ -20,19 +20,10 @@
         this.redrawOnly = false;
         this.animations = 0;
 
-        this.xdata.cls      = this.$className;
-        this.xdata.state    = 4;
-        this.xdata.general  = {};
-        this.xdata.layout   = { rotation:         0 };
-        this.xdata.shapes   = { width:           16,
-                                height:          16,
-                                linked:          true,
-                                color_ok:       '#339966',
-                                color_warning:  '#FFFF00',
-                                color_critical: '#FF0000',
-                                color_unknown:  '#FF9900',
-                                gradient:       'normal'
-                            };
+        this.xdata.cls        = this.$className;
+        this.xdata.state      = 4;
+        this.xdata.general    = {};
+        this.xdata.layout     = { rotation:              0 };
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -136,9 +127,10 @@
         if(xdata == undefined) { xdata = this.xdata; }
 
         /* restore missing sections */
-        Ext.Array.each(['general', 'layout', 'shapes', 'link', 'label'], function(name, idx) {
+        Ext.Array.each(['general', 'layout', 'appearance', 'link', 'label'], function(name, idx) {
             if(xdata[name] == undefined) { xdata[name] = {} };
         });
+        if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
         this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
@@ -456,7 +448,6 @@ Ext.define('TP.IconWidget', {
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.xdata.layout.iconset = '';
         this.addListener('afterrender', function(This, eOpts) {
             if(this.el.down('image')) {
                 this.el.down('image').on("load", function (evt, ele, opts) {
@@ -497,14 +488,13 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(newStatus != undefined && panel.xdata.state != newStatus) {
             panel.xdata.state = newStatus;
-            this.shapeRender();
+            if(panel.xdata.appearance.type == 'shape') { this.shapeRender(); }
             if(panel.el) {
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
 
-        if(panel.xdata.shapes.use_shape) { return; }
-        this.iconSetSourceFromState();
+        if(panel.xdata.appearance.type == 'icon') { this.iconSetSourceFromState(); }
     },
     /* rotates this thing */
     applyRotation: function(value) {
@@ -518,19 +508,19 @@ Ext.define('TP.IconWidget', {
     shapeRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.shapes && xdata.shapes.use_shape) {
-            if(xdata.shapes.shape == undefined) { return; }
+        if(xdata.appearance.type == 'shape') {
+            if(xdata.appearance.shapename == undefined) { return; }
             var shapeData;
             TP.shapesStore.findBy(function(rec, id) {
-                if(rec.data.name == xdata.shapes.shape) {
+                if(rec.data.name == xdata.appearance.shapename) {
                     shapeData = rec.data.data;
                 }
             });
             if(shapeData == undefined) {
-                if(initial_shapes[xdata.shapes.shape]) {
-                    shapeData = initial_shapes[xdata.shapes.shape];
+                if(initial_shapes[xdata.appearance.shapename]) {
+                    shapeData = initial_shapes[xdata.appearance.shapename];
                 } else {
-                    TP.Msg.msg("fail_message~~loading shape '"+xdata.shapes.shape+"' failed: no such shape");
+                    TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: no such shape");
                     return;
                 }
             }
@@ -539,17 +529,17 @@ Ext.define('TP.IconWidget', {
             var state = xdata.state, fillcolor;
             if(state == undefined) { state = panel.xdata.state; }
             if(forceColor != undefined) { fillcolor = forceColor; }
-            else if(state == 0)         { fillcolor = xdata.shapes.color_ok; }
-            else if(state == 1)         { fillcolor = xdata.shapes.color_warning; }
-            else if(state == 2)         { fillcolor = xdata.shapes.color_critical; }
-            else if(state == 3)         { fillcolor = xdata.shapes.color_unknown; }
+            else if(state == 0)         { fillcolor = xdata.appearance.color_ok; }
+            else if(state == 1)         { fillcolor = xdata.appearance.color_warning; }
+            else if(state == 2)         { fillcolor = xdata.appearance.color_critical; }
+            else if(state == 3)         { fillcolor = xdata.appearance.color_unknown; }
             else if(state == 4)         { fillcolor = "#777777"; }
             if(!fillcolor) { fillcolor = '#333333'; }
             fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
-            if(xdata.shapes.gradient == undefined) { xdata.shapes.gradient = 'normal'; }
-            if(xdata.shapes.gradient == 'off') {
+            if(xdata.appearance.shapegradient == undefined) { xdata.appearance.shapegradient = 'normal'; }
+            if(xdata.appearance.shapegradient == 'off') {
                 shapeData += ",fill:'#"+fillcolor+"'";
-            } else if(xdata.shapes.gradient == 'normal') {
+            } else if(xdata.appearance.shapegradient == 'normal') {
                 shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
             }
             var spriteData;
@@ -557,7 +547,7 @@ Ext.define('TP.IconWidget', {
                 eval("spriteData = {"+shapeData+"};");
             }
             catch(e) {
-                TP.Msg.msg("fail_message~~loading shape '"+xdata.shapes.shape+"' failed: "+e);
+                TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
                 debug(e);
                 return;
             }
@@ -577,9 +567,9 @@ Ext.define('TP.IconWidget', {
                 if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
                 sprite = panel.surface.add(spriteData);
                 var box = sprite.getBBox();
-                var xScale = xdata.shapes.width/box.width;
-                var yScale = xdata.shapes.height/box.height;
-                if(xdata.shapes.locked) { yScale = xScale; }
+                var xScale = xdata.appearance.shapewidth/box.width;
+                var yScale = xdata.appearance.shapeheight/box.height;
+                if(xdata.appearance.shapelocked) { yScale = xScale; }
                 sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
                 sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
                 box = sprite.getBBox();
@@ -591,7 +581,8 @@ Ext.define('TP.IconWidget', {
             }
         }
         else if(panel.el) {
-            if(!panel.skipShapeRender && !panel.el.down('image')) {
+            // TODO: do that in icon renderer
+            if(!panel.el.down('image')) {
                 // switching back from shape?
                 if(panel.surface.items.length >= 1) { panel.surface.removeAll() }
                 var sprite = panel.surface.add({
@@ -614,7 +605,7 @@ Ext.define('TP.IconWidget', {
     iconSetSourceFromState: function() {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
-        iconset = panel.xdata.layout.iconset;
+        iconset = panel.xdata.appearance.iconset;
         if(iconset == '' || iconset == undefined) {
             iconset = tab.xdata.defaulticonset;
         }
@@ -1243,7 +1234,7 @@ Ext.define('TP.TextLabelWidget', {
     },
     iconType:           'text',
     html:               '',
-    initialSettingsTab: 3,
+    initialSettingsTab: 4,
     rotateLabel:        true,
     constructor: function (config) {
         this.mixins.smallWidget.constructor.call(this, config);

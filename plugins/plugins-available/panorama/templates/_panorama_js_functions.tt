@@ -1403,12 +1403,12 @@ var TP = {
             items:    [],
             xdata: {
                 state: 0,
-                shapes: { use_shape: true, shape: name, height: 16, width: 16 },
+                appearance: { type: 'shape', shapename: name, shapeheight: 16, shapewidth: 16 },
                 layout: { rotation: 0 }
             }
         }).show(true);
         tmppanel.setFloatParent(item.el);
-        panel.renderShape(tmppanel.xdata, panel.xdata.shapes.color_ok, tmppanel);
+        panel.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
         list.push(tmppanel);
     }
 }
