@@ -842,34 +842,12 @@ var TP = {
         menu.show();
     },
     objectSearchItem: function(panel, type, name) {
-        var handler = function() {
-            searchStore.panel = panel;
-            if(searchStore.search_type != type) {
-                searchStore.search_type = type;
-                if(type == 'service') {
-                    searchStore.getProxy().extraParams.host = this.up('form').getForm().getFieldValues().host;
-                } else {
-                    delete searchStore.getProxy().extraParams.host;
-                }
-                searchStore.load();
-            }
-        };
         return({
             name:           type,
             fieldLabel:     name,
-            xtype:          'combobox',
-            queryMode:      'remote',
-            store:          searchStore,
-            triggerAction:  'all',
-            pageSize:       true,
-            selectOnFocus:  true,
-            typeAhead:      true,
-            minChars:       0,
-            listeners: {
-                'expand': handler,
-                'change': handler,
-                'keyup':  handler
-            }
+            panel:          panel,
+            xtype:          'searchCbo',
+            store:          searchStore
         });
     },
     removeWindowFromPanels: function(win_id) {
@@ -881,9 +859,9 @@ var TP = {
             tab.saveState();
         }
     },
-    updateAllIcons: function(tab, id) {
+    updateAllIcons: function(tab, id, xdata) {
         if(id != undefined) {
-            TP.updateAllIconsDo(tab, id);
+            TP.updateAllIconsDo(tab, id, xdata);
         } else {
             /* avoid duplicate updates */
             window.clearTimeout(TP.timeouts['timeout_global_icon_update'+tab.id]);
@@ -892,7 +870,7 @@ var TP = {
             }, 100);
         }
     },
-    updateAllIconsDo: function(tab, id) {
+    updateAllIconsDo: function(tab, id, xdata) {
         var panels = TP.getAllPanel(tab);
         var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
         var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
@@ -900,6 +878,7 @@ var TP = {
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(id && p.id != id) { continue; }
+            if(id) { p.oldXdata = p.xdata; p.xdata = xdata; }
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
@@ -951,6 +930,7 @@ var TP = {
                     count++;
                 }
             }
+            if(id) { p.xdata = p.oldXdata; }
         };
         var tabpan = Ext.getCmp('tabpan');
         if(count == 0 && tab != tabpan.getActiveTab()) { return; }

@@ -23,6 +23,11 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     /* General Settings Tab */
+    var stateUpdate = function() {
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
+        labelUpdate();
+    }
     var generalItems = panel.getGeneralItems();
     var generalTab = {
         title : 'General',
@@ -39,7 +44,7 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: 132 },
+                    defaults:      { anchor: '-12', labelWidth: 132, listeners: { change: function() { stateUpdate() } } },
                     items:           generalItems
             }]
         }]
@@ -373,7 +378,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label, true); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -405,7 +410,7 @@ TP.iconShowEditDialog = function(panel) {
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
                         tooltip:       'open label editor wizard',
                         handler:       function(btn) {
-                            TP.openLabelEditorWindow();
+                            TP.openLabelEditorWindow(panel);
                         }
                     }]
                 }, {
@@ -636,7 +641,7 @@ TP.iconShowEditDialog = function(panel) {
     } else {
         panelPos[1] = viewPortSize.height - settingsWindow.height - offsetY;
     }
-    panel.setIconLabel();
+    panel.setIconLabel(undefined, true);
     settingsWindow.showAt(panelPos);
     settingsWindow.toFront();
 };
@@ -652,16 +657,16 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     return(xdata);
 }
 
-TP.openLabelEditorWindow = function() {
+TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
     var perf_data = '';
-    if(window.perfdata) {
-        for(var key in window.perfdata) {
-            delete window.perfdata[key].perf;
-            delete window.perfdata[key].key;
-            for(var key2 in window.perfdata[key]) {
-                perf_data += '<tr><td><\/td><td><i>perfdata.'+key+'.'+key2+'<\/i><\/td><td>'+window.perfdata[key][key2]+'<\/td><\/tr>'
-            }
+    window.perfdata = {};
+    panel.setIconLabel(undefined, true);
+    for(var key in perfdata) {
+        delete perfdata[key].perf;
+        delete perfdata[key].key;
+        for(var key2 in perfdata[key]) {
+            perf_data += '<tr><td><\/td><td><i>perfdata.'+key+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
     var labelEditorWindow = new Ext.Window({

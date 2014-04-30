@@ -207,18 +207,15 @@
     },
 
     /* render label for this widget */
-    setIconLabel: function(cfg) {
+    setIconLabel: function(cfg, force_perfdata) {
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex) { return; }
-        if(!cfg.labeltext) {
-            if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
-            return;
-        }
-        /* dynamic label? */
         var txt = cfg.labeltext;
-        if(txt.match(/\{\{.*?\}\}/)) {
+        if(txt == undefined) { txt = ''; }
+        /* dynamic label? */
+        if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
             var allowed_functions = ['strftime', 'sprintf', 'if'];
             var matches           = txt.match(/(\{\{.*?\}\})/g);
             if(this.servicegroup) { totals = this.servicegroup; }
@@ -255,6 +252,10 @@
                 if(res == undefined) { res = ''; }
                 txt = txt.replace(item, res);
             });
+        }
+        if(!cfg.labeltext) {
+            if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
+            return;
         }
         if(!this.labelEl) {
             var panel = this;
