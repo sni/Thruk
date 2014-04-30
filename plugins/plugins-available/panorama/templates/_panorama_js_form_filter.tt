@@ -63,9 +63,9 @@ var searchStore = Ext.create('Ext.data.Store', {
                 debug("type: "+type+" not supported");
                 return false;
             }
-            // refresh every 60 seconds or if type changed
+            // refresh every 120 seconds or if type changed
             var now = new Date();
-            if(store.count() > 0 && Object.my_equals(store.lastParam, store.proxy.extraParams) && store.lastLoaded.getTime() < now.getTime() - 60000) {
+            if(store.count() > 0 && Object.my_equals(store.lastParam, store.proxy.extraParams) && store.lastLoaded.getTime() > now.getTime() - 120000) {
                 return false;
             }
             store.lastParam  = store.proxy.extraParams;
