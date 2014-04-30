@@ -501,23 +501,35 @@ Ext.define('TP.IconWidget', {
             var size = Math.ceil(Math.sqrt(Math.pow(xdata.nsize[0], 2) + Math.pow(xdata.nsize[1], 2)));
             this.setSize(size, size);
         }
-        this.shapeRender(xdata);
+        if(this.lastType != xdata.appearance.type) {
+            this.setRenderItem(xdata);
+        }
+        this.lastType = xdata.appearance.type;
+        this.updateRender();
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);
         var panel = this;
+        if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
+        this.updateRender();
         if(newStatus != undefined && panel.xdata.state != newStatus) {
             var lastState = panel.xdata.state;
             panel.xdata.state = newStatus;
-            if(panel.xdata.appearance.type == 'shape') { this.shapeRender(); }
             if(panel.el && lastState != 4) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
-
-        if(panel.xdata.appearance.type == 'icon') { this.iconSetSourceFromState(); }
         panel.setIconLabel();
     },
+
+    /* update shapes and stuff */
+    updateRender: function() {
+        var panel = this;
+        if(panel.xdata.appearance.type == 'shape') { panel.shapeRender();  }
+        if(panel.xdata.appearance.type == 'pie')   { panel.pieRender();    }
+        if(panel.xdata.appearance.type == 'icon')  { panel.setIconLabel(); }
+    },
+
     /* rotates this thing */
     applyRotation: function(value) {
         if(value        == undefined) { return; }
@@ -526,13 +538,59 @@ Ext.define('TP.IconWidget', {
         this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
     },
 
+    /* return totals array which can be used in a store */
+    getTotals: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        var totals = [];
+        if(panel.hostgroup) {
+            if(xdata.general.incl_hst) {
+                totals.push({name: 'up',          value: panel.hostgroup.hosts.up});
+                totals.push({name: 'unreachable', value: panel.hostgroup.hosts.unreachable});
+                totals.push({name: 'down',        value: panel.hostgroup.hosts.down});
+                totals.push({name: 'pending',     value: panel.hostgroup.hosts.pending});
+            }
+            if(xdata.general.incl_svc) {
+                totals.push({name: 'ok',          value: panel.hostgroup.services.ok});
+                totals.push({name: 'warning',     value: panel.hostgroup.services.warning});
+                totals.push({name: 'critical',    value: panel.hostgroup.services.critical});
+                totals.push({name: 'unknown',     value: panel.hostgroup.services.unknown});
+                totals.push({name: 'pending',     value: panel.hostgroup.services.pending});
+            }
+        }
+        if(panel.servicegroup) {
+            totals.push({name: 'ok',          value: panel.servicegroup.services.ok});
+            totals.push({name: 'warning',     value: panel.servicegroup.services.warning});
+            totals.push({name: 'critical',    value: panel.servicegroup.services.critical});
+            totals.push({name: 'unknown',     value: panel.servicegroup.services.unknown});
+            totals.push({name: 'pending',     value: panel.servicegroup.services.pending});
+        }
+        if(panel.results) {
+            if(xdata.general.incl_hst) {
+                totals.push({name: 'up',          value: panel.results.hosts.up});
+                totals.push({name: 'unreachable', value: panel.results.hosts.unreachable});
+                totals.push({name: 'down',        value: panel.results.hosts.down});
+                totals.push({name: 'pending',     value: panel.results.hosts.pending});
+            }
+            if(xdata.general.incl_svc) {
+                totals.push({name: 'ok',          value: panel.results.services.ok});
+                totals.push({name: 'warning',     value: panel.results.services.warning});
+                totals.push({name: 'critical',    value: panel.results.services.critical});
+                totals.push({name: 'unknown',     value: panel.results.services.unknown});
+                totals.push({name: 'pending',     value: panel.results.services.pending});
+            }
+        }
+        return(totals);
+    },
+
     /* set main render item*/
     setRenderItem: function(xdata) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         panel.removeAll();
-        panel.surface = undefined;
-        panel.icon    = undefined;
+        panel.surface  = undefined;
+        panel.icon     = undefined;
+        panel.chart    = undefined;
 
         var x       = 0;
         var y       = 0;
@@ -589,92 +647,140 @@ Ext.define('TP.IconWidget', {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             panel.iconSetSourceFromState();
                         }
-                        if(xdata.appearance.type == 'shape') {
-                            panel.shapeRender(xdata);
-                        }
+                        if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata); }
                     }
                 }
             });
         }
+        if(xdata.appearance.type == 'pie') {
+            var pieStore = Ext.create('Ext.data.Store', {
+                fields: ['name','value'],
+                data:  []
+            });
+            if(xdata.appearance.piewidth)  { width  = xdata.appearance.piewidth; }
+            if(xdata.appearance.pieheight) { height = xdata.appearance.pieheight; }
+            if(xdata.appearance.pielocked) { height = width; }
+            panel.add({
+                xtype:  'tp_piechart',
+                store:   pieStore,
+                panel:   panel,
+                width:   width,
+                height:  height,
+                animate: false,
+                listeners: {
+                    afterrender: function(This, eOpts) { panel.chart = This; }
+                }
+            });
+        }
+    },
+
+    /* renders pie chart */
+    pieRender: function(xdata) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type != 'pie') { return }
+        if(!panel.chart) {
+            panel.setRenderItem(xdata);
+            return;
+        }
+        if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
+        panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
+        panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
+        var totals = this.getTotals(xdata);
+        panel.chart.series.getAt(0).colorSet = [];
+        if(xdata.general.incl_hst) {
+            panel.chart.series.getAt(0).colorSet.push('#00FF33', '#FF5B33', '#FF7A59', '#ACACAC');
+        }
+        if(xdata.general.incl_svc || panel.iconType == 'servicegroup') {
+            panel.chart.series.getAt(0).colorSet.push('#00FF33', '#FFDE00', '#FF9E00', '#FF5B33', '#ACACAC');
+        }
+        var pieStore = Ext.create('Ext.data.Store', {
+            fields: ['name','value'],
+            data:  []
+        });
+        TP.updateArrayStoreHash(pieStore, totals);
+        panel.chart.bindStore(pieStore);
+        panel.chart.panel.xdata.showlabel = false;
+        panel.chart.setShowLabel();
     },
 
     /* renders shape */
     shapeRender: function(xdata, forceColor, panel) {
         if(panel == undefined) { panel = this; }
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type == 'shape') {
-            if(xdata.appearance.shapename == undefined) { return; }
-            if(!panel.surface) {
-                panel.setRenderItem(xdata);
-                return;
-            }
-            var shapeData;
-            TP.shapesStore.findBy(function(rec, id) {
-                if(rec.data.name == xdata.appearance.shapename) {
-                    shapeData = rec.data.data;
-                }
-            });
-            if(shapeData == undefined) {
-                if(initial_shapes[xdata.appearance.shapename]) {
-                    shapeData = initial_shapes[xdata.appearance.shapename];
-                } else {
-                    TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: no such shape");
-                    return;
-                }
-            }
+        if(xdata.appearance.type != 'shape') { return }
 
-            shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-            var state = xdata.state, fillcolor;
-            if(state == undefined) { state = panel.xdata.state; }
-            if(forceColor != undefined) { fillcolor = forceColor; }
-            else if(state == 0)         { fillcolor = xdata.appearance.color_ok; }
-            else if(state == 1)         { fillcolor = xdata.appearance.color_warning; }
-            else if(state == 2)         { fillcolor = xdata.appearance.color_critical; }
-            else if(state == 3)         { fillcolor = xdata.appearance.color_unknown; }
-            else if(state == 4)         { fillcolor = "#777777"; }
-            if(!fillcolor) { fillcolor = '#333333'; }
-            fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
-            if(xdata.appearance.shapegradient == undefined) { xdata.appearance.shapegradient = 'normal'; }
-            if(xdata.appearance.shapegradient == 'off') {
-                shapeData += ",fill:'#"+fillcolor+"'";
-            } else if(xdata.appearance.shapegradient == 'normal') {
-                shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
+        if(xdata.appearance.shapename == undefined) { return; }
+        if(!panel.surface) {
+            panel.setRenderItem(xdata);
+            return;
+        }
+        var shapeData;
+        TP.shapesStore.findBy(function(rec, id) {
+            if(rec.data.name == xdata.appearance.shapename) {
+                shapeData = rec.data.data;
             }
-            var spriteData;
-            try {
-                eval("spriteData = {"+shapeData+"};");
-            }
-            catch(e) {
-                TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
-                debug(e);
+        });
+        if(shapeData == undefined) {
+            if(initial_shapes[xdata.appearance.shapename]) {
+                shapeData = initial_shapes[xdata.appearance.shapename];
+            } else {
+                TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: no such shape");
                 return;
             }
-            if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-            if(panel.surface.existingGradients[fillcolor] == undefined) {
-                panel.surface.addGradient({
-                   id: 'fillGradient'+fillcolor,
-                   angle: 45,
-                   stops: {
-                       0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
-                       100: { color: '#'+fillcolor }
-                   }
-                });
-                panel.surface.existingGradients[fillcolor] = true;
-            }
-            panel.surface.removeAll();
-            sprite = panel.surface.add(spriteData);
-            var box = sprite.getBBox();
-            var xScale = xdata.appearance.shapewidth/box.width;
-            var yScale = xdata.appearance.shapeheight/box.height;
-            if(xdata.appearance.shapelocked) { yScale = xScale; }
-            sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
-            sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
-            box = sprite.getBBox();
-            sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
-            panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
-            panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
-            sprite.show(true);
         }
+
+        shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
+        var state = xdata.state, fillcolor;
+        if(state == undefined) { state = panel.xdata.state; }
+        if(forceColor != undefined) { fillcolor = forceColor; }
+        else if(state == 0)         { fillcolor = xdata.appearance.color_ok; }
+        else if(state == 1)         { fillcolor = xdata.appearance.color_warning; }
+        else if(state == 2)         { fillcolor = xdata.appearance.color_critical; }
+        else if(state == 3)         { fillcolor = xdata.appearance.color_unknown; }
+        else if(state == 4)         { fillcolor = "#777777"; }
+        if(!fillcolor) { fillcolor = '#333333'; }
+        fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
+        if(xdata.appearance.shapegradient == undefined) { xdata.appearance.shapegradient = 'normal'; }
+        if(xdata.appearance.shapegradient == 'off') {
+            shapeData += ",fill:'#"+fillcolor+"'";
+        } else if(xdata.appearance.shapegradient == 'normal') {
+            shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
+        }
+        var spriteData;
+        try {
+            eval("spriteData = {"+shapeData+"};");
+        }
+        catch(e) {
+            TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
+            debug(e);
+            return;
+        }
+        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+        if(panel.surface.existingGradients[fillcolor] == undefined) {
+            panel.surface.addGradient({
+               id: 'fillGradient'+fillcolor,
+               angle: 45,
+               stops: {
+                   0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
+                   100: { color: '#'+fillcolor }
+               }
+            });
+            panel.surface.existingGradients[fillcolor] = true;
+        }
+        panel.surface.removeAll();
+        sprite = panel.surface.add(spriteData);
+        var box = sprite.getBBox();
+        var xScale = xdata.appearance.shapewidth/box.width;
+        var yScale = xdata.appearance.shapeheight/box.height;
+        if(xdata.appearance.shapelocked) { yScale = xScale; }
+        sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
+        sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
+        box = sprite.getBBox();
+        sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
+        panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
+        panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
+        sprite.show(true);
     },
     iconSetSourceFromState: function() {
         var panel = this;

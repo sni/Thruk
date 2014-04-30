@@ -7,12 +7,11 @@
     initComponent: function() {
         var panel = this;
         this.callParent();
-        this.xdata.showborder = false;
-        this.xdata.showlabel  = true;
+        this.xdata.showlabel = true;
 
         this.pieStore = Ext.create('Ext.data.Store', {
-            fields: ['name','data'],
-            data:  [{name:' ', data: 100}]
+            fields: ['name','value'],
+            data:  [{name:' ', value: 100}]
         });
 
         this.loader = {
@@ -57,91 +56,23 @@
                             this.chart.redraw();
                         } catch(e) { debug(e) }
                     }
-                    this.setShowLabel();
+                    this.chart.setShowLabel();
                 }
             }
         };
 
-        var global = Ext.getCmp(this.panel_id);
-        this.chart = Ext.create('Ext.chart.Chart', {
-            xtype:  'chart',
-            animate: true,
-            store:   this.pieStore,
-            shadow:  true,
-            legend:  false,
-            insetPadding: 3,
-            theme:  'Base:gradients',
-            panel:   this,
-            series: [{
-                type: 'pie',
-                field: 'data',
-                showInLegend: true,
-                colorSet: [ '#00FF00' ],
-                tips: {
-                    trackMouse: true,
-                    width: 140,
-                    height: 28,
-                    renderer: function(storeItem, item) {
-                        var total = 0;
-                        storeItem.store.each(function(rec) {
-                            total += rec.get('data');
-                        });
-                        this.setTitle(storeItem.get('name') + ': ' + storeItem.get('data') + ' (' + Math.round(storeItem.get('data') / total * 100) + '%)');
-                    }
-                },
-                highlight: {
-                    segment: {
-                        margin: 20
-                    }
-                },
-                label: {
-                    field: 'name',
-                    display: 'rotate',
-                    contrast: true,
-                    font: '12px Arial'
-                }
-            }],
-            listeners: {
-                render: function(This, eOpts) {
-                    var div   = This.getEl();
-                    var panel = This.panel;
-                    div.on("mouseout", function()  {
-                        TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
-                            panel.chart.redraw();
-                        }, panel, []), 1000);
-                    });
-                    div.on("mouseover", function()  {
-                        window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
-                    });
-                },
-                destroy: function(This) {
-                    window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
-                },
-                resize: function(This) {
-                    This.panel.setShowLabel();
-                }
-            }
-        });
-        this.add(this.chart);
-
         this.addListener('beforerender', function() {
             this.refreshHandler();
         });
+        this.chart = Ext.create('TP.piechart', {
+            store:   this.pieStore,
+            panel:   this
+        });
+        this.add(this.chart);
+
         this.addListener('show', function() {
             this.syncShadowTimeout();
         });
-    },
-    setShowLabel: function() {
-        var panel = this;
-        if(this.chart.getEl()) {
-            Ext.each(this.chart.getEl().query('text'), function(el) {
-                if(panel.xdata.showlabel == false) {
-                    el.style.fill = 'transparent';
-                } else {
-                    el.style.fill = '';
-                }
-            });
-        }
     },
     setGearItems: function() {
         var panel = this;
@@ -156,5 +87,83 @@
             xtype:      'checkbox',
             name:       'showlabel'
         });
+    }
+});
+
+
+Ext.define('TP.piechart', {
+    extend: 'Ext.chart.Chart',
+
+    alias:  'widget.tp_piechart',
+
+    animate: true,
+    shadow:  true,
+    legend:  false,
+    insetPadding: 3,
+    theme:  'Base:gradients',
+    initComponent: function() {
+        if(this.animate) {
+            this.series[0].tips = {
+                trackMouse: true,
+                width: 140,
+                height: 28,
+                renderer: function(storeItem, item) {
+                    var total = 0;
+                    storeItem.store.each(function(rec) {
+                        total += rec.get('value');
+                    });
+                    this.setTitle(storeItem.get('name') + ': ' + storeItem.get('value') + ' (' + Math.round(storeItem.get('value') / total * 100) + '%)');
+                }
+            };
+            this.series[0].highlight = {
+                segment: {
+                    margin: 20
+                }
+            };
+        }
+        this.callParent();
+
+        this.addListener('render', function(This, eOpts) {
+            var div   = This.getEl();
+            var panel = This.panel;
+            div.on("mouseout", function()  {
+                TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
+                    panel.chart.redraw();
+                }, panel, []), 1000);
+            });
+            div.on("mouseover", function()  {
+                window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
+            });
+        });
+        this.addListener('destroy', function(This) {
+            window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
+        });
+        this.addListener('resize', function(This) {
+            This.setShowLabel();
+        });
+    },
+    series: [{
+        type: 'pie',
+        field: 'value',
+        showInLegend: true,
+        colorSet: [ '#00FF00' ],
+        label: {
+            field: 'name',
+            display: 'rotate',
+            contrast: true,
+            font: '12px Arial'
+        }
+    }],
+    setShowLabel: function() {
+        var panel = this.panel;
+        if(this.getEl()) {
+            Ext.each(this.getEl().query('text'), function(el) {
+                if(panel.xdata.showlabel == false) {
+                    el.style.fill = 'transparent';
+                } else {
+                    el.style.fill = '';
+                }
+            });
+        }
     }
 });

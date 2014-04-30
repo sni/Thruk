@@ -13,10 +13,6 @@
                         text:   'Hostgroup Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/server_link.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.HostgroupStatusIcon'}, -8, -8) }
-                    }, {
-                        text:   'Hosts Graph',
-                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                        handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartHosts'}, -8, -8) }
                     }, '-' ,{
                         text:   'Service Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/computer.png',
@@ -25,10 +21,6 @@
                         text:   'Servicegroup Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/computer_link.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.ServicegroupStatusIcon'}, -8, -8) }
-                    }, {
-                        text:   'Services Graph',
-                        icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
-                        handler: function() { TP.add_panlet_delayed({type:'TP.PanletPieChartServices'}, -8, -8) }
                     }, '-', {
                         text:   'Custom Filter',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_find.png',
@@ -71,6 +63,10 @@
                 text:   'Hosts Totals',
                 icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                 handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
+            }, {
+                text:   'Hosts Graph',
+                icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
             },
             /* Services */
             '-', {
@@ -81,6 +77,10 @@
                 text:   'Services Totals',
                 icon:   '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                 handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
+            }, {
+                text:   'Services Graph',
+                icon:   '[% url_prefix %]plugins/panorama/images/chart_pie.png',
+                handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
             }, {
                 text:   'Mine Map',
                 icon:   '[% url_prefix %]plugins/panorama/images/minemap.png',

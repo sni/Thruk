@@ -976,7 +976,7 @@ sub _task_hosts_pie {
     my $json = {
         columns => [
             { 'header' => 'Name',      dataIndex => 'name' },
-            { 'header' => 'Data',      dataIndex => 'data' },
+            { 'header' => 'Data',      dataIndex => 'value' },
         ],
         colors    => [ ],
         data      => [],
@@ -992,7 +992,7 @@ sub _task_hosts_pie {
         next if $data->{$state} == 0;
         push @{$json->{'data'}}, {
             name    => ucfirst $state,
-            data    => $data->{$state},
+            value   => $data->{$state},
         };
         push @{$json->{'colors'}}, $colors->{$state};
     }
@@ -1015,7 +1015,7 @@ sub _task_services_pie {
     my $json = {
         columns => [
             { 'header' => 'Name',      dataIndex => 'name' },
-            { 'header' => 'Data',      dataIndex => 'data' },
+            { 'header' => 'Data',      dataIndex => 'value' },
         ],
         colors    => [],
         data      => [],
@@ -1032,7 +1032,7 @@ sub _task_services_pie {
         next if $data->{$state} == 0;
         push @{$json->{'data'}}, {
             name    => ucfirst $state,
-            data    => $data->{$state},
+            value   => $data->{$state},
         };
         push @{$json->{'colors'}}, $colors->{$state};
     }

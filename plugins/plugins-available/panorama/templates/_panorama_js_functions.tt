@@ -801,6 +801,21 @@ var TP = {
             store.loadRawData({name:data[x][0], value:data[x][1]}, true);
         }
     },
+    /* update an array store with new data from hash */
+    updateArrayStoreHash: function(store, data) {
+        if(!store) { return; }
+        store.suspendEvents(false);
+        store.removeAll();
+        var num = data.length-1;
+        for(var x=0;x<num;x++) {
+            store.loadRawData({name:data[x]['name'], value:data[x]['value']}, true);
+        }
+        store.resumeEvents();
+        // add last one to trigger some events
+        if(data.length > 0) {
+            store.loadRawData({name:data[x]['name'], value:data[x]['value']}, true);
+        }
+    },
     /* return location object for url */
     getLocationObject: function(url) {
         var a  = document.createElement('a');

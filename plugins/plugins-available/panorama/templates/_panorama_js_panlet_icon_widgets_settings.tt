@@ -16,6 +16,7 @@ TP.shapesStore.load();
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
+    var lastType = panel.xdata.appearance.type;
 
     // make sure only one window is open at a time
     if(TP.iconSettingsWindow != undefined) {
@@ -51,8 +52,13 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     var updateDisabledFields = function(xdata) {
+        var originalRenderUpdate = renderUpdate;
+        renderUpdate = Ext.emptyFn;
         Ext.getCmp('shapeheightfield').setDisabled(xdata.appearance.shapelocked);
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
+        Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
+        Ext.getCmp('pietogglelocked').toggle(xdata.appearance.pielocked);
+        renderUpdate = originalRenderUpdate;
     };
 
     /* Layout Settings Tab */
@@ -111,9 +117,20 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     TP.shapesStore.load();
-    var shapeUpdate = function(forceColor) {
+    var renderUpdate   = Ext.emptyFn;
+    var renderUpdateDo = function(forceColor) {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
-        if(panel.setRenderItem) { panel.setRenderItem(xdata); }
+        if(xdata.appearance.type == undefined) { return; }
+        if(xdata.appearance.type != lastType) {
+            if(panel.setRenderItem) { panel.setRenderItem(xdata); }
+        }
+        lastType = xdata.appearance.type;
+        if(xdata.appearance.type == 'shape') {
+            panel.shapeRender(xdata, forceColor);
+        }
+        if(xdata.appearance.type == 'pie') {
+            panel.pieRender(xdata);
+        }
         labelUpdate();
         updateDisabledFields(xdata);
     }
@@ -132,7 +149,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { shapeUpdate() } } },
+                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { renderUpdate(); } } },
                 items: [{
                     /* appearance type */
                     xtype:      'combobox',
@@ -154,20 +171,37 @@ TP.iconShowEditDialog = function(panel) {
                             if(newValue == 'shape') {
                                 // fill in defaults
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
-                                if(!values['shapename'])      { values['shapename']      = 'arrow'; values['shapelocked'] = true; }
-                                if(!values['shapewidth'])     { values['shapewidth']     = 16; }
-                                if(!values['shapeheight'])    { values['shapeheight']    = 16; }
-                                if(!values['color_ok'])       { values['color_ok']       = '#199C0F'; }
-                                if(!values['color_warning'])  { values['color_warning']  = '#CDCD0A'; }
-                                if(!values['color_critical']) { values['color_critical'] = '#CA1414'; }
-                                if(!values['color_unknown'])  { values['color_unknown']  = '#CC740F'; }
-                                if(!values['shapegradient'])  { values['shapegradient']  = 'normal'; }
-                                var originalShapeUpdate = shapeUpdate;
-                                shapeUpdate = Ext.emptyFn;
+                                if(!values['shapename']) {
+                                    values['shapename']      = 'arrow';
+                                    values['shapelocked']    = true;
+                                    values['shapewidth']     = 16;
+                                    values['shapeheight']    = 16;
+                                    values['color_ok']       = '#199C0F';
+                                    values['color_warning']  = '#CDCD0A';
+                                    values['color_critical'] = '#CA1414';
+                                    values['color_unknown']  = '#CC740F';
+                                    values['shapegradient']  = 'normal';
+                                }
+                                var originalRenderUpdate = renderUpdate;
+                                renderUpdate = Ext.emptyFn;
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
-                                shapeUpdate = originalShapeUpdate;
+                                renderUpdate = originalRenderUpdate;
                             }
-                            shapeUpdate();
+
+                            if(newValue == 'pie') {
+                                // fill in defaults
+                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
+                                if(!values['piewidth']) {
+                                    values['piewidth']     = 30;
+                                    values['pieheight']    = 30;
+                                    values['pielocked']    = true;
+                                    values['pieshadow']    = true;
+                                    values['piedonut']     = 0;
+                                    values['pielabel']     = false;
+                                }
+                                Ext.getCmp('appearanceForm').getForm().setValues(values);
+                            }
+                            renderUpdate();
                         }
                     }
                 },
@@ -231,7 +265,7 @@ TP.iconShowEditDialog = function(panel) {
                             // clean up
                             Ext.Array.each(This.shapes, function(item, idx) { item.destroy() });
                         },
-                        change: function(This) { shapeUpdate(); }
+                        change: function(This) { renderUpdate(); }
                     }
                 }, {
                     fieldLabel: 'Size',
@@ -239,13 +273,13 @@ TP.iconShowEditDialog = function(panel) {
                     name:       'shapesize',
                     cls:        'shape',
                     layout:     'table',
-                    defaults: { listeners: { change: function() { shapeUpdate() } } },
+                    defaults: { listeners: { change: function() { renderUpdate() } } },
                     items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
                             { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
                             { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
-                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); shapeUpdate(); }
+                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); renderUpdate(); }
                             },
                             { xtype: 'hidden', name: 'shapelocked' }
                     ]
@@ -255,9 +289,9 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
                     defaults:    {
-                        listeners: { change: function() { shapeUpdate() } },
-                        mouseover:   function(color) { shapeUpdate(color); },
-                        mouseout:    function(color) { shapeUpdate();      }
+                        listeners: { change:    function()      { renderUpdateDo() }     },
+                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
                         { xtype: 'label', text: panel.iconType == 'host' ? 'up: ' : 'ok: ' },
@@ -309,6 +343,24 @@ TP.iconShowEditDialog = function(panel) {
                     bodyCls:    'form-hint',
                     padding:    '10 0 0 0',
                     border:      0
+                },
+                /* Pie Chart */
+                {
+                    fieldLabel: 'Size',
+                    xtype:      'fieldcontainer',
+                    name:       'piesize',
+                    cls:        'pie',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate() } } },
+                    items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberunit', name: 'piewidth', unit: 'px', width: 65, value: panel.xdata.appearance.piewidth },
+                            { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberunit', name: 'pieheight', unit: 'px', width: 65, value: panel.xdata.appearance.pieheight, id: 'pieheightfield' },
+                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
+                                toggleHandler: function(btn, state) { this.up('form').getForm().setValues({pielocked: state ? '1' : '' }); renderUpdate(); }
+                            },
+                            { xtype: 'hidden', name: 'pielocked' }
+                    ]
                 }]
             }]
         }]
@@ -643,6 +695,15 @@ TP.iconShowEditDialog = function(panel) {
     panel.setIconLabel(undefined, true);
     settingsWindow.showAt(panelPos);
     settingsWindow.toFront();
+    TP.iconSettingsWindow.panel = panel;
+
+    renderUpdate = function(forceColor) {
+        window.clearTimeout(TP.timeouts['settingsRenderUpdate']);
+        TP.timeouts['settingsRenderUpdate'] = window.setTimeout(function() {
+            renderUpdateDo(forceColor);
+        }, 100);
+    };
+    renderUpdate();
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
