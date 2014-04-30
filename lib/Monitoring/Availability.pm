@@ -218,7 +218,9 @@ sub new {
 
  calculate()
 
-Calculate the availability
+Calculate the availability.
+
+Returns hash with the availability.
 
 =over 4
 
