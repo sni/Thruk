@@ -1671,25 +1671,21 @@ function preserve_hash() {
  * 88          88          88     `8b  88          88      .a8P d8'        `8b  88  d8'        `8b
  * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
 *******************************************************************************/
-/* write/return table with performance data */
-function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host) {
-    var matches   = perfdata.match(/([^\s]+|'[^']+')=([^\s]*)/gi);
-    if(!matches) { return false; }
-    if(is_host == undefined) { is_host = false; }
-    if(is_host && state == 1) { state = 2; } // set critical state for host checks
-    var result    = '';
+function parse_perf_data(perfdata) {
+    var matches   = String(perfdata).match(/([^\s]+|'[^']+')=([^\s]*)/gi);
     var perf_data = [];
+    if(!matches) { return([]); }
     for(var nr=0; nr<matches.length; nr++) {
         try {
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
-            tmp[1] = tmp[1].replace(/,/g, '.');
+            tmp[1]  = tmp[1].replace(/,/g, '.');
             var data = tmp[1].match(
                 /^(-?\d+(\.\d+)?)([\w%]*);(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;*$/
             );
             data[4]  = (data[4]  != null) ? data[4].replace(/~?:/, '')  : '';
             data[11] = (data[11] != null) ? data[11].replace(/~?:/, '') : '';
-            perf_data.push({
+            var d = {
                 key:      tmp[0],
                 perf:     tmp[1],
                 val:      (data[1]  != null && data[1]  != '') ? parseFloat(data[1])  : '',
@@ -1700,10 +1696,21 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
                 crit_max: (data[15] != null && data[15] != '') ? parseFloat(data[15]) : '',
                 min:      (data[18] != null && data[18] != '') ? parseFloat(data[18]) : '',
                 max:      (data[21] != null && data[21] != '') ? parseFloat(data[21]) : ''
-            });
+            };
+            perf_data.push(d);
         } catch(e) {}
     }
-    var cls = 'notclickable';
+    return(perf_data);
+}
+
+/* write/return table with performance data */
+function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host) {
+    if(is_host == undefined) { is_host = false; }
+    if(is_host && state == 1) { state = 2; } // set critical state for host checks
+    var perf_data = parse_perf_data(perfdata);
+    var cls       = 'notclickable';
+    var result    = '';
+    if(perf_data.length == 0) { return false; }
     if(pnp_url != '') {
         cls = 'clickable';
     }

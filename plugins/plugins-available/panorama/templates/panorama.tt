@@ -28,6 +28,8 @@
     [% END %]
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/ux/form/MultiSelect.js"></script>
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/ux/form/ItemSelector.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/sprintf.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]/javascript/strftime-min.js"></script>
     [% PROCESS custom_perf_bar_adjustments.tt %]
 </head>
 <body onunload="TP.unload()">

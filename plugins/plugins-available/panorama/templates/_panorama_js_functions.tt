@@ -1412,3 +1412,9 @@ var TP = {
         list.push(tmppanel);
     }
 }
+
+/* returns formated time string */
+function strftime(format, unix_timestamp) {
+    var date = new Date(unix_timestamp*1000);
+    return(date.strftime(format));
+}

@@ -791,6 +791,7 @@ plugins/plugins-available/panorama/root/images/house.png
 plugins/plugins-available/panorama/root/images/html_add.png
 plugins/plugins-available/panorama/root/images/image_edit.png
 plugins/plugins-available/panorama/root/images/information.png
+plugins/plugins-available/panorama/root/images/lightning_go.png
 plugins/plugins-available/panorama/root/images/link.png
 plugins/plugins-available/panorama/root/images/loading-icon.gif
 plugins/plugins-available/panorama/root/images/menu-parent.gif
@@ -824,6 +825,7 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/panorama-1.82.css
+plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/t/controller_panorama.t

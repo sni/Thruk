@@ -205,6 +205,8 @@
             TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
         }
     },
+
+    /* render label for this widget */
     setIconLabel: function(cfg) {
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
@@ -213,6 +215,46 @@
         if(!cfg.labeltext) {
             if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
             return;
+        }
+        /* dynamic label? */
+        var txt = cfg.labeltext;
+        if(txt.match(/\{\{.*?\}\}/)) {
+            var allowed_functions = ['strftime', 'sprintf', 'if'];
+            var matches           = txt.match(/(\{\{.*?\}\})/g);
+            if(this.servicegroup) { totals = this.servicegroup; }
+            if(this.hostgroup)    { totals = this.hostgroup; }
+            if(this.results)      { totals = this.results; }
+            if(this.host)         { for(var key in this.host)    { window[key] = this.host[key];    } }
+            if(this.service)      { for(var key in this.service) { window[key] = this.service[key]; } }
+            if(window.perf_data) {
+                window.perf_data = parse_perf_data(window.perf_data);
+                window.perfdata = {};
+                for(var x = 0; x < window.perf_data.length; x++) {
+                    var d = window.perf_data[x];
+                    window.perfdata[d.key] = d;
+                }
+            } else {
+                window.perfdata = {};
+            }
+            Ext.Array.each(matches, function(item, idx) {
+                var calc      = item.replace(/^\{\{/, '').replace(/\}\}$/, '');
+                var functions = calc.match(/[\w+_]+\(/g);
+                var ok        = true;
+                // only run a few allow functions
+                Ext.Array.each(functions, function(f, idx) {
+                    f = f.replace(/\($/, '');
+                    if(!Ext.Array.contains(allowed_functions, f)) {
+                        ok = false;
+                    }
+                });
+                if(!ok) { return; }
+                var res = '';
+                try {
+                    res = eval(calc);
+                } catch(e) { debug(e); }
+                if(res == undefined) { res = ''; }
+                txt = txt.replace(item, res);
+            });
         }
         if(!this.labelEl) {
             var panel = this;
@@ -261,7 +303,7 @@
         }
         var el = this.labelEl.el.dom;
         el.style.zIndex       = Number(this.el.dom.style.zIndex)+1; /* keep above icon */
-        this.labelEl.update(cfg.labeltext);
+        this.labelEl.update(txt);
         el.style.color        = cfg.fontcolor;
         el.style.fontFamily   = cfg.fontfamily;
         el.style.background   = cfg.bgcolor;
@@ -324,6 +366,7 @@
         this.labelEl.oldX = left;
         this.labelEl.oldY = top;
     },
+
     /* add dbl click and context menu events */
     addClickEventhandler: function(el) {
         var This = this;
@@ -472,6 +515,7 @@ Ext.define('TP.IconWidget', {
         }
 
         if(panel.xdata.appearance.type == 'icon') { this.iconSetSourceFromState(); }
+        panel.setIconLabel();
     },
     /* rotates this thing */
     applyRotation: function(value) {

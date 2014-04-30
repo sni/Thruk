@@ -24,6 +24,8 @@ next:
             - background can be change in dashboard settings
             - panels are not pinnable anymore
             - tabs are now independant and can be exported and imported seperatly
+            - added icon widgets
+            - added dynamic labels to icon widgets
             - changed internal storage format
             - default_view can no longer be a string, its always a file now
             - fixed panlet cluttering when opening dashboard with smaller screens

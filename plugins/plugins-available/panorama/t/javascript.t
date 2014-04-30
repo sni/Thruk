@@ -48,12 +48,16 @@ var window = {
   setInterva:          function(){},
   clearInterval:       function(){}
 };
-var navigator = window.navigator;
-var document  = window.document;
-setTimeout    = function(){};
-clearTimeout  = function(){};
-setInterval   = function(){};
-clearInterval = function(){};
+var navigator  = window.navigator;
+var document   = window.document;
+setTimeout     = function(){};
+clearTimeout   = function(){};
+setInterval    = function(){};
+clearInterval  = function(){};
+XMLHttpRequest = function(){ return({
+    open: function(){},
+    send: function(){}
+})};
 thruk_debug_js = 1;
 ", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');

@@ -464,3 +464,19 @@ DIV.iconlabel, A.iconlabel {
   text-decoration: none;
   position: absolute;
 }
+
+/* label editor help */
+.labelhelp {
+    font-size: smaller;
+    color: #6F6F6F;
+}
+.labelhelp P {
+    padding-bottom: 4px;
+}
+.labelhelp i {
+    color: #000000;
+}
+.labelhelp td {
+  padding-left: 4px;
+  vertical-align: top;
+}

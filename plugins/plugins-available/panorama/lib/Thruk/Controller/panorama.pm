@@ -415,7 +415,7 @@ sub _task_status {
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
-        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number/]);
+        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data/]);
     }
     if(scalar keys %{$types->{'services'}} > 0) {
         my $filter = [];
@@ -425,7 +425,7 @@ sub _task_status {
             }
         }
         $filter = Thruk::Utils::combine_filter('-or', $filter);
-        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number/]);
+        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data/]);
     }
 
     $data->{backends} = $c->stash->{'backend_detail'};
