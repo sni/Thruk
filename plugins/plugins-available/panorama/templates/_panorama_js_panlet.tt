@@ -109,6 +109,7 @@
         if(state) {
             Ext.apply(this, state);
             this.setTitle(state.title);
+            this.applyBorderAndBackground();
         }
     },
     /* change size and position animated */
@@ -317,8 +318,14 @@
                 this.header.hide();
             }
         }
-        if(this.xdata.showborder == true) {
+        if(this.xdata.showborder == true && global.xdata.autohideheader == false) {
             this.header.show();
+        }
+        if(this.xdata.showborder == true && global.xdata.autohideheader == true) {
+            var panel = this;
+            window.setTimeout(Ext.bind(function() {
+                if(panel.header) { panel.header.hide(); }
+            }, panel, []), 100);
         }
     },
     /* add item to settings form */
