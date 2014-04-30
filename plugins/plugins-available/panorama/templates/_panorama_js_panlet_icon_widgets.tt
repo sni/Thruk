@@ -538,7 +538,7 @@ Ext.define('TP.IconWidget', {
         var y       = 0;
         var width   = 16;
         var height  = 16;
-        var size    = 16;
+        var size;
         if(xdata.nsize && xdata.size) {
             x        = (xdata.size - xdata.nsize[0]) / 2;
             y        = (xdata.size - xdata.nsize[1]) / 2;
@@ -553,6 +553,10 @@ Ext.define('TP.IconWidget', {
             height   = panel.xdata.nsize[1];
             size     = panel.xdata.size;
             panel.setSize(width,height);
+        } else {
+            size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
+            x    = (size - width)  / 2;
+            y    = (size - height) / 2;
         }
 
         if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
