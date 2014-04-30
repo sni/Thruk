@@ -44,7 +44,7 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: 132, listeners: { change: function() { stateUpdate() } } },
+                    defaults:      { anchor: '-12', labelWidth: 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { stateUpdate() } } } },
                     items:           generalItems
             }]
         }]
@@ -581,7 +581,6 @@ TP.iconShowEditDialog = function(panel) {
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
                     panel.applyState({xdata: panel.xdata});
                     panel.saveState();
-                    TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
                     delete TP.iconSettingsWindow;
                     settingsWindow.destroy();
                     panel.firstRun = false;
