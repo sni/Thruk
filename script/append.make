@@ -148,3 +148,10 @@ naemon-patch:
 	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
 	rm -f ${DESTDIR}${DATADIR}/root/index.html
 	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
+
+quicktest:
+	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'blib/lib', 'blib/arch')" \
+	    t/xt/panorama/javascript.t \
+	    t/0*.t \
+	    t/9*.t
+

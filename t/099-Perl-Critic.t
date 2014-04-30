@@ -28,6 +28,7 @@ if ( $EVAL_ERROR ) {
 }
 
 sub save_cache {
+    return if scalar keys %{$cache} == 0;
     open(my $fh, '>', $cachefile);
     print $fh nfreeze($cache);
     close($fh);
