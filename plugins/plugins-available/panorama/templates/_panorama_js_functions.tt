@@ -893,7 +893,7 @@ var TP = {
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
             if(id && p.id != id) { continue; }
-            if(id) { p.oldXdata = p.xdata; p.xdata = xdata; }
+            if(id && xdata) { p.oldXdata = p.xdata; p.xdata = xdata; }
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
@@ -945,7 +945,7 @@ var TP = {
                     count++;
                 }
             }
-            if(id) { p.xdata = p.oldXdata; }
+            if(id && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
         };
         var tabpan = Ext.getCmp('tabpan');
         if(count == 0 && tab != tabpan.getActiveTab()) { return; }
