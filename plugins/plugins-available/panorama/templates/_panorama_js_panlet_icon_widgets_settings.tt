@@ -662,6 +662,7 @@ TP.iconShowEditDialog = function(panel) {
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();
+                    TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
                  }
                }
         ],

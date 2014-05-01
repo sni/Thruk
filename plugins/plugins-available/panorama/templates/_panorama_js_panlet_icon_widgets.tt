@@ -517,11 +517,12 @@ Ext.define('TP.IconWidget', {
         var tab   = Ext.getCmp(this.panel_id);
         var panel = this;
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
+        var oldState = panel.xdata.state;
+        panel.xdata.state = newStatus;
         this.updateRender();
-        if(newStatus != undefined && panel.xdata.state != newStatus) {
-            var lastState = panel.xdata.state;
+        if(newStatus != undefined && oldState != newStatus) {
             panel.xdata.state = newStatus;
-            if(panel.el && lastState != 4) { // not when initial state was pending
+            if(panel.el && (oldState != 4 && oldState != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
             }
         }
@@ -555,16 +556,30 @@ Ext.define('TP.IconWidget', {
             if(xdata.general.incl_hst) { hosts    = panel.hostgroup.hosts;    }
             if(xdata.general.incl_svc) { services = panel.hostgroup.services; }
         }
-        if(panel.servicegroup) { services = panel.servicegroup.services; }
-        if(panel.results) {
+        else if(panel.servicegroup) { services = panel.servicegroup.services; }
+        else if(panel.results) {
             if(xdata.general.incl_hst) { hosts    = panel.results.hosts;    }
             if(xdata.general.incl_svc) { services = panel.results.services; }
+        }
+        else {
+            var state = xdata.state;
+            if(panel.iconType == 'host') {
+                if(state == 0) { totals.push({name: 'up',          value: 1, color: colors['up'] }); }
+                if(state == 1) { totals.push({name: 'down',        value: 1, color: colors['down'] }); }
+                if(state == 2) { totals.push({name: 'unreachable', value: 1, color: colors['unreachable'] }); }
+            } else {
+                if(state == 0) { totals.push({name: 'ok',       value: 1, color: colors['ok'] }); }
+                if(state == 1) { totals.push({name: 'warning',  value: 1, color: colors['warning'] }); }
+                if(state == 2) { totals.push({name: 'critical', value: 1, color: colors['critical'] }); }
+                if(state == 3) { totals.push({name: 'unknown',  value: 1, color: colors['unknown'] }); }
+            }
+            if(state == 4) { totals.push({name: 'pending', value: 1, color: colors['pending'] }); }
         }
         Ext.Array.each(['down', 'unreachable', 'critical', 'unknown', 'warning', 'up', 'ok', 'pending'], function(name, i) {
             if(   hosts[name]) { totals.push({name: name, value:    hosts[name], color: colors[name] }); }
             if(services[name]) { totals.push({name: name, value: services[name], color: colors[name] }); }
         });
-        if(totals.length == 0) { totals.push({name: 'none', value: 0, color: colors['pending'] }); }
+        if(totals.length == 0) { totals.push({name: 'none', value: 1, color: colors['pending'] }); }
         return(totals);
     },
 
