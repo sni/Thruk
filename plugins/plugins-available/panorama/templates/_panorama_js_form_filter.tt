@@ -47,6 +47,7 @@ var searchStore = Ext.create('Ext.data.Store', {
     remoteFilter: true,
     listeners: {
         beforeload: function(store, operation, eOpts) {
+            var now = new Date();
             store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
             if(!searchStore.search_type) { return false; }
             var type = searchStore.search_type.toLowerCase();
@@ -61,14 +62,20 @@ var searchStore = Ext.create('Ext.data.Store', {
             } else {
                 store.removeAll();
                 debug("type: "+type+" not supported");
+                store.lastParam  = {};
+                store.lastLoaded = now;
                 return false;
             }
             // refresh every 120 seconds or if type changed
-            var now = new Date();
-            if(store.count() > 0 && Object.my_equals(store.lastParam, store.proxy.extraParams) && store.lastLoaded.getTime() > now.getTime() - 120000) {
+            var param = {
+                type: type,
+                page: operation.page,
+                query: operation.params ? operation.params.query : ''
+            };
+            if(store.count() > 0 && Object.my_equals(store.lastParam, param) && store.lastLoaded.getTime() > now.getTime() - 120000) {
                 return false;
             }
-            store.lastParam  = store.proxy.extraParams;
+            store.lastParam  = param;
             store.lastLoaded = now;
             return true;
         }
