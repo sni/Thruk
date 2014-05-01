@@ -646,7 +646,7 @@ TP.iconShowEditDialog = function(panel) {
                     settingsWindow.destroy();
                     // restore position any layout
                     if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
-                    panel.applyXdata();
+                    panel.applyXdata(cp.state[panel.id].xdata);
                  }
                },
                /* panlet setting save button */
