@@ -141,7 +141,9 @@
         this.setIconLabel(xdata.label);
 
         /* recalculate state */
-        this.refreshHandler();
+        if(TP.initialized) {
+            this.refreshHandler();
+        }
 
         /* add link */
         if(xdata.link && xdata.link.link) {
@@ -503,9 +505,10 @@ Ext.define('TP.IconWidget', {
         }
         if(this.lastType != xdata.appearance.type) {
             this.setRenderItem(xdata);
+        } else {
+            this.updateRender();
         }
         this.lastType = xdata.appearance.type;
-        this.updateRender();
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);
@@ -527,7 +530,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(panel.xdata.appearance.type == 'shape') { panel.shapeRender();  }
         if(panel.xdata.appearance.type == 'pie')   { panel.pieRender();    }
-        if(panel.xdata.appearance.type == 'icon')  { panel.setIconLabel(); }
+        if(panel.xdata.appearance.type == 'icon')  { panel.iconSetSourceFromState(); }
     },
 
     /* rotates this thing */
@@ -587,6 +590,8 @@ Ext.define('TP.IconWidget', {
     setRenderItem: function(xdata) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
+        if(panel.itemRendering) { return; }
+        panel.itemRendering = true;
         panel.removeAll();
         panel.surface  = undefined;
         panel.icon     = undefined;
@@ -639,15 +644,15 @@ Ext.define('TP.IconWidget', {
                 style:     'vertical-align:inherit;',
                 listeners: {
                     afterrender: function(This, eOpts) {
+                        panel.itemRendering = false;
                         panel.surface = panel.items.getAt(0).surface;
                         if(xdata.appearance.type == 'icon') {
                             This.el.down('image').on("load", function (evt, ele, opts) {
                                 panel.iconFixSize();
                             });
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
-                            panel.iconSetSourceFromState();
                         }
-                        if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata); }
+                        panel.updateRender();
                     }
                 }
             });
@@ -668,7 +673,11 @@ Ext.define('TP.IconWidget', {
                 height:  height,
                 animate: false,
                 listeners: {
-                    afterrender: function(This, eOpts) { panel.chart = This; }
+                    afterrender: function(This, eOpts) {
+                        panel.itemRendering = false;
+                        panel.chart = This;
+                        panel.updateRender();
+                    }
                 }
             });
         }

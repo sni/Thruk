@@ -120,27 +120,32 @@ Ext.define('TP.piechart', {
                     margin: 20
                 }
             };
+        } else {
+            this.series[0].tips      = false;
+            this.series[0].highlight = false;
         }
         this.callParent();
 
-        this.addListener('render', function(This, eOpts) {
-            var div   = This.getEl();
-            var panel = This.panel;
-            div.on("mouseout", function()  {
-                TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
-                    panel.chart.redraw();
-                }, panel, []), 1000);
+        if(this.animate) {
+            this.addListener('render', function(This, eOpts) {
+                var div   = This.getEl();
+                var panel = This.panel;
+                div.on("mouseout", function()  {
+                    TP.timeouts['timeout_'+This.id+'_redraw'] = window.setTimeout(Ext.bind(function() {
+                        panel.chart.redraw();
+                    }, panel, []), 1000);
+                });
+                div.on("mouseover", function()  {
+                    window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
+                });
             });
-            div.on("mouseover", function()  {
+            this.addListener('destroy', function(This) {
                 window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
             });
-        });
-        this.addListener('destroy', function(This) {
-            window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
-        });
-        this.addListener('resize', function(This) {
-            This.setShowLabel();
-        });
+            this.addListener('resize', function(This) {
+                This.setShowLabel();
+            });
+        }
     },
     series: [{
         type: 'pie',

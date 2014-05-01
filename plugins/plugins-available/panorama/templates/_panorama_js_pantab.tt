@@ -88,7 +88,9 @@
             Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
 
             // refresh icons
-            TP.updateAllIcons(This);
+            if(TP.initialized) {
+                TP.updateAllIcons(This);
+            }
         },
         hide: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
