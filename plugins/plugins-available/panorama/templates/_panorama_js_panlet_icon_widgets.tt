@@ -506,7 +506,7 @@ Ext.define('TP.IconWidget', {
         if(this.lastType != xdata.appearance.type) {
             this.setRenderItem(xdata);
         } else {
-            this.updateRender();
+            this.updateRender(xdata);
         }
         this.lastType = xdata.appearance.type;
     },
@@ -526,11 +526,12 @@ Ext.define('TP.IconWidget', {
     },
 
     /* update shapes and stuff */
-    updateRender: function() {
+    updateRender: function(xdata) {
         var panel = this;
-        if(panel.xdata.appearance.type == 'shape') { panel.shapeRender();  }
-        if(panel.xdata.appearance.type == 'pie')   { panel.pieRender();    }
-        if(panel.xdata.appearance.type == 'icon')  { panel.iconSetSourceFromState(); }
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata);  }
+        if(xdata.appearance.type == 'pie')   { panel.pieRender(xdata);    }
+        if(xdata.appearance.type == 'icon')  { panel.iconSetSourceFromState(xdata); }
     },
 
     /* rotates this thing */
@@ -609,7 +610,7 @@ Ext.define('TP.IconWidget', {
             height   = xdata.nsize[1];
             size     = xdata.size;
             panel.setSize(width,height);
-        } else if(panel.xdata.size && panel.xdata.nsize) {
+        } else if(panel.xdata.size && panel.xdata.nsize && panel.xdata.nsize[0] > 1) {
             x        = (panel.xdata.size - panel.xdata.nsize[0]) / 2;
             y        = (panel.xdata.size - panel.xdata.nsize[1]) / 2;
             width    = panel.xdata.nsize[0];
@@ -647,17 +648,17 @@ Ext.define('TP.IconWidget', {
                         panel.itemRendering = false;
                         panel.surface = panel.items.getAt(0).surface;
                         if(xdata.appearance.type == 'icon') {
+                            panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             This.el.down('image').on("load", function (evt, ele, opts) {
                                 panel.iconFixSize();
                             });
-                            panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                         }
-                        panel.updateRender();
+                        panel.updateRender(xdata);
                     }
                 }
             });
         }
-        if(xdata.appearance.type == 'pie') {
+        else if(xdata.appearance.type == 'pie') {
             var pieStore = Ext.create('Ext.data.Store', {
                 fields: ['name','value'],
                 data:  []
@@ -676,10 +677,13 @@ Ext.define('TP.IconWidget', {
                     afterrender: function(This, eOpts) {
                         panel.itemRendering = false;
                         panel.chart = This;
-                        panel.updateRender();
+                        panel.updateRender(xdata);
                     }
                 }
             });
+        }
+        else {
+            panel.itemRendering = false;
         }
     },
 
@@ -791,54 +795,57 @@ Ext.define('TP.IconWidget', {
         panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
         sprite.show(true);
     },
-    iconSetSourceFromState: function() {
+    iconSetSourceFromState: function(xdata) {
         var panel = this;
+        if(xdata       == undefined) { xdata = panel.xdata; }
+        if(xdata.state == undefined) { xdata.state = panel.xdata.state; }
+        if(xdata.state == undefined) { xdata.state = 4; }
         var tab   = Ext.getCmp(panel.panel_id);
         if(!panel.icon) {
-            panel.setRenderItem();
+            panel.setRenderItem(xdata);
             return;
         }
-        iconset = panel.xdata.appearance.iconset;
+        iconset = xdata.appearance.iconset;
         if(iconset == '' || iconset == undefined) {
             iconset = tab.xdata.defaulticonset;
         }
         var newSrc;
         if(panel.iconType == 'host') {
             if(panel.acknowledged) {
-                     if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_down.png';        }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'; }
+                     if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_down.png';        }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'; }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';     }
             }
             else if(panel.downtime) {
-                if(     panel.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_up.png';          }
-                else if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_down.png';        }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unreachable.png'; }
-                else if(panel.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';     }
+                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_up.png';          }
+                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_down.png';        }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unreachable.png'; }
+                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';     }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';     }
             } else {
-                if(     panel.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/up.png';          }
-                else if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/down.png';        }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/unreachable.png'; }
-                else if(panel.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';     }
+                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/up.png';          }
+                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/down.png';        }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/unreachable.png'; }
+                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';     }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';     }
             }
         } else {
             if(panel.acknowledged) {
-                     if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_warning.png';  }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_critical.png'; }
+                     if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_warning.png';  }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_critical.png'; }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';  }
             }
             else if(panel.downtime) {
-                if(     panel.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_ok.png';       }
-                else if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_warning.png';  }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_critical.png'; }
-                else if(panel.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';  }
+                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_ok.png';       }
+                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_warning.png';  }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_critical.png'; }
+                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';  }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';  }
             } else {
-                if(     panel.xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/ok.png';       }
-                else if(panel.xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/warning.png';  }
-                else if(panel.xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/critical.png'; }
-                else if(panel.xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';  }
+                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/ok.png';       }
+                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/warning.png';  }
+                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/critical.png'; }
+                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';  }
                 else                            { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
             }
         }
@@ -880,7 +887,7 @@ Ext.define('TP.IconWidget', {
             panel.items.getAt(0).setSize(size, size);
             panel.xdata.size  = size;
             panel.xdata.nsize = [naturalWidth, naturalHeight];
-            panel.icon.setAttributes({translation:{x:0, y:0}}, true);
+            panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:1, y:1}}, true);
             this.setIconLabel();
         }
     }
