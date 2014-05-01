@@ -546,47 +546,25 @@ Ext.define('TP.IconWidget', {
     },
 
     /* return totals array which can be used in a store */
-    getTotals: function(xdata) {
+    getTotals: function(xdata, colors) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         var totals = [];
+        var hosts  = {}, services = {};
         if(panel.hostgroup) {
-            if(xdata.general.incl_hst) {
-                totals.push({name: 'up',          value: panel.hostgroup.hosts.up});
-                totals.push({name: 'unreachable', value: panel.hostgroup.hosts.unreachable});
-                totals.push({name: 'down',        value: panel.hostgroup.hosts.down});
-                totals.push({name: 'pending',     value: panel.hostgroup.hosts.pending});
-            }
-            if(xdata.general.incl_svc) {
-                totals.push({name: 'ok',          value: panel.hostgroup.services.ok});
-                totals.push({name: 'warning',     value: panel.hostgroup.services.warning});
-                totals.push({name: 'critical',    value: panel.hostgroup.services.critical});
-                totals.push({name: 'unknown',     value: panel.hostgroup.services.unknown});
-                totals.push({name: 'pending',     value: panel.hostgroup.services.pending});
-            }
+            if(xdata.general.incl_hst) { hosts    = panel.hostgroup.hosts;    }
+            if(xdata.general.incl_svc) { services = panel.hostgroup.services; }
         }
-        if(panel.servicegroup) {
-            totals.push({name: 'ok',          value: panel.servicegroup.services.ok});
-            totals.push({name: 'warning',     value: panel.servicegroup.services.warning});
-            totals.push({name: 'critical',    value: panel.servicegroup.services.critical});
-            totals.push({name: 'unknown',     value: panel.servicegroup.services.unknown});
-            totals.push({name: 'pending',     value: panel.servicegroup.services.pending});
-        }
+        if(panel.servicegroup) { services = panel.servicegroup.services; }
         if(panel.results) {
-            if(xdata.general.incl_hst) {
-                totals.push({name: 'up',          value: panel.results.hosts.up});
-                totals.push({name: 'unreachable', value: panel.results.hosts.unreachable});
-                totals.push({name: 'down',        value: panel.results.hosts.down});
-                totals.push({name: 'pending',     value: panel.results.hosts.pending});
-            }
-            if(xdata.general.incl_svc) {
-                totals.push({name: 'ok',          value: panel.results.services.ok});
-                totals.push({name: 'warning',     value: panel.results.services.warning});
-                totals.push({name: 'critical',    value: panel.results.services.critical});
-                totals.push({name: 'unknown',     value: panel.results.services.unknown});
-                totals.push({name: 'pending',     value: panel.results.services.pending});
-            }
+            if(xdata.general.incl_hst) { hosts    = panel.results.hosts;    }
+            if(xdata.general.incl_svc) { services = panel.results.services; }
         }
+        Ext.Array.each(['down', 'unreachable', 'critical', 'unknown', 'warning', 'up', 'ok', 'pending'], function(name, i) {
+            if(   hosts[name]) { totals.push({name: name, value:    hosts[name], color: colors[name] }); }
+            if(services[name]) { totals.push({name: name, value: services[name], color: colors[name] }); }
+        });
+        if(totals.length == 0) { totals.push({name: 'none', value: 0, color: colors['pending'] }); }
         return(totals);
     },
 
@@ -704,14 +682,20 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
         panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
-        var totals = this.getTotals(xdata);
-        panel.chart.series.getAt(0).colorSet = [];
-        if(xdata.general.incl_hst) {
-            panel.chart.series.getAt(0).colorSet.push('#00FF33', '#FF5B33', '#FF7A59', '#ACACAC');
-        }
-        if(xdata.general.incl_svc || panel.iconType == 'servicegroup') {
-            panel.chart.series.getAt(0).colorSet.push('#00FF33', '#FFDE00', '#FF9E00', '#FF5B33', '#ACACAC');
-        }
+        var colors = {
+            up:          '#00FF33',
+            down:        '#FF5B33',
+            unreachable: '#FF7A59',
+            pending:     '#ACACAC',
+            ok:          '#00FF33',
+            warning:     '#FFDE00',
+            unknown:     '#FF9E00',
+            critical:    '#FF5B33'
+        };
+        var totals   = this.getTotals(xdata, colors);
+        var colorSet = [];
+        Ext.Array.each(totals, function(t,i) { colorSet.push(t.color) });
+        panel.chart.series.getAt(0).colorSet = colorSet;
         var pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','value'],
             data:  []
