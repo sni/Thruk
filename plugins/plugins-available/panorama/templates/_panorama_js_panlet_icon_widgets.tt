@@ -591,10 +591,10 @@ Ext.define('TP.IconWidget', {
     },
 
     /* set main render item*/
-    setRenderItem: function(xdata) {
+    setRenderItem: function(xdata, forceRecreate) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(panel.itemRendering) { return; }
+        if(panel.itemRendering && !forceRecreate) { return; }
         panel.itemRendering = true;
         panel.removeAll();
         panel.surface  = undefined;
@@ -676,6 +676,8 @@ Ext.define('TP.IconWidget', {
                 width:   width,
                 height:  height,
                 animate: false,
+                shadow:  xdata.appearance.pieshadow,
+                donut:   xdata.appearance.piedonut,
                 listeners: {
                     afterrender: function(This, eOpts) {
                         panel.itemRendering = false;
@@ -716,7 +718,7 @@ Ext.define('TP.IconWidget', {
         });
         TP.updateArrayStoreHash(pieStore, totals);
         panel.chart.bindStore(pieStore);
-        panel.chart.panel.xdata.showlabel = false;
+        panel.chart.panel.xdata.showlabel = !!xdata.appearance.pielabel;
         panel.chart.setShowLabel();
     },
 

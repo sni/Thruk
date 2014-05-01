@@ -118,11 +118,11 @@ TP.iconShowEditDialog = function(panel) {
 
     TP.shapesStore.load();
     var renderUpdate   = Ext.emptyFn;
-    var renderUpdateDo = function(forceColor) {
+    var renderUpdateDo = function(forceColor, forceRenderItem) {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         if(xdata.appearance.type == undefined) { return; }
-        if(xdata.appearance.type != lastType) {
-            if(panel.setRenderItem) { panel.setRenderItem(xdata); }
+        if(xdata.appearance.type != lastType || forceRenderItem) {
+            if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem); }
         }
         lastType = xdata.appearance.type;
         if(xdata.appearance.type == 'shape') {
@@ -348,7 +348,6 @@ TP.iconShowEditDialog = function(panel) {
                 {
                     fieldLabel: 'Size',
                     xtype:      'fieldcontainer',
-                    name:       'piesize',
                     cls:        'pie',
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate() } } },
@@ -361,6 +360,31 @@ TP.iconShowEditDialog = function(panel) {
                             },
                             { xtype: 'hidden', name: 'pielocked' }
                     ]
+                }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    cls:        'pie',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
+                    items: [
+                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
+                    {
+                        xtype:      'checkbox',
+                        name:       'pieshadow'
+                    },
+                    { xtype: 'label', text: 'Label:', style: 'margin-left: 10px; margin-right: 2px;' },
+                    {
+                        xtype:      'checkbox',
+                        name:       'pielabel'
+                    },
+                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 10px; margin-right: 2px;' },
+                    {
+                        xtype:      'numberunit',
+                        allowDecimals: false,
+                        width:       60,
+                        name:       'piedonut',
+                        unit:       'px'
+                    }]
                 }]
             }]
         }]
@@ -621,6 +645,7 @@ TP.iconShowEditDialog = function(panel) {
                     }
                     settingsWindow.destroy();
                     // restore position any layout
+                    if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
                     panel.applyXdata();
                  }
                },
@@ -697,10 +722,10 @@ TP.iconShowEditDialog = function(panel) {
     settingsWindow.toFront();
     TP.iconSettingsWindow.panel = panel;
 
-    renderUpdate = function(forceColor) {
+    renderUpdate = function(forceColor, forceRenderItem) {
         window.clearTimeout(TP.timeouts['settingsRenderUpdate']);
         TP.timeouts['settingsRenderUpdate'] = window.setTimeout(function() {
-            renderUpdateDo(forceColor);
+            renderUpdateDo(forceColor, forceRenderItem);
         }, 100);
     };
     renderUpdate();

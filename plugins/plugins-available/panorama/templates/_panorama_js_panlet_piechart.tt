@@ -124,6 +124,7 @@ Ext.define('TP.piechart', {
             this.series[0].tips      = false;
             this.series[0].highlight = false;
         }
+        this.series[0].donut = this.donut ? this.donut : false;
         this.callParent();
 
         if(this.animate) {
@@ -142,10 +143,10 @@ Ext.define('TP.piechart', {
             this.addListener('destroy', function(This) {
                 window.clearTimeout(TP.timeouts['timeout_'+This.id+'_redraw']);
             });
-            this.addListener('resize', function(This) {
-                This.setShowLabel();
-            });
         }
+        this.addListener('resize', function(This) {
+            This.setShowLabel();
+        });
     },
     series: [{
         type: 'pie',
