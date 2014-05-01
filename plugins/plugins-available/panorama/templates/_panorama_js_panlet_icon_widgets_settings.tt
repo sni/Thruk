@@ -121,6 +121,7 @@ TP.iconShowEditDialog = function(panel) {
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         if(xdata.appearance.type == undefined) { return; }
+        if(xdata.appearance.type == 'shape') { forceRenderItem = true; }
         if(xdata.appearance.type != lastType || forceRenderItem) {
             if(panel.setRenderItem) { panel.setRenderItem(xdata, forceRenderItem); }
         }
@@ -129,7 +130,7 @@ TP.iconShowEditDialog = function(panel) {
             panel.shapeRender(xdata, forceColor);
         }
         if(xdata.appearance.type == 'pie') {
-            panel.pieRender(xdata);
+            panel.pieRender(xdata, forceColor);
         }
         labelUpdate();
         updateDisabledFields(xdata);
@@ -149,7 +150,7 @@ TP.iconShowEditDialog = function(panel) {
                 border:          0,
                 bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
-                defaults:      { anchor: '-12', labelWidth: 80, listeners: { change: function() { renderUpdate(); } } },
+                defaults:      { anchor: '-12', labelWidth: 60, listeners: { change: function() { renderUpdate(); } } },
                 items: [{
                     /* appearance type */
                     xtype:      'combobox',
@@ -172,15 +173,15 @@ TP.iconShowEditDialog = function(panel) {
                                 // fill in defaults
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
                                 if(!values['shapename']) {
-                                    values['shapename']      = 'arrow';
-                                    values['shapelocked']    = true;
-                                    values['shapewidth']     = 16;
-                                    values['shapeheight']    = 16;
-                                    values['color_ok']       = '#199C0F';
-                                    values['color_warning']  = '#CDCD0A';
-                                    values['color_critical'] = '#CA1414';
-                                    values['color_unknown']  = '#CC740F';
-                                    values['shapegradient']  = 'normal';
+                                    values['shapename']           = 'arrow';
+                                    values['shapelocked']         = true;
+                                    values['shapewidth']          = 16;
+                                    values['shapeheight']         = 16;
+                                    values['shapecolor_ok']       = '#199C0F';
+                                    values['shapecolor_warning']  = '#CDCD0A';
+                                    values['shapecolor_critical'] = '#CA1414';
+                                    values['shapecolor_unknown']  = '#CC740F';
+                                    values['shapegradient']       =  0.1;
                                 }
                                 var originalRenderUpdate = renderUpdate;
                                 renderUpdate = Ext.emptyFn;
@@ -192,12 +193,20 @@ TP.iconShowEditDialog = function(panel) {
                                 // fill in defaults
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
                                 if(!values['piewidth']) {
-                                    values['piewidth']     = 30;
-                                    values['pieheight']    = 30;
-                                    values['pielocked']    = true;
-                                    values['pieshadow']    = true;
-                                    values['piedonut']     = 0;
-                                    values['pielabel']     = false;
+                                    values['piewidth']             = 50;
+                                    values['pieheight']            = 50;
+                                    values['pielocked']            = true;
+                                    values['pieshadow']            = true;
+                                    values['piedonut']             = 0;
+                                    values['pielabel']             = false;
+                                    values['piegradient']          = -0.15;
+                                    values['piecolor_ok']          = '#199C0F';
+                                    values['piecolor_warning']     = '#CDCD0A';
+                                    values['piecolor_critical']    = '#CA1414';
+                                    values['piecolor_unknown']     = '#CC740F';
+                                    values['piecolor_up']          = '#199C0F';
+                                    values['piecolor_down']        = '#CA1414';
+                                    values['piecolor_unreachable'] = '#CA1414';
                                 }
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
                             }
@@ -297,7 +306,7 @@ TP.iconShowEditDialog = function(panel) {
                         { xtype: 'label', text: panel.iconType == 'host' ? 'up: ' : 'ok: ' },
                         {
                             xtype:          'colorcbo',
-                            name:           'color_ok',
+                            name:           'shapecolor_ok',
                             value:           panel.xdata.appearance.shapecolor_ok,
                             width:           80,
                             tdAttrs:       { style: 'padding-right: 10px;'},
@@ -306,7 +315,7 @@ TP.iconShowEditDialog = function(panel) {
                         { xtype: 'label', text: panel.iconType == 'host' ? 'unreachable: ' : 'warning: ' },
                         {
                             xtype:          'colorcbo',
-                            name:           'color_warning',
+                            name:           'shapecolor_warning',
                             value:           panel.xdata.appearance.shapecolor_warning,
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
@@ -314,7 +323,7 @@ TP.iconShowEditDialog = function(panel) {
                         { xtype: 'label', text: panel.iconType == 'host' ? 'down: ' : 'critical: ' },
                         {
                             xtype:          'colorcbo',
-                            name:           'color_critical',
+                            name:           'shapecolor_critical',
                             value:           panel.xdata.appearance.shapecolor_critical,
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
@@ -322,7 +331,7 @@ TP.iconShowEditDialog = function(panel) {
                         { xtype: 'label', text: 'unknown: ', hidden: panel.iconType == 'host' ? true : false },
                         {
                             xtype:          'colorcbo',
-                            name:           'color_unknown',
+                            name:           'shapecolor_unknown',
                             value:           panel.xdata.appearance.shapecolor_unknown,
                             width:           80,
                             colorGradient: { start: '#DAB891', stop: '#FF8900' },
@@ -330,11 +339,14 @@ TP.iconShowEditDialog = function(panel) {
                     }]
                 }, {
                     fieldLabel:   'Gradient',
-                    xtype:        'combobox',
-                    name:         'shapegradient',
+                    xtype:        'numberfield',
                     cls:          'shape',
-                    store:       ['off', 'normal'],
-                    value:        panel.xdata.appearance.shapegradient
+                    allowDecimals: true,
+                    name:         'shapegradient',
+                    maxValue:      1,
+                    minValue:     -1,
+                    step:          0.05,
+                    value:         panel.xdata.appearance.shapegradient
                 }, {
                     xtype:      'panel',
                     cls:        'shape',
@@ -372,12 +384,12 @@ TP.iconShowEditDialog = function(panel) {
                         xtype:      'checkbox',
                         name:       'pieshadow'
                     },
-                    { xtype: 'label', text: 'Label:', style: 'margin-left: 10px; margin-right: 2px;' },
+                    { xtype: 'label', text: 'Label:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {
                         xtype:      'checkbox',
                         name:       'pielabel'
                     },
-                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 10px; margin-right: 2px;' },
+                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {
                         xtype:      'numberunit',
                         allowDecimals: false,
@@ -385,6 +397,86 @@ TP.iconShowEditDialog = function(panel) {
                         name:       'piedonut',
                         unit:       'px'
                     }]
+                }, {
+                    fieldLabel: 'Colors',
+                    cls:        'pie',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
+                    defaults:    {
+                        listeners: { change:    function()      { renderUpdateDo() }     },
+                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseout:  function(color) { renderUpdateDo();      }
+                    },
+                    items: [
+                        { xtype: 'label', text: 'ok:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_ok',
+                            value:           panel.xdata.appearance.piecolor_ok,
+                            width:           80,
+                            tdAttrs:       { style: 'padding-right: 10px;'},
+                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
+                        },
+                        { xtype: 'label', text: 'warning:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_warning',
+                            value:           panel.xdata.appearance.piecolor_warning,
+                            width:           80,
+                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
+                        },
+                        { xtype: 'label', text: 'critical:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_critical',
+                            value:           panel.xdata.appearance.piecolor_critical,
+                            width:           80,
+                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
+                        },
+                        { xtype: 'label', text: 'unknown:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_unknown',
+                            value:           panel.xdata.appearance.piecolor_unknown,
+                            width:           80,
+                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
+                        },
+                        { xtype: 'label', text: 'up:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_up',
+                            value:           panel.xdata.appearance.piecolor_up,
+                            width:           80,
+                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
+                        },
+                        { xtype: 'label', text: 'down:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_down',
+                            value:           panel.xdata.appearance.piecolor_down,
+                            width:           80,
+                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
+                        },
+                        { xtype: 'label', text: 'unreachable:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'piecolor_unreachable',
+                            value:           panel.xdata.appearance.piecolor_unreachable,
+                            width:           80,
+                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
+                        },
+                        { xtype: 'label', text: 'Gradient:' },
+                        {
+                            xtype:      'numberfield',
+                            allowDecimals: true,
+                            width:       80,
+                            name:       'piegradient',
+                            maxValue:    1,
+                            minValue:   -1,
+                            step:        0.05,
+                            value:       panel.xdata.appearance.piegradient
+                        }
+                    ]
                 }]
             }]
         }]
@@ -642,11 +734,12 @@ TP.iconShowEditDialog = function(panel) {
                     // if we cancel directly after adding a new icon, destroy it
                     if(panel.firstRun) {
                         panel.destroy();
+                    } else {
+                        // restore position any layout
+                        if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
+                        panel.applyXdata(cp.state[panel.id].xdata);
                     }
                     settingsWindow.destroy();
-                    // restore position any layout
-                    if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
-                    panel.applyXdata(cp.state[panel.id].xdata);
                  }
                },
                /* panlet setting save button */

@@ -686,7 +686,7 @@ Ext.define('TP.IconWidget', {
     },
 
     /* renders pie chart */
-    pieRender: function(xdata) {
+    pieRender: function(xdata, forceColor) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type != 'pie') { return }
@@ -698,18 +698,32 @@ Ext.define('TP.IconWidget', {
         panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         var colors = {
-            up:          '#00FF33',
-            down:        '#FF5B33',
-            unreachable: '#FF7A59',
-            pending:     '#ACACAC',
-            ok:          '#00FF33',
-            warning:     '#FFDE00',
-            unknown:     '#FF9E00',
-            critical:    '#FF5B33'
+            up:          xdata.appearance.piecolor_up          ? xdata.appearance.piecolor_up          : '#00FF33',
+            down:        xdata.appearance.piecolor_down        ? xdata.appearance.piecolor_down        : '#FF5B33',
+            unreachable: xdata.appearance.piecolor_unreachable ? xdata.appearance.piecolor_unreachable : '#FF7A59',
+            pending:     xdata.appearance.piecolor_pending     ? xdata.appearance.piecolor_pending     : '#ACACAC',
+            ok:          xdata.appearance.piecolor_ok          ? xdata.appearance.piecolor_ok          : '#00FF33',
+            warning:     xdata.appearance.piecolor_warning     ? xdata.appearance.piecolor_warning     : '#FFDE00',
+            unknown:     xdata.appearance.piecolor_unknown     ? xdata.appearance.piecolor_unknown     : '#FF9E00',
+            critical:    xdata.appearance.piecolor_critical    ? xdata.appearance.piecolor_critical    : '#FF5B33'
         };
         var totals   = this.getTotals(xdata, colors);
         var colorSet = [];
-        Ext.Array.each(totals, function(t,i) { colorSet.push(t.color) });
+        Ext.Array.each(totals, function(t,i) {
+            var color = t.color;
+            if(forceColor) { color = forceColor; }
+            if(xdata.appearance.piegradient != 0) {
+                var gradient = TP.createGradient(color, xdata.appearance.piegradient);
+                if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
+                if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
+                    panel.chart.surface.existingGradients[gradient.id] = true;
+                    panel.chart.surface.addGradient(gradient);
+                }
+                colorSet.push('url(#'+gradient.id+')');
+            } else {
+                colorSet.push(color);
+            }
+        });
         panel.chart.series.getAt(0).colorSet = colorSet;
         var pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','value'],
@@ -751,18 +765,23 @@ Ext.define('TP.IconWidget', {
         var state = xdata.state, fillcolor;
         if(state == undefined) { state = panel.xdata.state; }
         if(forceColor != undefined) { fillcolor = forceColor; }
-        else if(state == 0)         { fillcolor = xdata.appearance.color_ok; }
-        else if(state == 1)         { fillcolor = xdata.appearance.color_warning; }
-        else if(state == 2)         { fillcolor = xdata.appearance.color_critical; }
-        else if(state == 3)         { fillcolor = xdata.appearance.color_unknown; }
+        else if(state == 0)         { fillcolor = xdata.appearance.shapecolor_ok; }
+        else if(state == 1)         { fillcolor = xdata.appearance.shapecolor_warning; }
+        else if(state == 2)         { fillcolor = xdata.appearance.shapecolor_critical; }
+        else if(state == 3)         { fillcolor = xdata.appearance.shapecolor_unknown; }
         else if(state == 4)         { fillcolor = "#777777"; }
         if(!fillcolor) { fillcolor = '#333333'; }
         fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
-        if(xdata.appearance.shapegradient == undefined) { xdata.appearance.shapegradient = 'normal'; }
-        if(xdata.appearance.shapegradient == 'off') {
+        if(xdata.appearance.shapegradient != 0) {
+            if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+            var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
+            if(panel.surface.existingGradients[gradient.id] == undefined) {
+                panel.surface.addGradient(gradient);
+                panel.surface.existingGradients[gradient.id] = true;
+            }
+            shapeData += ",fill:'url(#"+gradient.id+")'";
+        } else {
             shapeData += ",fill:'#"+fillcolor+"'";
-        } else if(xdata.appearance.shapegradient == 'normal') {
-            shapeData += ",fill:'url(#fillGradient"+fillcolor+")'";
         }
         var spriteData;
         try {
@@ -772,18 +791,6 @@ Ext.define('TP.IconWidget', {
             TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
             debug(e);
             return;
-        }
-        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-        if(panel.surface.existingGradients[fillcolor] == undefined) {
-            panel.surface.addGradient({
-               id: 'fillGradient'+fillcolor,
-               angle: 45,
-               stops: {
-                   0:   { color: Ext.draw.Color.fromString('#'+fillcolor).getLighter().toString() },
-                   100: { color: '#'+fillcolor }
-               }
-            });
-            panel.surface.existingGradients[fillcolor] = true;
         }
         panel.surface.removeAll();
         sprite = panel.surface.add(spriteData);
@@ -1530,4 +1537,27 @@ TP.getIconDetailsLink = function(panel) {
     [% ELSE %]
         return(base+"?"+Ext.Object.toQueryString(options));
     [% END %]
+}
+
+/* get gradient for color */
+TP.createGradient = function(color, num) {
+    if(num == undefined) { num = 0.2; }
+    color = color.replace(/^#/, '');
+    var start;
+    var end;
+    if(num > 0) {
+        start = Ext.draw.Color.fromString('#'+color).getLighter(Number(num)).toString();
+        end   = '#'+color;
+    } else if (num < 0) {
+        start = '#'+color;
+        end   = Ext.draw.Color.fromString('#'+color).getDarker(Number(-num)).toString();
+    }
+    return({
+        id: 'fillGradient'+color+num,
+        angle: 45,
+        stops: {
+              0: { color: start },
+            100: { color: end   }
+        }
+    });
 }
