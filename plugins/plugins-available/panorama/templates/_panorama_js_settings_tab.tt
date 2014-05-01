@@ -31,7 +31,7 @@ TP.getExportTab = function(options) {
         fieldLabel: 'Export',
         items: [{
             xtype: 'button',
-            text:  'Active Tab',
+            text:  'Export Active Tab',
             handler: function() {
                 Ext.MessageBox.show({
                     title:      'Current Tab Export',
@@ -50,7 +50,7 @@ TP.getExportTab = function(options) {
         labelSeparator: ' ',
         items: [{
             xtype: 'button',
-            text: 'All Open Tabs',
+            text: 'Export All Open Tabs',
             handler: function() {
                 Ext.MessageBox.show({
                     title:      'All Tabs Export',
