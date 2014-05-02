@@ -496,3 +496,34 @@ Ext.define('Ext.ux.SearchCombobox', {
         me.addListener('keyup',  handler);
     }
 });
+
+Ext.define('TP.speedochart', {
+    extend: 'Ext.chart.Chart',
+
+    alias:  'widget.tp_speedochart',
+
+    legend:  false,
+    initComponent: function() {
+        this.series[0].donut  = this.donut  ? this.donut : false;
+        this.series[0].needle = !!this.needle;
+        this.axes[0].margin   = this.axis_margin != undefined ? this.axis_margin : -10;
+        this.axes[0].steps    = this.axis_steps  != undefined ? this.axis_steps  :  10;
+        this.axes[0].minimum  = this.axis_min    != undefined ? this.axis_min    :   0;
+        this.axes[0].maximum  = this.axis_max    != undefined ? this.axis_max    : 100;
+        this.callParent();
+    },
+    axes: [{
+        type:     'gauge',
+        position: 'gauge',
+        minimum:   0,
+        maximum: 100,
+        steps:    10,
+        margin:   10
+    }],
+    series: [{
+        type:        'gauge',
+        field:       'value',
+        showInLegend: true,
+        colorSet:  [ '#00FF00' ]
+    }]
+});

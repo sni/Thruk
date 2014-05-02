@@ -533,9 +533,10 @@ Ext.define('TP.IconWidget', {
     updateRender: function(xdata) {
         var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
-        if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata);  }
-        if(xdata.appearance.type == 'pie')   { panel.pieRender(xdata);    }
-        if(xdata.appearance.type == 'icon')  { panel.iconSetSourceFromState(xdata); }
+        if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
+        if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
+        if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
+        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
     },
 
     /* rotates this thing */
@@ -659,15 +660,10 @@ Ext.define('TP.IconWidget', {
                 fields: ['name','value'],
                 data:  []
             });
-            if(xdata.appearance.piewidth)  { width  = xdata.appearance.piewidth; }
-            if(xdata.appearance.pieheight) { height = xdata.appearance.pieheight; }
-            if(xdata.appearance.pielocked) { height = width; }
             panel.add({
                 xtype:  'tp_piechart',
                 store:   pieStore,
                 panel:   panel,
-                width:   width,
-                height:  height,
                 animate: false,
                 shadow:  xdata.appearance.pieshadow,
                 donut:   xdata.appearance.piedonut,
@@ -680,8 +676,104 @@ Ext.define('TP.IconWidget', {
                 }
             });
         }
+        else if(xdata.appearance.type == 'speedometer') {
+            panel.add({
+                xtype:       'tp_speedochart',
+                store:        [0],
+                panel:        panel,
+                insetPadding: xdata.appearance.speedomargin > 0 ? xdata.appearance.speedomargin + 20 : 10,
+                shadow:       xdata.appearance.speedoshadow,
+                donut:        xdata.appearance.speedodonut,
+                needle:       xdata.appearance.speedoneedle,
+                axis_margin:  xdata.appearance.speedomargin == 0 ? 0.1 : xdata.appearance.speedomargin,
+                axis_steps:   xdata.appearance.speedosteps,
+                axis_min:     xdata.appearance.speedoaxis_min ? xdata.appearance.speedoaxis_min : 0,
+                axis_max:     xdata.appearance.speedoaxis_max ? xdata.appearance.speedoaxis_max : 0,
+                listeners: {
+                    afterrender: function(This, eOpts) {
+                        panel.itemRendering = false;
+                        panel.chart = This;
+                        panel.updateRender(xdata);
+                    },
+                    resize: function(This, eOpts) {
+                        panel.updateRender(xdata);
+                    }
+                }
+            });
+        }
         else {
             panel.itemRendering = false;
+        }
+    },
+
+    /* renders speedometer chart */
+    speedoRender: function(xdata, forceColor) {
+        var panel = this;
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type != 'speedometer') { return }
+        if(!panel.chart) {
+            panel.setRenderItem(xdata);
+            return;
+        }
+        var extraSpace = 0;
+        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth);
+        panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth);
+        var colors = {
+            pending:  xdata.appearance.speedocolor_pending  ? xdata.appearance.speedocolor_pending  : '#ACACAC',
+            ok:       xdata.appearance.speedocolor_ok       ? xdata.appearance.speedocolor_ok       : '#00FF33',
+            warning:  xdata.appearance.speedocolor_warning  ? xdata.appearance.speedocolor_warning  : '#FFDE00',
+            unknown:  xdata.appearance.speedocolor_unknown  ? xdata.appearance.speedocolor_unknown  : '#FF9E00',
+            critical: xdata.appearance.speedocolor_critical ? xdata.appearance.speedocolor_critical : '#FF5B33',
+            bg:       xdata.appearance.speedocolor_bg       ? xdata.appearance.speedocolor_bg       : '#DDDDDD'
+        };
+
+        // which source to use
+        var state  = xdata.state, value = 0, min = 0, max = 100;
+        if(state == undefined) { state = panel.xdata.state; }
+        if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {
+            var totals = this.getTotals(xdata, colors);
+            max = 0;
+            Ext.Array.each(totals, function(t,i) {
+                max += t.value;
+                if(t.name == 'critical' || t.name == 'unknown' || t.name == 'down' || t.name == 'unreachable') {
+                    value += t.value;
+                }
+                if(xdata.appearance.speedosource == 'problems_warn' && t.name == 'warning') {
+                    value += t.value;
+                }
+            });
+        }
+        if(panel.chart.axes.getAt(0).minimum != min || panel.chart.axes.getAt(0).maximum != max) {
+            xdata.appearance.speedoaxis_min = min;
+            xdata.appearance.speedoaxis_max = max;
+            panel.setRenderItem(xdata);
+            return;
+        }
+        var color_fg = colors['unknown'];
+        if(state == 0) { color_fg = colors['ok'];       }
+        if(state == 1) { color_fg = colors['warning'];  }
+        if(state == 2) { color_fg = colors['critical']; }
+        if(state == 3) { color_fg = colors['unknown'];  }
+        if(state == 4) { color_fg = colors['pending'];  }
+
+        var colorSet = [];
+        Ext.Array.each([color_fg, colors['bg']], function(color,i) {
+            if(forceColor) { color = forceColor; }
+            if(xdata.appearance.speedogradient != 0) {
+                var gradient = TP.createGradient(color, xdata.appearance.speedogradient);
+                if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
+                if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
+                    panel.chart.surface.existingGradients[gradient.id] = true;
+                    panel.chart.surface.addGradient(gradient);
+                }
+                colorSet.push('url(#'+gradient.id+')');
+            } else {
+                colorSet.push(color);
+            }
+        });
+        panel.chart.series.getAt(0).colorSet = colorSet;
+        if(panel.chart.series.getAt(0).setValue) {
+            panel.chart.series.getAt(0).setValue(value);
         }
     },
 
@@ -771,7 +863,6 @@ Ext.define('TP.IconWidget', {
         else if(state == 3)         { fillcolor = xdata.appearance.shapecolor_unknown; }
         else if(state == 4)         { fillcolor = "#777777"; }
         if(!fillcolor) { fillcolor = '#333333'; }
-        fillcolor = Ext.draw.Color.fromString(fillcolor).toString().replace(/^\#/, '');
         if(xdata.appearance.shapegradient != 0) {
             if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
             var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
@@ -781,7 +872,7 @@ Ext.define('TP.IconWidget', {
             }
             shapeData += ",fill:'url(#"+gradient.id+")'";
         } else {
-            shapeData += ",fill:'#"+fillcolor+"'";
+            shapeData += ",fill:'"+fillcolor+"'";
         }
         var spriteData;
         try {
@@ -1542,15 +1633,15 @@ TP.getIconDetailsLink = function(panel) {
 /* get gradient for color */
 TP.createGradient = function(color, num) {
     if(num == undefined) { num = 0.2; }
-    color = color.replace(/^#/, '');
+    color = Ext.draw.Color.fromString(color);
     var start;
     var end;
     if(num > 0) {
-        start = Ext.draw.Color.fromString('#'+color).getLighter(Number(num)).toString();
-        end   = '#'+color;
+        start = color.getLighter(Number(num)).toString();
+        end   = color.toString();
     } else if (num < 0) {
-        start = '#'+color;
-        end   = Ext.draw.Color.fromString('#'+color).getDarker(Number(-num)).toString();
+        start = color.toString();
+        end   = color.getDarker(Number(-num)).toString();
     }
     return({
         id: 'fillGradient'+color+num,

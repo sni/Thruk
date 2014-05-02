@@ -132,6 +132,9 @@ TP.iconShowEditDialog = function(panel) {
         if(xdata.appearance.type == 'pie') {
             panel.pieRender(xdata, forceColor);
         }
+        if(xdata.appearance.type == 'speedometer') {
+            panel.speedoRender(xdata, forceColor);
+        }
         labelUpdate();
         updateDisabledFields(xdata);
     }
@@ -210,10 +213,32 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
                             }
+
+                            if(newValue == 'speedometer') {
+                                // fill in defaults
+                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
+                                if(!values['speedowidth']) {
+                                    values['speedowidth']             = 200;
+                                    values['speedoshadow']            = true;
+                                    values['speedoneedle']            = false;
+                                    values['speedodonut']             = 0;
+                                    values['speedogradient']          = -0.15;
+                                    values['speedosource']            = 'problems';
+                                    values['speedomargin']            =  5;
+                                    values['speedosteps']             = 10;
+                                    values['speedocolor_ok']          = '#199C0F';
+                                    values['speedocolor_warning']     = '#CDCD0A';
+                                    values['speedocolor_critical']    = '#CA1414';
+                                    values['speedocolor_unknown']     = '#CC740F';
+                                    values['speedocolor_bg']          = '#DDDDDD';
+                                }
+                                Ext.getCmp('appearanceForm').getForm().setValues(values);
+                            }
                             renderUpdate();
                         }
                     }
                 },
+
                 /* Icons */
                 {
                     fieldLabel:   'Icon Set',
@@ -240,6 +265,7 @@ TP.iconShowEditDialog = function(panel) {
                     padding:    '10 0 0 0',
                     border:      0
                 },
+
                 /* Shapes */
                 {
                     fieldLabel:   'Shape',
@@ -283,9 +309,9 @@ TP.iconShowEditDialog = function(panel) {
                     cls:        'shape',
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
+                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
-                            { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
                             { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
                                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); renderUpdate(); }
@@ -303,7 +329,7 @@ TP.iconShowEditDialog = function(panel) {
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'up: ' : 'ok: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'shapecolor_ok',
@@ -312,7 +338,7 @@ TP.iconShowEditDialog = function(panel) {
                             tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'unreachable: ' : 'warning: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'shapecolor_warning',
@@ -320,7 +346,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'down: ' : 'critical: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'shapecolor_critical',
@@ -328,7 +354,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
-                        { xtype: 'label', text: 'unknown: ', hidden: panel.iconType == 'host' ? true : false },
+                        { xtype: 'label', text: 'Unknown: ', hidden: panel.iconType == 'host' ? true : false },
                         {
                             xtype:          'colorcbo',
                             name:           'shapecolor_unknown',
@@ -356,6 +382,7 @@ TP.iconShowEditDialog = function(panel) {
                     padding:    '10 0 0 0',
                     border:      0
                 },
+
                 /* Pie Chart */
                 {
                     fieldLabel: 'Size',
@@ -363,9 +390,9 @@ TP.iconShowEditDialog = function(panel) {
                     cls:        'pie',
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate() } } },
-                    items: [{ xtype: 'label', text: 'width:', style: 'margin-left: 0; margin-right: 2px;' },
+                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'piewidth', unit: 'px', width: 65, value: panel.xdata.appearance.piewidth },
-                            { xtype: 'label', text: 'height:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'pieheight', unit: 'px', width: 65, value: panel.xdata.appearance.pieheight, id: 'pieheightfield' },
                             { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
                                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({pielocked: state ? '1' : '' }); renderUpdate(); }
@@ -408,7 +435,7 @@ TP.iconShowEditDialog = function(panel) {
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
-                        { xtype: 'label', text: 'ok:' },
+                        { xtype: 'label', text: 'Ok:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_ok',
@@ -417,7 +444,7 @@ TP.iconShowEditDialog = function(panel) {
                             tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: 'warning:' },
+                        { xtype: 'label', text: 'Warning:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_warning',
@@ -425,7 +452,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
-                        { xtype: 'label', text: 'critical:' },
+                        { xtype: 'label', text: 'Critical:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_critical',
@@ -433,7 +460,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
-                        { xtype: 'label', text: 'unknown:' },
+                        { xtype: 'label', text: 'Unknown:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_unknown',
@@ -441,7 +468,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#DAB891', stop: '#FF8900' }
                         },
-                        { xtype: 'label', text: 'up:' },
+                        { xtype: 'label', text: 'Up:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_up',
@@ -449,7 +476,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: 'down:' },
+                        { xtype: 'label', text: 'Down:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_down',
@@ -457,7 +484,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
-                        { xtype: 'label', text: 'unreachable:' },
+                        { xtype: 'label', text: 'Unreachable:' },
                         {
                             xtype:          'colorcbo',
                             name:           'piecolor_unreachable',
@@ -477,6 +504,141 @@ TP.iconShowEditDialog = function(panel) {
                             value:       panel.xdata.appearance.piegradient
                         }
                     ]
+                },
+
+
+                /* Speedometer Chart */
+                {
+                    fieldLabel: 'Size',
+                    xtype:      'fieldcontainer',
+                    cls:        'speedometer',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate() } } },
+                    items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth }
+                    ]
+                }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    cls:        'speedometer',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
+                    items: [
+                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
+                    {
+                        xtype:      'checkbox',
+                        name:       'speedoshadow'
+                    },
+                    { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        xtype:      'checkbox',
+                        name:       'speedoneedle'
+                    },
+                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        xtype:      'numberunit',
+                        allowDecimals: false,
+                        width:       60,
+                        name:       'speedodonut',
+                        unit:       'px'
+                    }]
+                }, {
+                    fieldLabel: 'Axis',
+                    xtype:      'fieldcontainer',
+                    cls:        'speedometer',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
+                    items: [
+                    { xtype: 'label', text: 'Steps:', style: 'margin-left: 0px; margin-right: 2px;' },
+                    {
+                        xtype:      'numberfield',
+                        allowDecimals: false,
+                        width:       60,
+                        name:       'speedosteps',
+                        step:        1,
+                        minValue:    0,
+                        maxValue:    1000
+                    },
+                    { xtype: 'label', text: 'Margin:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        xtype:      'numberunit',
+                        allowDecimals: false,
+                        width:       60,
+                        name:       'speedomargin',
+                        unit:       'px'
+                    }]
+                }, {
+                    fieldLabel: 'Colors',
+                    cls:        'speedometer',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
+                    defaults:    {
+                        listeners: { change:    function()      { renderUpdateDo() }     },
+                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseout:  function(color) { renderUpdateDo();      }
+                    },
+                    items: [
+                        { xtype: 'label', text: 'Ok:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'speedocolor_ok',
+                            value:           panel.xdata.appearance.speedocolor_ok,
+                            width:           80,
+                            tdAttrs:       { style: 'padding-right: 10px;'},
+                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
+                        },
+                        { xtype: 'label', text: 'Warning:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'speedocolor_warning',
+                            value:           panel.xdata.appearance.speedocolor_warning,
+                            width:           80,
+                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
+                        },
+                        { xtype: 'label', text: 'Critical:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'speedocolor_critical',
+                            value:           panel.xdata.appearance.speedocolor_critical,
+                            width:           80,
+                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
+                        },
+                        { xtype: 'label', text: 'Unknown:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'speedocolor_unknown',
+                            value:           panel.xdata.appearance.speedocolor_unknown,
+                            width:           80,
+                            colorGradient: { start: '#DAB891', stop: '#FF8900' }
+                        },
+                        { xtype: 'label', text: 'Background:' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'speedocolor_bg',
+                            value:           panel.xdata.appearance.speedocolor_bg,
+                            width:           80
+                        },
+                        { xtype: 'label', text: 'Gradient:' },
+                        {
+                            xtype:      'numberfield',
+                            allowDecimals: true,
+                            width:       80,
+                            name:       'speedogradient',
+                            maxValue:    1,
+                            minValue:   -1,
+                            step:        0.05,
+                            value:       panel.xdata.appearance.speedogradient
+                        }
+                    ]
+                }, {
+                    fieldLabel: 'Source',
+                    name:       'speedosource',
+                    xtype:      'combobox',
+                    cls:        'speedometer',
+                    store:      [['problems', 'number of problems'],
+                                 ['problems_warn', 'number of problems (incl. warnings)']
+                                ],
+                    editable:   false
                 }]
             }]
         }]
@@ -719,7 +881,7 @@ TP.iconShowEditDialog = function(panel) {
         ]
     });
     var settingsWindow = new Ext.Window({
-        height:  300,
+        height:  330,
         width:   400,
         layout: 'fit',
         items:   tabPanel,
