@@ -259,7 +259,7 @@
             style.zIndex   = 20;
             style.opacity  = '0.9';
             if(this.xdata.showborder == false) {
-                if(this.getEl().shadow.el) {
+                if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.removeCls('hidden');
                 }
             }
@@ -273,7 +273,7 @@
             style.opacity  = '';
             style.zIndex   = '';
             if(this.xdata.showborder == false) {
-                if(this.getEl().shadow.el) {
+                if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.addCls('hidden');
                 }
             }
@@ -288,7 +288,7 @@
             if(this.rendered) {
                 this.addCls('autohideheader');
                 if(this.body) { this.body.addCls('autohideheader'); }
-                if(this.getEl().shadow.el) {
+                if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.addCls('hidden');
                 }
                 this.getEl().setStyle('background-color', 'transparent');
@@ -303,7 +303,7 @@
             if(this.rendered) {
                 this.removeCls('autohideheader');
                 this.body.removeCls('autohideheader');
-                if(this.getEl().shadow.el) {
+                if(this.getEl().shadow && this.getEl().shadow.el) {
                     this.getEl().shadow.el.removeCls('hidden');
                 }
                 this.getEl().setStyle('background-color', '');
@@ -351,7 +351,7 @@
         if(delay == undefined) { delay = 100; }
         if(win.xdata.showborder == false) {
             TP.timeouts['timeout_'+win.id+'_remove_shadow'] = window.setTimeout(Ext.bind(function() {
-                if(win.getEl().shadow.el) {
+                if(win.getEl().shadow && win.getEl().shadow.el) {
                     win.getEl().shadow.el.addCls('hidden');
                 }
             }, win, []), delay);
