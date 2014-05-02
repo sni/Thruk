@@ -518,7 +518,9 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.panel == panel) { return; }
         var oldState = panel.xdata.state;
-        panel.xdata.state = newStatus;
+        if(newStatus != undefined) {
+            panel.xdata.state = newStatus;
+        }
         this.updateRender();
         if(newStatus != undefined && oldState != newStatus) {
             panel.xdata.state = newStatus;
