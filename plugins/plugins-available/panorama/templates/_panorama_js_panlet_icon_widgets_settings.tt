@@ -23,11 +23,28 @@ TP.iconShowEditDialog = function(panel) {
         TP.iconSettingsWindow.destroy();
     }
 
+    var defaultSpeedoSource = 'problems';
+    var perfDataUpdate = function() {
+        // ensure fresh and correct performance data
+        window.perfdata = {};
+        panel.setIconLabel(undefined, true);
+        var data = [['number of problems',                  'problems'],
+                    ['number of problems (incl. warnings)', 'problems_warn']];
+        for(var key in perfdata) {
+            if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
+            data.push(['Performance Data: '+key, 'perfdata:'+key]);
+        }
+        var cbo = Ext.getCmp('speedosourceStore');
+        TP.updateArrayStoreKV(cbo.store, data);
+    }
+
     /* General Settings Tab */
     var stateUpdate = function() {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, xdata);
         labelUpdate();
+        // update performance data stores
+        perfDataUpdate();
     }
     var generalItems = panel.getGeneralItems();
     var generalTab = {
@@ -223,7 +240,7 @@ TP.iconShowEditDialog = function(panel) {
                                     values['speedoneedle']            = false;
                                     values['speedodonut']             = 0;
                                     values['speedogradient']          = -0.15;
-                                    values['speedosource']            = 'problems';
+                                    values['speedosource']            = defaultSpeedoSource;
                                     values['speedomargin']            =  5;
                                     values['speedosteps']             = 10;
                                     values['speedocolor_ok']          = '#199C0F';
@@ -631,14 +648,16 @@ TP.iconShowEditDialog = function(panel) {
                         }
                     ]
                 }, {
-                    fieldLabel: 'Source',
-                    name:       'speedosource',
-                    xtype:      'combobox',
-                    cls:        'speedometer',
-                    store:      [['problems', 'number of problems'],
-                                 ['problems_warn', 'number of problems (incl. warnings)']
-                                ],
-                    editable:   false
+                    fieldLabel:   'Source',
+                    name:         'speedosource',
+                    xtype:        'combobox',
+                    cls:          'speedometer',
+                    id:           'speedosourceStore',
+                    displayField: 'name',
+                    valueField:   'value',
+                    queryMode:    'local',
+                    store:       { fields: ['name', 'value'], data: [] },
+                    editable:      false
                 }]
             }]
         }]
@@ -1002,6 +1021,7 @@ TP.openLabelEditorWindow = function(panel) {
     var oldValue  = Ext.getCmp('label_textfield').getValue();
     var perf_data = '';
     window.perfdata = {};
+    // ensure fresh and correct performance data
     panel.setIconLabel(undefined, true);
     for(var key in perfdata) {
         delete perfdata[key].perf;

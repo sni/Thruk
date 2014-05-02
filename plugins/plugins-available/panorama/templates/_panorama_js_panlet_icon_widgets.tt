@@ -716,8 +716,8 @@ Ext.define('TP.IconWidget', {
             return;
         }
         var extraSpace = 0;
-        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth);
-        panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth);
+        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
+        panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
         var colors = {
             pending:  xdata.appearance.speedocolor_pending  ? xdata.appearance.speedocolor_pending  : '#ACACAC',
             ok:       xdata.appearance.speedocolor_ok       ? xdata.appearance.speedocolor_ok       : '#00FF33',
@@ -730,7 +730,18 @@ Ext.define('TP.IconWidget', {
         // which source to use
         var state  = xdata.state, value = 0, min = 0, max = 100;
         if(state == undefined) { state = panel.xdata.state; }
-        if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {
+        if(xdata.appearance.speedosource == undefined) { xdata.appearance.speedosource = 'problems'; }
+        var matches = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
+        if(matches && matches[1]) {
+            window.perfdata = {};
+            panel.setIconLabel(undefined, true);
+            if(perfdata[matches[1]]) {
+                var p = perfdata[matches[1]];
+                value = p.val;
+                max   = p.crit_max || p.max || p.warn_max || 100;
+            }
+        }
+        else if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {
             var totals = this.getTotals(xdata, colors);
             max = 0;
             Ext.Array.each(totals, function(t,i) {
@@ -773,6 +784,7 @@ Ext.define('TP.IconWidget', {
         });
         panel.chart.series.getAt(0).colorSet = colorSet;
         if(panel.chart.series.getAt(0).setValue) {
+            if(value == 0) { value = 0.0001; } // doesn't draw anything otherwise
             panel.chart.series.getAt(0).setValue(value);
         }
     },
