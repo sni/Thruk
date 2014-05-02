@@ -657,7 +657,8 @@ TP.iconShowEditDialog = function(panel) {
                     valueField:   'value',
                     queryMode:    'local',
                     store:       { fields: ['name', 'value'], data: [] },
-                    editable:      false
+                    editable:      false,
+                    listeners: { focus: perfDataUpdate }
                 }]
             }]
         }]
