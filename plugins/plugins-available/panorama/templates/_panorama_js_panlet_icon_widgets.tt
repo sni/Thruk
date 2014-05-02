@@ -1634,6 +1634,7 @@ TP.getIconDetailsLink = function(panel) {
 TP.createGradient = function(color, num) {
     if(num == undefined) { num = 0.2; }
     color = Ext.draw.Color.fromString(color);
+    if(color == undefined) { color = Ext.draw.Color.fromString('#DDDDDD'); }
     var start;
     var end;
     if(num > 0) {
