@@ -1028,7 +1028,9 @@ TP.openLabelEditorWindow = function(panel) {
         delete perfdata[key].perf;
         delete perfdata[key].key;
         for(var key2 in perfdata[key]) {
-            perf_data += '<tr><td><\/td><td><i>perfdata.'+key+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
+            var keyname = '.'+key;
+            if(key.match(/[^a-zA-Z]/)) { keyname = '[\''+key+'\']'; }
+            perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
     var labelEditorWindow = new Ext.Window({
