@@ -909,7 +909,9 @@ Ext.define('TP.IconWidget', {
         box = sprite.getBBox();
         sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
         panel.setSize(Math.ceil(box.width), Math.ceil(box.height));
-        panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
+        if(panel.items.getAt && panel.items.getAt(0)) {
+            panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
+        }
         sprite.show(true);
     },
     iconSetSourceFromState: function(xdata) {
