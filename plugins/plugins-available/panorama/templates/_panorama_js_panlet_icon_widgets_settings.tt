@@ -75,6 +75,11 @@ TP.iconShowEditDialog = function(panel) {
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
         Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
         Ext.getCmp('pietogglelocked').toggle(xdata.appearance.pielocked);
+        if(xdata.appearance.type == 'pie' || xdata.appearance.type == 'speedometer') {
+            Ext.getCmp('rotationfield').disable();
+        } else {
+            Ext.getCmp('rotationfield').enable();
+        }
         renderUpdate = originalRenderUpdate;
     };
 
@@ -122,6 +127,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'numberunit',
                     allowDecimals: false,
                     name:         'rotation',
+                    id:           'rotationfield',
                     unit:         '°',
                     minValue:     -360,
                     maxValue:      360,
