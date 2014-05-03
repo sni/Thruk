@@ -1727,7 +1727,7 @@ TP.createGradient = function(color, num, color2, percent) {
         id: 'fillGradient'+color+num,
         angle: 45,
         stops: {
-              0: { color: start },
+              0: { color: start }
         }
     };
     if(percent != undefined) {
