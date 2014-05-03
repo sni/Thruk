@@ -966,6 +966,7 @@ Ext.define('TP.IconWidget', {
         var yScale = xdata.appearance.shapeheight/box.height;
         if(xdata.appearance.shapelocked) { yScale = xScale; }
         sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
+        if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
         sprite.setAttributes({rotate:{degrees: -1*xdata.layout.rotation}}, true);
         box = sprite.getBBox();
         sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);

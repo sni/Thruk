@@ -197,6 +197,7 @@ TP.iconShowEditDialog = function(panel) {
                     fieldLabel: 'Type',
                     name:       'type',
                     store:      [['icon','Icon'], ['shape', 'Shape'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer']],
+                    id:         'appearance_types',
                     editable:    false,
                     listeners: {
                         change: function(This, newValue, oldValue, eOpts) {
@@ -929,6 +930,72 @@ TP.iconShowEditDialog = function(panel) {
         }]
     };
 
+    /* Source Tab */
+    var sourceTab = {
+        title: 'Source',
+        type:  'panel',
+        listeners: {
+            activate: function(This) {
+                var xdata = TP.get_icon_form_xdata(settingsWindow);
+                var j     = Ext.JSON.encode(xdata);
+                try {
+                    j = JSON.stringify(xdata, null, 2);
+                } catch(e) { debug(e); }
+                this.down('form').getForm().setValues({source: j, sourceError: ''});
+            }
+        },
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                xtype:           'form',
+                id:              'sourceForm',
+                bodyPadding:     2,
+                border:          0,
+                bodyStyle:       'overflow-y: auto;',
+                submitEmptyText: false,
+                defaults:      { anchor: '-12', labelWidth: 50 },
+                items: [{
+                    fieldLabel:     'Source',
+                    xtype:          'textarea',
+                    name:           'source',
+                    height:         190
+                }, {
+                    fieldLabel:     ' ',
+                    labelSeparator: '',
+                    xtype:          'fieldcontainer',
+                    items: [{
+                        xtype:      'button',
+                        name:       'sourceapply',
+                        text:       'Apply',
+                        width:       100,
+                        handler: function(btn) {
+                            var values = Ext.getCmp('sourceForm').getForm().getValues();
+                            debug(values.source);
+                            try {
+                                var xdata = Ext.JSON.decode(values.source);
+                                Ext.getCmp('generalForm').getForm().setValues(xdata.general);
+                                Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
+                                Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
+                                Ext.getCmp('linkForm').getForm().setValues(xdata.link);
+                                Ext.getCmp('labelForm').getForm().setValues(xdata.label);
+                            } catch(e) {
+                                Ext.getCmp('sourceForm').getForm().setValues({sourceError: e});
+                            }
+                        }
+                    }]
+                }, {
+                    fieldLabel:     ' ',
+                    labelSeparator: '',
+                    xtype:          'displayfield',
+                    name:           'sourceError',
+                    value:          ''
+                }]
+            }]
+        }]
+    };
+
     var tabPanel = new Ext.TabPanel({
         activeTab         : panel.initialSettingsTab ? panel.initialSettingsTab : 0,
         enableTabScroll   : true,
@@ -937,7 +1004,8 @@ TP.iconShowEditDialog = function(panel) {
             layoutTab,
             appearanceTab,
             linkTab,
-            labelTab
+            labelTab,
+            sourceTab
         ]
     });
     var settingsWindow = new Ext.Window({
@@ -1057,6 +1125,21 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         link:       Ext.getCmp('linkForm').getForm().getValues(),
         label:      Ext.getCmp('labelForm').getForm().getValues()
     }
+    // clean up
+    if(xdata.label.labeltext == '') { xdata.label = {} }
+    if(xdata.link.link == '')       { xdata.link  = {} }
+    if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
+    Ext.getCmp('appearance_types').store.each(function(data, i) {
+        var t = data.raw[0];
+        for(var key in xdata.appearance) {
+            var t2 = t;
+            if(t == 'speedometer') { t2 = 'speedo'; }
+            var p = new RegExp('^'+t2, 'g');
+            if(key.match(p) && t != xdata.appearance.type) {
+                delete xdata.appearance[key];
+            }
+        }
+    });
     return(xdata);
 }
 
