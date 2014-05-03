@@ -28,13 +28,27 @@ TP.iconShowEditDialog = function(panel) {
         // ensure fresh and correct performance data
         window.perfdata = {};
         panel.setIconLabel(undefined, true);
+
+        // update speedo
         var data = [['number of problems',                  'problems'],
                     ['number of problems (incl. warnings)', 'problems_warn']];
         for(var key in perfdata) {
             if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
-            data.push(['Performance Data: '+key, 'perfdata:'+key]);
+            var r = TP.getPerfDataMinMax(perfdata[key], 100);
+            var options = r.min+" - "+r.max;
+            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         var cbo = Ext.getCmp('speedosourceStore');
+        TP.updateArrayStoreKV(cbo.store, data);
+
+        // update shape
+        var data = [['fixed', 'fixed']];
+        for(var key in perfdata) {
+            var r = TP.getPerfDataMinMax(perfdata[key], 100);
+            var options = r.min+" - "+r.max;
+            data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
+        }
+        var cbo = Ext.getCmp('shapesourceStore');
         TP.updateArrayStoreKV(cbo.store, data);
     }
 
@@ -208,6 +222,7 @@ TP.iconShowEditDialog = function(panel) {
                                     values['shapecolor_critical'] = '#CA1414';
                                     values['shapecolor_unknown']  = '#CC740F';
                                     values['shapegradient']       =  0.1;
+                                    values['shapesource']         =  'fixed';
                                 }
                                 var originalRenderUpdate = renderUpdate;
                                 renderUpdate = Ext.emptyFn;
@@ -387,15 +402,34 @@ TP.iconShowEditDialog = function(panel) {
                             hidden:          panel.iconType == 'host' ? true : false
                     }]
                 }, {
-                    fieldLabel:   'Gradient',
-                    xtype:        'numberfield',
-                    cls:          'shape',
-                    allowDecimals: true,
-                    name:         'shapegradient',
-                    maxValue:      1,
-                    minValue:     -1,
-                    step:          0.05,
-                    value:         panel.xdata.appearance.shapegradient
+                    fieldLabel: 'Gradient',
+                    cls:        'shape',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    items: [{
+                        xtype:        'numberfield',
+                        allowDecimals: true,
+                        name:         'shapegradient',
+                        maxValue:      1,
+                        minValue:     -1,
+                        step:          0.05,
+                        value:         panel.xdata.appearance.shapegradient,
+                        width:         50
+                    },
+                    { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
+                    {
+                        name:         'shapesource',
+                        xtype:        'combobox',
+                        id:           'shapesourceStore',
+                        displayField: 'name',
+                        valueField:   'value',
+                        queryMode:    'local',
+                        store:       { fields: ['name', 'value'], data: [] },
+                        editable:      false,
+                        value:         panel.xdata.appearance.shapesource,
+                        listeners: { focus: perfDataUpdate },
+                        flex:          1
+                    }]
                 }, {
                     xtype:      'panel',
                     cls:        'shape',

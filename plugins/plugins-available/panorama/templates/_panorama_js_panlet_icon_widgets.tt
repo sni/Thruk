@@ -740,7 +740,9 @@ Ext.define('TP.IconWidget', {
             if(perfdata[matches[1]]) {
                 var p = perfdata[matches[1]];
                 value = p.val;
-                max   = p.crit_max || p.max || p.warn_max || 100;
+                var r = TP.getPerfDataMinMax(p, 100);
+                max   = r.max;
+                min   = r.min;
             }
         }
         else if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {
@@ -880,12 +882,71 @@ Ext.define('TP.IconWidget', {
         if(!fillcolor) { fillcolor = '#333333'; }
         if(xdata.appearance.shapegradient != 0) {
             if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-            var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
-            if(panel.surface.existingGradients[gradient.id] == undefined) {
-                panel.surface.addGradient(gradient);
-                panel.surface.existingGradients[gradient.id] = true;
+
+            if(xdata.appearance.shapesource == undefined) { xdata.appearance.shapesource = 'fixed'; }
+            var matches = xdata.appearance.shapesource.match(/^perfdata:(.*)$/);
+            if(xdata.appearance.shapesource != 'fixed' && matches && matches[1]) {
+                /* dynamic gradient */
+                window.perfdata = {};
+                panel.setIconLabel(undefined, true);
+                if(perfdata[matches[1]]) {
+                    var p = perfdata[matches[1]];
+                    var r = TP.getPerfDataMinMax(p, 100);
+                    var color1 = xdata.appearance.shapecolor_ok;
+                    var color2 = xdata.appearance.shapecolor_ok;
+                    var perc  = 100;
+                    /* inside critical range: V c w o w c  */
+                    if(p.crit_min != "" && p.val < p.crit_min) {
+                        color1 = xdata.appearance.shapecolor_critical;
+                        color2 = xdata.appearance.shapecolor_critical;
+                        perc   = 100;
+                    }
+                    /* above critical threshold: o w c V */
+                    else if(p.crit_max != "" && p.val > p.crit_max) {
+                        color1 = xdata.appearance.shapecolor_critical;
+                        color2 = xdata.appearance.shapecolor_critical;
+                        perc   = 100;
+                    }
+                    /* inside warning range low: c V w o w c */
+                    else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
+                        color1 = xdata.appearance.shapecolor_warning;
+                        color2 = xdata.appearance.shapecolor_critical;
+                        perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
+                    }
+                    /* inside warning range high: c w o w V c */
+                    else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
+                        color1 = xdata.appearance.shapecolor_warning;
+                        color2 = xdata.appearance.shapecolor_critical;
+                        perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
+                    }
+                    /* above warning threshold: o w V c */
+                    else if(p.warn_max != "" && p.val > p.warn_max) {
+                        color1 = xdata.appearance.shapecolor_warning;
+                        color2 = xdata.appearance.shapecolor_critical;
+                        perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
+                    }
+                    /* below warning threshold: o V w c */
+                    else if(p.warn_max != "" && p.val < p.warn_max) {
+                        color1 = xdata.appearance.shapecolor_ok;
+                        color2 = xdata.appearance.shapecolor_warning;
+                        perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
+                    }
+                    var gradient = TP.createGradient(color1, xdata.appearance.shapegradient, color2, perc);
+                    if(panel.surface.existingGradients[gradient.id] == undefined) {
+                        panel.surface.addGradient(gradient);
+                        panel.surface.existingGradients[gradient.id] = true;
+                    }
+                    shapeData += ",fill:'url(#"+gradient.id+")'";
+                }
+            } else {
+                /* fixed gradient */
+                var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
+                if(panel.surface.existingGradients[gradient.id] == undefined) {
+                    panel.surface.addGradient(gradient);
+                    panel.surface.existingGradients[gradient.id] = true;
+                }
+                shapeData += ",fill:'url(#"+gradient.id+")'";
             }
-            shapeData += ",fill:'url(#"+gradient.id+")'";
         } else {
             shapeData += ",fill:'"+fillcolor+"'";
         }
@@ -1648,25 +1709,48 @@ TP.getIconDetailsLink = function(panel) {
 }
 
 /* get gradient for color */
-TP.createGradient = function(color, num) {
+TP.createGradient = function(color, num, color2, percent) {
     if(num == undefined) { num = 0.2; }
-    color = Ext.draw.Color.fromString(color);
+    color  = Ext.draw.Color.fromString(color);
     if(color == undefined) { color = Ext.draw.Color.fromString('#DDDDDD'); }
+    color2 = color2 ? Ext.draw.Color.fromString(color2) : color;
     var start;
     var end;
     if(num > 0) {
-        start = color.getLighter(Number(num)).toString();
+        start = color2.getLighter(Number(num)).toString();
         end   = color.toString();
     } else if (num < 0) {
         start = color.toString();
-        end   = color.getDarker(Number(-num)).toString();
+        end   = color2.getDarker(Number(-num)).toString();
     }
-    return({
+    var g = {
         id: 'fillGradient'+color+num,
         angle: 45,
         stops: {
               0: { color: start },
-            100: { color: end   }
         }
-    });
+    };
+    if(percent != undefined) {
+        if(percent > 10 && percent < 90) {
+            g.stops[percent-10] = { color: start };
+            g.stops[percent+10] = { color: end };
+        } else {
+            g.stops[percent] = { color: end };
+        }
+        g.stops[100]     = { color: end };
+    } else {
+        g.stops[100]     = { color: end };
+    }
+    return(g);
+}
+
+/* extract min/max */
+TP.getPerfDataMinMax = function(p, maxDefault) {
+    var r = { warn: undefined, crit: undefined, min: 0, max: maxDefault };
+    if(p.max)           { r.max = p.max; }
+    else if(p.crit_max) { r.max = p.crit_max; }
+    else if(p.warn_max) { r.max = p.warn_max; }
+
+    if(p.min)           { r.min = p.min; }
+    return(r);
 }
