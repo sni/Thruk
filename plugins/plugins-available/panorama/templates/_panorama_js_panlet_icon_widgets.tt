@@ -625,6 +625,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
             var items = [];
             if(xdata.appearance.type == 'icon') {
+                if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
                 items = [{
                     type:      'image',
                     src:        Ext.BLANK_IMAGE_URL,
