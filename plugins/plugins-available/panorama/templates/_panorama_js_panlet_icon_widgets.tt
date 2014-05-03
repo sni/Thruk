@@ -762,6 +762,7 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+        if(value > max) { value = max; } // value cannot exceed speedo
         var color_fg = colors['unknown'];
         if(state == 0) { color_fg = colors['ok'];       }
         if(state == 1) { color_fg = colors['warning'];  }

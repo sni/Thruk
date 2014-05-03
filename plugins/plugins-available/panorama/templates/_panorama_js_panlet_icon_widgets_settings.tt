@@ -195,8 +195,8 @@ TP.iconShowEditDialog = function(panel) {
                                 if(!values['shapename']) {
                                     values['shapename']           = 'arrow';
                                     values['shapelocked']         = true;
-                                    values['shapewidth']          = 16;
-                                    values['shapeheight']         = 16;
+                                    values['shapewidth']          = 50;
+                                    values['shapeheight']         = 50;
                                     values['shapecolor_ok']       = '#199C0F';
                                     values['shapecolor_warning']  = '#CDCD0A';
                                     values['shapecolor_critical'] = '#CA1414';
