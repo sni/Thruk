@@ -1027,7 +1027,7 @@ var TP = {
                             var svc   = data.services[x]['description'];
                             var state = data.services[x]['state'];
                             if(data.services[x]['has_been_checked'] == 0) { state = 4; }
-                            if(ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
+                            if(ref.services[hst] && ref.services[hst][svc]) { // may be empty if we get the same service twice in a result
                                 for(var y=0; y<ref.services[hst][svc].length; y++) {
                                     ref.services[hst][svc][y].service = data.services[x];
                                     ref.services[hst][svc][y].refreshHandler(state);
