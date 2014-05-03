@@ -235,7 +235,7 @@ TP.iconShowEditDialog = function(panel) {
                                 // fill in defaults
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
                                 if(!values['speedowidth']) {
-                                    values['speedowidth']             = 200;
+                                    values['speedowidth']             = 180;
                                     values['speedoshadow']            = true;
                                     values['speedoneedle']            = false;
                                     values['speedodonut']             = 0;
@@ -530,7 +530,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     cls:        'speedometer',
                     layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate() } } },
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
                     items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth }
                     ]
@@ -976,14 +976,16 @@ TP.iconShowEditDialog = function(panel) {
     if(panel.labelEl) {
         sizes.push(panel.labelEl.getSize().width);
     }
-    var offsetX = Ext.Array.max(sizes) + 10;
+    sizes.push(180); // max size of new speedos
+    var offsetLeft  = 30;
+    var offsetRight = Ext.Array.max(sizes) + 10;
     var offsetY = 40;
     var panelPos     = panel.getPosition();
     var viewPortSize = TP.viewport.getSize();
-    if(viewPortSize.width > panelPos[0] + settingsWindow.width+offsetX) {
-        panelPos[0] = panelPos[0] + offsetX;
+    if(viewPortSize.width > panelPos[0] + settingsWindow.width+offsetRight) {
+        panelPos[0] = panelPos[0] + offsetRight;
     } else {
-        panelPos[0] = panelPos[0] - settingsWindow.width - 10 - offsetX;
+        panelPos[0] = panelPos[0] - settingsWindow.width - offsetLeft;
     }
     if(panelPos[1] - 50 < 0) {
         panelPos[1] = offsetY;
