@@ -777,8 +777,9 @@ sub _send {
         }
     }
 
-    if($status >= 300) {
-        $body = '' if !defined $body;
+    if(!$status || $status >= 300) {
+        $body   = ''  if !defined $body;
+        $status = 300 if !defined $status;
         chomp($body);
         $Monitoring::Livestatus::ErrorCode    = $status;
         if(defined $body and $body ne '') {
