@@ -1056,8 +1056,10 @@ Ext.define('TP.IconWidget', {
                         This.el.on("load", function (evt, ele, opts) {
                             var naturalWidth  = This.el.dom.naturalWidth;
                             var naturalHeight = This.el.dom.naturalHeight;
-                            TP.imageSizes[src] = [naturalWidth, naturalHeight];
-                            panel.iconFixSize();
+                            if(naturalWidth > 1 && naturalHeight > 1) {
+                                TP.imageSizes[src] = [naturalWidth, naturalHeight];
+                                panel.iconFixSize();
+                            }
                             This.destroy();
                         });
                     }
