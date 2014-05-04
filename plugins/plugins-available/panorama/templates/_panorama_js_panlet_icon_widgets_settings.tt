@@ -1126,8 +1126,8 @@ TP.get_icon_form_xdata = function(settingsWindow) {
         label:      Ext.getCmp('labelForm').getForm().getValues()
     }
     // clean up
-    if(xdata.label.labeltext == '') { xdata.label = {} }
-    if(xdata.link.link == '')       { xdata.link  = {} }
+    if(xdata.label.labeltext == '') { delete xdata.label; }
+    if(xdata.link.link == '')       { delete xdata.link;  }
     if(xdata.layout.rotation == 0)  { delete xdata.layout.rotation; }
     Ext.getCmp('appearance_types').store.each(function(data, i) {
         var t = data.raw[0];

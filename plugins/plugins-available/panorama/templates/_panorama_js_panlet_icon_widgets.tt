@@ -135,7 +135,11 @@
 
         /* restore position */
         this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
-        this.applyRotation(Number(xdata.layout.rotation));
+        if(xdata.layout.rotation) {
+            this.applyRotation(Number(xdata.layout.rotation));
+        } else {
+            this.applyRotation(0);
+        }
 
         /* set label */
         this.setIconLabel(xdata.label);
