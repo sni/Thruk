@@ -959,13 +959,20 @@ var TP = {
             params: params,
             callback: function(options, success, response) {
                 if(!success) {
-                    if(response.status == 0) {
-                        TP.Msg.msg("fail_message~~refreshing status failed");
-                    } else {
-                        TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText);
+                    if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
+                    TP.refresh_errors++;
+                    /* ignore first error, maybe caused by a reload */
+                    if(TP.refresh_errors > 1) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~refreshing status failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText);
+                        }
                     }
                 } else {
+                    TP.refresh_errors = 0;
                     var data = TP.getResponse(undefined, response);
+                    if(!data || !data.data) { return; }
                     data = data.data;
                     /* update custom filter */
                     if(data.filter) {

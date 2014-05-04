@@ -993,7 +993,7 @@ Ext.define('TP.IconWidget', {
         }
         iconset = xdata.appearance.iconset;
         if(iconset == '' || iconset == undefined) {
-            iconset = tab.xdata.defaulticonset;
+            iconset = tab.xdata.defaulticonset || 'default';
         }
         var newSrc;
         if(panel.iconType == 'host') {
