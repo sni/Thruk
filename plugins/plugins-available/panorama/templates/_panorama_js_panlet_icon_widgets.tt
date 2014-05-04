@@ -725,7 +725,9 @@ Ext.define('TP.IconWidget', {
             return;
         }
         var extraSpace = 0;
-        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
+        if(panel.items.getAt && panel.items.getAt(0)) {
+            panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
+        }
         panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
         var colors = {
             pending:  xdata.appearance.speedocolor_pending  ? xdata.appearance.speedocolor_pending  : '#ACACAC',
@@ -811,7 +813,9 @@ Ext.define('TP.IconWidget', {
             return;
         }
         if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
-        panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
+        if(panel.items.getAt && panel.items.getAt(0)) {
+            panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
+        }
         panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         var colors = {
             up:          xdata.appearance.piecolor_up          ? xdata.appearance.piecolor_up          : '#00FF33',
@@ -1074,7 +1078,9 @@ Ext.define('TP.IconWidget', {
         if(naturalWidth > 1 && naturalHeight > 1) {
             var size = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
             panel.setSize(size, size);
-            panel.items.getAt(0).setSize(size, size);
+            if(panel.items.getAt && panel.items.getAt(0)) {
+                panel.items.getAt(0).setSize(size, size);
+            }
             panel.xdata.size  = size;
             panel.xdata.nsize = [naturalWidth, naturalHeight];
             panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:1, y:1}}, true);

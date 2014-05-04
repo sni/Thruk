@@ -196,7 +196,7 @@ var TP = {
             tmp[0].innerHTML = "loading panel "+TP.cur_panels+'/'+TP.num_panels+"...";
             TP.cur_panels++;
         }
-        return true;
+        return win;
     },
 
     /* choose position handler */
@@ -206,7 +206,12 @@ var TP = {
         if(config.conf == undefined) { config.conf = {}; }
         config.conf.pos = [evt.getX()+offsetX, evt.getY()+offsetY];
         tb.getEl().dom.style.cursor = '';
-        TP.add_panlet(config);
+        var panel = TP.add_panlet(config);
+        if(panel.iconType) {
+            TP.updateAllIcons(tb, panel.id);
+        } else {
+            panel.refreshHandler();
+        }
     },
 
     /* add panel, but let the user choose position */

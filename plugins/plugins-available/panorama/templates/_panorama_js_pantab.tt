@@ -126,10 +126,8 @@
                         text:   'Paste',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
                         handler: function() {
-                            var config = TP.clone(TP.clipboard);
-                            if(config.conf == undefined) { config.conf = {} }
-                            config.conf.pos = [pos[0]-8, pos[1] -8];
-                            TP.add_panlet(config);
+                            var tb = Ext.getCmp('tabpan').getActiveTab();
+                            TP.add_panlet_handler(e, e.target, [tb, TP.clipboard, -8, -8]);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
                     }],
