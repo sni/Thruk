@@ -66,7 +66,8 @@
         });
         this.chart = Ext.create('TP.piechart', {
             store:   this.pieStore,
-            panel:   this
+            panel:   this,
+            donut:   false
         });
         this.add(this.chart);
 
@@ -102,6 +103,19 @@ Ext.define('TP.piechart', {
     insetPadding: 3,
     theme:  'Base:gradients',
     initComponent: function() {
+        this.series = [{
+            type:        'pie',
+            field:       'value',
+            showInLegend: true,
+            colorSet:  [ '#00FF00' ],
+            donut:        this.donut != undefined ? this.donut : false,
+            label: {
+                field: 'name',
+                display: 'rotate',
+                contrast: true,
+                font: '12px Arial'
+            }
+        }];
         if(this.animate) {
             this.series[0].tips = {
                 trackMouse: true,
@@ -124,7 +138,6 @@ Ext.define('TP.piechart', {
             this.series[0].tips      = false;
             this.series[0].highlight = false;
         }
-        this.series[0].donut = this.donut ? this.donut : false;
         this.callParent();
 
         if(this.animate) {
@@ -148,18 +161,6 @@ Ext.define('TP.piechart', {
             This.setShowLabel();
         });
     },
-    series: [{
-        type: 'pie',
-        field: 'value',
-        showInLegend: true,
-        colorSet: [ '#00FF00' ],
-        label: {
-            field: 'name',
-            display: 'rotate',
-            contrast: true,
-            font: '12px Arial'
-        }
-    }],
     setShowLabel: function() {
         var panel = this.panel;
         if(this.getEl()) {

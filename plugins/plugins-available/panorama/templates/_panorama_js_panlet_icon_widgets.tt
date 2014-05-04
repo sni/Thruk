@@ -1733,8 +1733,9 @@ TP.createGradient = function(color, num, color2, percent) {
         start = color.toString();
         end   = color2.getDarker(Number(-num)).toString();
     }
+    var colorname = color.toString().replace(/^#/, '');
     var g = {
-        id: 'fillGradient'+color+num,
+        id: 'fillGradient'+colorname+num,
         angle: 45,
         stops: {
               0: { color: start }
