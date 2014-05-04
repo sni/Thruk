@@ -725,9 +725,8 @@ Ext.define('TP.IconWidget', {
             return;
         }
         var extraSpace = 0;
-        if(panel.items.getAt && panel.items.getAt(0)) {
-            panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
-        }
+        if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
+        panel.items.getAt(0).setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
         panel.setSize(xdata.appearance.speedowidth, xdata.appearance.speedowidth/1.8);
         var colors = {
             pending:  xdata.appearance.speedocolor_pending  ? xdata.appearance.speedocolor_pending  : '#ACACAC',
@@ -813,9 +812,8 @@ Ext.define('TP.IconWidget', {
             return;
         }
         if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
-        if(panel.items.getAt && panel.items.getAt(0)) {
-            panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
-        }
+        if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
+        panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         panel.setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
         var colors = {
             up:          xdata.appearance.piecolor_up          ? xdata.appearance.piecolor_up          : '#00FF33',
