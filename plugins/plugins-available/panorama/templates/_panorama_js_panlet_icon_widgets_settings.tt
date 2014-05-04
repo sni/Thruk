@@ -975,11 +975,7 @@ TP.iconShowEditDialog = function(panel) {
                             debug(values.source);
                             try {
                                 var xdata = Ext.JSON.decode(values.source);
-                                Ext.getCmp('generalForm').getForm().setValues(xdata.general);
-                                Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
-                                Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
-                                Ext.getCmp('linkForm').getForm().setValues(xdata.link);
-                                Ext.getCmp('labelForm').getForm().setValues(xdata.label);
+                                TP.getIconSettingsValues(xdata);
                             } catch(e) {
                                 Ext.getCmp('sourceForm').getForm().setValues({sourceError: e});
                             }
@@ -1067,11 +1063,7 @@ TP.iconShowEditDialog = function(panel) {
         }
     }).show();
 
-    Ext.getCmp('generalForm').getForm().setValues(panel.xdata.general);
-    Ext.getCmp('layoutForm').getForm().setValues(panel.xdata.layout);
-    Ext.getCmp('appearanceForm').getForm().setValues(panel.xdata.appearance);
-    Ext.getCmp('linkForm').getForm().setValues(panel.xdata.link);
-    Ext.getCmp('labelForm').getForm().setValues(panel.xdata.label);
+    TP.getIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -1264,4 +1256,16 @@ TP.openLabelEditorWindow = function(panel) {
             }]
         }]
     }).show();
+}
+
+TP.getIconSettingsValues = function(xdata) {
+    xdata = TP.clone(xdata);
+    // set some defaults
+    if(xdata.label.fontsize   == 0) { xdata.label.fontsize   = 14; }
+    if(xdata.label.bordersize == 0) { xdata.label.bordersize =  1; }
+    Ext.getCmp('generalForm').getForm().setValues(xdata.general);
+    Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
+    Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
+    Ext.getCmp('linkForm').getForm().setValues(xdata.link);
+    Ext.getCmp('labelForm').getForm().setValues(xdata.label);
 }
