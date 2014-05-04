@@ -1067,7 +1067,7 @@ Ext.define('TP.IconWidget', {
         }
         var naturalWidth  = TP.imageSizes[src][0];
         var naturalHeight = TP.imageSizes[src][1];
-        if(naturalWidth > 0 && naturalHeight > 0) {
+        if(naturalWidth > 1 && naturalHeight > 1) {
             var size = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
             panel.setSize(size, size);
             panel.items.getAt(0).setSize(size, size);
