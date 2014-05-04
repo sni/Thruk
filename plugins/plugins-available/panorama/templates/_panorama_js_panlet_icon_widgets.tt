@@ -781,11 +781,11 @@ Ext.define('TP.IconWidget', {
         if(state == 4) { color_fg = colors['pending'];  }
 
         var colorSet = [];
+        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
         Ext.Array.each([color_fg, colors['bg']], function(color,i) {
             if(forceColor) { color = forceColor; }
             if(xdata.appearance.speedogradient != 0) {
                 var gradient = TP.createGradient(color, xdata.appearance.speedogradient);
-                if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
                 if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
                     panel.chart.surface.existingGradients[gradient.id] = true;
                     panel.chart.surface.addGradient(gradient);
@@ -811,6 +811,7 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+        if(panel.itemRendering) { return; }
         if(xdata.appearance.pielocked) { xdata.appearance.pieheight = xdata.appearance.piewidth; }
         if(!panel.items.getAt || !panel.items.getAt(0)) { return; }
         panel.items.getAt(0).setSize(xdata.appearance.piewidth, xdata.appearance.pieheight);
@@ -827,12 +828,12 @@ Ext.define('TP.IconWidget', {
         };
         var totals   = this.getTotals(xdata, colors);
         var colorSet = [];
+        if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
         Ext.Array.each(totals, function(t,i) {
             var color = t.color;
             if(forceColor) { color = forceColor; }
             if(xdata.appearance.piegradient != 0) {
                 var gradient = TP.createGradient(color, xdata.appearance.piegradient);
-                if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
                 if(panel.chart.surface.existingGradients[gradient.id] == undefined) {
                     panel.chart.surface.existingGradients[gradient.id] = true;
                     panel.chart.surface.addGradient(gradient);
