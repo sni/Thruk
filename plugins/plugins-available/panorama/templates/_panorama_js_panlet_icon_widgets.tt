@@ -612,14 +612,16 @@ Ext.define('TP.IconWidget', {
             width    = xdata.nsize[0];
             height   = xdata.nsize[1];
             size     = xdata.size;
-            panel.setSize(width,height);
+            var size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
+            panel.setSize(size,size);
         } else if(panel.xdata.size && panel.xdata.nsize && panel.xdata.nsize[0] > 1) {
             x        = (panel.xdata.size - panel.xdata.nsize[0]) / 2;
             y        = (panel.xdata.size - panel.xdata.nsize[1]) / 2;
             width    = panel.xdata.nsize[0];
             height   = panel.xdata.nsize[1];
             size     = panel.xdata.size;
-            panel.setSize(width,height);
+            var size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
+            panel.setSize(size,size);
         } else {
             size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
             x    = (size - width)  / 2;
