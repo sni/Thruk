@@ -415,7 +415,8 @@ TP.iconShowEditDialog = function(panel) {
                         minValue:     -1,
                         step:          0.05,
                         value:         panel.xdata.appearance.shapegradient,
-                        width:         50
+                        width:         50,
+                        listeners:   { change: function() { renderUpdate(); } }
                     },
                     { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
                     {
@@ -428,7 +429,7 @@ TP.iconShowEditDialog = function(panel) {
                         store:       { fields: ['name', 'value'], data: [] },
                         editable:      false,
                         value:         panel.xdata.appearance.shapesource,
-                        listeners: { focus: perfDataUpdate },
+                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
                         flex:          1
                     }]
                 }, {
