@@ -69,11 +69,18 @@
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
+            var delay = 50;
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
                     try {    // so allow it to fail
-                        panlet.show(false);
+                        if(panlet.rendered == false) {
+                            /* delay initial show when its not yet rendered */
+                            window.setTimeout(Ext.bind(panlet.show, panlet, []), delay);
+                            delay = delay + 50;
+                        } else {
+                            panlet.show(false);
+                        }
                     } catch(e) { debug(e) }
                 }
             }

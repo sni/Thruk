@@ -214,12 +214,14 @@
 
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
+        var panel = this;
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex) { return; }
         var txt = cfg.labeltext;
         if(txt == undefined) { txt = ''; }
+        this.el.dom.title = '';
         /* dynamic label? */
         if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
             var allowed_functions = ['strftime', 'sprintf', 'if'];
@@ -254,7 +256,7 @@
                 var res = '';
                 try {
                     res = eval(calc);
-                } catch(e) { debug(e); }
+                } catch(e) { panel.el.dom.title = e; }
                 if(res == undefined) { res = ''; }
                 txt = txt.replace(item, res);
             });
