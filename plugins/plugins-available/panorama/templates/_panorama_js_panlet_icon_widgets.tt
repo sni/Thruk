@@ -1740,9 +1740,10 @@ TP.createGradient = function(color, num, color2, percent) {
         start = color.toString();
         end   = color2.getDarker(Number(-num)).toString();
     }
-    var colorname = color.toString().replace(/^#/, '');
+    var colorname1 = color.toString().replace(/^#/, '');
+    var colorname2 = color2.toString().replace(/^#/, '');
     var g = {
-        id: 'fillGradient'+colorname+num,
+        id: 'fill'+colorname1+colorname2+num,
         angle: 45,
         stops: {
               0: { color: start }
@@ -1755,9 +1756,10 @@ TP.createGradient = function(color, num, color2, percent) {
         } else {
             g.stops[percent] = { color: end };
         }
-        g.stops[100]     = { color: end };
+        g.stops[100] = { color: end };
+        g.id         = 'fill'+colorname1+colorname2+num+percent;
     } else {
-        g.stops[100]     = { color: end };
+        g.stops[100] = { color: end };
     }
     return(g);
 }

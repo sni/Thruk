@@ -134,6 +134,15 @@
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
                         handler: function() {
                             var tb = Ext.getCmp('tabpan').getActiveTab();
+                            if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
+                                // workaround for not existing gradient after copy&paste
+                                if(TP.clipboard.state.xdata.appearance.piegradient) {
+                                    TP.clipboard.state.xdata.appearance.piegradient = Number(TP.clipboard.state.xdata.appearance.piegradient) + 0.001;
+                                }
+                                if(TP.clipboard.state.xdata.appearance.shapegradient) {
+                                    TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
+                                }
+                            }
                             TP.add_panlet_handler(e, e.target, [tb, TP.clipboard, -8, -8]);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
