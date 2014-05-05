@@ -1751,13 +1751,14 @@ wait up to 60 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
+    sleep(3);
     $pkey = $c->stash->{'param_backend'} unless $pkey;
 
     # wait until core responds again
     my $start    = time();
     my $procinfo = {};
     while($start > time() - 60) {
-        sleep(1);
+        sleep(2);
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
@@ -1766,7 +1767,7 @@ sub wait_after_reload {
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$pkey}) {
+        if(!$@ and !$c->{'stash'}->{'failed_backends'}->{$pkey}) {
             if($pkey and $time and $procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
                 # not yet restarted
             } else {
