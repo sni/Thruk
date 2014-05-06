@@ -393,7 +393,9 @@ sub get_objects_by_type {
     # scalar filter by name only
     if(defined $filter and ref $filter eq '') {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$filter}) {
-            return $self->{'objects'}->{'byname'}->{$type}->{$filter};
+            my $id  = $self->{'objects'}->{'byname'}->{$type}->{$filter};
+            return $id if ref $id;
+            return({$type.'_name' => { $filter => $id }});
         }
         return;
     }

@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    my $tests = 1318;
+    my $tests = 1338;
     $tests    = $tests - 12 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }
@@ -169,6 +169,8 @@ my $other_json = [
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'action' => 'json', 'type' => 'pluginhelp', 'plugin' => '##PLUGIN##'}, like => '"plugin_help" :' },
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'action' => 'json', 'type' => 'pluginpreview' }, like => '"plugin_output" :' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers', like => '"servicemembers"' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=host&filter='.$host, like => '"hosts"' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=service&filter='.$host, like => '"hosts"' },
 ];
 for my $url (@{$other_json}) {
     $url->{'post'}->{'plugin'} =~ s/\#\#PLUGIN\#\#/$plugin/gmx if($url->{'post'} and $url->{'post'}->{'plugin'});
