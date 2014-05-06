@@ -1895,6 +1895,7 @@ TP.getPerfDataMinMax = function(p, maxDefault) {
     if(p.max)           { r.max = p.max; }
     else if(p.crit_max) { r.max = p.crit_max; }
     else if(p.warn_max) { r.max = p.warn_max; }
+    if(p.unit == '%')   { r.max = 100; }
 
     if(p.min)           { r.min = p.min; }
     return(r);
