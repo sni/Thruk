@@ -657,9 +657,11 @@ Ext.define('TP.IconWidget', {
                         panel.surface = panel.items.getAt(0).surface;
                         if(xdata.appearance.type == 'icon') {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
-                            This.el.down('image').on("load", function (evt, ele, opts) {
-                                panel.iconFixSize();
-                            });
+                            if(This.el.down('image')) {
+                                This.el.down('image').on("load", function (evt, ele, opts) {
+                                    panel.iconFixSize();
+                                });
+                            }
                         }
                         panel.updateRender(xdata);
                     }
