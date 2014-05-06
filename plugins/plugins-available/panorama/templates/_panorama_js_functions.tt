@@ -976,6 +976,7 @@ var TP = {
                     }
                 } else {
                     TP.refresh_errors = 0;
+                    if(TP.iconTip) { TP.iconTip.lastUrl = undefined; }
                     var data = TP.getResponse(undefined, response);
                     if(!data || !data.data) { return; }
                     data = data.data;

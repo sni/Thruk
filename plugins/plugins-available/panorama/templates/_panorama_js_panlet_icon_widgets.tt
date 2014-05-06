@@ -1205,28 +1205,29 @@ TP.renderTipDetails = function(data) {
     if(data == undefined) { return; }
     if(TP.iconTip == undefined) { return; }
     if(TP.iconTip.panel == undefined) { return; }
-    var panel = TP.iconTip.panel;
-    var details = '';
+    var panel      = TP.iconTip.panel;
+    var details    = '';
+    var num_shown  = 0;
     if(panel.xdata.general.incl_hst || panel.iconType == 'host') {
         details += '<table class="TipDetails">';
         details += '<tr>';
         details += '<th>Hosts:</th>';
         details += '</tr>';
         var uniq_hosts = {};
-        var num_shown  = 0;
         for(var x=0; x<data.length;x++) {
             var d = data[x];
-            details += '<tr>';
             var prefix = '';
             if(d['host_name']) {
                 prefix = 'host_';
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
+            if(panel.xdata.state != 0 && d[prefix+'state'] == 0) { continue; }
             uniq_hosts[d[prefix+'name']] = true;
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
+            details += '<tr>';
             details += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'</td><td class="icons">'+icons+'</td></tr></table></td>';
             details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
             details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'</td>';
@@ -1244,6 +1245,7 @@ TP.renderTipDetails = function(data) {
         var last_host = "";
         for(var x=0; x<data.length;x++) {
             var d = data[x];
+            if(panel.xdata.state != 0 && d['state'] == 0) { continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_service_icons({}, {}, {}, {}, {}, {}, {}, d);
@@ -1259,7 +1261,8 @@ TP.renderTipDetails = function(data) {
             details += '<td class="plugin_output">'+d['plugin_output']+'</td>';
             details += '</tr>';
             last_host = d['host_name'];
-            if(x >= 4) { break; }
+            num_shown++;
+            if(num_shown >= 10) { break; }
         }
         details += '</table>';
     }
@@ -1337,11 +1340,11 @@ Ext.define('TP.HostStatusIcon', {
 /* get summarized table for hosts */
 TP.get_summarized_hoststatus = function(item) {
     var table = '<table class="ministatus"><tr>';
-    table += '<th>Up</th><th>Unreachable</th><th>Down</th><th>Pending</th></tr><tr>';
-    table += '<td class='+(item.up ? 'UP' : 'miniEmpty')+'>'+item.up+'</td>';
+    table += '<th>Up</th><th>Down</th><th>Unreachable</th><th>Pending</th></tr><tr>';
+    table += '<td class='+(item.up          ? 'UP'          : 'miniEmpty')+'>'+item.up+'</td>';
+    table += '<td class='+(item.down        ? 'DOWN'        : 'miniEmpty')+'>'+item.down+'</td>';
     table += '<td class='+(item.unreachable ? 'UNREACHABLE' : 'miniEmpty')+'>'+item.unreachable+'</td>';
-    table += '<td class='+(item.down ? 'DOWN' : 'miniEmpty')+'>'+item.down+'</td>';
-    table += '<td class='+(item.pending ? 'PENDING' : 'miniEmpty')+'>'+item.pending+'</td>';
+    table += '<td class='+(item.pending     ? 'PENDING'     : 'miniEmpty')+'>'+item.pending+'</td>';
     table += '</tr></table>';
     return(table);
 }
@@ -1349,12 +1352,12 @@ TP.get_summarized_hoststatus = function(item) {
 /* get summarized table for services */
 TP.get_summarized_servicestatus = function(item) {
     var table = '<table class="ministatus"><tr>';
-    table += '<th>Ok</th><th>Warning</th><th>Critical</th><th>Unknown</th><th>Pending</th></tr><tr>';
-    table += '<td class='+(item.ok ? 'OK' : 'miniEmpty')+'>'+item.ok+'</td>';
-    table += '<td class='+(item.warning ? 'WARNING' : 'miniEmpty')+'>'+item.warning+'</td>';
+    table += '<th>Ok</th><th>Warning</th><th>Unknown</th><th>Critical</th><th>Pending</th></tr><tr>';
+    table += '<td class='+(item.ok       ? 'OK'       : 'miniEmpty')+'>'+item.ok+'</td>';
+    table += '<td class='+(item.warning  ? 'WARNING'  : 'miniEmpty')+'>'+item.warning+'</td>';
+    table += '<td class='+(item.unknown  ? 'UNKNOWN'  : 'miniEmpty')+'>'+item.unknown+'</td>';
     table += '<td class='+(item.critical ? 'CRITICAL' : 'miniEmpty')+'>'+item.critical+'</td>';
-    table += '<td class='+(item.unknown ? 'UNKNOWN' : 'miniEmpty')+'>'+item.unknown+'</td>';
-    table += '<td class='+(item.pending ? 'PENDING' : 'miniEmpty')+'>'+item.pending+'</td>';
+    table += '<td class='+(item.pending  ? 'PENDING'  : 'miniEmpty')+'>'+item.pending+'</td>';
     table += '</tr></table>';
     return(table);
 }

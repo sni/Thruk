@@ -68,8 +68,8 @@ TP.render_on_off = function(v, td, item) {
 TP.text_host_status = function(v) {
     var state = 'Unknown';
          if(v==0) { state = 'Up';          }
-    else if(v==1) { state = 'Unreachable'; }
-    else if(v==2) { state = 'Down';        }
+    else if(v==1) { state = 'Down';        }
+    else if(v==2) { state = 'Unreachable'; }
     else if(v==4) { state = 'Pending';     }
     return(state);
 }
