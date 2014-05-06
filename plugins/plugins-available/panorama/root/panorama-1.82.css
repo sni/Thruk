@@ -480,3 +480,47 @@ DIV.iconlabel, A.iconlabel {
   padding-left: 4px;
   vertical-align: top;
 }
+
+
+TABLE.TipDetails {
+  width: 100%;
+  padding: 3px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: #FFFFFF;
+}
+TABLE.TipDetails TH {
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: top;
+  border: 0;
+  padding: 2px;
+  padding-right: 4px;
+}
+TABLE.TipDetails TD {
+  text-align: left;
+  border: 0;
+  padding: 2px;
+  font-size: smaller;
+  border-top: 1px solid #AAAAAA;
+  border-left: 1px solid #AAAAAA;
+  border-bottom: 1px solid #AAAAAA;
+}
+TABLE.TipDetails TD.emptyhost {
+  border-bottom: 0;
+  border-top: 0;
+}
+TABLE.TipDetails TD.svchost {
+  border-bottom: 0;
+}
+TABLE.TipDetails TD.plugin_output {
+  white-space: nowrap;
+  overflow: hidden;
+}
+TABLE.TipDetails TD.descr, TABLE.TipDetails TD.host {
+  white-space: nowrap;
+}
+TABLE.TipDetails DIV.extinfostate {
+  width: 50px;
+}

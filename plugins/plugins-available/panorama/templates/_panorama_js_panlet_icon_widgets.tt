@@ -1102,8 +1102,9 @@ Ext.onReady(function() {
         showDelay: 500,
         dismissDelay: 0,
         width:     400,
+        manageHeight: false,
         maxWidth:  400,
-        //closable:  true,  // enable for easier css debuging
+        //closable:  true, hideDelay: 600000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
         shadow:   'drop',
@@ -1126,17 +1127,67 @@ Ext.onReady(function() {
         } else {
             TP.iconTip.setTitle(ucfirst(img.iconType)+': '+img.getName());
         }
+        var link;
         var d = img.getDetails();
         var details = '<table class="iconDetails">';
+        TP.iconTip.panel = undefined;
         for(var x=0; x<d.length; x++) {
-            details += '<tr>';
-            details += '<th>'+d[x][0]+'</th>';
-            details += '<td>'+d[x][1]+'</td>';
-            details += '</tr>';
+            if(d[x][0] == "Details") {
+                TP.iconTip.panel = d[x][2];
+                link = d[x][1];
+                details += '<tr>';
+                details += '<td colspan=2 id="tipdetails"></td>';
+                details += '</tr>';
+            } else {
+                details += '<tr>';
+                details += '<th>'+d[x][0]+'</th>';
+                details += '<td>'+d[x][1]+'</td>';
+                details += '</tr>';
+            }
         }
         details += '</table>';
         TP.iconTip.update(details);
         TP.iconTip.show();
+        if(link) {
+            var style = 'detail';
+            if(!TP.iconTip.panel.xdata.general.incl_svc || TP.iconTip.panel.iconType == 'host') {
+                style = 'hostdetail';
+            }
+            link = link+'&style='+style+'&view_mode=json';
+            if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.destroy(); }
+            TP.iconTip.detailsTarget = Ext.create('Ext.panel.Panel', {
+                renderTo: 'tipdetails',
+                html:     ' ',
+                border:     0,
+                minHeight: 40,
+                width:     380
+            });
+            TP.iconTip.detailsTarget.body.mask("loading");
+            if(link == TP.iconTip.lastUrl) {
+                TP.renderTipDetails(TP.iconTip.lastData);
+                TP.iconTip.detailsTarget.body.unmask();
+            } else {
+                TP.iconTip.lastUrl = link;
+                Ext.Ajax.request({
+                    url:     link,
+                    method: 'POST',
+                    callback: function(options, success, response) {
+                        if(!success) {
+                            if(response.status == 0) {
+                                TP.Msg.msg("fail_message~~fetching details failed");
+                            } else {
+                                TP.Msg.msg("fail_message~~fetching details failed: "+response.status+' - '+response.statusText);
+                            }
+                        } else {
+                            var data = TP.getResponse(undefined, response);
+                            TP.iconTip.lastData = data;
+                            TP.renderTipDetails(TP.iconTip.lastData);
+                        }
+                        TP.iconTip.detailsTarget.body.unmask();
+                    }
+                });
+            }
+        }
     };
 
     Ext.getBody().on('mouseover', function(e,t,a) {
@@ -1144,6 +1195,65 @@ Ext.onReady(function() {
     }, null, {delegate:'A.iconWidget'});
 });
 
+/* render tip details */
+TP.renderTipDetails = function(data) {
+    if(data == undefined) { return; }
+    var panel = TP.iconTip.panel;
+    var details = '';
+    if(panel == undefined) { return; }
+    if(panel.xdata.general.incl_hst || panel.iconType == 'host') {
+        details += '<table class="TipDetails">';
+        details += '<tr>';
+        details += '<th>Hosts:</th>';
+        details += '</tr>';
+        var uniq_hosts = {};
+        var num_shown  = 0;
+        for(var x=0; x<data.length;x++) {
+            var d = data[x];
+            details += '<tr>';
+            var prefix = '';
+            if(d['host_name']) {
+                prefix = 'host_';
+            }
+            if(uniq_hosts[d[prefix+'name']]) { continue; }
+            uniq_hosts[d[prefix+'name']] = true;
+            var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
+            details += '<td class="host">'+d[prefix+'name']+'</td>';
+            details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
+            details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'</td>';
+            details += '</tr>';
+            num_shown++;
+            if(num_shown >= 5) { break; }
+        }
+        details += '</table>';
+    }
+    if(panel.xdata.general.incl_svc) {
+        details += '<table class="TipDetails">';
+        details += '<tr>';
+        details += '<th>Services:</th>';
+        details += '</tr>';
+        var last_host = "";
+        for(var x=0; x<data.length;x++) {
+            var d = data[x];
+            var statename = TP.render_service_status(d['state'], {}, {data:d});
+            details += '<tr>';
+            if(last_host != d['host_name']) {
+                details += '<td class="host svchost">'+d['host_name']+'</td>';
+            } else {
+                details += '<td class="emptyhost"></td>';
+            }
+            details += '<td class="descr">'+d['description']+'</td>';
+            details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
+            details += '<td class="plugin_output">'+d['plugin_output']+'</td>';
+            details += '</tr>';
+            last_host = d['host_name'];
+            if(x >= 4) { break; }
+        }
+        details += '</table>';
+    }
+    TP.iconTip.detailsTarget.update(details);
+    return;
+}
 
 /* Host Status Icon */
 Ext.define('TP.HostStatusIcon', {
@@ -1335,6 +1445,7 @@ Ext.define('TP.HostgroupStatusIcon', {
         return(this.xdata.general.hostgroup);
     },
     getDetails: function() {
+        var panel = this;
         var details = [];
         if(!this.hostgroup) {
             return([['Status', 'No status information available']]);
@@ -1350,6 +1461,8 @@ Ext.define('TP.HostgroupStatusIcon', {
         if(this.xdata.general.incl_svc) {
             details.push([ 'Services', TP.get_summarized_servicestatus(this.hostgroup.services)]);
         }
+        var link = TP.getIconDetailsLink(panel, true);
+        details.push([ 'Details', link, panel]);
         return(details);
     }
 });
@@ -1465,6 +1578,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
         return(this.xdata.general.servicegroup);
     },
     getDetails: function() {
+        var panel = this;
         var details = [];
         if(!this.servicegroup) {
             return([['Status', 'No status information available']]);
@@ -1475,6 +1589,8 @@ Ext.define('TP.ServicegroupStatusIcon', {
                                             +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         details.push([ 'Services', TP.get_summarized_servicestatus(this.servicegroup.services)]);
+        var link = TP.getIconDetailsLink(panel, true);
+        details.push([ 'Details', link, panel]);
         return(details);
     }
 });
@@ -1549,6 +1665,7 @@ Ext.define('TP.FilterStatusIcon', {
         return(this.xdata.general.name);
     },
     getDetails: function() {
+        var panel = this;
         var details = [];
         if(!this.results) {
             return([['Status', 'No status information available']]);
@@ -1569,6 +1686,8 @@ Ext.define('TP.FilterStatusIcon', {
         if(this.xdata.general.incl_svc) {
             details.push([ 'Services', TP.get_summarized_servicestatus(this.results.services)]);
         }
+        var link = TP.getIconDetailsLink(panel, true);
+        details.push([ 'Details', link, panel]);
         return(details);
     }
 });
@@ -1689,7 +1808,7 @@ TP.iconClickHandlerDo = function(id) {
 };
 
 /* return link representing the data for this icon */
-TP.getIconDetailsLink = function(panel) {
+TP.getIconDetailsLink = function(panel, relativeUrl) {
     if(!panel.xdata || !panel.xdata.general) {
         return('#');
     }
@@ -1719,6 +1838,9 @@ TP.getIconDetailsLink = function(panel) {
         base           = 'panorama.cgi';
     } else {
         return('#');
+    }
+    if(relativeUrl) {
+        return(base+"?"+Ext.Object.toQueryString(options));
     }
     [%+ IF use_frames +%]
         return("[% url_prefix %]#cgi-bin/"+base+"?"+Ext.Object.toQueryString(options));
