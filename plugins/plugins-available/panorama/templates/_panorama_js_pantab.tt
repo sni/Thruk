@@ -69,7 +69,7 @@
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
-            var delay = 50;
+            var delay = 0;
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
@@ -96,7 +96,11 @@
 
             // refresh icons
             if(TP.initialized) {
-                TP.updateAllIcons(This);
+                if(delay > 0) {
+                    window.setTimeout(Ext.bind(TP.updateAllIcons, This, [This]), delay + 100);
+                } else {
+                    TP.updateAllIcons(This);
+                }
             }
         },
         hide: function(This, eOpts) {
