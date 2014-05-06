@@ -1132,7 +1132,12 @@ Ext.onReady(function() {
         var details = '<table class="iconDetails">';
         TP.iconTip.panel = undefined;
         for(var x=0; x<d.length; x++) {
-            if(d[x][0] == "Details") {
+            if(d[x].length == 1) {
+                details += '<tr>';
+                details += '<td colspan=2>'+d[x][0]+'</td>';
+                details += '</tr>';
+            }
+            else if(d[x][0] == "Details") {
                 TP.iconTip.panel = d[x][2];
                 link             = d[x][1];
                 details += '<tr>';
@@ -1301,7 +1306,15 @@ Ext.define('TP.HostStatusIcon', {
                      ]);
         details.push([ 'Status Information', this.host.plugin_output]);
         details.push([ 'Last Check', this.host.last_check ? TP.date_format(this.host.last_check) : 'never']);
+        details.push([ 'Next Check', this.host.next_check ? TP.date_format(this.host.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.host.last_notification == 0 ? 'N/A' : TP.date_format(this.host.last_notification)) + ' (notification '+this.host.current_notification_number+')']);
+        if(this.host.pnp_url) {
+            var now = new Date();
+            var url = this.host.pnp_url+'/image?host='+this.xdata.general.host+'&srv=_HOST_&view=1&source=0&graph_width=300&graph_height=100';
+            url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
+            url    += '&end='   + Math.round(now.getTime()/1000);
+            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;">']);
+        }
         return(details);
     },
     refreshHandler: function(newStatus) {
@@ -1515,7 +1528,15 @@ Ext.define('TP.ServiceStatusIcon', {
                      ]);
         details.push([ 'Status Information', this.service.plugin_output]);
         details.push([ 'Last Check', this.service.last_check ? TP.date_format(this.service.last_check) : 'never']);
+        details.push([ 'Next Check', this.service.next_check ? TP.date_format(this.service.next_check) : 'not planned']);
         details.push([ 'Last Notification', (this.service.last_notification == 0 ? 'N/A' : TP.date_format(this.service.last_notification)) + ' (notification '+this.service.current_notification_number+')']);
+        if(this.service.pnp_url) {
+            var now = new Date();
+            var url = this.service.pnp_url+'/image?host='+this.xdata.general.host+'&srv='+this.xdata.general.service+'&view=1&source=0&graph_width=300&graph_height=100';
+            url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
+            url    += '&end='   + Math.round(now.getTime()/1000);
+            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;">']);
+        }
         return(details);
     },
     refreshHandler: function(newStatus) {

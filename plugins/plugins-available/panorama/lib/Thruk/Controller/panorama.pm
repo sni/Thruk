@@ -415,7 +415,12 @@ sub _task_status {
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
-        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data/]);
+        $data->{'hosts'} = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded/]);
+        if($c->config->{'shown_inline_pnp'}) {
+            for my $hst (@{$data->{'hosts'}}) {
+                $hst->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $hst);
+            }
+        }
     }
     if(scalar keys %{$types->{'services'}} > 0) {
         my $filter = [];
@@ -425,7 +430,12 @@ sub _task_status {
             }
         }
         $filter = Thruk::Utils::combine_filter('-or', $filter);
-        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data/]);
+        $data->{'services'} = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded/]);
+        if($c->config->{'shown_inline_pnp'}) {
+            for my $svc (@{$data->{'services'}}) {
+                $svc->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $svc);
+            }
+        }
     }
 
     $data->{backends} = $c->stash->{'backend_detail'};

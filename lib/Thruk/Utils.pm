@@ -1275,9 +1275,7 @@ return pnp url for object (host/service)
 =cut
 
 sub get_pnp_url {
-    my $c     = shift;
-    my $obj   = shift;
-    my $force = shift;
+    my($c, $obj, $force) = @_;
 
     return '' unless $c->config->{'shown_inline_pnp'} || $force;
 
