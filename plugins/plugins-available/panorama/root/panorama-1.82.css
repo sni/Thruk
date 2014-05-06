@@ -501,11 +501,15 @@ TABLE.TipDetails TH {
 TABLE.TipDetails TD {
   text-align: left;
   border: 0;
-  padding: 2px;
+  padding: 0 2px 0 2px;
   font-size: smaller;
   border-top: 1px solid #AAAAAA;
   border-left: 1px solid #AAAAAA;
   border-bottom: 1px solid #AAAAAA;
+  line-height: 10px;
+}
+TABLE.TipDetails TD.state {
+  padding: 0;
 }
 TABLE.TipDetails TD.emptyhost {
   border-bottom: 0;
@@ -523,4 +527,16 @@ TABLE.TipDetails TD.descr, TABLE.TipDetails TD.host {
 }
 TABLE.TipDetails DIV.extinfostate {
   width: 50px;
+  height: 22px;
+}
+TABLE.TipDetails TABLE.icons {
+  width: 100%;
+}
+TABLE.TipDetails TABLE.icons TD {
+  border: 0px;
+  padding: 0;
+}
+TABLE.TipDetails TABLE.icons TD.icons {
+  float: right;
+  padding-left: 3px;
 }

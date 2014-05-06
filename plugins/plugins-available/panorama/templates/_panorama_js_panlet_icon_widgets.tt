@@ -1223,8 +1223,11 @@ TP.renderTipDetails = function(data) {
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
             uniq_hosts[d[prefix+'name']] = true;
+            delete d['action_url_expanded'];
+            delete d['notes_url_expanded'];
+            var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
-            details += '<td class="host">'+d[prefix+'name']+'</td>';
+            details += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'</td><td class="icons">'+icons+'</td></tr></table></td>';
             details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
             details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'</td>';
             details += '</tr>';
@@ -1241,6 +1244,9 @@ TP.renderTipDetails = function(data) {
         var last_host = "";
         for(var x=0; x<data.length;x++) {
             var d = data[x];
+            delete d['action_url_expanded'];
+            delete d['notes_url_expanded'];
+            var icons = TP.render_service_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_service_status(d['state'], {}, {data:d});
             details += '<tr>';
             if(last_host != d['host_name']) {
@@ -1248,7 +1254,7 @@ TP.renderTipDetails = function(data) {
             } else {
                 details += '<td class="emptyhost"></td>';
             }
-            details += '<td class="descr">'+d['description']+'</td>';
+            details += '<td class="descr"><table class="icons"><tr><td>'+d['description']+'</td><td class="icons">'+icons+'</td></tr></table></td>';
             details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
             details += '<td class="plugin_output">'+d['plugin_output']+'</td>';
             details += '</tr>';

@@ -284,9 +284,12 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
 }
 
 /* render service icons */
-TP.render_service_icons = function(v, td, item, row, col, store, view) {
+TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     var icons = '';
     var d     = item.data;
+    if(data != undefined) {
+        d = data;
+    }
     if(d.notifications_enabled == 0)   { icons += '<img src="[% url_prefix %]themes/[% theme %]/images/ndisabled.gif" alt="Notifications for this service have been disabled" title="Notifications for this service have been disabled" border="0" height="20" width="20">'; }
     [% IF hide_passive_icon %]
         [% passive_icon ='empty.gif' %]
