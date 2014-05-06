@@ -170,7 +170,7 @@ my $other_json = [
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'action' => 'json', 'type' => 'pluginpreview' }, like => '"plugin_output" :' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers', like => '"servicemembers"' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=host&filter='.$host, like => '"hosts"' },
-    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=service&filter='.$host, like => '"hosts"' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=service&filter='.$service, like => '"hosts"' },
 ];
 for my $url (@{$other_json}) {
     $url->{'post'}->{'plugin'} =~ s/\#\#PLUGIN\#\#/$plugin/gmx if($url->{'post'} and $url->{'post'}->{'plugin'});
