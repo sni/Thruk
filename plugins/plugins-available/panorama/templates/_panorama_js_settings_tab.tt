@@ -457,10 +457,12 @@ TP.tabSettingsWindow = function() {
                         var values = s_form.getFieldValues();
                         Ext.apply(tab.xdata, values);
 
-                        var b_form  = Ext.getCmp('backendsForm').getForm();
-                        if(!b_form.isValid()) { return false; }
-                        var values = b_form.getFieldValues();
-                        Ext.apply(tab.xdata, values);
+                        if(Ext.getCmp('backendsForm')) {
+                            var b_form  = Ext.getCmp('backendsForm').getForm();
+                            if(!b_form.isValid()) { return false; }
+                            var values = b_form.getFieldValues();
+                            Ext.apply(tab.xdata, values);
+                        }
 
                         tab.applyXdata(undefined, false);
                         tab.saveState();
