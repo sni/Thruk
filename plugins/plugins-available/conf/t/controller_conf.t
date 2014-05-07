@@ -169,8 +169,8 @@ my $other_json = [
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'action' => 'json', 'type' => 'pluginhelp', 'plugin' => '##PLUGIN##'}, like => '"plugin_help" :' },
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'action' => 'json', 'type' => 'pluginpreview' }, like => '"plugin_output" :' },
     { url => '/thruk/cgi-bin/conf.cgi?action=json&type=servicemembers', like => '"servicemembers"' },
-    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=host&filter='.$host, like => '"hosts"' },
-    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=service&filter='.$service, like => '"hosts"' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=host&filter='.$host,       like => '"hosts"', jsize => '>=' },
+    { url => '/thruk/cgi-bin/conf.cgi?action=json&long=1&type=service&filter='.$service, like => '"hosts"', jsize => '>=' },
 ];
 for my $url (@{$other_json}) {
     $url->{'post'}->{'plugin'} =~ s/\#\#PLUGIN\#\#/$plugin/gmx if($url->{'post'} and $url->{'post'}->{'plugin'});
@@ -180,7 +180,11 @@ for my $url (@{$other_json}) {
     $url->{'jtype'} = 'ARRAY' unless defined $url->{'jtype'};
     is(ref $data, $url->{'jtype'}, "json result ref is ".$url->{'jtype'}) or diag("got: ".Dumper($data));
     if($url->{'jtype'} eq 'ARRAY') {
-        ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
+        if($url->{'jsize'} && $url->{'jsize'} eq '>=') {
+            ok(scalar @{$data} >= 1, "json result size is: ".(scalar @{$data}));
+        } else {
+            ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
+        }
     }
 
     if(ref $data eq 'ARRAY'
