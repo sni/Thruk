@@ -147,7 +147,7 @@ TP.iconShowEditDialog = function(panel) {
                     maxValue:      360,
                     step:           15,
                     value:         panel.xdata.layout.rotation,
-                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.appearance.type == 'shape') { panel.shapeRender(xdata) } else { panel.applyRotation(This.value); } } }
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); if(xdata.appearance && xdata.appearance.type == 'shape') { panel.shapeRender(xdata) } else { panel.applyRotation(This.value); } } }
                 }]
             }]
         }]
@@ -157,6 +157,8 @@ TP.iconShowEditDialog = function(panel) {
     var renderUpdate   = Ext.emptyFn;
     var renderUpdateDo = function(forceColor, forceRenderItem) {
         var xdata = TP.get_icon_form_xdata(settingsWindow);
+        if(panel.iconType == 'image') { panel.setRenderItem(xdata); }
+        if(xdata.appearance      == undefined) { return; }
         if(xdata.appearance.type == undefined) { return; }
         if(xdata.appearance.type == 'shape') { forceRenderItem = true; }
         if(xdata.appearance.type != lastType || forceRenderItem) {
@@ -178,7 +180,7 @@ TP.iconShowEditDialog = function(panel) {
     var appearanceTab = {
         title: 'Appearance',
         type:  'panel',
-        hidden: panel.iconType != 'text' ? false : true,
+        hidden: panel.hideAppearanceTab,
         items: [{
             xtype : 'panel',
             layout: 'fit',
@@ -1011,6 +1013,7 @@ TP.iconShowEditDialog = function(panel) {
         width:   400,
         layout: 'fit',
         items:   tabPanel,
+        panel:   panel,
         title:  'Icon Settings',
         buttonAlign: 'center',
         fbar: [/* panlet setting cancel button */
@@ -1109,6 +1112,7 @@ TP.iconShowEditDialog = function(panel) {
         }, 100);
     };
     renderUpdate();
+    settingsWindow.renderUpdate = renderUpdate;
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1134,6 +1138,8 @@ TP.get_icon_form_xdata = function(settingsWindow) {
             }
         }
     });
+    if(settingsWindow.panel.hideAppearanceTab)  { delete xdata.appearance; }
+    if(settingsWindow.panel.iconType == 'text') { delete xdata.general;    }
     return(xdata);
 }
 

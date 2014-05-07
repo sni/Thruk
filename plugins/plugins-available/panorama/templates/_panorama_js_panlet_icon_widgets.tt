@@ -659,7 +659,7 @@ Ext.define('TP.IconWidget', {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             if(This.el.down('image')) {
                                 This.el.down('image').on("load", function (evt, ele, opts) {
-                                    panel.iconFixSize();
+                                    panel.iconFixSize(xdata);
                                 });
                             }
                         }
@@ -1005,49 +1005,52 @@ Ext.define('TP.IconWidget', {
             iconset = tab.xdata.defaulticonset || 'default';
         }
         var newSrc;
-        if(panel.iconType == 'host') {
+        if(panel.iconType == 'image') {
+            newSrc = xdata.general.src;
+        }
+        else if(panel.iconType == 'host') {
             if(panel.acknowledged) {
                      if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_down.png';        }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'; }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';     }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';     }
             }
             else if(panel.downtime) {
                 if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_up.png';          }
                 else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_down.png';        }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unreachable.png'; }
                 else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';     }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';     }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';     }
             } else {
                 if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/up.png';          }
                 else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/down.png';        }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/unreachable.png'; }
                 else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';     }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';     }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';     }
             }
         } else {
             if(panel.acknowledged) {
                      if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_warning.png';  }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_critical.png'; }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';  }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';  }
             }
             else if(panel.downtime) {
                 if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_ok.png';       }
                 else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_warning.png';  }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_critical.png'; }
                 else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';  }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';  }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';  }
             } else {
                 if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/ok.png';       }
                 else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/warning.png';  }
                 else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/critical.png'; }
                 else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';  }
-                else                            { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
+                else                      { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
             }
         }
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
     },
-    iconFixSize: function() {
+    iconFixSize: function(xdata) {
         var panel = this;
         if(!panel.icon) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
@@ -1067,7 +1070,7 @@ Ext.define('TP.IconWidget', {
                             var naturalHeight = This.el.dom.naturalHeight;
                             if(naturalWidth > 1 && naturalHeight > 1) {
                                 TP.imageSizes[src] = [naturalWidth, naturalHeight];
-                                panel.iconFixSize();
+                                panel.iconFixSize(xdata);
                             }
                             This.destroy();
                         });
@@ -1084,9 +1087,12 @@ Ext.define('TP.IconWidget', {
             if(panel.items.getAt && panel.items.getAt(0)) {
                 panel.items.getAt(0).setSize(size, size);
             }
-            panel.xdata.size  = size;
-            panel.xdata.nsize = [naturalWidth, naturalHeight];
+            xdata.size  = size;
+            xdata.nsize = [naturalWidth, naturalHeight];
             panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:1, y:1}}, true);
+            if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight) {
+                panel.setRenderItem(xdata, true);
+            }
             this.setIconLabel();
         }
     }
@@ -1778,6 +1784,7 @@ Ext.define('TP.TextLabelWidget', {
     },
     iconType:           'text',
     html:               '',
+    hideAppearanceTab:  true,
     initialSettingsTab: 4,
     rotateLabel:        true,
     constructor: function (config) {
@@ -1791,6 +1798,54 @@ Ext.define('TP.TextLabelWidget', {
     },
     getGeneralItems: function() { return; },
     refreshHandler: function()  { return; }
+});
+
+/* Static Image */
+Ext.define('TP.StaticIcon', {
+    extend: 'TP.IconWidget',
+
+    iconType: 'image',
+    cls:      'statciconWidget',
+    hideAppearanceTab: true,
+    initComponent: function() {
+        var panel = this;
+        this.callParent();
+    },
+    getGeneralItems: function() {
+        var panel = this;
+        backgrounds.load();
+        backgrounds.removeAt(0); // remove the "none" entry
+        return([{
+            xtype:      'combobox',
+            name:       'src',
+            fieldLabel: 'Image',
+            store:       backgrounds,
+            queryMode:  'local',
+            displayField: 'image',
+            valueField: 'path',
+            listConfig : {
+                getInnerTpl: function(displayField) {
+                    return '<div class="x-combo-list-item"><img src="{path}" height=16 width=16>{image}<\/div>';
+                }
+            },
+            listeners: { change: function() {
+                TP.iconSettingsWindow.renderUpdate();
+            }}
+        }, {
+            xtype:      'panel',
+            html:       'Place images in: [% usercontent_folder %]/images/',
+            style:      'text-align: center;',
+            bodyCls:    'form-hint',
+            padding:    '10 0 0 0',
+            border:      0
+        }]);
+    },
+    refreshHandler: function(newStatus) {},
+    setRenderItem: function(xdata, forceRecreate) {
+        if(xdata == undefined) { xdata = this.xdata; }
+        xdata.appearance = { type: 'icon'};
+        this.callParent([xdata, forceRecreate]);
+    }
 });
 
 /* delay link opening to allow double click menu */
