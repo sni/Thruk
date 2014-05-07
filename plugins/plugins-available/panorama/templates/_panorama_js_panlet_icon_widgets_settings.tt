@@ -467,7 +467,7 @@ TP.iconShowEditDialog = function(panel) {
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
                     items: [
-                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
+                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
                     {
                         xtype:      'checkbox',
                         name:       'pieshadow',
@@ -586,7 +586,7 @@ TP.iconShowEditDialog = function(panel) {
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
                     items: [
-                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
+                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
                     {
                         xtype:      'checkbox',
                         name:       'speedoshadow',
