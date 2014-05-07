@@ -260,7 +260,7 @@ TP.iconShowEditDialog = function(panel) {
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
                                 if(!values['speedowidth']) {
                                     values['speedowidth']             = 180;
-                                    values['speedoshadow']            = true;
+                                    values['speedoshadow']            = false;
                                     values['speedoneedle']            = false;
                                     values['speedodonut']             = 0;
                                     values['speedogradient']          = -0.15;
@@ -589,7 +589,8 @@ TP.iconShowEditDialog = function(panel) {
                     { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
                     {
                         xtype:      'checkbox',
-                        name:       'speedoshadow'
+                        name:       'speedoshadow',
+                        hidden:      true
                     },
                     { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {
@@ -773,7 +774,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label, true); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}, true); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
@@ -976,7 +977,6 @@ TP.iconShowEditDialog = function(panel) {
                         width:       100,
                         handler: function(btn) {
                             var values = Ext.getCmp('sourceForm').getForm().getValues();
-                            debug(values.source);
                             try {
                                 var xdata = Ext.JSON.decode(values.source);
                                 TP.getIconSettingsValues(xdata);
@@ -1028,7 +1028,7 @@ TP.iconShowEditDialog = function(panel) {
                     } else {
                         // restore position any layout
                         if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
-                        panel.applyXdata(cp.state[panel.id].xdata);
+                        if(cp.state[panel.id])  { panel.applyXdata(cp.state[panel.id].xdata); }
                     }
                     settingsWindow.destroy();
                  }
@@ -1038,6 +1038,8 @@ TP.iconShowEditDialog = function(panel) {
                  text:   'save',
                  handler: function() {
                     panel.stateful = true;
+                    delete panel.xdata.label;
+                    delete panel.xdata.link;
                     var xdata = TP.get_icon_form_xdata(settingsWindow);
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
                     panel.applyState({xdata: panel.xdata});
@@ -1140,6 +1142,10 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     });
     if(settingsWindow.panel.hideAppearanceTab)  { delete xdata.appearance; }
     if(settingsWindow.panel.iconType == 'text') { delete xdata.general;    }
+    if(xdata.appearance) {
+        delete xdata.appearance.speedoshadow;
+        delete xdata.appearance.pieshadow;
+    }
     return(xdata);
 }
 
