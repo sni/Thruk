@@ -678,7 +678,7 @@ Ext.define('TP.IconWidget', {
                 store:   pieStore,
                 panel:   panel,
                 animate: false,
-                shadow:  xdata.appearance.pieshadow,
+                shadow:  false, // xdata.appearance.pieshadow, // not working atm
                 donut:   xdata.appearance.piedonut,
                 listeners: {
                     afterrender: function(This, eOpts) {
@@ -1137,7 +1137,7 @@ Ext.onReady(function() {
                 details += '<td colspan=2>'+d[x][0]+'</td>';
                 details += '</tr>';
             }
-            else if(d[x][0] == "Details") {
+            else if(d[x][0] == "Details" && d[x].length == 3) {
                 TP.iconTip.panel = d[x][2];
                 link             = d[x][1];
                 details += '<tr>';
@@ -1764,8 +1764,8 @@ Ext.define('TP.SiteStatusIcon', {
             details.push([ 'Details', "Operating normal"]);
         } else {
             details.push([ 'Details', this.site.last_error]);
-            details.push([ 'Address', this.site.addr]);
         }
+        details.push([ 'Address', this.site.addr]);
         return(details);
     }
 });

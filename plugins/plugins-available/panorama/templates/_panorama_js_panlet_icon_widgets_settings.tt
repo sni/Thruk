@@ -238,7 +238,7 @@ TP.iconShowEditDialog = function(panel) {
                                     values['piewidth']             = 50;
                                     values['pieheight']            = 50;
                                     values['pielocked']            = true;
-                                    values['pieshadow']            = true;
+                                    values['pieshadow']            = false;
                                     values['piedonut']             = 0;
                                     values['pielabel']             = false;
                                     values['piegradient']          = -0.15;
@@ -468,7 +468,8 @@ TP.iconShowEditDialog = function(panel) {
                     { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;' },
                     {
                         xtype:      'checkbox',
-                        name:       'pieshadow'
+                        name:       'pieshadow',
+                        hidden:      true
                     },
                     { xtype: 'label', text: 'Label:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {

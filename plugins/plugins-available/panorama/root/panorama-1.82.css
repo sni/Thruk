@@ -508,9 +508,6 @@ TABLE.TipDetails TD {
   border-bottom: 1px solid #AAAAAA;
   line-height: 10px;
 }
-TABLE.TipDetails TD.state {
-  padding: 0;
-}
 TABLE.TipDetails TD.emptyhost {
   border-bottom: 0;
   border-top: 0;
@@ -524,6 +521,10 @@ TABLE.TipDetails TD.plugin_output {
 }
 TABLE.TipDetails TD.descr, TABLE.TipDetails TD.host {
   white-space: nowrap;
+}
+TABLE.TipDetails TD.state {
+  padding: 0;
+  width: 65px;
 }
 TABLE.TipDetails DIV.extinfostate {
   width: 65px;
