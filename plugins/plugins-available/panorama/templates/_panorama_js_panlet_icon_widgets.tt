@@ -1118,14 +1118,14 @@ Ext.define('TP.IconWidget', {
     }
 });
 
-TP.suppressIconTip    = false;
+TP.suppressIconTip = false;
 Ext.onReady(function() {
     TP.iconTip = Ext.create('Ext.tip.ToolTip', {
         title:    'Details:',
         itemId:   'iconTip',
         target:    Ext.getBody(),
         delegate: 'A.iconWidget', // the cell class in which the tooltip has to be triggered
-        showDelay: 500,
+        //showDelay: 500,
         dismissDelay: 0,
         width:     400,
         manageHeight: false,
@@ -1136,10 +1136,19 @@ Ext.onReady(function() {
         shadow:   'drop',
         html:      '',
         listeners: {
-            show: function(This) {
+            beforeshow: function(This) {
                 if(TP.suppressIconTip) {
                     This.hide();
                     return false;
+                }
+            },
+            show: function(This) {
+                var size = This.getSize();
+                if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+                var showAtPos = TP.getNextToPanelPos(TP.iconTip.panel, size.width, size.height);
+                var pos = This.getPosition();
+                if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
+                    This.showAt(showAtPos);
                 }
             }
         }
@@ -1148,6 +1157,7 @@ Ext.onReady(function() {
     var tipRenderer = function (e, el, eOpts) {
         e.stopEvent();
         var img = Ext.getCmp(el.id);
+        TP.iconTip.panel = img;
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());
         } else {
@@ -1178,7 +1188,11 @@ Ext.onReady(function() {
         }
         details += '</table>';
         TP.iconTip.update(details);
-        TP.iconTip.show();
+        var size;
+        if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
+        if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+        var showAtPos = TP.getNextToPanelPos(img, size.width, size.height);
+        TP.iconTip.showAt(showAtPos);
         if(link && TP.iconTip.panel) {
             var style = 'detail';
             if(!TP.iconTip.panel.xdata.general.incl_svc || TP.iconTip.panel.iconType == 'host') {
@@ -1194,16 +1208,20 @@ Ext.onReady(function() {
                 width:     380
             });
             TP.iconTip.detailsTarget.body.mask("loading");
-            if(link == TP.iconTip.lastUrl) {
+            if(link == TP.iconTip.lastUrl && TP.iconTip.lastData) {
                 TP.renderTipDetails(TP.iconTip.lastData);
                 TP.iconTip.detailsTarget.body.unmask();
+            } else if(link == TP.iconTip.lastUrl) {
+                // just wait till its rendered...
             } else {
-                TP.iconTip.lastUrl = link;
+                TP.iconTip.lastData = undefined;
+                TP.iconTip.lastUrl  = link;
                 Ext.Ajax.request({
                     url:     link,
                     method: 'POST',
                     callback: function(options, success, response) {
                         if(!success) {
+                            TP.iconTip.lastUrl = undefined;
                             if(response.status == 0) {
                                 TP.Msg.msg("fail_message~~fetching details failed");
                             } else {
@@ -1293,6 +1311,11 @@ TP.renderTipDetails = function(data) {
         details += '</table>';
     }
     TP.iconTip.detailsTarget.update(details);
+    // make sure new size fits viewport
+    var size      = TP.iconTip.getSize();
+    if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
+    var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
+    TP.iconTip.showAt(showAtPos);
     return;
 }
 

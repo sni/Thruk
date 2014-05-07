@@ -1072,32 +1072,9 @@ TP.iconShowEditDialog = function(panel) {
     TP.suppressIconTip = true;
 
     // move settings window next to panel itself
-    var sizes = [];
-    sizes.push(panel.getSize().width);
-    if(panel.labelEl) {
-        sizes.push(panel.labelEl.getSize().width);
-    }
-    sizes.push(180); // max size of new speedos
-    var offsetLeft  = 30;
-    var offsetRight = Ext.Array.max(sizes) + 10;
-    var offsetY = 40;
-    var panelPos     = panel.getPosition();
-    var viewPortSize = TP.viewport.getSize();
-    if(viewPortSize.width > panelPos[0] + settingsWindow.width+offsetRight) {
-        panelPos[0] = panelPos[0] + offsetRight;
-    } else {
-        panelPos[0] = panelPos[0] - settingsWindow.width - offsetLeft;
-    }
-    if(panelPos[1] - 50 < 0) {
-        panelPos[1] = offsetY;
-    }
-    else if(viewPortSize.height > panelPos[1] + settingsWindow.height - offsetY) {
-        panelPos[1] = panelPos[1] - offsetY;
-    } else {
-        panelPos[1] = viewPortSize.height - settingsWindow.height - offsetY;
-    }
+    var showAtPos = TP.getNextToPanelPos(panel, settingsWindow.width, settingsWindow.height);
     panel.setIconLabel(undefined, true);
-    settingsWindow.showAt(panelPos);
+    settingsWindow.showAt(showAtPos);
     settingsWindow.toFront();
     TP.iconSettingsWindow.panel = panel;
 
@@ -1276,4 +1253,32 @@ TP.getIconSettingsValues = function(xdata) {
     Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
     Ext.getCmp('linkForm').getForm().setValues(xdata.link);
     Ext.getCmp('labelForm').getForm().setValues(xdata.label);
+}
+
+TP.getNextToPanelPos = function(panel, width, height) {
+    var sizes = [];
+    sizes.push(panel.getSize().width);
+    if(panel.labelEl) {
+        sizes.push(panel.labelEl.getSize().width);
+    }
+    sizes.push(180); // max size of new speedos
+    var offsetLeft  = 30;
+    var offsetRight = Ext.Array.max(sizes) + 10;
+    var offsetY = 40;
+    var panelPos     = panel.getPosition();
+    var viewPortSize = TP.viewport.getSize();
+    if(viewPortSize.width > panelPos[0] + width+offsetRight) {
+        panelPos[0] = panelPos[0] + offsetRight;
+    } else {
+        panelPos[0] = panelPos[0] - width - offsetLeft;
+    }
+    if(panelPos[1] - 50 < 0) {
+        panelPos[1] = offsetY;
+    }
+    else if(viewPortSize.height > panelPos[1] + height - offsetY) {
+        panelPos[1] = panelPos[1] - offsetY;
+    } else {
+        panelPos[1] = viewPortSize.height - height - offsetY;
+    }
+    return(panelPos);
 }
