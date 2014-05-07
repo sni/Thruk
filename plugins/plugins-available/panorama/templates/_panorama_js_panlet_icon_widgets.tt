@@ -1130,7 +1130,7 @@ Ext.onReady(function() {
         width:     400,
         manageHeight: false,
         maxWidth:  400,
-        //closable:  true, hideDelay: 600000, // enable for easier css debuging
+        //closable:  true, hideDelay: 6000000, // enable for easier css debuging
         style:    'background: #E5E5E5',
         bodyStyle:'background: #E5E5E5',
         shadow:   'drop',
@@ -1143,6 +1143,7 @@ Ext.onReady(function() {
                 }
             },
             show: function(This) {
+                if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
                 var size = This.getSize();
                 if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
                 var showAtPos = TP.getNextToPanelPos(TP.iconTip.panel, size.width, size.height);
@@ -1150,14 +1151,18 @@ Ext.onReady(function() {
                 if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
                     This.showAt(showAtPos);
                 }
-            }
+            },
+            hide:    function(This) { delete TP.iconTip.last_id; },
+            destroy: function(This) { delete TP.iconTip; }
         }
     });
 
     var tipRenderer = function (e, el, eOpts) {
         e.stopEvent();
+        if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         var img = Ext.getCmp(el.id);
-        TP.iconTip.panel = img;
+        TP.iconTip.panel   = img;
+        TP.iconTip.last_id = el.id;
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());
         } else {
@@ -1312,6 +1317,7 @@ TP.renderTipDetails = function(data) {
     }
     TP.iconTip.detailsTarget.update(details);
     // make sure new size fits viewport
+    TP.iconTip.detailsTarget.doLayout();
     var size      = TP.iconTip.getSize();
     if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
     var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
