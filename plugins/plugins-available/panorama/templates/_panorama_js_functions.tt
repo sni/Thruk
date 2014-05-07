@@ -61,6 +61,8 @@ var TP = {
                             TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
                         }
                     } else {
+                        id = String(id).replace(/^tabpan-tab_/, '');
+                        id = "tabpan-tab_"+id;
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
                         if(data.newid) { id = data.newid; delete data.newid; }

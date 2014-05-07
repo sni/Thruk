@@ -272,20 +272,7 @@ Ext.define('TP.TabBar', {
             minWidth: 28,
             maxWidth: 28
         },
-        tooltip: 'Add new Dashboard',
-        listeners: {
-            beforeactivate: function() {
-                try { // fails in IE
-                    tabpan = Ext.getCmp('tabpan');
-                    if(tabpan && tabpan.items && tabpan.items.length == 1) {
-                        TP.add_pantab();
-                    }
-                } catch(e) {
-                    debug(e);
-                }
-                return false;
-            }
-        }
+        tooltip: 'Add Dashboards'
     }],
 
     /* start all timed actions all tabs all panels */

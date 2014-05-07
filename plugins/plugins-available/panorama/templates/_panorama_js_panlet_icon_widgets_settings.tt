@@ -1256,6 +1256,7 @@ TP.getIconSettingsValues = function(xdata) {
 }
 
 TP.getNextToPanelPos = function(panel, width, height) {
+    if(!panel) { return([0,0]); }
     var sizes = [];
     sizes.push(panel.getSize().width);
     if(panel.labelEl) {
