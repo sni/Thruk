@@ -398,10 +398,12 @@ returns json encoded string
 
 =cut
 sub json_encode {
+    # do not use utf8 here, results in double encoding because object should be utf8 already
+    # for example business processes having utf8 characters in the plugin output
     if(scalar @_ > 1) {
-        return JSON::XS::encode_json([@_]);
+        return JSON::XS->new->encode([@_]);
     }
-    return JSON::XS::encode_json($_[0]);
+    return JSON::XS->new->encode($_[0]);
 }
 
 ########################################
