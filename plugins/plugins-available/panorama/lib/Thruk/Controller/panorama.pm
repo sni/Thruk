@@ -1803,6 +1803,7 @@ sub _is_authorized_for_dashboard {
             return 2 if $c->stash->{'readonly'};
             return 1;
         }
+        return 2 if $dashboard->{'public'};
         return 0;
     }
     return 2 if $c->stash->{'readonly'};
