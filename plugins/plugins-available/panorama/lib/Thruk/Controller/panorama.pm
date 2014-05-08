@@ -275,7 +275,8 @@ sub _js {
         if(ref $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'} eq 'ARRAY') {
             $default_dashboard = join(',', @{$default_dashboard});
         }
-        $c->stash->{default_dashboard} = encode_json(split(/\s*,+\s*/mx, $default_dashboard));
+        my @defaults = split(/\s*,+\s*/mx, $default_dashboard);
+        $c->stash->{default_dashboard} = encode_json(\@defaults);
     }
 
     unless($only_data) {

@@ -160,9 +160,14 @@ Ext.define('TP.TabBar', {
             });
             if(open_tabs.length == 0 && default_dashboard && default_dashboard.length > 0) {
                 debug("using default view");
+                TP.initial_active_tab = default_dashboard[0];
+                TP.initial_active_tab = String(TP.initial_active_tab).replace(/^tabpan-tab_/, '');
+                TP.initial_active_tab = "tabpan-tab_"+TP.initial_active_tab;
                 for(var x = 0; x<default_dashboard.length; x++) {
-                    TP.add_pantab(default_dashboard[x]);
+                    TP.add_pantab(default_dashboard[x], undefined, x == 0 ? false : true);
                 }
+            } else if(open_tabs.length == 0) {
+                TP.add_pantab();
             }
             TP.startServerTime();
         });
@@ -272,7 +277,10 @@ Ext.define('TP.TabBar', {
             minWidth: 28,
             maxWidth: 28
         },
-        tooltip: 'Add Dashboards'
+        tooltip: 'Add Dashboards',
+        listeners: {
+            beforeactivate: function() { return false; }
+        }
     }],
 
     /* start all timed actions all tabs all panels */
