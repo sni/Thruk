@@ -92,7 +92,9 @@
             set_hash(this.id.replace(/^tabpan-tab_/, ''), 1);
 
             /* disable add button */
-            Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
+            if(Ext.getCmp('tabbar_addbtn')) {
+                Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
+            }
 
             // refresh icons
             if(TP.initialized) {
