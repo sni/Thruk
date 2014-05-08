@@ -269,7 +269,14 @@ sub _js {
     }
 
     $c->stash->{dashboards}        = encode_json($data->{'panorama'}->{'dashboards'} || {});
-    $c->stash->{default_dashboard} = encode_json($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'} || []);
+    $c->stash->{default_dashboard} = encode_json([]);
+    if($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'}) {
+        my $default_dashboard = $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'};
+        if(ref $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'} eq 'ARRAY') {
+            $default_dashboard = join(',', @{$default_dashboard});
+        }
+        $c->stash->{default_dashboard} = encode_json(split(/\s*,+\s*/mx, $default_dashboard));
+    }
 
     unless($only_data) {
         $c->res->content_type('text/javascript; charset=UTF-8');
