@@ -1281,5 +1281,8 @@ TP.getNextToPanelPos = function(panel, width, height) {
     } else {
         panelPos[1] = viewPortSize.height - height - offsetY;
     }
+    // make sure its on the screen
+    if(panelPos[0] <  0) { panelPos[0] =  0; }
+    if(panelPos[1] < 20) { panelPos[1] = 20; }
     return(panelPos);
 }
