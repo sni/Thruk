@@ -67,9 +67,9 @@
     },
     listeners: {
         afterrender: function(This, eOpts) {
-            [% UNLESS readonly %]
             This.addClickEventhandler(This.el);
 
+            [% UNLESS readonly %]
             if(!this.locked) {
                 var pos = this.getPosition();
                 this.xdata.layout.x = pos[0];
@@ -380,12 +380,14 @@
     addClickEventhandler: function(el) {
         var This = this;
         /* open edit box on double or right click */
+        [% UNLESS readonly %]
         el.on("dblclick", function(e) {
             window.clearTimeout(TP.timeouts['click'+This.id]);
             if(!This.locked) {
                 TP.iconShowEditDialog(This);
             }
         });
+        [% END %]
 
         /* right click context menu on icon widgets */
         el.on("contextmenu", function(e) {
@@ -406,7 +408,9 @@
                         afterrender: function(btn, eOpts) { btn.el.dom.children[0].href = TP.getIconDetailsLink(This); }
                     },
                     hidden:  This.xdata.state == undefined ? true : false
-                }, {
+                }
+                [% UNLESS readonly %]
+                , {
                     text:   'Settings',
                     icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                     handler: function() { TP.iconShowEditDialog(This) },
@@ -455,7 +459,9 @@
                         });
                         menu.move(menu.items.length, i);
                     }
-                }],
+                }
+                [% END %]
+                ],
                 listeners: {
                     beforehide: function(menu, eOpts) { menu.destroy(); }
                 }

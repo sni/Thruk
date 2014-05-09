@@ -218,10 +218,14 @@ var TP = {
 
     /* choose position handler */
     add_panlet_handler: function(evt, element, args) {
-        var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3];
+        var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3], pos = args[4];
         tb.getEl().un('click', TP.add_panlet_handler, this, args); // remove event handler again
         if(config.conf == undefined) { config.conf = {}; }
-        config.conf.pos = [evt.getX()+offsetX, evt.getY()+offsetY];
+        if(pos != undefined) {
+            config.conf.pos = pos;
+        } else {
+            config.conf.pos = [evt.getX()+offsetX, evt.getY()+offsetY];
+        }
         tb.getEl().dom.style.cursor = '';
         var panel = TP.add_panlet(config);
         if(panel.iconType) {

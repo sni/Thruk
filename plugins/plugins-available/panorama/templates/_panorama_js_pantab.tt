@@ -131,7 +131,9 @@
                         text:   'Refresh',
                         icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                         handler: function() { TP.refreshAllSitePanel(tab) }
-                    }, {
+                    },
+                    [% UNLESS readonly %]
+                    {
                         text:   'New',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
                         hideOnClick: false,
@@ -150,10 +152,14 @@
                                     TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
                                 }
                             }
-                            TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), -8, -8]);
+                            pos[0] = pos[0] - 8;
+                            pos[1] = pos[1] - 8;
+                            TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
-                    }],
+                    }
+                    [% END %]
+                    ],
                     listeners: {
                         beforehide: function(menu, eOpts) { menu.destroy(); }
                     }
@@ -328,7 +334,9 @@
         tab.xdata.locked = val;
 
         /* disable add button */
-        Ext.getCmp('tabbar_addbtn').setDisabled(val);
+        if(Ext.getCmp('tabbar_addbtn')) {
+            Ext.getCmp('tabbar_addbtn').setDisabled(val);
+        }
 
         /* apply to all widgets and panels */
         var panels = TP.getAllPanel(this);
