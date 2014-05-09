@@ -663,15 +663,10 @@ Ext.define('TP.IconWidget', {
                             panel.icon = panel.items.getAt(0).surface.items.getAt(0);
                             if(This.el.down('image')) {
                                 This.el.down('image').on("load", function (evt, ele, opts) {
-                                    panel.el.dom.style.border    = "";
-                                    panel.el.dom.style.minWidth  = "";
-                                    panel.el.dom.style.minHeight = "";
-                                    panel.iconFixSize(xdata);
+                                    panel.iconCheckBorder(xdata);
                                 });
                                 This.el.down('image').on("error", function (evt, ele, opts) {
-                                    panel.el.dom.style.border    = "1px dashed black";
-                                    panel.el.dom.style.minWidth  = 20;
-                                    panel.el.dom.style.minHeight = 20;
+                                    panel.iconCheckBorder(xdata, true);
                                 });
                             }
                         }
@@ -1016,16 +1011,11 @@ Ext.define('TP.IconWidget', {
         }
         var newSrc;
         if(panel.iconType == 'image') {
+            panel.iconCheckBorder(xdata);
             if(xdata.general.src == undefined || xdata.general.src == "" || xdata.general.src.match(/\/panorama\/images\/s\.gif$/)) {
                 newSrc = Ext.BLANK_IMAGE_URL;
-                panel.el.dom.style.border    = "1px dashed black";
-                panel.el.dom.style.minWidth  = 20;
-                panel.el.dom.style.minHeight = 20;
             } else {
                 newSrc = xdata.general.src;
-                panel.el.dom.style.border    = "";
-                panel.el.dom.style.minWidth  = "";
-                panel.el.dom.style.minHeight = "";
             }
         }
         else if(panel.iconType == 'host') {
@@ -1114,6 +1104,19 @@ Ext.define('TP.IconWidget', {
                 panel.setRenderItem(xdata, true);
             }
             this.setIconLabel();
+        }
+    },
+    iconCheckBorder: function(xdata, isError) {
+        var panel = this;
+        if(isError || xdata.general.src == undefined || xdata.general.src == "" || xdata.general.src.match(/\/panorama\/images\/s\.gif$/)) {
+            panel.el.dom.style.border    = "1px dashed black";
+            panel.el.dom.style.minWidth  = 20;
+            panel.el.dom.style.minHeight = 20;
+        } else {
+            panel.el.dom.style.border    = "";
+            panel.el.dom.style.minWidth  = "";
+            panel.el.dom.style.minHeight = "";
+            panel.iconFixSize(xdata);
         }
     }
 });
