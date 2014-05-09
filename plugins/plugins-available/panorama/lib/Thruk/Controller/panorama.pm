@@ -1173,7 +1173,7 @@ sub _task_pnp_graphs {
             };
         }
     }
-    $graphs = Thruk::Backend::Manager::_sort({}, $c->stash->{'data'}, 'text');
+    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
     $c->{'db'}->_page_data($c, $graphs);
 
     $c->stash->{'json'} = {
@@ -1192,7 +1192,7 @@ sub _task_userdata_backgroundimages {
     my $folder = $c->config->{'home'}.'/root/thruk/usercontent/backgrounds/';
     my $query  = $c->{'request'}->{'parameters'}->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$');
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
@@ -1224,7 +1224,7 @@ sub _task_userdata_images {
     my $folder = $c->config->{'home'}.'/root/thruk/usercontent/images/';
     my $query  = $c->{'request'}->{'parameters'}->{'query'};
     my $images = [];
-    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$');
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
     for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;

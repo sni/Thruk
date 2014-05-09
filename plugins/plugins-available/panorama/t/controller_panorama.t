@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 183;
+    plan tests => 192;
 }
 
 BEGIN {
@@ -23,7 +23,7 @@ SKIP: {
 my $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi', like => 'Thruk Panorama' },
     { url => '/thruk/cgi-bin/panorama.cgi?readonly=1', like => 'Thruk Panorama' },
-    { url => '/thruk/usercontent/images/world.png', like => 'PNG' },
+    { url => '/thruk/usercontent/backgrounds/world.png', like => 'PNG' },
 ];
 
 
@@ -48,6 +48,7 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=stats_gearman_grid',
     '/thruk/cgi-bin/panorama.cgi?task=pnp_graphs',
     '/thruk/cgi-bin/panorama.cgi?task=dashboard_list',
+    '/thruk/cgi-bin/panorama.cgi?task=userdata_backgroundimages',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_images',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_sounds',
 ];
