@@ -154,14 +154,14 @@ sub process {
         }
 
         # clean old session cache every hour
-        clean_session_cache($sessioncache) if($last_cache_clean < $now - 3600);
+        clean_session_cache() if($last_cache_clean < $now - 3600);
 
         # grant access
         $sessioncache->{$auth} = {
                 'login' => $user,
                 'time'  => $now,
         };
-        print STDERR "thruk_auth: basic auth ok for ".$user if $verbose;
+        print STDERR 'thruk_auth: basic auth ok for '.$user if $verbose;
         return "/loginok/".$user."/".$path."\n";
     }
 
@@ -172,10 +172,11 @@ sub process {
 
 ##########################################################
 sub clean_session_cache {
-    my($sessioncache) = @_;
     my $clean_before = time() - $sessiontimeout - $sessioncachetimeout;
     for my $key (keys %{$sessioncache}) {
         delete $sessioncache->{$key} if $sessioncache->{$key}->{'time'} < $clean_before;
     }
+    # cleanup old session files
+    Thruk::Utils::CookieAuth::clean_session_files();
     return;
 }
