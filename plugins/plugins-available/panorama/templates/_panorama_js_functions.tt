@@ -40,6 +40,11 @@ var TP = {
     add_pantab: function(id, replace_id, hidden) {
         var tabpan = Ext.getCmp('tabpan');
 
+        if(TP.dashboardsSettingWindow) {
+            TP.dashboardsSettingWindow.body.mask('loading...');
+            TP.dashboardsSettingWindow.toFront();
+        }
+
         if(id == undefined) {
             TP.initialized = true;
             id = 'new';
@@ -54,15 +59,18 @@ var TP = {
                 params: { nr: id },
                 async: false,
                 callback: function(options, success, response) {
+                    if(id != 'new') {
+                        id = String(id).replace(/^tabpan-tab_/, '');
+                        id = "tabpan-tab_"+id;
+                    }
                     if(!success) {
                         if(response.status == 0) {
                             TP.Msg.msg("fail_message~~adding new dashboard failed");
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
                         }
+                        tabpan.saveState();
                     } else {
-                        id = String(id).replace(/^tabpan-tab_/, '');
-                        id = "tabpan-tab_"+id;
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
                         if(data.newid) { id = data.newid; delete data.newid; }
@@ -80,6 +88,7 @@ var TP = {
                             }
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
+                            tabpan.saveState();
                         }
                     }
                 }
@@ -1202,15 +1211,18 @@ var TP = {
                 callback: function(options, success, response) {
                     if(!success) {
                         if(response.status == 0) {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed");
+                            TP.Msg.msg("fail_message~~removing dashboard failed");
                         } else {
-                            TP.Msg.msg("fail_message~~adding new dashboard failed: "+response.status+' - '+response.statusText);
+                            TP.Msg.msg("fail_message~~removing dashboard failed: "+response.status+' - '+response.statusText);
                         }
                     } else {
                         if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                             TP.dashboardsSettingGrid.loader.load();
                         }
-                        TP.reconfigureDashboard(nr);
+                        nr = String(nr).replace(/^tabpan-tab_/, '');
+                        nr = "tabpan-tab_"+nr;
+                        var tab = Ext.getCmp(nr);
+                        if(tab) { tab.close(); }
                     }
                 }
             });

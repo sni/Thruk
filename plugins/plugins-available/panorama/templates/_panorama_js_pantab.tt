@@ -56,9 +56,8 @@
             for(var nr=0; nr<window_ids.length; nr++) {
                 Ext.getCmp(window_ids[nr]).destroy();
             }
-            tabpan.open_tabs = TP.removeFromList(tabpan.open_tabs, This.id);
             cp.clear(This.id);
-            // activate first tab or create new empty one
+            // activate first tab
             if(!tabpan.getActiveTab()) {
                 var tabs = Ext.query('.x-tab-closable');
                 for(var nr=0; nr<tabs.length; nr++) {
@@ -295,6 +294,11 @@
         TP.updateAllIcons(This);
 
         if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
+
+        if(TP.dashboardsSettingWindow) {
+            TP.dashboardsSettingWindow.body.unmask();
+            TP.dashboardsSettingWindow.toFront();
+        }
     },
 
     /* stop all timed actions for this tab and its panels */
