@@ -541,3 +541,7 @@ TABLE.TipDetails TABLE.icons TD.icons {
   float: right;
   padding-left: 3px;
 }
+
+#tabpan-body {
+  background: #E8E8E8;
+}
