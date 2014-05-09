@@ -155,6 +155,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'pnp_graphs') {
             return($self->_task_pnp_graphs($c));
         }
+        elsif($task eq 'userdata_backgroundimages') {
+            return($self->_task_userdata_backgroundimages($c));
+        }
         elsif($task eq 'userdata_images') {
             return($self->_task_userdata_images($c));
         }
@@ -1170,11 +1173,11 @@ sub _task_pnp_graphs {
             };
         }
     }
-    $c->{'db'}->_page_data($c, $graphs);
     $graphs = Thruk::Backend::Manager::_sort({}, $c->stash->{'data'}, 'text');
+    $c->{'db'}->_page_data($c, $graphs);
 
     $c->stash->{'json'} = {
-        data        => $graphs,
+        data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
@@ -1184,23 +1187,65 @@ sub _task_pnp_graphs {
 }
 
 ##########################################################
-sub _task_userdata_images {
+sub _task_userdata_backgroundimages {
     my($self, $c) = @_;
-    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/images/';
+    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/backgrounds/';
+    my $query  = $c->{'request'}->{'parameters'}->{'query'};
     my $images = [];
-    for my $img (glob("$folder/*.png $folder/*.gif $folder/*.jpg")) {
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$');
+    for my $img (@{$files}) {
         my $path = $img;
         $path    =~ s/^\Q$folder\E//gmx;
+        next if $query and $path !~ m/\Q$query\E/mx;
         my $name = $path;
         $name    =~ s/^.*\///gmx;
         push @{$images}, {
-            path  => '../usercontent/images'.$path,
-            image => $name,
+            path  => '../usercontent/backgrounds/'.$path,
+            image => $path,
         };
     }
-    $images = Thruk::Backend::Manager::_sort({}, $images, 'image');
-    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'/plugins/panorama/images/s.gif', image => 'none'};
-    $c->stash->{'json'} = { data => $images };
+    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
+    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
+    $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
+    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'/plugins/panorama/images/s.gif', image => 'none'} unless $query;
+    $c->{'db'}->_page_data($c, $images);
+    $c->stash->{'json'} = {
+        data        => $c->stash->{'data'},
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+    };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_userdata_images {
+    my($self, $c) = @_;
+    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/images/';
+    my $query  = $c->{'request'}->{'parameters'}->{'query'};
+    my $images = [];
+    my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$');
+    for my $img (@{$files}) {
+        my $path = $img;
+        $path    =~ s/^\Q$folder\E//gmx;
+        next if $query and $path !~ m/\Q$query\E/mx;
+        my $name = $path;
+        $name    =~ s/^.*\///gmx;
+        push @{$images}, {
+            path  => '../usercontent/images/'.$path,
+            image => $path,
+        };
+    }
+    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
+    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
+    $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
+    $c->{'db'}->_page_data($c, $images);
+    $c->stash->{'json'} = {
+        data        => $c->stash->{'data'},
+        total       => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+    };
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1398,6 +1443,7 @@ sub _task_dashboard_list {
                     public      => $d->{'public'}   ? JSON::XS::true : JSON::XS::false,
                     readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
                     description => $d->{'description'} || '',
+                    objects     => $d->{'objects'},
                 };
             }
         }
@@ -1417,6 +1463,7 @@ sub _task_dashboard_list {
                                          hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false,
                                          tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
             },
+            { 'header' => 'Objects',     width => 45,  dataIndex => 'objects',      align => 'center' },
             { 'header' => 'Public',      width => 60,  dataIndex => 'public',       align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
             { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
             { 'header' => 'Actions',     width => 100,
@@ -1766,6 +1813,7 @@ sub _load_dashboard {
     my $file  = $self->{'var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
+    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -3;
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission;
     if($permission == 2) {

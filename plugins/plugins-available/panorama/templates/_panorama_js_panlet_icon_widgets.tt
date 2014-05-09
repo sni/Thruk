@@ -1853,33 +1853,53 @@ Ext.define('TP.TextLabelWidget', {
 });
 
 /* Static Image */
+var imagesStore = Ext.create('Ext.data.Store', {
+    fields: ['path', 'image'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=userdata_images',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: false,
+    data : []
+});
 Ext.define('TP.StaticIcon', {
     extend: 'TP.IconWidget',
 
     iconType: 'image',
     cls:      'statciconWidget',
     hideAppearanceTab: true,
+    generalLabelWidth: 50,
     initComponent: function() {
         var panel = this;
         this.callParent();
     },
     getGeneralItems: function() {
         var panel = this;
-        backgrounds.load();
-        backgrounds.removeAt(0); // remove the "none" entry
+        imagesStore.load();
         return([{
             xtype:      'combobox',
             name:       'src',
             fieldLabel: 'Image',
-            store:       backgrounds,
-            queryMode:  'local',
+            store:       imagesStore,
+            queryMode:      'remote',
+            triggerAction:  'all',
+            pageSize:       true,
+            selectOnFocus:  true,
+            typeAhead:      true,
             displayField: 'image',
             valueField: 'path',
             listConfig : {
                 getInnerTpl: function(displayField) {
-                    return '<div class="x-combo-list-item"><img src="{path}" height=16 width=16>{image}<\/div>';
-                }
+                    return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
+                },
+                minWidth: 300,
+                maxWidth: 800
             },
+            matchFieldWidth: false,
             listeners: { change: function() {
                 TP.iconSettingsWindow.renderUpdate();
             }}

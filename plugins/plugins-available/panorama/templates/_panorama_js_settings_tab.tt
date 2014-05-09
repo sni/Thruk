@@ -2,7 +2,7 @@
     fields: ['path', 'image'],
     proxy: {
         type: 'ajax',
-        url:  'panorama.cgi?task=userdata_images',
+        url:  'panorama.cgi?task=userdata_backgroundimages',
         reader: {
             type: 'json',
             root: 'data'
@@ -284,12 +284,16 @@ TP.tabSettingsWindow = function() {
             name:       'background',
             fieldLabel: 'Background',
             store:       backgrounds,
-            queryMode:  'local',
+            queryMode:      'remote',
+            triggerAction:  'all',
+            pageSize:       true,
+            selectOnFocus:  true,
+            typeAhead:      true,
             displayField: 'image',
             valueField: 'path',
             listConfig : {
                 getInnerTpl: function(displayField) {
-                    return '<div class="x-combo-list-item"><img src="{path}" height=16 width=16>{image}<\/div>';
+                    return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
                 }
             }
         }, {
@@ -311,7 +315,14 @@ TP.tabSettingsWindow = function() {
             fieldLabel: 'Hide Panlet Header',
             name:       'autohideheader',
             boxLabel:   ' (widget header will be displayed on mouse over)'
-    }];
+        }, {
+            xtype:      'panel',
+            html:       'Place background images in: [% usercontent_folder %]/backgrounds/',
+            style:      'text-align: center;',
+            bodyCls:    'form-hint',
+            padding:    '10 0 0 0',
+            border:      0
+        }];
     var dashboardTab = {
         title : 'Dashboard',
         type  : 'panel',

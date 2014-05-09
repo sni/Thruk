@@ -76,7 +76,7 @@ TP.iconShowEditDialog = function(panel) {
                     border:          0,
                     bodyStyle:       'overflow-y: auto;',
                     submitEmptyText: false,
-                    defaults:      { anchor: '-12', labelWidth: 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { stateUpdate() } } } },
+                    defaults:      { anchor: '-12', labelWidth: panel.generalLabelWidth || 132, listeners: { change: function(This, newValue, oldValue, eOpts) { if(newValue != "") { stateUpdate() } } } },
                     items:           generalItems
             }]
         }]
