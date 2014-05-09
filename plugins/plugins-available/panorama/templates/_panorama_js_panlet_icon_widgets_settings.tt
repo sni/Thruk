@@ -1014,16 +1014,6 @@ TP.iconShowEditDialog = function(panel) {
                { xtype:  'button',
                  text:   'cancel',
                  handler: function(This) {
-                    delete TP.iconSettingsWindow;
-                    panel.stateful = true;
-                    // if we cancel directly after adding a new icon, destroy it
-                    if(panel.firstRun) {
-                        panel.destroy();
-                    } else {
-                        // restore position any layout
-                        if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
-                        if(cp.state[panel.id])  { panel.applyXdata(cp.state[panel.id].xdata); }
-                    }
                     settingsWindow.destroy();
                  }
                },
@@ -1031,6 +1021,7 @@ TP.iconShowEditDialog = function(panel) {
                { xtype:  'button',
                  text:   'save',
                  handler: function() {
+                    settingsWindow.skipRestore = true;
                     panel.stateful = true;
                     delete panel.xdata.label;
                     delete panel.xdata.link;
@@ -1058,6 +1049,18 @@ TP.iconShowEditDialog = function(panel) {
                 });
             },
             destroy: function() {
+                delete TP.iconSettingsWindow;
+                panel.stateful = true;
+                if(!settingsWindow.skipRestore) {
+                    // if we cancel directly after adding a new icon, destroy it
+                    if(panel.firstRun) {
+                        panel.destroy();
+                    } else {
+                        // restore position any layout
+                        if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
+                        if(cp.state[panel.id])  { panel.applyXdata(cp.state[panel.id].xdata); }
+                    }
+                }
                 TP.suppressIconTip = false;
                 panel.setIconLabel();
             }
