@@ -1108,7 +1108,8 @@ Ext.define('TP.IconWidget', {
     },
     iconCheckBorder: function(xdata, isError) {
         var panel = this;
-        if(isError || xdata.general.src == undefined || xdata.general.src == "" || xdata.general.src.match(/\/panorama\/images\/s\.gif$/)) {
+        var src = panel.src || xdata.general.src;
+        if(isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/)) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;
