@@ -418,12 +418,12 @@
                 }, {
                     text:   'Paste',
                     icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
-                    handler: function() { TP.add_panlet_delayed(TP.clipboard, -8, -8) },
+                    handler: function() { TP.add_panlet_delayed(TP.clone(TP.clipboard), -8, -8) },
                     disabled: (This.locked || TP.clipboard == undefined)
                 }, {
                     text:   'Clone',
                     icon:   '[% url_prefix %]plugins/panorama/images/page_lightning.png',
-                    handler: function() { TP.add_panlet_delayed({type:This.xdata.cls, state:TP.clone_panel_config(This)}, -8, -8) },
+                    handler: function() { TP.add_panlet_delayed(TP.clone({type:This.xdata.cls, state:TP.clone_panel_config(This)}), -8, -8) },
                     disabled: This.locked
                 }, '-', {
                     text:   'Remove',

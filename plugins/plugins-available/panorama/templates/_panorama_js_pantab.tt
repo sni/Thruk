@@ -149,7 +149,7 @@
                                     TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
                                 }
                             }
-                            TP.add_panlet_handler(e, e.target, [tb, TP.clipboard, -8, -8]);
+                            TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), -8, -8]);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
                     }],
