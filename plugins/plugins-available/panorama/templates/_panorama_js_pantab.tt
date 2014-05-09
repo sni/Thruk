@@ -45,6 +45,7 @@
             var tabpan = Ext.getCmp('tabpan');
             tabpan.saveState(); // recalculate open_tabs
             if(tabpan.open_tabs.length <= 1) {
+                TP.Msg.msg("info_message~~cannot close last dashboard.");
                 return false;
             }
             return true;
