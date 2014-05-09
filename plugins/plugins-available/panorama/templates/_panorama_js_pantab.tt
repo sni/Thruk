@@ -4,6 +4,7 @@
     [% UNLESS readonly %]
     tooltip:     'double click to rename',
     closable:    true,
+    bodyCls:     'pantabbody',
     [% ELSE %]
     closable:    false,
     [% END %]
