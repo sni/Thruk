@@ -1382,11 +1382,12 @@ sub _task_dashboard_list {
             my $d = $self->_load_dashboard($c, $1);
             if($d) {
                 if($type eq 'all') {
-                    # just show all
+                    # all
                 } elsif($type eq 'public') {
-                    next if  $d->{'user'} eq $c->stash->{'remote_user'};
+                    # public
                     next if !$d->{'public'};
                 } else {
+                    # my
                     next if $d->{'user'} ne $c->stash->{'remote_user'};
                 }
                 push @{$dashboards}, {
