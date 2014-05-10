@@ -131,9 +131,9 @@
                         text:   'Refresh',
                         icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                         handler: function() { TP.refreshAllSitePanel(tab) }
-                    },
+                    }
                     [% UNLESS readonly %]
-                    {
+                    , {
                         text:   'New',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
                         hideOnClick: false,
