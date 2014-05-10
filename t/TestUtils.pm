@@ -420,8 +420,8 @@ sub set_cookie {
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
-    my $c = get_c();
-    my $cookie_path = $c->stash->{'cookie_path'};
+    my $config = Thruk::Backend::Pool::get_config();
+    my $cookie_path = $config->{'cookie_path'};
     $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
     $cookie_jar->save();
     return;

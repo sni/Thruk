@@ -5,7 +5,9 @@ use JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 277;
+    my $tests = 277;
+    $tests = $tests - 35 if $ENV{'CATALYST_SERVER'};
+    plan tests => $tests;
 }
 
 BEGIN {
@@ -28,6 +30,7 @@ my $choose_pages = [
     '/thruk/index.html',
 ];
 for my $url (@{$choose_pages}) {
+    next if $url eq '/thruk' and $ENV{'CATALYST_SERVER'};
     TestUtils::test_page(
         'url'      => $url,
         'like'     => 'Do you want to use the mobile version',
