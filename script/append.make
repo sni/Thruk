@@ -150,7 +150,7 @@ naemon-patch:
 	cp -p blib/replace/thruk_cookie_auth.include ${DESTDIR}${DATADIR}/
 
 quicktest:
-	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'blib/lib', 'blib/arch')" \
+	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
 	    t/xt/panorama/javascript.t \
 	    t/0*.t \
 	    t/9*.t
