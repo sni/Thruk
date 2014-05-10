@@ -81,7 +81,7 @@
             var iframe = evt.target;
             var ifrm   = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
             ifrm.document.open();
-            ifrm.document.write("<style type='text/css'>body {background: white;}</style><span style='color: red; font-weight:bold;'>failed to load: " + iframe.src+"</span><br>due to javascripts cross domain policy, the exact error cannot be determinced.<br>possible causes:<ul><li>Server does not respond</li><li>Trying to access http url from https dashboard.</li></ul>");
+            ifrm.document.write("<style type='text/css'>body {background: white;}<\/style><span style='color: red; font-weight:bold;'>failed to load: " + iframe.src+"<\/span><br>due to javascripts cross domain policy, the exact error cannot be determinced.<br>possible causes:<ul><li>Server does not respond<\/li><li>Trying to access http url from https dashboard.<\/li><\/ul>");
             ifrm.document.close();
         };
 

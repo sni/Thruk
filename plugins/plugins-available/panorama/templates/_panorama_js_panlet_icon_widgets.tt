@@ -1186,23 +1186,23 @@ Ext.onReady(function() {
         for(var x=0; x<d.length; x++) {
             if(d[x].length == 1) {
                 details += '<tr>';
-                details += '<td colspan=2>'+d[x][0]+'</td>';
-                details += '</tr>';
+                details += '<td colspan=2>'+d[x][0]+'<\/td>';
+                details += '<\/tr>';
             }
             else if(d[x][0] == "Details" && d[x].length == 3) {
                 TP.iconTip.panel = d[x][2];
                 link             = d[x][1];
                 details += '<tr>';
-                details += '<td colspan=2 id="tipdetails"></td>';
-                details += '</tr>';
+                details += '<td colspan=2 id="tipdetails"><\/td>';
+                details += '<\/tr>';
             } else {
                 details += '<tr>';
-                details += '<th>'+d[x][0]+'</th>';
-                details += '<td>'+d[x][1]+'</td>';
-                details += '</tr>';
+                details += '<th>'+d[x][0]+'<\/th>';
+                details += '<td>'+d[x][1]+'<\/td>';
+                details += '<\/tr>';
             }
         }
-        details += '</table>';
+        details += '<\/table>';
         TP.iconTip.update(details);
         var size;
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
@@ -1271,8 +1271,8 @@ TP.renderTipDetails = function(data) {
     if(panel.xdata.general.incl_hst || panel.iconType == 'host') {
         details += '<table class="TipDetails">';
         details += '<tr>';
-        details += '<th>Hosts:</th>';
-        details += '</tr>';
+        details += '<th>Hosts:<\/th>';
+        details += '<\/tr>';
         var uniq_hosts = {};
         for(var x=0; x<data.length;x++) {
             var d = data[x];
@@ -1288,20 +1288,20 @@ TP.renderTipDetails = function(data) {
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
             details += '<tr>';
-            details += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'</td><td class="icons">'+icons+'</td></tr></table></td>';
+            details += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
-            details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'</td>';
-            details += '</tr>';
+            details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
+            details += '<\/tr>';
             num_shown++;
             if(num_shown >= 5) { break; }
         }
-        details += '</table>';
+        details += '<\/table>';
     }
     if(panel.xdata.general.incl_svc) {
         details += '<table class="TipDetails">';
         details += '<tr>';
-        details += '<th>Services:</th>';
-        details += '</tr>';
+        details += '<th>Services:<\/th>';
+        details += '<\/tr>';
         var last_host = "";
         for(var x=0; x<data.length;x++) {
             var d = data[x];
@@ -1312,19 +1312,19 @@ TP.renderTipDetails = function(data) {
             var statename = TP.render_service_status(d['state'], {}, {data:d});
             details += '<tr>';
             if(last_host != d['host_name']) {
-                details += '<td class="host svchost">'+d['host_name']+'</td>';
+                details += '<td class="host svchost">'+d['host_name']+'<\/td>';
             } else {
-                details += '<td class="emptyhost"></td>';
+                details += '<td class="emptyhost"><\/td>';
             }
-            details += '<td class="descr"><table class="icons"><tr><td>'+d['description']+'</td><td class="icons">'+icons+'</td></tr></table></td>';
+            details += '<td class="descr"><table class="icons"><tr><td>'+d['description']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
-            details += '<td class="plugin_output">'+d['plugin_output']+'</td>';
-            details += '</tr>';
+            details += '<td class="plugin_output">'+d['plugin_output']+'<\/td>';
+            details += '<\/tr>';
             last_host = d['host_name'];
             num_shown++;
             if(num_shown >= 10) { break; }
         }
-        details += '</table>';
+        details += '<\/table>';
     }
     TP.iconTip.detailsTarget.update(details);
     // make sure new size fits viewport
@@ -1406,25 +1406,25 @@ Ext.define('TP.HostStatusIcon', {
 /* get summarized table for hosts */
 TP.get_summarized_hoststatus = function(item) {
     var table = '<table class="ministatus"><tr>';
-    table += '<th>Up</th><th>Down</th><th>Unreachable</th><th>Pending</th></tr><tr>';
-    table += '<td class='+(item.up          ? 'UP'          : 'miniEmpty')+'>'+item.up+'</td>';
-    table += '<td class='+(item.down        ? 'DOWN'        : 'miniEmpty')+'>'+item.down+'</td>';
-    table += '<td class='+(item.unreachable ? 'UNREACHABLE' : 'miniEmpty')+'>'+item.unreachable+'</td>';
-    table += '<td class='+(item.pending     ? 'PENDING'     : 'miniEmpty')+'>'+item.pending+'</td>';
-    table += '</tr></table>';
+    table += '<th>Up<\/th><th>Down<\/th><th>Unreachable<\/th><th>Pending<\/th><\/tr><tr>';
+    table += '<td class='+(item.up          ? 'UP'          : 'miniEmpty')+'>'+item.up+'<\/td>';
+    table += '<td class='+(item.down        ? 'DOWN'        : 'miniEmpty')+'>'+item.down+'<\/td>';
+    table += '<td class='+(item.unreachable ? 'UNREACHABLE' : 'miniEmpty')+'>'+item.unreachable+'<\/td>';
+    table += '<td class='+(item.pending     ? 'PENDING'     : 'miniEmpty')+'>'+item.pending+'<\/td>';
+    table += '<\/tr><\/table>';
     return(table);
 }
 
 /* get summarized table for services */
 TP.get_summarized_servicestatus = function(item) {
     var table = '<table class="ministatus"><tr>';
-    table += '<th>Ok</th><th>Warning</th><th>Unknown</th><th>Critical</th><th>Pending</th></tr><tr>';
-    table += '<td class='+(item.ok       ? 'OK'       : 'miniEmpty')+'>'+item.ok+'</td>';
-    table += '<td class='+(item.warning  ? 'WARNING'  : 'miniEmpty')+'>'+item.warning+'</td>';
-    table += '<td class='+(item.unknown  ? 'UNKNOWN'  : 'miniEmpty')+'>'+item.unknown+'</td>';
-    table += '<td class='+(item.critical ? 'CRITICAL' : 'miniEmpty')+'>'+item.critical+'</td>';
-    table += '<td class='+(item.pending  ? 'PENDING'  : 'miniEmpty')+'>'+item.pending+'</td>';
-    table += '</tr></table>';
+    table += '<th>Ok<\/th><th>Warning<\/th><th>Unknown<\/th><th>Critical<\/th><th>Pending<\/th><\/tr><tr>';
+    table += '<td class='+(item.ok       ? 'OK'       : 'miniEmpty')+'>'+item.ok+'<\/td>';
+    table += '<td class='+(item.warning  ? 'WARNING'  : 'miniEmpty')+'>'+item.warning+'<\/td>';
+    table += '<td class='+(item.unknown  ? 'UNKNOWN'  : 'miniEmpty')+'>'+item.unknown+'<\/td>';
+    table += '<td class='+(item.critical ? 'CRITICAL' : 'miniEmpty')+'>'+item.critical+'<\/td>';
+    table += '<td class='+(item.pending  ? 'PENDING'  : 'miniEmpty')+'>'+item.pending+'<\/td>';
+    table += '<\/tr><\/table>';
     return(table);
 }
 

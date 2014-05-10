@@ -313,7 +313,7 @@ TP.iconShowEditDialog = function(panel) {
                     listConfig : {
                         getInnerTpl: function(displayField) {
                             TP.tmpid = 0;
-                            return '<div class="x-combo-list-item"><span name="{name}" height=16 width=16 style="vertical-align:top; margin-right: 3px;"></span>{name}<\/div>';
+                            return '<div class="x-combo-list-item"><span name="{name}" height=16 width=16 style="vertical-align:top; margin-right: 3px;"><\/span>{name}<\/div>';
                         }
                     },
                     listeners: {
@@ -1186,7 +1186,7 @@ TP.openLabelEditorWindow = function(panel) {
                     html:    '<p>Use HTML to format your label<br>'
                             +'Ex.: <i>Host &lt;b&gt;name&lt;/b&gt;<\/i><\/p>'
                             +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
-                            +'Ex.: <i>Host XY: {{plugin_output}}</i><\/p>'
+                            +'Ex.: <i>Host XY: {{plugin_output}}<\/i><\/p>'
                             +'<p>You may also do calculations inside placeholders like this:<br>'
                             +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
                             +'<p>use sprintf to format numbers:<br>'
