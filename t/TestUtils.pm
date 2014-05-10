@@ -17,7 +17,7 @@ use Test::More;
 use URI::Escape;
 use Encode qw/decode_utf8/;
 use File::Slurp;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw(POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/ tempfile /;
@@ -654,7 +654,7 @@ sub _request {
     my $response;
     if($post) {
         $post->{'token'} = 'test';
-        my $request = HTTP::Request->new(POST => $url, {}, $post);
+        my $request = POST($url, [%{$post}]);
         $cookie_jar->add_cookie_header($request);
         $request->header("User-Agent" => $agent) if $agent;
         $response = request($request);
