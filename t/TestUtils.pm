@@ -173,6 +173,7 @@ sub get_test_hostgroup_cli {
     skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
     waitfor         => wait till regex occurs (max 60sec)
+    agent           => user agent for requests
   }
 
 =cut
@@ -198,13 +199,13 @@ sub test_page {
         ok($opts->{'url'}, $opts->{'url'});
     }
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
         while(my $location = $request->{'_headers'}->{'location'}) {
             if($location !~ m/^(http|\/)/gmxo) { $location = _relative_url($location, $request->base()->as_string()); }
-            $request = _request($location);
+            $request = _request($location, undef, undef, $opts->{'agent'});
             $redirects++;
             last if $redirects > 10;
         }
@@ -241,7 +242,7 @@ sub test_page {
             }
             sleep(1);
             $now = time();
-            $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
+            $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
         }
         fail("content did not occur within 60 seconds") unless $found;
@@ -252,7 +253,7 @@ sub test_page {
         # is it a background job page?
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
-        $request = _request($location);
+        $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
@@ -276,7 +277,7 @@ sub test_page {
         # is it a background job page?
         wait_for_job($1);
         my $location = "/".$product."/cgi-bin/job.cgi?job=".$1;
-        $request = _request($location);
+        $request = _request($location, undef, undef, $opts->{'agent'});
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
@@ -374,13 +375,13 @@ sub test_page {
             next if $test_url =~ m/\/pnp4nagios\//mxo;
             next if $test_url =~ m|/$product/themes/.*?/images/logos/|mxo;
             if($test_url !~ m/^(http|\/)/gmxo) { $test_url = _relative_url($test_url, $request->base()->as_string()); }
-            my $request = _request($test_url);
+            my $request = _request($test_url, undef, undef, $opts->{'agent'});
 
             if($request->is_redirect) {
                 my $redirects = 0;
                 while(my $location = $request->{'_headers'}->{'location'}) {
                     if($location !~ m/^(http|\/)/gmxo) { $location = _relative_url($location, $request->base()->as_string()); }
-                    $request = _request($location);
+                    $request = _request($location, undef, undef, $opts->{'agent'});
                     $redirects++;
                     last if $redirects > 10;
                 }
@@ -399,6 +400,31 @@ sub test_page {
     }
 
     return $return;
+}
+
+#########################
+
+=head2 set_cookie
+
+    set_cookie($name, $value, $expire)
+
+  Sets cookie. Expire date is in seconds. A value <= 0 will remove the cookie.
+
+=cut
+sub set_cookie {
+    my($var, $val, $expire) = @_;
+    our($cookie_jar, $cookie_file);
+    if(!defined $cookie_jar) {
+        my $fh;
+        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
+        unlink ($cookie_file);
+        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
+    }
+    my $c = get_c();
+    my $cookie_path = $c->stash->{'cookie_path'};
+    $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
+    $cookie_jar->save();
+    return;
 }
 
 #########################
@@ -454,7 +480,10 @@ sub get_themes {
 
 #########################
 sub get_c {
-    my($res, $c) = ctx_request('/thruk/side.html');
+    our($c);
+    return $c if defined $c;
+    my $res;
+    ($res, $c) = ctx_request('/thruk/side.html');
     return $c;
 }
 
@@ -607,27 +636,43 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to, $post) = @_;
+    my($url, $start_to, $post, $agent) = @_;
+
+    our($cookie_jar, $cookie_file);
+    if(!defined $cookie_jar) {
+        my $fh;
+        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
+        unlink ($cookie_file);
+        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
+    }
 
     if(defined $ENV{'CATALYST_SERVER'}) {
         return(_external_request(@_));
     }
+    $url = 'http://localhost.local'.$url;
 
-    my $request;
+    my $response;
     if($post) {
         $post->{'token'} = 'test';
-        $request = request POST $url, $post;
+        my $request = HTTP::Request->new(POST => $url, {}, $post);
+        $cookie_jar->add_cookie_header($request);
+        $request->header("User-Agent" => $agent) if $agent;
+        $response = request($request);
     } else {
-        $request = request($url);
+        my $request = HTTP::Request->new(GET => $url);
+        $request->header("User-Agent" => $agent) if $agent;
+        $cookie_jar->add_cookie_header($request);
+        $response = request($request);
     }
-    $request = _check_startup_redirect($request, $start_to);
+    $cookie_jar->extract_cookies($response);
+    $response      = _check_startup_redirect($response, $start_to);
 
-    return $request;
+    return $response;
 }
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $retry) = @_;
+    my($url, $start_to, $post, $agent, $retry) = @_;
     $retry = 1 unless defined $retry;
 
     # make tests with http://localhost/naemon possible
@@ -643,13 +688,6 @@ sub _external_request {
     }
 
     our($cookie_jar, $cookie_file);
-    if(!defined $cookie_jar) {
-        my $fh;
-        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
-        unlink ($cookie_file);
-        $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
-    }
-
     my $ua = LWP::UserAgent->new(
         keep_alive   => 1,
         max_redirect => 0,
@@ -658,6 +696,7 @@ sub _external_request {
     );
     $ua->env_proxy;
     $ua->cookie_jar($cookie_jar);
+    $ua->agent( $agent ) if $agent;
 
     my $request;
     if($post) {
@@ -673,9 +712,9 @@ sub _external_request {
         die("login failed: ".Dumper($request)) unless $retry;
         my $product = $1;
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
-        my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, 0);
-           $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, 0);
-        $request = _external_request($url, $start_to, $post, 0);
+        my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, undef, $agent);
+           $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, $agent, 0);
+        $request = _external_request($url, $start_to, $post, $agent, 0);
     }
     return $request;
 }

@@ -5,7 +5,7 @@ use JSON::XS qw/decode_json/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 172;
+    plan tests => 277;
 }
 
 BEGIN {
@@ -21,6 +21,37 @@ SKIP: {
 };
 
 my($host,$service) = TestUtils::get_test_service();
+
+my $choose_pages = [
+    '/thruk',
+    '/thruk/',
+    '/thruk/index.html',
+];
+for my $url (@{$choose_pages}) {
+    TestUtils::test_page(
+        'url'      => $url,
+        'like'     => 'Do you want to use the mobile version',
+        'agent'    => 'iPhone',
+        'follow'   => 1,
+    );
+    TestUtils::set_cookie( 'thruk_mobile', 0, 120);
+    TestUtils::test_page(
+        'url'      => $url,
+        'unlike'   => 'Do you want to use the mobile version',
+        'like'     => '<head>',
+        'agent'    => 'iPhone',
+        'follow'   => 1,
+    );
+    TestUtils::set_cookie( 'thruk_mobile', 1, 120);
+    TestUtils::test_page(
+        'url'      => $url,
+        'unlike'   => 'Do you want to use the mobile version',
+        'like'     => 'ThrukMobile',
+        'agent'    => 'iPhone',
+        'follow'   => 1,
+    );
+    TestUtils::set_cookie( 'thruk_mobile', 0, -1);
+}
 
 my $pages = [
     '/thruk/cgi-bin/mobile.cgi',
