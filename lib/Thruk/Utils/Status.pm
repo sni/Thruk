@@ -652,6 +652,7 @@ sub single_search {
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
 
             my $host_search_filter = [ { name               => { $op     => $value } },
+                                       { display_name       => { $op     => $value } },
                                        { alias              => { $op     => $value } },
                                        { address            => { $op     => $value } },
                                        { groups             => { $listop => $value } },
@@ -664,10 +665,12 @@ sub single_search {
 
             # and some for services
             my $service_search_filter = [ { description        => { $op     => $value } },
+                                          { display_name       => { $op     => $value } },
                                           { groups             => { $listop => $value } },
                                           { plugin_output      => { $op     => $value } },
                                           { long_plugin_output => { $op     => $value } },
                                           { host_name          => { $op     => $value } },
+                                          { host_display_name  => { $op     => $value } },
                                           { host_alias         => { $op     => $value } },
                                           { host_address       => { $op     => $value } },
                                           { host_groups        => { $listop => $value } },
@@ -685,21 +688,21 @@ sub single_search {
                 my $searchhost = $value;
                 $searchhost =~ s/\.\*/*/gmx;
                 $searchhost =~ s/\*/.*/gmx;
-                push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost } ] };
-                push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost } ] };
-                push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost } ] };
-                push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost } ] };
+                push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
+                push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
+                push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
+                push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
             }
             else {
-                push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value } ] };
-                push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value } ] };
-                push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value } ] };
-                push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }] };
+                push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
+                push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
             }
         }
         elsif ( $filter->{'type'} eq 'service' ) {
-            push @servicefilter,       { description => { $op => $value } };
-            push @servicetotalsfilter, { description => { $op => $value } };
+            push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+            push @servicetotalsfilter, { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
