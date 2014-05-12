@@ -148,6 +148,7 @@ clean up session files
 =cut
 sub clean_session_files {
     my($config) = @_;
+    die("no config") unless $config;
     my $sdir    = $config->{'var_path'}.'/sessions';
     my $timeout = time() - $config->{'cookie_auth_session_timeout'};
     Thruk::Utils::IO::mkdir($sdir);

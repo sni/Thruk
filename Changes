@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed removing old sessions with cookie auth
+
 1.84     Sat May 10 20:58:24 CEST 2014
           - support time definitions like 1st monday, last friday for recurring downtimes and reports
           - support host/hostgroup/servicegroup lists for recurring downtimes
