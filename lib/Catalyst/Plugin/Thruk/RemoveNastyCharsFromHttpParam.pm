@@ -28,6 +28,7 @@ sub prepare_uploads {
         next if $key eq 'filter';
         next if $key eq 'performance_data';
         next if $key eq 'password';
+        next if $key eq 'types';
         next if $key =~ /^s\d+_op/mx;
         next if $key =~ /^s\d+_value/mx;
         next if $key =~ /^\w{3}_s\d+_value/mx;
