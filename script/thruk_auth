@@ -52,7 +52,7 @@ my $prefix              = $urlprefix; $prefix =~ s|^/||mx;
 my $pass_regex          = qr#^$prefix(startup\.html|themes|javascript|images|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
 my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
 my $session_split       = qr/~~~/mx;
-my $last_cache_clean    = time();
+my $last_cache_clean    = 0;
 
 ##########################################################
 while (<STDIN>) {
@@ -172,7 +172,9 @@ sub process {
 
 ##########################################################
 sub clean_session_cache {
-    my $clean_before = time() - $sessiontimeout - $sessioncachetimeout;
+    print STDERR "thruk_auth: session cache house keeping" if $verbose;
+    $last_cache_clean = time();
+    my $clean_before  = time() - $sessiontimeout - $sessioncachetimeout;
     for my $key (keys %{$sessioncache}) {
         delete $sessioncache->{$key} if $sessioncache->{$key}->{'time'} < $clean_before;
     }
