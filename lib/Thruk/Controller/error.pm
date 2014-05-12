@@ -270,6 +270,13 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         }
     }
 
+    # check if our shadows are still up and running
+    if($arg1 eq "9") {
+        if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+            $c->run_after_request('Thruk::Utils::check_shadow_naemon_procs($c->config, $c);');
+        }
+    }
+
     return 1;
 }
 
