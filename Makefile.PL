@@ -177,7 +177,7 @@ install_script glob('script/*.pl');
 eval {
     require CPAN;
 };
-auto_install unless $@;
+installdeps_target unless $@;
 WriteAll;
 
 ##################################

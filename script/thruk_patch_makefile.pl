@@ -14,11 +14,6 @@ while(<$fh>) {
 install :: local_install
 EOT
     }
-    if($line =~ m/^all\s*:/mx) {
-        $line = <<EOT;
-all :: local_all
-EOT
-    }
     # search the create_distdir part
     if($line =~ m/create_distdir\s*:/mx) {
         $found_make_create_distdir = 1;
