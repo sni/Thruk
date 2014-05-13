@@ -67,7 +67,7 @@ TestUtils::test_command({
 # clearcache
 TestUtils::test_command({
     cmd  => $BIN.' ./script/thruk -a clearcache',
-    like => ['/^$/'],
+    like => ['/^cache cleared$/'],
 });
 
 # dumpcache
@@ -79,7 +79,7 @@ TestUtils::test_command({
 # 2 commands
 TestUtils::test_command({
     cmd  => $BIN.' ./script/thruk -a clearcache,dumpcache',
-    like => ['/^\$VAR1/'],
+    like => ['/^cache cleared\$VAR1/'],
 });
 
 # create recurring downtime
