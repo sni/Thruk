@@ -91,6 +91,12 @@ sub index :Path :Args(0) {
     $referer    =~ s#^//#/#gmx;         # strip double slashes
     $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
     $referer    = $c->stash->{'url_prefix'} unless $referer;
+    # append slash for omd sites, IE and chrome wont send the login cookie otherwise
+    if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
+       or ($referer eq $c->stash->{'url_prefix'})) {
+        $referer =~ s/\/*$//gmx;
+        $referer = $referer.'/';
+    }
 
     # make lowercase username
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
