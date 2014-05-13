@@ -561,7 +561,8 @@ sub _run_command_action {
     }
     elsif($action eq 'clearcache') {
         $data->{'rc'} = 0;
-        $data->{'output'} = Dumper($c->cache->clear);
+        $c->cache->clear);
+        $data->{'output'} = "cache cleared";
     }
 
     # import mongodb/mysql logs

@@ -125,8 +125,7 @@ clear complete cache
 =cut
 sub clear {
     my($self) = @_;
-    $self->{'_data'} = {};
-    $self->_store();
+    unlink($self->{'_cachefile'});
     return;
 }
 
