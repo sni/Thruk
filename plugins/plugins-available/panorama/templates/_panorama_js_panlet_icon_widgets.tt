@@ -1244,7 +1244,7 @@ Ext.onReady(function() {
         TP.iconTip.showAt(showAtPos);
         if(link && TP.iconTip.panel) {
             var style = 'detail';
-            if(!TP.iconTip.panel.xdata.general.incl_svc || TP.iconTip.panel.iconType == 'host') {
+            if(!(TP.iconTip.panel.iconType == 'servicegroup' || TP.iconTip.panel.xdata.general.incl_svc) || TP.iconTip.panel.iconType == 'host') {
                 style = 'hostdetail';
             }
             link = link+'&style='+style+'&view_mode=json';
@@ -1330,7 +1330,7 @@ TP.renderTipDetails = function(data) {
         }
         details += '<\/table>';
     }
-    if(panel.xdata.general.incl_svc) {
+    if(panel.xdata.general.incl_svc || panel.iconType == 'servicegroup') {
         details += '<table class="TipDetails">';
         details += '<tr>';
         details += '<th>Services:<\/th>';
