@@ -172,7 +172,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 
     /* send changes back to server */
     saveChanges: function(async, extraParams) {
-        [% IF readonly %]return;[% END %]
+        [% IF (readonly || dashboard_ignore_changes) %]return;[% END %]
         if(!TP.initialized) { this.queueChanges(); return; }
         if(async == undefined) { async = true; }
 
