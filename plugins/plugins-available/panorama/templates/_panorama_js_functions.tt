@@ -109,7 +109,7 @@ var TP = {
         tabpan.getTabBar().move(size-1, size);
 
         /* make tab title editable */
-        [% UNLESS readonly %]
+        [% UNLESS (readonly || dashboard_ignore_changes) %]
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
         if(tabhead.rendered == false) {
             tabhead.addListener('afterrender', function(This, eOpts) {
