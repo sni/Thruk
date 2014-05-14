@@ -492,7 +492,7 @@
                 TP.isShift = is_shift_pressed(e);
                 if(!el.ddShadow) {
                     var size = el.getSize();
-                    el.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: absolute; z-index: 99999; top: 0px; ; left: 0px; display: hidden;" />' , true);
+                    el.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
                 }
             });
             el.dd.addListener('drag', function(This, e) {
