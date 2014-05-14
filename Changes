@@ -4,6 +4,7 @@ next:
           - Bug Fixes
             - fixed removing old sessions with cookie auth
             - fixed panorama filter containing pipes
+            - fixed panorama not showing usercontent
             - fixed cookie auth problem when accessing site without trailing slash
 
 1.84     Sat May 10 20:58:24 CEST 2014

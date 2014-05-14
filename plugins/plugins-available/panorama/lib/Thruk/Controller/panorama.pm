@@ -258,8 +258,8 @@ sub _js {
                 if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
                     my $shape = $dashboard->{$key}->{'xdata'}->{'appearance'}->{'shapename'};
                     if($shape && !exists $shapes->{$shape}) {
-                        if(-e $c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js') {
-                            $shapes->{$shape} = scalar read_file($c->config->{'home'}.'/root/thruk/usercontent/shapes/'.$shape.'.js');
+                        if(-e $c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js') {
+                            $shapes->{$shape} = scalar read_file($c->stash->{'usercontent_folder'}.'/shapes/'.$shape.'.js');
                         } else {
                             $shapes->{$shape} = undef;
                         }
@@ -1189,7 +1189,7 @@ sub _task_pnp_graphs {
 ##########################################################
 sub _task_userdata_backgroundimages {
     my($self, $c) = @_;
-    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/backgrounds/';
+    my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
     my $query  = $c->{'request'}->{'parameters'}->{'query'};
     my $images = [];
     my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
@@ -1221,7 +1221,7 @@ sub _task_userdata_backgroundimages {
 ##########################################################
 sub _task_userdata_images {
     my($self, $c) = @_;
-    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/images/';
+    my $folder = $c->stash->{'usercontent_folder'}.'/images/';
     my $query  = $c->{'request'}->{'parameters'}->{'query'};
     my $images = [];
     my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
@@ -1252,7 +1252,7 @@ sub _task_userdata_images {
 ##########################################################
 sub _task_userdata_iconsets {
     my($self, $c) = @_;
-    my $folder  = $c->config->{'home'}.'/root/thruk/usercontent/images/status';
+    my $folder  = $c->stash->{'usercontent_folder'}.'/images/status';
     my $folders = [];
     for my $f (glob("$folder/*/up.png")) {
         my $name = $f;
@@ -1272,7 +1272,7 @@ sub _task_userdata_iconsets {
 ##########################################################
 sub _task_userdata_sounds {
     my($self, $c) = @_;
-    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/sounds/';
+    my $folder = $c->stash->{'usercontent_folder'}.'/sounds/';
     my $sounds = [];
     for my $file (glob("$folder/*.mp3 $folder/*/*.mp3")) {
         my $path = $file;
@@ -1293,7 +1293,7 @@ sub _task_userdata_sounds {
 ##########################################################
 sub _task_userdata_shapes {
     my($self, $c) = @_;
-    my $folder = $c->config->{'home'}.'/root/thruk/usercontent/shapes/';
+    my $folder = $c->stash->{'usercontent_folder'}.'/shapes/';
     my $shapes = [];
     for my $file (glob("$folder/*.js $folder/*/*.js")) {
         my $name = $file;
