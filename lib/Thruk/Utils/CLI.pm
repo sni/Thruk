@@ -561,7 +561,8 @@ sub _run_command_action {
     }
     elsif($action eq 'clearcache') {
         $data->{'rc'} = 0;
-        $c->cache->clear;
+        unlink($c->config->{'var_path'}.'/token');
+        unlink($c->config->{'tmp_path'}.'/thruk.cache');
         $data->{'output'} = "cache cleared";
     }
 
