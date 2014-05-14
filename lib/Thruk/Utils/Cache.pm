@@ -179,7 +179,7 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
-    local $SIG{ALRM} = sub { die('timeout while waiting for cache store') };
+    local $SIG{ALRM} = sub { die('timeout while waiting for cache store '.$self->{'_cachefile'}) };
     alarm($self->{'_lock_timeout'});
     lock_nstore($self->{'_data'}, $self->{'_cachefile'});
     alarm(0);
@@ -202,9 +202,15 @@ retrieve data from disk
 =cut
 sub _retrieve {
     my($self) = @_;
-    local $SIG{ALRM} = sub { die('timeout while reading cache') };
+    local $SIG{ALRM} = sub { die('timeout while reading cache '.$self->{'_cachefile'}) };
     alarm($self->{'_lock_timeout'});
-    my $data = lock_retrieve($self->{'_cachefile'});
+    my $data;
+    eval {
+        $data = lock_retrieve($self->{'_cachefile'});
+    };
+    if($@) {
+        die('failed to read '.$self->{'_cachefile'}.': '.$@);
+    }
     alarm(0);
     return $data;
 }
