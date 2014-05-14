@@ -1207,7 +1207,7 @@ sub _task_userdata_backgroundimages {
     $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
     $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
-    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'/plugins/panorama/images/s.gif', image => 'none'} unless $query;
+    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'} unless $query;
     $c->{'db'}->_page_data($c, $images);
     $c->stash->{'json'} = {
         data        => $c->stash->{'data'},
