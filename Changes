@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Panorama View:
+            - icons snap to raster on drag/drop when shift key is hold
           - Bug Fixes
             - fixed removing old sessions with cookie auth
             - fixed panorama filter containing pipes

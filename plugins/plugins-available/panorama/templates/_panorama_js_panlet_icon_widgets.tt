@@ -108,6 +108,21 @@
             var pos = This.getPosition();
             if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
             if(y != undefined) { y = Math.floor(y); } else { y = pos[1]; }
+
+            // snap to roaster when shift key is hold
+            if(TP.isShift) {
+                var pos = TP.get_snap(x, y);
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = '';
+                    This.ddShadow.dom.style.left    = pos[0]+"px";
+                    This.ddShadow.dom.style.top     = pos[1]+"px";
+                }
+            } else {
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = 'none';
+                }
+            }
+
             // update settings window
             if(TP.iconSettingsWindow) {
                 TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
@@ -471,14 +486,32 @@
     addDDListener: function(el) {
         var panel = this;
         if(el.dd && !el.dd_listener_added) {
-            el.dd.addListener('dragstart', function(This, eOpts) {
+            el.dd.addListener('dragstart', function(This, e) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
                 TP.suppressIconTip = true;
+                TP.isShift = is_shift_pressed(e);
+                if(!el.ddShadow) {
+                    var size = el.getSize();
+                    el.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: absolute; z-index: 99999; top: 0px; ; left: 0px; display: hidden;" />' , true);
+                }
             });
-            el.dd.addListener('dragend', function(This, eOpts) {
+            el.dd.addListener('drag', function(This, e) {
+                TP.isShift = is_shift_pressed(e);
+            });
+            el.dd.addListener('dragend', function(This, e) {
+                TP.isShift = is_shift_pressed(e);
                 /* prevents opening link after draging */
+                if(TP.isShift) {
+                    var pos = el.getPosition();
+                    el.setPosition(TP.get_snap(pos[0], pos[1]));
+                }
+                TP.isShift = false;
+                if(el.ddShadow) { el.ddShadow.dom.style.display = 'none'; }
                 window.setTimeout(function() {
                     window.clearTimeout(TP.timeouts['click'+panel.id]);
+                    if(el.ddShadow) {
+                        el.ddShadow.dom.style.display = 'none';
+                    }
                 }, 100);
                 TP.suppressIconTip = false;
                 panel.setIconLabel();
