@@ -28,7 +28,7 @@
         [% END %]
         this.redraw     = false;
         this.animations = 0;
-        
+
         this.semilocked = false;
         [% IF dashboard_ignore_changes %]
         this.locked = true;
