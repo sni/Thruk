@@ -65,7 +65,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
-    
+
     $c->stash->{'dashboard_ignore_changes'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} : 0;
     $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->request->parameters->{'dashboard_ignore_changes'};
 
