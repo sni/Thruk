@@ -300,7 +300,7 @@ sub _stateprovider {
     my $task  = delete $param->{'task'};
     my $value = $param->{'value'};
     my $name  = $param->{'name'};
-    f($c->stash->{'readonly'} || $c->stash->{'dashboard_ignore_changes'}) {
+    if($c->stash->{'readonly'} || $c->stash->{'dashboard_ignore_changes'}) {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
     # REMOVE AFTER: 01.01.2016
