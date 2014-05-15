@@ -261,7 +261,7 @@
 <tr>
   <th align="right">Custom Function</th>
   <td align="left">
-    <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this, node)">
+    <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this)">
     </select>
   </td>
 </tr>

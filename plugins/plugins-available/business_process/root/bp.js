@@ -495,7 +495,10 @@ function bp_update_cust_attributes(select, node) {
     jQuery(func['args']).each(function(x, arg) {
         var nr = x + 2;
         var field;
-        var val = node['func_args'][x+1];
+        var val = '';
+        if(node && node.func_args) {
+            val = node['func_args'][x+1];
+        }
         if(arg['type'] == 'text') {
             field = '<input type="text" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
         }
