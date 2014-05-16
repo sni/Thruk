@@ -494,11 +494,16 @@
                     var size = el.getSize();
                     el.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
                 }
+                if(!el.dragHint) {
+                    el.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+                }
             });
             el.dd.addListener('drag', function(This, e) {
                 TP.isShift = is_shift_pressed(e);
             });
             el.dd.addListener('dragend', function(This, e) {
+                el.dragHint.destroy();
+                el.dragHint = undefined;
                 TP.isShift = is_shift_pressed(e);
                 /* prevents opening link after draging */
                 if(TP.isShift) {
