@@ -1366,6 +1366,7 @@ TP.renderTipDetails = function(data) {
     if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
     var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
     TP.iconTip.showAt(showAtPos);
+    TP.iconTip.syncShadow();
     return;
 }
 
@@ -1421,7 +1422,7 @@ Ext.define('TP.HostStatusIcon', {
             var url = this.host.pnp_url+'/image?host='+this.xdata.general.host+'&srv=_HOST_&view=1&source=0&graph_width=300&graph_height=100';
             url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
             url    += '&end='   + Math.round(now.getTime()/1000);
-            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;">']);
+            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
         }
         return(details);
     },
@@ -1643,7 +1644,7 @@ Ext.define('TP.ServiceStatusIcon', {
             var url = this.service.pnp_url+'/image?host='+this.xdata.general.host+'&srv='+this.xdata.general.service+'&view=1&source=0&graph_width=300&graph_height=100';
             url    += '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds('24h'));
             url    += '&end='   + Math.round(now.getTime()/1000);
-            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;">']);
+            details.push([ '<img src="'+url+'" width="100%" border=1 style="max-height: 250px;" onload="TP.iconTip.syncShadow()">']);
         }
         return(details);
     },
