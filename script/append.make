@@ -129,6 +129,9 @@ local_install: local_patches
 	find ${DESTDIR}${DATADIR}/ -name \*.orig -delete
 	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
 	mkdir -p ${DESTDIR}${TMPDIR}/reports ${DESTDIR}${LOGDIR} ${DESTDIR}${SYSCONFDIR}/bp
+	############################################################################
+	# examples
+	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
 
 naemon-patch:
 	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0031-naemon-init.patch; }
