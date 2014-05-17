@@ -1477,6 +1477,8 @@ TP.get_group_status = function(options) {
     var s;
     var acknowledged = false;
     var downtime     = false;
+    if(group.hosts    == undefined) { group.hosts    = {} }
+    if(group.services == undefined) { group.services = {} }
          if(incl_svc && group.services.unknown > 0)                              { s = 3; }
     else if(incl_svc && incl_ack && group.services.ack_unknown > 0)              { s = 3; }
     else if(incl_svc && incl_downtimes && group.services.downtimes_unknown > 0)  { s = 3; }
