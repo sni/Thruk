@@ -155,8 +155,6 @@ if [ $1 = 0 ]; then
 fi
 /etc/init.d/thruk stop
 chkconfig --del thruk 2>/dev/null
-rmdir /etc/thruk/bp 2>/dev/null
-rmdir /etc/thruk 2>/dev/null
 exit 0
 
 %postun
@@ -171,6 +169,7 @@ case "$*" in
           /usr/share/thruk \
           /usr/lib/thruk \
           /etc/thruk/ssi \
+          /etc/thruk/bp \
           /etc/thruk \
           2>/dev/null
     ;;
@@ -204,6 +203,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/
+%config(noreplace) %{_sysconfdir}/thruk/bp/bp_functions.pm
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/wkhtmltopdf

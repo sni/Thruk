@@ -22,7 +22,6 @@ set -e
 case "$1" in
     remove)
         rm -rf /var/cache/thruk
-        rmdir /etc/thruk/bp >/dev/null 2>&1 || true
     ;;
     upgrade)
         rm -rf /var/cache/thruk/*
