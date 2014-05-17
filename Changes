@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.84-2   Sat May 17 16:49:45 CEST 2014
           - Panorama View:
             - icons snap to raster on drag/drop when shift key is hold
           - Bug Fixes
