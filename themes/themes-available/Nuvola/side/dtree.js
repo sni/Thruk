@@ -142,7 +142,7 @@ dTree.prototype.header = function(title,icon,height,bgImage,bgColor,open) {
 	header += '<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">';
 	header += '<tbody>';
 	header += '<tr>';
-	header += '<td colspan="2"><img src="'+url_prefix+'hemes/Nuvola/side/blank.gif" height="9" width="0"></td>';
+	header += '<td colspan="2"><img src="'+url_prefix+'themes/Nuvola/side/blank.gif" height="9" width="0"></td>';
 	header += '</tr>';
 	header += '<tr>';
 	header += '<td class="header" style="background-repeat: repeat-y;" background="' + bgImage + '" bgcolor="' + bgColor + '" height="100%" nowrap="nowrap" width="100%">';
