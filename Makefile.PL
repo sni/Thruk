@@ -176,7 +176,7 @@ tests_recursive;
 install_script glob('script/*.pl');
 eval {
     require CPAN;
-    installdeps_target;
+    installdeps_target();
 };
 WriteAll;
 
