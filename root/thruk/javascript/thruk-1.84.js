@@ -1680,6 +1680,8 @@ function parse_perf_data(perfdata) {
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
             tmp[1]  = tmp[1].replace(/,/g, '.');
+            tmp[1]  = tmp[1].replace(/;U;/g, '');
+            tmp[1]  = tmp[1].replace(/;U$/g, '');
             var data = tmp[1].match(
                 /^(-?\d+(\.\d+)?)([\w%]*);(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;(((-?\d+|\d*)(\.\d+)?:)|~:)?((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;((-?\d+|\d*)(\.\d+)?)?;*$/
             );
