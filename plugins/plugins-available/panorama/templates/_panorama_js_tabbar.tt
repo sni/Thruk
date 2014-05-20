@@ -15,6 +15,7 @@ Ext.define('TP.TabBar', {
     ],
 
     id:             'tabpan',
+    bodyCls:        'tabbarbody',
     region:         'center',
     minTabWidth:    80,
     deferredRender: false,

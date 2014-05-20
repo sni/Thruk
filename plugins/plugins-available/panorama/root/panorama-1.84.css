@@ -12,6 +12,15 @@
 .BG_UNREACHABLE  { background: #FFC0C0 !important; }
 .BG_DOWN         { background: #FFC0C0 !important; }
 
+HTML {
+  background: white;
+}
+
+.tabbarbody {
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
 .window_drop_shadow {
   border: 1px dashed black;
 }
