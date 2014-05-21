@@ -194,4 +194,14 @@ Ext.define('TP.DashboardManagementWindow', {
 TP.dashboardsWindow = function() {
     var win = Ext.create('TP.DashboardManagementWindow', {});
     TP.dashboardsSettingWindow = win;
+
+    // somehow new tabbar elements occur when opening window again, so we just remove them
+    var toDelete = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getCount() - 7;
+    if(toDelete > 0) {
+        for(var x = toDelete-1; x >= 0; x--) {
+            TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(7+x).destroy();
+            TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.removeAt(7+x);
+        }
+        TP.dashboardsSettingWindow.items.getAt(0).tabBar.doLayout();
+    }
 }
