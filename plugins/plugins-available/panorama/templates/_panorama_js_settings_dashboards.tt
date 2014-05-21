@@ -1,14 +1,14 @@
 ﻿/* show dashboard managment window */
 Ext.define('TP.DashboardManagementWindow', {
-    extend:     'Ext.window.Window',
-    autoShow:    true,
-    modal:       true,
-    width:       670,
-    resizable:   false,
+    extend:      'Ext.window.Window',
+    autoShow:     true,
+    modal:        true,
+    width:        670,
+    resizable:    false,
     title:       'Dashboard Managment',
     closeAction: 'destroy',
     initComponent: function() {
-        this.xdata         = {};
+        this.xdata = {};
         this.callParent();
 
         var listeners = {
@@ -23,8 +23,8 @@ Ext.define('TP.DashboardManagementWindow', {
                 TP.dashboardsSettingGrid = This;
                 // reset filter
                 if(TP.dashboardsSettingWindow) {
-                    var filterEl = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.length-2);
-                    var resetEl  = TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.getAt(TP.dashboardsSettingWindow.items.getAt(0).tabBar.items.length-1);
+                    var filterEl = Ext.getCmp('dashboardManagmentFilterEl');
+                    var resetEl  = Ext.getCmp('dashboardManagmentResetBtn');
                     if(   (TP.dashboardsSettingGrid.tabConfig && TP.dashboardsSettingGrid.tabConfig.title.match(/Import/))
                        || (TP.dashboardsSettingGrid.title && TP.dashboardsSettingGrid.title.match(/Import/))
                        ) {
@@ -49,11 +49,11 @@ Ext.define('TP.DashboardManagementWindow', {
             },
             destroy: function(This, eOpts) {
                 delete TP.dashboardsSettingWindow;
-                delete TP.dashboardsSettingGrid;
+                return true;
             },
             close: function(This, eOpts) {
                 delete TP.dashboardsSettingWindow;
-                delete TP.dashboardsSettingGrid;
+                return true;
             }
         }
         /* My Dasboards */
@@ -131,24 +131,25 @@ Ext.define('TP.DashboardManagementWindow', {
             items: [{
                 xtype: 'tbfill'
             }, {
-                xtype:     'textfield',
-                emptyText: 'filter dashboards',
-                width:      120,
-                closable:   false,
-                fieldStyle: 'border-bottom: 1px solid #EAEAEA;',
-                fieldBodyCls:   'x-form-clear-trigger',
+                xtype:        'textfield',
+                emptyText:    'filter dashboards',
+                width:         120,
+                closable:      false,
+                id:           'dashboardManagmentFilterEl',
+                fieldStyle:   'border-bottom: 1px solid #EAEAEA;',
+                fieldBodyCls: 'x-form-clear-trigger',
                 listeners: {
                     change: function(This) {
-                        var clearBtn  = This.up().items.getAt(This.up().items.length-1);
+                        var clearBtn  = Ext.getCmp('dashboardManagmentResetBtn');
                         var activeTab = This.up('window').items.getAt(0).getActiveTab();
                         var store     = activeTab.store;
                         if(This.value != undefined && This.value != '') {
                             clearBtn.enable();
-                            var val   = This.value;
+                            var val   = This.value.toLowerCase();
                             store.filterBy(function(rec, id) {
                                 var found = false;
                                 for(var key in rec.data) {
-                                    if(String(rec.data[key]).match(val)) { found=true; }
+                                    if(String(rec.data[key]).toLowerCase().match(val)) { found=true; }
                                 }
                                 return found;
                             });
@@ -165,9 +166,10 @@ Ext.define('TP.DashboardManagementWindow', {
                 border:   1,
                 style:    'padding: 0 0 5px;',
                 cls:     'x-form-clear-trigger',
+                id:      'dashboardManagmentResetBtn',
                 disabled: true,
                 handler: function(This) {
-                    var searchField = This.up().items.getAt(This.up().items.length-2);
+                   var searchField = Ext.getCmp('dashboardManagmentFilterEl');
                     searchField.reset();
                 },
                 listeners: {

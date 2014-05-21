@@ -82,7 +82,7 @@ var TP = {
                                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
                             }
                             TP.add_pantab(id, replace_id, hidden);
-                            if(TP.dashboardsSettingGrid) {
+                            if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
                                 TP.dashboardsSettingGrid.getView().refresh();
                                 TP.dashboardsSettingWindow.toFront();
                             }
@@ -1145,7 +1145,7 @@ var TP = {
                         TP.Msg.msg("fail_message~~adding dashboard failed: "+response.status+' - '+response.statusText);
                     }
                 } else {
-                    if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
+                    if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                         TP.dashboardsSettingGrid.loader.load();
                     }
                     TP.reconfigureDashboard(nr);
@@ -1158,7 +1158,7 @@ var TP = {
     /* fetch dashboard data from server and reapply settings */
     reconfigureDashboard: function(nr) {
         /* update dashboard managment view */
-        if(TP.dashboardsSettingGrid) {
+        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
             TP.dashboardsSettingGrid.getView().refresh();
             TP.dashboardsSettingWindow.toFront();
         }
@@ -1220,7 +1220,7 @@ var TP = {
                             TP.Msg.msg("fail_message~~removing dashboard failed: "+response.status+' - '+response.statusText);
                         }
                     } else {
-                        if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
+                        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                             TP.dashboardsSettingGrid.loader.load();
                         }
                         nr = String(nr).replace(/^tabpan-tab_/, '');
