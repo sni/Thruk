@@ -532,6 +532,9 @@ var TP = {
     },
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
+        if(!timedef || !timedef.match) {
+            return 3600;
+        }
         var res  = timedef.match(/^(\d+)(\w{1})/);
         if(res && res.length == 1) {
             return 3600;
