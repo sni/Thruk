@@ -259,6 +259,7 @@ plugins/plugins-available/conf/t/data/6/servicegroups_iso-8859.cfg
 plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
 plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/data/8/commented_object.cfg
+plugins/plugins-available/conf/t/data/9/test.cfg
 plugins/plugins-available/conf/t/data/http_api/thruk_local.conf
 plugins/plugins-available/conf/t/data/local/core.d.utf8/utf8.cfg
 plugins/plugins-available/conf/t/data/local/core.d/test.cfg

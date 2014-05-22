@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 665;
+    plan tests => 666;
 }
 
 BEGIN {
@@ -331,3 +331,18 @@ my @comments = split/\n/mx,"
 my $orig_comments = dclone(\@comments);
 my $com = Monitoring::Config::Object::format_comments(\@comments);
 is_deeply($orig_comments, \@comments, 'comments shouldn\'t change');
+
+
+###########################################################
+# computed config for nested templates
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/9' });
+$objects->init();
+$parsedfile = $objects->{'files'}->[0];
+$obj = $parsedfile->{'objects'}->[0];
+my $testhost = {
+    'host_name'           => 'test',
+    'check_period'        => '9x13',
+    'notification_period' => '24x7',
+};
+my($computed_keys, $computed) = $obj->get_computed_config($objects);
+is_deeply($computed, $testhost, 'parsed nested templates');
