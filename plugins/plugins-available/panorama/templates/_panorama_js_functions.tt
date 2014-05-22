@@ -532,15 +532,16 @@ var TP = {
     },
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
-        if(!timedef || !timedef.match) {
-            return 3600;
-        }
+        if(Ext.isNumeric(String(timedef))) { timedef = timedef + 's'; }
+        if(!timedef || !timedef.match)     { return 3600; }
+
         var res  = timedef.match(/^(\d+)(\w{1})/);
         if(res && res.length == 1) {
             return 3600;
         }
         var nr    = res[1];
         var unit  = res[2];
+        if(unit == 's') { return nr; }          // seconds
         if(unit == 'm') { return nr * 60; }     // minutes
         if(unit == 'h') { return nr * 3600; }   // hours
         if(unit == 'd') { return nr * 86400; }  // days
