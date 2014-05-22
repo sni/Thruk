@@ -790,13 +790,19 @@ sub update_object {
 
     my $file = $obj->{'file'};
 
+    # invalidate all caches, because this object might have been used as template
+    for my $file (@{$self->{'files'}}) {
+        for my $o (@{$file->{'objects'}}) {
+            $o->{'cache'} = {};
+        }
+    }
+
     # delete some references
     $self->delete_object($obj, 0);
 
     # update object
-    $obj->{'conf'}          = $data;
-    $obj->{'cache'}         = {};
-    $obj->{'comments'}      = [ split/\n/mx, $comment ];
+    $obj->{'conf'}     = $data;
+    $obj->{'comments'} = [ split/\n/mx, $comment ];
 
     # unify comments
     for my $com (@{$obj->{'comments'}}) {

@@ -391,16 +391,18 @@ sub get_computed_config {
     for my $tname (@{$templates}) {
         my $t = $objects->get_template_by_name($self->{'type'}, $tname);
         if(defined $t) {
-            for my $key (keys %{$t->{'conf'}}) {
-                if( !defined $conf->{$key} ) {
-                    $conf->{$key} = $t->{'conf'}->{$key};
+            my($tconf_keys, $tconf) = $t->get_computed_config($objects);
+            for my $key (keys %{$tconf}) {
+                next if $key eq 'name';
+                if(!defined $conf->{$key}) {
+                    $conf->{$key} = $tconf->{$key};
                 }
-                elsif( defined $self->{'default'}->{$key}
-                      and $self->{'default'}->{$key}->{'type'} eq 'LIST')
+                elsif(defined $self->{'default'}->{$key}
+                         and  $self->{'default'}->{$key}->{'type'} eq 'LIST')
                 {
                     if(substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
-                        my $list           = dclone($t->{'conf'}->{$key});
+                        my $list           = dclone($tconf->{$key});
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
                         @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
                         $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
