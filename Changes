@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - Bug Fixes
             - fixed calculation of computed configuration in config tool
+            - fixed panorama icon size in IE8
 
 1.84-2   Sat May 17 16:49:45 CEST 2014
           - Panorama View:

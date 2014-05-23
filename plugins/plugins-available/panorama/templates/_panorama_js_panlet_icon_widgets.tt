@@ -1103,34 +1103,19 @@ Ext.define('TP.IconWidget', {
         }
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
+        panel.iconFixSize(xdata);
     },
     iconFixSize: function(xdata) {
         var panel = this;
         if(!panel.icon) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
-        var src = panel.icon.el.dom.href.baseVal;
+        var src = panel.icon.el.dom.href.baseVal || panel.src;
         if(TP.imageSizes[src] == undefined) {
-            var img = Ext.create('Ext.Img', {
-                src:       Ext.BLANK_IMAGE_URL,
-                width:     1,
-                height:    1,
-                style:    "position: absolute; top: -1px;",
-                floating:  true,
-                listeners: {
-                    afterrender: function(This, eOpts) {
-                        This.setSrc(src);
-                        This.el.on("load", function (evt, ele, opts) {
-                            var naturalWidth  = This.el.dom.naturalWidth;
-                            var naturalHeight = This.el.dom.naturalHeight;
-                            if(naturalWidth > 1 && naturalHeight > 1) {
-                                TP.imageSizes[src] = [naturalWidth, naturalHeight];
-                                panel.iconFixSize(xdata);
-                            }
-                            This.destroy();
-                        });
-                    }
-                }
-            }).show();
+            var naturalSize = TP.getNatural(src);
+            if(naturalSize && naturalSize.width > 1 && naturalSize.height > 1) {
+                TP.imageSizes[src] = [naturalSize.width, naturalSize.height];
+                panel.iconFixSize(xdata);
+            }
             return;
         }
         var naturalWidth  = TP.imageSizes[src][0];
@@ -2105,4 +2090,11 @@ TP.getPerfDataMinMax = function(p, maxDefault) {
 
     if(p.min)           { r.min = p.min; }
     return(r);
+}
+
+/* return natural size cross browser compatible */
+TP.getNatural = function(src) {
+    img = new Image();
+    img.src = src;
+    return {width: img.width, height: img.height};
 }
