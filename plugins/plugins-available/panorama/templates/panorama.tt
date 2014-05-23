@@ -2,7 +2,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <script type="text/javascript">
     <!--
     [%+ PROCESS _panorama_js_globals.tt +%]
