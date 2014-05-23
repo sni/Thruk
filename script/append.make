@@ -37,7 +37,8 @@ local_patches:
 	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
-	@if [ "x${DESTDIR}" = "x" ]; then echo "*** no DESTDIR set ***"; exit 1; fi
+	# breaks naemon travis tests
+	#@if [ "x${DESTDIR}" = "x" ]; then echo "*** no DESTDIR set ***"; exit 1; fi
 	mkdir -p ${DESTDIR}${TMPDIR}
 	mkdir -p ${DESTDIR}${LOCALSTATEDIR}
 	############################################################################
