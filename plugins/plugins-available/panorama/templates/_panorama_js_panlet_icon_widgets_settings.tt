@@ -290,6 +290,9 @@ TP.iconShowEditDialog = function(panel) {
                         getInnerTpl: function(displayField) {
                             return '<div class="x-combo-list-item"><img src="{sample}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
                         }
+                    },
+                    listeners: {
+                        change: function(This) { renderUpdate(undefined, true); }
                     }
                 }, {
                     xtype:      'panel',
