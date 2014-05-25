@@ -9,9 +9,21 @@ TP.shapesStore = Ext.create('Ext.data.Store', {
             root: 'data'
         }
     },
-    data : []
+    data : [% json_encode(shape_data) %]
 });
-TP.shapesStore.load();
+TP.iconsetsStore = Ext.create('Ext.data.Store', {
+    fields: ['name', 'sample', 'value', 'fileset'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: true,
+    data : [% json_encode(iconset_data) %]
+});
 
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
@@ -93,19 +105,6 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Layout Settings Tab */
-    var iconsetsStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'sample', 'value'],
-        proxy: {
-            type: 'ajax',
-            url:  'panorama.cgi?task=userdata_iconsets&withempty=1',
-            reader: {
-                type: 'json',
-                root: 'data'
-            }
-        },
-        autoLoad: true,
-        data : []
-    });
     var layoutTab = {
         title: 'Layout',
         type:  'panel',
@@ -281,7 +280,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'combobox',
                     name:         'iconset',
                     cls:          'icon',
-                    store:         iconsetsStore,
+                    store:         TP.iconsetsStore,
                     value:        '',
                     emptyText:    'use dashboards default icon set',
                     displayField: 'name',

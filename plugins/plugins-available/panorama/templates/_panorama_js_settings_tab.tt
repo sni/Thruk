@@ -246,19 +246,6 @@ TP.tabSettingsWindow = function() {
 
 
     /* Dashboard Settings Tab */
-    var iconsetsStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'sample', 'value'],
-        proxy: {
-            type: 'ajax',
-            url:  'panorama.cgi?task=userdata_iconsets',
-            reader: {
-                type: 'json',
-                root: 'data'
-            }
-        },
-        autoLoad: true,
-        data : []
-    });
     var dashboardItems = [{
             xtype:      'checkbox',
             fieldLabel: 'Locked',
@@ -300,7 +287,7 @@ TP.tabSettingsWindow = function() {
             fieldLabel:   'Default Icon Set',
             xtype:        'combobox',
             name:         'defaulticonset',
-            store:         iconsetsStore,
+            store:         TP.iconsetsStore,
             value:        'default',
             displayField: 'name',
             valueField:   'value',

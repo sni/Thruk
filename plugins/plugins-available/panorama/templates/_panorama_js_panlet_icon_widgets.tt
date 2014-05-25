@@ -1049,12 +1049,19 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
-        iconset = xdata.appearance.iconset;
-        if(iconset == '' || iconset == undefined) {
-            iconset = tab.xdata.defaulticonset || 'default';
+        var iconsetName = xdata.appearance.iconset;
+        if(iconsetName == '' || iconsetName == undefined) {
+            iconsetName = tab.xdata.defaulticonset || 'default';
         }
+
         var newSrc;
-        if(panel.iconType == 'image') {
+
+        // get iconset from store
+        var rec = TP.iconsetsStore.findRecord('value', iconsetName);
+        if(rec == null) {
+            newSrc = Ext.BLANK_IMAGE_URL;
+        }
+        else if(panel.iconType == 'image') {
             panel.iconCheckBorder(xdata);
             if(xdata.general.src == undefined || xdata.general.src == "" || xdata.general.src.match(/\/panorama\/images\/s\.gif$/)) {
                 newSrc = Ext.BLANK_IMAGE_URL;
@@ -1064,42 +1071,45 @@ Ext.define('TP.IconWidget', {
         }
         else if(panel.iconType == 'host') {
             if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_down.png';        }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unreachable.png'; }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';     }
+                     if(xdata.state == 1) { newSrc = 'acknowledged_down';        }
+                else if(xdata.state == 2) { newSrc = 'acknowledged_unreachable'; }
+                else                      { newSrc = 'acknowledged_unknown';     }
             }
             else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_up.png';          }
-                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_down.png';        }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unreachable.png'; }
-                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';     }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';     }
+                if(     xdata.state == 0) { newSrc = 'downtime_up';          }
+                else if(xdata.state == 1) { newSrc = 'downtime_down';        }
+                else if(xdata.state == 2) { newSrc = 'downtime_unreachable'; }
+                else if(xdata.state == 4) { newSrc = 'downtime_pending';     }
+                else                      { newSrc = 'downtime_unknown';     }
             } else {
-                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/up.png';          }
-                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/down.png';        }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/unreachable.png'; }
-                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';     }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';     }
+                if(     xdata.state == 0) { newSrc = 'up';          }
+                else if(xdata.state == 1) { newSrc = 'down';        }
+                else if(xdata.state == 2) { newSrc = 'unreachable'; }
+                else if(xdata.state == 4) { newSrc = 'pending';     }
+                else                      { newSrc = 'unknown';     }
             }
         } else {
             if(panel.acknowledged) {
-                     if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_warning.png';  }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_critical.png'; }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/acknowledged_unknown.png';  }
+                     if(xdata.state == 1) { newSrc = 'acknowledged_warning';  }
+                else if(xdata.state == 2) { newSrc = 'acknowledged_critical'; }
+                else                      { newSrc = 'acknowledged_unknown';  }
             }
             else if(panel.downtime) {
-                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_ok.png';       }
-                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_warning.png';  }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_critical.png'; }
-                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/downtime_pending.png';  }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/downtime_unknown.png';  }
+                if(     xdata.state == 0) { newSrc = 'downtime_ok';       }
+                else if(xdata.state == 1) { newSrc = 'downtime_warning';  }
+                else if(xdata.state == 2) { newSrc = 'downtime_critical'; }
+                else if(xdata.state == 4) { newSrc = 'downtime_pending';  }
+                else                      { newSrc = 'downtime_unknown';  }
             } else {
-                if(     xdata.state == 0) { newSrc = '../usercontent/images/status/'+iconset+'/ok.png';       }
-                else if(xdata.state == 1) { newSrc = '../usercontent/images/status/'+iconset+'/warning.png';  }
-                else if(xdata.state == 2) { newSrc = '../usercontent/images/status/'+iconset+'/critical.png'; }
-                else if(xdata.state == 4) { newSrc = '../usercontent/images/status/'+iconset+'/pending.png';  }
-                else                      { newSrc = '../usercontent/images/status/'+iconset+'/unknown.png';  }
+                if(     xdata.state == 0) { newSrc = 'ok';       }
+                else if(xdata.state == 1) { newSrc = 'warning';  }
+                else if(xdata.state == 2) { newSrc = 'critical'; }
+                else if(xdata.state == 4) { newSrc = 'pending';  }
+                else                      { newSrc = 'unknown';  }
             }
+        }
+        if(rec != null && rec.data.fileset[newSrc]) {
+            newSrc = '../usercontent/images/status/'+iconsetName+'/'+rec.data.fileset[newSrc];
         }
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();

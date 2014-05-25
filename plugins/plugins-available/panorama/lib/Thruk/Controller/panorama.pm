@@ -282,6 +282,10 @@ sub _js {
         $c->stash->{default_dashboard} = encode_json(\@defaults);
     }
 
+
+    $c->stash->{shape_data}   = $self->_task_userdata_shapes($c, 1);
+    $c->stash->{iconset_data} = $self->_task_userdata_iconsets($c, 1);
+
     unless($only_data) {
         $c->res->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';
@@ -1251,20 +1255,28 @@ sub _task_userdata_images {
 
 ##########################################################
 sub _task_userdata_iconsets {
-    my($self, $c) = @_;
+    my($self, $c, $return_only) = @_;
     my $folder  = $c->stash->{'usercontent_folder'}.'/images/status';
     my $folders = [];
-    for my $f (glob("$folder/*/up.png")) {
+    for my $f (glob("$folder/*/.")) {
         my $name = $f;
         $name    =~ s/^\Q$folder\E//gmx;
         $name    =~ s/^\///gmx;
-        $name    =~ s/\/up\.png$//gmx;
-        push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/ok.png", value => $name };
+        $name    =~ s/\/\.$//gmx;
+        my $fileset = {};
+        for my $pic (glob("$folder/$name/*.gif $folder/$name/*.jpg $folder/$name/*.png")) {
+            $pic =~ s|\Q$folder/$name/\E||gmx;
+            my $type = $pic;
+            $type =~ s/\.(png|gif|jpg)$//gmx;
+            $fileset->{$type} = $pic;
+        }
+        push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/".$fileset->{'ok'}, value => $name, fileset => $fileset };
     }
     $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
     if($c->request->parameters->{'withempty'}) {
         unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' }
     }
+    return $folders if $return_only;
     $c->stash->{'json'} = { data => $folders };
     return $c->forward('Thruk::View::JSON');
 }
@@ -1292,7 +1304,7 @@ sub _task_userdata_sounds {
 
 ##########################################################
 sub _task_userdata_shapes {
-    my($self, $c) = @_;
+    my($self, $c, $return_only) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/shapes/';
     my $shapes = [];
     for my $file (glob("$folder/*.js $folder/*/*.js")) {
@@ -1306,6 +1318,7 @@ sub _task_userdata_shapes {
         };
     }
     $shapes = Thruk::Backend::Manager::_sort({}, $shapes, 'name');
+    return $shapes if $return_only;
     $c->stash->{'json'} = { data => $shapes };
     return $c->forward('Thruk::View::JSON');
 }
