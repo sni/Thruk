@@ -1107,7 +1107,8 @@ Ext.define('TP.IconWidget', {
     },
     iconFixSize: function(xdata) {
         var panel = this;
-        if(!panel.icon) { return; }
+        if(!panel.icon)    { return; }
+        if(!panel.icon.el) { return; }
         if(TP.imageSizes == undefined) { TP.imageSizes = {} }
         var src = panel.icon.el.dom.href.baseVal || panel.src;
         if(TP.imageSizes[src] == undefined) {
