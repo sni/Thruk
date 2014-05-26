@@ -194,8 +194,7 @@ sub uri {
     carp("no c") unless defined $c;
     my $uri = $c->request->uri();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri    =~ s/&amp;/&/gmx;
-    $uri    =~ s/&/&amp;/gmx;
+    $uri    = escape_ampersand($uri);
     return $uri;
 }
 
@@ -219,8 +218,7 @@ sub full_uri {
     my $url_prefix = $c->stash->{'url_prefix'};
     $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     if($amps) {
-        $uri    =~ s/&amp;/&/gmx;
-        $uri    =~ s/&/&amp;/gmx;
+        $uri = escape_ampersand($uri)
     }
     return $uri;
 }
@@ -320,8 +318,7 @@ sub uri_with {
         confess("ERROR in uri_with(): ".$@);
     }
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri =~ s/&amp;/&/gmx;
-    $uri =~ s/&/&amp;/gmx;
+    $uri = escape_ampersand($uri);
     # make relative url
     $uri =~ s|^/[^?]+/||mx;
     return $uri;
@@ -369,6 +366,22 @@ sub escape_quotes {
     $_[0] =~ s/\\'/'/gmx;
     $_[0] =~ s/'/\\'/gmx;
     $_[0] =~ s/"/\\'/gmx;
+    return $_[0];
+}
+
+
+########################################
+
+=head2 escape_ampersand
+
+  escape_ampersand($text)
+
+returns a string with & escaped to &amp;
+
+=cut
+sub escape_ampersand{
+    $_[0] =~ s/&amp;/&/gmx;
+    $_[0] =~ s/&/&amp;/gmx;
     return $_[0];
 }
 

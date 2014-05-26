@@ -284,6 +284,7 @@ sub _renew_navigation {
                     name => $item->[0],
                     href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
+                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
                 push @{$user_items}, [ $section, $item ];
             }
         }
@@ -298,6 +299,7 @@ sub _renew_navigation {
                     name => $item->[0],
                     href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
+                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
                 push @{$user_items}, [ $section, $item ];
             }
         }
