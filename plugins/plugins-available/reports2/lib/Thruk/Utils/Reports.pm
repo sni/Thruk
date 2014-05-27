@@ -370,7 +370,9 @@ sub generate_report {
                 push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
-        die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
+        if($options->{'failed_backends'} eq 'cancel') {
+            die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
+        }
     }
 
     # set some defaults
@@ -438,7 +440,7 @@ sub generate_report {
                 push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
         }
-        if(scalar @failed > 0) {
+        if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {
             unlink($attachment);
             die("Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n")
         }
@@ -756,6 +758,7 @@ sub _read_report_file {
 
     # add defaults
     add_report_defaults($c, undef, $report) unless $simple;
+    $report->{'failed_backends'} = 'cancel' unless $report->{'failed_backends'};
 
     unless($noauth) {
         $report->{'readonly'}   = 1;
