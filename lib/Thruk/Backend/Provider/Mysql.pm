@@ -623,7 +623,7 @@ sub _get_filter {
 
     # message filter have to go into a having clause
     my($contact,$system,$strict);
-    if($filter and $filter =~ m/message\ (RLIKE|=|LIKE|!=)\ /mx) {
+    if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
         if($filter =~ s/^\ WHERE\ \((time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
             my $timef = $1;
             my $having = $filter;
