@@ -97,6 +97,7 @@ sub index :Path :Args(0) {
         $referer =~ s/\/*$//gmx;
         $referer = $referer.'/';
     }
+    $referer =~ s/%3f/?/mx;
 
     # make lowercase username
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
