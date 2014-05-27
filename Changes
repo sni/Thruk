@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - added csrf_allowed_hosts configuration option
           - Panorama View:
             - iconsets may now contain png, jpg or gif images
           - Bug Fixes

@@ -74,6 +74,7 @@ sub set_default_config {
         use_strict_host_authorization   => 0,
         make_auth_user_lowercase        => 0,
         make_auth_user_uppercase        => 0,
+        csrf_allowed_hosts              => ['127.0.0.1', '::1'],
         can_submit_commands             => 1,
         group_paging_overview           => '*3, 10, 100, all',
         group_paging_grid               => '*5, 10, 50, all',
@@ -246,6 +247,9 @@ sub set_default_config {
             unshift @{$config->{templates_paths}}, $config->{'user_template_path'};
         }
     }
+
+    # ensure csrf hosts is a list
+    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{Thruk::Utils::list($config->{'csrf_allowed_hosts'})}))];
 
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
 

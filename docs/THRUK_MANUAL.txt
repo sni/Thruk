@@ -982,6 +982,18 @@ ex.:
   use_strict_host_authorization = 1
 
 
+==== csrf_allowed_hosts
+
+Allow specific hosts to bypass the csrf protection which
+requires a generated token to submit certain post requests,
+for example to send commands. Use comma seperated list or
+multiple configuration attributes. Wildcards are allowed.
+
+ex.:
+
+  csrf_allowed_hosts=127.0.0.1
+  csrf_allowed_hosts=192.168.*
+
 
 
 

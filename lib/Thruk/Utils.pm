@@ -2269,7 +2269,16 @@ sub check_csrf {
     my($c) = @_;
     return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
     return unless is_post($c);
-    return 1 if $c->request->address eq '127.0.0.1';
+    for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
+        return 1 if $c->request->address eq $addr;
+        if(CORE::index( $addr, '*' ) >= 0) {
+            # convert wildcards into real regexp
+            my $search = $addr;
+            $search =~ s/\.\*/*/gmx;
+            $search =~ s/\*/.*/gmx;
+            return 1 if $c->request->address =~ m/$search/mx;
+        }
+    }
     my $post_token  = $c->request->{'parameters'}->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
     if($valid_token and $post_token and $valid_token eq $post_token) {
