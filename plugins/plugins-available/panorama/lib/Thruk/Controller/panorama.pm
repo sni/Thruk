@@ -9,6 +9,7 @@ use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
 use File::Copy qw/copy/;
+use Encode qw(decode_utf8);
 use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
@@ -271,7 +272,7 @@ sub _js {
         $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'});
     }
 
-    $c->stash->{dashboards}        = encode_json($data->{'panorama'}->{'dashboards'} || {});
+    $c->stash->{dashboards}        = decode_utf8(encode_json($data->{'panorama'}->{'dashboards'} || {}));
     $c->stash->{default_dashboard} = encode_json([]);
     if($c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'}) {
         my $default_dashboard = $c->config->{'Thruk::Plugin::Panorama'}->{'default_dashboard'};
@@ -1882,14 +1883,14 @@ sub _merge_dashboard_into_hash {
         if($key =~ m/^panlet_\d+$/mx or $key =~ m/^tabpan-tab_\d+_panlet_\d+/mx) {
             my $pkey = $key;
             $pkey =~ s/^tabpan-tab_\d+_//mx;
-            $data->{$id.'_'.$pkey} = encode_json($dashboard->{$key});
+            $data->{$id.'_'.$pkey} = decode_utf8(encode_json($dashboard->{$key}));
         }
         elsif($key eq 'tab') {
             # add some values to the tab
             for my $k (qw/user public readonly ts/) {
                 $dashboard->{'tab'}->{$k} = $dashboard->{$k};
             }
-            $data->{$id} = encode_json($dashboard->{$key});
+            $data->{$id} = decode_utf8(encode_json($dashboard->{$key}));
         }
     }
     return $data;
