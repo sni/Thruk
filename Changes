@@ -5,6 +5,7 @@ next:
           - allow unicode characters in performance data units
           - Panorama View:
             - iconsets may now contain png, jpg or gif images
+            - added dashboard_ignore_changes configuration option
           - Business Process
             - added easier host:* status aggregation
           - Bug Fixes
