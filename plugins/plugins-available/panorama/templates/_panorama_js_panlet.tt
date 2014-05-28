@@ -29,7 +29,13 @@
         this.redraw     = false;
         this.animations = 0;
 
-        if(this.locked) {
+        this.semilocked = false;
+        [% IF dashboard_ignore_changes %]
+        this.locked = true;
+        this.semilocked = true;
+        [% END %]
+
+        if(this.locked && !this.semilocked) {
             this.resizable = false;
             this.closable  = false;
             this.draggable = false;

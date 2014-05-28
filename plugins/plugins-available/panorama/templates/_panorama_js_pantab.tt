@@ -1,7 +1,7 @@
 ﻿Ext.define('TP.Pantab', {
     extend: 'Ext.panel.Panel',
 
-    [% UNLESS readonly %]
+    [% UNLESS (readonly || dashboard_ignore_changes) %]
     tooltip:     'double click to rename',
     closable:    true,
     bodyCls:     'pantabbody',

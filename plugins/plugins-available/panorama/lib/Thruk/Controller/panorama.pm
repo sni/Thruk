@@ -67,6 +67,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
     $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
 
+    $c->stash->{'dashboard_ignore_changes'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} : 0;
+    $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->request->parameters->{'dashboard_ignore_changes'};
+
     $c->stash->{'is_admin'} = 0;
     if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
         $c->stash->{'is_admin'} = 1;
@@ -302,7 +305,7 @@ sub _stateprovider {
     my $task  = delete $param->{'task'};
     my $value = $param->{'value'};
     my $name  = $param->{'name'};
-    if($c->stash->{'readonly'}) {
+    if($c->stash->{'readonly'} || $c->stash->{'dashboard_ignore_changes'}) {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
     # REMOVE AFTER: 01.01.2016

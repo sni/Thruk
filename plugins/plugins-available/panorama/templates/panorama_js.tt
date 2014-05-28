@@ -80,7 +80,7 @@ Ext.onReady(function() {
     Ext.getCmp('debug_tab').hide();
     [% END %]
 
-    [% IF readonly %]
+    [% IF (readonly || dashboard_ignore_changes) %]
     var icon = Ext.query('SPAN.new-tab')[0];
     icon.parentNode.parentNode.parentNode.style.display = 'none';
     [% END %]
