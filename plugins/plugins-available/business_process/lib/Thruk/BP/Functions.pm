@@ -35,6 +35,35 @@ sub status {
 
     if($hostname and $description) {
         $data = $livedata->{'services'}->{$hostname}->{$description};
+
+        # description may contain wildcards, return worst function in that case
+        if($description =~ m/\*/mx) {
+            my $orig_description = $description;
+            my $function = 'worst';
+            if($description =~ m/^(b|w):(.*)$/mx) {
+                if($1 eq 'b') { $function = 'worst' };
+                $description = $2;
+            }
+            $description =~ s/\*/.*/gmx;
+
+            # create hash which can be used by internal calculation function
+            my $depends = [];
+            for my $sname (keys %{$livedata->{'services'}->{$hostname}}) {
+                if($sname =~ m/$description/mx) {
+                    my $s = $livedata->{'services'}->{$hostname}->{$sname};
+                    next if($bp->{'state_type'} eq 'hard' and $s->{'state_type'} != 1);
+                    push @{$depends}, { label => $sname, status => $s->{'state'} };
+                }
+            }
+            my @res;
+            if($function eq 'worst') {
+                @res = worst($c, $bp, { depends => $depends });
+            } else {
+                @res = best($c, $bp, { depends => $depends });
+            }
+            $res[1] = $hostname.':'.$orig_description;
+            return(@res);
+        }
     }
     elsif($hostname) {
         $data = $livedata->{'hosts'}->{$hostname};
@@ -190,7 +219,7 @@ returns worst state of all dependent nodes
 =cut
 sub worst {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n, $bp);
+    my $states = _get_nodes_grouped_by_state($n);
     if(scalar keys %{$states} == 0) {
         return(3, 'no dependent nodes');
     }
@@ -211,7 +240,7 @@ returns best state of all dependent nodes
 =cut
 sub best {
     my($c, $bp, $n) = @_;
-    my $states = _get_nodes_grouped_by_state($n, $bp);
+    my $states = _get_nodes_grouped_by_state($n);
     if(scalar keys %{$states} == 0) {
         return(3, 'no dependent nodes');
     }
@@ -368,7 +397,7 @@ sub custom {
 
 ##########################################################
 sub _get_nodes_grouped_by_state {
-    my($n, $bp) = @_;
+    my($n) = @_;
     my $states = {};
     for my $d (@{$n->{'depends'}}) {
         my $state = defined $d->{'status'} ? $d->{'status'} : 4;

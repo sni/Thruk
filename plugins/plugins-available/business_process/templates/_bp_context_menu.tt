@@ -112,7 +112,10 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_status'
     function='status'
-    div_help='Uses status from the selected host or service.<br>The hoststatus will be used if the service is left empty.'
+    div_help='Uses status from the selected host or service.<br>'
+           _ 'The hoststatus will be used if the service is left empty.<br>'
+           _ 'Wildcards in service descriptions are possible:<br>'
+           _ 'check_* (worst), w:check_* (worst), b:check_* (best)'
 %]
 <tr>
   <th align="right">Host</th>

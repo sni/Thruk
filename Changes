@@ -5,6 +5,8 @@ next:
           - allow unicode characters in performance data units
           - Panorama View:
             - iconsets may now contain png, jpg or gif images
+          - Business Process
+            - added easier host:* status aggregation
           - Bug Fixes
             - fixed calculation of computed configuration in config tool
             - fixed panorama icon size in IE8
