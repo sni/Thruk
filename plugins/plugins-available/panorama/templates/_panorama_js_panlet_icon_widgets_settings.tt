@@ -1235,7 +1235,7 @@ TP.openLabelEditorWindow = function(panel) {
                                     e.onclick   = function(i) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
                                         var val = Ext.htmlDecode(e.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && !val.match(/\ /)) { val = '{{'+val+'}}'; }
+                                        if(!val.match(/\{\{.*?\}\}/) && val.match(/^perfdata/)) { val = '{{'+val+'}}'; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);
                                         Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
                                     }
