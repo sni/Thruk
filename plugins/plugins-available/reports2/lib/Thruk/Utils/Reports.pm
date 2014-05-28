@@ -365,7 +365,8 @@ sub generate_report {
     my $processinfo = $c->{'db'}->get_processinfo();
     if($options->{'backends'}) {
         my @failed;
-        for my $b (@{$options->{'backends'}}) {
+        for my $b (keys %{$disabled_backends}) {
+            next unless $disabled_backends->{$b} == 0;
             if($c->stash->{'failed_backends'}->{$b}) {
                 push @failed, $c->{'db'}->get_peer_by_key($b)->peer_name().': '.$c->stash->{'failed_backends'}->{$b};
             }
@@ -373,6 +374,11 @@ sub generate_report {
         if($options->{'failed_backends'} eq 'cancel') {
             die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
         }
+    }
+    $c->stash->{'selected_backends'} = [];
+    for my $b (keys %{$disabled_backends}) {
+        next unless $disabled_backends->{$b} == 0;
+        push @{$c->stash->{'selected_backends'}}, $b;
     }
 
     # set some defaults
@@ -479,15 +485,16 @@ sub get_report_data_from_param {
 
     my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
-        'name'       => $params->{'name'}            || 'New Report',
-        'desc'       => $params->{'desc'}            || '',
-        'template'   => $params->{'template'}        || 'sla.tt',
-        'is_public'  => $params->{'is_public'}       || 0,
-        'to'         => $params->{'to'}              || '',
-        'cc'         => $params->{'cc'}              || '',
-        'backends'   => $params->{'report_backends'} || [],
-        'params'     => $p,
-        'send_types' => $send_types,
+        'name'            => $params->{'name'}            || 'New Report',
+        'desc'            => $params->{'desc'}            || '',
+        'template'        => $params->{'template'}        || 'sla.tt',
+        'is_public'       => $params->{'is_public'}       || 0,
+        'to'              => $params->{'to'}              || '',
+        'cc'              => $params->{'cc'}              || '',
+        'backends'        => $params->{'report_backends'} || [],
+        'failed_backends' => $params->{'failed_backends'} || 'cancel',
+        'params'          => $p,
+        'send_types'      => $send_types,
     };
 
     return($data);

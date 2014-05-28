@@ -72,7 +72,8 @@
       <font size='-2'>what should happen if some of the selected backends are not available:</font><br>
       <select name="failed_backends">
         <option value="cancel"[% IF r.failed_backends == 'cancel' %] selected[% END %]>cancel report</option>
-        <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error and continue with remaining backends</option>
+        <option value="ignore"[% IF r.failed_backends == 'ignore' %] selected[% END %]>ignore the error</option>
+        <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
       </select>
     </td>
   </tr>

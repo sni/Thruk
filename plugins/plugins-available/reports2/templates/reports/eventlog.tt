@@ -35,6 +35,7 @@
   [% WRAPPER 'reports/comp/report.tt' %]
 
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% PROCESS 'reports/comp/backend_error_page.tt' %]
 
     [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc('Legend') %]
       <table class="legendtable">
