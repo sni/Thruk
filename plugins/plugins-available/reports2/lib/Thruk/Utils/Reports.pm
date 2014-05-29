@@ -689,18 +689,19 @@ sub _get_new_report {
     my($c, $data) = @_;
     $data = {} unless defined $data;
     my $r = {
-        'name'       => 'New Report',
-        'desc'       => 'Description',
-        'nr'         => 'new',
-        'template'   => '',
-        'params'     => {},
-        'var'        => {},
-        'to'         => '',
-        'cc'         => '',
-        'is_public'  => 0,
-        'user'       => $c->stash->{'remote_user'},
-        'backends'   => [],
-        'send_types' => [],
+        'name'            => 'New Report',
+        'desc'            => 'Description',
+        'nr'              => 'new',
+        'template'        => '',
+        'params'          => {},
+        'var'             => {},
+        'to'              => '',
+        'cc'              => '',
+        'is_public'       => 0,
+        'user'            => $c->stash->{'remote_user'},
+        'backends'        => [],
+        'send_types'      => [],
+        'failed_backends' => 'cancel',
     };
     for my $key (keys %{$data}) {
         $r->{$key} = $data->{$key};
