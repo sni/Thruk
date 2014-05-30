@@ -84,7 +84,7 @@
                 }
             }
             [% END %]
-            This.applyRotation(This.xdata.layout.rotation);
+            This.applyRotation(This.xdata.layout.rotation, This.xdata);
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -151,9 +151,9 @@
         /* restore position */
         this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
         if(xdata.layout.rotation) {
-            this.applyRotation(Number(xdata.layout.rotation));
+            this.applyRotation(Number(xdata.layout.rotation), xdata);
         } else {
-            this.applyRotation(0);
+            this.applyRotation(0, xdata);
         }
 
         /* set label */
@@ -205,7 +205,7 @@
         this.animate(animated);
     },
     /* rotates this thing */
-    applyRotation: function(value) {
+    applyRotation: function(value, xdata) {
         if(value == undefined) { return; }
         value = value*-1;
         var el = this.el;
@@ -595,9 +595,10 @@ Ext.define('TP.IconWidget', {
     },
 
     /* rotates this thing */
-    applyRotation: function(value) {
-        if(value        == undefined) { return; }
-        if(this.xdata.appearance && this.xdata.appearance.type == "icon") {
+    applyRotation: function(value, xdata) {
+        if(xdata == undefined) { xdata = this.xdata; }
+        if(value == undefined) { return; }
+        if(xdata.appearance && xdata.appearance.type == "icon") {
             if(this.surface == undefined) { return; }
             if(this.surface.items.getAt(0) == undefined) { return; }
             this.surface.items.getAt(0).setAttributes({rotate:{degrees: -1*value}}, true);
