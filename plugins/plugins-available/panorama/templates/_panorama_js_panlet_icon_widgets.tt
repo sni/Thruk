@@ -412,7 +412,10 @@
                 items: [{
                     text:   'Refresh',
                     icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
-                    handler: function() { TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id) },
+                    handler: function() {
+                        TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id, undefined, el)
+                        el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
+                    },
                     hidden:  This.xdata.state == undefined ? true : false
                 }, {
                     text:       'Show Details',

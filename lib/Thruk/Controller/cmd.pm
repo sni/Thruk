@@ -256,7 +256,7 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
         delete $c->{'request'}->{'parameters'}->{'backend'};
-        $self->_redirect_or_success( $c, -1 );
+        _redirect_or_success( $c, -1 );
     }
 
     # normal page call
@@ -329,7 +329,7 @@ sub _check_for_commands {
     $c->stash->{'use_csrf'} = 1;
     if( $cmd_mod == 2 and $self->_do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
-        $self->_redirect_or_success( $c, -2 );
+        _redirect_or_success( $c, -2 );
     }
     else {
         # no command submited, view commands page (can be nonnumerical)
@@ -359,10 +359,10 @@ sub _check_for_commands {
 ######################################
 # view our success page or redirect to referer
 sub _redirect_or_success {
-    my( $self, $c, $how_far_back ) = @_;
+    my( $c, $how_far_back, $just_return ) = @_;
 
     my $wait = defined $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 0;
-    if($self->_bulk_send($c)) {
+    if(_bulk_send($c)) {
         $c->log->debug("bulk sending commands succeeded");
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'Sending Commands failed' );
@@ -480,6 +480,7 @@ sub _redirect_or_success {
             sleep(1);
         }
 
+        return if $just_return;
         if($c->{'request'}->{'parameters'}->{'json'}) {
             $c->stash->{'json'} = {'success' => 1};
             return $c->detach('View::JSON');
@@ -489,6 +490,7 @@ sub _redirect_or_success {
         }
     }
     else {
+        return if $just_return;
         if($c->{'request'}->{'parameters'}->{'json'}) {
             $c->stash->{'json'} = {'success' => 1};
             return $c->detach('View::JSON');
@@ -521,7 +523,7 @@ sub _do_send_command {
     # replace parsed dates
     my $start_time_unix = 0;
     my $end_time_unix   = 0;
-    if( defined $self->{'spread_startdates'} and scalar @{ $self->{'spread_startdates'} } > 0 ) {
+    if( ref $self and defined $self->{'spread_startdates'} and scalar @{ $self->{'spread_startdates'} } > 0 ) {
         my $new_start_time = shift @{ $self->{'spread_startdates'} };
         my $new_date = Thruk::Utils::format_date( $new_start_time, '%Y-%m-%d %H:%M:%S' );
         $c->log->debug( "setting spreaded start date to: " . $new_date );
@@ -564,7 +566,7 @@ sub _do_send_command {
         }
     }
 
-    return 1 if $self->_check_reschedule_alias($c);
+    return 1 if _check_reschedule_alias($c);
 
     if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
         return $c->detach('/error/index/12');
@@ -677,7 +679,7 @@ sub _do_send_command {
 ######################################
 # send all collected commands at once
 sub _bulk_send {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     for my $backends (keys %{$c->stash->{'commands2send'}}) {
         my $options = {};
@@ -753,7 +755,7 @@ sub _generate_spread_startdates {
 ######################################
 # should this command be redirected?
 sub _check_reschedule_alias {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     # only for service reschedule requests
     return unless $c->request->parameters->{'cmd_typ'} == 7;

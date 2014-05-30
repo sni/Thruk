@@ -904,9 +904,9 @@ var TP = {
             tab.saveState();
         }
     },
-    updateAllIcons: function(tab, id, xdata) {
+    updateAllIcons: function(tab, id, xdata, reschedule) {
         if(id != undefined) {
-            TP.updateAllIconsDo(tab, id, xdata);
+            TP.updateAllIconsDo(tab, id, xdata, reschedule);
         } else {
             /* avoid duplicate updates */
             window.clearTimeout(TP.timeouts['timeout_global_icon_update'+tab.id]);
@@ -915,7 +915,7 @@ var TP = {
             }, 100);
         }
     },
-    updateAllIconsDo: function(tab, id, xdata) {
+    updateAllIconsDo: function(tab, id, xdata, reschedule) {
         var panels = TP.getAllPanel(tab);
         var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
         var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
@@ -980,14 +980,16 @@ var TP = {
         var tabpan = Ext.getCmp('tabpan');
         if(count == 0 && tab != tabpan.getActiveTab()) { return; }
         var params = {
-            types:    Ext.JSON.encode(req),
-            backends: TP.getActiveBackendsPanel(tab)
+            types:      Ext.JSON.encode(req),
+            backends:   TP.getActiveBackendsPanel(tab),
+            reschedule: reschedule ? 1 : ''
         };
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
+                if(reschedule) { reschedule.unmask(); }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;

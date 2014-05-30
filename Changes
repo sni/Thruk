@@ -6,6 +6,7 @@ next:
           - Panorama View:
             - iconsets may now contain png, jpg or gif images
             - added dashboard_ignore_changes configuration option
+            - reschedule next check when refreshing single icon with host/service
           - Business Process
             - added easier host:* status aggregation
           - Bug Fixes

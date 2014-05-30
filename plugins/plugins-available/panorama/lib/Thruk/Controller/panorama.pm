@@ -416,14 +416,58 @@ sub _task_status {
         $types = decode_json($c->request->parameters->{'types'});
     }
 
+    my $hostfilter    = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
+    my $servicefilter = [];
+    for my $host (keys %{$types->{'services'}}) {
+        for my $svc (keys %{$types->{'services'}->{$host}}) {
+            push @{$servicefilter}, { host_name => $host, description => $svc};
+        }
+    }
+    $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
+
+    if($c->request->parameters->{'reschedule'}) {
+        # works only for a single host or service
+        $c->stash->{'now'}                               = time();
+        $c->{'request'}->{'parameters'}->{'cmd_mod'}     = 2;
+        $c->{'request'}->{'parameters'}->{'force_check'} = 0;
+        $c->{'request'}->{'parameters'}->{'start_time'}  = time();
+        $c->{'request'}->{'parameters'}->{'json'}        = 1;
+        $c->{'request'}->{'parameters'}->{'service'}     = '';
+        if(scalar keys %{$types->{'hosts'}} == 1) {
+            my $hosts  = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
+                                               columns => [qw/name/]);
+            if(scalar @{$hosts} == 1) {
+                $c->{'request'}->{'parameters'}->{'cmd_typ'} = 96;
+                $c->{'request'}->{'parameters'}->{'host'}    = $hosts->[0]->{'name'};
+                $c->{'request'}->{'parameters'}->{'backend'} = [$hosts->[0]->{'peer_key'}];
+            }
+        }
+        elsif(scalar keys %{$types->{'services'}} == 1) {
+            my $services = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
+                                                    columns => [qw/host_name description/]);
+            if(scalar @{$services} == 1) {
+                $c->{'request'}->{'parameters'}->{'cmd_typ'} = 7;
+                $c->{'request'}->{'parameters'}->{'host'}    = $services->[0]->{'host_name'};
+                $c->{'request'}->{'parameters'}->{'service'} = $services->[0]->{'description'};
+                $c->{'request'}->{'parameters'}->{'backend'} = [$services->[0]->{'peer_key'}];
+            }
+        }
+        $c->stash->{'use_csrf'} = 0;
+        if(Thruk::Controller::cmd->_do_send_command($c)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
+            Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
+        }
+
+    }
+
     my $data = {};
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
             my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
             $c->request->parameters->{'filter'} = $filter;
-            my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+            my( $hfilter, $sfilter, $groupfilter ) = $self->_do_filter($c);
             next if $c->stash->{'has_error'};
-            $data->{'filter'}->{$f} = $self->_summarize_query($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter);
+            $data->{'filter'}->{$f} = $self->_summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
         }
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
@@ -433,8 +477,7 @@ sub _task_status {
         $data->{'servicegroups'} = [values %{$self->_summarize_servicegroup_query($c, $types->{'servicegroups'})}];
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
-        my $filter = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
-        $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ],
+        $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                                  columns => [qw/name state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check plugin_output
                                                                 last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                                                                /]);
@@ -445,14 +488,7 @@ sub _task_status {
         }
     }
     if(scalar keys %{$types->{'services'}} > 0) {
-        my $filter = [];
-        for my $host (keys %{$types->{'services'}}) {
-            for my $svc (keys %{$types->{'services'}->{$host}}) {
-                push @{$filter}, { host_name => $host, description => $svc};
-            }
-        }
-        $filter = Thruk::Utils::combine_filter('-or', $filter);
-        $data->{'services'} = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ],
+        $data->{'services'} = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
                                                        columns => [qw/host_name description state has_been_checked scheduled_downtime_depth acknowledged last_state_change last_check
                                                                       plugin_output last_notification current_notification_number perf_data next_check action_url_expanded notes_url_expanded
                                                                      /]);
