@@ -131,7 +131,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{'json'} = {};
             if(ref $data eq 'ARRAY') {
                 $data = $c->stash->{'data'} if defined $c->stash->{'data'};
-                $c->stash->{'json'}->{'more'} = 1 if $page < $c->stash->{'pages'};
+                $c->stash->{'json'}->{'more'} = 1 if($page < ($c->stash->{'pages'} || 1));
             }
             $c->stash->{'json'}->{'data'} = $data;
             my $program_starts = {};
