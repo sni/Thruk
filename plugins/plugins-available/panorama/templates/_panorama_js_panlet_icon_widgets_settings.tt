@@ -1251,8 +1251,8 @@ TP.openLabelEditorWindow = function(panel) {
 TP.getIconSettingsValues = function(xdata) {
     xdata = TP.clone(xdata);
     // set some defaults
-    if(xdata.label.fontsize   == 0) { xdata.label.fontsize   = 14; }
-    if(xdata.label.bordersize == 0) { xdata.label.bordersize =  1; }
+    if(!xdata.label.fontsize)   { xdata.label.fontsize   = 14; }
+    if(!xdata.label.bordersize) { xdata.label.bordersize =  1; }
     Ext.getCmp('generalForm').getForm().setValues(xdata.general);
     Ext.getCmp('layoutForm').getForm().setValues(xdata.layout);
     Ext.getCmp('appearanceForm').getForm().setValues(xdata.appearance);
