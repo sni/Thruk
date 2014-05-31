@@ -5,7 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - allow unicode characters in performance data units
           - Panorama View:
             - iconsets may now contain png, jpg or gif images
-            - added dashboard_ignore_changes configuration option
+            - added dashboard_ignore_changes configuration option (Franky Van Liedekerke)
             - reschedule next check when refreshing single icon with host/service
           - Business Process
             - added easier host:* status aggregation
