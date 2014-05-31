@@ -79,7 +79,7 @@ case "$1" in
         /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
 
         # update cron entries
-        rm -f /var/cache/thruk/thruk.cache /var/lib/thruk/token
+        rm -f /var/cache/thruk/thruk.cache
         /usr/bin/thruk -a clearcache,installcron --local > /dev/null
 
         echo "Thruk have been configured for http://$(hostname)/thruk/."

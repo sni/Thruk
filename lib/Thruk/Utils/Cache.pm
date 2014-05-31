@@ -208,10 +208,14 @@ sub _retrieve {
     eval {
         $data = lock_retrieve($self->{'_cachefile'});
     };
-    if($@) {
-        die('failed to read '.$self->{'_cachefile'}.': '.$@);
-    }
     alarm(0);
+    if($@) {
+        warn('failed to read '.$self->{'_cachefile'}.': '.$@);
+        $self->clear();
+        $self->{'_data'} = {};
+        $self->_store();
+        $data = {};
+    }
     return $data;
 }
 
