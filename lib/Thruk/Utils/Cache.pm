@@ -210,11 +210,12 @@ sub _retrieve {
     };
     alarm(0);
     if($@) {
-        warn('failed to read '.$self->{'_cachefile'}.': '.$@);
+        my $err = $@;
         $self->clear();
         $self->{'_data'} = {};
         $self->_store();
         $data = {};
+        warn('failed to read '.$self->{'_cachefile'}.': '.$err);
     }
     return $data;
 }
