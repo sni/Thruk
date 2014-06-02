@@ -1,5 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Panorama View:
+            - added z-index option for icons
+          - Bug Fixes
+            - fixed rendering icons above dashboard settings window
+
 1.84-3   Sat May 31 16:10:07 CEST 2014
           - added csrf_allowed_hosts configuration option
           - allow unicode characters in performance data units

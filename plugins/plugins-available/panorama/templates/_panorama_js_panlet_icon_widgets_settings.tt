@@ -141,6 +141,16 @@ TP.iconShowEditDialog = function(panel) {
                     step:           15,
                     value:         panel.xdata.layout.rotation,
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyRotation(This.value, xdata); } }
+                }, {
+                    fieldLabel:   'Z-Index',
+                    xtype:        'numberfield',
+                    allowDecimals: false,
+                    name:         'zindex',
+                    minValue:        0,
+                    maxValue:      100,
+                    step:            1,
+                    value:         panel.xdata.layout.zindex,
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyZindex(This.value, xdata); } }
                 }]
             }]
         }]

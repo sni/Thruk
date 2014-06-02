@@ -85,6 +85,7 @@
             }
             [% END %]
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
+            This.applyZindex(This.xdata.layout.zindex, This.xdata);
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -159,6 +160,11 @@
         } else {
             this.applyRotation(0, xdata);
         }
+        if(xdata.layout.zindex) {
+            this.applyZindex(Number(xdata.layout.zindex), xdata);
+        } else {
+            this.applyZindex(0, xdata);
+        }
 
         /* set label */
         this.setIconLabel(xdata.label);
@@ -208,6 +214,16 @@
         animated.to = {x:layout.x, y:layout.y};
         this.animate(animated);
     },
+    /* apply z-index */
+    applyZindex: function(value, xdata) {
+        var This = this;
+        This.effectiveZindex = value;
+        var tab = Ext.getCmp(This.panel_id);
+        window.clearTimeout(TP.timeouts['applyZindex_'+tab.id]);
+        TP.timeouts['applyZindex_'+tab.id] = window.setTimeout(function() {
+            tab.applyZindex();
+        }, 250);
+    },
     /* rotates this thing */
     applyRotation: function(value, xdata) {
         if(value == undefined) { return; }
@@ -238,7 +254,7 @@
         if(cfg == undefined)          { return; }
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex) { return; }
-        var txt = cfg.labeltext;
+        var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
         this.el.dom.title = '';
         /* dynamic label? */
