@@ -5,6 +5,7 @@ next:
             - added z-index option for icons
           - Bug Fixes
             - fixed rendering icons above dashboard settings window
+            - fixed recurring downtimes not beeing saved under some conditions with multiple backends
 
 1.84-3   Sat May 31 16:10:07 CEST 2014
           - added csrf_allowed_hosts configuration option

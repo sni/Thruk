@@ -36,7 +36,7 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my $downtimes = get_downtimes_list($c, 0, 0);
+    my $downtimes = get_downtimes_list($c, 0, 1);
     for my $d (@{$downtimes}) {
         next unless defined $d->{'schedule'};
         next unless scalar @{$d->{'schedule'}} > 0;
