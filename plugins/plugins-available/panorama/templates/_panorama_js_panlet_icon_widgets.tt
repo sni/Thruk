@@ -1334,6 +1334,7 @@ TP.renderTipDetails = function(data) {
         details += '<tr>';
         details += '<th>Hosts:<\/th>';
         details += '<\/tr>';
+        var skipped = 0;
         var uniq_hosts = {};
         for(var x=0; x<data.length;x++) {
             var d = data[x];
@@ -1342,8 +1343,9 @@ TP.renderTipDetails = function(data) {
                 prefix = 'host_';
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
-            if(panel.xdata.state != 0 && d[prefix+'state'] == 0) { continue; }
             uniq_hosts[d[prefix+'name']] = true;
+            if(num_shown >= 5) { skipped++; continue; }
+            if(panel.xdata.state != 0 && d[prefix+'state'] == 0) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
@@ -1354,7 +1356,11 @@ TP.renderTipDetails = function(data) {
             details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
             details += '<\/tr>';
             num_shown++;
-            if(num_shown >= 5) { break; }
+        }
+        if(skipped > 0) {
+            details += '<tr>';
+            details += '<td class="more_hosts" colspan=3>'+(skipped)+' more host'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<\/tr>';
         }
         details += '<\/table>';
     }
@@ -1364,9 +1370,11 @@ TP.renderTipDetails = function(data) {
         details += '<th>Services:<\/th>';
         details += '<\/tr>';
         var last_host = "";
+        skipped = 0;
         for(var x=0; x<data.length;x++) {
             var d = data[x];
-            if(panel.xdata.state != 0 && d['state'] == 0) { continue; }
+            if(panel.xdata.state != 0 && d['state'] == 0) { skipped++; continue; }
+            if(num_shown >= 10) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_service_icons({}, {}, {}, {}, {}, {}, {}, d);
@@ -1383,7 +1391,11 @@ TP.renderTipDetails = function(data) {
             details += '<\/tr>';
             last_host = d['host_name'];
             num_shown++;
-            if(num_shown >= 10) { break; }
+        }
+        if(skipped > 0) {
+            details += '<tr>';
+            details += '<td class="more_services" colspan=4>'+skipped+' more service'+(skipped > 1 ? 's' : '')+'...<\/td>';
+            details += '<\/tr>';
         }
         details += '<\/table>';
     }
