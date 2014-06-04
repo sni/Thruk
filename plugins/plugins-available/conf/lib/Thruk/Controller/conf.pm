@@ -1271,8 +1271,12 @@ sub _update_password {
         if($pass1 ne '') {
             return unless Thruk::Utils::check_csrf($c);
             if($pass1 eq $pass2) {
-                $pass1 =~ s/'/\'/gmx;
-                $user  =~ s/'/\'/gmx;
+                # mangle apostrophes to allow them to be embedded in single-quoted 
+                # shell strings - taking advantage of the shell's feature of merging
+                # adjacent quoted strings e.g. 'blah'"'"'blah' evaluates to "blah'blah".
+                # We cannot use double quotes as this opens up a remote execution vector.
+                $pass1 =~ s/'/'"'"'/gmx;
+                $user  =~ s/'/'"'"'/gmx;
                 my $create = -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} ? '' : '-c ';
                 my $cmd    = sprintf("%s -b %s '%s' '%s' '%s' 2>&1",
                                         '$(which htpasswd2 2>/dev/null || which htpasswd 2>/dev/null)',
