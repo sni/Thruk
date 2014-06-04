@@ -401,7 +401,7 @@ sub get_downtime_backends {
     elsif($downtime->{'target'} eq 'servicegroup') {
         $cmd_typ = 122;
         if($choose_backends) {
-            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/name/] );
+            my $data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'groups' => { '>=' => $downtime->{'servicegroup'} }} ], columns => [qw/description/] );
             $backends = [keys %{Thruk::Utils::array2hash($data, 'peer_key')}];
         }
     }
