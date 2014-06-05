@@ -1271,7 +1271,7 @@ sub _update_password {
         if($pass1 ne '') {
             return unless Thruk::Utils::check_csrf($c);
             if($pass1 eq $pass2) {
-                # mangle apostrophes to allow them to be embedded in single-quoted 
+                # mangle apostrophes to allow them to be embedded in single-quoted
                 # shell strings - taking advantage of the shell's feature of merging
                 # adjacent quoted strings e.g. 'blah'"'"'blah' evaluates to "blah'blah".
                 # We cannot use double quotes as this opens up a remote execution vector.
