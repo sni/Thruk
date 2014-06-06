@@ -274,6 +274,9 @@
                 }
             });
         }
+        if(TP.iconSettingsWindow && TP.iconSettingsWindow.toFront) {
+            TP.iconSettingsWindow.toFront();
+        }
     },
 
     /* start all timed actions for this tab and its panels */

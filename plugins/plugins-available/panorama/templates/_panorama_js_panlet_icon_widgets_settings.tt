@@ -1090,7 +1090,6 @@ TP.iconShowEditDialog = function(panel) {
     var showAtPos = TP.getNextToPanelPos(panel, settingsWindow.width, settingsWindow.height);
     panel.setIconLabel(undefined, true);
     settingsWindow.showAt(showAtPos);
-    settingsWindow.toFront();
     TP.iconSettingsWindow.panel = panel;
 
     renderUpdate = function(forceColor, forceRenderItem) {
@@ -1101,6 +1100,10 @@ TP.iconShowEditDialog = function(panel) {
     };
     renderUpdate();
     settingsWindow.renderUpdate = renderUpdate;
+
+    window.setTimeout(function() {
+        TP.iconSettingsWindow.toFront();
+    }, 100);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
