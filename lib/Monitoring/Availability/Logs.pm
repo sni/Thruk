@@ -242,6 +242,7 @@ sub _set_from_options {
         my @tmp = split(/;/mxo, $string,6); # regex is faster than strtok here
         $data->{'host_name'}           = $tmp[0];
         $data->{'service_description'} = $tmp[1];
+        return unless defined $tmp[2];
         $data->{'state'}               = $Monitoring::Availability::Logs::service_states->{$tmp[2]};
         return unless defined $data->{'state'};
         $data->{'hard'}                = $tmp[3] eq 'HARD' ? 1 : 0;
@@ -255,6 +256,7 @@ sub _set_from_options {
     ) {
         my @tmp = split(/;/mxo, $string,5); # regex is faster than strtok here
         $data->{'host_name'}     = $tmp[0];
+        return unless defined $tmp[1];
         $data->{'state'}         = $Monitoring::Availability::Logs::host_states->{$tmp[1]};
         return unless defined $data->{'state'};
         $data->{'hard'}          = $tmp[2] eq 'HARD' ? 1 : 0;
