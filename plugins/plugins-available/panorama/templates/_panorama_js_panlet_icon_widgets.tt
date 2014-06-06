@@ -234,6 +234,7 @@
         el.setStyle("-webkit-transform", "rotate("+value+"deg)");
         el.setStyle("-moz-transform", "rotate("+value+"deg)");
         el.setStyle("-o-transform", "rotate("+value+"deg)");
+        el.dom.style.msTransform = "rotate("+value+"deg)";
         el.setStyle("-ms-transform", "rotate("+value+"deg)");
     },
     /* enable / disable editing of this panlet */
