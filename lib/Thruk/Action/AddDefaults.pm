@@ -555,8 +555,9 @@ sub set_processinfo {
 
     # check our backends uptime
     if(defined $c->config->{'delay_pages_after_backend_reload'} and $c->config->{'delay_pages_after_backend_reload'} > 0) {
-        my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'};
+        my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'} || 0;
         for my $backend (keys %{$processinfo}) {
+            next unless($processinfo->{$backend} and $processinfo->{$backend}->{'program_start'});
             my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
             if($delay > 0) {
                 $c->log->debug("delaying page delivery by $delay seconds...");
