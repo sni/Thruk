@@ -14,7 +14,7 @@
       [% IF type == 'int' %]
         <input type="text" name="params.[% key %]" value="[% value %]">
       [% ELSIF type == 'textarea' %]
-        <textarea name="params.[% key %]" wrap="hard" cols=74>[% value %]</textarea></td>
+        <textarea name="params.[% key %]" wrap="hard" cols=74>[% value %]</textarea>
       [% ELSIF type == 'yes_no' %]
         <select name="params.[% key %]">
           <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
