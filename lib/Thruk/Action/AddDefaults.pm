@@ -107,6 +107,17 @@ sub add_defaults {
     my $cached_data = $c->cache->get->{'global'} || {};
 
     ###############################
+    # start shadow naemon process on first request
+    if($c->config->{'use_shadow_naemon'} and !$c->config->{'_shadow_naemon_started'}) {
+        if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
+            $c->stats->profile(begin => "AddDefaults::check_shadow_naemon_procs");
+            Thruk::Utils::check_shadow_naemon_procs($c->config);
+            $c->stats->profile(end => "AddDefaults::check_shadow_naemon_procs");
+            $c->config->{'_shadow_naemon_started'} = 1;
+        }
+    }
+
+    ###############################
     # no db access before here, so check if all pool worker are up already
     if($Thruk::Backend::Pool::pool) {
         my $worker = do { lock ${$Thruk::Backend::Pool::pool->{worker}}; ${$Thruk::Backend::Pool::pool->{worker}} };

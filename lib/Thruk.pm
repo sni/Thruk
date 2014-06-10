@@ -229,14 +229,6 @@ elsif(!__PACKAGE__->debug) {
 }
 
 ###################################################
-# check shadownaemons processes
-if(__PACKAGE__->config->{'use_shadow_naemon'}) {
-    if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
-        Thruk::Utils::check_shadow_naemon_procs(__PACKAGE__->config);
-    }
-}
-
-###################################################
 # SizeMe and other devel internals
 if($ENV{'SIZEME'}) {
     # add signal handler to print memory information
