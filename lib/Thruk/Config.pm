@@ -6,6 +6,7 @@ use utf8;
 use Carp;
 use Config::Any;
 use Cwd 'abs_path';
+use File::Slurp qw/read_file/;
 use Catalyst::Plugin::Thruk::ConfigLoader;
 
 =head1 NAME
@@ -332,7 +333,7 @@ sub get_debug_details {
     my $release = "";
     for my $f (qw|/etc/redhat-release /etc/issue|) {
         if(-e $f) {
-            $release = `cat $f`;
+            $release = read_file($f);
             last;
         }
     }

@@ -9,6 +9,7 @@ use Thruk::Pool::Simple;
 use Thruk::Backend::Peer;
 use Thruk::Utils::IO;
 use Config::General;
+use Cwd qw/getcwd/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
 
@@ -400,8 +401,7 @@ sub do_on_peer {
                 my $inc;
                 my $code = $arg->[$x+1];
                 if(ref($code) eq 'HASH') {
-                    chomp(my $pwd = `pwd`);
-                    for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : $pwd.'/plugins/plugins-available/')) {
+                    for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : getcwd().'/plugins/plugins-available/')) {
                         if(-e $path.'/'.$code->{'inc'}) {
                             $inc  = $path.'/'.$code->{'inc'};
                             last;
@@ -416,7 +416,7 @@ sub do_on_peer {
                 if($@) {
                     require Data::Dumper;
                     Data::Dumper->import();
-                    die("eval failed:".Dumper(`pwd`, $arg, $@));
+                    die("eval failed:".Dumper(getcwd(), $arg, $@));
                 }
                 pop @INC if $inc;
             }
