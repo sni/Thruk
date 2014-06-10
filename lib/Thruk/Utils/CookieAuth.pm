@@ -70,7 +70,7 @@ sub external_authentication {
             $login = encode_utf8(Thruk::Utils::decode_any($login));
             $pass  = encode_utf8(Thruk::Utils::decode_any($pass));
             $ua->credentials( $netloc, $realm, $login, $pass );
-            $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
+            $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
             $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {

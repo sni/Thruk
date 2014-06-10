@@ -2161,20 +2161,21 @@ sub get_memory_usage {
 
 =head2 check_shadow_naemon_procs
 
-  check_shadow_naemon_procs($config, [$log_missing])
+  check_shadow_naemon_procs($config, [$c], [$log_missing])
 
 makes sure all shadownaemon processes are running
 
 =cut
 
 sub check_shadow_naemon_procs {
-    my($config, $log_missing) = @_;
+    my($config, $c, $log_missing) = @_;
     local $SIG{CHLD} = 'DEFAULT';
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
+        # faster check if nothing failed
+        next if($c and !$c->stash->{'failed_backends'}->{$key});
         my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
-        Thruk::Utils::IO::mkdir_r($basedir.'/tmp');
         my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         my $started = 0;
         if(-s $pidfile) {
@@ -2184,7 +2185,8 @@ sub check_shadow_naemon_procs {
             }
         }
         if(!$started) {
-            $log_missing->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}))) if $log_missing;
+            Thruk::Utils::IO::mkdir_r($basedir.'/tmp');
+            $c->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}))) if $log_missing;
             my $cmd = sprintf("%s -d -i %s -o %s%s >> %s/tmp/shadownaemon.log 2>&1",
                               $config->{'shadow_naemon_bin'} || 'shadownaemon',
                               $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},
@@ -2192,7 +2194,7 @@ sub check_shadow_naemon_procs {
                               $config->{'shadow_naemon_ls'} ? " -l ".$config->{'shadow_naemon_ls'} : '',
                               $config->{'shadow_naemon_dir'}.'/'.$key,
                             );
-            $log_missing->log->debug($cmd) if $log_missing;
+            $c->log->debug($cmd) if $log_missing;
             `$cmd`;
         }
     }

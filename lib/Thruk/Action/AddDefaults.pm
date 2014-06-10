@@ -111,7 +111,7 @@ sub add_defaults {
     if($c->config->{'use_shadow_naemon'} and !$c->config->{'_shadow_naemon_started'}) {
         if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
             $c->stats->profile(begin => "AddDefaults::check_shadow_naemon_procs");
-            Thruk::Utils::check_shadow_naemon_procs($c->config);
+            Thruk::Utils::check_shadow_naemon_procs($c->config, $c);
             $c->stats->profile(end => "AddDefaults::check_shadow_naemon_procs");
             $c->config->{'_shadow_naemon_started'} = 1;
         }
@@ -316,7 +316,7 @@ sub after_execute {
 
     # check if our shadows are still up and running
     if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
-        $c->run_after_request('Thruk::Utils::check_shadow_naemon_procs($c->config, $c);');
+        $c->run_after_request('Thruk::Utils::check_shadow_naemon_procs($c->config, $c, 1);');
     }
 
     $c->stats->profile(end => "AddDefaults::after");
