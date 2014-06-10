@@ -49,7 +49,7 @@ return:
 
 =cut
 sub external_authentication {
-    my($config, $login, $pass, $address) = @_;
+    my($config, $login, $pass, $address, $stats) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
     my $sdir     = $config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
@@ -60,7 +60,9 @@ sub external_authentication {
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
+    $stats->profile(begin => "ext::auth: post1 ".$authurl) if $stats;
     my $res      = $ua->post($authurl);
+    $stats->profile(end   => "ext::auth: post1 ".$authurl) if $stats;
     if($res->code == 401) {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
@@ -68,7 +70,9 @@ sub external_authentication {
             $login = encode_utf8(Thruk::Utils::decode_any($login));
             $pass  = encode_utf8(Thruk::Utils::decode_any($pass));
             $ua->credentials( $netloc, $realm, $login, $pass );
+            $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
+            $stats->profile(end   => "ext::auth: post2 ".$authurl) if $stats;
             if($res->code == 200 and $res->request->header('authorization') and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
                 if($1 eq $login) {
                     my $sessionid = md5_hex(rand(1000).time());

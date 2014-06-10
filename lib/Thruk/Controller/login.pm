@@ -115,7 +115,7 @@ sub index :Path :Args(0) {
             return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");
-            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'});
+            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'}, $c->stats);
             $c->stats->profile(end => "login::external_authentication");
             if($success eq '-1') {
                 return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
