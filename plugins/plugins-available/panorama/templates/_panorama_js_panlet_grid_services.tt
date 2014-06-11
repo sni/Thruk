@@ -53,6 +53,11 @@ Ext.define('TP.PanletGridServiceMineMap', {
     reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
+        delete this.initialState;
+        var state = cp.get(this.id);
+        if(state && state.xdata && state.xdata.gridstate) {
+            delete state.xdata.gridstate;
+        }
         this.xdata.url = 'panorama.cgi?task=servicesminemap';
     },
     setGearItems: function() {

@@ -9,6 +9,7 @@ next:
             - fixed problem in servicegroup recurring downtimes
             - fixed half-visible panorama buttons in IE11
             - fixed panorama shape rotation in IE11
+            - fixed panorama column error in minemap
 
 1.84-3   Sat May 31 16:10:07 CEST 2014
           - added csrf_allowed_hosts configuration option
