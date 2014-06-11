@@ -111,7 +111,7 @@ sub add_defaults {
     if($c->config->{'use_shadow_naemon'} and !$c->config->{'_shadow_naemon_started'}) {
         if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
             $c->stats->profile(begin => "AddDefaults::check_shadow_naemon_procs");
-            Thruk::Utils::check_shadow_naemon_procs($c->config, $c);
+            Thruk::Utils::check_shadow_naemon_procs($c->config, $c, 0, 1);
             $c->stats->profile(end => "AddDefaults::check_shadow_naemon_procs");
             $c->config->{'_shadow_naemon_started'} = 1;
         }

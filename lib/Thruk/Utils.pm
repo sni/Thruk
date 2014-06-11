@@ -2161,20 +2161,20 @@ sub get_memory_usage {
 
 =head2 check_shadow_naemon_procs
 
-  check_shadow_naemon_procs($config, [$c], [$log_missing])
+  check_shadow_naemon_procs($config, [$c], [$log_missing], [$force])
 
 makes sure all shadownaemon processes are running
 
 =cut
 
 sub check_shadow_naemon_procs {
-    my($config, $c, $log_missing) = @_;
+    my($config, $c, $log_missing, $force) = @_;
     local $SIG{CHLD} = 'DEFAULT';
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
         # faster check if nothing failed
-        next if($c and !$c->stash->{'failed_backends'}->{$key});
+        next if(!$force and $c and !$c->stash->{'failed_backends'}->{$key});
         my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
         my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         my $started = 0;
