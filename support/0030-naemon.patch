@@ -39,15 +39,6 @@
  
  ######################################
  # log4perl config
-@@ -520,7 +523,7 @@
- # bug reporting
- # show link to bug reports when internal errors occur.
- # set to 'server' to log js error server side
--show_error_reports = 1
-+show_error_reports = server
- 
- # don't report some known harmless javascript errors
- skip_js_errors  = cluetip is not a function
 @@ -532,8 +535,8 @@
  # COOKIE AUTH
  # cookie auth requires additional webserver settings, see the documentation
