@@ -172,7 +172,7 @@ sub set_default_config {
                     '7'                     => 'Sunday',
                                            },
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
-        'show_error_reports'            => 1,
+        'show_error_reports'            => 'both',
         'skip_js_errors'                => [ 'cluetip is not a function', 'sprite._defaults is undefined' ],
         'cookie_auth_login_url'             => 'thruk/cgi-bin/login.cgi',
         'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',

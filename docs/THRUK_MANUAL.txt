@@ -1597,10 +1597,12 @@ ex.:
 
 ==== show_error_reports
 Show link to bug reports when internal errors occur.
+Set to '1' to show a error icon which links to a error report mail.
 Set to 'server' to log js error server side.
+Set to 'both' to log server side but still show the icon.
 
 ex.:
-  show_error_reports = 1
+  show_error_reports = both
 
 
 ==== skip_js_errors
