@@ -3,7 +3,13 @@ var version_info   = '[% fullversion(c) %]';
 var released       = '[% c.config.released %]';
 var thruk_errors   = [];
 var bug_email_rcpt = "[% bug_email_rcpt %]";
+var error_count    = 0;
 window.onerror = function(msg, url, line) {
+  error_count++;
+  if(error_count > 30) {
+    debug("too many errors, not logging any more...");
+    window.onerror = undefined;
+  }
   try {
     thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
     // hide errors from saved pages
