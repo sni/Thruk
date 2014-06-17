@@ -1,12 +1,15 @@
 #!/usr/bin/env perl
 
+use warnings;
 use strict;
+use utf8;
 use Test::More;
 use Data::Dumper;
+use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 38;
+    plan tests => 46;
 
     use lib('t');
     require TestUtils;
@@ -176,3 +179,29 @@ my($replaced,$rc) = $b->_get_replaced_string($str, $macros);
 my $expected = '/opt/test -a a -b  -c host';
 is($rc, 1, 'macro replacement with empty args succeeds');
 is($replaced, $expected, 'macro replacement with empty args string');
+
+#########################
+# utf8 encoding
+my $teststring = 'test';
+my $encoded    = $teststring;
+$encoded       = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, $teststring, 'ensure utf8 test');
+ok(is_utf8($encoded), 'is_utf8 test');
+
+$teststring = 'testä';
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, 'test'.chr(228), 'ensure utf8 testae');
+ok(is_utf8($encoded), 'is_utf8 testae');
+
+$teststring ='test€';
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, "test\x{20ac}", 'ensure utf8 testeuro');
+ok(is_utf8($encoded), 'is_utf8 testeuro');
+
+$teststring = "test\x{20ac}";
+$encoded    = $teststring;
+$encoded    = Thruk::Utils::ensure_utf8($encoded);
+is($encoded, "test\x{20ac}", 'ensure utf8 test20ac');
+ok(is_utf8($encoded), 'is_utf8 test20ac');
