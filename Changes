@@ -13,6 +13,7 @@ next:
             - fixed panorama shape rotation in IE11
             - fixed panorama column error in minemap
             - fixed problem with utf8 characters in passwords
+            - fixed problem with quotes in passwords
 
 1.84-3   Sat May 31 16:10:07 CEST 2014
           - added csrf_allowed_hosts configuration option

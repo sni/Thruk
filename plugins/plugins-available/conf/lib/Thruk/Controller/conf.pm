@@ -18,6 +18,7 @@ use File::Slurp;
 use Encode qw(decode_utf8 encode_utf8);
 use Config::General qw(ParseConfig);
 use Digest::MD5 qw(md5_hex);
+use IPC::Open3;
 
 =head1 NAME
 
@@ -1250,14 +1251,13 @@ sub _update_password {
     my $user = $c->{'request'}->{'parameters'}->{'data.username'};
     my $send = $c->{'request'}->{'parameters'}->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+        my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
+        return('could not find htpasswd or htpasswd2 in path, cannot update passwords') unless $htpasswd;
+
         # remove password?
         if($send eq 'remove password') {
             return unless Thruk::Utils::check_csrf($c);
-            my $cmd = sprintf("%s -D %s '%s' 2>&1",
-                                 '$(which htpasswd2 2>/dev/null || which htpasswd 2>/dev/null)',
-                                 $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'},
-                                 $user
-                             );
+            my $cmd = [ $htpasswd, '-D', $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}, $user ];
             if($self->_cmd($c, $cmd)) {
                 $c->log->info("removed password for ".$user);
                 return;
@@ -1271,16 +1271,12 @@ sub _update_password {
         if($pass1 ne '') {
             return unless Thruk::Utils::check_csrf($c);
             if($pass1 eq $pass2) {
-                $pass1 =~ s/'/\'/gmx;
-                $user  =~ s/'/\'/gmx;
-                my $create = -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'} ? '' : '-c ';
-                my $cmd    = sprintf("%s -b %s '%s' '%s' '%s' 2>&1",
-                                        '$(which htpasswd2 2>/dev/null || which htpasswd 2>/dev/null)',
-                                        $create,
-                                        $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'},
-                                        $user,
-                                        $pass1
-                                    );
+                my $cmd = [$htpasswd];
+                push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+                push @{$cmd}, '-b';
+                push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+                push @{$cmd}, $user;
+                push @{$cmd}, $pass1;
                 if($self->_cmd($c, $cmd)) {
                     $c->log->info("changed password for ".$user);
                     return;
@@ -1328,9 +1324,20 @@ sub _cmd {
 
     local $SIG{CHLD}='';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-    $c->log->debug( "running cmd: ". $cmd );
-    my $output = `$cmd 2>&1`;
-    my $rc = $?;
+    my($rc, $output);
+    if(ref $cmd eq 'ARRAY') {
+        my $prog = shift @{$cmd};
+        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
+        my($pid, $wtr, $rdr);
+        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        waitpid( $pid, 0 );
+        $rc = $?;
+        chomp($output = <$rdr> || '');
+    } else {
+        $c->log->debug( "running cmd: ". $cmd );
+        $output = `$cmd 2>&1`;
+        $rc = $?;
+    }
     if($rc == -1) {
         $output .= "[".$!."]";
     } else {

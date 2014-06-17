@@ -1908,6 +1908,22 @@ sub ensure_utf8 {
     return(encode_utf8($_[0]));
 }
 
+########################################
+
+=head2 which
+
+    which($prog)
+
+returns path to program or undef
+
+=cut
+sub which {
+    my($prog) = @_;
+    my $path = `which $prog`;
+    return unless $path;
+    chomp($path);
+    return($path);
+}
 
 ########################################
 

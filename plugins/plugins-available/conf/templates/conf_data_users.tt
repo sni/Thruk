@@ -30,7 +30,7 @@
 
 [% IF show_user %]
 <table><tr><td valign="top">
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="POST" autocomplete="off">
 <input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="store">
@@ -61,11 +61,11 @@
     </tr>
     <tr>
       <td class='dataVar' align="left">Password</td>
-      <td class='dataVal'><input type="password" name="data.password" value="" size=15></td>
+      <td class='dataVal'><input type="password" name="data.password" value="" size=15 autocomplete="off"></td>
     </tr>
     <tr>
       <td class='dataVar' align="left">Verify Password</td>
-      <td class='dataVal'><input type="password" name="data.password2" value="" size=15></td>
+      <td class='dataVal'><input type="password" name="data.password2" value="" size=15 autocomplete="off"></td>
     </tr>
     [% END %]
     [% IF conf_config.exists('cgi.cfg') %]
