@@ -67,8 +67,9 @@ sub external_authentication {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
             $realm = $1;
-            $login = Thruk::Utils::ensure_utf8($login);
-            $pass  = Thruk::Utils::ensure_utf8($pass);
+            # LWP requires perl internal format
+            $login = encode_utf8(Thruk::Utils::ensure_utf8($login));
+            $pass  = encode_utf8(Thruk::Utils::ensure_utf8($pass));
             $ua->credentials( $netloc, $realm, $login, $pass );
             $stats->profile(begin => "ext::auth: post2 ".$authurl) if $stats;
             $res = $ua->post($authurl);
