@@ -13,6 +13,7 @@ resources(
 );
 
 requires 'parent'                                 => 0;     # required by Thruk
+requires 'pxarent'                                 => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
 requires 'Config::Any'                            => 0;     # required by Thruk::Config
@@ -101,6 +102,7 @@ feature     ('mysql_support',
 );
 
 # requirements test requirements
+if(scalar @ARGV != 1 || $ARGV[0] ne '--checkdeps') {
 feature     ('author_test',
   -default                                                                  => 0,
   'Catalyst::Devel'                                                         => 0,
@@ -118,7 +120,9 @@ feature     ('author_test',
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
+  'Test::JavaScriptx'                                                        => 0,
 );
+};
 
 ##################################
 # should come with Catalyst::Devel

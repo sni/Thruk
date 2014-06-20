@@ -10,6 +10,7 @@ if($@ && !-e 'Makefile') {
     print STDERR $@;
     exit 1;
 }
+unlink("Makefile");
 
 alarm(180);
 
@@ -51,6 +52,7 @@ Getopt::Long::GetOptions (
    "with-thruk-vardir=s"    => \$options->{'thruk-vardir'},
    "with-thruk-logdir=s"    => \$options->{'thruk-logdir'},
    "without-compress"       => \$options->{'nocompress'},
+   "without-thruk-libs"     => \$options->{'nolibs'},
    "quiet|q"                => \$options->{'quiet'},
 ) or warn "error in options";
 
@@ -80,10 +82,11 @@ $options->{'logdir'}         = $options->{'thruk-logdir'}  if $options->{'thruk-
 chomp($options->{'thruk-user'});
 chomp($options->{'thruk-group'});
 
-$options->{'htmlurl'}  =~ s|/+$||mx;
-$options->{'htmlurl'}  =~ s|^/+||mx;
-$options->{'htmlurl'}  = '/'.$options->{'htmlurl'};
-$options->{'compress'} = $options->{'nocompress'} ? 'disabled' : 'enabled';
+$options->{'htmlurl'}    =~ s|/+$||mx;
+$options->{'htmlurl'}    =~ s|^/+||mx;
+$options->{'htmlurl'}    = '/'.$options->{'htmlurl'};
+$options->{'compress'}   = $options->{'nocompress'} ? 'disabled' : 'enabled';
+$options->{'thruk-libs'} = '' if $options->{'nolibs'};
 
 open(my $fh, '>', 'script/append.make.options') or die("cannot write to: append.make.options:".$!);
 print $fh <<EOT;
@@ -116,6 +119,17 @@ if(!-e "Makefile") {
     print "configure failed:\n\n";
     print $out;
     exit 1;
+}
+
+# check our modules if not modules are build
+if($options->{'nolibs'}) {
+    $out = `make checkdeps 2>&1`;
+    if($out =~ m/Warning:\sprerequisite/mx) {
+        print $out;
+        unlink("Makefile");
+        print "ERROR: missing dependencies, see list above for details\n";
+        exit 1;
+    }
 }
 
 exit if $options->{'quiet'};
@@ -208,5 +222,6 @@ __END__
     --with-thruk-group           sets group name to run thruk [thruk]
     --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
     --without-compress           skip compression of css and javascript files which requires yui-compressor
+    --without-thruk-libs         skip building the required perl modules. Make sure you add dependencies accordingly
 
 =cut
