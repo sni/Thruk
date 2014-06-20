@@ -13,7 +13,6 @@ resources(
 );
 
 requires 'parent'                                 => 0;     # required by Thruk
-requires 'pxarent'                                 => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
 requires 'Config::Any'                            => 0;     # required by Thruk::Config
@@ -120,7 +119,6 @@ feature     ('author_test',
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
-  'Test::JavaScriptx'                                                        => 0,
 );
 };
 
