@@ -1083,7 +1083,7 @@ sub _do_on_peers {
         }
         # failed to open socket /tmp/live.sock: No such file or directory
         elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
-            die($1);
+            confess($1);
         }
         # failed to connect at .../Class/Lite.pm line 245.
         elsif($err =~ m|(failed\s+to\s+connect)\s+at\s+|mx) {

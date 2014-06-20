@@ -172,6 +172,11 @@ script has the following arguments
       - logcacheoptimize            optimize and repair logcache (mysql only)
       - logcacheremoveunused        remove old tables from no longer used backends (mysql only)
 
+    Livestatus Cache:
+      - livecachestart              start shadownaemons livecache
+      - livecachestop               stop all shadownaemons
+      - livecachestatus             show livecache status
+
     Internal Commands
       - installcron                 update cronjobs for downtimes and reports
                                     (only needed during package installation)

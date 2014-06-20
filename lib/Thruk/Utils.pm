@@ -2234,6 +2234,39 @@ sub check_shadow_naemon_procs {
     return;
 }
 
+##########################################################
+
+=head2 status_shadow_naemon_procs
+
+  status_shadow_naemon_procs($config)
+
+get status of shadownaemon processes
+
+=cut
+
+sub status_shadow_naemon_procs {
+    my($config)       = @_;
+    my $status        = [];
+    my $total_started = 0;
+    for my $key (keys %{$Thruk::Backend::Pool::peers}) {
+        my $peer    = $Thruk::Backend::Pool::peers->{$key};
+        next unless $peer->{'cacheproxy'};
+        my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
+        my $pidfile = $basedir.'/tmp/shadownaemon.pid';
+        my $started = 0;
+        my $pid;
+        if(-s $pidfile) {
+            $pid = read_file($pidfile);
+            if(kill(0, $pid)) {
+                $started = 1;
+                $total_started++;
+            }
+        }
+        push @{$status}, { key => $key, name => $peer->{'name'}, status => $started, pid => $pid, dir => $basedir };
+    }
+    return($status, $total_started);
+}
+
 ########################################
 
 =head2 shutdown_shadow_naemon_procs

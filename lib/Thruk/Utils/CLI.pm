@@ -309,7 +309,13 @@ sub _run {
 
     unless(defined $result) {
         # initialize backend pool here to safe some memory
-        Thruk::Backend::Pool::init_backend_thread_pool();
+        if($self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ m/livecache/mx) {
+            local $ENV{'USE_SHADOW_NAEMON'}        = 1;
+            local $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+            Thruk::Backend::Pool::init_backend_thread_pool();
+        } else {
+            Thruk::Backend::Pool::init_backend_thread_pool();
+        }
 
         $c = $self->get_c();
         if(!defined $c) {
@@ -586,6 +592,11 @@ sub _run_command_action {
     }
     elsif($action =~ /logcacheremoveunused/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'removeunused', $src, $2, $opt);
+    }
+
+    # livestatus proxy cache
+    elsif($action =~ /livecache(start|stop|status)/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_livecache($c, $1, $src, $opt);
     }
 
     # self check
@@ -1063,6 +1074,75 @@ sub _cmd_import_logs {
                        (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
                        ), 0);
     }
+}
+
+##############################################
+sub _cmd_livecache {
+    my($c, $mode, $src, $opt) = @_;
+    $c->stats->profile(begin => "_cmd_livecache($mode)");
+
+    if($src ne 'local' and $mode ne 'status') {
+        return("ERROR - please run with --local only\n", 1);
+    }
+
+    Thruk::Backend::Pool::init_backend_thread_pool();
+
+    if($mode eq 'start') {
+        Thruk::Utils::check_shadow_naemon_procs($c->config, $c, 0, 1);
+        # wait for the startup
+        my($status, $started);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+            };
+            last if($status && scalar @{$status} == $started);
+        }
+        sleep(1);
+    }
+    elsif($mode eq 'stop') {
+        Thruk::Utils::shutdown_shadow_naemon_procs($c->config);
+        # wait for the fully stopped
+        my($status, $started, $total, $failed);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+                ($total, $failed) = _get_shadownaemon_totals($c, $status);
+            };
+            last if(defined $started && $started == 0 && defined $total && $total == $failed);
+        }
+        sleep(1);
+    }
+
+    my($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+    $c->stats->profile(end => "_cmd_livecache($mode)");
+    if(scalar @{$status} == 0) {
+        return("UNKNOWN - livecache not enabled for any backend\n", 3);
+    }
+    if(scalar @{$status} == $started) {
+        my($total, $failed) = _get_shadownaemon_totals($c, $status);
+        return("OK - $started/$started livecache running, ".($total-$failed)."/".$total." online\n", 0);
+    }
+    if($started == 0) {
+        return("STOPPED - $started livecache running\n", 2);
+    }
+    return("WARNING - $started/".(scalar @{$status})." livecache running\n", 1);
+}
+
+##########################################################
+sub _get_shadownaemon_totals {
+    my($c, $status) = @_;
+    # get number of online sites
+    my $sites = [];
+    for my $site (@{$status}) { push @{$sites}, $site->{'key'}; }
+    $c->{'db'}->reset_failed_backends();
+    $c->{'db'}->enable_backends($sites);
+    my $total  = scalar @{$sites};
+    my $failed = $total;
+    eval {
+        my $proc = $c->{'db'}->get_processinfo(backend => $sites);
+        $failed = scalar keys %{$c->stash->{'failed_backends'}};
+    };
+    return($total, $failed);
 }
 
 ##########################################################
