@@ -1281,8 +1281,8 @@ sub get_pnp_url {
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        for my $regex (qw/pnp4nagios pnp/) {
-            return($1.'index.php') if $obj->{$type} =~ m|(^.*?/$regex/)|mx;
+        for my $regex (qw|/pnp[^/]*/|) {
+            return($1.'/index.php') if $obj->{$type} =~ m|(^.*?$regex)|mx;
         }
     }
 
