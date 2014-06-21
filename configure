@@ -10,7 +10,6 @@ if($@ && !-e 'Makefile') {
     print STDERR $@;
     exit 1;
 }
-unlink("Makefile");
 
 alarm(180);
 
