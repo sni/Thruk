@@ -327,6 +327,15 @@ Ext.define('TP.TabBar', {
                 tab.stopTimeouts();
             }
         });
+    },
+
+    /* ensure only panlets from the active tab are visible */
+    checkPanletVisibility: function(activeTab) {
+        this.items.each(function(tab) {
+            if(tab.hidePanlets && tab.id != activeTab.id) {
+                tab.hidePanlets();
+            }
+        });
     }
 });
 

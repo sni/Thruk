@@ -85,8 +85,18 @@
                     } catch(e) { debug(e) }
                 }
             }
-            // save current active tab unless we are in tab rotation mode
             var tabpan = Ext.getCmp('tabpan');
+            if(delay > 0) {
+                // make sure we hide all panlets if the user meanwhile changed tab again
+                TP.timeouts['timeout_'+this.id+'_check_panel_show'] = window.setTimeout(function() {
+                    if(This.id != tabpan.getActiveTab().id) {
+                        // hide all except the active one
+                        tabpan.checkPanletVisibility(tabpan.getActiveTab());
+                    }
+                }, delay + 100);
+            }
+
+            // save current active tab unless we are in tab rotation mode
             if(tabpan.xdata.rotate_tabs <= 0) {
                 tabpan.saveState();
             }
@@ -107,12 +117,7 @@
             }
         },
         hide: function(This, eOpts) {
-            for(var nr=0; nr<This.window_ids.length; nr++) {
-                var panlet = Ext.getCmp(This.window_ids[nr]);
-                if(panlet) {
-                    panlet.hide(false);
-                }
-            }
+            This.hidePanlets();
         },
         afterrender: function(This, eOpts) {
             if(!this.title) {
@@ -280,6 +285,16 @@
         }
         if(TP.iconSettingsWindow && TP.iconSettingsWindow.toFront) {
             TP.iconSettingsWindow.toFront();
+        }
+    },
+
+    hidePanlets: function() {
+        var This = this;
+        for(var nr=0; nr<This.window_ids.length; nr++) {
+            var panlet = Ext.getCmp(This.window_ids[nr]);
+            if(panlet) {
+                panlet.hide(false);
+            }
         }
     },
 
