@@ -1080,6 +1080,7 @@ Ext.define('TP.IconWidget', {
         }
         var iconsetName = xdata.appearance.iconset;
         if(iconsetName == '' || iconsetName == undefined) {
+            if(!tab) { return; }
             iconsetName = tab.xdata.defaulticonset || 'default';
         }
 
