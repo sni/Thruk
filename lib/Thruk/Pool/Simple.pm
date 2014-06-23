@@ -137,7 +137,7 @@ sub _handle {
             else {
                 unshift @ret, 'n';
             }
-            my $ret = encode_json(\@ret);
+            my $ret = JSON::XS->new->utf8->convert_blessed->encode(\@ret);
             {
                 lock %{$self->{done}};
                 $self->{done}{$id} = $ret;
