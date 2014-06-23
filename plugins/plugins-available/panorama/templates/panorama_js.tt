@@ -51,6 +51,7 @@ var initial_shapes = [% json_encode(shapes) %];
 [%+ PROCESS _panorama_js_panlet_icon_widgets.tt +%]
 
 Ext.onReady(function() {
+    TP.unloading = false;
     var state = cp.readValues();
     for(var key in ExtState) {
         if(key.search(/panlet_/) != -1) {

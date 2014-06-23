@@ -286,6 +286,7 @@ TP.Msg = function() {
     }
     return {
         msg : function(s) {
+            if(TP.unloading) { return; }
             if(!msgCt){
                 msgCt = Ext.DomHelper.insertFirst(document.body, {id:'msg-div'}, true);
             }
