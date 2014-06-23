@@ -234,7 +234,7 @@
             if(TP.initMask && this.keepMask) {
                 TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
                     if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete this.keepMask; }
-                } ,TP.initial_create_delay_active);
+                }, TP.initial_create_delay_active);
             }
         }
         this.applyXdata();
@@ -269,7 +269,11 @@
             Ext.Array.each(zIndexList, function(panels, id1) {
                 if(panels != undefined) {
                     Ext.Array.each(panels, function(panel, id2) {
-                        panel.toFront();
+                        // may fail when not yet rendered
+                        try {
+                            panel.toFront();
+                        }
+                        catch(e) {}
                     });
                 }
             });
