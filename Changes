@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+1.84-4   Mon Jun 23 17:44:32 CEST 2014
           - added show_error_reports mode 'both' which shows the error indicator but logs to server side
           - set default show_error_reports mode to 'both' to make error handling easier
           - support pnp urls with suffix
