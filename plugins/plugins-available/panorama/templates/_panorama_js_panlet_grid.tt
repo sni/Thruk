@@ -26,8 +26,10 @@
             if(data.paging) {
                 if(this.pagingToolbar) {
                     this.pagingToolbar.show();
-                    this.pagingToolbar.items.getAt(9).hide();  // hide seperator
-                    this.pagingToolbar.items.getAt(10).hide(); // hide refresh
+                    if(this.pagingToolbar.items.getAt(9)) {
+                        this.pagingToolbar.items.getAt(9).hide();  // hide seperator
+                        this.pagingToolbar.items.getAt(10).hide(); // hide refresh
+                    }
                     this.pagingToolbar.updateData(data);
                 }
                 if(body) {
