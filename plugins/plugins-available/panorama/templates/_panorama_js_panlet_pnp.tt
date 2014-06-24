@@ -16,9 +16,9 @@ Ext.define('TP_GraphModell', {
 });
 
 TP.graphStore = Ext.create('Ext.data.Store', {
-    pageSize: 10,
-    model: 'TP_GraphModell',
-    remoteSort: true,
+    pageSize:     10,
+    model:       'TP_GraphModell',
+    remoteSort:   true,
     remoteFilter: true,
     proxy: {
         type:   'ajax',
@@ -38,7 +38,6 @@ Ext.define('TP.PanletPNP', {
     height: 240,
     width:  420,
     hideSettingsForm: ['backends'],
-    //maximizable: true, // does not work stateful
     initComponent: function() {
         this.callParent();
         var panel             = this;
@@ -54,10 +53,10 @@ Ext.define('TP.PanletPNP', {
         this.size_adjustment_y = 50;
 
         /* update source selector */
-        this.updateSource = function() {
+        this.updateSource = function(force) {
             var form   = this.down('form').getForm();
             var values = form.getValues();
-            if(values.graph && values.graph != this.lastGraph && values.graph.indexOf('host=') != -1) {
+            if(force || (values.graph && values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
@@ -191,13 +190,13 @@ Ext.define('TP.PanletPNP', {
             xtype:          'combobox',
             fieldLabel:     'Graph',
             name:           'graph',
-            queryMode:      'remove',
+            queryMode:      'remote',
             valueField:     'url',
             displayField:   'text',
             typeAhead:       true,
             minChars:        3,
             pageSize:        10,
-            store:          TP.graphStore,
+            store:           TP.graphStore,
             listeners: {
                 select: function( combo, records, eOpts ) {
                     panel.xdata.source = 0;
@@ -231,5 +230,9 @@ Ext.define('TP.PanletPNP', {
             xtype:      'checkbox',
             name:       'showborder'
         });
+    },
+    gearInitCallback: function(panel) {
+        TP.graphStore.load();
+        panel.updateSource(true);
     }
 });
