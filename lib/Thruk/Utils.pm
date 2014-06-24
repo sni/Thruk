@@ -708,7 +708,7 @@ sub read_ssi {
        return $output;
     }
     elsif( -r $c->config->{'ssi_path'}."/".$file ){
-        return read_file($c->config->{'ssi_path'}."/".$file) or carp("cannot open ssi: $!");
+        return(read_file($c->config->{'ssi_path'}."/".$file)) or carp("cannot open ssi: $!");
     }
     $c->log->warn($c->config->{'ssi_path'}."/".$file." is no longer accessible, please restart thruk to initialize ssi information");
     return "";
