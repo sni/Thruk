@@ -1626,32 +1626,42 @@ sub _get_gearman_stats {
 sub _do_filter {
     my($self, $c) = @_;
 
-    if(defined $c->request->parameters->{'filter'} and $c->request->parameters->{'filter'} ne '') {
-        my $filter;
-        eval {
-            $filter = decode_json($c->request->parameters->{'filter'});
-        };
-        if($@) {
-            $c->log->warn('filter failed: '.$@);
-            return;
-        }
+    if(!defined $c->request->parameters->{'filter'} or $c->request->parameters->{'filter'} eq '') {
+        my @f = Thruk::Utils::Status::do_filter($c);
+        return @f;
+    }
 
-        my $pre = 'dfl_s0_';
+    my $filter;
+    eval {
+        $filter = decode_json($c->request->parameters->{'filter'});
+    };
+    if($@) {
+        $c->log->warn('filter failed: '.$@);
+        return;
+    }
+
+    if(ref $filter eq 'HASH') {
+        $filter = [$filter];
+    }
+
+    my $nr = 0;
+    for my $f (@{$filter}) {
+        my $pre = 'dfl_s'.$nr.'_';
         for my $key (qw/hostprops hoststatustypes serviceprops servicestatustypes/) {
-            $c->request->parameters->{$pre.$key} = $filter->{$key};
+            $c->request->parameters->{$pre.$key} = $f->{$key};
         }
         for my $type (qw/op type value value_date val_pre/) {
-            if(ref $filter->{$type} ne 'ARRAY') { $filter->{$type} = [$filter->{$type}]; }
+            if(ref $f->{$type} ne 'ARRAY') { $f->{$type} = [$f->{$type}]; }
         }
 
         for my $type (qw/op type value val_pre/) {
             my $x = 0;
-            for my $val (@{$filter->{$type}}) {
+            for my $val (@{$f->{$type}}) {
                 $c->request->parameters->{$pre.$type} = [] unless defined $c->request->parameters->{$pre.$type};
                 if($type eq 'value') {
                     if(!defined $val) { $val = ''; }
-                    if($filter->{'type'}->[$x] eq 'last check' or $filter->{'type'}->[$x] eq 'next check') {
-                        $val = $filter->{'value_date'}->[$x];
+                    if($f->{'type'}->[$x] eq 'last check' or $f->{'type'}->[$x] eq 'next check') {
+                        $val = $f->{'value_date'}->[$x];
                         $val =~ s/T/ /gmx;
                     }
                 }
@@ -1666,7 +1676,9 @@ sub _do_filter {
                 $x++;
             }
         }
+        $nr++;
     }
+
     my @f = Thruk::Utils::Status::do_filter($c);
     return @f;
 }

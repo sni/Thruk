@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Panorama View:
+            - added -or filter to all filter panels
           - Bug Fixes
             - fixed pnp source not selectable anymore after revisiting panel settings
 

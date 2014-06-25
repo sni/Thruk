@@ -200,6 +200,7 @@ Ext.define('TP.formFilterSelect', {
         border:     false,
         maxWidth:   14,
         flex:       1,
+        margin:     '5 0 0 0',
         html:       '<div align="center" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
         listeners:  {
             afterrender: function(This, eOpts) { This.body.on('click', function() {
@@ -285,154 +286,239 @@ Ext.define('TP.formFilterSelect', {
     }
 });
 
+Ext.define('TP.formFilterPanel', {
+    extend: 'Ext.form.Panel',
+
+    initComponent: function() {
+        this.callParent();
+        if(!this.panel) {
+            throw new Error("TP.formFilterPanel(): no panel!");
+        }
+    },
+
+    submitEmptyText: false,
+    bodyPadding:     3,
+    padding:        '0 0 15 0', // leave some space for scrollbars
+    bodyStyle:      'border-width: 0 1px 0 0;',
+    defaults: {
+        labelWidth: 135,
+        style: 'margin-top: 5px'
+    },
+    items: [{
+            xtype:      'panel',
+            border:     false,
+            width:      '100%',
+            height:     6,
+            style:      'margin-top: 0px',
+            html:       '<div align="right" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
+            listeners:  {
+                afterrender: function(This, eOpts) { This.body.on('click', function() {
+                    var win = This.up('form').up('window');
+                    win.remove(This.up('panel'));
+                    if(win.items.length == 2) { win.setWidth(600); }
+                    win.center();
+                })}
+            }
+        }, {
+            fieldLabel: 'Host Status Types',
+            name:       'hoststatustypes',
+            xtype:      'tp_combobox_sum',
+            width:      485,
+            value:      [1,2,4,8],
+            sum_values: {'15': 'All', '12': 'All Problems' },
+            store:      [[2,'Up'], [4,'Down'], [8,'Unreachable'], [1,'Pending']]
+        }, {
+            fieldLabel: 'Host Properties',
+            name:       'hostprops',
+            xtype:      'tp_combobox_sum',
+            width:      485,
+            columns:    true,
+            value:      [],
+            sum_values: {'0': 'Any' },
+            store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
+                         [4,'Has Been Acknowledged'], [8,'Has Not Been Acknowledged'],
+                         [16,'Checks Disabled'], [32,'Checks Enabled'],
+                         [64,'Event Handler Disabled'], [128,'Event Handler Enabled'],
+                         [256,'Flap Detection Disabled'], [512,'Flap Detection Enabled'],
+                         [1024,'Is Flapping'], [2048,'Is Not Flapping'],
+                         [4096,'Notifications Disabled'], [8192,'Notifications Enabled'],
+                         [16384,'Passive Checks Disabled'], [32768,'Passive Checks Enabled'],
+                         [65536,'Passive Checks'], [131072,'Active Checks'],
+                         [262144,'In Hard State'], [524288,'In Soft State'],
+                         [1048576,'In Check Period'], [2097152,'Outside Check Period'],
+                         [4194304,'In Notification Period'], [8388608,'Outside Notification Period'],
+                         [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
+        }, {
+            fieldLabel: 'Service Status Types',
+            name:       'servicestatustypes',
+            xtype:      'tp_combobox_sum',
+            width:      485,
+            value:      [1,2,4,8,16],
+            sum_values: {'31': 'All', '28': 'All Problems' },
+            store:      [[2,'Ok'],[4,'Warning'],[8,'Unknown'],[16,'Critical'],[1,'Pending']]
+        }, {
+            fieldLabel: 'Service Properties',
+            name:       'serviceprops',
+            xtype:      'tp_combobox_sum',
+            width:      485,
+            columns:    true,
+            value:      [],
+            sum_values: {'0': 'Any' },
+            store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
+                         [4,'Has Been Acknowledged'], [8,'Has Not Been Acknowledged'],
+                         [16,'Active Checks Disabled'], [32,'Active Checks Enabled'],
+                         [64,'Event Handler Disabled'], [128,'Event Handler Enabled'],
+                         [512,'Flap Detection Disabled'], [256,'Flap Detection Enabled'],
+                         [1024,'Is Flapping'], [2048,'Is Not Flapping'],
+                         [4096,'Notifications Disabled'], [8192,'Notifications Enabled'],
+                         [16384,'Passive Checks Disabled'], [32768,'Passive Checks Enabled'],
+                         [65536,'Passive Checks'], [131072,'Active Checks'],
+                         [262144,'In Hard State'], [524288,'In Soft State'],
+                         [1048576,'In Check Period'], [2097152,'Outside Check Period'],
+                         [4194304,'In Notification Period'], [8388608,'Outside Notification Period'],
+                         [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
+        }, {
+            xtype:      'panel',
+            border:     false,
+            html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]plugins/panorama/images/down.png" alt="add new and filter" style="vertical-align: middle"> and<\/div><\/div>',
+            listeners:  {
+                afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
+                    var form = This.up('form');
+                    form.insert(form.items.length-1, {xtype: 'tp_filter_select', panel: This.up('panel').panel});
+                })}
+            }
+    }]
+});
+
 TP.filterWindow = function(ftype, base_el, panel) {
     if(!panel) {
         throw new Error("TP.formFilterSelect(): no panel!");
     }
-    var form = new Ext.form.Panel({
-            submitEmptyText: false,
-            bodyPadding:     3,
-            defaults: {
-                labelWidth: 135,
-                style: 'margin-top: 5px'
-            },
-            items: [{
-                    fieldLabel: 'Host Status Types',
-                    name:       'hoststatustypes',
-                    xtype:      'tp_combobox_sum',
-                    width:      485,
-                    value:      [1,2,4,8],
-                    sum_values: {'15': 'All', '12': 'All Problems' },
-                    store:      [[2,'Up'], [4,'Down'], [8,'Unreachable'], [1,'Pending']]
-                }, {
-                    fieldLabel: 'Host Properties',
-                    name:       'hostprops',
-                    xtype:      'tp_combobox_sum',
-                    width:      485,
-                    columns:    true,
-                    value:      [],
-                    sum_values: {'0': 'Any' },
-                    store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
-                                 [4,'Has Been Acknowledged'], [8,'Has Not Been Acknowledged'],
-                                 [16,'Checks Disabled'], [32,'Checks Enabled'],
-                                 [64,'Event Handler Disabled'], [128,'Event Handler Enabled'],
-                                 [256,'Flap Detection Disabled'], [512,'Flap Detection Enabled'],
-                                 [1024,'Is Flapping'], [2048,'Is Not Flapping'],
-                                 [4096,'Notifications Disabled'], [8192,'Notifications Enabled'],
-                                 [16384,'Passive Checks Disabled'], [32768,'Passive Checks Enabled'],
-                                 [65536,'Passive Checks'], [131072,'Active Checks'],
-                                 [262144,'In Hard State'], [524288,'In Soft State'],
-                                 [1048576,'In Check Period'], [2097152,'Outside Check Period'],
-                                 [4194304,'In Notification Period'], [8388608,'Outside Notification Period'],
-                                 [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
-                }, {
-                    fieldLabel: 'Service Status Types',
-                    name:       'servicestatustypes',
-                    xtype:      'tp_combobox_sum',
-                    width:      485,
-                    value:      [1,2,4,8,16],
-                    sum_values: {'31': 'All', '28': 'All Problems' },
-                    store:      [[2,'Ok'],[4,'Warning'],[8,'Unknown'],[16,'Critical'],[1,'Pending']]
-                }, {
-                    fieldLabel: 'Service Properties',
-                    name:       'serviceprops',
-                    xtype:      'tp_combobox_sum',
-                    width:      485,
-                    columns:    true,
-                    value:      [],
-                    sum_values: {'0': 'Any' },
-                    store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
-                                 [4,'Has Been Acknowledged'], [8,'Has Not Been Acknowledged'],
-                                 [16,'Active Checks Disabled'], [32,'Active Checks Enabled'],
-                                 [64,'Event Handler Disabled'], [128,'Event Handler Enabled'],
-                                 [512,'Flap Detection Disabled'], [256,'Flap Detection Enabled'],
-                                 [1024,'Is Flapping'], [2048,'Is Not Flapping'],
-                                 [4096,'Notifications Disabled'], [8192,'Notifications Enabled'],
-                                 [16384,'Passive Checks Disabled'], [32768,'Passive Checks Enabled'],
-                                 [65536,'Passive Checks'], [131072,'Active Checks'],
-                                 [262144,'In Hard State'], [524288,'In Soft State'],
-                                 [1048576,'In Check Period'], [2097152,'Outside Check Period'],
-                                 [4194304,'In Notification Period'], [8388608,'Outside Notification Period'],
-                                 [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
-                }, {
-                    xtype:      'panel',
-                    border:     false,
-                    html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div><\/div>',
-                    listeners:  {
-                        afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
-                            var form = This.up('form');
-                            form.insert(form.items.length-1, {xtype: 'tp_filter_select', panel: panel});
-                        })}
-                    }
-            }],
-            buttonAlign: 'center',
-            fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
-                   { xtype:  'button',
-                     text:    'save',
-                     handler: function(This) {
-                        var form = This.up('panel').getForm();
-                        var vals = form.getFieldValues();
-                        vals.hostprops          = TP.arraySum(vals.hostprops);
-                        vals.serviceprops       = TP.arraySum(vals.serviceprops);
-                        vals.hoststatustypes    = TP.arraySum(vals.hoststatustypes);
-                        vals.servicestatustypes = TP.arraySum(vals.servicestatustypes);
-                        base_el.setValue(Ext.JSON.encode(vals));
-                        this.up('window').destroy();
-                     }
-            }]
-    });
-
     var win = new Ext.window.Window({
         title:      'Filter',
-        layout:     'fit',
-        modal:       true,
+        layout:     'hbox',
         maximizable: true,
-        items:       [form]
+        width:       600,
+        minHeight:   200,
+        autoScroll:  true,
+        modal:       true,
+        items:       [],
+        buttonAlign: 'center',
+        bodyStyle:   'background: white;',
+        fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
+               { xtype:  'button',
+                 text:    'save',
+                 handler: function(This) {
+                    var filter = [];
+                    win.items.each(function(item, idx, length) {
+                        if(item.getForm) {
+                            var form                = item.getForm();
+                            var vals                = form.getFieldValues();
+                            vals.hostprops          = TP.arraySum(vals.hostprops);
+                            vals.serviceprops       = TP.arraySum(vals.serviceprops);
+                            vals.hoststatustypes    = TP.arraySum(vals.hoststatustypes);
+                            vals.servicestatustypes = TP.arraySum(vals.servicestatustypes);
+                            filter.push(vals);
+                        }
+                    });
+                    base_el.setValue(Ext.JSON.encode(filter));
+                    this.up('window').destroy();
+                 }
+               }
+        ],
+        listeners: {
+            afterrender: function(This, eOpts) {
+                /* autoScroll overwrites this otherwise */
+                this.body.dom.style.overflowY = 'hidden';
+            }
+        }
     });
-
-    /* hide service specific fields for hosts */
-    if(ftype == 'host') {
-        form.items.getAt(2).hide();
-        form.items.getAt(3).hide();
-    }
 
     /* add values */
     var val = base_el.getValue();
     if(val) {
         val = Ext.JSON.decode(val);
-        var values = {
-            hoststatustypes:    TP.dec2bin(val.hoststatustypes),
-            hostprops:          TP.dec2bin(val.hostprops),
-            servicestatustypes: TP.dec2bin(val.servicestatustypes),
-            serviceprops:       TP.dec2bin(val.serviceprops)
-        };
-        if(Ext.isArray(val.type)) {
-            for(var nr=0; nr<val.type.length; nr++) {
+        if(!Ext.isArray(val)) {
+            /* convert old searches */
+            val = [val];
+        }
+        Ext.Array.each(val, function(f, i) {
+            var form = Ext.create("TP.formFilterPanel", {panel: panel});
+            var values = {
+                hoststatustypes:    TP.dec2bin(f.hoststatustypes),
+                hostprops:          TP.dec2bin(f.hostprops),
+                servicestatustypes: TP.dec2bin(f.servicestatustypes),
+                serviceprops:       TP.dec2bin(f.serviceprops)
+            };
+            if(Ext.isArray(f.type)) {
+                for(var nr=0; nr<f.type.length; nr++) {
+                    form.insert(form.items.length-1, {
+                        xtype:     'tp_filter_select',
+                        panel:      panel,
+                        val_op:     f.op[nr],
+                        val_type:   f.type[nr],
+                        val_pre:    f.val_pre[nr],
+                        val_value:  f.value[nr],
+                        val_val_d:  f.value_date[nr]
+                    });
+                }
+            } else {
                 form.insert(form.items.length-1, {
                     xtype:     'tp_filter_select',
                     panel:      panel,
-                    val_op:     val.op[nr],
-                    val_type:   val.type[nr],
-                    val_pre:    val.val_pre[nr],
-                    val_value:  val.value[nr],
-                    val_val_d:  val.value_date[nr]
+                    val_op:     f.op,
+                    val_type:   f.type,
+                    val_pre:    f.val_pre,
+                    val_value:  f.value,
+                    val_val_d:  f.value_date
                 });
             }
-        } else {
-            form.insert(form.items.length-1, {
-                xtype:     'tp_filter_select',
-                panel:      panel,
-                val_op:     val.op,
-                val_type:   val.type,
-                val_pre:    val.val_pre,
-                val_value:  val.value,
-                val_val_d:  val.value_date
-            });
-        }
-        form.getForm().setValues(values);
+            form.getForm().setValues(values);
+            win.add(form);
+        });
     } else {
-        /* add one empty search field */
+        /* add one empty filter */
+        var form = Ext.create("TP.formFilterPanel", {panel: panel});
         form.insert(form.items.length-1, {xtype: 'tp_filter_select', panel: panel});
+        win.add(form);
+    }
+
+    /* hide service specific fields for hosts */
+    if(ftype == 'host') {
+        win.items.each(function(item, idx, length) {
+            if(item.getForm) {
+                var fields = item.getForm().getFields();
+                fields.getAt(2).hide();
+                fields.getAt(3).hide();
+            }
+        });
+    }
+
+    /* add or button */
+    win.add({
+        xtype:      'panel',
+        border:     false,
+        height:     '100%',
+        html:       '<div align="center" class="clickable" style="width: 25px; margin-top: 60px;"><img src="[% url_prefix %]plugins/panorama/images/right.png" alt="add new or filter" style="vertical-align: middle"><br>or<\/div>',
+        listeners:  {
+            afterrender: function(This, eOpts) {
+                Ext.get(This.body.dom.firstChild).on('click', function() {
+                    var newform = Ext.create("TP.formFilterPanel", {panel: panel});
+                    newform.insert(newform.items.length-1, {xtype: 'tp_filter_select', panel: panel});
+                    win.insert(win.items.length-1, newform);
+                    win.body.dom.scrollLeft=10000000000;
+                    if(win.items.length  > 2) { win.setWidth(1070); }
+                    if(win.items.length == 2) { win.setWidth(600);  }
+                    win.center();
+                });
+            }
+        }
+    });
+
+    // at least two filter fit on the screen
+    if(win.items.length > 2) {
+        win.setWidth(1070);
+        win.center();
     }
 
     /* show the window */
