@@ -4,6 +4,7 @@ next:
           - Panorama View:
             - added -or filter to all filter panels
             - added optional min/max values for speedometer
+            - added invert switch for speedometer
           - Bug Fixes
             - fixed pnp source not selectable anymore after revisiting panel settings
 

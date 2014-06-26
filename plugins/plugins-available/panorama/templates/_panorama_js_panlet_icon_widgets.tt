@@ -860,6 +860,10 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+        /* inverted value? */
+        if(xdata.appearance.speedoinvert) {
+            value = max - value;
+        }
         if(value > max) { value = max; } // value cannot exceed speedo
         if(value < min) { value = min; } // value cannot exceed speedo
         var color_fg = colors['unknown'];
