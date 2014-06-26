@@ -516,7 +516,7 @@ __DATA__
         'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
     },
     'checkmodulation' => {
-        'resultmodulation_name' => 'This directive identifies the unique name of the checkmodulation so you reference it by your objects.',
+        'checkmodulation_name' => 'This directive identifies the unique name of the checkmodulation so you reference it by your objects.',
         'check_command' => 'This directive is used to define the short name of a check command to which the modulation applies.',
         'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
     },
