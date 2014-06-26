@@ -506,10 +506,18 @@ TP.filterWindow = function(ftype, base_el, panel) {
                     var newform = Ext.create("TP.formFilterPanel", {panel: panel});
                     newform.insert(newform.items.length-1, {xtype: 'tp_filter_select', panel: panel});
                     win.insert(win.items.length-1, newform);
+
+                    // scroll right to view the new filter
                     win.body.dom.scrollLeft=10000000000;
+
+                    // adjust size if possible
                     if(win.items.length  > 2) { win.setWidth(1070); }
                     if(win.items.length == 2) { win.setWidth(600);  }
                     win.center();
+
+                    // highlight the new filter
+                    var newid = win.items.getAt(win.items.length-2).body.id;
+                    Ext.get(newid).highlight();
                 });
             }
         }
