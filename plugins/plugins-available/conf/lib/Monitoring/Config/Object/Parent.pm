@@ -857,6 +857,17 @@ sub _break_long_command {
     return \@text;
 }
 
+##########################################################
+sub _business_impact_keys {
+    return [
+        "Business Critical",     # 5
+        "Top Production",        # 4
+        "Production",            # 3
+        "Standard",              # 2
+        "Testing",               # 1
+        "Development",           # 0
+    ];
+}
 
 =head1 AUTHOR
 
