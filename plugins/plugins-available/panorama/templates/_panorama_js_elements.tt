@@ -505,12 +505,36 @@ Ext.define('TP.speedochart', {
 
     legend:  false,
     initComponent: function() {
+        var me = this;
         this.series[0].donut  = this.donut  ? this.donut : false;
         this.series[0].needle = !!this.needle;
         this.axes[0].margin   = this.axis_margin != undefined ? this.axis_margin : -10;
         this.axes[0].steps    = this.axis_steps  != undefined ? this.axis_steps  :  10;
         this.axes[0].minimum  = this.axis_min    != undefined ? this.axis_min    :   0;
         this.axes[0].maximum  = this.axis_max    != undefined ? this.axis_max    : 100;
+        this.axes[0].label    = {
+            renderer: function(v) {
+                var axe = me.axes.getAt(0);
+                if(axe.i == undefined) {
+                    axe.i = 0;
+                }
+                var round = 0;
+                var range = axe.maximum - axe.minimum;
+                if(axe.steps > 0) {
+                    var singleStep = range / axe.steps;
+                    if(singleStep < 1)    { round = 1; }
+                    if(singleStep < 0.1)  { round = 2; }
+                    if(singleStep < 0.01) { round = 3; }
+                }
+                if(round > 0) {
+                    v = Ext.util.Format.round((axe.i / axe.steps * range)+axe.minimum, round);
+                    axe.i++;
+                    if(axe.i > axe.steps) { axe.i = 0; }
+                    return(v);
+                }
+                return(v);
+            }
+        };
         this.callParent();
     },
     axes: [{

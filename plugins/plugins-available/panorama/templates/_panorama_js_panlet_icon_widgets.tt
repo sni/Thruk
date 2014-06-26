@@ -832,7 +832,7 @@ Ext.define('TP.IconWidget', {
             if(perfdata[matches[1]]) {
                 var p = perfdata[matches[1]];
                 value = p.val;
-                var r = TP.getPerfDataMinMax(p, 100);
+                var r = TP.getPerfDataMinMax(p, '?');
                 max   = r.max;
                 min   = r.min;
             }
@@ -850,6 +850,10 @@ Ext.define('TP.IconWidget', {
                 }
             });
         }
+        // override min / max by option
+        if(xdata.appearance.speedomin != undefined && xdata.appearance.speedomin != '') { min = Number(xdata.appearance.speedomin); }
+        if(xdata.appearance.speedomax != undefined && xdata.appearance.speedomax != '') { max = Number(xdata.appearance.speedomax); }
+
         if(panel.chart.axes.getAt(0).minimum != min || panel.chart.axes.getAt(0).maximum != max) {
             xdata.appearance.speedoaxis_min = min;
             xdata.appearance.speedoaxis_max = max;
@@ -857,6 +861,7 @@ Ext.define('TP.IconWidget', {
             return;
         }
         if(value > max) { value = max; } // value cannot exceed speedo
+        if(value < min) { value = min; } // value cannot exceed speedo
         var color_fg = colors['unknown'];
         if(state == 0) { color_fg = colors['ok'];       }
         if(state == 1) { color_fg = colors['warning'];  }

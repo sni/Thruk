@@ -46,7 +46,7 @@ TP.iconShowEditDialog = function(panel) {
                     ['number of problems (incl. warnings)', 'problems_warn']];
         for(var key in perfdata) {
             if(defaultSpeedoSource == 'problems') { defaultSpeedoSource = 'perfdata:'+key; }
-            var r = TP.getPerfDataMinMax(perfdata[key], 100);
+            var r = TP.getPerfDataMinMax(perfdata[key], '?');
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
@@ -583,34 +583,14 @@ TP.iconShowEditDialog = function(panel) {
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
                     items: [{ xtype: 'label', text: 'Width:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth }
-                    ]
-                }, {
-                    fieldLabel: 'Options',
-                    xtype:      'fieldcontainer',
-                    cls:        'speedometer',
-                    layout:     'table',
-                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [
-                    { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
-                    {
-                        xtype:      'checkbox',
-                        name:       'speedoshadow',
-                        hidden:      true
-                    },
-                    { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'checkbox',
-                        name:       'speedoneedle'
-                    },
-                    { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
-                    {
-                        xtype:      'numberunit',
-                        allowDecimals: false,
-                        width:       60,
-                        name:       'speedodonut',
-                        unit:       'px'
-                    }]
+                            { xtype: 'numberunit', name: 'speedowidth', unit: 'px', width: 65, value: panel.xdata.appearance.speedowidth },
+                            { xtype: 'label', text: 'Shadow:', style: 'margin-left: 0px; margin-right: 2px;', hidden: true },
+                            { xtype: 'checkbox', name: 'speedoshadow', hidden: true },
+                            { xtype: 'label', text: 'Needle:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'checkbox', name: 'speedoneedle' },
+                            { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'numberunit', allowDecimals: false, width: 60, name: 'speedodonut', unit: 'px' }
+                        ]
                 }, {
                     fieldLabel: 'Axis',
                     xtype:      'fieldcontainer',
@@ -710,7 +690,22 @@ TP.iconShowEditDialog = function(panel) {
                     queryMode:    'local',
                     store:       { fields: ['name', 'value'], data: [] },
                     editable:      false,
-                    listeners: { focus: perfDataUpdate }
+                    listeners: { focus:  perfDataUpdate,
+                                 change: function() { renderUpdate(undefined, true) }
+                    }
+                }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    cls:        'speedometer',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
+                    items: [{ xtype: 'label', text: 'Invert:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'checkbox', name: 'speedoinvert' },
+                            { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomin', step: 100 },
+                            { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'speedomax', step: 100 }
+                        ]
                 }]
             }]
         }]
