@@ -1825,6 +1825,7 @@ sub _check_references {
 
             # shinken defines this command by itself
             return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
+            return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
 
             if($options{'hash'}) {
                 push @parse_errors, { type  => $link,
