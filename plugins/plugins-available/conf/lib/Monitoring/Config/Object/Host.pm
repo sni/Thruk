@@ -85,8 +85,9 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'realm'                       => { type => 'LIST', 'link' => 'realm', cat => 'Extended' },
     'poller_tag'                  => { type => 'STRING', cat => 'Extended' },
     'reactionner_tag'             => { type => 'STRING', cat => 'Extended' },
-    'resultmodulations'           => { type => 'STRING', cat => 'Extended' },
-    'business_impact_modulations' => { type => 'STRING', cat => 'Extended' },
+    'resultmodulations'           => { type => 'STRING', 'link' => 'resultmodulation', cat => 'Extended' },
+    'business_impact_modulations' => { type => 'STRING', 'link' => 'businessimpactmodulation', cat => 'Extended' },
+    'checkmodulations'            => { type => 'STRING', 'link' => 'checkmodulation', cat => 'Extended' },
     'escalations'                 => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
     'icon_set'                    => { type => 'STRING', cat => 'Extended' },
 };

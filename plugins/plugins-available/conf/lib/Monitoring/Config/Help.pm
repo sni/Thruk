@@ -502,4 +502,20 @@ __DATA__
         'default' => 'This directive is used to define if this realm is the default one (untagged host and satellites wil be put into it). The default value is 0.',
         'broker_complete_links' => 'Enable multi-brokers features',
     },
+    'businessimpactmodulation' => {
+        'business_impact_modulation_name' => 'This directive identifies the unique name of the businessimpactmodulation so you reference it by your objects.',
+        'business_impact' => 'This variable is used to set the (modulated) importance we gave to this host/service for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail).',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
+    },
+    'resultmodulation' => {
+        'resultmodulation_name' => 'This directive identifies the unique name of the resultmodulation so you reference it by your objects.',
+        'exit_codes_match' => 'This directive is used to define a list of exit codes to change',
+        'exit_code_modulation' => 'This directive is used to define the code that will be put if the code match',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
+    },
+    'checkmodulation' => {
+        'resultmodulation_name' => 'This directive identifies the unique name of the checkmodulation so you reference it by your objects.',
+        'check_command' => 'This directive is used to define the short name of a check command to which the modulation applies.',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
+    },
 };
