@@ -873,6 +873,12 @@ Ext.define('TP.IconWidget', {
         if(state == 3) { color_fg = colors['unknown'];  }
         if(state == 4) { color_fg = colors['pending'];  }
 
+        /* translate host state */
+        if(panel.iconType == 'host') {
+            if(state == 1) { color_fg = colors['critical']; }
+            if(state == 2) { color_fg = colors['warning'];  }
+        }
+
         var colorSet = [];
         if(panel.chart.surface.existingGradients == undefined) { panel.chart.surface.existingGradients = {} }
         Ext.Array.each([color_fg, colors['bg']], function(color,i) {

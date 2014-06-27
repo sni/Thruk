@@ -627,7 +627,7 @@ TP.iconShowEditDialog = function(panel) {
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
-                        { xtype: 'label', text: 'Ok:' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'speedocolor_ok',
@@ -636,7 +636,7 @@ TP.iconShowEditDialog = function(panel) {
                             tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: 'Warning:' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'speedocolor_warning',
@@ -644,7 +644,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
-                        { xtype: 'label', text: 'Critical:' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
                         {
                             xtype:          'colorcbo',
                             name:           'speedocolor_critical',
