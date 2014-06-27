@@ -7,6 +7,7 @@ next:
             - added invert switch for speedometer
           - Bug Fixes
             - fixed pnp source not selectable anymore after revisiting panel settings
+            - fixed applying panel source
 
 1.84-4   Mon Jun 23 17:44:32 CEST 2014
           - added show_error_reports mode 'both' which shows the error indicator but logs to server side

@@ -980,8 +980,9 @@ TP.iconShowEditDialog = function(panel) {
                             var values = Ext.getCmp('sourceForm').getForm().getValues();
                             try {
                                 var xdata = Ext.JSON.decode(values.source);
-                                TP.getIconSettingsValues(xdata);
+                                TP.setIconSettingsValues(xdata);
                             } catch(e) {
+                                debug(e);
                                 Ext.getCmp('sourceForm').getForm().setValues({sourceError: e});
                             }
                         }
@@ -1074,7 +1075,7 @@ TP.iconShowEditDialog = function(panel) {
         }
     }).show();
 
-    TP.getIconSettingsValues(panel.xdata);
+    TP.setIconSettingsValues(panel.xdata);
     TP.iconSettingsWindow = settingsWindow;
 
     // new mouseover tips while settings are open
@@ -1256,9 +1257,10 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
 }
 
-TP.getIconSettingsValues = function(xdata) {
+TP.setIconSettingsValues = function(xdata) {
     xdata = TP.clone(xdata);
     // set some defaults
+    if(!xdata.label)            { xdata.label = { labeltext: '' }; }
     if(!xdata.label.fontsize)   { xdata.label.fontsize   = 14; }
     if(!xdata.label.bordersize) { xdata.label.bordersize =  1; }
     Ext.getCmp('generalForm').getForm().setValues(xdata.general);
