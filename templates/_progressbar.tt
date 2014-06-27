@@ -1,5 +1,5 @@
 ﻿<!-- thruk: waiting for job [% job_id %] -->
-<div id="[% progressbarid %]" style="width: [% width %]px; height:[% height %]px; color: inherit;"><div align="center" class="job_time" style="z-index: 100;  line-height: [% lineheight %]px; position: absolute; width: [% width %]px; color: inherit;">[% job_time %]s</div></div>
+<div id="[% progressbarid %]" style="width: [% width %]px; height:[% height %]px; color: inherit;" onmouseover="return pb_overlib_[% progressbarid %]()"><div align="center" class="job_time" style="z-index: 100;  line-height: [% lineheight %]px; position: absolute; width: [% width %]px; color: inherit;">[% job_time %]s</div></div>
 <script type="text/javascript">
 <!--
     jQuery(function() {
@@ -8,8 +8,13 @@
         });
     });
 
-    var last_time_[% progressbarid %]    = 0;
-    var last_message_[% progressbarid %] = '';
+    function pb_overlib_[% progressbarid %]() {
+        return overlib("<div id='over_[% progressbarid %]'><\/div>",CAPTION,'report status',WIDTH,200,[% c.config.info_popup_options %]);
+    }
+
+    var last_time_[% progressbarid %]      = 0;
+    var last_message_[% progressbarid %]   = '';
+    var last_remaining_[% progressbarid %] = '';
     function update_job_progressbar_[% progressbarid %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
         var val = jQuery( "#[% progressbarid %]" ).progressbar( "value" );
@@ -31,6 +36,12 @@
                 }
                 if(data.percent != 100) {
                   if([% show_message %] && data.message) { last_message_[% progressbarid %] = " - " + data.message; }
+                  if(data.remaining && data.remaining != -1) { last_remaining_[% progressbarid %] = data.remaining; } else { last_remaining_[% progressbarid %] = ''; }
+                  var title = last_message_[% progressbarid %] + '<br>progress: ' + Math.round(data.percent)+"%<br>";
+                  if(last_remaining_[% progressbarid %]) {
+                    title = title + "(~"+last_remaining_[% progressbarid %]+" seconds remaining for this step)";
+                  }
+                  jQuery("#over_[% progressbarid %]").html(title);
                   last_time_[% progressbarid %] = data.time;
                   jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s"+last_message_[% progressbarid %]);
                 }

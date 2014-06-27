@@ -287,12 +287,14 @@ sub get_status {
         chomp($forward);
     }
 
-    if($percent =~ m/^(\d+)\s+(.*)$/mx) {
-        $percent = $1;
-        $message = $2;
+    my $remaining;
+    if($percent =~ m/^(\d+)\s+([\d\.\-]+)\s+(.*)$/mx) {
+        $percent   = $1;
+        $remaining = $2;
+        $message   = $3;
     }
 
-    return($is_running,$time,$percent,$message,$forward);
+    return($is_running,$time,$percent,$message,$forward,$remaining);
 }
 
 
@@ -309,15 +311,17 @@ sub get_json_status {
     my $c   = shift;
     my $id  = shift;
 
-    my($is_running,$time,$percent,$message,$forward) = get_status($c, $id);
+    my($is_running,$time,$percent,$message,$forward,$remaining) = get_status($c, $id);
     return unless defined $time;
 
+    $remaining = -1 unless defined $remaining;
     $c->stash->{'json'}   = {
             'is_running' => 0+$is_running,
             'time'       => 0+$time,
             'percent'    => 0+$percent,
             'message'    => $message,
             'forward'    => $forward,
+            'remaining'  => 0+$remaining,
     };
 
     return $c->forward('Thruk::View::JSON');
@@ -437,16 +441,17 @@ sub job_page {
 
 =head2 update_status
 
-  update_status($dir, $percent, $status)
+  update_status($dir, $percent, $status, $remaining_seconds)
 
 update status for this job
 
 =cut
 sub update_status {
-    my($dir, $percent, $status) = @_;
+    my($dir, $percent, $status, $remaining_seconds) = @_;
+    $remaining_seconds = -1 unless defined $remaining_seconds;
     my $statusfile = $dir."/status";
     open(my $fh, '>', $statusfile) or die("cannot write status $statusfile: $!");
-    print $fh $percent, " ", $status, "\n";
+    print $fh $percent, " ", $remaining_seconds, " ", $status, "\n";
     Thruk::Utils::IO::close($fh, $statusfile);
     return;
 }

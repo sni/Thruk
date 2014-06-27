@@ -625,6 +625,7 @@ sub _compute_availability_line_by_line {
     # logs should be sorted already
     my $count     = 0;
     my $last_perc = 35;  # our range is from 35% - 75%
+    my $started   = time();
     while(my $line = <$fh>) {
         $count++;
         &Monitoring::Availability::Logs::_decode_any($line);
@@ -638,7 +639,9 @@ sub _compute_availability_line_by_line {
         if($ENV{'THRUK_JOB_DIR'} && $count%10 == 0) {
             my $perc = int(($count / $total * 40) + 35);
             if($perc != $last_perc) {
-                Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, $perc, 'calculating');
+                my $elapsed = time() - $started;
+                my $remaining_seconds = int(($elapsed) / ($count / $total)) - $elapsed;
+                Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, $perc, 'calculating', $remaining_seconds);
             }
             $last_perc = $perc;
         }
