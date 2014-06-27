@@ -181,7 +181,7 @@ sub perl {
 
 =head2 is_running
 
-  is_running($c, $id)
+  is_running($c, $id, [$nouser])
 
 return true if process is still running
 
@@ -199,6 +199,37 @@ sub is_running {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
+    return _is_running($dir);
+}
+
+
+##############################################
+
+=head2 cancel
+
+  cancel($c, $id, [$nouser])
+
+returns true if successfully canceled
+
+=cut
+sub cancel {
+    my $c      = shift;
+    my $id     = shift;
+    my $nouser = shift;
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+
+    if(!$nouser && -f $dir."/user" ) {
+        my $user = read_file($dir."/user");
+        chomp($user);
+        confess('no remote_user') unless defined $c->stash->{'remote_user'};
+        return unless $user eq $c->stash->{'remote_user'};
+    }
+
+    my $pid = read_file($dir."/pid");
+    kill(-15, $pid);
+    sleep(1);
+    kill(-2, $pid);
+    sleep(1);
     return _is_running($dir);
 }
 

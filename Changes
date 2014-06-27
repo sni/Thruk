@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - Reports
+            - added cancel button for running reports
           - Panorama View:
             - added -or filter to all filter panels
             - added optional min/max values for speedometer

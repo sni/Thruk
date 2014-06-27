@@ -146,6 +146,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($action eq 'remove') {
             return $self->report_remove($c, $report_nr);
         }
+        elsif($action eq 'cancel') {
+            return $self->report_cancel($c, $report_nr);
+        }
         elsif($action eq 'email') {
             return $self->report_email($c, $report_nr);
         }
@@ -305,6 +308,28 @@ sub report_remove {
 
     if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+}
+
+##########################################################
+
+=head2 report_cancel
+
+=cut
+sub report_cancel {
+    my($self, $c, $report_nr) = @_;
+
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if($report) {
+        if($report->{'var'}->{'job'}) {
+            Thruk::Utils::External::cancel($c, $report->{'var'}->{'job'});
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report canceled' });
+        } else {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'report could not be canceled' });
+        }
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
