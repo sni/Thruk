@@ -22,7 +22,6 @@
   </tr>
 </table>
 
-[% running = 0 %]
 <table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
   <tr>
     <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
@@ -48,7 +47,7 @@
     <th class="status" nowrap width="40">Mail</th>
     <th class="status" nowrap width="100">Schedule</th>
     <th class="status" nowrap width="150">Last Time Run</th>
-    <th class="status" nowrap width="150">Duration</th>
+    <th class="status" nowrap width="163">Duration</th>
     <th class="status" nowrap width="25">&nbsp;</th>
     <th class="status" nowrap width="25">&nbsp;</th>
     <th class="status" nowrap width="25">&nbsp;</th>
@@ -66,19 +65,33 @@
     <td class="status [% rowclass %]">
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
-    <td class="status [% rowclass %]">
+    <td class="status [% rowclass %] report_progessbar">
       [% IF r.failed %]
         <span style="color: red;">failed</span>
       [% ELSE %]
         [% IF r.var.start_time %]
           [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
-          [% duration(end_time - r.var.start_time, 3) %]
+          [% job_time = end_time - r.var.start_time %]
+          [% IF r.var.exists('job_data') %]
+                [% PROCESS _progressbar.tt
+                            job_percent=r.var.job_data.percent
+                            job_time=job_time
+                            job_id=r.var.job
+                            progressbarid="progressbar" _ r.nr
+                            lineheight=19
+                            width=160
+                            height=20
+                            percent_per_second=0
+                            show_message=1
+                %]
+          [% ELSE %]
+            [% duration(job_time, 3) %]
+          [% END %]
         [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF r.var.is_running != 0 %]
-        [% running = running + 1 %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=cancel" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/stop.png' border="0" alt='Cancel Report' title='Cancel Report' width=16 height=16></a>
       [% ELSE %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
@@ -139,9 +152,6 @@
     else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
     else                     { jQuery('#view1').attr('checked', 'checked') }
     init_report_tool_buttons();
-    [% IF running > 0 %]
-    update_reports_status();
-    [%+ END +%]
     [% IF highlight %]
     jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
     if(typ == 'my') {

@@ -37,22 +37,6 @@ function init_report_tool_buttons() {
     });
 }
 
-/* update report list status */
-function update_reports_status() {
-    /* adding timestamp makes IE happy */
-    var ts = new Date().getTime();
-    jQuery('#reports_table').load('reports2.cgi?_=' + ts + ' #statusTable', {},
-                                  function(responseText, textStatus, XMLHttpRequest) {
-        // now count is_running elements
-        size = jQuery('.is_running').size();
-        if(size > 0) {
-            window.setTimeout('update_reports_status()', 1500);
-        }
-        reports_view(last_reports_typ);
-        table_search("table_search_input", ["statusTable"], 1);
-    });
-}
-
 /* update reports edit step2 */
 var tmpDiv;
 var updateRetries;

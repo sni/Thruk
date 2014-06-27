@@ -41,6 +41,14 @@ sub get_report_list {
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $r = _read_report_file($c, $1, undef, $noauth, 1);
+            if($r->{'var'} and $r->{'var'}->{'job'}) {
+                my($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $r->{'var'}->{'job'});
+                $r->{'var'}->{'job_data'} = {
+                    time    => $time,
+                    percent => $percent,
+                    message => $message,
+                } if defined $time;
+            }
             push @{$reports}, $r if defined $r;
         }
     }
@@ -344,6 +352,8 @@ sub generate_report {
         }
     }
 
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
+
     # empty logfile
     my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     open(my $fh, '>', $logfile);
@@ -360,6 +370,8 @@ sub generate_report {
     # need to update defaults backends
     my($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
     Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 2, 'getting backends') if $ENV{'THRUK_JOB_DIR'};
 
     # check backend connections
     my $processinfo = $c->{'db'}->get_processinfo();
@@ -381,6 +393,8 @@ sub generate_report {
         push @{$c->stash->{'selected_backends'}}, $b;
     }
 
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 3, 'setting defaults') if $ENV{'THRUK_JOB_DIR'};
+
     # set some defaults
     Thruk::Utils::Reports::Render::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
@@ -394,10 +408,12 @@ sub generate_report {
         confess('template reports/'.$options->{'template'}.' does not exist');
     }
 
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 4, 'initializing') if $ENV{'THRUK_JOB_DIR'};
     _initialize_report_templates($c, $options);
 
     # prepage stage, functions here could still change stash
     eval {
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'prepare';
         $c->view("TT")->render($c, 'reports/'.$options->{'template'});
     };
@@ -410,6 +426,7 @@ sub generate_report {
     # render report
     my $reportdata;
     eval {
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'rendering') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'render';
         $reportdata = $c->view("TT")->render($c, 'reports/'.$options->{'template'});
     };
@@ -421,6 +438,7 @@ sub generate_report {
 
     # convert to pdf
     if($Thruk::Utils::PDF::ctype eq 'html2pdf') {
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
         _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
     }
 
@@ -451,6 +469,8 @@ sub generate_report {
             die("Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n")
         }
     }
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 100, 'finished') if $ENV{'THRUK_JOB_DIR'};
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;

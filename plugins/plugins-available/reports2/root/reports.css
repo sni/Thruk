@@ -80,3 +80,7 @@ body.status TABLE.weekly_days TD {
 .error {
     color: #FF0000;
 }
+
+.report_progessbar DIV {
+  font-size: 11px;
+}

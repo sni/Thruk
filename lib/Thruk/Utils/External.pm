@@ -66,7 +66,7 @@ sub cmd {
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        _do_child_stuff($c, $dir);
+        _do_child_stuff($c, $dir, $id);
 
         $SIG{CHLD} = 'DEFAULT';
 
@@ -134,7 +134,7 @@ sub perl {
             $c->{'db'}->enable_backends($conf->{'backends'});
         }
         eval {
-            _do_child_stuff($c, $dir);
+            _do_child_stuff($c, $dir, $id);
 
             do {
                 ## no critic
@@ -225,6 +225,8 @@ sub cancel {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
+    update_status($dir, 99.9, 'canceled');
+
     my $pid = read_file($dir."/pid");
     kill(-15, $pid);
     sleep(1);
@@ -285,6 +287,11 @@ sub get_status {
         chomp($forward);
     }
 
+    if($percent =~ m/^(\d+)\s+(.*)$/mx) {
+        $percent = $1;
+        $message = $2;
+    }
+
     return($is_running,$time,$percent,$message,$forward);
 }
 
@@ -306,9 +313,9 @@ sub get_json_status {
     return unless defined $time;
 
     $c->stash->{'json'}   = {
-            'is_running' => $is_running,
-            'time'       => $time,
-            'percent'    => $percent,
+            'is_running' => 0+$is_running,
+            'time'       => 0+$time,
+            'percent'    => 0+$percent,
             'message'    => $message,
             'forward'    => $forward,
     };
@@ -425,9 +432,29 @@ sub job_page {
     return;
 }
 
+
+##############################################
+
+=head2 update_status
+
+  update_status($dir, $percent, $status)
+
+update status for this job
+
+=cut
+sub update_status {
+    my($dir, $percent, $status) = @_;
+    my $statusfile = $dir."/status";
+    open(my $fh, '>', $statusfile) or die("cannot write status $statusfile: $!");
+    print $fh $percent, " ", $status, "\n";
+    Thruk::Utils::IO::close($fh, $statusfile);
+    return;
+}
+
+
 ##############################################
 sub _do_child_stuff {
-    my($c, $dir) = @_;
+    my($c, $dir, $id) = @_;
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
@@ -440,6 +467,10 @@ sub _do_child_stuff {
     # make remote user available
     confess('no remote_user') unless defined $c->stash->{'remote_user'};
     $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+
+    # make job id available
+    $ENV{'THRUK_JOB_ID'}  = $id;
+    $ENV{'THRUK_JOB_DIR'} = $dir;
 
     $|=1; # autoflush
 

@@ -32,6 +32,8 @@ sub calculate_availability {
     my($c)         = @_;
     my $start_time = time();
 
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 6, 'preparing logs') if $ENV{'THRUK_JOB_DIR'};
+
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'};
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
@@ -559,8 +561,11 @@ sub calculate_availability {
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
     $c->stats->profile(begin => "avail.pm updatecache");
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
     $c->{'db'}->renew_logcache($c, 1);
     $c->stats->profile(end   => "avail.pm updatecache");
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 10, 'fetching logs') if $ENV{'THRUK_JOB_DIR'};
 
     # use tempfiles for reports > 14 days
     my $file = 0;
@@ -571,8 +576,11 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
 
     $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 35, 'reading logs') if $ENV{'THRUK_JOB_DIR'};
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new();
@@ -604,6 +612,7 @@ sub calculate_availability {
     $c->stash->{avail_data} = $ma->calculate(%{$ma_options});
     $c->stats->profile(end => "calculate availability");
 
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 75, 'finished calculation') if $ENV{'THRUK_JOB_DIR'};
     if($c->{'request'}->{'parameters'}->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";
         $c->stash->{'debug_info'} .= Dumper($ma_options);

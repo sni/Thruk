@@ -8,15 +8,17 @@
         });
     });
 
-    var last_time_[% progressbarid %] = 0;
+    var last_time_[% progressbarid %]    = 0;
+    var last_message_[% progressbarid %] = '';
     function update_job_progressbar_[% progressbarid %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
         var val = jQuery( "#[% progressbarid %]" ).progressbar( "value" );
+
         // update every 2 seconds
         if(last_time_[% progressbarid %] != 0 && datestr%2 != 0 && val < 100) {
             last_time_[% progressbarid %] = last_time_[% progressbarid %] + 1;
             jQuery("#[% progressbarid %]").progressbar( "value", val + [% percent_per_second %] );
-            jQuery("#[% progressbarid %] DIV.job_time").html(last_time_[% progressbarid %] + "s");
+            jQuery("#[% progressbarid %] DIV.job_time").html(last_time_[% progressbarid %] + "s" + last_message_[% progressbarid %]);
             return;
         }
         jQuery.ajax({
@@ -28,8 +30,9 @@
                     jQuery( "#[% progressbarid %]" ).progressbar( "value", data.percent );
                 }
                 if(data.percent != 100) {
+                  if([% show_message %] && data.message) { last_message_[% progressbarid %] = " - " + data.message; }
                   last_time_[% progressbarid %] = data.time;
-                  jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s");
+                  jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s"+last_message_[% progressbarid %]);
                 }
             }
         });
@@ -43,6 +46,7 @@
             jQuery( "#[% progressbarid %]" ).progressbar( "value", val + [% percent_per_second %] );
         }
     }
+
     [% IF job_percent != 100 %]
     var timer_[% progressbarid %];
     jQuery(function() {
