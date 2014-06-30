@@ -183,6 +183,8 @@ plugins/plugins-available/conf/lib/Monitoring/Config/Multi.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Arbiter.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Broker.pm
+plugins/plugins-available/conf/lib/Monitoring/Config/Object/Businessimpactmodulation.pm
+plugins/plugins-available/conf/lib/Monitoring/Config/Object/Checkmodulation.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Command.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Contact.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Contactgroup.pm
@@ -201,6 +203,7 @@ plugins/plugins-available/conf/lib/Monitoring/Config/Object/Poller.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Reactionner.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Realm.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Receiver.pm
+plugins/plugins-available/conf/lib/Monitoring/Config/Object/Resultmodulation.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Scheduler.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Service.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Servicedependency.pm

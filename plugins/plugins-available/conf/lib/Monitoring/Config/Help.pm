@@ -166,6 +166,7 @@ __DATA__
         'poller_tag' => 'This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter. By default there is no poller_tag, so all untagged pollers can take it.',
         'business_impact' => 'This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail). The default value is 2.',
         'resultmodulations' => 'This variable is used to link with resultmodulations objects. It will allow such modulation to apply, like change a warning in critical for this host.',
+        'checkmodulations' => 'This variable is used to link with checkmodulations objects. It will allow such modulation to apply, to change the way a check command works.',
         'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
         'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
         'icon_set' => 'This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server',
@@ -260,6 +261,7 @@ __DATA__
         'poller_tag' => 'This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter. By default there is no poller_tag, so all untagged pollers can take it.',
         'business_impact' => 'This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail). The default value is 2.',
         'resultmodulations' => 'This variable is used to link with resultmodulations objects. It will allow such modulation to apply, like change a warning in critical for this host.',
+        'checkmodulations' => 'This variable is used to link with checkmodulations objects. It will allow such modulation to apply, to change the way a check command works.',
         'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
         'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
         'service_dependencies' => 'This variable is used to define services that this serice is dependent of for notifications. It\'s a comma separated list of service like host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as \'u,c,w\' and no dependency_period). By default this value is void so there is no linked dependencies.',
@@ -501,5 +503,21 @@ __DATA__
         'realm_members' => 'This directive is used to define the sub-realms of this realms.',
         'default' => 'This directive is used to define if this realm is the default one (untagged host and satellites wil be put into it). The default value is 0.',
         'broker_complete_links' => 'Enable multi-brokers features',
+    },
+    'businessimpactmodulation' => {
+        'business_impact_modulation_name' => 'This directive identifies the unique name of the businessimpactmodulation so you reference it by your objects.',
+        'business_impact' => 'This variable is used to set the (modulated) importance we gave to this host/service for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail).',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
+    },
+    'resultmodulation' => {
+        'resultmodulation_name' => 'This directive identifies the unique name of the resultmodulation so you reference it by your objects.',
+        'exit_codes_match' => 'This directive is used to define a list of exit codes to change',
+        'exit_code_modulation' => 'This directive is used to define the code that will be put if the code match',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
+    },
+    'checkmodulation' => {
+        'checkmodulation_name' => 'This directive identifies the unique name of the checkmodulation so you reference it by your objects.',
+        'check_command' => 'This directive is used to define the short name of a check command to which the modulation applies.',
+        'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
     },
 };

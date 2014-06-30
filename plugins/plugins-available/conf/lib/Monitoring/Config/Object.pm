@@ -35,6 +35,9 @@ use Monitoring::Config::Object::Discoveryrule;
 use Monitoring::Config::Object::Discoveryrun;
 use Monitoring::Config::Object::Notificationway;
 use Monitoring::Config::Object::Realm;
+use Monitoring::Config::Object::Businessimpactmodulation;
+use Monitoring::Config::Object::Resultmodulation;
+use Monitoring::Config::Object::Checkmodulation;
 
 =head1 NAME
 
