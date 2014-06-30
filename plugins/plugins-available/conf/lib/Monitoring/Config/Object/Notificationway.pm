@@ -27,7 +27,7 @@ $Monitoring::Config::Object::Notificationway::Defaults = {
     'host_notification_period'        => { type => 'STRING', 'link' => 'timeperiod', cat => 'Notifications' },
     'service_notification_period'     => { type => 'STRING', 'link' => 'timeperiod', cat => 'Notifications' },
     'host_notification_options'       => { type => 'ENUM', values => ['d','u','r','f','s','n'], keys => [ 'Down', 'Unreachable', 'Recovery', 'Flapping', 'Downtime', 'None' ], cat => 'Notifications' },
-    'service_notification_options'    => { type => 'ENUM', values => ['d','u','r','f','s','n'], keys => [ 'Down', 'Unreachable', 'Recovery', 'Flapping', 'Downtime', 'None' ], cat => 'Notifications' },
+    'service_notification_options'    => { type => 'ENUM', values => ['w','u','c','r','f','s','n'], keys => [ 'Warning', 'Unknown', 'Critical', 'Recovery', 'Flapping', 'Downtime', 'None' ], cat => 'Notifications' },
     'host_notification_commands'      => { type => 'LIST', 'link' => 'command', cat => 'Notifications' },
     'service_notification_commands'   => { type => 'LIST', 'link' => 'command', cat => 'Notifications' },
     'min_business_impact'             => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
