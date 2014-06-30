@@ -576,7 +576,6 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
 
     $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
 
@@ -681,6 +680,8 @@ from the real date
 =cut
 sub fix_and_sort_logs {
     my($c, $logs, $file, $rpttimeperiod, $sort) = @_;
+
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
 
     $sort = 'asc' unless $sort;
     $sort = lc $sort;
