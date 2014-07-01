@@ -956,6 +956,11 @@ sub _import_logs {
     my $files = $options->{'url'} || [];
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
+    my $forcestart;
+    if($options->{'start'}) {
+        $forcestart = time() - Thruk::Utils::Status::convert_time_amount($options->{'start'});
+    }
+
     my $backend_count = 0;
     my $log_count     = 0;
     my $log_skipped   = 0;
@@ -991,7 +996,7 @@ sub _import_logs {
         # backends maybe down, we still want to continue updates
         eval {
             if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
-                $log_count += $self->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files);
+                $log_count += $self->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'authupdate') {
                 $log_count += $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
@@ -1014,7 +1019,7 @@ sub _import_logs {
 
 ##########################################################
 sub _update_logcache {
-    my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files) = @_;
+    my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart) = @_;
 
     unless(defined $blocksize) {
         $blocksize = 86400;
@@ -1088,7 +1093,7 @@ sub _update_logcache {
     if(defined $files and scalar @{$files} > 0) {
         $log_count += $self->_import_logcache_from_file($mode,$dbh,$files,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$peer,$contact_lookup);
     } else {
-        $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup);
+        $log_count += $self->_import_peer_logfiles($c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart);
     }
 
     if($mode eq 'import') {
@@ -1441,7 +1446,7 @@ sub _fill_lookup_logs {
 
 ##########################################################
 sub _import_peer_logfiles {
-    my($self,$c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup) = @_;
+    my($self,$c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart) = @_;
 
     # get start / end timestamp
     my($mstart, $mend);
@@ -1462,6 +1467,7 @@ sub _import_peer_logfiles {
     my($start, $end) = @{$peer->{'class'}->_get_logs_start_end(filter => $filter)};
     print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
     $c->stats->profile(end => "get livestatus timestamp");
+    $start = $forcestart if $forcestart;
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
 

@@ -59,6 +59,7 @@ Getopt::Long::GetOptions (
    "y|yes"              => \$options->{'yes'},
    "f|force"            => \$options->{'force'},
    "i|all-inclusive"    => \$options->{'all_inclusive'},
+   "s|start=s"          => \$options->{'start'},
    "<>"                 => sub { push @{$options->{'url'}}, "".shift },
 ) or do {
     print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
@@ -164,7 +165,7 @@ script has the following arguments
       - reportmail=<nr>             send report by mail
 
     Logcache: ( MySQL / MongoDB )
-      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day.
+      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day. (hint: use --start=3w to import last 3weeks only)
       - logcacheupdate              update logcache
       - logcacheauthupdate          update logcache authorization information
       - logcachestats               print logcache statistics
