@@ -1203,6 +1203,7 @@ t/100-backend_mysql_utf8.t
 t/100-backend_shinken.t
 t/100-cli-examples-dups.t
 t/100-cli-examples.t
+t/100-cli-livecache.t
 t/100-cli-naglint.t
 t/100-cli-naglint2.t
 t/100-cli-thruk.t

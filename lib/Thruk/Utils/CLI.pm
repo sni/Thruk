@@ -1135,7 +1135,7 @@ sub _cmd_livecache {
         return("OK - $started/$started livecache running, ".($total-$failed)."/".$total." online\n", 0);
     }
     if($started == 0) {
-        return("STOPPED - $started livecache running\n", 2);
+        return("STOPPED - $started livecache running\n", $mode eq 'stop' ? 0 : 2);
     }
     return("WARNING - $started/".(scalar @{$status})." livecache running\n", 1);
 }
