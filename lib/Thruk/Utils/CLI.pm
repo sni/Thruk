@@ -595,7 +595,7 @@ sub _run_command_action {
     }
 
     # livestatus proxy cache
-    elsif($action =~ /livecache(start|stop|status)/mx) {
+    elsif($action =~ /livecache(start|stop|status|restart)/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_livecache($c, $1, $src, $opt);
     }
 
@@ -1088,32 +1088,44 @@ sub _cmd_livecache {
     Thruk::Backend::Pool::init_backend_thread_pool();
 
     if($mode eq 'start') {
-        Thruk::Utils::check_shadow_naemon_procs($c->config, $c, 0, 1);
+        Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 0, 1);
         # wait for the startup
         my($status, $started);
         for(my $x = 0; $x <= 20; $x++) {
             eval {
-                ($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
             };
             last if($status && scalar @{$status} == $started);
         }
         sleep(1);
     }
     elsif($mode eq 'stop') {
-        Thruk::Utils::shutdown_shadow_naemon_procs($c->config);
+        Thruk::Utils::Livecache::shutdown_shadow_naemon_procs($c->config);
         # wait for the fully stopped
         my($status, $started, $total, $failed);
         for(my $x = 0; $x <= 20; $x++) {
             eval {
-                ($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
                 ($total, $failed) = _get_shadownaemon_totals($c, $status);
             };
             last if(defined $started && $started == 0 && defined $total && $total == $failed);
         }
         sleep(1);
     }
+    elsif($mode eq 'restart') {
+        Thruk::Utils::Livecache::restart_shadow_naemon_procs($c->config);
+        # wait for the startup
+        my($status, $started);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
+            };
+            last if($status && scalar @{$status} == $started);
+        }
+        sleep(1);
+    }
 
-    my($status, $started) = Thruk::Utils::status_shadow_naemon_procs($c->config);
+    my($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
     $c->stats->profile(end => "_cmd_livecache($mode)");
     if(scalar @{$status} == 0) {
         return("UNKNOWN - livecache not enabled for any backend\n", 3);

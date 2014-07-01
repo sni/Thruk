@@ -175,6 +175,7 @@ script has the following arguments
     Livestatus Cache:
       - livecachestart              start shadownaemons livecache
       - livecachestop               stop all shadownaemons
+      - livecacherestart            restart livecaches for each site sequentially
       - livecachestatus             show livecache status
 
     Internal Commands

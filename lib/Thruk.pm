@@ -47,6 +47,7 @@ use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Avail;
 use Thruk::Utils::External;
+use Thruk::Utils::Livecache;
 use Thruk::Utils::Cache qw/cache/;
 use Catalyst::Runtime '5.70';
 
@@ -131,7 +132,7 @@ sub _remove_pid {
             if(scalar @{$remaining} == 0) {
                 unlink($pidfile);
                 if(__PACKAGE__->config->{'use_shadow_naemon'} and __PACKAGE__->config->{'use_shadow_naemon'} ne 'start_only') {
-                    Thruk::Utils::shutdown_shadow_naemon_procs(__PACKAGE__->config);
+                    Thruk::Utils::Livecache::shutdown_shadow_naemon_procs(__PACKAGE__->config);
                 }
             } else {
                 open(my $fh, '>', $pidfile);
@@ -143,7 +144,7 @@ sub _remove_pid {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'DebugServer') {
         # debug server has no pid file, so just kill our shadows
         if(__PACKAGE__->config->{'use_shadow_naemon'} and __PACKAGE__->config->{'use_shadow_naemon'} ne 'start_only') {
-            Thruk::Utils::shutdown_shadow_naemon_procs(__PACKAGE__->config);
+            Thruk::Utils::Livecache::shutdown_shadow_naemon_procs(__PACKAGE__->config);
         }
     }
     return;
