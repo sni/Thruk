@@ -152,6 +152,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($action eq 'email') {
             return $self->report_email($c, $report_nr);
         }
+        elsif($action eq 'profile') {
+            return $self->report_profile($c, $report_nr);
+        }
     }
 
     if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} and !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
@@ -334,6 +337,29 @@ sub report_cancel {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
     return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+}
+
+##########################################################
+
+=head2 report_profile
+
+=cut
+sub report_profile {
+    my($self, $c, $report_nr) = @_;
+
+    my $data = '';
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if($report) {
+        if($report->{'var'}->{'profile'}) {
+            $data = $report->{'var'}->{'profile'};
+        } else {
+            $data = "no profile information available";
+        }
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    $c->stash->{'json'} = { 'data' => $data };
+    return $c->forward('Thruk::View::JSON');
 }
 
 ##########################################################

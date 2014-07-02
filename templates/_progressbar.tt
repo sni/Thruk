@@ -9,12 +9,15 @@
     });
 
     function pb_overlib_[% progressbarid %]() {
-        return overlib("<div id='over_[% progressbarid %]'><\/div>",CAPTION,'report status',WIDTH,200,[% c.config.info_popup_options %]);
+        overlib("<div id='over_[% progressbarid %]'><\/div>",CAPTION,'report status',WIDTH,200,[% c.config.info_popup_options %]);
+        jQuery("#over_[% progressbarid %]").html(last_overmsg_[% progressbarid %]);
+        return;
     }
 
     var last_time_[% progressbarid %]      = 0;
     var last_message_[% progressbarid %]   = '';
     var last_remaining_[% progressbarid %] = '';
+    var last_overmsg_[% progressbarid %]   = '';
     function update_job_progressbar_[% progressbarid %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
         var val = jQuery( "#[% progressbarid %]" ).progressbar( "value" );
@@ -42,6 +45,7 @@
                     title = title + "(~"+last_remaining_[% progressbarid %]+" seconds remaining for this step)";
                   }
                   jQuery("#over_[% progressbarid %]").html(title);
+                  last_overmsg_[% progressbarid %] = title;
                   last_time_[% progressbarid %] = data.time;
                   jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s"+last_message_[% progressbarid %]);
                 }

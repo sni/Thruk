@@ -338,15 +338,13 @@ sub get_json_status {
 
 =head2 get_result
 
-  get_result($c, $id)
+  get_result($c, $id, [$nouser])
 
 return result of a job
 
 =cut
 sub get_result {
-    my $c       = shift;
-    my $id      = shift;
-    my $nouser  = shift;
+    my($c, $id, $nouser) = @_;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
     if(!$nouser && -f $dir."/user") {
@@ -382,7 +380,11 @@ sub get_result {
     $rc = read_file($dir."/rc") if -f $dir."/rc";
     chomp($rc) if defined $rc;
 
-    return($out,$err,$time,$dir,$stash,$rc);
+    my $profile;
+    $profile = read_file($dir."/profile.log") if -f $dir."/profile.log";
+    chomp($profile) if defined $profile;
+
+    return($out,$err,$time,$dir,$stash,$rc,$profile);
 }
 
 ##############################################

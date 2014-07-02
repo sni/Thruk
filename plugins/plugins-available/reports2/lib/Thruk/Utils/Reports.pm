@@ -828,13 +828,14 @@ sub _read_report_file {
     my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     if(!$report->{'var'}->{'is_running'} and $report->{'var'}->{'job'}) {
         my $jobid = delete $report->{'var'}->{'job'};
-        my($out,$err,$time, $dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $jobid, 1);
+        my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
         if($err) {
             # append job error to report logfile
             open(my $fh, '>>', $log);
             print $fh $err;
             Thruk::Utils::IO::close($fh, $log);
         }
+        $report->{'var'}->{'profile'} = $profile;
         $needs_save = 1;
     }
 

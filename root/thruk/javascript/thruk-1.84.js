@@ -1661,6 +1661,26 @@ function preserve_hash() {
     cookieSave('thruk_preserve_hash', get_hash(), 60);
 }
 
+/* fetch content by ajax and replace content */
+function load_overlib_content(id, url, add_pre) {
+    jQuery.ajax({
+        url: url,
+        type: 'POST',
+        success: function(data) {
+            var el = document.getElementById(id);
+            if(el) {
+                if(add_pre) {
+                    data.data = "<pre>"+data.data+"<\/pre>";
+                }
+                el.innerHTML = data.data;
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            debug(textStatus);
+        }
+    });
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b
