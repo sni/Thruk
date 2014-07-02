@@ -619,12 +619,14 @@ sub calculate_availability {
         unlink($file) if $file;
     }
 
+    $c->stats->profile(begin => "got logs");
     if($full_log_entries) {
         $c->stash->{'logs'} = $ma->get_full_logs() || [];
     }
     elsif($show_log_entries) {
         $c->stash->{'logs'} = $ma->get_condensed_logs() || [];
     }
+    $c->stats->profile(end => "got logs");
 
     # csv output needs host list
     if($csvoutput or $view_mode eq 'xls') {
@@ -635,8 +637,6 @@ sub calculate_availability {
             $c->stash->{'services'} = $c->stash->{'avail_data'}->{'services'};
         }
     }
-
-    $c->stats->profile(end => "got logs");
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
@@ -721,12 +721,15 @@ sub fix_and_sort_logs {
                 unlink($fname);
             }
             CORE::close($fh);
+            $c->stats->profile(end   => "avail.pm sort fix logs");
+
+            $c->stats->profile(begin => "avail.pm sort logs");
             Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.'2 '.$tempfile;
             `$cmd`;
             unlink($tempfile);
             $file = $tempfile.'2';
-            $c->stats->profile(end   => "avail.pm sort fix logs");
+            $c->stats->profile(end   => "avail.pm sort logs");
         } else {
             # use short file handling if no timeperiods have to be altered
             $c->stats->profile(begin => "avail.pm sort logs");

@@ -325,6 +325,8 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
+    $c->stats->enable(1) if $ENV{'THRUK_JOB_DIR'};
+
     my $product = $c->config->{'product_prefix'} || 'thruk';
     if($product ne 'thruk') {
         # make it look like a thruk url, ex.: .../thruk/cgi-bin/tac.cgi
@@ -366,6 +368,9 @@ sub run_after_request {
 
 after finalize => sub {
     my($c) = @_;
+
+    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
+
     return unless defined $c->stash->{'run_after_request_cb'};
     while(my $sub = shift @{$c->stash->{'run_after_request_cb'}}) {
         ## no critic

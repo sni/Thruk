@@ -573,10 +573,10 @@ sets the authorized_for_read_only role and group based roles
 sub set_dynamic_roles {
     my $c = shift;
 
-    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
     my $username = $c->request->{'user'}->{'username'};
-
     return unless defined $username;
+
+    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
     my($roles, $can_submit_commands, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
 

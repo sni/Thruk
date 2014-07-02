@@ -566,6 +566,7 @@ sub set_running {
     $options->{'var'}->{'is_running'} = $val   if defined $val;
     $options->{'var'}->{'start_time'} = $start if defined $start;
     $options->{'var'}->{'end_time'}   = $end   if defined $end;
+    $options->{'var'}->{'job'}        = $ENV{'THRUK_JOB_ID'} if defined $ENV{'THRUK_JOB_ID'};
     $options->{'var'}->{'job'}        = $job   if defined $job;
     $options->{'var'}->{'attachment'} = $Thruk::Utils::PDF::attachment if $Thruk::Utils::PDF::attachment;
     $options->{'var'}->{'ctype'}      = $Thruk::Utils::PDF::ctype      if $Thruk::Utils::PDF::ctype;

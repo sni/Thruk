@@ -58,7 +58,7 @@ sub cmd {
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 
-    my ($id,$dir) = _init_external($c);
+    my($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
@@ -134,6 +134,7 @@ sub perl {
             $c->{'db'}->enable_backends($conf->{'backends'});
         }
         eval {
+            $c->stats->profile(begin => 'External::perl');
             _do_child_stuff($c, $dir, $id);
 
             do {
@@ -161,6 +162,9 @@ sub perl {
             # save stash
             _clean_code_refs($c->stash);
             store(\%{$c->stash}, $dir."/stash");
+
+            $c->stats->profile(end => 'External::perl');
+            save_profile($c, $dir);
         };
         if($@) {
             my $err = $@;
@@ -169,8 +173,10 @@ sub perl {
                 print $fh $err;
                 Thruk::Utils::IO::close($fh, $dir."/stderr");
             };
+            save_profile($c, $dir);
             exit(1);
         }
+        save_profile($c, $dir);
         exit(0);
     }
     exit(1);
@@ -456,6 +462,24 @@ sub update_status {
     return;
 }
 
+##############################################
+
+=head2 save_profile
+
+  save_profile($c, $dir)
+
+save profile to profile.log of this job
+
+=cut
+sub save_profile {
+    my($c, $dir) = @_;
+
+    my $file = $dir.'/profile.log';
+    open(my $fh, '>>', $file) or die("cannot write $file: $!");
+    print $fh "".$c->stats->report(),"\n";
+    CORE::close($fh);
+    return;
+}
 
 ##############################################
 sub _do_child_stuff {
@@ -483,6 +507,8 @@ sub _do_child_stuff {
     for my $fd (0..1024) {
         POSIX::close($fd);
     }
+
+    $c->stats->enable(1);
 
     return;
 }

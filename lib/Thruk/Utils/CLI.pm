@@ -99,6 +99,7 @@ sub get_c {
     return $Thruk::Utils::CLI::c if defined $Thruk::Utils::CLI::c;
     my($c, $failed) = $self->_dummy_c();
     $Thruk::Utils::CLI::c = $c;
+    $c->stats->enable(1);
     return $c;
 }
 
@@ -321,6 +322,13 @@ sub _run {
         if(!defined $c) {
             print STDERR "command failed";
             return 1;
+        }
+        if(!$ENV{'THRUK_JOB_ID'} and $self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
+            # create fake job
+            my($id,$dir) = Thruk::Utils::External::_init_external($c);
+            Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all'});
+            $ENV{'THRUK_JOB_ID'}  = $id;
+            $ENV{'THRUK_JOB_DIR'} = $dir;
         }
         $result = $self->_from_local($c, $self->{'opt'})
     }
@@ -612,6 +620,11 @@ sub _run_command_action {
     }
 
     $c->stats->profile(end => "_run_command_action($action)");
+
+    if($ENV{'THRUK_JOB_DIR'}) {
+        Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
+        `touch $ENV{'THRUK_JOB_DIR'}/stdout`;
+    }
 
     return $data;
 }
