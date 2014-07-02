@@ -340,9 +340,8 @@
         var This = this;
         if(activeTab && activeTab.xdata && activeTab.xdata.refresh > 0) {
             TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, activeTab.xdata.refresh * 1000);
+            TP.updateAllIcons(This);
         }
-
-        TP.updateAllIcons(This);
 
         if(TP.initMask && !this.keepMask) { TP.initMask.destroy(); delete TP.initMask; }
 

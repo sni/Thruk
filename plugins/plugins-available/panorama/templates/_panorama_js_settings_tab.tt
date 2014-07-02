@@ -444,6 +444,7 @@ TP.tabSettingsWindow = function() {
                         var win     = this.up('window');
                         var oldautohideheader = tab.xdata.autohideheader;
 
+                        var oldstate = Ext.JSON.encode(tab.getState());
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
                         if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
@@ -463,7 +464,11 @@ TP.tabSettingsWindow = function() {
                         }
 
                         tab.applyXdata(undefined, false);
+                        var newstate = Ext.JSON.encode(tab.getState());
                         tab.saveState();
+                        if(oldstate != newstate) {
+                            tabpan.startTimeouts();
+                        }
 
                         /* user settings */
                         var oldstate = Ext.JSON.encode(tabpan.getState());
@@ -500,6 +505,7 @@ TP.tabSettingsWindow = function() {
                }
         ]
     });
+    tab.xdata['refresh_txt'] = TP.sliderValue2Txt(tab.xdata['refresh']); // refresh text is wrong otherwise on initial settings window
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
