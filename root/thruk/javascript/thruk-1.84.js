@@ -4324,8 +4324,9 @@ var ajax_search = {
 
         var style     = panel.style;
         var coords;
-        if(input.className == 'NavBarSearchItem') {
-            coords    = jQuery(input).position();
+        if(jQuery(input).hasClass("NavBarSearchItem")) {
+            // input is wraped in deletable icon span
+            coords    = jQuery(input.parentNode).position();
         } else {
             coords    = jQuery(input).offset();
         }
@@ -4334,8 +4335,13 @@ var ajax_search = {
         style.display = "block";
         style.width   = ( ajax_search.size -2 ) + "px";
 
+        if(jQuery(input).hasClass("NavBarSearchItem")) {
+            style.top   = (coords.top + input.offsetHeight - 4) + "px";
+            style.width = ( ajax_search.size + 28 ) + "px";
+        }
+
         /* move dom node to make sure it scrolls with the input field */
-        if(input.className == 'NavBarSearchItem') {
+        if(jQuery(input).hasClass("NavBarSearchItem")) {
             var tmpElem = input;
             var x = 0;
             // put result div below the form, otherwise clicking a type header would result in a redirect to undefined (#197)
@@ -4430,7 +4436,7 @@ var ajax_search = {
 
         if(( ajax_search.autosubmit == undefined
              && (
-                    input.className == "NavBarSearchItem"
+                    jQuery(input).hasClass("NavBarSearchItem")
                  || ajax_search.input_field == "data.username"
                  || ajax_search.input_field == "data.name"
                  )

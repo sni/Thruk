@@ -817,11 +817,12 @@ DIV#progressbar .ui-progressbar-value {
 
 SPAN.deleteicon {
   position: relative;
+  display: inline-block;
 }
 SPAN.deleteicon SPAN {
   position: absolute;
   display: block;
-  top: -1px;
+  top: 4px;
   right: 5px;
   width: 14px;
   height: 14px;
@@ -1104,4 +1105,3 @@ TABLE.livestatus_metrics TD.dataVal {
 .tab_hidden, .filter_hidden {
   display: none;
 }
-

@@ -29,6 +29,10 @@
             });
             return false;
         });
+
+        jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+            jQuery(this).prev('input').val('').focus();
+        }));
     });
 
     function check_frame_loaded() {
