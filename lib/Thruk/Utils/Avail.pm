@@ -681,7 +681,7 @@ from the real date
 sub fix_and_sort_logs {
     my($c, $logs, $file, $rpttimeperiod, $sort) = @_;
 
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
+    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 25, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
 
     $sort = 'asc' unless $sort;
     $sort = lc $sort;
@@ -705,11 +705,12 @@ sub fix_and_sort_logs {
         my $sort_add = '';
         $sort_add = '-r' if $sort eq 'desc';
         if($rpttimeperiod) {
+            Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 25, 'fixing logs') if $ENV{'THRUK_JOB_DIR'};
             $c->stats->profile(begin => "avail.pm sort fix logs");
             for my $fname (values %{$logs}) {
                 open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
                 while(my $line = <$fh2>) {
-                    if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mx) {
+                    if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mxo) {
                         my $t = floor(($1+30)/120) * 120;
                         print $fh '['.$t.'] TIMEPERIOD TRANSITION:'.$2."\n";
                     } else {
@@ -717,9 +718,10 @@ sub fix_and_sort_logs {
                     }
                 }
                 CORE::close($fh2);
+                unlink($fname);
             }
             CORE::close($fh);
-            unlink(values %{$logs});
+            Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 30, 'sorting logs') if $ENV{'THRUK_JOB_DIR'};
             my $cmd = 'sort -k 1,12 '.$sort_add.' -o '.$tempfile.'2 '.$tempfile;
             `$cmd`;
             unlink($tempfile);
