@@ -229,6 +229,28 @@ sub do_filter {
     return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
 }
 
+##############################################
+
+=head2 reset_filter
+
+  reset_filter($c)
+
+reset filter from c->request->parameters
+
+=cut
+sub reset_filter {
+    my($c) = @_;
+    delete $c->stash->{'host'};
+    delete $c->stash->{'hostgroup'};
+    delete $c->stash->{'servicegroup'};
+    delete $c->stash->{'service'};
+    for my $key (keys %{$c->request->parameters}) {
+        delete $c->request->{'parameters'}->{$key} if $key =~ m/^dfl_/mx;
+        delete $c->request->{'parameters'}->{$key} if $key =~ m/^svc_/mx;
+        delete $c->request->{'parameters'}->{$key} if $key =~ m/^hst_/mx;
+    }
+    return;
+}
 
 ##############################################
 

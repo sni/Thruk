@@ -1626,6 +1626,9 @@ sub _get_gearman_stats {
 sub _do_filter {
     my($self, $c) = @_;
 
+    # reset existing filter
+    Thruk::Utils::Status::reset_filter($c);
+
     if(!defined $c->request->parameters->{'filter'} or $c->request->parameters->{'filter'} eq '') {
         my @f = Thruk::Utils::Status::do_filter($c);
         return @f;
