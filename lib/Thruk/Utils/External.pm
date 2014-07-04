@@ -478,7 +478,11 @@ sub save_profile {
 
     my $file = $dir.'/profile.log';
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
-    print $fh "".$c->stats->report(),"\n";
+    local $ENV{COLUMNS} = 80;
+    eval {
+        print $fh "".$c->stats->report(),"\n";
+    };
+    print $fh $@,"\n" if $@;
     CORE::close($fh);
     return;
 }
