@@ -53,6 +53,7 @@ Ext.define('TP.PanletGridServiceMineMap', {
     reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
+        this.xdata.showborder = true;
         delete this.initialState;
         var state = cp.get(this.id);
         if(state && state.xdata && state.xdata.gridstate) {
@@ -64,5 +65,10 @@ Ext.define('TP.PanletGridServiceMineMap', {
         var panel = this;
         this.callParent();
         TP.addFormFilter(this, this.has_search_button);
+        this.addGearItems({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
+        });
     }
 });

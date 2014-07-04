@@ -9,12 +9,13 @@
     initComponent: function() {
         var panel = this;
         panel.callParent();
-        panel.xdata.url      = '';
-        panel.xdata.selector = '';
-        panel.xdata.keepcss  = true;
-        panel.xdata.graph    = '';
+        panel.xdata.url           = '';
+        panel.xdata.selector      = '';
+        panel.xdata.keepcss       = true;
+        panel.xdata.graph         = '';
         panel.reloadOnSiteChanges = false;
-        panel.last_url       = '';
+        panel.last_url            = '';
+        panel.xdata.showborder    = true;
 
         panel.loader = {};
 
@@ -106,6 +107,11 @@
             displayField:   'name',
             store:           { fields: ['name', 'id'], data: [] },
             emptyText:      'select business process to display'
+        });
+        this.addGearItems({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
         });
     }
 });
