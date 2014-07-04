@@ -2161,7 +2161,12 @@ TP.getPerfDataMinMax = function(p, maxDefault) {
 
 /* return natural size cross browser compatible */
 TP.getNatural = function(src) {
+    if(TP.imageSizes == undefined) { TP.imageSizes = {} }
+    if(TP.imageSizes[src] != undefined) {
+        return {width: TP.imageSizes[src][0], height: TP.imageSizes[src][1]};
+    }
     img = new Image();
     img.src = src;
+    TP.imageSizes[src] = [img.width, img.height];
     return {width: img.width, height: img.height};
 }

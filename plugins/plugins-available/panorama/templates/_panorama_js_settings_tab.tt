@@ -244,6 +244,12 @@ TP.tabSettingsWindow = function() {
         };
     }
 
+    function applyBackground(field) {
+        var d_form  = Ext.getCmp('dashboardForm').getForm();
+        if(!d_form.isValid()) { return false; }
+        var values = d_form.getFieldValues();
+        tab.setBackground(values.background, values.backgroundscale);
+    }
 
     /* Dashboard Settings Tab */
     var dashboardItems = [{
@@ -267,22 +273,43 @@ TP.tabSettingsWindow = function() {
                 nameL:      'refresh_txt'
             }
         }, {
-            xtype:      'combobox',
-            name:       'background',
             fieldLabel: 'Background',
-            store:       backgrounds,
-            queryMode:      'remote',
-            triggerAction:  'all',
-            pageSize:       true,
-            selectOnFocus:  true,
-            typeAhead:      true,
-            displayField: 'image',
-            valueField: 'path',
-            listConfig : {
-                getInnerTpl: function(displayField) {
-                    return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
-                }
-            }
+            xtype:      'fieldcontainer',
+            layout:     'hbox',
+            defaults: {
+                listeners: { change: function(This) { applyBackground(This) } }
+            },
+            items: [{
+                xtype:          'combobox',
+                name:           'background',
+                store:           backgrounds,
+                queryMode:      'remote',
+                triggerAction:  'all',
+                pageSize:        true,
+                selectOnFocus:   true,
+                typeAhead:       true,
+                displayField:   'image',
+                flex:            1,
+                valueField: 'path',
+                listConfig : {
+                    getInnerTpl: function(displayField) {
+                        return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
+                    }
+                },
+            },
+            { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px;' },
+            {
+                xtype:          'numberunit',
+                unit:           '%',
+                allowDecimals:   true,
+                name:           'backgroundscale',
+                minValue:        0,
+                maxValue:        10000,
+                step:            1,
+                width:           70,
+                value:           100,
+                fieldStyle:     'text-align: right;',
+            }]
         }, {
             fieldLabel:   'Default Icon Set',
             xtype:        'combobox',
@@ -434,6 +461,8 @@ TP.tabSettingsWindow = function() {
                     xtype:  'button',
                     text:   'cancel',
                     handler: function(This) {
+                        // restore old values
+                        tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
                     }
                 }, {

@@ -8,6 +8,7 @@ next:
             - added -or filter to all filter panels
             - added optional min/max values for speedometer
             - added invert switch for speedometer
+            - background images can now be scaled
           - Bug Fixes
             - fixed pnp source not selectable anymore after revisiting panel settings
             - fixed applying panel source
