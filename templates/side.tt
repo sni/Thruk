@@ -20,6 +20,10 @@
     }
     -->
     </style>
+    <!-- avoid menu flickering in IE9 -->
+    <!--[if IE 9]>
+    <style type="text/css">ul.navsectionlinks li:hover { background:none !important; }</style>
+    <![endif]-->
   </head>
   <body class='navbar'>
 [% END %]
