@@ -122,7 +122,7 @@ SKIP: {
 
     #########################
     # external cmd
-    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
+    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;", background => 1 });
     my $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id: ".$id);
 
@@ -142,7 +142,7 @@ SKIP: {
 
     #########################
     # external perl
-    Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';" });
+    Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';", background => 1 });
     $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id");
 
