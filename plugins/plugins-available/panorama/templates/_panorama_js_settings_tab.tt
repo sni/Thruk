@@ -295,7 +295,7 @@ TP.tabSettingsWindow = function() {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
                     }
-                },
+                }
             },
             { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px;' },
             {
@@ -308,7 +308,7 @@ TP.tabSettingsWindow = function() {
                 step:            1,
                 width:           70,
                 value:           100,
-                fieldStyle:     'text-align: right;',
+                fieldStyle:     'text-align: right;'
             }]
         }, {
             fieldLabel:   'Default Icon Set',
