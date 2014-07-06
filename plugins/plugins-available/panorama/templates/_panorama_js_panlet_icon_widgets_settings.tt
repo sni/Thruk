@@ -139,7 +139,7 @@ TP.iconShowEditDialog = function(panel) {
                     minValue:     -360,
                     maxValue:      360,
                     step:           15,
-                    value:         panel.xdata.layout.rotation,
+                    value:         panel.xdata.layout.rotation != undefined ? panel.xdata.layout.rotation : 0,
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyRotation(This.value, xdata); } }
                 }, {
                     fieldLabel:   'Z-Index',
@@ -149,8 +149,21 @@ TP.iconShowEditDialog = function(panel) {
                     minValue:      -10,
                     maxValue:      100,
                     step:            1,
-                    value:         panel.xdata.layout.zindex,
+                    value:         panel.xdata.layout.zindex != undefined ? panel.xdata.layout.zindex : 0,
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyZindex(This.value, xdata); } }
+                }, {
+                    fieldLabel:   'Scale',
+                    id:           'layoutscale',
+                    xtype:        'numberunit',
+                    unit:         '%',
+                    allowDecimals: true,
+                    name:         'scale',
+                    minValue:        0,
+                    maxValue:    10000,
+                    step:            1,
+                    value:         panel.xdata.layout.scale != undefined ? panel.xdata.layout.scale : 100,
+                    listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } },
+                    disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true
                 }]
             }]
         }]
@@ -215,6 +228,11 @@ TP.iconShowEditDialog = function(panel) {
                                     }
                                 }
                             });
+                            if(newValue == 'icon' || panel.hasScale) {
+                                Ext.getCmp('layoutscale').setDisabled(false);
+                            } else {
+                                Ext.getCmp('layoutscale').setDisabled(true);
+                            }
                             if(newValue == 'shape') {
                                 // fill in defaults
                                 var values = Ext.getCmp('appearanceForm').getForm().getValues();
@@ -834,7 +852,8 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'fontsize',
                         width:         60,
                         unit:         'px',
-                        margins:      {top: 0, right: 0, bottom: 0, left: 3}
+                        margins:      {top: 0, right: 0, bottom: 0, left: 3},
+                        value:         panel.xdata.label.fontsize != undefined ? panel.xdata.label.fontsize : 14
                     }, {
                         xtype:        'hiddenfield',
                         name:         'fontitalic',

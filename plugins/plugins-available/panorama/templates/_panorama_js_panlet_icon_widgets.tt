@@ -86,6 +86,7 @@
             [% END %]
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
+            This.applyScale(This.xdata.layout.scale, This.xdata);
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -165,6 +166,7 @@
         } else {
             this.applyZindex(0, xdata);
         }
+        this.applyScale(Number(xdata.layout.scale), xdata);
 
         /* set label */
         this.setIconLabel(xdata.label);
@@ -236,6 +238,10 @@
         el.setStyle("-o-transform", "rotate("+value+"deg)");
         el.dom.style.msTransform = "rotate("+value+"deg)";
         el.setStyle("-ms-transform", "rotate("+value+"deg)");
+    },
+    /* apply z-index */
+    applyScale: function(value, xdata) {
+        this.iconFixSize(xdata);
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
@@ -685,27 +691,30 @@ Ext.define('TP.IconWidget', {
         var width   = 16;
         var height  = 16;
         var size;
+        var scale   = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
+        if(scale <= 0) { scale = 1; }
         if(xdata.nsize && xdata.size) {
             x        = (xdata.size - xdata.nsize[0]) / 2;
             y        = (xdata.size - xdata.nsize[1]) / 2;
             width    = xdata.nsize[0];
             height   = xdata.nsize[1];
             size     = xdata.size;
-            var size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
-            panel.setSize(size,size);
+            size     = Math.ceil((Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)))*scale);
+            panel.setSize(size, size);
         } else if(panel.xdata.size && panel.xdata.nsize && panel.xdata.nsize[0] > 1) {
             x        = (panel.xdata.size - panel.xdata.nsize[0]) / 2;
             y        = (panel.xdata.size - panel.xdata.nsize[1]) / 2;
             width    = panel.xdata.nsize[0];
             height   = panel.xdata.nsize[1];
             size     = panel.xdata.size;
-            var size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
-            panel.setSize(size,size);
+            size     = Math.ceil((Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)))*scale);
+            panel.setSize(size, size);
         } else {
             size = Math.ceil(Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)));
             x    = (size - width)  / 2;
             y    = (size - height) / 2;
         }
+        panel.lastScale = scale;
 
         if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
             var items = [];
@@ -1177,15 +1186,19 @@ Ext.define('TP.IconWidget', {
         var naturalWidth  = TP.imageSizes[src][0];
         var naturalHeight = TP.imageSizes[src][1];
         if(naturalWidth > 1 && naturalHeight > 1) {
-            var size = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
+            var size  = Math.ceil(Math.sqrt(Math.pow(naturalWidth, 2) + Math.pow(naturalHeight, 2)));
+            var scale = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
+            if(scale <= 0) { scale = 1; }
+            size = Math.ceil(size * scale);
             panel.setSize(size, size);
             if(panel.items.getAt && panel.items.getAt(0)) {
                 panel.items.getAt(0).setSize(size, size);
             }
             xdata.size  = size;
             xdata.nsize = [naturalWidth, naturalHeight];
-            panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:1, y:1}}, true);
-            if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight) {
+            panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:scale, y:scale}}, true);
+            // image size has changed
+            if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
                 panel.setRenderItem(xdata, true);
             }
             this.setIconLabel();
@@ -1970,10 +1983,11 @@ var imagesStore = Ext.create('Ext.data.Store', {
 Ext.define('TP.StaticIcon', {
     extend: 'TP.IconWidget',
 
-    iconType: 'image',
-    cls:      'statciconWidget',
+    iconType:         'image',
+    cls:              'statciconWidget',
     hideAppearanceTab: true,
     generalLabelWidth: 50,
+    hasScale:          true,
     initComponent: function() {
         var panel = this;
         this.callParent();
