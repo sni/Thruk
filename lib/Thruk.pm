@@ -57,10 +57,10 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 BEGIN {
+    # Compress - temporarily disabled till https://rt.cpan.org/Ticket/Display.html?id=87998 gets fixed
     my @catalyst_plugins = qw/
           Thruk::ConfigLoader
           Unicode::Encoding
-          Compress
           Authentication
           Authorization::ThrukRoles
           CustomErrorMessage
