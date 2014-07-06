@@ -2167,6 +2167,8 @@ TP.getNatural = function(src) {
     }
     img = new Image();
     img.src = src;
-    TP.imageSizes[src] = [img.width, img.height];
+    if(img.width > 0 && img.height > 0) {
+        TP.imageSizes[src] = [img.width, img.height];
+    }
     return {width: img.width, height: img.height};
 }

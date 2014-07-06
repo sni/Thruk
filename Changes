@@ -9,6 +9,7 @@ next:
             - added optional min/max values for speedometer
             - added invert switch for speedometer
             - background images can now be scaled
+            - background images can have an offset
           - Bug Fixes
             - fixed pnp source not selectable anymore after revisiting panel settings
             - fixed applying panel source

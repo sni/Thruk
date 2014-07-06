@@ -253,7 +253,7 @@
         }
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
-        this.setBackground(xdata.background, xdata.backgroundscale);
+        this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
         if(TP.initialized && startTimeouts != false) {
             this.startTimeouts();
         }
@@ -363,21 +363,30 @@
 
         window.clearInterval(TP.timeouts['interval_global_icons' + this.id + '_refresh']);
     },
-    setBackground: function(background, scale) {
+    setBackground: function(background, scale, offset_x, offset_y, retries) {
+        var This = this;
+        if(retries == undefined) { retries = 0; }
+        if(retries >= 5)         { return;      }
         if(background != undefined && background != 'none') {
-            this.setBodyStyle("background:url('"+background+"');");
-            this.setBodyStyle("background-repeat:no-repeat;");
+            This.setBodyStyle("background:url('"+background+"');");
+            This.setBodyStyle("background-repeat:no-repeat;");
             if(scale == 100) {
-                this.setBodyStyle("background-size:auto;");
+                This.setBodyStyle("background-size:auto;");
             } else {
                 var naturalSize = TP.getNatural(background);
+                if(naturalSize.width < 2 || naturalSize.height < 2) {
+                    This.setBodyStyle("background:#ffffff");
+                    window.setTimeout(Ext.bind(This.setBackground, This, [background, scale, offset_x, offset_y, retries+1]), 500);
+                    return;
+                }
                 var width  = Number(scale * naturalSize.width  / 100);
                 var height = Number(scale * naturalSize.height / 100);
-                this.setBodyStyle("background-size:"+width+"px "+height+"px;");
+                This.setBodyStyle("background-size:"+width+"px "+height+"px;");
             }
+            This.setBodyStyle("background-position:"+offset_x+"px "+offset_y+"px;");
         } else {
-            this.setBodyStyle("background:#ffffff");
-            this.setBodyStyle("background-size:auto;");
+            This.setBodyStyle("background:#ffffff");
+            This.setBodyStyle("background-size:auto;");
         }
     },
     /* enable or disable locking for this tab and all panlet below */

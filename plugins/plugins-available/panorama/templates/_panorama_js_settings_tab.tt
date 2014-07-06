@@ -248,7 +248,7 @@ TP.tabSettingsWindow = function() {
         var d_form  = Ext.getCmp('dashboardForm').getForm();
         if(!d_form.isValid()) { return false; }
         var values = d_form.getFieldValues();
-        tab.setBackground(values.background, values.backgroundscale);
+        tab.setBackground(values.background, values.backgroundscale, values.backgroundoffset_x, values.backgroundoffset_y);
     }
 
     /* Dashboard Settings Tab */
@@ -310,6 +310,42 @@ TP.tabSettingsWindow = function() {
                 value:           100,
                 fieldStyle:     'text-align: right;'
             }]
+        }, {
+            fieldLabel:     ' ',
+            labelSeparator: '',
+            xtype:          'fieldcontainer',
+            layout:         'hbox',
+            defaults: {
+                listeners: { change: function(This) { applyBackground(This) } }
+            },
+            items: [
+            { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px; margin-top: 5px;' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundoffset_x',
+                minValue:       -10000,
+                maxValue:        10000,
+                step:            1,
+                width:           70,
+                value:           0,
+                fieldStyle:     'text-align: right;'
+            },
+            { xtype: 'label', text: 'Y:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px;' },
+            {
+                xtype:          'numberunit',
+                unit:           'px',
+                allowDecimals:   true,
+                name:           'backgroundoffset_y',
+                minValue:       -10000,
+                maxValue:        10000,
+                step:            1,
+                width:           70,
+                value:           0,
+                fieldStyle:     'text-align: right;'
+            }]
+
         }, {
             fieldLabel:   'Default Icon Set',
             xtype:        'combobox',
