@@ -146,7 +146,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'numberfield',
                     allowDecimals: false,
                     name:         'zindex',
-                    minValue:        0,
+                    minValue:      -10,
                     maxValue:      100,
                     step:            1,
                     value:         panel.xdata.layout.zindex,

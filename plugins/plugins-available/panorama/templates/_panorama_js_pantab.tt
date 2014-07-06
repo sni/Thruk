@@ -267,6 +267,7 @@
                 var panlet = Ext.getCmp(this.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
                     var zIndex = panlet.effectiveZindex || 0;
+                    zIndex = zIndex + 10;
                     if(zIndexList[zIndex] == undefined) { zIndexList[zIndex] = []; }
                     zIndexList[zIndex].push(panlet);
                 }
