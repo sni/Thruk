@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-01-25 18:39:13.510437546 +0100
-+++ b/thruk.conf	2014-01-27 12:12:05.273581581 +0100
+--- a/thruk.conf	2014-07-07 11:49:48.417646848 +0200
++++ b/thruk.conf	2014-07-07 12:19:54.545645878 +0200
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -69,3 +69,12 @@
      Order Deny,Allow
      Allow from all
      Satisfy any
+@@ -62,7 +52,7 @@
+ 
+ # use compressed output if available
+ <IfModule mod_deflate.c>
+-  <Location /thruk/>
++  <Location @HTMLURL@/>
+     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+   </Location>
+ </IfModule>
