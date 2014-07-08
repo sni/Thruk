@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-07-07 11:49:48.417646848 +0200
-+++ b/thruk.conf	2014-07-07 12:19:54.545645878 +0200
+--- a/thruk.conf	2014-07-08 12:23:46.026641622 +0200
++++ b/thruk.conf	2014-07-08 13:06:54.341645859 +0200
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -27,7 +27,7 @@
      Options FollowSymLinks
      allow from all
      # required for apache 2.4
-@@ -29,31 +29,21 @@
+@@ -29,32 +29,22 @@
      </IfModule>
    </Directory>
  
@@ -42,6 +42,7 @@
 -  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
 +  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
 +  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
++  AliasMatch ^@HTMLURL@/usercontent/(.*)$  @SYSCONFDIR@/usercontent/$1
 +  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh@HTMLURL@/$1
 +  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
 +  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
@@ -49,6 +50,7 @@
  
 -  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
 -  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
+-  AliasMatch ^/thruk/usercontent/(.*)$   /etc/thruk/usercontent/$1
 -  AliasMatch ^/thruk/(.*\.cgi|.*\.html)  /usr/share/thruk/fcgid_env.sh/thruk/$1
 -  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
 -  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
@@ -69,7 +71,7 @@
      Order Deny,Allow
      Allow from all
      Satisfy any
-@@ -62,7 +52,7 @@
+@@ -63,7 +53,7 @@
  
  # use compressed output if available
  <IfModule mod_deflate.c>
