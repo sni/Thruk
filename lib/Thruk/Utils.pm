@@ -2301,7 +2301,7 @@ sub _parse_date {
         require Date::Manip;
         Date::Manip->import(qw/UnixDate/);
         $timestamp = UnixDate($string, '%s');
-        $c->log->debug("not a valid date: ".$string);
+        $c->log->debug("not a valid date: ".$string) if $c;
         if(!defined $timestamp) {
             return;
         }

@@ -1127,6 +1127,7 @@ root/thruk/usercontent/sounds/ok.mp3
 root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
 script/append.make
+script/generate_timeperiod_transitions.pl
 script/nagexp
 script/nagimp
 script/naglint
