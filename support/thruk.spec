@@ -119,7 +119,11 @@ a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-/etc/init.d/httpd restart || /etc/init.d/httpd start
+if [ /usr/sbin/systemctl ]; then
+    systemctl restart httpd
+else
+    /etc/init.d/httpd restart || /etc/init.d/httpd start
+fi
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   echo "******************************************";
   echo "Thruk will not work when SELinux is enabled";
