@@ -52,6 +52,9 @@ large installations.
 # disable binary striping
 %global __os_install_post %{nil}
 
+# disable creating useless empty debug packages
+%global debug_package %{nil}
+
 %prep
 %setup -q -n %{fullname}
 
