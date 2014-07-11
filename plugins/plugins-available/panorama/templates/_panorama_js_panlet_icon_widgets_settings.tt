@@ -163,7 +163,8 @@ TP.iconShowEditDialog = function(panel) {
                     step:            1,
                     value:         panel.xdata.layout.scale != undefined ? panel.xdata.layout.scale : 100,
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } },
-                    disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true
+                    disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
+                    hidden:        panel.iconType == 'text' ? true : false
                 }]
             }]
         }]

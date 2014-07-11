@@ -241,7 +241,9 @@
     },
     /* apply z-index */
     applyScale: function(value, xdata) {
-        this.iconFixSize(xdata);
+        if(this.iconFixSize) {
+            this.iconFixSize(xdata);
+        }
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
