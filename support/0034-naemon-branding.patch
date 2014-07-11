@@ -1,6 +1,6 @@
-From 607d4313613097fb75632354512b91d8d6cde9cf Mon Sep 17 00:00:00 2001
+From 476ba1f8cf287ab7c5acac261e1c86f4df08d9ed Mon Sep 17 00:00:00 2001
 From: Sven Nierlein <sven@nierlein.de>
-Date: Thu, 13 Feb 2014 17:48:25 +0100
+Date: Fri, 11 Jul 2014 11:42:47 +0200
 Subject: [PATCH] naemon branding
 
 ---
@@ -11,7 +11,7 @@ Subject: [PATCH] naemon branding
  4 files changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/templates/_infobox.tt b/templates/_infobox.tt
-index 1416574..236ad49 100644
+index ab70bb9..fd01626 100644
 --- a/templates/_infobox.tt
 +++ b/templates/_infobox.tt
 @@ -5,7 +5,12 @@
@@ -29,7 +29,7 @@ index 1416574..236ad49 100644
        [% IF has_proc_info %]
        [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
 diff --git a/templates/login.tt b/templates/login.tt
-index dc6cbeb..3afb44d 100644
+index 52cf467..0025846 100644
 --- a/templates/login.tt
 +++ b/templates/login.tt
 @@ -18,13 +18,13 @@
@@ -60,7 +60,7 @@ index dc6cbeb..3afb44d 100644
      </div>
      [% PROCESS _disclaimer.tt %]
 diff --git a/templates/main.tt b/templates/main.tt
-index c942754..093f57e 100644
+index 03288b4..c39cfbb 100644
 --- a/templates/main.tt
 +++ b/templates/main.tt
 @@ -1,10 +1,12 @@
@@ -80,10 +80,10 @@ index c942754..093f57e 100644
        <div class="checkforupdates">
          <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
 diff --git a/templates/side.tt b/templates/side.tt
-index 563abc6..fe29ba1 100644
+index e1f1cdf..1b8e01a 100644
 --- a/templates/side.tt
 +++ b/templates/side.tt
-@@ -23,7 +23,7 @@
+@@ -27,7 +27,7 @@
    </head>
    <body class='navbar'>
  [% END %]
