@@ -47,7 +47,7 @@ var TP = {
 
         if(id == undefined) {
             TP.initialized = true;
-            id = 'new';
+            id = 'new_or_empty';
         }
 
         /* get tab data from server */

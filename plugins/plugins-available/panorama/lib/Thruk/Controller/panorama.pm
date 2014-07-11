@@ -1442,6 +1442,22 @@ sub _task_dashboard_data {
     my($self, $c) = @_;
     my $nr = $c->request->parameters->{'nr'} || die('no number supplied');
     my $dashboard;
+
+    my $new_override = 0;
+    if($nr eq 'new_or_empty' || $nr eq 'first_or_new') {
+        # avoid too many empty dashboards, so return the first existing empty dashboard for this user
+        my $dashboards = $self->_get_dashboard_list($c, 'my');
+        for my $d (@{$dashboards}) {
+            if($nr eq 'first_or_new' || $d->{'objects'} == 0) {
+                $nr = $d->{'nr'};
+                $new_override = 1;
+                last;
+            }
+        }
+        $nr = 'new' if $nr eq 'first_or_new';
+        $nr = 'new' if $nr eq 'new_or_empty';
+    }
+
     if($nr eq 'new') {
         return if $c->stash->{'readonly'};
         $dashboard = {
@@ -1460,7 +1476,7 @@ sub _task_dashboard_data {
     } else {
         my $data = {};
         $self->_merge_dashboard_into_hash($dashboard, $data);
-        if($nr eq 'new') {
+        if($nr eq 'new' || $new_override) {
             $data->{'newid'} = $dashboard->{'id'};
         }
         $c->stash->{'json'} = { data => $data };
@@ -1469,11 +1485,9 @@ sub _task_dashboard_data {
 }
 
 ##########################################################
-sub _task_dashboard_list {
-    my($self, $c) = @_;
+sub _get_dashboard_list {
+    my($self, $c, $type) = @_;
 
-    my $type = $c->request->parameters->{'list'} || 'my';
-    return if($type eq 'all' and !$c->stash->{'is_admin'});
     my $dashboards = [];
     for my $file (glob($self->{'var'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
@@ -1503,6 +1517,17 @@ sub _task_dashboard_list {
     }
 
     $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
+    return $dashboards;
+}
+
+##########################################################
+sub _task_dashboard_list {
+    my($self, $c) = @_;
+
+    my $type = $c->request->parameters->{'list'} || 'my';
+    return if($type eq 'all' and !$c->stash->{'is_admin'});
+
+    my $dashboards = $self->_get_dashboard_list($c, $type);
 
     my $json = {
         columns => [

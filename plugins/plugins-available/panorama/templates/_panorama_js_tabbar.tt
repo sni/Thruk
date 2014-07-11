@@ -123,7 +123,7 @@ Ext.define('TP.TabBar', {
                 items: [{
                     text:   'New Dashboard',
                     icon:   '[% url_prefix %]plugins/panorama/images/add.png',
-                    handler: function() { TP.add_pantab() }
+                    handler: function() { TP.add_pantab('new') }
                 }, {
                     text:   'Dashboard Managment',
                     icon:   '[% url_prefix %]plugins/panorama/images/new_tab.gif',
@@ -172,7 +172,7 @@ Ext.define('TP.TabBar', {
                     TP.add_pantab(default_dashboard[x], undefined, x == 0 ? false : true);
                 }
             } else if(open_tabs.length == 0) {
-                TP.add_pantab();
+                TP.add_pantab('first_or_new');
             }
             TP.startServerTime();
         });
