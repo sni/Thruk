@@ -33,16 +33,20 @@
                     this.pagingToolbar.updateData(data);
                 }
                 if(body) {
-                    body.style.overflow  = 'inherit';
-                    body.style.overflowY = 'hidden';
+                    try {
+                        body.style.overflow  = 'inherit';
+                        body.style.overflowY = 'hidden';
+                    } catch(e) { debug(e) } // breaks in IE 8 sometimes
                 }
             } else {
                 if(this.pagingToolbar) {
                     this.pagingToolbar.hide();
                 }
                 if(body) {
-                    body.style.overflowY = 'inherit';
-                    body.style.overflow  = 'auto';
+                    try {
+                        body.style.overflowY = 'inherit';
+                        body.style.overflow  = 'auto';
+                    } catch(e) { debug(e) } // breaks in IE 8 sometimes
                 }
             }
             var fields = [];
