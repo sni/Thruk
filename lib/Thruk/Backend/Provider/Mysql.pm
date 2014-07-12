@@ -1267,11 +1267,15 @@ sub _get_contact_lookup {
 ##########################################################
 sub _get_plugin_lookup {
     my($dbh,$peer,$prefix) = @_;
+    my $max_initial_cache = 10000;
 
-    my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output`");
+    my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output` LIMIT $max_initial_cache");
     $sth->execute;
     my $plugin_lookup = {};
     for my $o (@{$sth->fetchall_arrayref()}) { $plugin_lookup->{$o->[1]} = $o->[0]; }
+    if(scalar keys %{$plugin_lookup} >= $max_initial_cache) {
+        $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 0;
+    }
     return $plugin_lookup;
 }
 
