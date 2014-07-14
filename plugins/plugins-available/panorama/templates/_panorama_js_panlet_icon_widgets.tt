@@ -273,8 +273,8 @@
             if(this.servicegroup) { totals = this.servicegroup; }
             if(this.hostgroup)    { totals = this.hostgroup; }
             if(this.results)      { totals = this.results; }
-            if(this.host)         { for(var key in this.host)    { window[key] = this.host[key];    } }
-            if(this.service)      { for(var key in this.service) { window[key] = this.service[key]; } }
+            if(this.host)         { for(var key in this.host)    { window[key] = this.host[key];    } window['performance_data'] = this.host['perf_data']; }
+            if(this.service)      { for(var key in this.service) { window[key] = this.service[key]; } window['performance_data'] = this.service['perf_data']; }
             if(window.perf_data) {
                 window.perf_data = parse_perf_data(window.perf_data);
                 window.perfdata = {};

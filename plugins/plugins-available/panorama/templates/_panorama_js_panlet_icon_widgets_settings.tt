@@ -1169,9 +1169,12 @@ TP.openLabelEditorWindow = function(panel) {
             perf_data += '<tr><td><\/td><td><i>perfdata'+keyname+'.'+key2+'<\/i><\/td><td>'+perfdata[key][key2]+'<\/td><\/tr>'
         }
     }
+
+    var avail_data = '';
+
     var labelEditorWindow = new Ext.Window({
-        height:  300,
-        width:   500,
+        height:  500,
+        width:   650,
         layout: 'fit',
         title:  'Label Editor',
         modal:  true,
@@ -1196,13 +1199,14 @@ TP.openLabelEditorWindow = function(panel) {
             border:          0,
             bodyStyle:       'overflow-y: auto;',
             submitEmptyText: false,
-            defaults:      { anchor: '-12', labelWidth: 40 },
+            layout:          'anchor',
+            defaults:      { width: '99%', labelWidth: 40 },
             items:        [{
                 xtype:      'textarea',
                 fieldLabel: 'Label',
                 value:       Ext.getCmp('label_textfield').getValue(),
                 id:         'label_textfield_edit',
-                height:      70,
+                height:      90,
                 listeners: {
                     change: function(This) {
                         Ext.getCmp('label_textfield').setValue(This.getValue())
@@ -1215,7 +1219,7 @@ TP.openLabelEditorWindow = function(panel) {
                     xtype:   'label',
                     cls:     'labelhelp',
                     html:    '<p>Use HTML to format your label<br>'
-                            +'Ex.: <i>Host &lt;b&gt;name&lt;/b&gt;<\/i><\/p>'
+                            +'Ex.: <i>Host &lt;b&gt;name&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
                             +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
                             +'Ex.: <i>Host XY: {{plugin_output}}<\/i><\/p>'
                             +'<p>You may also do calculations inside placeholders like this:<br>'
@@ -1229,17 +1233,17 @@ TP.openLabelEditorWindow = function(panel) {
 
                             +'<p>There are different variables available depending on the type of icon/widget:<br>'
                             +'<table><tr><th>Groups/Filters:<\/th><td><i>totals.services.ok<\/i><\/td><td>totals number of ok services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>total.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>total.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>total.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.services.warning<\/i><\/td><td>totals number of warning services<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.services.critical<\/i><\/td><td>totals number of critical services<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.services.unknown<\/i><\/td><td>totals number of unknown services<\/td><\/tr>'
 
-                            +'<tr><td><\/td><td><i>total.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>total.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>total.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.hosts.up<\/i><\/td><td>totals number of up hosts<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.hosts.down<\/i><\/td><td>totals number of down hosts<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>totals.hosts.unreachable<\/i><\/td><td>totals number of unreachable hosts<\/td><\/tr>'
 
                             +'<tr><th>Hosts:<\/th><td><i>name<\/i><\/td><td>Hostname<\/td><\/tr>'
                             +'<tr><td><\/td><td><i>state<\/i><\/td><td>State: 0 - Ok, 1 - Warning, 2 - Critical,...<\/td><\/tr>'
-                            +'<tr><td><\/td><td><i>perfdata<\/i><\/td><td>Performance data as hash structure<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>performance_data<\/i><\/td><td>Performance data. Use list below to access specific values<\/td><\/tr>'
                             +'<tr><td><\/td><td><i>has_been_checked<\/i><\/td><td>Has this host been checked: 0 - No, 1 - Yes<\/td><\/tr>'
                             +'<tr><td><\/td><td><i>scheduled_downtime_depth<\/i><\/td><td>Downtime: 0 - No, &gtl;=1 - Yes<\/td><\/tr>'
                             +'<tr><td><\/td><td><i>acknowledged<\/i><\/td><td>Has this host been acknowledged: 0 - No, 1 - Yes<\/td><\/tr>'
@@ -1255,6 +1259,9 @@ TP.openLabelEditorWindow = function(panel) {
                             +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
                             +perf_data
 
+                            //+'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
+                            //+avail_data
+
                             +'<\/table>',
                         listeners: {
                             afterrender: function(This) {
@@ -1264,7 +1271,7 @@ TP.openLabelEditorWindow = function(panel) {
                                     e.onclick   = function(i) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
                                         var val = Ext.htmlDecode(e.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && val.match(/^perfdata/)) { val = '{{'+val+'}}'; }
+                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);
                                         Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
                                     }
@@ -1275,6 +1282,8 @@ TP.openLabelEditorWindow = function(panel) {
             }]
         }]
     }).show();
+    Ext.getCmp('label_textfield').setValue(" ");
+    Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
 }
 
 TP.setIconSettingsValues = function(xdata) {
