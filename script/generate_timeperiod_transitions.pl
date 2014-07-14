@@ -223,7 +223,8 @@ generate_timeperiod_transitions returns 0 on success and >= 1 otherwise
 
 =head1 EXAMPLES
 
-  %> generate_timeperiod_transitions --name=5x8 --start="Last Year" --end="Today" --time="10:00-18:00" --days=1-5
+  %> generate_timeperiod_transitions.pl --name=5x8 --start="Last Year" --end="Today" --time="10:00-18:00" --days=1-5 > /tmp/timeperiods.log
+  %> thruk -a logcacheupdate --local /tmp/timeperiods.log
 
 Print timeperiod transitions of last year.
 
