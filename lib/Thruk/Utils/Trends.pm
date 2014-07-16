@@ -261,7 +261,9 @@ sub _create_image {
         $im->transparent($colors->{'white'});
 
         # make sure the graphic is interlaced
-        $im->interlaced('true');
+        # 2014-06-16: interlaced png are broken on centos 7, resulting in
+        # libpng warning: Interlace handling should be turned on when using png_read_image
+        #$im->interlaced('true');
     }
 
     # draw service / host states
