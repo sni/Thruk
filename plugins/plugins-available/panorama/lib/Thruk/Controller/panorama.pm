@@ -468,7 +468,7 @@ sub _task_status {
         for my $f (keys %{$types->{'filter'}}) {
             my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
             $c->request->parameters->{'filter'} = $filter;
-            my( $hfilter, $sfilter, $groupfilter ) = $self->_do_filter($c);
+            my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
             next if $c->stash->{'has_error'};
             $data->{'filter'}->{$f} = $self->_summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
         }
@@ -517,7 +517,7 @@ sub _task_redirect_status {
     my($self, $c) = @_;
     my $types = {};
     if($c->request->parameters->{'filter'}) {
-        $self->_do_filter($c);
+        _do_filter($c);
         my $url = Thruk::Utils::Filter::uri_with($c, $c->request->parameters);
         $url    =~ s/^panorama.cgi/status.cgi/gmx;
         $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
@@ -531,9 +531,30 @@ sub _task_redirect_status {
 ##########################################################
 sub _task_avail {
     my($self, $c) = @_;
+    my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_task_avail_update($c)',
+                                                   message    => 'availability is being calculated',
+                                                   background => 1
+                                                  }
+    );
+
+    # wait up to 30 seconds for the job above to finish
+    for(my $x = 0; $x < 30; $x++) {
+        last unless Thruk::Utils::External::is_running($c, $jobid);
+        sleep(1);
+    }
+
+    return _task_avail_update($c, 1);
+}
+
+
+##########################################################
+sub _task_avail_update {
+    my($c, $cached_only) = @_;
+
     $c->stats->profile(begin => "_task_avail");
     my $in    = {};
     my $types = {};
+
     if($c->request->parameters->{'avail'}) { $in = decode_json($c->request->parameters->{'avail'}); }
     if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
 
@@ -564,7 +585,7 @@ sub _task_avail {
             my $filtername = "$f"; # results in *** glibc detected *** perl: double free or corruption (!prev): 0x0e482c38 *** otherwise
             my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
             $c->request->parameters->{'filter'} = $filter;
-            my( $hfilter, $sfilter, $groupfilter ) = $self->_do_filter($c);
+            my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
             next if $c->stash->{'has_error'};
             for my $panel (@{$types->{'filter'}->{$f}}) {
                 for my $key (keys %{$in->{$panel}}) {
@@ -586,7 +607,7 @@ sub _task_avail {
                     }
 
                     my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $opts);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -603,7 +624,7 @@ sub _task_avail {
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
                         $c->{request}->{parameters}->{include_host_services} = 1
                     }
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $opts);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -616,7 +637,7 @@ sub _task_avail {
             for my $panel (@{$types->{'servicegroups'}->{$group}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'servicegroups', $group, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts});
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts});
                     $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -629,7 +650,7 @@ sub _task_avail {
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
                     $cache->set(@cache_prefix, 'hosts', $host, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -644,7 +665,7 @@ sub _task_avail {
                 for my $panel (@{$types->{'services'}->{$host}->{$service}}) {
                     for my $key (keys %{$in->{$panel}}) {
                         my $cached = $cache->get(@cache_prefix, 'services', $host, $service, $key);
-                        $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
+                        $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
                         $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                     }
                 }
@@ -687,7 +708,7 @@ sub _task_avail_clean_cache {
 
 ##########################################################
 sub _task_avail_calc {
-    my($c, $now, $cached, $opts, $host, $service) = @_;
+    my($c, $cached_only, $now, $cached, $opts, $host, $service) = @_;
     my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
     my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
@@ -703,6 +724,7 @@ sub _task_avail_calc {
         }
         $cached->{'time'} = $now;
     }
+    return(-1) if $cached_only;
 
     $c->{request}->{parameters}->{t2}            = time();
     $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;
@@ -1036,7 +1058,7 @@ sub _task_site_status {
 sub _task_hosts {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
     $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
@@ -1108,7 +1130,7 @@ sub _task_hosts {
 sub _task_services {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
     $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
@@ -1201,7 +1223,7 @@ sub _task_services {
 sub _task_hosttotals {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
     Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, undef, 1);
 
@@ -1231,7 +1253,7 @@ sub _task_hosttotals {
 sub _task_servicetotals {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
     Thruk::Utils::Status::fill_totals_box( $c, undef, $servicefilter, 1 );
 
@@ -1261,7 +1283,7 @@ sub _task_servicetotals {
 sub _task_hosts_pie {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
     my $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
@@ -1300,7 +1322,7 @@ sub _task_hosts_pie {
 sub _task_services_pie {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
     my $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
@@ -1340,7 +1362,7 @@ sub _task_services_pie {
 sub _task_servicesminemap {
     my($self, $c) = @_;
 
-    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
     my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $hostfilter, $servicefilter);
@@ -1871,7 +1893,7 @@ sub _get_gearman_stats {
 ##########################################################
 # convert json filter to perl object and do filtering
 sub _do_filter {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     # reset existing filter
     Thruk::Utils::Status::reset_filter($c);
