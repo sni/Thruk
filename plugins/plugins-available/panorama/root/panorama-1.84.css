@@ -487,6 +487,7 @@ DIV.iconlabel, A.iconlabel {
 }
 .labelhelp i {
     color: #000000;
+    white-space: nowrap;
 }
 .labelhelp td {
   padding-left: 4px;
@@ -559,4 +560,8 @@ TABLE.TipDetails TD.more_hosts {
 }
 TABLE.TipDetails TD.more_services {
     padding-left: 135px;
+}
+
+SPAN.avail_result_not_ready {
+    opacity: 0.2;
 }

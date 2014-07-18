@@ -1214,6 +1214,7 @@ t/100-themes.t
 t/101-cli-thruk.t
 t/102-thruk_utils.t
 t/103-thruk_utils_io.t
+t/104-thruk_utils_cache.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t

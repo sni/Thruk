@@ -912,73 +912,17 @@ var TP = {
             window.clearTimeout(TP.timeouts['timeout_global_icon_update'+tab.id]);
             TP.timeouts['timeout_global_icon_update'+tab.id] = window.setTimeout(function() {
                 TP.updateAllIconsDo(tab);
-            }, 100);
+            }, 300);
         }
     },
     updateAllIconsDo: function(tab, id, xdata, reschedule) {
         var panels = TP.getAllPanel(tab);
-        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
-        var count  = 0;
-        for(var nr=0; nr<panels.length; nr++) {
-            var p = panels[nr];
-            if(id && p.id != id) { continue; }
-            if(id && xdata) { p.oldXdata = p.xdata; p.xdata = xdata; }
-            if(p.xdata && p.xdata.general) {
-                /* custom filter */
-                if(p.xdata.general.filter) {
-                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter]);
-                    if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
-                    req.filter[filter] = 1;
-                    ref.filter[filter].push(p);
-                    count++;
-                }
 
-                /* update services */
-                else if(p.xdata.general.service && p.xdata.general.host) {
-                    if(req.services[p.xdata.general.host] == undefined) {
-                        req.services[p.xdata.general.host] = {};
-                        ref.services[p.xdata.general.host] = {};
-                    }
-                    if(ref.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
-                        ref.services[p.xdata.general.host][p.xdata.general.service] = [];
-                    }
-                    req.services[p.xdata.general.host][p.xdata.general.service] = 1;
-                    ref.services[p.xdata.general.host][p.xdata.general.service].push(p);
-                    count++;
-                }
-                /* update hosts */
-                else if(p.xdata.general.host) {
-                    if(ref.hosts[p.xdata.general.host] == undefined) { ref.hosts[p.xdata.general.host] = []; }
-                    req.hosts[p.xdata.general.host] = 1;
-                    ref.hosts[p.xdata.general.host].push(p);
-                    count++;
-                }
-                /* update hostgroups */
-                else if(p.xdata.general.hostgroup) {
-                    if(ref.hostgroups[p.xdata.general.hostgroup] == undefined) { ref.hostgroups[p.xdata.general.hostgroup] = []; }
-                    req.hostgroups[p.xdata.general.hostgroup] = 1;
-                    ref.hostgroups[p.xdata.general.hostgroup].push(p);
-                    count++;
-                }
-                /* update servicegroups */
-                else if(p.xdata.general.servicegroup) {
-                    if(ref.servicegroups[p.xdata.general.servicegroup] == undefined) { ref.servicegroups[p.xdata.general.servicegroup] = []; }
-                    req.servicegroups[p.xdata.general.servicegroup] = 1;
-                    ref.servicegroups[p.xdata.general.servicegroup].push(p);
-                    count++;
-                }
-                /* update sites */
-                else if(p.xdata.general.site) {
-                    if(ref.sites[p.xdata.general.site] == undefined) { ref.sites[p.xdata.general.site] = []; }
-                    ref.sites[p.xdata.general.site].push(p);
-                    count++;
-                }
-            }
-            if(id && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
-        };
-        var tabpan = Ext.getCmp('tabpan');
-        if(count == 0 && tab != tabpan.getActiveTab()) { return; }
+        var statusReq = TP.getStatusReq(tab, id, xdata);
+        if(statusReq == undefined) { return; }
+        var req = statusReq.req,
+            ref = statusReq.ref;
+
         var params = {
             types:      Ext.JSON.encode(req),
             backends:   TP.getActiveBackendsPanel(tab),
@@ -1120,6 +1064,131 @@ var TP = {
             }
         });
     },
+
+    /* do delayed availability update */
+    updateAllLabelAvailability: function(tab, id, xdata) {
+        if(id != undefined) {
+            TP.updateAllLabelAvailabilityDo(tab, id, xdata);
+        } else {
+            /* avoid duplicate updates */
+            window.clearTimeout(TP.timeouts['timeout_global_avail_update'+tab.id]);
+            TP.timeouts['timeout_global_avail_update'+tab.id] = window.setTimeout(function() {
+                TP.updateAllLabelAvailabilityDo(tab);
+            }, 300);
+        }
+    },
+
+    /* do the availability update */
+    updateAllLabelAvailabilityDo: function(tab, id, xdata) {
+        if(!TP.initialized) { return; }
+        var statusReq = TP.getStatusReq(tab, id, xdata);
+        if(statusReq == undefined) { return; }
+        var req = statusReq.req,
+            ref = statusReq.ref;
+
+        var params = {
+            types:      Ext.JSON.encode(req),
+            backends:   TP.getActiveBackendsPanel(tab),
+            avail:      Ext.JSON.encode(TP.availabilities)
+        };
+        Ext.Ajax.request({
+            url: 'panorama.cgi?task=availability',
+            method: 'POST',
+            params: params,
+            callback: function(options, success, response) {
+                if(success) {
+                    var data = TP.getResponse(undefined, response);
+                    if(!data || !data.data) { return; }
+                    data = data.data;
+                    var now = Math.floor(new Date().getTime()/1000);
+                    for(var key in data) {
+                        for(var key2 in data[key]) {
+                            TP.availabilities[key][key2]['last']         = data[key][key2];
+                            TP.availabilities[key][key2]['last_refresh'] = now;
+                        }
+                        var panel = Ext.getCmp(key);
+                        panel.setIconLabel();
+                    }
+                }
+            }
+        });
+    },
+
+    /* get request parameters for status requests */
+    getStatusReq: function(tab, id, xdata) {
+        var panels = TP.getAllPanel(tab);
+        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
+        var count  = 0;
+        for(var nr=0; nr<panels.length; nr++) {
+            var p = panels[nr];
+            if(id && p.id != id) { continue; }
+            if(id && xdata) { p.oldXdata = p.xdata; p.xdata = xdata; }
+            if(p.xdata && p.xdata.general) {
+                /* custom filter */
+                if(p.xdata.general.filter) {
+                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter]);
+                    if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
+                    if(req.filter[filter] == undefined) { req.filter[filter] = []; }
+                    req.filter[filter].push(p.id);
+                    ref.filter[filter].push(p);
+                    count++;
+                }
+
+                /* update services */
+                else if(p.xdata.general.service && p.xdata.general.host) {
+                    if(req.services[p.xdata.general.host] == undefined) {
+                        req.services[p.xdata.general.host] = {};
+                        ref.services[p.xdata.general.host] = {};
+                    }
+                    if(ref.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
+                        ref.services[p.xdata.general.host][p.xdata.general.service] = [];
+                    }
+                    if(req.services[p.xdata.general.host][p.xdata.general.service] == undefined) {
+                        req.services[p.xdata.general.host][p.xdata.general.service] = [];
+                    }
+                    req.services[p.xdata.general.host][p.xdata.general.service].push(p.id);
+                    ref.services[p.xdata.general.host][p.xdata.general.service].push(p);
+                    count++;
+                }
+                /* update hosts */
+                else if(p.xdata.general.host) {
+                    if(ref.hosts[p.xdata.general.host] == undefined) { ref.hosts[p.xdata.general.host] = []; }
+                    if(req.hosts[p.xdata.general.host] == undefined) { req.hosts[p.xdata.general.host] = []; }
+                    req.hosts[p.xdata.general.host].push(p.id);
+                    ref.hosts[p.xdata.general.host].push(p);
+                    count++;
+                }
+                /* update hostgroups */
+                else if(p.xdata.general.hostgroup) {
+                    if(ref.hostgroups[p.xdata.general.hostgroup] == undefined) { ref.hostgroups[p.xdata.general.hostgroup] = []; }
+                    if(req.hostgroups[p.xdata.general.hostgroup] == undefined) { req.hostgroups[p.xdata.general.hostgroup] = []; }
+                    req.hostgroups[p.xdata.general.hostgroup].push(p.id);
+                    ref.hostgroups[p.xdata.general.hostgroup].push(p);
+                    count++;
+                }
+                /* update servicegroups */
+                else if(p.xdata.general.servicegroup) {
+                    if(ref.servicegroups[p.xdata.general.servicegroup] == undefined) { ref.servicegroups[p.xdata.general.servicegroup] = []; }
+                    if(req.servicegroups[p.xdata.general.servicegroup] == undefined) { req.servicegroups[p.xdata.general.servicegroup] = []; }
+                    req.servicegroups[p.xdata.general.servicegroup].push(p.id);
+                    ref.servicegroups[p.xdata.general.servicegroup].push(p);
+                    count++;
+                }
+                /* update sites */
+                else if(p.xdata.general.site) {
+                    if(ref.sites[p.xdata.general.site] == undefined) { ref.sites[p.xdata.general.site] = []; }
+                    ref.sites[p.xdata.general.site].push(p);
+                    count++;
+                }
+            }
+            if(id && p.oldXdata) { p.xdata = p.oldXdata; delete p.oldXdata; }
+        };
+        var tabpan = Ext.getCmp('tabpan');
+        if(count == 0 && tab != tabpan.getActiveTab()) { return; }
+        return({req: req, ref: ref });
+    },
+
     /* let this element flicker and make it a little bit bigger */
     flickerImg: function(dom_id) {
         var el     = Ext.get(dom_id);

@@ -258,6 +258,7 @@
 
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
+        if(!TP.initialized) { return; }
         var panel = this;
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
@@ -268,7 +269,13 @@
         this.el.dom.title = '';
         /* dynamic label? */
         if(force_perfdata || txt.match(/\{\{.*?\}\}/)) {
-            var allowed_functions = ['strftime', 'sprintf', 'if'];
+            var allowed_functions = ['strftime', 'sprintf', 'if', 'availability'];
+            if(TP.availabilities == undefined) { TP.availabilities = {}; }
+            if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
+            /* reset existing availabilities flag to safele remove them later */
+            for(var key in TP.availabilities[panel.id]) {
+                TP.availabilities[panel.id][key]['active'] = false;
+            }
             var matches           = txt.match(/(\{\{.*?\}\})/g);
             if(this.servicegroup) { totals = this.servicegroup; }
             if(this.hostgroup)    { totals = this.hostgroup; }
@@ -293,17 +300,30 @@
                 Ext.Array.each(functions, function(f, idx) {
                     f = f.replace(/\($/, '');
                     if(!Ext.Array.contains(allowed_functions, f)) {
+                        debug("function "+f+" is not allowed");
                         ok = false;
                     }
                 });
                 if(!ok) { return; }
                 var res = '';
+                calc = calc.replace(/availability\(/g, 'availability(panel, ');
                 try {
                     res = eval(calc);
-                } catch(e) { panel.el.dom.title = e; }
+                } catch(e) { debug(e); panel.el.dom.title = e; }
                 if(res == undefined) { res = ''; }
+                // replace not yet resolved availabilities
+                if(calc.match(/availability\(/) && res.match(/\-1/)) {
+                    res = res.replace(/\-1[\.0]*/g, '...');
+                    res = "<span class='avail_result_not_ready'>"+res+"<\/span>";
+                }
                 txt = txt.replace(item, res);
             });
+            /* remove inactive availabilities */
+            for(var key in TP.availabilities[panel.id]) {
+                if(!TP.availabilities[panel.id][key]['active']) {
+                    delete TP.availabilities[panel.id][key];
+                }
+            }
         }
         if(!cfg.labeltext) {
             if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
@@ -2187,4 +2207,34 @@ TP.getNatural = function(src) {
         TP.imageSizes[src] = [img.width, img.height];
     }
     return {width: img.width, height: img.height};
+}
+
+/* calculates availability used in labels */
+function availability(panel, opts) {
+    if(panel.iconType == 'hostgroup' || panel.iconType == 'filtered') {
+        if(panel.xdata.general.incl_hst) { opts['incl_hst'] = 1; }
+        if(panel.xdata.general.incl_svc) { opts['incl_svc'] = 1; }
+    }
+    var opts_enc = Ext.JSON.encode(opts);
+    if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
+    var refresh = false;
+    var now     = Math.floor(new Date().getTime()/1000);
+    if(TP.availabilities[panel.id][opts_enc] == undefined) {
+        refresh = true;
+        TP.availabilities[panel.id][opts_enc] = {
+            opts:         opts,
+            last_refresh: TP.iconSettingsWindow == undefined ? now : 0,
+            last:        -1
+        };
+    }
+    else if(TP.availabilities[panel.id][opts_enc]['last_refresh'] < now - 30) {
+        refresh = true;
+    }
+    TP.availabilities[panel.id][opts_enc]['active'] = true;
+    if(refresh) {
+        if(TP.iconSettingsWindow != undefined) { return(TP.availabilities[panel.id][opts_enc]['last']); }
+        TP.availabilities[panel.id][opts_enc]['last_refresh'] = now;
+        TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
+    }
+    return(TP.availabilities[panel.id][opts_enc]['last']);
 }

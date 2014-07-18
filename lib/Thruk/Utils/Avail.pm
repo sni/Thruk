@@ -227,11 +227,14 @@ sub calculate_availability {
 
     # services
     $c->stash->{'services'} = {};
-    if(defined $service) {
+    if(defined $service || $c->{request}->{parameters}->{s_filter}) {
         my $all_services;
         my @servicefilter;
         my @hostfilter;
-        if($service ne 'all') {
+        if($c->{request}->{parameters}->{s_filter}) {
+            $servicefilter = $c->{request}->{parameters}->{s_filter};
+        }
+        elsif($service ne 'all') {
             $host = '*' if $host =~ m/^\s*$/mx;
             for my $h (split(/\s*,\s*/mx, $host)) {
                 if($h =~ m/\*/mx) {
@@ -286,38 +289,45 @@ sub calculate_availability {
     }
 
     # single/multiple hosts
-    elsif(defined $host and $host ne 'all') {
+    elsif((defined $host and $host ne 'all') || $c->{request}->{parameters}->{h_filter}) {
         my @servicefilter;
         my @hostfilter;
-        for my $h (split(/\s*,\s*/mx, $host)) {
-            if($h =~ m/\*/mx) {
-                $h   =~ s/\.\*/\*/gmx;
-                $h   =~ s/\*/.*/gmx;
-                push @hostfilter,    { 'name'      => { '~~' => $h }};
-                push @servicefilter, { 'host_name' => { '~~' => $h }};
-            } else {
-                push @hostfilter,    { 'name'      => $h };
-                push @servicefilter, { 'host_name' => $h };
-            }
+        my $hostfilter;
+        if($c->{request}->{parameters}->{h_filter}) {
+            $hostfilter = $c->{request}->{parameters}->{h_filter};
         }
-        if($c->{'request'}->{'parameters'}->{'include_host_services'}) {
-            # host availability page includes services too, so
-            # calculate service availability for services on these hosts too
-            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
-            for my $service (@{$service_data}) {
-                $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
-                push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
-            }
-            $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter);
-
-            if($initialassumedservicestate == -1) {
-                for my $service (@{$service_data}) {
-                    $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+        else {
+            for my $h (split(/\s*,\s*/mx, $host)) {
+                if($h =~ m/\*/mx) {
+                    $h   =~ s/\.\*/\*/gmx;
+                    $h   =~ s/\*/.*/gmx;
+                    push @hostfilter,    { 'name'      => { '~~' => $h }};
+                    push @servicefilter, { 'host_name' => { '~~' => $h }};
+                } else {
+                    push @hostfilter,    { 'name'      => $h };
+                    push @servicefilter, { 'host_name' => $h };
                 }
             }
+            if($c->{'request'}->{'parameters'}->{'include_host_services'}) {
+                # host availability page includes services too, so
+                # calculate service availability for services on these hosts too
+                my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+                for my $service (@{$service_data}) {
+                    $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+                    push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+                }
+                $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter);
+
+                if($initialassumedservicestate == -1) {
+                    for my $service (@{$service_data}) {
+                        $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+                    }
+                }
+            }
+            $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
 
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         die('no such host: '.$host) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
@@ -741,6 +751,137 @@ sub fix_and_sort_logs {
         }
     }
     return($file);
+}
+
+##############################################
+
+=head2 reset_req_parameters
+
+  reset_req_parameters($c)
+
+removes all parameters used for availability calculation from c->request->parameters
+
+=cut
+
+sub reset_req_parameters {
+    my($c) = @_;
+    delete $c->{request}->{parameters}->{h_filter};
+    delete $c->{request}->{parameters}->{s_filter};
+    delete $c->{request}->{parameters}->{filter};
+    delete $c->{request}->{parameters}->{host};
+    delete $c->{request}->{parameters}->{hostgroup};
+    delete $c->{request}->{parameters}->{service};
+    delete $c->{request}->{parameters}->{servicegroup};
+
+    delete $c->{request}->{parameters}->{view_mode};
+    delete $c->{request}->{parameters}->{csvoutput};
+    delete $c->{request}->{parameters}->{show_log_entries};
+    delete $c->{request}->{parameters}->{full_log_entries};
+    delete $c->{request}->{parameters}->{timeperiod};
+    delete $c->{request}->{parameters}->{rpttimeperiod};
+    delete $c->{request}->{parameters}->{assumeinitialstates};
+    delete $c->{request}->{parameters}->{assumestateretention};
+    delete $c->{request}->{parameters}->{assumestatesduringnotrunning};
+    delete $c->{request}->{parameters}->{includesoftstates};
+    delete $c->{request}->{parameters}->{initialassumedhoststate};
+    delete $c->{request}->{parameters}->{initialassumedservicestate};
+    delete $c->{request}->{parameters}->{backtrack};
+    delete $c->{request}->{parameters}->{show_log_entries};
+    delete $c->{request}->{parameters}->{full_log_entries};
+    delete $c->{request}->{parameters}->{zoom};
+    delete $c->{request}->{parameters}->{breakdown};
+    delete $c->{request}->{parameters}->{include_host_services};
+    delete $c->{request}->{parameters}->{get_total_numbers_only};
+
+    return;
+}
+
+##########################################################
+
+=head2 get_availability_percents
+
+  get_availability_percents($avail_data, $unavailable_states, $host, $service)
+
+return list of availability percent as json list
+
+=cut
+sub get_availability_percents {
+    my($avail_data, $unavailable_states, $host, $service) = @_;
+    confess("No host") unless defined $host;
+
+    my $avail;
+    if($service) {
+        $avail = $avail_data->{'services'}->{$host}->{$service};
+    } else {
+        $avail = $avail_data->{'hosts'}->{$host};
+    }
+    return unless defined $avail;
+
+    my $u = $unavailable_states;
+    my $values = {};
+    for my $name (sort keys %{$avail->{'breakdown'}}) {
+        my $t = $avail->{'breakdown'}->{$name};
+
+        my($percent, $time) = _sum_availability($t, $u);
+        confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
+        $values->{$name} = [
+            $t->{'timestamp'}*1000,
+            $percent,
+        ];
+    }
+
+    my $x = 1;
+    my $json = {keys => [], values => [], tvalues => []};
+    for my $key (sort keys %{$values}) {
+        push @{$json->{'keys'}},    [$x, $key];
+        push @{$json->{'values'}},  [$x, $values->{$key}->[1]+=0 ];
+        push @{$json->{'tvalues'}}, [$values->{$key}->[0], $values->{$key}->[1]+=0 ];
+        $x++;
+    }
+
+    my($percent, $time) = _sum_availability($avail, $u);
+    $json->{'total'} = {
+        'percent' => $percent,
+        'time'    => $time,
+    };
+    return $json;
+}
+
+##############################################
+sub _sum_availability {
+    my($t, $u) = @_;
+    my $time = {
+        'available'                             => 0,
+        'unavailable'                           => 0,
+        'time_indeterminate_notrunning'         => $t->{'time_indeterminate_notrunning'}         || 0,
+        'time_indeterminate_nodata'             => $t->{'time_indeterminate_nodata'}             || 0,
+        'time_indeterminate_outside_timeperiod' => $t->{'time_indeterminate_outside_timeperiod'} || 0,
+    };
+
+    for my $s ( keys %{$t} ) {
+        for my $state (qw/ok warning critical unknown up down unreachable/) {
+            if($s eq 'time_'.$state) {
+                if(defined $u->{$state}) {
+                    $time->{'unavailable'} += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
+                } else {
+                    $time->{'available'}   += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
+                }
+            }
+            elsif($s eq 'scheduled_time_'.$state) {
+                if(defined $u->{$state.'_downtime'}) {
+                    $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
+                } else {
+                    $time->{'available'}   += $t->{'scheduled_time_'.$state};
+                }
+            }
+        }
+    }
+
+    my $percent = -1;
+    if($time->{'available'} + $time->{'unavailable'} > 0) {
+        $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
+    }
+    return($percent, $time);
 }
 
 ##############################################

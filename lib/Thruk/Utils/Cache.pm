@@ -65,37 +65,58 @@ sub cache {
 
 =head2 get
 
+  get()
   get($key)
+  get($key, $key2)
+  get($key, $key2, $key3)
+  ...
 
 return cache entry
 
 =cut
 sub get {
-    my($self,$key) = @_;
+    my($self,@keys) = @_;
     $self->_update();
-    if($key) {
-        return($self->{'_data'}->{$key});
+    my $last_key = pop(@keys);
+    return($self->{'_data'}) unless $last_key;
+    my $data = $self->{'_data'};
+    return unless defined $data;
+    while(my $key = shift @keys) {
+        return unless defined $data->{$key};
+        $data = $data->{$key};
     }
-    return($self->{'_data'});
+    return($data->{$last_key});
 }
 
 ##############################################
 
 =head2 set
 
+  set($data)
   set($key, $value)
+  set($key, $key2, $value)
+  set($key, $key2, $key3, $value)
+  ...
 
 set value
 
 =cut
 sub set {
-    my($self,$key,$value, $value2) = @_;
-    $self->_update('force' => 1);
-    if(defined $value2) {
-        $self->{'_data'}->{$key}->{$value} = $value2;
-    } else {
-        $self->{'_data'}->{$key} = $value;
+    my($self,@keys) = @_;
+    if(scalar @keys == 1) {
+        $self->{'_data'} = $keys[0];
+        $self->_store();
+        return;
     }
+    my $value    = pop(@keys);
+    my $last_key = pop(@keys);
+    $self->_update('force' => 1);
+    my $data = $self->{'_data'};
+    while(my $key = shift @keys) {
+        $data->{$key} = {} unless defined $data->{$key};
+        $data = $data->{$key};
+    }
+    $data->{$last_key} = $value;
     $self->_store();
     return;
 }

@@ -1170,8 +1170,6 @@ TP.openLabelEditorWindow = function(panel) {
         }
     }
 
-    var avail_data = '';
-
     var labelEditorWindow = new Ext.Window({
         height:  500,
         width:   650,
@@ -1259,8 +1257,13 @@ TP.openLabelEditorWindow = function(panel) {
                             +'<tr><th>Performance Data:<\/th><td colspan=2>(available performance data with their current values)<\/td><\/tr>'
                             +perf_data
 
-                            //+'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
-                            //+avail_data
+                            +'<tr><th>Availability Data:<\/th><td colspan=2><\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "60m"})) }}%<\/i><\/td><td>availability for the last 60 minutes<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "24h"})) }}%<\/i><\/td><td>availability for the last 24 hours<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "7d"})) }}%<\/i><\/td><td>availability for the last 7 days<\/td><\/tr>'
+                            +'<tr><td><\/td><td><i>{{ sprintf("%.2f", availability({d: "31d"})) }}%<\/i><\/td><td>availability for the last 31 days<\/td><\/tr>'
+                            +'<tr><td><\/td><td colspan=2><i>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8"})) }}%<\/i><\/td><\/tr>'
+                            +'<tr><td><\/td><td><\/td><td>availability for the last 24 hours within given timeperiod<\/td><\/tr>'
 
                             +'<\/table>',
                         listeners: {
@@ -1271,7 +1274,7 @@ TP.openLabelEditorWindow = function(panel) {
                                     e.onclick   = function(i) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
                                         var val = Ext.htmlDecode(e.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);
                                         Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
                                     }

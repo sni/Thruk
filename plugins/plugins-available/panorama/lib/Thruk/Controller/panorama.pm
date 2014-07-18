@@ -93,6 +93,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         if($task eq 'status') {
             return($self->_task_status($c));
         }
+        if($task eq 'availability') {
+            return($self->_task_avail($c));
+        }
         elsif($task eq 'dashboard_data') {
             return($self->_task_dashboard_data($c));
         }
@@ -523,6 +526,225 @@ sub _task_redirect_status {
         return $c->response->redirect($url);
     }
     return $c->response->redirect("status.cgi");
+}
+
+##########################################################
+sub _task_avail {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "_task_avail");
+    my $in    = {};
+    my $types = {};
+    if($c->request->parameters->{'avail'}) { $in = decode_json($c->request->parameters->{'avail'}); }
+    if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
+
+    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
+
+    # cache hit?
+    my @cache_prefix;
+    if($c->check_user_roles('authorized_for_all_hosts') && $c->check_user_roles('authorized_for_all_services')) {
+        my $tmp_cache = $cache->get('global');
+        if(!defined $tmp_cache) {
+            $cache->set('global', {});
+        }
+        @cache_prefix = ('global');
+    } else {
+        my $tmp_cache = $cache->get('users');
+        if(!defined $tmp_cache->{$c->stash->{'remote_user'}}) {
+            $tmp_cache->{$c->stash->{'remote_user'}} = {};
+            $cache->set('users', $c->stash->{'remote_user'}, {});
+        }
+        @cache_prefix = ('users', $c->stash->{'remote_user'});
+    }
+
+    my $data = {};
+    my $now  = time();
+    if(scalar keys %{$types->{'filter'}} > 0) {
+        for my $f (keys %{$types->{'filter'}}) {
+            Thruk::Utils::Avail::reset_req_parameters($c);
+            my $filtername = "$f"; # results in *** glibc detected *** perl: double free or corruption (!prev): 0x0e482c38 *** otherwise
+            my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
+            $c->request->parameters->{'filter'} = $filter;
+            my( $hfilter, $sfilter, $groupfilter ) = $self->_do_filter($c);
+            next if $c->stash->{'has_error'};
+            for my $panel (@{$types->{'filter'}->{$f}}) {
+                for my $key (keys %{$in->{$panel}}) {
+                    my $opts   = $in->{$panel}->{$key}->{opts};
+                    Thruk::Utils::Avail::reset_req_parameters($c);
+                    if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+                        if($hfilter) {
+                            $c->{request}->{parameters}->{h_filter} = $hfilter;
+                        } else {
+                            $c->{request}->{parameters}->{host}     = 'all';
+                        }
+                    }
+                    if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+                        if($sfilter) {
+                            $c->{request}->{parameters}->{s_filter} = $sfilter;
+                        } else {
+                            $c->{request}->{parameters}->{service}  = 'all';
+                        }
+                    }
+
+                    my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $opts);
+                    $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                }
+            }
+        }
+    }
+    if(scalar keys %{$types->{'hostgroups'}} > 0) {
+        for my $group (keys %{$types->{'hostgroups'}}) {
+            Thruk::Utils::Avail::reset_req_parameters($c);
+            $c->{request}->{parameters}->{hostgroup} = $group;
+            for my $panel (@{$types->{'hostgroups'}->{$group}}) {
+                for my $key (keys %{$in->{$panel}}) {
+                    my $opts   = $in->{$panel}->{$key}->{opts};
+                    my $cached = $cache->get(@cache_prefix, 'hostgroups', $group, $key);
+                    if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+                        $c->{request}->{parameters}->{include_host_services} = 1
+                    }
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $opts);
+                    $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                }
+            }
+        }
+    }
+    if(scalar keys %{$types->{'servicegroups'}} > 0) {
+        for my $group (keys %{$types->{'servicegroups'}}) {
+            Thruk::Utils::Avail::reset_req_parameters($c);
+            $c->{request}->{parameters}->{servicegroup} = $group;
+            for my $panel (@{$types->{'servicegroups'}->{$group}}) {
+                for my $key (keys %{$in->{$panel}}) {
+                    my $cached = $cache->get(@cache_prefix, 'servicegroups', $group, $key);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts});
+                    $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                }
+            }
+        }
+    }
+    if(scalar keys %{$types->{'hosts'}} > 0) {
+        for my $host (keys %{$types->{'hosts'}}) {
+            Thruk::Utils::Avail::reset_req_parameters($c);
+            $c->{request}->{parameters}->{host} = $host;
+            for my $panel (@{$types->{'hosts'}->{$host}}) {
+                for my $key (keys %{$in->{$panel}}) {
+                    my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
+                    $cache->set(@cache_prefix, 'hosts', $host, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                }
+            }
+        }
+    }
+    if(scalar keys %{$types->{'services'}} > 0) {
+        for my $host (keys %{$types->{'services'}}) {
+            for my $service (keys %{$types->{'services'}->{$host}}) {
+                Thruk::Utils::Avail::reset_req_parameters($c);
+                $c->{request}->{parameters}->{host}    = $host;
+                $c->{request}->{parameters}->{service} = $service;
+                for my $panel (@{$types->{'services'}->{$host}->{$service}}) {
+                    for my $key (keys %{$in->{$panel}}) {
+                        my $cached = $cache->get(@cache_prefix, 'services', $host, $service, $key);
+                        $data->{$panel}->{$key} = _task_avail_calc($c, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
+                        $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
+                    }
+                }
+            }
+        }
+    }
+
+    # clean up cache
+    $c->stats->profile(begin => "_task_avail_clean_cache");
+    my $cached = $cache->get();
+    _task_avail_clean_cache($cached, $now - 86400);
+    $cache->set($cached);
+    $c->stats->profile(end => "_task_avail_clean_cache");
+
+    $c->stash->{'json'} = { data => $data };
+
+    $c->stats->profile(end => "_task_avail");
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_avail_clean_cache {
+    my($data, $expire) = @_;
+    for my $key (keys %{$data}) {
+        if(ref $data->{$key} eq 'HASH') {
+            if(exists $data->{$key}->{'time'}) {
+                if($data->{$key}->{'time'} < $expire) {
+                    delete $data->{$key};
+                }
+            } else {
+                _task_avail_clean_cache($data->{$key}, $expire);
+            }
+            if(scalar keys %{$data->{$key}} == 0) {
+                delete $data->{$key};
+            }
+        }
+    }
+    return;
+}
+
+##########################################################
+sub _task_avail_calc {
+    my($c, $now, $cached, $opts, $host, $service) = @_;
+    my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
+    my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
+    my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
+
+    # cache hit?
+    if($cached) {
+        my $refresh = 0;
+        if($now > $cached->{'time'} + $duration * $cache_retrieve_factor) {
+            $refresh = 1;
+        }
+        if(!$refresh) {
+            return($cached->{'val'});
+        }
+        $cached->{'time'} = $now;
+    }
+
+    $c->{request}->{parameters}->{t2}            = time();
+    $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;
+    $c->{request}->{parameters}->{rpttimeperiod} = $opts->{'tm'};
+    Thruk::Utils::Avail::calculate_availability($c);
+    if($host) {
+        my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
+                                                                    $unavailable_states,
+                                                                    $host,
+                                                                    $service
+                                                                   );
+        return $totals->{'total'}->{'percent'};
+    } else {
+        my($num, $total) = (0,0);
+        if(defined $c->stash->{avail_data}->{'hosts'} && ($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'}))) {
+            for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
+                my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
+                                                                            $unavailable_states,
+                                                                            $host
+                                                                           );
+                $total += $totals->{'total'}->{'percent'};
+                $num++;
+            }
+        }
+        if(defined $c->stash->{avail_data}->{'services'} && ($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'}))) {
+            for my $host (keys %{$c->stash->{avail_data}->{'services'}}) {
+                for my $service (keys %{$c->stash->{avail_data}->{'services'}->{$host}}) {
+                    my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
+                                                                                $unavailable_states,
+                                                                                $host,
+                                                                                $service
+                                                                               );
+                    $total += $totals->{'total'}->{'percent'};
+                    $num++;
+                }
+            }
+        }
+        if($num > 0) {
+            return($total/$num);
+        }
+    }
+    return(-1);
 }
 
 ##########################################################

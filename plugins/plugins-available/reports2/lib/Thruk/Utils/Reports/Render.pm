@@ -444,45 +444,12 @@ return list of availability percent as json list
 sub get_availability_percents {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
 
-    my $host           = $c->{'request'}->{'parameters'}->{'host'};
-    my $service        = $c->{'request'}->{'parameters'}->{'service'};
+    my $host               = $c->{'request'}->{'parameters'}->{'host'};
+    my $service            = $c->{'request'}->{'parameters'}->{'service'};
+    my $avail_data         = $c->stash->{'avail_data'};
+    my $unavailable_states = $c->stash->{'unavailable_states'};
     confess("No host in parameters:\n".    Dumper($c->{'request'}->{'parameters'})) unless defined $host;
-    my $avail;
-    if($service) {
-        $avail = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
-    } else {
-        $avail = $c->stash->{'avail_data'}->{'hosts'}->{$host};
-    }
-    return unless defined $avail;
-
-    my $u = $c->stash->{'unavailable_states'};
-    my $values = {};
-    for my $name (sort keys %{$avail->{'breakdown'}}) {
-        my $t = $avail->{'breakdown'}->{$name};
-
-        my($percent, $time) = _sum_availability($t, $u);
-        confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
-        $values->{$name} = [
-            $t->{'timestamp'}*1000,
-            $percent,
-        ];
-    }
-
-    my $x = 1;
-    my $json = {keys => [], values => [], tvalues => []};
-    for my $key (sort keys %{$values}) {
-        push @{$json->{'keys'}},    [$x, $key];
-        push @{$json->{'values'}},  [$x, $values->{$key}->[1]+=0 ];
-        push @{$json->{'tvalues'}}, [$values->{$key}->[0], $values->{$key}->[1]+=0 ];
-        $x++;
-    }
-
-    my($percent, $time) = _sum_availability($avail, $u);
-    $json->{'total'} = {
-        'percent' => $percent,
-        'time'    => $time,
-    };
-    return $json;
+    return(Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service));
 }
 
 
@@ -860,43 +827,6 @@ sub _read_static_content_file {
     croak("_read_static_content_file($url) $file: $!") if $ENV{'TEST_AUTHOR'};
     $c->log->debug("_read_static_content_file($url) $file: $!");
     return "";
-}
-
-##############################################
-sub _sum_availability {
-    my($t, $u) = @_;
-    my $time = {
-        'available'                             => 0,
-        'unavailable'                           => 0,
-        'time_indeterminate_notrunning'         => $t->{'time_indeterminate_notrunning'}         || 0,
-        'time_indeterminate_nodata'             => $t->{'time_indeterminate_nodata'}             || 0,
-        'time_indeterminate_outside_timeperiod' => $t->{'time_indeterminate_outside_timeperiod'} || 0,
-    };
-
-    for my $s ( keys %{$t} ) {
-        for my $state (qw/ok warning critical unknown up down unreachable/) {
-            if($s eq 'time_'.$state) {
-                if(defined $u->{$state}) {
-                    $time->{'unavailable'} += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
-                } else {
-                    $time->{'available'}   += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
-                }
-            }
-            elsif($s eq 'scheduled_time_'.$state) {
-                if(defined $u->{$state.'_downtime'}) {
-                    $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
-                } else {
-                    $time->{'available'}   += $t->{'scheduled_time_'.$state};
-                }
-            }
-        }
-    }
-
-    my $percent = -1;
-    if($time->{'available'} + $time->{'unavailable'} > 0) {
-        $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
-    }
-    return($percent, $time);
 }
 
 ##############################################
