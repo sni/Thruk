@@ -722,9 +722,13 @@ sub _task_avail_calc {
         if(!$refresh) {
             return($cached->{'val'});
         }
-        $cached->{'time'} = $now;
     }
-    return(-1) if $cached_only;
+    if($cached_only) {
+        return($cached->{'val'}) if defined $cached->{'val'};
+        return(-1);
+    }
+
+    $cached->{'time'} = $now;
 
     $c->{request}->{parameters}->{t2}            = time();
     $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;

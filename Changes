@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+next:
+          - Panorama View:
+            - support availability results in labels
+
 1.84-5   Wed Jul 16 13:30:05 CEST 2014
           - Reports
             - added cancel button for running reports
