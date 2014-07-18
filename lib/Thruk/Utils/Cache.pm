@@ -14,7 +14,8 @@ use strict;
 use warnings;
 use Carp;
 use Thruk::Utils::IO;
-use Storable qw/lock_nstore lock_retrieve/;
+use Storable qw(nstore retrieve);
+use File::Copy qw(move);
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -36,7 +37,6 @@ sub new {
         '_data'         => {},
         '_stat'         => [],
         '_checked'      => 0,
-        '_lock_timeout' => 10,
     };
     bless $self, $class;
     $self->_update();
@@ -162,13 +162,10 @@ update cache from file
 sub _update {
     my($self, %args) = @_;
     my $update = 0;
-    if($args{'force'}) {
-        $update = 1;
-    }
     if(-f $self->{'_cachefile'}) {
         my $now = time();
         # only check every x seconds
-        if($now > $self->{'_checked'} + 5) {
+        if($now > $self->{'_checked'} + 5 || $args{'force'}) {
             $self->{'_checked'} = $now;
             my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
             if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
@@ -176,11 +173,6 @@ sub _update {
                 $self->{'_stat'} = \@stat;
                 return;
             }
-        }
-        if($update) {
-            my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-            $self->{'_data'} = $self->_retrieve();
-            $self->{'_stat'} = \@stat;
         }
     } else {
         # did not exist before, so create an empty cache
@@ -200,15 +192,12 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
-    local $SIG{ALRM} = sub { die('timeout while waiting for cache store '.$self->{'_cachefile'}) };
-    alarm($self->{'_lock_timeout'});
-    lock_nstore($self->{'_data'}, $self->{'_cachefile'});
-    alarm(0);
-    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
-    $self->{'_stat'} = \@stat;
+    nstore($self->{'_data'}, $self->{'_cachefile'}.'.'.$$);
+    move($self->{'_cachefile'}.'.'.$$, $self->{'_cachefile'});
     Thruk::Utils::IO::ensure_permissions('file', $self->{'_cachefile'});
-    my $now = time();
-    $self->{'_checked'} = $now;
+    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
+    $self->{'_stat'}    = \@stat;
+    $self->{'_checked'} = time();
     return;
 }
 
@@ -223,13 +212,10 @@ retrieve data from disk
 =cut
 sub _retrieve {
     my($self) = @_;
-    local $SIG{ALRM} = sub { die('timeout while reading cache '.$self->{'_cachefile'}) };
-    alarm($self->{'_lock_timeout'});
     my $data;
     eval {
-        $data = lock_retrieve($self->{'_cachefile'});
+        $data = retrieve($self->{'_cachefile'});
     };
-    alarm(0);
     if($@) {
         my $err = $@;
         $self->clear();
