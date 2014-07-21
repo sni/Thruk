@@ -397,6 +397,7 @@ sub _dummy_c {
     open(STDERR, ">&", $saveerr)  if $Thruk::Utils::CLI::verbose <= 1;
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
     my $failed = ( $res->code == 200 ? 0 : 1 );
+    _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
     return($c, $failed);
 }
 

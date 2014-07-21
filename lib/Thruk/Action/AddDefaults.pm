@@ -506,13 +506,19 @@ sub set_processinfo {
                 }
 
                 # check if we have original datasource and core version when using shadownaemon
-                if($peer->{'cacheproxy'} and !$cached_data->{'real_processinfo'}->{$key}) {
+                # but only if the backend itself is available
+                if($peer->{'cacheproxy'} and !$cached_data->{'real_processinfo'}->{$key} and !$c->stash->{'failed_backends'}->{$key}) {
                     push @{$missing_keys}, $key;
                 }
             }
             if(scalar @{$missing_keys} > 0) {
                 local $ENV{'THRUK_USE_SHADOW'} = 0;
-                my $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
+                $c->stats->profile(begin => "AddDefaults::set_processinfo fetch shadowed info");
+                my $real_processinfo;
+                eval {
+                    $real_processinfo = $c->{'db'}->get_processinfo(backend => $missing_keys);
+                };
+                $c->log->debug("get_processinfo: ".$@) if $@;
                 if(ref $real_processinfo eq 'HASH') {
                     for my $k (keys %{$real_processinfo}) {
                         if(scalar keys %{$real_processinfo->{$k}} > 5) {
@@ -520,6 +526,7 @@ sub set_processinfo {
                         }
                     }
                 }
+                $c->stats->profile(end => "AddDefaults::set_processinfo fetch shadowed info");
             }
         }
         $cached_data->{'processinfo_time'} = time();
@@ -527,7 +534,6 @@ sub set_processinfo {
         $c->cache->set('global', $cached_data);
         $c->stats->profile(end => "AddDefaults::set_processinfo fetch");
     }
-
 
     $processinfo                 = {} unless defined $processinfo;
     $processinfo                 = {} if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0);
