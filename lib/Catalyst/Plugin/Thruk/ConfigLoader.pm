@@ -164,7 +164,7 @@ sub _do_finalize_config {
     }
 
     # make this setting available in env
-    $ENV{'THRUK_CURL'} = $config->{'use_curl'};
+    $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
 
     # set default config
     Thruk::Backend::Pool::set_default_config($config);
