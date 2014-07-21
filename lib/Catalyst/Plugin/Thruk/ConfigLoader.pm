@@ -163,6 +163,9 @@ sub _do_finalize_config {
         $config->{'check_local_states'}   = 0; # local state checking not required
     }
 
+    # make this setting available in env
+    $ENV{'THRUK_CURL'} = $config->{'use_curl'};
+
     # set default config
     Thruk::Backend::Pool::set_default_config($config);
 

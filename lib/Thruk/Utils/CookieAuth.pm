@@ -14,7 +14,7 @@ to logout again.
 use warnings;
 use strict;
 use Data::Dumper;
-use LWP::UserAgent;
+use Thruk::UserAgent;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Utils;
 use Thruk::Utils::IO;
@@ -22,13 +22,15 @@ use Encode qw/encode_utf8/;
 
 ##############################################
 BEGIN {
-    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
-    eval {
-        # required for new IO::Socket::SSL versions
-        require IO::Socket::SSL;
-        IO::Socket::SSL->import();
-        IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-    };
+    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+        $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+        eval {
+            # required for new IO::Socket::SSL versions
+            require IO::Socket::SSL;
+            IO::Socket::SSL->import();
+            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+        };
+    }
 };
 
 ##############################################
@@ -55,7 +57,7 @@ sub external_authentication {
     Thruk::Utils::IO::mkdir($sdir);
 
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
-    my $ua       = get_user_agent();
+    my $ua       = get_user_agent($config);
     # unset proxy which eventually has been set from https backends
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     # bypass ssl host verfication on localhost
@@ -113,7 +115,7 @@ sub verify_basic_auth {
     my($config, $basic_auth, $login) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($config);
     # bypass ssl host verfication on localhost
     $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
@@ -130,13 +132,14 @@ sub verify_basic_auth {
 
 =head2 get_user_agent
 
-    get_user_agent()
+    get_user_agent($config)
 
 returns user agent used for external requests
 
 =cut
 sub get_user_agent {
-    my $ua = LWP::UserAgent->new;
+    my($config) = @_;
+    my $ua = Thruk::UserAgent->new($config);
     $ua->timeout(30);
     $ua->agent("thruk_auth");
     return $ua;

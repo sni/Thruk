@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use JSON::XS;
-use LWP::UserAgent;
+use Thruk::UserAgent;
 use Thruk::Utils;
 use Encode qw/encode_utf8/;
 use parent 'Thruk::Backend::Provider::Base';
@@ -51,13 +51,15 @@ sub new {
     };
     bless $self, $class;
 
-    if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $options->{'peer'} =~ m/^https:/mx) {
-        eval {
-            # required for new IO::Socket::SSL versions
-            require IO::Socket::SSL;
-            IO::Socket::SSL->import();
-            IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-        };
+    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+        if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $options->{'peer'} =~ m/^https:/mx) {
+            eval {
+                # required for new IO::Socket::SSL versions
+                require IO::Socket::SSL;
+                IO::Socket::SSL->import();
+                IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+            };
+        }
     }
 
     $self->reconnect();
@@ -137,7 +139,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
 
-    $self->{'ua'} = LWP::UserAgent->new;
+    $self->{'ua'} = Thruk::UserAgent->new({ use_curl => 1 });
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');

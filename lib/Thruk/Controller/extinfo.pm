@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 use parent 'Catalyst::Controller';
 use Data::Page;
-use LWP::UserAgent;
+use Thruk::UserAgent;
 use Thruk::Utils::RecurringDowntimes;
 
 =head1 NAME
@@ -735,7 +735,7 @@ sub _set_backend_selector {
 # get apache status
 sub _apache_status {
     my($c, $name, $url) = @_;
-    my $ua = LWP::UserAgent->new;
+    my $ua = Thruk::UserAgent->new($c->config);
     $ua->timeout(10);
     $ua->agent("thruk");
     $ua->ssl_opts('verify_hostname' => 0 );

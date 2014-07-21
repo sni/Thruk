@@ -71,6 +71,7 @@ sub set_default_config {
         use_feature_trends              => 1,
         use_wait_feature                => 1,
         wait_timeout                    => 10,
+        use_curl                        => $ENV{'THRUK_CURL'} ? 1 : 0,
         use_frames                      => 1,
         use_strict_host_authorization   => 0,
         make_auth_user_lowercase        => 0,
@@ -318,19 +319,21 @@ sub init_backend_thread_pool {
         }
     }
 
-    if($https_count > 2 and $pool_size > 1) {
-        eval {
-            require IO::Socket::SSL;
-            IO::Socket::SSL->import();
-        };
-        if($@) {
-            die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
-        }
-        if(!$Net::SSLeay::VERSION or $Net::SSLeay::VERSION < 1.43) {
-            die('Net::SSLeay (>=1.43) is required for multiple parallel https connections, you have '.($Net::SSLeay::VERSION ? $Net::SSLeay::VERSION : 'unknown'));
-        }
-        if($INC{'Crypt/SSLeay.pm'}) {
-            die('Crypt::SSLeay must not be loaded for multiple parallel https connections!');
+    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+        if($https_count > 2 and $pool_size > 1) {
+            eval {
+                require IO::Socket::SSL;
+                IO::Socket::SSL->import();
+            };
+            if($@) {
+                die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
+            }
+            if(!$Net::SSLeay::VERSION or $Net::SSLeay::VERSION < 1.43) {
+                die('Net::SSLeay (>=1.43) is required for multiple parallel https connections, you have '.($Net::SSLeay::VERSION ? $Net::SSLeay::VERSION : 'unknown'));
+            }
+            if($INC{'Crypt/SSLeay.pm'}) {
+                die('Crypt::SSLeay must not be loaded for multiple parallel https connections!');
+            }
         }
     }
 

@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Carp;
 use Data::Dumper qw/Dumper/;
-use LWP::UserAgent qw//;
+use Thruk::UserAgent qw//;
 use JSON::XS qw/encode_json decode_json/;
 use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
@@ -1409,7 +1409,8 @@ sub _cmd_selfcheck {
 
 ##############################################
 sub _get_user_agent {
-    my $ua = LWP::UserAgent->new;
+    my $config = { 'use_curl' => $ENV{'THRUK_CURL'} };
+    my $ua = Thruk::UserAgent->new($config);
     $ua->agent("thruk_cli");
     return $ua;
 }
