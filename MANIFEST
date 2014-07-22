@@ -75,6 +75,7 @@ lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
 lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/Script/Thrukembedded.pm
 lib/Catalyst/View/GD.pm
+lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Monitoring/Availability.pm
 lib/Monitoring/Availability/Logs.pm
 lib/Monitoring/Livestatus.pm
