@@ -19,6 +19,7 @@ requires 'Config::Any'                            => 0;     # required by Thruk:
 requires 'Class::Data::Inheritable'               => 0;     # required by Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam
 requires 'MRO::Compat'                            => 0;     # required by Catalyst::Plugin::Unicode::Encoding
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::Utils::CLI
+requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'Net::HTTP'                              => 6.02;  # required for HTTP connections. Version required due to timeout bug
 requires 'Class::C3::Adopt::NEXT'                 => 0;     # required by Catalyst::View::GD
 requires 'Class::C3::XS'                          => 0;     # speed up class things
@@ -55,8 +56,6 @@ requires 'Catalyst::Plugin::Redirect'             => 0;     # required by Thruk
 requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
 requires 'Log::Dispatch::File'                    => 0;     # required by Thruk / Log4perl example config
 requires 'FCGI'                                   => 0;     # required by Thruk
-requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
-requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
 requires 'Storable'                               => 0;     # required by Thruk::Utils::External
@@ -97,6 +96,13 @@ feature     ('mysql_support',
   -default                                        => 0,
   'DBI'                                           => 0,     # required by Thruk::Backend::Provider::Mysql
   'DBD::mysql'                                    => 0,     # required by Thruk::Backend::Provider::Mysql
+);
+
+# fastcgi_server support
+feature     ('fastcgi_server',
+  -default                                        => 0,
+  'FCGI::ProcManager'                             => 0,     # required by fastcgi_server
+  'FCGI::ProcManager::MaxRequests'                => 0,     # required by fastcgi_server
 );
 
 # requirements test requirements
