@@ -918,6 +918,9 @@ var TP = {
     updateAllIconsDo: function(tab, id, xdata, reschedule) {
         var panels = TP.getAllPanel(tab);
 
+        if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
+        if(TP.iconUpdateRunning[tab.id]) { return; }
+
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) { return; }
         var req = statusReq.req,
@@ -928,11 +931,13 @@ var TP = {
             backends:   TP.getActiveBackendsPanel(tab),
             reschedule: reschedule ? 1 : ''
         };
+        TP.iconUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=status',
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
+                TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
@@ -1080,7 +1085,9 @@ var TP = {
 
     /* do the availability update */
     updateAllLabelAvailabilityDo: function(tab, id, xdata) {
-        if(!TP.initialized) { return; }
+        if(!TP.initialized)               { return; }
+        if(!TP.availabilityUpdateRunning) { TP.availabilityUpdateRunning = {}; }
+        if(TP.availabilityUpdateRunning[tab.id]) { return; }
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) { return; }
         var req = statusReq.req,
@@ -1091,11 +1098,13 @@ var TP = {
             backends:   TP.getActiveBackendsPanel(tab),
             avail:      Ext.JSON.encode(TP.availabilities)
         };
+        TP.availabilityUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=availability',
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
+                TP.availabilityUpdateRunning[tab.id] = false;
                 if(success) {
                     var data = TP.getResponse(undefined, response);
                     if(!data || !data.data) { return; }

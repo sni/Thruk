@@ -50,6 +50,21 @@ TP.iconShowEditDialog = function(panel) {
             var options = r.min+" - "+r.max;
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
+        /* use availability data as source */
+        var xdata = TP.get_icon_form_xdata(settingsWindow);
+        if(xdata.label && xdata.label.labeltext && TP.availabilities && TP.availabilities[panel.id]) {
+            var avail = TP.availabilities[panel.id];
+            for(var key in avail) {
+                var d = avail[key];
+                var last    = d.last != undefined ? d.last : '...';
+                if(last == -1) { last = '...'; }
+                var options = d.opts['d'];
+                if(d.opts['tm']) {
+                    options    += '/'+d.opts['tm'];
+                }
+                data.push(['Availability: '+last+'% ('+options+')', 'avail:'+key]);
+            }
+        }
         var cbo = Ext.getCmp('speedosourceStore');
         TP.updateArrayStoreKV(cbo.store, data);
 
@@ -198,6 +213,7 @@ TP.iconShowEditDialog = function(panel) {
         title: 'Appearance',
         type:  'panel',
         hidden: panel.hideAppearanceTab,
+        listeners: { show: perfDataUpdate },
         items: [{
             xtype : 'panel',
             layout: 'fit',

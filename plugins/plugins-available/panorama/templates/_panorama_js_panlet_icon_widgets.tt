@@ -258,7 +258,6 @@
 
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
-        if(!TP.initialized) { return; }
         var panel = this;
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
@@ -323,6 +322,10 @@
                 if(!TP.availabilities[panel.id][key]['active']) {
                     delete TP.availabilities[panel.id][key];
                 }
+            }
+            /* update value since it might have changed */
+            if(panel.xdata.appearance.type == 'speedometer' && panel.xdata.appearance.speedosource.match(/^avail:(.*)$/)) {
+                panel.updateRender(panel.xdata);
             }
         }
         if(!cfg.labeltext) {
@@ -856,16 +859,24 @@ Ext.define('TP.IconWidget', {
         var state  = xdata.state, value = 0, min = 0, max = 100;
         if(state == undefined) { state = panel.xdata.state; }
         if(xdata.appearance.speedosource == undefined) { xdata.appearance.speedosource = 'problems'; }
-        var matches = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
-        if(matches && matches[1]) {
+        var matchesP = xdata.appearance.speedosource.match(/^perfdata:(.*)$/);
+        var matchesA = xdata.appearance.speedosource.match(/^avail:(.*)$/);
+        if(matchesP && matchesP[1]) {
             window.perfdata = {};
             panel.setIconLabel(undefined, true);
-            if(perfdata[matches[1]]) {
-                var p = perfdata[matches[1]];
+            if(perfdata[matchesP[1]]) {
+                var p = perfdata[matchesP[1]];
                 value = p.val;
                 var r = TP.getPerfDataMinMax(p, '?');
                 max   = r.max;
                 min   = r.min;
+            }
+        }
+        else if(matchesA && matchesA[1]) {
+            if(TP.availabilities && TP.availabilities[panel.id] && TP.availabilities[panel.id][matchesA[1]] && TP.availabilities[panel.id][matchesA[1]].last != undefined) {
+                value = Number(TP.availabilities[panel.id][matchesA[1]].last);
+                max   = 100;
+                min   = 0;
             }
         }
         else if(xdata.appearance.speedosource == 'problems' || xdata.appearance.speedosource == 'problems_warn') {

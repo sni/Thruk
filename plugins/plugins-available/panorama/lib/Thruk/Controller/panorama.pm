@@ -543,7 +543,8 @@ sub _task_avail {
         sleep(1);
     }
 
-    return _task_avail_update($c, 1);
+    my $res = _task_avail_update($c, 1);
+    return($res);
 }
 
 
