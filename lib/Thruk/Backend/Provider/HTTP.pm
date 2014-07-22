@@ -139,7 +139,7 @@ sub reconnect {
     $self->{'addr'} =~ s|/$||mx;
     $self->{'addr'} .= '/'.$pp.'/cgi-bin/remote.cgi';
 
-    $self->{'ua'} = Thruk::UserAgent->new({ use_curl => 1 });
+    $self->{'ua'} = Thruk::UserAgent->new({ use_curl => $ENV{'THRUK_CURL'} ? 1 : 0 });
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
