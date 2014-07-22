@@ -42,7 +42,7 @@ sub new {
         'default_header'        => {},
         'max_redirect'          => 7,
         'protocols_allowed'     => ['http', 'https'],
-        'requests_redirectable' => [ 'GET' ],
+        'requests_redirectable' => [ 'GET' ],           # not used
     };
     bless($self, $class);
     return $self;
@@ -228,9 +228,9 @@ sub _get_cmd_line {
         'curl',
         '-A',                $self->{'agent'},
         '--connect-timeout', $self->{'ssl_opts'}->{'timeout'} || $self->{'timeout'},
+        '--max-time',        ($self->{'ssl_opts'}->{'timeout'} || $self->{'timeout'}) + 2,
         '--max-redirs',      $self->{'max_redirect'},
         '--proto',           '-all,'.join(',', @{$self->{'protocols_allowed'}}),
-        #'--...',     '-all,'.join(',', @{$self->{'protocols_allowed'}}),
         '--dump-header',     '-',
         '--silent',
     ];
