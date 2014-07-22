@@ -7,15 +7,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $replace = {
     'Log::Log4perl::Catalyst'                     => 'Log::Log4perl',
-    'LWP::ConnCache'                              => 'LWP::UserAgent',
     'Monitoring::Availability::Logs'              => 'Monitoring::Availability',
-    'Chart::Clicker::Data::DataSet'               => 'Chart::Clicker',
-    'Chart::Clicker::Data::Series'                => 'Chart::Clicker',
-    'Chart::Clicker::Data::Marker'                => 'Chart::Clicker',
-    'Chart::Clicker::Data::Range'                 => 'Chart::Clicker',
-    'Chart::Clicker::Decoration::Legend::Tabular' => 'Chart::Clicker',
-    'Chart::Clicker::Renderer::Pie'               => 'Chart::Clicker',
-    'Chart::Clicker::Renderer::StackedBar'        => 'Chart::Clicker',
 };
 
 # first get all we have already
@@ -27,9 +19,10 @@ my $packages = _get_packages($files);
 for my $file (@{$files}) {
   my $modules = _get_modules($file);
   for my $mod (@{$modules}) {
-    next if $mod eq 'MongoDB'     and defined $reqs->{'plugin_shinken'}->{$mod};
-    next if $mod eq 'Tie::IxHash' and defined $reqs->{'plugin_shinken'}->{$mod};
-    next if $mod eq 'DBI'         and defined $reqs->{'mysql_support'}->{$mod};
+    next if $mod eq 'MongoDB'                        and defined $reqs->{'plugin_shinken'}->{$mod};
+    next if $mod eq 'Tie::IxHash'                    and defined $reqs->{'plugin_shinken'}->{$mod};
+    next if $mod eq 'DBI'                            and defined $reqs->{'mysql_support'}->{$mod};
+    next if $mod eq 'FCGI::ProcManager::MaxRequests' and defined $reqs->{'fastcgi_server'}->{$mod};
     $mod = $replace->{$mod} if defined $replace->{$mod};
     if(defined $reqs->{$mod}) {
       pass("$mod required by $file exists in Makefile.PL");
