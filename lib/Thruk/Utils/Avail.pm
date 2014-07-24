@@ -832,17 +832,21 @@ sub get_availability_percents {
 
     my $x = 1;
     my $json = {keys => [], values => [], tvalues => []};
+    $json->{'total'}->{'breakdown'} = {};
+    my $breakdown = {};
     for my $key (sort keys %{$values}) {
         push @{$json->{'keys'}},    [$x, $key];
         push @{$json->{'values'}},  [$x, $values->{$key}->[1]+=0 ];
         push @{$json->{'tvalues'}}, [$values->{$key}->[0], $values->{$key}->[1]+=0 ];
+        $breakdown->{$key} = $values->{$key}->[1] += 0;
         $x++;
     }
 
     my($percent, $time) = _sum_availability($avail, $u);
     $json->{'total'} = {
-        'percent' => $percent,
-        'time'    => $time,
+        'percent'   => $percent,
+        'time'      => $time,
+        'breakdown' => $breakdown,
     };
     return $json;
 }
