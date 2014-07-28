@@ -514,10 +514,15 @@ TP.iconShowEditDialog = function(panel) {
                         name:       'pieshadow',
                         hidden:      true
                     },
-                    { xtype: 'label', text: 'Label:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    { xtype: 'label', text: 'Label Name:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {
                         xtype:      'checkbox',
                         name:       'pielabel'
+                    },
+                    { xtype: 'label', text: 'Label Value:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    {
+                        xtype:      'checkbox',
+                        name:       'pielabelval'
                     },
                     { xtype: 'label', text: 'Donut:', style: 'margin-left: 8px; margin-right: 2px;' },
                     {

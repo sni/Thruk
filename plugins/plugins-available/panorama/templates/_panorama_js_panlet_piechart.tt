@@ -103,6 +103,7 @@ Ext.define('TP.piechart', {
     insetPadding: 3,
     theme:  'Base:gradients',
     initComponent: function() {
+        var pie = this;
         this.series = [{
             type:        'pie',
             field:       'value',
@@ -113,7 +114,19 @@ Ext.define('TP.piechart', {
                 field: 'name',
                 display: 'rotate',
                 contrast: true,
-                font: '12px Arial'
+                font: '12px Arial',
+                renderer: function(v, x, y) {
+                    if(!pie.panel || !pie.panel.xdata || !pie.panel.xdata.showlabelVal) {
+                        return(v);
+                    }
+                    var idx       = pie.store.findExact('name', v);
+                    var storeItem = pie.store.getAt(idx);
+                    var total = 0;
+                    storeItem.store.each(function(rec) {
+                        total += rec.get('value');
+                    });
+                    return((pie.panel.xdata.showlabel ? v+' ' : '') + Math.round(storeItem.get('value') / total * 100) + '%');
+                }
             }
         }];
         if(this.animate) {
@@ -165,7 +178,7 @@ Ext.define('TP.piechart', {
         var panel = this.panel;
         if(this.getEl()) {
             Ext.each(this.getEl().query('text'), function(el) {
-                if(panel.xdata.showlabel == false) {
+                if(panel.xdata.showlabel == false && panel.xdata.showlabelVal != true) {
                     el.style.fill = 'transparent';
                 } else {
                     el.style.fill = '';

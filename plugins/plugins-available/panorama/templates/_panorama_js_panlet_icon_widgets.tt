@@ -991,7 +991,8 @@ Ext.define('TP.IconWidget', {
         });
         TP.updateArrayStoreHash(pieStore, totals);
         panel.chart.bindStore(pieStore);
-        panel.chart.panel.xdata.showlabel = !!xdata.appearance.pielabel;
+        panel.chart.panel.xdata.showlabel    = !!xdata.appearance.pielabel;
+        panel.chart.panel.xdata.showlabelVal = !!xdata.appearance.pielabelval;
         panel.chart.setShowLabel();
     },
 
