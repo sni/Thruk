@@ -1112,7 +1112,7 @@ sub _cmd_livecache {
             };
             last if($status && scalar @{$status} == $started);
         }
-        sleep(1);
+        return("OK - livecache started\n", 0);
     }
     elsif($mode eq 'stop') {
         Thruk::Utils::Livecache::shutdown_shadow_naemon_procs($c->config);
