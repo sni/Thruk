@@ -736,7 +736,7 @@ sub _check_startup_redirect {
         #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, []);
+        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, {});
         #diag("startup request:");
         #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
