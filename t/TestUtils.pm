@@ -21,6 +21,7 @@ use HTTP::Request::Common qw(POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/ tempfile /;
+use Carp;
 use Thruk::Utils;
 use Thruk::Utils::External;
 
@@ -264,7 +265,7 @@ sub test_page {
         ok( $request->is_error, 'Request '.$opts->{'url'}.' should fail' );
     }
     elsif(defined $opts->{'redirect'}) {
-        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($request));
+        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($opts, $request));
         if(defined $opts->{'location'}) {
             if(defined $request->{'_headers'}->{'location'}) {
                 like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
@@ -702,7 +703,7 @@ sub _external_request {
     $ua->agent( $agent ) if $agent;
 
     if($post and ref $post ne 'HASH') {
-        die("unknown post data: ".Dumper($post));
+        confess("unknown post data: ".Dumper($post));
     }
     my $req;
     if($post) {
