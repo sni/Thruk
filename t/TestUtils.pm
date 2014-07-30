@@ -701,25 +701,28 @@ sub _external_request {
     $ua->cookie_jar($cookie_jar);
     $ua->agent( $agent ) if $agent;
 
-    my $request;
+    if($post and ref $post ne 'HASH') {
+        die("unknown post data: ".Dumper($post));
+    }
+    my $req;
     if($post) {
         $post->{'token'} = 'test';
-        $request = $ua->post($url, $post);
+        $req = $ua->post($url, $post);
     } else {
-        $request = $ua->get($url);
+        $req = $ua->get($url);
     }
 
-    $request = _check_startup_redirect($request, $start_to);
+    $req = _check_startup_redirect($req, $start_to);
 
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
-        die("login failed: ".Dumper($request)) unless $retry;
+    if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
+        die("login failed: ".Dumper($req)) unless $retry;
         my $product = $1;
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
         my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, undef, $agent);
            $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, $agent, 0);
-        $request = _external_request($url, $start_to, $post, $agent, 0);
+        $req  = _external_request($url, $start_to, $post, $agent, 0);
     }
-    return $request;
+    return $req;
 }
 
 #########################
