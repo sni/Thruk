@@ -1563,6 +1563,14 @@ if a service or host has a graph url in action url (or notes url) set
 it can be displayed by specifying a regular expression that always appears
 in this url. You can specify multiple graph_words.
 
+[TIP]
+.pnp4nagios
+=======
+When using pnp4nagios, no graph_word is required, just keep it empty.
+=======
+
+
+
 sample service configuration for graphite:
 
 .....
@@ -1577,12 +1585,15 @@ sample service configuration for graphite:
 
 ex.:
 
-  graph_word = /pnp4nagios/   # for pnp4nagios
   graph_word = /render/       # for graphite
 
 
-Info : Quotes are supported in the action_url statement, you may want to use it for special graphite function (http://graphite.readthedocs.org/en/1.0/functions.html)
+[TIP]
+.quotes
+=======
+Quotes are supported in the action_url statement, you may want to use it for special graphite function (http://graphite.readthedocs.org/en/1.0/functions.html)
 Do not escape double quotes here, otherwise graph won't work.
+=======
 
 ==== show_custom_vars
 Show custom vars in host / service ext info. List variable names to
