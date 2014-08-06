@@ -28,7 +28,7 @@ use strict;
 use warnings;
 
 our $VERSION = '1.84';
-my $branch       = '5';
+my $branch       = '6';
 
 my $nagimp = Thruk::nagimp->new();
 exit $nagimp->run();
