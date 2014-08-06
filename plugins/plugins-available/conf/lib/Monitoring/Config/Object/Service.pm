@@ -89,6 +89,7 @@ $Monitoring::Config::Object::Service::ShinkenSpecific = {
     'escalations'                  => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
     'icon_set'                     => { type => 'STRING', cat => 'Extended' },
     'duplicate_foreach'            => { type => 'STRING', cat => 'Extended' },
+    'service_dependencies'         => { type => 'STRING', cat => 'Extended' },
 };
 
 ##########################################################
