@@ -147,17 +147,18 @@ formats a time definition into date format
 sub date_format {
     my($c, $timestamp, $format) = @_;
     return "" unless defined $timestamp;
+    confess("no c") unless defined $c;
 
     # get today
     my @today;
-    if(defined $c->{'stash'}->{'today'}) {
-        @today = @{$c->{'stash'}->{'today'}};
+    if(defined $c->stash->{'today'}) {
+        @today = @{$c->stash->{'today'}};
     }
     else {
         @today = Today();
     }
     my($t_year,$t_month,$t_day) = @today;
-    $c->{'stash'}->{'today'} = \@today;
+    $c->stash->{'today'} = \@today;
 
     my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
@@ -173,10 +174,12 @@ sub date_format {
     }
 
     if($t_year == $year and $t_month == $month and $t_day == $day) {
-        return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format_today'}));
+        confess("no datetime_format_today") unless $c->stash->{'datetime_format_today'};
+        return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format_today'}));
     }
 
-    return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format'}));
+    confess("no datetime_format") unless $c->stash->{'datetime_format'};
+    return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format'}));
 }
 
 
@@ -871,9 +874,9 @@ return paths used to remove old/abandoned cookie paths
 =cut
 sub get_cookie_remove_paths {
     my($c) = @_;
-    my $prefix  = $c->{'stash'}->{'url_prefix'};
+    my $prefix  = $c->stash->{'url_prefix'};
     $prefix     =~ s|/$||gmx;
-    my $product = $c->{'stash'}->{'product_prefix'};
+    my $product = $c->stash->{'product_prefix'};
     $product    =~ s|/$||gmx;
     my $paths   = [
         '/',

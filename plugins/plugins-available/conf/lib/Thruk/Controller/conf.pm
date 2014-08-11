@@ -1203,7 +1203,7 @@ sub _apply_config_changes {
 
     # make nicer output
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
-        $c->{'stash'}->{'output'} = Thruk::Utils::beautify_diff($c->{'stash'}->{'output'});
+        $c->stash->{'output'} = Thruk::Utils::beautify_diff($c->stash->{'output'});
     }
 
     # discard changes
@@ -1343,7 +1343,7 @@ sub _cmd {
     } else {
         $rc = $rc>>8;
     }
-    $c->{'stash'}->{'output'} = decode_utf8($output);
+    $c->stash->{'output'} = decode_utf8($output);
     $c->log->debug( "rc:     ". $rc );
     $c->log->debug( "output: ". $output );
     if($rc != 0) {
@@ -1973,13 +1973,13 @@ sub _file_history_commit {
         return;
     }
 
-    $c->{'stash'}->{'previous'} = '';
-    $c->{'stash'}->{'next'}     = '';
+    $c->stash->{'previous'} = '';
+    $c->stash->{'next'}     = '';
     my $logs = $self->_get_git_logs($c, $dir);
     for my $l (@{$logs}) {
         if($l->{'id'} eq $data->{'id'}) {
-            $c->{'stash'}->{'previous'} = $self->_get_git_commit($c, $dir, $l->{'previous'}) if $l->{'previous'};
-            $c->{'stash'}->{'next'}     = $self->_get_git_commit($c, $dir, $l->{'next'})     if $l->{'next'};
+            $c->stash->{'previous'} = $self->_get_git_commit($c, $dir, $l->{'previous'}) if $l->{'previous'};
+            $c->stash->{'next'}     = $self->_get_git_commit($c, $dir, $l->{'next'})     if $l->{'next'};
             last;
         }
     }
@@ -1995,9 +1995,9 @@ sub _file_history_commit {
     $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
     $data->{'diff'} =~ s/^\s+//gmx;
 
-    $c->{'stash'}->{'dir'}    = $dir;
-    $c->{'stash'}->{'data'}   = $data;
-    $c->{'stash'}->{'links'}  = $diff_link_files;
+    $c->stash->{'dir'}    = $dir;
+    $c->stash->{'data'}   = $data;
+    $c->stash->{'links'}  = $diff_link_files;
 
     return 1;
 }
@@ -2239,7 +2239,7 @@ sub _config_reload {
             'backend' => [ $pkey ],
         };
         $c->{'db'}->send_command( %{$options} );
-        $c->{'stash'}->{'output'} = 'config reloaded by external command.';
+        $c->stash->{'output'} = 'config reloaded by external command.';
     }
 
     # wait until core responds again
@@ -2255,16 +2255,16 @@ sub _config_reload {
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
-    $c->{'stash'}->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
-    $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
-    $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
-    $c->{'stash'}->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->{'stash'}->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->{'stash'}->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
-    $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
+    $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
+    $c->stash->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
+    $c->stash->{'output'} = "<pre>".$c->stash->{'output'}."</pre>";
     return;
 }
 

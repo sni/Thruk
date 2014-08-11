@@ -786,7 +786,7 @@ sub _read_static_content_file {
     $logo_url            =~ s/^$logo_path_prefix//gmx;
 
     # image from theme
-    my $default = $c->{'config'}->{'default_theme'};
+    my $default = $c->config->{'default_theme'};
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';

@@ -1766,7 +1766,7 @@ sub wait_after_reload {
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if(!$@ and !$c->{'stash'}->{'failed_backends'}->{$pkey}) {
+        if(!$@ and !$c->stash->{'failed_backends'}->{$pkey}) {
             if($pkey and $time and $procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
                 # not yet restarted
             } else {

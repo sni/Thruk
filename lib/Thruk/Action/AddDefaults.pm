@@ -338,7 +338,7 @@ sub set_configs_stash {
     for my $key (qw/url_prefix product_prefix title_prefix use_pager start_page documentation_link
                   use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
-                  use_new_search ajax_search show_notification_number strict_passive_mode hide_passive_icon
+                  use_new_search show_notification_number strict_passive_mode hide_passive_icon
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
                   show_backends_in_table host_action_icon service_action_icon cookie_path
@@ -348,6 +348,7 @@ sub set_configs_stash {
                   use_service_description force_sticky_ack force_send_notification force_persistent_ack
                   force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
                 /) {
+        confess("$key not defined in config,\n".Dumper($c->config)) unless defined $c->config->{$key};
         $c->stash->{$key} = $c->config->{$key};
         Thruk::Utils::decode_any($c->stash->{$key}) if ref $c->stash->{$key} eq '';
     }

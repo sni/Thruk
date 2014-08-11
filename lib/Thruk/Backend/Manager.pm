@@ -1408,8 +1408,8 @@ sub _remove_duplicates {
     for my $dat ( @{$data} ) {
         my $peer_key = $dat->{'peer_key'};
         delete $dat->{'peer_key'};
-        my $peer_name = $c->{'stash'}->{'pi_detail'}->{$peer_key}->{'peer_name'};
-        my $peer_addr = $c->{'stash'}->{'pi_detail'}->{$peer_key}->{'peer_addr'};
+        my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
+        my $peer_addr = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_addr'};
         my $md5       = md5_hex( encode_utf8( join( ';', grep(defined, values %{$dat})) ) );
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;

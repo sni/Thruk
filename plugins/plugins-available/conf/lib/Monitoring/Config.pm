@@ -2139,7 +2139,7 @@ sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 
@@ -2156,7 +2156,7 @@ sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 
