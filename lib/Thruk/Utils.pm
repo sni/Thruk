@@ -73,6 +73,7 @@ sub format_date {
         Template::Plugin::Date->import();
         $tpd = Template::Plugin::Date->new()
     }
+    confess("no format") unless defined $format;
     my $date = $tpd->format($timestamp, $format);
     return decode("utf-8", $date);
 }
