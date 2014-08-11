@@ -26,7 +26,7 @@ $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CA
 # start cache
 TestUtils::test_command({
     cmd     => $BIN.' -a livecachestart',
-    like    => ['/OK - \d+/\d+ livecache running, \d+\/\d+ online/'],
+    like    => ['/OK - livecache started/'],
     exit    => 0,
 });
 

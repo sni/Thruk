@@ -1112,8 +1112,10 @@ sub _cmd_livecache {
                 ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
             };
             last if($status && scalar @{$status} == $started);
+            sleep(1);
         }
-        return("OK - livecache started\n", 0);
+        return("OK - livecache started\n", 0) if(defined $started and $started > 0);
+        return("FAILED - starting livecache failed\n", 1);
     }
     elsif($mode eq 'stop') {
         Thruk::Utils::Livecache::shutdown_shadow_naemon_procs($c->config);
@@ -1125,8 +1127,8 @@ sub _cmd_livecache {
                 ($total, $failed) = _get_shadownaemon_totals($c, $status);
             };
             last if(defined $started && $started == 0 && defined $total && $total == $failed);
+            sleep(1);
         }
-        sleep(1);
     }
     elsif($mode eq 'restart') {
         Thruk::Utils::Livecache::restart_shadow_naemon_procs($c->config);
@@ -1137,8 +1139,8 @@ sub _cmd_livecache {
                 ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
             };
             last if($status && scalar @{$status} == $started);
+            sleep(1);
         }
-        sleep(1);
     }
 
     my($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
