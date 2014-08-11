@@ -65,8 +65,8 @@ case "$1" in
                            /etc/thruk/plugins/plugins-enabled \
                            /etc/thruk/thruk_local.conf \
                            /etc/thruk/bp
-        chown 755 /usr/share/thruk/fcgid_env.sh
-        chown 755 /usr/bin/thruk
+        chmod 755 /usr/share/thruk/fcgid_env.sh
+        chmod 755 /usr/bin/thruk
 
         # reload new apache config
         if which invoke-rc.d >/dev/null 2>&1; then
