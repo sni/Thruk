@@ -187,6 +187,7 @@ sub request_url {
     local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
     local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+    local $ENV{'NO_EXTERNAL_JOBS'} = 1;
 
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();

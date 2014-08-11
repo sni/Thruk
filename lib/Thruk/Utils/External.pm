@@ -500,6 +500,9 @@ sub _do_child_stuff {
     # don't use connection pool after forking
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
 
+    # don't fork twice
+    $ENV{'NO_EXTERNAL_JOBS'}         = 1;
+
     # make remote user available
     confess('no remote_user') unless defined $c->stash->{'remote_user'};
     $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
