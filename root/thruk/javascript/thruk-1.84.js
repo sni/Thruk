@@ -398,6 +398,7 @@ function setRefreshRate(rate) {
 
 /* reset refresh interval */
 function resetRefresh() {
+  window.clearTimeout(refreshTimer);
   if( typeof refresh_rate == "number" ) {
     setRefreshRate(refresh_rate);
   }
@@ -473,6 +474,7 @@ function toQueryString(obj) {
 
 /* reloads the current page and adds some parameter from a hash */
 function reloadPage() {
+    window.clearTimeout(refreshTimer);
     var obj = document.getElementById('refresh_rate');
     obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
 
