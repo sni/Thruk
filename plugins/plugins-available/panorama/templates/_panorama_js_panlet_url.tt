@@ -64,16 +64,24 @@
                 if(iframe) {
                     var ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                     try {
-                        ifrm.document.open();
-                        ifrm.document.write(html);
-                        ifrm.document.close();
+                        if(ifrm && ifrm.document) {
+                            ifrm.document.open();
+                            ifrm.document.write(html);
+                            ifrm.document.close();
+                        } else {
+                            this.setBlankAndRefreshLater(iframe);
+                        }
                     } catch(e) {
                         /* first reload after changing from external to internal url does not work*/
-                        iframe.src = 'about:blank';
-                        TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+                        this.setBlankAndRefreshLater(iframe);
                     }
                 }
             }
+        };
+
+        this.setBlankAndRefreshLater = function(iframe) {
+            iframe.src = 'about:blank';
+            TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
         };
 
         this.iframeErrorHandler = function(evt) {
@@ -85,10 +93,17 @@
             ifrm.document.close();
         };
 
+        this.reloads = 0;
         this.refreshHandler = function() {
+            this.reloads++;
+            /* remove and replace complete iframe object to prevent memory leaks */
+            if(this.reloads % 10 == 0) {
+                this.addIframe();
+            }
+            var iframeObj = this.items.getAt(0).getEl();
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
                 /* set external url as src */
-                var iframeObj = this.items.getAt(0).getEl();
+                var iframeObj = this.items.getAt(this.items.length-1).getEl();
                 if(iframeObj && iframeObj.dom) {
                     iframeObj.dom.onerror = this.iframeErrorHandler;
                     iframeObj.dom.src     = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
@@ -102,26 +117,29 @@
             this.refreshHandler();
         };
 
-
-        /* url content should be in an iframe */
-        this.add({
-            xtype : 'component',
-            autoEl : {
-                tag : 'iframe',
-                src : '',
-                style: {
-                    border: 0
-                }
-            },
-            listeners: {
-                load: {
-                    element: 'el',
-                    fn: function () {
-                        this.parent().unmask();
+        this.addIframe = function() {
+            this.removeAll(true);
+            /* url content should be in an iframe */
+            this.add({
+                xtype : 'component',
+                autoEl : {
+                    tag : 'iframe',
+                    src : '',
+                    style: {
+                        border: 0
+                    }
+                },
+                listeners: {
+                    load: {
+                        element: 'el',
+                        fn: function () {
+                            this.parent().unmask();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+        this.addIframe();
 
         /* auto load when url is set */
         this.addListener('afterrender', function() {

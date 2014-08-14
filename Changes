@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+next:
+          - Panorama View:
+            - fixed memory leak in generic url panel
+
 1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:
             - support availability results in labels and speedometer
