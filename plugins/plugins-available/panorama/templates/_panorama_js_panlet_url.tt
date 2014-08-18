@@ -6,6 +6,7 @@
     width:  440,
     initComponent: function() {
         this.callParent();
+        this.noChangeUrlParams = true;
         this.xdata.url      = '';
         this.xdata.selector = '';
         this.xdata.keepcss  = true;
@@ -15,7 +16,7 @@
             autoLoad: false,
             renderer: 'data',
             scope:    this,
-            ajaxOptions: { method: 'POST' },
+            ajaxOptions: { method: 'GET' },
             callback: function(This, success, response, options) {
                 var html;
                 if(response.status == 200) {
