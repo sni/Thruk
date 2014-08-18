@@ -19080,6 +19080,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_csrf_allowed_hosts'>csrf_allowed_hosts</a></div>
 
+<div class='toclevel4'><a href='#_max_process_memory'>max_process_memory</a></div>
+
 <div class='toclevel3'><a href='#_path_settings'>Path Settings</a></div>
 
 <div class='toclevel4'><a href='#_cgi_cfg'>cgi_cfg</a></div>
@@ -19674,6 +19676,17 @@ multiple configuration attributes. Wildcards are allowed.</p></div>
 <div class="content">
 <pre><tt>csrf_allowed_hosts=127.0.0.1
 csrf_allowed_hosts=192.168.*</tt></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_max_process_memory">max_process_memory</h4>
+<div class="paragraph"><p>Maximum memory usage (in MB) after which a
+Thruk process will exit after finishing its request.
+Only affects the fcgid daemon.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>max_process_memory=1000</tt></pre>
 </div></div>
 </div>
 </div>
@@ -25235,7 +25248,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-07-30 13:46:12 CEST
+Last updated 2014-08-18 15:55:10 CEST
 </div>
 </div>
 </body>

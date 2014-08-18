@@ -268,6 +268,13 @@ sub begin : Private {
     $c->stash->{'usercontent_folder'} = $ENV{'CATALYST_CONFIG'}.'/usercontent' if $ENV{'CATALYST_CONFIG'};
     $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
 
+
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        if($c->config->{'max_process_memory'} && $Catalyst::COUNT && $Catalyst::COUNT%10 == 0) {
+            $c->run_after_request('Thruk::Utils::check_memory_usage($c);');
+        }
+    }
+
     $c->stats->profile(end => "Root begin");
     return 1;
 }

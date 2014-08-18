@@ -2192,6 +2192,27 @@ sub get_memory_usage {
 
 ##########################################################
 
+=head2 check_memory_usage
+
+  check_memory_usage($c)
+
+check if memory limit is above the threshold
+
+=cut
+
+sub check_memory_usage {
+    my($c) = @_;
+    my $mem = get_memory_usage();
+    $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+    if($mem > $c->config->{'max_process_memory'}) {
+        $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+        exit(0);
+    }
+    return;
+}
+
+##########################################################
+
 =head2 base_folder
 
     base_folder($c)
