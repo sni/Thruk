@@ -86,6 +86,10 @@ Ext.onReady(function() {
     icon.parentNode.parentNode.parentNode.style.display = 'none';
     [% END %]
 
-    // make sure initialized is set to true
+    /* make sure initialized is set to true */
     TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);
+
+    /* reload page after 3 hours */
+    TP.timeouts['timeout_page_reload'] = window.setTimeout("reloadPage()", 10800000);
+    cleanUnderscoreUrl();
 });

@@ -76,14 +76,18 @@ function init_page() {
         }
     });
 
-    var newUrl   = window.location.href;
-
+    var newUrl = window.location.href;
     var scroll = newUrl.match(/(\?|\&)scrollTo=(\d+)/);
     if(scroll) {
         scrollToPos = scroll[2];
     }
 
-    // remove ugly ?_=... from url
+    cleanUnderscoreUrl();
+}
+
+/* remove ugly ?_=... from url */
+function cleanUnderscoreUrl() {
+    var newUrl = window.location.href;
     if (history.replaceState) {
         newUrl = newUrl.replace(/\?_=\d+/g, '?');
         newUrl = newUrl.replace(/\&_=\d+/g, '');
@@ -457,18 +461,20 @@ function toQueryParams(str) {
 /* create query string from object */
 function toQueryString(obj) {
     var str = '';
-    jQuery.each(obj, function(key, value) {
+    for(var key in obj) {
+        var value = obj[key];
         if(typeof(value) == 'object') {
-            jQuery.each(value, function(k2, v2) {
-                str = str + key + '=' + encodeURIComponent(v2) + '&';
-            });
+            for(var key2 in value) {
+                var value2 = value[key2];
+                str = str + key + '=' + encodeURIComponent(value2) + '&';
+            };
         } else if (value == undefined) {
             str = str + key + '&';
         }
         else {
             str = str + key + '=' + encodeURIComponent(value) + '&';
         }
-    });
+    };
     // remove last &
     str = str.substring(0, str.length-1);
     return str;
@@ -478,7 +484,9 @@ function toQueryString(obj) {
 function reloadPage() {
     window.clearTimeout(refreshTimer);
     var obj = document.getElementById('refresh_rate');
-    obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
+    if(obj) {
+        obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
+    }
 
     var origHash = window.location.hash;
     var newUrl   = window.location.href;

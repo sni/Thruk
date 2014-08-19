@@ -10,5 +10,6 @@ var theme          = '[% theme %]';
 var cookie_path    = '[% cookie_path %]';
 var base           = '[% url_prefix %]plugins/panorama';
 var user_token     = '[% get_user_token(c) %]';
+var fav_counter    = false;
 
 [%+ PROCESS _header_initial_states.tt +%]
