@@ -56,7 +56,8 @@ Ext.define('TP.PanletPNP', {
         this.updateSource = function(force) {
             var form   = this.down('form').getForm();
             var values = form.getValues();
-            if(force || (values.graph && values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
+            if(!values.graph) { return; }
+            if(force || (values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
