@@ -1,5 +1,5 @@
 ﻿<!-- thruk: waiting for job [% job_id %] -->
-<div id="[% progressbarid %]" style="width: [% width %]px; height:[% height %]px; color: inherit;" onmouseover="return pb_overlib_[% progressbarid %]()"><div align="center" class="job_time" style="z-index: 100;  line-height: [% lineheight %]px; position: absolute; width: [% width %]px; color: inherit;">[% job_time %]s</div></div>
+<div id="[% progressbarid %]" style="width: [% width %]px; height:[% height %]px; color: inherit;"[% IF show_message %] onmouseover="return pb_overlib_[% progressbarid %]()"[% END %]><div align="center" class="job_time" style="z-index: 100;  line-height: [% lineheight %]px; position: absolute; width: [% width %]px; color: inherit;">[% job_time %]s</div></div>
 <script type="text/javascript">
 <!--
     jQuery(function() {
