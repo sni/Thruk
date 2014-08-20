@@ -193,11 +193,10 @@ return true if process is still running
 
 =cut
 sub is_running {
-    my $c      = shift;
-    my $id     = shift;
-    my $nouser = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id, $nouser) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
@@ -219,11 +218,10 @@ returns true if successfully canceled
 
 =cut
 sub cancel {
-    my $c      = shift;
-    my $id     = shift;
-    my $nouser = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id, $nouser) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
@@ -252,10 +250,10 @@ return status of a job
 
 =cut
 sub get_status {
-    my $c   = shift;
-    my $id  = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
     # reap pending zombies
@@ -314,8 +312,8 @@ return json status of a job
 
 =cut
 sub get_json_status {
-    my $c   = shift;
-    my $id  = shift;
+    my($c, $id) = @_;
+    confess("got no id") unless $id;
 
     my($is_running,$time,$percent,$message,$forward,$remaining) = get_status($c, $id);
     return unless defined $time;
@@ -345,13 +343,18 @@ return result of a job
 =cut
 sub get_result {
     my($c, $id, $nouser) = @_;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user") {
         my $user = read_file($dir."/user");
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
+    }
+
+    if(!-d $dir) {
+        return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
     my($out, $err) = ('', '');
@@ -410,7 +413,7 @@ sub job_page {
     my($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
     return $c->detach('/error/index/22') unless defined $is_running;
 
-    # try to directly server the request if it takes less than 10seconds
+    # try to directly serve the request if it takes less than 10seconds
     while($is_running and $time < 10) {
         sleep(1);
         ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
@@ -527,6 +530,8 @@ sub _do_child_stuff {
 ##############################################
 sub _do_parent_stuff {
     my($c, $dir, $pid, $id, $conf) = @_;
+
+    confess("got no id") unless $id;
 
     # write pid file
     my $pidfile = $dir."/pid";
