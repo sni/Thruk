@@ -6,6 +6,8 @@ next:
           - Panorama View:
             - fixed memory leak in generic url panel
             - reload every 3 hours to prevent noncatchable memory leaks
+          - Bug Fixes
+            - fixed problem with timeperiods in logcache database
 
 1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:

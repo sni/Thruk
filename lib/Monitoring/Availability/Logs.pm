@@ -287,6 +287,7 @@ sub _set_from_options {
         $data->{'timeperiod'} = $tmp[0];
         $data->{'from'}       = $tmp[1];
         $data->{'to'}         = $tmp[2];
+        $data->{'timeperiod'} =~ s/^TIMEPERIOD\ TRANSITION:\ //mxo; # workaround for doubled string in logcache db
     }
 
     # Host States
