@@ -5,6 +5,7 @@ next:
           - added new configuration setting: max_process_memory
           - Panorama View:
             - fixed memory leak in generic url panel
+            - fixed problem with stopped timers after import
             - reload every 3 hours to prevent noncatchable memory leaks
           - Bug Fixes
             - fixed problem with timeperiods in logcache database

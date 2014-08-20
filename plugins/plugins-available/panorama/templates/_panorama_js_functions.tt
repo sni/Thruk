@@ -581,7 +581,6 @@ var TP = {
 
         /* stop everything */
         var tabpan = Ext.getCmp('tabpan');
-        tabpan.stopTimeouts();
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
@@ -592,6 +591,7 @@ var TP = {
                 'This is an old import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and be added again.',
                 function(button) {
                     if(button === 'yes') {
+                        tabpan.stopTimeouts();
                         cp.loadData(decoded, false);
                         cp.saveChanges(false, {replace: 1});
                         Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...').toFront();
