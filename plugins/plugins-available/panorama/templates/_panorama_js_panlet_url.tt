@@ -62,7 +62,7 @@
                     debug(e);
                 }
 
-                if(iframe) {
+                if(iframe && (iframe.contentWindow || iframe.contentDocument)) {
                     var ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                     try {
                         if(ifrm && ifrm.document) {
