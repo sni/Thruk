@@ -107,7 +107,11 @@ function bodyOnLoad(refresh) {
         scrollToPos = 0;
     }
     if(refresh) {
-        if(!String(window.location.href).match(/\/panorama\.cgi/)) {
+        if(window.parent && window.parent.location && String(window.parent.location.href).match(/\/panorama\.cgi/)) {
+            stopRefresh();
+        } else if(String(window.location.href).match(/\/panorama\.cgi/)) {
+            stopRefresh();
+        } else {
             setRefreshRate(refresh);
         }
     }
