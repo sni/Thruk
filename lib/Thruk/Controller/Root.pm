@@ -885,6 +885,7 @@ sub end : ActionClass('RenderView') {
         $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
         my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
         $url     = $c->request->uri unless $url;
+        $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
         $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
     }
