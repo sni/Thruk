@@ -1838,10 +1838,10 @@ get matrix of services usable by a minemap
 
 =cut
 sub get_service_matrix {
-    my( $c, $hostfilter, $servicefilter ) = @_;
+    my( $c, $hostfilter, $servicefilter, $skip_comments ) = @_;
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) unless $skip_comments;
 
     my $uniq_hosts = {};
 
