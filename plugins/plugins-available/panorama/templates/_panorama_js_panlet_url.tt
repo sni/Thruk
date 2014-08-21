@@ -97,7 +97,10 @@
         this.reloads = 0;
         this.refreshHandler = function() {
             this.reloads++;
-            /* remove and replace complete iframe object to prevent memory leaks */
+            /* remove and replace complete iframe object to prevent memory leaks
+             * update: no longer required since we reload the whole page every 3 hours
+             * would result in flickering otherwise
+             */
             //if(this.reloads % 10 == 0) {
             //    this.addIframe();
             //}

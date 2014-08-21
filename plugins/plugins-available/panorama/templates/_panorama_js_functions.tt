@@ -528,10 +528,25 @@ var TP = {
                 // add backend settings
                 var tab = Ext.getCmp(panel.panel_id);
                 baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
+
+                // update proc info?
+                baseParams['update_proc'] = TP.setUpdateProcInfo();
             }
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },
+
+    /* only request proc update information every 30 seconds */
+    setUpdateProcInfo: function() {
+        var d   = new Date();
+        var now = Math.floor(d.getTime()/1000);
+        if(TP.last_update_proc == undefined || TP.last_update_proc < now - 30) {
+            TP.last_update_proc = now;
+            return("1");
+        }
+        return("0");
+    },
+
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         if(Ext.isNumeric(String(timedef))) { timedef = timedef + 's'; }
@@ -929,9 +944,10 @@ var TP = {
             ref = statusReq.ref;
 
         var params = {
-            types:      Ext.JSON.encode(req),
-            backends:   TP.getActiveBackendsPanel(tab),
-            reschedule: reschedule ? 1 : ''
+            types:       Ext.JSON.encode(req),
+            backends:    TP.getActiveBackendsPanel(tab),
+            update_proc: TP.setUpdateProcInfo(),
+            reschedule:  reschedule ? 1 : ''
         };
         TP.iconUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
@@ -1096,9 +1112,10 @@ var TP = {
             ref = statusReq.ref;
 
         var params = {
-            types:      Ext.JSON.encode(req),
-            backends:   TP.getActiveBackendsPanel(tab),
-            avail:      Ext.JSON.encode(TP.availabilities)
+            types:       Ext.JSON.encode(req),
+            backends:    TP.getActiveBackendsPanel(tab),
+            update_proc: TP.setUpdateProcInfo(),
+            avail:       Ext.JSON.encode(TP.availabilities)
         };
         TP.availabilityUpdateRunning[tab.id] = true;
         Ext.Ajax.request({

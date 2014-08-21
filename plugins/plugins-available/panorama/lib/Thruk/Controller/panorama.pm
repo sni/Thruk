@@ -371,7 +371,7 @@ sub _stateprovider {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
 
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -507,8 +507,7 @@ sub _task_status {
     my $json = { data => $data };
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
-    $self->_add_json_pi_detail($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -796,7 +795,7 @@ sub _task_stats_core_metrics {
     };
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -822,7 +821,7 @@ sub _task_stats_check_metrics {
     };
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -895,7 +894,7 @@ sub _task_server_stats {
             { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' };
     }
 
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -903,7 +902,7 @@ sub _task_server_stats {
 sub _task_stats_gearman {
     my($self, $c) = @_;
     $c->stash->{'json'} = $self->_get_gearman_stats($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -934,7 +933,7 @@ sub _task_stats_gearman_grid {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -979,7 +978,7 @@ sub _task_show_logs {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1055,7 +1054,7 @@ sub _task_site_status {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1126,8 +1125,7 @@ sub _task_hosts {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1219,8 +1217,7 @@ sub _task_services {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1249,8 +1246,7 @@ sub _task_hosttotals {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1279,8 +1275,7 @@ sub _task_servicetotals {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1318,8 +1313,7 @@ sub _task_hosts_pie {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1358,8 +1352,7 @@ sub _task_services_pie {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1428,8 +1421,7 @@ sub _task_servicesminemap {
     }
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1644,7 +1636,7 @@ sub _task_host_detail {
         }
         $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
     }
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1682,7 +1674,7 @@ sub _task_service_detail {
         }
         $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
     }
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1807,8 +1799,7 @@ sub _task_dashboard_list {
     };
 
     $c->stash->{'json'} = $json;
-    $self->_add_json_pi_detail($c);
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -1846,7 +1837,7 @@ sub _task_dashboard_update {
             $self->_save_dashboard($c, $dashboard, $extra_settings);
         }
     }
-    $self->_add_json_dashboard_timestamps($c);
+    $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -2258,6 +2249,18 @@ sub _add_json_dashboard_timestamps {
 sub _add_json_pi_detail {
     my($self, $c) = @_;
     $c->stash->{'json'}->{'pi_detail'} = $c->stash->{pi_detail};
+    return;
+}
+
+##########################################################
+sub _add_misc_details {
+    my($self, $c, $always) = @_;
+    if($always || $c->request->parameters->{'update_proc'}) {
+        $c->stats->profile(begin => "_add_misc_details");
+        $self->_add_json_dashboard_timestamps($c);
+        $self->_add_json_pi_detail($c);
+        $c->stats->profile(end => "_add_misc_details");
+    }
     return;
 }
 
