@@ -987,7 +987,8 @@ sub _task_show_logs {
 sub _task_site_status {
     my($self, $c) = @_;
 
-    Thruk::Action::AddDefaults::set_processinfo($c);
+    my $cached_data = $c->cache->get->{'global'} || {};
+    Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, $cached_data, 1);
 
     my $backend_filter;
     if($c->request->parameters->{'backends'}) {

@@ -469,7 +469,7 @@ set process info into stash
 
 =cut
 sub set_processinfo {
-    my($c, $cached_user_data, $safe, $cached_data) = @_;
+    my($c, $cached_user_data, $safe, $cached_data, $skip_cache_update) = @_;
     my $last_program_restart     = 0;
     $safe = 0 unless defined $safe;
 
@@ -559,7 +559,7 @@ sub set_processinfo {
        or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
        or $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
       ) {
-        if(defined $c->stash->{'remote_user'}) {
+        if(defined $c->stash->{'remote_user'} and !$skip_cache_update) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
             $cached_user_data = {
@@ -729,7 +729,7 @@ sub delayed_proc_info_update {
     my($c) = @_;
     my $disabled_backends = $c->{'db'}->disable_hidden_backends();
     _set_possible_backends($c, $disabled_backends);
-    set_processinfo($c);
+    set_processinfo($c, undef, undef, undef, 1);
     return;
 }
 
