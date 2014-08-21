@@ -768,7 +768,9 @@ sub end : ActionClass('RenderView') {
 
     $c->stats->profile(begin => "Root end");
 
-    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
+    if(!defined $c->stash->{'navigation'} or $c->stash->{'navigation'} eq '') {
+        Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
+    }
 
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {

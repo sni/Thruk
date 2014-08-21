@@ -60,7 +60,8 @@ sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
 sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'no_totals'}   = 1;
+    $c->stash->{'skip_navigation'} = 1;
+    $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
 
