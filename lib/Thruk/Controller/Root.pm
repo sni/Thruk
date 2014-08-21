@@ -888,6 +888,10 @@ sub end : ActionClass('RenderView') {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
         $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
+
+        if($ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2) {
+            $c->run_after_request('Thruk::Utils::External::log_profile($c);');
+        }
     }
 
     $c->stats->profile(end => "Root end");

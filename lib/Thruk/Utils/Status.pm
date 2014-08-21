@@ -1840,6 +1840,8 @@ get matrix of services usable by a minemap
 sub get_service_matrix {
     my( $c, $hostfilter, $servicefilter, $skip_comments ) = @_;
 
+    $c->stats->profile(begin => "Status::get_service_matrix()");
+
     # add comments and downtimes
     Thruk::Utils::Status::set_comments_and_downtimes($c) unless $skip_comments;
 
@@ -1887,6 +1889,8 @@ sub get_service_matrix {
         $hosts->{$svc->{'host_name'}} = $svc;
         $matrix->{$svc->{'host_name'}}->{$svc->{'description'}} = $svc;
     }
+
+    $c->stats->profile(end => "Status::get_service_matrix()");
 
     return($uniq_services, $hosts, $matrix);
 }

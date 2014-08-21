@@ -325,7 +325,10 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
-    $c->stats->enable(1) if $ENV{'THRUK_JOB_DIR'};
+    # collect statistics when running external command or if enabled by env variable
+    if($ENV{'THRUK_JOB_DIR'} || ($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2)) {
+        $c->stats->enable(1);
+    }
 
     my $product = $c->config->{'product_prefix'} || 'thruk';
     if($product ne 'thruk') {
