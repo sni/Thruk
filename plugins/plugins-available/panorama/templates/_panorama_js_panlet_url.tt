@@ -98,9 +98,9 @@
         this.refreshHandler = function() {
             this.reloads++;
             /* remove and replace complete iframe object to prevent memory leaks */
-            if(this.reloads % 10 == 0) {
-                this.addIframe();
-            }
+            //if(this.reloads % 10 == 0) {
+            //    this.addIframe();
+            //}
             var iframeObj = this.items.getAt(0).getEl();
             if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
                 /* set external url as src */
@@ -119,6 +119,7 @@
         };
 
         this.addIframe = function() {
+            if(this.gearitem) { return; }
             this.removeAll(true);
             /* url content should be in an iframe */
             this.add({

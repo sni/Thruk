@@ -149,7 +149,7 @@ our %config = ('name'                   => 'Thruk',
                                                 '_'             => undef,
                                           },
                                           'all_in_one_javascript' => [
-                                              'jquery-1.7.2.min.js',
+                                              'jquery-1.11.1.min.js',
                                               'thruk-'.$VERSION.'.js',
                                               'cal/jscal2.js',
                                               'overlib.js',
