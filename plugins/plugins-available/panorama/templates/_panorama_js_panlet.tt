@@ -261,7 +261,7 @@
                 this.header.hide();
                 this.xdata.refresh = refresh;
             }
-            style.display  = 'inherit';
+            style.display  = ''; // using inherit here break ie9: Could not get the display property. Invalid argument.
             style.zIndex   = 20;
             style.opacity  = '0.9';
             if(this.xdata.showborder == false) {
