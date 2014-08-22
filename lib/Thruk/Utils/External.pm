@@ -536,6 +536,14 @@ sub _do_child_stuff {
 
     $|=1; # autoflush
 
+    if($Thruk::Backend::Pool::pool) {
+        eval {
+            $Thruk::Backend::Pool::pool->cancel_all();
+            $Thruk::Backend::Pool::pool->detach();
+            $Thruk::Backend::Pool::pool = undef;
+        };
+    };
+
     # close open filehandles
     for my $fd (0..1024) {
         POSIX::close($fd);
