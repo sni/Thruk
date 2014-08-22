@@ -519,11 +519,12 @@ var TP = {
     defaultSiteRefreshHandler: function(panel) {
         if(panel.xdata.url != '' && panel.xdata.refresh != -2) { // -2 means temporarily disabled
             var url = panel.xdata.url;
+            var baseParams = {};
             if(panel.noChangeUrlParams == undefined || !panel.noChangeUrlParams) {
                 if(panel.loader.baseParams == undefined) {
                     panel.loader.baseParams = {};
                 }
-                var baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
+                baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
                 delete baseParams['gridstate']; // not needed
                 // add backend settings
                 var tab = Ext.getCmp(panel.panel_id);

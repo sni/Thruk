@@ -94,9 +94,9 @@
             ifrm.document.close();
         };
 
-        this.reloads = 0;
+        //this.reloads = 0;
         this.refreshHandler = function() {
-            this.reloads++;
+            //this.reloads++;
             /* remove and replace complete iframe object to prevent memory leaks
              * update: no longer required since we reload the whole page every 3 hours
              * would result in flickering otherwise
