@@ -531,19 +531,14 @@ sub _task_redirect_status {
 ##########################################################
 sub _task_avail {
     my($self, $c) = @_;
+    $c->stats->profile(begin => "_task_avail");
     my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_task_avail_update($c)',
                                                    message    => 'availability is being calculated',
                                                    background => 1
-                                                  }
+                                                 }
     );
-
-    # wait up to 30 seconds for the job above to finish
-    for(my $x = 0; $x < 30; $x++) {
-        last unless Thruk::Utils::External::is_running($c, $jobid);
-        sleep(1);
-    }
-
     my $res = _task_avail_update($c, 1);
+    $c->stats->profile(end => "_task_avail");
     return($res);
 }
 
@@ -552,7 +547,7 @@ sub _task_avail {
 sub _task_avail_update {
     my($c, $cached_only) = @_;
 
-    $c->stats->profile(begin => "_task_avail");
+    $c->stats->profile(begin => "_task_avail_update");
     my $in    = {};
     my $types = {};
 
@@ -683,7 +678,7 @@ sub _task_avail_update {
 
     $c->stash->{'json'} = { data => $data };
 
-    $c->stats->profile(end => "_task_avail");
+    $c->stats->profile(end => "_task_avail_clean_cache");
     return $c->forward('Thruk::View::JSON');
 }
 
