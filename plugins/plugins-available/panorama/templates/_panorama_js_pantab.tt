@@ -341,8 +341,8 @@
             }
         }
         var This = this;
-        if(activeTab && activeTab.xdata && activeTab.xdata.refresh > 0) {
-            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, activeTab.xdata.refresh * 1000);
+        if(This.xdata && This.xdata.refresh > 0) {
+            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
             TP.updateAllIcons(This);
         }
 
