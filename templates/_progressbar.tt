@@ -18,6 +18,7 @@
     var last_message_[% progressbarid %]   = '';
     var last_remaining_[% progressbarid %] = '';
     var last_overmsg_[% progressbarid %]   = '';
+    var is_loading_[% progressbarid %]     = false;
     function update_job_progressbar_[% progressbarid %]() {
         var datestr = Math.round((new Date()).getTime()/1000);
         var val = jQuery( "#[% progressbarid %]" ).progressbar( "value" );
@@ -29,26 +30,32 @@
             jQuery("#[% progressbarid %] DIV.job_time").html(last_time_[% progressbarid %] + "s" + last_message_[% progressbarid %]);
             return;
         }
+        if(is_loading_[% progressbarid %]) { return; }
+        is_loading_[% progressbarid %] = true;
         jQuery.ajax({
             url: "job.cgi?job=[% job_id %]&json=1&_"+datestr,
             type: 'POST',
             dataType: 'json',
             success: function(data, status, jqXHR) {
+                is_loading_[% progressbarid %] = false;
                 if(data.percent != 0) {
                     jQuery( "#[% progressbarid %]" ).progressbar( "value", data.percent );
                 }
                 if(data.percent != 100) {
-                  if([% show_message %] && data.message) { last_message_[% progressbarid %] = " - " + data.message; }
-                  if(data.remaining && data.remaining != -1) { last_remaining_[% progressbarid %] = data.remaining; } else { last_remaining_[% progressbarid %] = ''; }
-                  var title = last_message_[% progressbarid %] + '<br>progress: ' + Math.round(data.percent)+"%<br>";
-                  if(last_remaining_[% progressbarid %]) {
-                    title = title + "(~"+last_remaining_[% progressbarid %]+" seconds remaining for this step)";
-                  }
-                  jQuery("#over_[% progressbarid %]").html(title);
-                  last_overmsg_[% progressbarid %] = title;
-                  last_time_[% progressbarid %] = data.time;
-                  jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s"+last_message_[% progressbarid %]);
+                    if([% show_message %] && data.message) { last_message_[% progressbarid %] = " - " + data.message; }
+                    if(data.remaining && data.remaining != -1) { last_remaining_[% progressbarid %] = data.remaining; } else { last_remaining_[% progressbarid %] = ''; }
+                    var title = last_message_[% progressbarid %] + '<br>progress: ' + Math.round(data.percent)+"%<br>";
+                    if(last_remaining_[% progressbarid %]) {
+                        title = title + "(~"+last_remaining_[% progressbarid %]+" seconds remaining for this step)";
+                    }
+                    jQuery("#over_[% progressbarid %]").html(title);
+                    last_overmsg_[% progressbarid %] = title;
+                    last_time_[% progressbarid %] = data.time;
+                    jQuery("#[% progressbarid %] DIV.job_time").html(data.time + "s"+last_message_[% progressbarid %]);
                 }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                is_loading_[% progressbarid %] = false;
             }
         });
 
