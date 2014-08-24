@@ -457,11 +457,12 @@ sub _task_status {
             }
         }
         $c->stash->{'use_csrf'} = 0;
-        if(Thruk::Controller::cmd->_do_send_command($c)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
-            Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
+        if($c->{'request'}->{'parameters'}->{'cmd_typ'}) {
+            if(Thruk::Controller::cmd->_do_send_command($c)) {
+                Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
+                Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
+            }
         }
-
     }
 
     my $data = {};
@@ -551,7 +552,7 @@ sub _task_avail_update {
     my $in    = {};
     my $types = {};
 
-    if($c->request->parameters->{'avail'}) { $in = decode_json($c->request->parameters->{'avail'}); }
+    if($c->request->parameters->{'avail'}) { $in    = decode_json($c->request->parameters->{'avail'}); }
     if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
 
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
