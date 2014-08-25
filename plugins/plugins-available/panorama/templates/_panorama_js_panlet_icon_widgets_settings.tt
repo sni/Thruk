@@ -1142,6 +1142,7 @@ TP.iconShowEditDialog = function(panel) {
     window.setTimeout(function() {
         TP.iconSettingsWindow.toFront();
     }, 100);
+    TP.modalWin = settingsWindow;
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {

@@ -358,8 +358,8 @@
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
-            TP.dashboardsSettingWindow.toFront();
         }
+        if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
     },
 
     /* stop all timed actions for this tab and its panels */

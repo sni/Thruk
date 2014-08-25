@@ -508,7 +508,5 @@ TP.openLogWindow = function() {
             }
         }
     }).toFront();
-    TP.timeouts['debug_log_keep_top'] = window.setInterval(function() {
-        debug_win.toFront();
-    }, 1000);
+    TP.modalWin = debug_win;
 }

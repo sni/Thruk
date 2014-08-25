@@ -43,8 +43,8 @@ var TP = {
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.mask('loading...');
-            TP.dashboardsSettingWindow.toFront();
         }
+        if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
 
         if(id == undefined) {
             TP.initialized = true;
@@ -88,8 +88,8 @@ var TP = {
                             TP.add_pantab(id, replace_id, hidden);
                             if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
                                 TP.dashboardsSettingGrid.getView().refresh();
-                                TP.dashboardsSettingWindow.toFront();
                             }
+                            if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
                             tabpan.saveState();
@@ -1276,8 +1276,8 @@ var TP = {
         /* update dashboard managment view */
         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
             TP.dashboardsSettingGrid.getView().refresh();
-            TP.dashboardsSettingWindow.toFront();
         }
+        if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
 
         var tab = Ext.getCmp(nr);
         if(tab == undefined) { return; }

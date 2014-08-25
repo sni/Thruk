@@ -350,4 +350,5 @@ thruk_debug_window_handler = function() {
             }
         }
     }).toFront();
+    TP.modalWin = debug_win;
 };

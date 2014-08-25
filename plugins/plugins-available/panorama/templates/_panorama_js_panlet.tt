@@ -193,9 +193,7 @@
                 This.dd_overriden = true;
             }
             /* make sure we don't overlap dashboard settings window */
-            if(TP.dashboardsSettingWindow) {
-                TP.dashboardsSettingWindow.toFront();
-            }
+            if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
         },
         render: function(This, eOpts) {
             /* make title editable */
