@@ -2322,8 +2322,9 @@ you to build your own panorama views.
 ex.:
 
   <Component Thruk::Plugin::Panorama>
-    default_dashboard = 1,3,7,4
-    readonly          = 0
+    default_dashboard    = 1,3,7,4
+    readonly             = 0
+    full_reload_interval = 10800
   </Component>
 
 
@@ -2340,6 +2341,9 @@ Make panorama dashboard ignore changes. The user is allowed to change
 some parts of the layout, but nothing is saved. Commands may still be
 send according to the user permissions.
 
+==== full_reload_interval
+Full page reload every 3 hours to prevent memory
+leaks. Disabled when set to 0.
 
 
 

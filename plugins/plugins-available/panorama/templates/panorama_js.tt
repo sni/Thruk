@@ -89,7 +89,10 @@ Ext.onReady(function() {
     /* make sure initialized is set to true */
     TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);
 
-    /* reload page after 3 hours */
-    TP.timeouts['timeout_page_reload'] = window.setInterval("reloadPage()", 10800000);
+    /* full reload page interval */
+    [% IF full_reload_interval != 0 %]
+    TP.timeouts['timeout_page_reload'] = window.setInterval("reloadPage()", [% full_reload_interval %]*1000);
+    TP.log('['+this.id+'] full_reload_interval set to: [% full_reload_interval %]');
+    [% END %]
     cleanUnderscoreUrl();
 });

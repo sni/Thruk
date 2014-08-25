@@ -76,6 +76,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         $c->stash->{'is_admin'} = 1;
     }
 
+    $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
+
     $self->{'var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($self->{'var'});
 

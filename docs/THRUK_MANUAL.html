@@ -19330,6 +19330,8 @@ newer and faster. The MongoDB logfile cache may be deprecated in the future.</p>
 
 <div class='toclevel4'><a href='#_dashboard_ignore_changes'>dashboard_ignore_changes</a></div>
 
+<div class='toclevel4'><a href='#_full_reload_interval'>full_reload_interval</a></div>
+
 <div class='toclevel3'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
 
 <div class='toclevel4'><a href='#_report_nice_level'>report_nice_level</a></div>
@@ -21270,8 +21272,9 @@ you to build your own panorama views.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::Panorama&gt;
-  default_dashboard = 1,3,7,4
-  readonly          = 0
+  default_dashboard    = 1,3,7,4
+  readonly             = 0
+  full_reload_interval = 10800
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <div class="sect3">
@@ -21289,6 +21292,11 @@ user permissions.</p></div>
 <div class="paragraph"><p>Make panorama dashboard ignore changes. The user is allowed to change
 some parts of the layout, but nothing is saved. Commands may still be
 send according to the user permissions.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_full_reload_interval">full_reload_interval</h4>
+<div class="paragraph"><p>Full page reload every 3 hours to prevent memory
+leaks. Disabled when set to 0.</p></div>
 </div>
 </div>
 <div class="sect2">
@@ -25248,7 +25256,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-08-18 15:55:10 CEST
+Last updated 2014-08-25 15:12:11 CEST
 </div>
 </div>
 </body>
