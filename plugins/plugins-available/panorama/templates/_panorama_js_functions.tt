@@ -1128,13 +1128,13 @@ var TP = {
             update_proc: TP.setUpdateProcInfo(),
             avail:       Ext.JSON.encode(TP.availabilities)
         };
+        TP.log('['+tab.id+'] updateAllLabelAvailability');
         TP.availabilityUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=availability',
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
-                TP.availabilityUpdateRunning[tab.id] = false;
                 if(success) {
                     var data = TP.getResponse(undefined, response);
                     if(!data || !data.data) { return; }
@@ -1149,6 +1149,8 @@ var TP = {
                         panel.setIconLabel();
                     }
                 }
+                TP.availabilityUpdateRunning[tab.id] = false;
+                TP.log('['+tab.id+'] updateAllLabelAvailability done');
             }
         });
     },
