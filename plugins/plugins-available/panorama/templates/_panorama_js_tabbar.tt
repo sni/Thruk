@@ -428,17 +428,18 @@ TP.getLogTab = function() {
                     Ext.getCmp('logtextarea').setValue(text);
                 }
             }, {
-                    xtype:    'checkbox',
-                    boxLabel: 'Automatically Refresh',
-                    handler:  function(This) {
-                        if(This.checked) {
-                            TP.timeouts['debug_log_refresh'] = window.setInterval(function() {
-                                Ext.getCmp('logrefresh').handler();
-                            }, 1000);
-                        } else {
-                            window.clearInterval(TP.timeouts['debug_log_refresh']);
-                        }
+                xtype:    'checkbox',
+                boxLabel: 'Automatically Refresh',
+                handler:  function(This) {
+                    if(This.checked) {
+                        TP.timeouts['debug_log_refresh'] = window.setInterval(function() {
+                            Ext.getCmp('logrefresh').handler();
+                        }, 1000);
+                    } else {
+                        window.clearInterval(TP.timeouts['debug_log_refresh']);
                     }
+                },
+                margins: '5 0 5 0'
             }, {
                 text:   'Save',
                 xtype:  'button',
@@ -502,7 +503,7 @@ TP.openLogWindow = function() {
                 window.clearInterval(TP.timeouts['debug_log_keep_top']);
             }
         }
-    });
+    }).toFront();
     TP.timeouts['debug_log_keep_top'] = window.setInterval(function() {
         debug_win.toFront();
     }, 1000);

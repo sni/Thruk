@@ -151,7 +151,8 @@ thruk_debug_window_handler = function() {
                         } else {
                             window.clearInterval(TP.timeouts['debug_timer_refresh']);
                         }
-                    }
+                    },
+                    margins: '5 0 5 0'
                 }, {
                     xtype: 'tbfill'
                 }, {
@@ -225,7 +226,8 @@ thruk_debug_window_handler = function() {
                         } else {
                             window.clearInterval(TP.timeouts['debug_interval_refresh']);
                         }
-                    }
+                    },
+                    margins: '5 0 5 0'
                 }, {
                     xtype: 'tbfill'
                 }, {
@@ -296,7 +298,8 @@ thruk_debug_window_handler = function() {
                         } else {
                             window.clearInterval(TP.timeouts['debug_component_refresh']);
                         }
-                    }
+                    },
+                    margins: '5 0 5 0'
                 }, {
                     xtype: 'tbfill'
                 }, {
@@ -346,5 +349,5 @@ thruk_debug_window_handler = function() {
                 window.clearInterval(TP.timeouts['debug_log_refresh']);
             }
         }
-    });
+    }).toFront();
 };
