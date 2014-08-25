@@ -51,6 +51,7 @@
                     }
                 } else {
                     html = 'ERROR: request failed with status: ' + response.status;
+                    TP.log('['+this.id+'] '+html);
                     debug(response);
                 }
 

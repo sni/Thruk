@@ -387,7 +387,7 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
     });
 }
 
-TP.openLogWindow = function() {
+TP.getLogTab = function() {
     var formatLogEntry = function(entry) {
         var date = Ext.Date.format(entry[0], "Y-m-d H:i:s.u");
         return('['+date+'] '+entry[1]+"\n");
@@ -400,6 +400,7 @@ TP.openLogWindow = function() {
         items: [{
             xtype:  'form',
             layout: 'fit',
+            id:     'logform',
             items: [{
                 xtype: 'textarea',
                 value: '',
@@ -409,8 +410,12 @@ TP.openLogWindow = function() {
                         Ext.getCmp('logrefresh').handler();
                     }
                 }
-            }],
-            fbar: [{
+            }]
+        }],
+        dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            items: [{
                 text:   'Refresh',
                 xtype:  'button',
                 iconCls:'refresh-btn',
@@ -423,6 +428,18 @@ TP.openLogWindow = function() {
                     Ext.getCmp('logtextarea').setValue(text);
                 }
             }, {
+                    xtype:    'checkbox',
+                    boxLabel: 'Automatically Refresh',
+                    handler:  function(This) {
+                        if(This.checked) {
+                            TP.timeouts['debug_log_refresh'] = window.setInterval(function() {
+                                Ext.getCmp('logrefresh').handler();
+                            }, 1000);
+                        } else {
+                            window.clearInterval(TP.timeouts['debug_log_refresh']);
+                        }
+                    }
+            }, {
                 text:   'Save',
                 xtype:  'button',
                 iconCls:'save-btn',
@@ -431,7 +448,7 @@ TP.openLogWindow = function() {
                     for(var i = 0, len = TP.logHistory.length; i < len; i++) {
                         text += formatLogEntry(TP.logHistory[i]);
                     }
-                    var form = This.up('form').getForm();
+                    var form = Ext.getCmp('logform').getForm();
                     form.standardSubmit = true;
                     form.submit({
                         url:    'panorama.cgi',
@@ -439,6 +456,8 @@ TP.openLogWindow = function() {
                         params: {text: text, task: 'textsave'}
                     });
                 }
+            }, {
+                    xtype: 'tbfill'
             }, {
                 text:   'Clear',
                 iconCls:'clear-btn',
@@ -450,14 +469,14 @@ TP.openLogWindow = function() {
             }]
         }]
     };
-
+    return(logTab);
+}
+TP.openLogWindow = function() {
     /* tab layout for log window */
     var tabPanel = new Ext.TabPanel({
         activeTab         : 0,
         enableTabScroll   : true,
-        items             : [
-            logTab
-        ]
+        items             : [ TP.getLogTab() ]
     });
 
     /* show the window containing the debug messages */
@@ -476,6 +495,15 @@ TP.openLogWindow = function() {
                     handler: function(This) {
                         debug_win.destroy();
                     }
-        }]
+        }],
+        listeners: {
+            destroy: function(This, eOpts) {
+                window.clearInterval(TP.timeouts['debug_log_refresh']);
+                window.clearInterval(TP.timeouts['debug_log_keep_top']);
+            }
+        }
     });
+    TP.timeouts['debug_log_keep_top'] = window.setInterval(function() {
+        debug_win.toFront();
+    }, 1000);
 }

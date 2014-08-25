@@ -316,7 +316,8 @@ thruk_debug_window_handler = function() {
         items             : [
             intervalsTab,
             timersTab,
-            componentsTab
+            componentsTab,
+            TP.getLogTab()
         ]
     });
 
@@ -342,6 +343,7 @@ thruk_debug_window_handler = function() {
                 window.clearInterval(TP.timeouts['debug_interval_refresh']);
                 window.clearInterval(TP.timeouts['debug_timer_refresh']);
                 window.clearInterval(TP.timeouts['debug_component_refresh']);
+                window.clearInterval(TP.timeouts['debug_log_refresh']);
             }
         }
     });
