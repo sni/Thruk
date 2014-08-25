@@ -307,6 +307,7 @@ TP.Msg = function() {
             if(p[0] == 'info_message') {
                 title = 'Information';
             }
+            TP.log('msg: '+title+' - '+p[1]);
             var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
             btn.on("click", function() {
