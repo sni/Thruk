@@ -89,6 +89,7 @@
             evt = (evt) ? evt : ((window.event) ? event : null);
             var iframe = evt.target;
             var ifrm   = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+            TP.log('['+this.id+'] iframeErrorHandler, error on '+iframe.src);
             ifrm.document.open();
             ifrm.document.write("<style type='text/css'>body {background: white;}<\/style><span style='color: red; font-weight:bold;'>failed to load: " + iframe.src+"<\/span><br>due to javascripts cross domain policy, the exact error cannot be determinced.<br>possible causes:<ul><li>Server does not respond<\/li><li>Trying to access http url from https dashboard.<\/li><\/ul>");
             ifrm.document.close();
@@ -96,6 +97,7 @@
 
         //this.reloads = 0;
         this.refreshHandler = function() {
+            TP.log('['+this.id+'] refreshHandler("'+this.xdata.url+'")');
             //this.reloads++;
             /* remove and replace complete iframe object to prevent memory leaks
              * update: no longer required since we reload the whole page every 3 hours
@@ -111,17 +113,20 @@
                 if(iframeObj && iframeObj.dom) {
                     iframeObj.dom.onerror = this.iframeErrorHandler;
                     iframeObj.dom.src     = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
+                    TP.log('['+this.id+'] refreshHandler: set iframe url '+iframeObj.dom.src);
                 }
             } else {
                 TP.defaultSiteRefreshHandler(this);
             }
         };
         this.manualRefresh = function() {
+            TP.log('['+this.id+'] manualRefresh');
             this.body.mask('Loading...');
             this.refreshHandler();
         };
 
         this.addIframe = function() {
+            var panel = this;
             if(this.gearitem) { return; }
             this.removeAll(true);
             /* url content should be in an iframe */
@@ -138,6 +143,7 @@
                     load: {
                         element: 'el',
                         fn: function () {
+                            TP.log('['+panel.id+'] loaded');
                             this.parent().unmask();
                         }
                     }

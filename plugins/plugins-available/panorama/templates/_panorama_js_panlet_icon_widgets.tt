@@ -67,6 +67,7 @@
     },
     listeners: {
         afterrender: function(This, eOpts) {
+            TP.log('added icon('+this.id+', '+this.xdata.cls+')');
             This.addClickEventhandler(This.el);
 
             [% UNLESS readonly %]

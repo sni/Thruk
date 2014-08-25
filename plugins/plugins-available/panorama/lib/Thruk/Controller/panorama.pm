@@ -181,6 +181,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'redirect_status') {
             return($self->_task_redirect_status($c));
         }
+        elsif($task eq 'textsave') {
+            return($self->_task_textsave($c));
+        }
     }
 
     # find images for preloader
@@ -527,6 +530,16 @@ sub _task_redirect_status {
         return $c->response->redirect($url);
     }
     return $c->response->redirect("status.cgi");
+}
+
+##########################################################
+sub _task_textsave {
+    my($self, $c) = @_;
+    $c->res->headers->header('Content-Disposition', qq[attachment; filename="log.txt"]);
+    $c->res->content_type('application/octet-stream');
+    $c->stash->{text}         = $c->request->parameters->{'text'};
+    $c->stash->{template}     = 'passthrough.tt';
+    return;
 }
 
 ##########################################################

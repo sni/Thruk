@@ -91,6 +91,7 @@
     startTimeouts: function() {
         if(!TP.initialized) { return; }
         this.stopTimeouts();
+        TP.log('['+this.id+'] startTimeouts');
         var refresh = this.xdata.refresh;
         if(this.xdata.refresh == -1) {
             var tab = Ext.getCmp(this.panel_id);
@@ -101,6 +102,7 @@
         }
     },
     stopTimeouts: function() {
+        TP.log('['+this.id+'] stopTimeouts');
         window.clearInterval(TP.timeouts['interval_'+this.id+'_refresh']);
     },
     dd_overriden: false,
@@ -145,6 +147,8 @@
             if(shadow != undefined) { shadow.hide(); }
         },
         destroy: function( This, eOpts ) {
+            TP.log('['+This.id+'] destroy');
+
             /* remove shadow */
             This.win_shadow.destroy();
 
@@ -213,6 +217,7 @@
         },
         afterrender: function(This, eOpts) {
             /* start refresh interval */
+            TP.log('['+this.id+'] added panlet - cls:'+this.xdata.cls+', refresh:'+this.xdata.refresh);
             this.startTimeouts();
             this.syncShadowTimeout();
         },

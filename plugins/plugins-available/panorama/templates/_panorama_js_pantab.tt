@@ -52,6 +52,7 @@
             return true;
         },
         destroy: function( This, eOpts ) {
+            TP.log('['+This.id+'] destroy');
             var tabpan = Ext.getCmp('tabpan');
             var window_ids = TP.clone(This.window_ids);
             for(var nr=0; nr<window_ids.length; nr++) {
@@ -120,6 +121,7 @@
             This.hidePanlets();
         },
         afterrender: function(This, eOpts) {
+            TP.log('['+this.id+'] added tab - refresh: '+this.xdata.refresh);
             if(!this.title) {
                 this.applyXdata();
             } else {
@@ -256,8 +258,12 @@
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
         this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
-        if(TP.initialized && startTimeouts != false) {
-            this.startTimeouts();
+        if(startTimeouts != false) {
+            if(TP.initialized) {
+                this.startTimeouts();
+            } else {
+                TP.timeouts['timeout_' + this.id + '_starttimeouts'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), 30000);
+            }
         }
     },
 
@@ -304,6 +310,7 @@
     /* start all timed actions for this tab and its panels */
     startTimeouts: function() {
         this.stopTimeouts();
+        TP.log('['+this.id+'] startTimeouts');
 
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
@@ -356,6 +363,7 @@
 
     /* stop all timed actions for this tab and its panels */
     stopTimeouts: function() {
+        TP.log('['+this.id+'] stopTimeouts');
         /* start refresh for all panlets with our refresh rate */
         var panels = TP.getAllPanel(this);
         for(var nr=0; nr<panels.length; nr++) {

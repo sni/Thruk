@@ -59,6 +59,21 @@ DIV.x-tab-top button {
     left: -2px;
     top: 0px;
 }
+.refresh-btn {
+    background-image: url("images/arrow_refresh.png") !important;
+    left: 4px;
+    top: 3px;
+}
+.clear-btn {
+    background-image: url("images/delete.png") !important;
+    left: 4px;
+    top: 3px;
+}
+.save-btn {
+    background-image: url("images/disk.png") !important;
+    left: 4px;
+    top: 3px;
+}
 
 .x-form-itemselector-add {
     background-image: url("images/btn_add.png") !important;

@@ -37,7 +37,14 @@ Ext.define('TP.TabBar', {
             tooltip:  'server time',
             style:    'margin-top: 3px',
             width:    35,
-            height:   16
+            height:   16,
+            listeners: {
+                afterrender: function(This, eOpts) {
+                    This.el.on('dblclick', function() {
+                        TP.openLogWindow();
+                    });
+                }
+            }
         }, {
             id:       'bug_report',
             closable:  false,
@@ -295,6 +302,7 @@ Ext.define('TP.TabBar', {
     startTimeouts: function() {
         TP.initialized = true;
         this.stopTimeouts();
+        TP.log('['+this.id+'] startTimeouts');
 
         // REMOVE AFTER: 01.01.2016
         delete this.xdata['refresh'];
@@ -318,11 +326,11 @@ Ext.define('TP.TabBar', {
                 tab.startTimeouts();
             }
         });
-
     },
 
     /* stop all timed actions all tabs all panels */
     stopTimeouts: function() {
+        TP.log('['+this.id+'] stopTimeouts');
         TP.stopRotatingTabs();
         TP.stopServerTime();
         this.items.each(function(tab) {
@@ -375,5 +383,94 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                 }
             }
         }
+    });
+}
+
+TP.openLogWindow = function() {
+
+    var logTab = {
+        title : 'Log',
+        type  : 'panel',
+        layout: 'fit',
+        items: [{
+            xtype:  'form',
+            layout: 'fit',
+            items: [{
+                xtype: 'textarea',
+                value: '',
+                id:    'logtextarea',
+                listeners: {
+                    afterrender: function(This, eOpts) {
+                        Ext.getCmp('logrefresh').handler();
+                    }
+                }
+            }],
+            fbar: [{
+                text:   'Refresh',
+                xtype:  'button',
+                iconCls:'refresh-btn',
+                id:     'logrefresh',
+                handler: function(This) {
+                    var text = "";
+                    for(var i = TP.logHistory.length - 1; i >= 0; i--) {
+                        text += '['+TP.logHistory[i][0].toLocaleString()+'] '+TP.logHistory[i][1]+"\n";
+                    }
+                    Ext.getCmp('logtextarea').setValue(text);
+                }
+            }, {
+                text:   'Save',
+                xtype:  'button',
+                iconCls:'save-btn',
+                handler: function(This) {
+                    var text = "";
+                    for(var i = 0, len = TP.logHistory.length; i < len; i++) {
+                        text += '['+TP.logHistory[i][0].toLocaleString()+'] '+TP.logHistory[i][1]+"\n";
+                    }
+                    var form = This.up('form').getForm();
+                    form.standardSubmit = true;
+                    form.submit({
+                        url:    'panorama.cgi',
+                        target: '_blank',
+                        params: {text: text, task: 'textsave'}
+                    });
+                }
+            }, {
+                text:   'Clear',
+                iconCls:'clear-btn',
+                xtype:  'button',
+                handler: function(This) {
+                    TP.logHistory = [];
+                    Ext.getCmp('logrefresh').handler();
+                }
+            }]
+        }]
+    };
+
+    /* tab layout for log window */
+    var tabPanel = new Ext.TabPanel({
+        activeTab         : 0,
+        enableTabScroll   : true,
+        items             : [
+            logTab
+        ]
+    });
+
+    /* show the window containing the debug messages */
+    var debug_win = new Ext.window.Window({
+        autoShow:    true,
+        modal:       true,
+        width:       1000,
+        height:      350,
+        title:       'Debug Information',
+        layout :     'fit',
+        buttonAlign: 'center',
+        items:       tabPanel,
+        fbar: [{/* close button */
+                    xtype:  'button',
+                    text:   'OK',
+                    handler: function(This) {
+                        debug_win.destroy();
+                    }
+        }]
     });
 }
