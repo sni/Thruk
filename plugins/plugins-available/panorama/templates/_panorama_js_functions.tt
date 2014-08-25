@@ -51,7 +51,7 @@ var TP = {
             id = 'new_or_empty';
         }
 
-        TP.log('add_pantab: id:'+id+', replace_id: '+replace_id);
+        TP.log('[global] add_pantab: id:'+id+', replace_id: '+replace_id);
 
         /* get tab data from server */
         if(id && cp.state[id] == undefined) {
@@ -76,7 +76,7 @@ var TP = {
                     } else {
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
-                        TP.log('dashboard_data: '+Ext.JSON.encode(data));
+                        TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
                         if(data.newid) { id = data.newid; delete data.newid; }
                         for(var key in data) {
                             cp.set(key, Ext.JSON.decode(data[key]));
@@ -1567,7 +1567,7 @@ var TP = {
         }
     }
 }
-TP.log('starting');
+TP.log('[global] starting');
 
 /* returns formated time string */
 function strftime(format, unix_timestamp) {
