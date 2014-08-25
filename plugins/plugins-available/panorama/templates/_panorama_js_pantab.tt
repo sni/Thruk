@@ -49,10 +49,12 @@
                 TP.Msg.msg("info_message~~cannot close last dashboard.");
                 return false;
             }
+            TP.log('['+This.id+'] closing tab');
             return true;
         },
         destroy: function( This, eOpts ) {
             TP.log('['+This.id+'] destroy');
+            This.stopTimeouts();
             var tabpan = Ext.getCmp('tabpan');
             var window_ids = TP.clone(This.window_ids);
             for(var nr=0; nr<window_ids.length; nr++) {

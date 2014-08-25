@@ -130,7 +130,7 @@ Ext.define('TP.TabBar', {
                 items: [{
                     text:   'New Dashboard',
                     icon:   '[% url_prefix %]plugins/panorama/images/add.png',
-                    handler: function() { TP.add_pantab('new') }
+                    handler: function() { TP.log('[global] adding new dashboard from menu'); TP.add_pantab('new') }
                 }, {
                     text:   'Dashboard Managment',
                     icon:   '[% url_prefix %]plugins/panorama/images/new_tab.gif',
@@ -374,7 +374,7 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                         menu.add({text:    data[x].name,
                                   val:     data[x].id,
                                   icon:   '[% url_prefix %]plugins/panorama/images/table_go.png',
-                                  handler: function() { handler(this.val); }
+                                  handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
                                 }
                         );
                     }
