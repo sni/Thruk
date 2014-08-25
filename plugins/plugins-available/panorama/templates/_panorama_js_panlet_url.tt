@@ -60,7 +60,6 @@
                 try {
                     iframe = this.items.getAt(0).getEl().dom;
                 } catch(e) {
-                    this.setBlankAndRefreshLater(iframe);
                     debug(e);
                 }
 
