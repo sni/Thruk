@@ -193,6 +193,7 @@
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
+            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             // REMOVE AFTER: 01.01.2016
             // migrate old settings
             if(state.xdata == undefined) { state.xdata = {} }

@@ -227,6 +227,7 @@ Ext.define('TP.TabBar', {
         }
     },
     applyState: function(state) {
+        TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
         var tmp = Ext.dom.Query.select('.x-mask');
         if(tmp.length > 0) {
             // make sure our mask covers new windows...

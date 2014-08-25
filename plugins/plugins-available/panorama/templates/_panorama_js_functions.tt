@@ -51,6 +51,8 @@ var TP = {
             id = 'new_or_empty';
         }
 
+        TP.log('add_pantab: id:'+id+', replace_id: '+replace_id);
+
         /* get tab data from server */
         if(id && cp.state[id] == undefined) {
             /* fetch state info and add new tab as callback */
@@ -74,6 +76,7 @@ var TP = {
                     } else {
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
+                        TP.log('dashboard_data: '+Ext.JSON.encode(data));
                         if(data.newid) { id = data.newid; delete data.newid; }
                         for(var key in data) {
                             cp.set(key, Ext.JSON.decode(data[key]));
@@ -195,6 +198,7 @@ var TP = {
             cp.set(config.conf.id, config.state);
         }
         config.conf.panel_id = tb.id;
+        TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
         var win = Ext.create(config.type, config.conf);
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
@@ -683,8 +687,10 @@ var TP = {
             }
             var tab = Ext.getCmp('tabpan').getActiveTab();
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
+                var old = tab.ts ? tab.ts : '';
                 tab.ts = data.dashboard_ts[tab.id];
                 if(no_ts == undefined || no_ts == false) {
+                    TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
                     TP.renewDashboard(tab);
                 }
             }
@@ -1460,11 +1466,12 @@ var TP = {
         window.clearTimeout(TP.timeouts['timeout_global_renewdashboard'+tab.id]);
         TP.timeouts['timeout_global_renewdashboard'+tab.id] = window.setTimeout(function() {
             TP.renewDashboardDo(tab);
-        });
+        }, 200);
     },
 
     /* renew dashboards on the fly */
     renewDashboardDo: function(tab) {
+        TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
         tab.renewInProgress = true;
         Ext.Ajax.request({
@@ -1558,6 +1565,7 @@ var TP = {
         }
     }
 }
+TP.log('starting');
 
 /* returns formated time string */
 function strftime(format, unix_timestamp) {

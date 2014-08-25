@@ -115,6 +115,7 @@
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
+            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             Ext.apply(this, state);
             this.setTitle(state.title);
             this.applyBorderAndBackground();
@@ -217,7 +218,7 @@
         },
         afterrender: function(This, eOpts) {
             /* start refresh interval */
-            TP.log('['+this.id+'] added panlet - cls:'+this.xdata.cls+', refresh:'+this.xdata.refresh);
+            TP.log('['+this.id+'] rendered');
             this.startTimeouts();
             this.syncShadowTimeout();
         },
@@ -461,6 +462,7 @@ Ext.define('TP.PanletGearItem', {
                 var form     = win.gearitem.down('form').getForm();
                 if(form.isValid()) {
                     win.xdata = TP.storeFormToData(form, win.xdata);
+                    TP.log('['+this.id+'] panlet config updated: '+Ext.JSON.encode(win.xdata));
                     win.setTitle(win.xdata.title);
                     win.startTimeouts();
                     win.saveState();

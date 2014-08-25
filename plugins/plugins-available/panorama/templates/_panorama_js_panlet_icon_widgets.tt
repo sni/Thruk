@@ -59,6 +59,7 @@
         this.origApplyState = this.applyState;
         this.applyState = function(state) {
             Ext.apply(this.xdata, state.xdata);
+            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             this.origApplyState(state);
             if(state) {
                 this.applyXdata(state.xdata);
@@ -67,7 +68,7 @@
     },
     listeners: {
         afterrender: function(This, eOpts) {
-            TP.log('['+this.id+'] added icon - cls:'+this.xdata.cls);
+            TP.log('['+this.id+'] rendered');
             This.addClickEventhandler(This.el);
 
             [% UNLESS readonly %]
