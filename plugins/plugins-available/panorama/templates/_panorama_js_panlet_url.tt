@@ -59,6 +59,7 @@
                 try {
                     iframe = this.items.getAt(0).getEl().dom;
                 } catch(e) {
+                    this.setBlankAndRefreshLater(iframe);
                     debug(e);
                 }
 
@@ -144,6 +145,7 @@
                         element: 'el',
                         fn: function () {
                             TP.log('['+panel.id+'] loaded');
+                            window.clearTimeout(TP.timeouts['timeout_' + this.id + '_refresh']);
                             this.parent().unmask();
                         }
                     }
@@ -160,6 +162,11 @@
                 this.refreshHandler();
             }
         });
+
+        /* sometime initial url doesn't work */
+        this.formUpdatedCallback = function(panel) {
+            TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+        };
     },
     setGearItems: function() {
         var panel = this;
