@@ -387,6 +387,10 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
 }
 
 TP.openLogWindow = function() {
+    var formatLogEntry = function(entry) {
+        var date = Ext.Date.format(entry[0], "Y-m-d H:i:s.u");
+        return('['+date+'] '+entry[1]+"\n");
+    }
 
     var logTab = {
         title : 'Log',
@@ -413,7 +417,7 @@ TP.openLogWindow = function() {
                 handler: function(This) {
                     var text = "";
                     for(var i = TP.logHistory.length - 1; i >= 0; i--) {
-                        text += '['+TP.logHistory[i][0].toLocaleString()+'] '+TP.logHistory[i][1]+"\n";
+                        text += formatLogEntry(TP.logHistory[i]);
                     }
                     Ext.getCmp('logtextarea').setValue(text);
                 }
@@ -424,7 +428,7 @@ TP.openLogWindow = function() {
                 handler: function(This) {
                     var text = "";
                     for(var i = 0, len = TP.logHistory.length; i < len; i++) {
-                        text += '['+TP.logHistory[i][0].toLocaleString()+'] '+TP.logHistory[i][1]+"\n";
+                        text += formatLogEntry(TP.logHistory[i]);
                     }
                     var form = This.up('form').getForm();
                     form.standardSubmit = true;

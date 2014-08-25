@@ -67,7 +67,7 @@
     },
     listeners: {
         afterrender: function(This, eOpts) {
-            TP.log('added icon('+this.id+', '+this.xdata.cls+')');
+            TP.log('['+this.id+'] added icon - cls:'+this.xdata.cls);
             This.addClickEventhandler(This.el);
 
             [% UNLESS readonly %]
@@ -103,6 +103,7 @@
             if(this.labelEl) { this.labelEl.hide(); }
         },
         destroy: function( This, eOpts ) {
+            TP.log('['+this.id+'] remove icon');
             if(!this.redrawOnly) {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
