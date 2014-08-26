@@ -69,6 +69,7 @@ Ext.define('TP.PanletChart', {
                 var data = TP.getResponse(this, response);
                 var row;
                 if(data) {
+                    TP.log('['+This.id+'] loaded');
                     row = data;
                     if(this.getData) {
                         row = this.getData(data);

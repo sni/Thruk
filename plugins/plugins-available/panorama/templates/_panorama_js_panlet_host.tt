@@ -101,6 +101,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
     This.loading = false;
     var data  = TP.getResponse(this, response);
     if(data && data.data) {
+        TP.log('['+This.id+'] loaded');
         var d         = data.data;
         var downtimes = data.downtimes;
         var panel     = this.items.getAt(0);
