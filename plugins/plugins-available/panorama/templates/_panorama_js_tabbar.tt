@@ -476,7 +476,29 @@ TP.getLogTab = function() {
                     listeners: {
                         keyup:  function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); },
                         change: function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); }
+                    },
+                    fieldBodyCls: 'x-form-clear-trigger'
+            }, {
+                xtype:   'button',
+                text:    ' ',
+                width:    19,
+                border:   1,
+                style:    'padding: 0 0 5px;',
+                cls:     'x-form-clear-trigger',
+                handler: function(This) {
+                   Ext.getCmp('logfilter').reset();
+                },
+                listeners: {
+                    afterrender: function(This) {
+                        window.setTimeout(function() {
+                            var style = This.getEl().dom.style;
+                            var left  = Number(String(style.left).replace(/px$/, ''));
+                            style.top    = '4px';
+                            style.border = '0';
+                            style.left   = left-3+'px';
+                        } , 100);
                     }
+                }
             }, {
                     xtype: 'tbfill'
             }, {
