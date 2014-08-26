@@ -26,7 +26,7 @@ our $VERSION = '1.84';
 my $project_root = home('Thruk::Config');
 my $branch       = '6';
 my $gitbranch    = get_git_name($project_root);
-$branch          = $gitbranch unless $branch ne '';
+$branch          = $gitbranch unless $gitbranch eq '';
 confess('got no project_root') unless $project_root;
 
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
