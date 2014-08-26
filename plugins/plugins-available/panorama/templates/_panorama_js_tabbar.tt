@@ -402,12 +402,15 @@ TP.getLogTab = function() {
             layout: 'fit',
             id:     'logform',
             items: [{
-                xtype: 'textarea',
-                value: '',
-                id:    'logtextarea',
+                xtype:   'textarea',
+                value:   'loading...',
+                id:      'logtextarea',
+                disabled: true,
                 listeners: {
                     afterrender: function(This, eOpts) {
-                        Ext.getCmp('logrefresh').handler();
+                        window.setTimeout(function() {
+                            Ext.getCmp('logrefresh').handler();
+                        }, 200);
                     }
                 }
             }]
@@ -435,6 +438,7 @@ TP.getLogTab = function() {
                             }
                         }
                         logtextarea.setValue(text);
+                        logtextarea.setDisabled(false);
                     }
                 }
             }, {
