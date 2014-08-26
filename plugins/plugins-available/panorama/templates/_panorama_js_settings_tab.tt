@@ -575,6 +575,7 @@ TP.tabSettingsWindow = function() {
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
+    TP.modalWin = tab_win_settings;
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {
