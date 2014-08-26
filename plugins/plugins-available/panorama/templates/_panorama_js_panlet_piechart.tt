@@ -34,7 +34,7 @@
                 This.loading = false;
                 var data = TP.getResponse(this, response);
                 if(data) {
-                    TP.log('['+This.id+'] loaded');
+                    TP.log('['+this.id+'] loaded');
                     var fields = [];
                     for(var key in data.columns) {
                         fields.push(data.columns[key].dataIndex);

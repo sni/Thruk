@@ -1577,7 +1577,7 @@ var TP = {
 TP.log('[global] starting');
 TP.log('[global] [% version %][% IF branch %]~[% branch %][% END %]');
 [% IF c.config.extra_version %]TP.log('[global] [% c.config.extra_version %]');[% END %]
-TP.log('[global] '+window.location.pathname + "?" + window.location.search);
+TP.log('[global] '+window.location);
 TP.log('[global] '+navigator.userAgent);
 
 /* returns formated time string */

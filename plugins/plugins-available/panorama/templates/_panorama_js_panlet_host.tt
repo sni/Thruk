@@ -101,10 +101,10 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
     This.loading = false;
     var data  = TP.getResponse(this, response);
     if(data && data.data) {
-        TP.log('['+This.id+'] loaded');
         var d         = data.data;
         var downtimes = data.downtimes;
         var panel     = this.items.getAt(0);
+        TP.log('['+panel.id+'] loaded');
         var statename = this.type == 'host' ? TP.render_host_status(d.state, {}, data) : TP.render_service_status(d.state, {}, data) ;
         panel.getComponent('current_status').update('<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
         panel.getComponent('status_information').update(d.plugin_output+'<br>'+d.long_plugin_output);

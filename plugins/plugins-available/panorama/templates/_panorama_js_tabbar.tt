@@ -422,11 +422,17 @@ TP.getLogTab = function() {
                 id:     'logrefresh',
                 handler: function(This) {
                     var logtextarea = Ext.getCmp('logtextarea');
-                    if(logtextarea.lastLength != TP.logHistory.length) {
+                    var filter      = Ext.getCmp('logfilter').getValue();
+                    if(logtextarea.lastLength != TP.logHistory.length || logtextarea.lastFilter != filter) {
                         logtextarea.lastLength = TP.logHistory.length;
+                        logtextarea.lastFilter = filter;
                         var text = "";
+                        var pattern;
+                        if(filter) { pattern = new RegExp(filter, 'i') }
                         for(var i = TP.logHistory.length - 1; i >= 0; i--) {
-                            text += formatLogEntry(TP.logHistory[i]);
+                            if(!pattern || TP.logHistory[i][1].match(pattern)) {
+                                text += formatLogEntry(TP.logHistory[i]);
+                            }
                         }
                         logtextarea.setValue(text);
                     }
@@ -461,6 +467,16 @@ TP.getLogTab = function() {
                         params: {text: text, task: 'textsave'}
                     });
                 }
+            }, {
+                    xtype: 'tbfill'
+            }, {
+                    xtype:     'textfield',
+                    emptyText: 'enter search term',
+                    id:        'logfilter',
+                    listeners: {
+                        keyup:  function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); },
+                        change: function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); }
+                    }
             }, {
                     xtype: 'tbfill'
             }, {
