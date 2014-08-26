@@ -371,6 +371,32 @@ sub init_backend_thread_pool {
 
 ########################################
 
+=head2 shutdown_backend_thread_pool
+
+  shutdown_backend_thread_pool()
+
+shutdown thread connection pool
+
+=cut
+
+sub shutdown_backend_thread_pool {
+    our($peer_order, $peers, $pool, $pool_size);
+
+    if($pool) {
+        eval {
+            local $SIG{ALRM} = sub { die "alarm\n" };
+            alarm(3);
+            $pool->cancel_all();
+            $pool->detach();
+            $pool = undef;
+        };
+        alarm(0);
+    };
+    return;
+}
+
+########################################
+
 =head2 _do_thread
 
   _do_thread()
