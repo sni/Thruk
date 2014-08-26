@@ -91,7 +91,7 @@ Ext.onReady(function() {
 
     /* full reload page interval */
     [% IF full_reload_interval != 0 %]
-    TP.timeouts['timeout_page_reload'] = window.setInterval("reloadPage()", [% full_reload_interval %]*1000);
+    TP.timeouts['timeout_page_reload'] = window.setInterval("TP.fullReload()", [% full_reload_interval %]*1000);
     TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
     [% END %]
     cleanUnderscoreUrl();

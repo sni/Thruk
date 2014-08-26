@@ -1563,9 +1563,13 @@ var TP = {
         panel.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
         list.push(tmppanel);
     },
+    fullReload: function() {
+        TP.log('[global] full reload');
+        reloadPage();
+    },
     log: function(str) {
         TP.logHistory.push([new Date(), str]);
-        while(TP.logHistory.length > 10000) {
+        while(TP.logHistory.length > 50000) {
             TP.logHistory.shift();
         }
     }
