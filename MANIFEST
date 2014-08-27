@@ -1322,7 +1322,6 @@ templates/_infobox.tt
 templates/_json_export.tt
 templates/_log_date_select.tt
 templates/_logs.tt
-templates/_logs_line.tt
 templates/_message.tt
 templates/_notifications_log_line.tt
 templates/_overdiv.tt

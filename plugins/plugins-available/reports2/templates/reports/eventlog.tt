@@ -22,6 +22,7 @@
 
 [%# REPORT LAYOUT #%]
 [% IF block == 'render' %]
+  [% PROCESS _blocks.tt %]
 
   [%# report settings #%]
   [% file = 'reports/locale/' _ param.language _ '.tt'; PROCESS $file %]
@@ -89,7 +90,7 @@
         [% logblock = logs.splice(0, 14) %][%# Items per page #%]
         [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc('Events') %]
             [% FOREACH l = logblock %]
-              [% PROCESS _logs_line.tt %]
+              [% PROCESS _logs_line %]
               <div class="logdate">
                 <img src="[% url_prefix %]themes/Thruk/images/[% pic %]">
                 [% format_date(l.time, reportDateTimeFormat) %]

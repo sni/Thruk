@@ -42,7 +42,7 @@ use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
 use MRO::Compat;
-use Time::HiRes qw/tv_interval/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils;
 use Thruk::Config;
 use Thruk::Utils::Auth;
@@ -427,7 +427,15 @@ sub use_stats {
 
 ###################################################
 # add some more profiles
-before prepare_body     => sub { my($c) = @_; $c->stats->profile(begin => "prepare_body");     return; };
+before prepare_body     => sub {
+    my($c) = @_;
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
+        $c->stash->{'memory_begin'} = Thruk::Utils::get_memory_usage();
+        $c->stash->{'time_begin'}   = [gettimeofday];
+    }
+    $c->stats->profile(begin => "prepare_body");
+    return;
+};
 after prepare_body      => sub { my($c) = @_; $c->stats->profile(end   => "prepare_body");     return; };
 
 before dispatch         => sub { my($c) = @_; $c->stats->profile(begin => "dispatch");         return; };

@@ -9,7 +9,6 @@ use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
 use POSIX qw/strftime/;
-use Time::HiRes qw/gettimeofday/;
 use Thruk::Utils::Filter;
 
 #
@@ -42,11 +41,6 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
     $c->stats->profile(begin => "Root begin");
-
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $c->stash->{'memory_begin'} = Thruk::Utils::get_memory_usage();
-        $c->stash->{'time_begin'}   = [gettimeofday];
-    }
 
     Thruk::Action::AddDefaults::set_configs_stash($c);
 
