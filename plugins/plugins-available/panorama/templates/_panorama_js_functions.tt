@@ -526,7 +526,7 @@ var TP = {
     /* default refresh handler */
     defaultSiteRefreshHandler: function(panel) {
         TP.log('['+panel.id+'] defaultSiteRefreshHandler');
-        if(panel.loader.isLoading) {
+        if(panel.loader.loading) {
             TP.log('['+panel.id+'] is already loading, skipped');
             return;
         }
@@ -554,7 +554,6 @@ var TP = {
             baseParams['update_proc'] = TP.setUpdateProcInfo();
         }
         TP.log('['+panel.id+'] loading '+url);
-        panel.loader.loading = true;
         panel.loader.load({url:url, baseParams: baseParams});
     },
 
