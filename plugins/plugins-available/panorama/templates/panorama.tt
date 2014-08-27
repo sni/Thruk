@@ -36,6 +36,11 @@
 <script type="text/javascript">
 <!--
 [%+ PROCESS panorama_js.tt +%]
+-->
+</script>
+[% END %]
+<script type="text/javascript">
+<!--
 function preloader() {
     if(document.images) {
 [%+ FOREACH i = preload_img %]
@@ -46,6 +51,5 @@ function preloader() {
 }
 -->
 </script>
-[% END %]
 </body>
 </html>
