@@ -1,4 +1,4 @@
-[% BLOCK _status_host_attributes %]
+﻿[% BLOCK _status_host_attributes %]
 [%
   host_accept_passive_checks    = hostprefix _ 'accept_passive_checks'
   host_acknowledged             = hostprefix _ 'acknowledged'
