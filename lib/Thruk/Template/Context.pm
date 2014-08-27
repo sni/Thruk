@@ -1,6 +1,9 @@
 package Thruk::Template::Context;
 use base qw(Template::Context);
 
+use strict;
+use warnings;
+
 my @stack;
 my %totals;
 
@@ -43,9 +46,29 @@ sub process {
   }
 
   # return value from process:
-  wantarray ? @return : $return[0];
+  return wantarray ? @return : $return[0];
 }
 
 $Template::Config::CONTEXT = __PACKAGE__;
+
+=head1 NAME
+
+Thruk::Template::Context - Profiling TT Context
+
+=head1 DESCRIPTION
+
+Prints Template Toolkit profiling details
+
+=head1 AUTHOR
+
+  http://www.stonehenge.com/merlyn/LinuxMag/col75.html
+
+=head1 METHODS
+
+=head2 process
+
+overridden process function which gathers statistics
+
+=cut
 
 1;

@@ -118,6 +118,7 @@ lib/Thruk/Controller/test.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Model/Thruk.pm
 lib/Thruk/Pool/Simple.pm
+lib/Thruk/Template/Context.pm
 lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm

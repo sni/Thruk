@@ -8,6 +8,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $replace = {
     'Log::Log4perl::Catalyst'                     => 'Log::Log4perl',
     'Monitoring::Availability::Logs'              => 'Monitoring::Availability',
+    'Template::Context'                           => 'Template',
 };
 
 # first get all we have already
@@ -105,6 +106,7 @@ sub _get_modules {
   my @mods;
   for my $key (sort keys %{$modules}) {
     $key = _clean($key);
+    $key =~ s/^qw\((.*?)\)/$1/gmx;
     next if $key =~ m/^\d+\.\d+$/;
     next if $key =~ m/^\s*$/;
     next if $key =~ m/^Thruk/;
