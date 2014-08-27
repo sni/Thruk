@@ -398,7 +398,7 @@
           [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
           </td>
         </tr>
-        [% END %]
+        [% ELSE %]
         [% graph_url = get_graph_url(c, service, 1)%]
         [% IF graph_url %]
         <tr>
@@ -406,6 +406,7 @@
           [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
           </td>
         </tr>
+        [% END %]
         [% END %]
 
         <tr>
