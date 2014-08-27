@@ -481,7 +481,7 @@ sub save_profile {
 
     my $file = $dir.'/profile.log';
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
-    local $ENV{COLUMNS} = 100;
+    local $ENV{COLUMNS} = 140;
     local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
     eval {
         print $fh "".$c->stats->report(),"\n";
@@ -503,10 +503,10 @@ log profile to info channel
 sub log_profile {
     my($c) = @_;
 
-    local $ENV{COLUMNS} = 100;
+    local $ENV{COLUMNS} = 140;
     local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
     eval {
-        $c->log->info("profile:\n".$c->stats->report());
+        $c->log->info(sprintf("Req: %03d, profile:\n%s", $Catalyst::COUNT, scalar $c->stats->report()));
     };
     return;
 }

@@ -9,7 +9,7 @@ use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
 use POSIX qw/strftime/;
-use Time::HiRes qw/gettimeofday tv_interval/;
+use Time::HiRes qw/gettimeofday/;
 use Thruk::Utils::Filter;
 
 #
@@ -44,8 +44,8 @@ sub begin : Private {
     $c->stats->profile(begin => "Root begin");
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $self->{'memory_begin'} = Thruk::Utils::get_memory_usage();
-        $self->{'time_begin'}   = [gettimeofday];
+        $c->stash->{'memory_begin'} = Thruk::Utils::get_memory_usage();
+        $c->stash->{'time_begin'}   = [gettimeofday];
     }
 
     Thruk::Action::AddDefaults::set_configs_stash($c);
@@ -879,20 +879,6 @@ sub end : ActionClass('RenderView') {
             else {
                $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
             }
-        }
-    }
-
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        my $elapsed = tv_interval($self->{'time_begin'});
-        $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
-        my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
-        $url     = $c->request->uri unless $url;
-        $url     =~ s/^cgi\-bin\///mxo;
-        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
-        $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
-
-        if($ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2) {
-            $c->run_after_request('Thruk::Utils::External::log_profile($c);');
         }
     }
 

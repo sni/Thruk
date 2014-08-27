@@ -40,6 +40,7 @@ use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
 use MRO::Compat;
+use Time::HiRes qw/tv_interval/;
 use Thruk::Utils;
 use Thruk::Config;
 use Thruk::Utils::Auth;
@@ -369,21 +370,65 @@ sub run_after_request {
     return;
 }
 
+before finalize => sub {
+    my($c) = @_;
+    $c->stats->profile(begin => "finalize");
+    return;
+};
+
 after finalize => sub {
     my($c) = @_;
+    $c->stats->profile(end => "finalize");
+    $c->stats->profile(begin => "after finalize");
 
-    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
-
-    return unless defined $c->stash->{'run_after_request_cb'};
     while(my $sub = shift @{$c->stash->{'run_after_request_cb'}}) {
         ## no critic
         eval($sub);
         ## use critic
         $c->log->info($@) if $@;
     }
+    $c->stats->profile(end => "after finalize");
+
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
+        my $elapsed = tv_interval($c->stash->{'time_begin'});
+        $c->stash->{'memory_end'} = Thruk::Utils::get_memory_usage();
+        my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
+        $url     = $c->request->uri unless $url;
+        $url     =~ s/^cgi\-bin\///mxo;
+        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
+        $c->log->info(sprintf("Req: %03d, mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", ($Catalyst::COUNT || 0), $c->stash->{'memory_end'}, ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}), $elapsed, $url));
+    }
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2) {
+        Thruk::Utils::External::log_profile($c);
+    }
+
+    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
     return;
 };
 
+# add some more profiles
+before prepare_body     => sub { my($c) = @_; $c->stats->profile(begin => "prepare_body");     return; };
+after prepare_body      => sub { my($c) = @_; $c->stats->profile(end   => "prepare_body");     return; };
+
+before dispatch         => sub { my($c) = @_; $c->stats->profile(begin => "dispatch");         return; };
+after dispatch          => sub { my($c) = @_; $c->stats->profile(end   => "dispatch");         return; };
+
+before finalize_uploads => sub { my($c) = @_; $c->stats->profile(begin => "finalize_uploads"); return; };
+after finalize_uploads  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_uploads"); return; };
+
+before finalize_error   => sub { my($c) = @_; $c->stats->profile(begin => "finalize_error");   return; };
+after finalize_error    => sub { my($c) = @_; $c->stats->profile(end   => "finalize_error");   return; };
+
+before finalize_headers => sub { my($c) = @_; $c->stats->profile(begin => "finalize_headers"); return; };
+after finalize_headers  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_headers"); return; };
+
+before finalize_cookies => sub { my($c) = @_; $c->stats->profile(begin => "finalize_cookies"); return; };
+after finalize_cookies  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_cookies"); return; };
+
+before finalize_body    => sub { my($c) = @_; $c->stats->profile(begin => "finalize_body");    return; };
+after finalize_body     => sub { my($c) = @_; $c->stats->profile(end   => "finalize_body");    return; };
 
 =head1 SEE ALSO
 
