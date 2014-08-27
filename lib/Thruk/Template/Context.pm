@@ -34,12 +34,14 @@ sub process {
   unless (@stack) {
     ## top level again, time to display results
     print STDERR "-- $template at ". localtime, ":\n";
-    printf STDERR "%3s %3s %6s %6s %6s %6s %s\n",
-      qw(cnt clk user sys cuser csys template);
-    for my $template (sort keys %totals) {
+    printf STDERR "%3s %6s %3s %6s %6s %6s %6s %s\n",
+      qw(cnt percent clk user sys cuser csys template);
+    my $total = 0;
+    for my $template (keys %totals) { $total += $totals{$template}->[1]; }
+    for my $template (sort { $totals{$b}->[1] <=> $totals{$a}->[1] } keys %totals) {
       my @values = @{$totals{$template}};
-      printf STDERR "%3d %3d %6.2f %6.2f %6.2f %6.2f %s\n",
-        $values[5], @values[0..4], $template;
+      printf STDERR "%3d %5d %% %3d %6.2f %6.2f %6.2f %6.2f %s\n",
+        $values[5], $values[1]/$total*100, @values[0..4], $template;
     }
     print STDERR "-- end\n";
     %totals = ();               # clear out results
