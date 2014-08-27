@@ -393,15 +393,13 @@ after finalize => sub {
     $c->stats->profile(end => "after finalize");
 
 
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
         my $elapsed = tv_interval($c->stash->{'time_begin'});
         $c->stash->{'memory_end'} = Thruk::Utils::get_memory_usage();
         my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
         $url     = $c->request->uri unless $url;
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
-        if(!defined $c->stash->{'memory_end'})   { warn("no memory_end"); }
-        if(!defined $c->stash->{'memory_begin'}) { warn("no memory_begin"); }
         $c->log->info(sprintf("Req: %03d, mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", ($Catalyst::COUNT || 0), $c->stash->{'memory_end'}, ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}), $elapsed, $url));
     }
 

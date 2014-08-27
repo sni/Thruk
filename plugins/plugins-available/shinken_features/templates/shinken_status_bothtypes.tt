@@ -1,5 +1,6 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _blocks.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
@@ -62,7 +63,7 @@
           <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
-            [% PROCESS _status_host_attributes.tt hostprefix="" host=host host_comment_count=host_comment_count with_status=0 imgsize=20 %]
+            [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host_comment_count with_status=0 imgsize=20 %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
           <td class='[% class %]'>[% host.affected_hosts %]</td>
@@ -115,7 +116,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
           <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
-            [% PROCESS _status_service_attributes.tt service=srv service_comment_count=srv_comment_count %]
+            [% PROCESS _status_service_attributes service=srv service_comment_count=srv_comment_count %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
           <td class='[% class %]'>[% srv.affected_hosts %]</td>

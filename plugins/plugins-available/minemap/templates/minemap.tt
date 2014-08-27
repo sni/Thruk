@@ -2,6 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
+[% PROCESS _blocks.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       <tr>
@@ -71,7 +72,7 @@
       <tr>
         <th align="left" class='[% hostclass %]' title='[% hst.host_address %]' style="height: 18px;"><a href='[% uri_with(c, host => hst.host_name, style => 'detail').replace("minemap.cgi", "status.cgi") %]&complex='>[% hst.host_name %]</a></th>
         <td align="right" class='[% hostclass %]' style="height: 18px;">
-          [% PROCESS _status_host_attributes.tt hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
+          [% PROCESS _status_host_attributes hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
         </td>
       </tr>
     </table>
