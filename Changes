@@ -8,6 +8,7 @@ next:
             - fixed memory leak in generic url panel
             - fixed problem with stopped timers after import
             - reload every x hours to prevent noncatchable memory leaks
+            - fixed linking public dashboards
           - Bug Fixes
             - fixed problem with timeperiods in logcache database
 

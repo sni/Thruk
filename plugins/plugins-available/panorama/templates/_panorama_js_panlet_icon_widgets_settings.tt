@@ -799,7 +799,7 @@ TP.iconShowEditDialog = function(panel) {
                             listeners: {
                                 afterrender: function(This, eOpts) {
                                     TP.load_dashboard_menu_items(This.items.get(0).menu, 'panorama.cgi?task=dashboard_list&list=my',     function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
-                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) {}, true);
+                                    TP.load_dashboard_menu_items(This.items.get(1).menu, 'panorama.cgi?task=dashboard_list&list=public', function(val) { This.up('form').getForm().setValues({link: 'dashboard://'+val.replace(/^tabpan-tab_/,'')})}, true);
                                 }
                             }
                         }
