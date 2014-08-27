@@ -11,7 +11,7 @@ sub process {
   my $self = shift;
 
   my $template = $_[0];
-  if (UNIVERSAL::isa($template, "Template::Document")) {
+  if(UNIVERSAL::isa($template, "Template::Document")) {
     $template = $template->name || $template;
   }
 
@@ -23,28 +23,29 @@ sub process {
 
   my @delta_times = @{pop @stack};
   @delta_times = map { $_ - shift @delta_times } time, times;
-  for (0..$#delta_times) {
+  for(0..$#delta_times) {
     $totals{$template}[$_] += $delta_times[$_];
     for my $parent (@stack) {
       $parent->[$_] += $delta_times[$_] if @stack; # parent adjust
     }
   }
-  $totals{$template}[5] ++;     # count of calls
+  # count of calls
+  $totals{$template}[5] ++;
 
-  unless (@stack) {
+  unless(@stack) {
     ## top level again, time to display results
-    print STDERR "-- $template at ". localtime, ":\n";
-    printf STDERR "%3s %6s %3s %6s %6s %6s %6s %s\n",
-      qw(cnt percent clk user sys cuser csys template);
+    print  STDERR "TT ",$template, ":\n";
+    printf STDERR "%3s %6s %3s %6s %6s %6s %6s %s\n", qw(cnt percent clk user sys cuser csys template);
     my $total = 0;
     for my $template (keys %totals) { $total += $totals{$template}->[1]; }
     for my $template (sort { $totals{$b}->[1] <=> $totals{$a}->[1] } keys %totals) {
-      my @values = @{$totals{$template}};
-      printf STDERR "%3d %5d %% %3d %6.2f %6.2f %6.2f %6.2f %s\n",
-        $values[5], $values[1]/$total*100, @values[0..4], $template;
+      my @values  = @{$totals{$template}};
+      my $percent = $total > 0 ? $values[1]/$total*100 : 0;
+      printf(STDERR "%3d %5d %% %3d %6.2f %6.2f %6.2f %6.2f %s\n", $values[5], $percent , @values[0..4], $template);
     }
-    print STDERR "-- end\n";
-    %totals = ();               # clear out results
+
+    # clear out results
+    %totals = ();
   }
 
   # return value from process:
