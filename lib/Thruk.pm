@@ -372,6 +372,7 @@ sub run_after_request {
 
 before finalize => sub {
     my($c) = @_;
+    $c->stash->{'no_more_profile'} = 1;
     $c->stats->profile(begin => "finalize");
     return;
 };
@@ -408,6 +409,21 @@ after finalize => sub {
     return;
 };
 
+###################################################
+
+=head2 use_stats
+
+switch for various internal catalyst sub wether to gather statistics or not
+
+=cut
+sub use_stats {
+    my($c) = @_;
+    if($c->stash->{'no_more_profile'})  { return(0); }
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) { return(1); }
+    return(0);
+}
+
+###################################################
 # add some more profiles
 before prepare_body     => sub { my($c) = @_; $c->stats->profile(begin => "prepare_body");     return; };
 after prepare_body      => sub { my($c) = @_; $c->stats->profile(end   => "prepare_body");     return; };
