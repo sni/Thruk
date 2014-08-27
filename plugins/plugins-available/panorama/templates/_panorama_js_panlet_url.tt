@@ -5,27 +5,30 @@
     height: 220,
     width:  440,
     initComponent: function() {
-        this.callParent();
-        this.noChangeUrlParams = true;
-        this.xdata.url      = '';
-        this.xdata.selector = '';
-        this.xdata.keepcss  = true;
-        this.reloadOnSiteChanges = true;
+        var panel = this;
+        panel.callParent();
+        panel.noChangeUrlParams = true;
+        panel.xdata.url      = '';
+        panel.xdata.selector = '';
+        panel.xdata.keepcss  = true;
+        panel.reloadOnSiteChanges = true;
 
-        this.loader = {
+        panel.loader = {
             autoLoad: false,
             renderer: 'data',
-            scope:    this,
+            scope:    panel,
             ajaxOptions: { method: 'GET' },
             callback: function(This, success, response, options) {
+                This.loading = false;
+                window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
                 var html;
                 if(response.status == 200) {
                     /* should we pick only a part of the page */
                     var el;
-                    if(this.xdata.selector != '') {
+                    if(panel.xdata.selector != '') {
                         /* create pseudo window to render html */
                         el    = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
-                        var q = el.body.select(this.xdata.selector).elements[0];
+                        var q = el.body.select(panel.xdata.selector).elements[0];
                         if(q == undefined) {
                             html = 'ERROR: selector not found';
                         } else {
@@ -37,7 +40,7 @@
 
                     var head = '';
                     /* keep css links */
-                    if(this.xdata.keepcss && this.xdata.selector != '') {
+                    if(panel.xdata.keepcss && panel.xdata.selector != '') {
                         el.body.select('LINK').each(function(e) {
                             if(!e.dom.outerHTML.match(/thruk_noframes\.css/)) {
                                 head = head + e.dom.outerHTML;
@@ -51,14 +54,14 @@
                     }
                 } else {
                     html = 'ERROR: request failed with status: ' + response.status;
-                    TP.log('['+this.id+'] '+html);
+                    TP.log('['+panel.id+'] '+html);
                     debug(response);
                 }
 
                 /* replace iframe content */
                 var iframe;
                 try {
-                    iframe = this.items.getAt(0).getEl().dom;
+                    iframe = panel.items.getAt(0).getEl().dom;
                 } catch(e) {
                     debug(e);
                 }
@@ -71,67 +74,67 @@
                             ifrm.document.write(html);
                             ifrm.document.close();
                         } else {
-                            this.setBlankAndRefreshLater(iframe);
+                            panel.setBlankAndRefreshLater(iframe);
                         }
                     } catch(e) {
                         /* first reload after changing from external to internal url does not work*/
-                        this.setBlankAndRefreshLater(iframe);
+                        panel.setBlankAndRefreshLater(iframe);
                     }
                 }
             }
         };
 
-        this.setBlankAndRefreshLater = function(iframe) {
+        panel.setBlankAndRefreshLater = function(iframe) {
             iframe.src = 'about:blank';
-            TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+            TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.refreshHandler, panel, []), 1000);
         };
 
-        this.iframeErrorHandler = function(evt) {
+        panel.iframeErrorHandler = function(evt) {
+            if(TP.isUnloading) { return; }
             evt = (evt) ? evt : ((window.event) ? event : null);
             var iframe = evt.target;
             var ifrm   = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
-            TP.log('['+this.id+'] iframeErrorHandler, error on '+iframe.src);
+            TP.log('['+panel.id+'] iframeErrorHandler, error on '+iframe.src);
             ifrm.document.open();
             ifrm.document.write("<style type='text/css'>body {background: white;}<\/style><span style='color: red; font-weight:bold;'>failed to load: " + iframe.src+"<\/span><br>due to javascripts cross domain policy, the exact error cannot be determinced.<br>possible causes:<ul><li>Server does not respond<\/li><li>Trying to access http url from https dashboard.<\/li><\/ul>");
             ifrm.document.close();
         };
 
-        //this.reloads = 0;
-        this.refreshHandler = function() {
-            TP.log('['+this.id+'] refreshHandler("'+this.xdata.url+'")');
-            //this.reloads++;
-            /* remove and replace complete iframe object to prevent memory leaks
-             * update: no longer required since we reload the whole page every 3 hours
-             * would result in flickering otherwise
-             */
-            //if(this.reloads % 10 == 0) {
-            //    this.addIframe();
-            //}
-            var iframeObj = this.items.getAt(0).getEl();
-            if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
+        panel.reloads = 0;
+        panel.refreshHandler = function() {
+            TP.log('['+panel.id+'] refreshHandler("'+panel.xdata.url+'")');
+            panel.reloads++;
+            /* remove and replace complete iframe object to prevent memory leaks */
+            if(panel.reloads > 20) {
+                panel.reloads = 0;
+                panel.addIframe();
+                window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
+                TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.refreshHandler, panel, []), 3000);
+            }
+            var iframeObj = panel.items.getAt(0).getEl();
+            if(!TP.isSameOrigin(window.location, TP.getLocationObject(panel.xdata.url))) {
                 /* set external url as src */
-                var iframeObj = this.items.getAt(this.items.length-1).getEl();
+                var iframeObj = panel.items.getAt(panel.items.length-1).getEl();
                 if(iframeObj && iframeObj.dom) {
-                    iframeObj.dom.onerror = this.iframeErrorHandler;
-                    iframeObj.dom.src     = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
-                    TP.log('['+this.id+'] refreshHandler: set iframe url '+iframeObj.dom.src);
+                    iframeObj.dom.onerror = panel.iframeErrorHandler;
+                    iframeObj.dom.src     = Ext.urlAppend(panel.xdata.url, '_dc='+Ext.Date.now())
+                    TP.log('['+panel.id+'] refreshHandler: set iframe url '+iframeObj.dom.src);
                 }
             } else {
-                TP.defaultSiteRefreshHandler(this);
+                TP.defaultSiteRefreshHandler(panel);
             }
         };
-        this.manualRefresh = function() {
-            TP.log('['+this.id+'] manualRefresh');
-            this.body.mask('Loading...');
-            this.refreshHandler();
+        panel.manualRefresh = function() {
+            TP.log('['+panel.id+'] manualRefresh');
+            panel.body.mask('Loading...');
+            panel.refreshHandler();
         };
 
-        this.addIframe = function() {
-            var panel = this;
-            if(this.gearitem) { return; }
-            this.removeAll(true);
+        panel.addIframe = function() {
+            if(panel.gearitem) { return; }
+            panel.removeAll(true);
             /* url content should be in an iframe */
-            this.add({
+            panel.add({
                 xtype : 'component',
                 autoEl : {
                     tag : 'iframe',
@@ -145,33 +148,33 @@
                         element: 'el',
                         fn: function () {
                             TP.log('['+panel.id+'] loaded');
-                            window.clearTimeout(TP.timeouts['timeout_' + this.id + '_refresh']);
-                            this.parent().unmask();
+                            window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
+                            panel.unmask();
                         }
                     }
                 }
             });
         }
-        this.addIframe();
+        panel.addIframe();
 
         /* auto load when url is set */
-        this.addListener('afterrender', function() {
-            if(this.xdata.url == '' || this.xdata.url == 'about:blank') {
-                this.gearHandler();
+        panel.addListener('afterrender', function() {
+            if(panel.xdata.url == '' || panel.xdata.url == 'about:blank') {
+                panel.gearHandler();
             } else {
-                this.refreshHandler();
+                panel.refreshHandler();
             }
         });
 
         /* sometime initial url doesn't work */
-        this.formUpdatedCallback = function(panel) {
-            TP.timeouts['timeout_' + this.id + '_refresh'] = window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+        panel.formUpdatedCallback = function(panel) {
+            TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.refreshHandler, panel, []), 1000);
         };
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems([{
+        panel.callParent();
+        panel.addGearItems([{
             fieldLabel: 'URL',
             xtype:      'textfield',
             name:       'url',

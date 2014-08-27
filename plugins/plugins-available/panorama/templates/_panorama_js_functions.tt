@@ -526,25 +526,36 @@ var TP = {
     /* default refresh handler */
     defaultSiteRefreshHandler: function(panel) {
         TP.log('['+panel.id+'] defaultSiteRefreshHandler');
-        if(panel.xdata.url != '' && panel.xdata.refresh != -2) { // -2 means temporarily disabled
-            var url = panel.xdata.url;
-            var baseParams = {};
-            if(panel.noChangeUrlParams == undefined || !panel.noChangeUrlParams) {
-                if(panel.loader.baseParams == undefined) {
-                    panel.loader.baseParams = {};
-                }
-                baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
-                delete baseParams['gridstate']; // not needed
-                // add backend settings
-                var tab = Ext.getCmp(panel.panel_id);
-                baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
-
-                // update proc info?
-                baseParams['update_proc'] = TP.setUpdateProcInfo();
-            }
-            TP.log('['+panel.id+'] loading '+url);
-            panel.loader.load({url:url, baseParams: baseParams});
+        if(panel.loader.isLoading) {
+            TP.log('['+panel.id+'] is already loading, skipped');
+            return;
         }
+        if(panel.xdata.url == '') {
+            TP.log('['+panel.id+'] no url, skipped');
+            return;
+        }
+        if(panel.xdata.refresh == -2) { // -2 means temporarily disabled
+            TP.log('['+panel.id+'] temporarily disabled, skipped');
+            return;
+        }
+        var url = panel.xdata.url;
+        var baseParams = {};
+        if(panel.noChangeUrlParams == undefined || !panel.noChangeUrlParams) {
+            if(panel.loader.baseParams == undefined) {
+                panel.loader.baseParams = {};
+            }
+            baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
+            delete baseParams['gridstate']; // not needed
+            // add backend settings
+            var tab = Ext.getCmp(panel.panel_id);
+            baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
+
+            // update proc info?
+            baseParams['update_proc'] = TP.setUpdateProcInfo();
+        }
+        TP.log('['+panel.id+'] loading '+url);
+        panel.loader.loading = true;
+        panel.loader.load({url:url, baseParams: baseParams});
     },
 
     /* only request proc update information every 30 seconds */
@@ -894,6 +905,7 @@ var TP = {
     },
     /* called on body unload */
     unload: function() {
+        TP.isUnloading = true;
         try {
             // try saving state
             cp.saveChanges(false);
