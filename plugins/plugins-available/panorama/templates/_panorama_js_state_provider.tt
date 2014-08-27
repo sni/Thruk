@@ -235,6 +235,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             Ext.apply(params, extraParams);
         }
         var conn      = new Ext.data.Connection();
+        TP.log('[global] state provider saved to server');
         conn.request({
             url:    this.url,
             params: params,
