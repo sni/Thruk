@@ -256,8 +256,9 @@ returns a correct uri but only the url part
 sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    for my $key (keys %uri_filter) {
+        $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
         for my $key (%{$data}) {
@@ -304,8 +305,9 @@ sub uri_with {
     my $data = shift;
 
     my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    for my $key (keys %uri_filter) {
+        $filter->{$key} = $uri_filter{$key};
     }
     for my $key (keys %{$data}) {
         next unless defined $data->{$key};
