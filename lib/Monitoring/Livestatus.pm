@@ -3,11 +3,11 @@ package Monitoring::Livestatus;
 use 5.006;
 use strict;
 use warnings;
-use Data::Dumper;
-use Carp;
+use Data::Dumper qw/Dumper/;
+use Carp qw/confess/;
 use Digest::MD5 qw(md5_hex);
-use Encode;
-use JSON::XS;
+use Encode qw(encode);
+use JSON::XS qw();
 
 our $VERSION = '0.76';
 
@@ -265,11 +265,11 @@ sub selectall_arrayref {
     $limit = 0 unless defined $limit;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
 
-    my $result = $self->_send($statement, $opt);
+    my $result = &_send($self, $statement, $opt);
 
     if(!defined $result) {
         return unless $self->{'errors_are_fatal'};
@@ -287,27 +287,35 @@ sub selectall_arrayref {
         # make an array of hashes, inplace to safe memory
         my $rnum = scalar @{$result->{'result'}};
         my $knum = scalar @{$result->{'keys'}};
+        my @keys = @{$result->{'keys'}};
+        $result  = $result->{'result'};
         for(my $x=0;$x<$rnum;$x++) {
-            my $row = $result->{'result'}->[$x];
-            my $hash_ref;
-            for(my $y=0;$y<$knum;$y++) {
-                my $key = $result->{'keys'}->[$y];
-                if(exists $opt->{'rename'} and defined $opt->{'rename'}->{$key}) {
-                    $key = $opt->{'rename'}->{$key};
+            my $row      = $result->[$x];
+            my %hash;
+
+            # sort array into hash slices
+            @hash{@keys} = @{$row};
+
+            # renamed columns
+            if(exists $opt->{'rename'}) {
+                for my $old (keys %{$opt->{'rename'}}) {
+                    my $new = $opt->{'rename'}->{$old};
+                    $hash{$new} = delete $hash{$old};
                 }
-                $hash_ref->{$key} = $row->[$y];
             }
+
             # add callbacks
             if(exists $opt->{'callbacks'}) {
                 for my $key (keys %{$opt->{'callbacks'}}) {
-                    $hash_ref->{$key} = $opt->{'callbacks'}->{$key}->($hash_ref);
+                    $hash{$key} = $opt->{'callbacks'}->{$key}->(\%hash);
                 }
             }
-            $result->{'result'}->[$x] = $hash_ref;
+            $result->[$x] = \%hash;
         }
-        return($result->{'result'});
+        return($result);
     }
-    elsif(exists $opt->{'callbacks'}) {
+
+    if(exists $opt->{'callbacks'}) {
         for my $res (@{$result->{'result'}}) {
             # add callbacks
             if(exists $opt->{'callbacks'}) {
@@ -316,9 +324,7 @@ sub selectall_arrayref {
                 }
             }
         }
-    }
 
-    if(exists $opt->{'callbacks'}) {
         for my $key (keys %{$opt->{'callbacks'}}) {
             push @{$result->{'keys'}}, $key;
         }
@@ -343,7 +349,7 @@ Sends a query and returns a hashref with the given key
 sub selectall_hashref {
     my($self, $statement, $key_field, $opt) = @_;
 
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     $opt->{'slice'} = 1;
 
@@ -414,7 +420,7 @@ sub selectcol_arrayref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     # if now colums are set, use just the first one
     if(!defined $opt->{'columns'} or ref $opt->{'columns'} ne 'ARRAY') {
@@ -451,7 +457,7 @@ sub selectrow_array {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my @result = @{$self->selectall_arrayref($statement, $opt, 1)};
     return @{$result[0]} if scalar @result > 0;
@@ -477,7 +483,7 @@ sub selectrow_arrayref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my $result = $self->selectall_arrayref($statement, $opt, 1);
     return if !defined $result;
@@ -504,7 +510,7 @@ sub selectrow_hashref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
     $opt->{slice} = 1;
 
     my $result = $self->selectall_arrayref($statement, $opt, 1);
@@ -532,7 +538,7 @@ sub selectscalar_value {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my $row = $self->selectrow_arrayref($statement);
     return if !defined $row;
@@ -767,7 +773,7 @@ sub _send {
         chomp($statement);
         my $send = "$statement\n$header";
         $self->{'logger'}->debug("> ".Dumper($send)) if $self->{'verbose'};
-        ($status,$msg,$body) = $self->_send_socket($send);
+        ($status,$msg,$body) = &_send_socket($self, $send);
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
@@ -1027,17 +1033,17 @@ sub _send_socket {
         };
 
         if($self->{'retries_on_connection_error'} <= 0) {
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
-            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
+            ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
 
         while((!defined $status or ($status == 491 or $status == 497 or $status == 500)) and $retries < $self->{'retries_on_connection_error'}) {
             $retries++;
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
+            ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
                 $self->{'logger'}->debug('got status '.$status.' retrying in '.$self->{'retry_interval'}.' seconds') if $self->{'verbose'};
@@ -1051,7 +1057,7 @@ sub _send_socket {
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
             ($sock, $msg, $recv) = $self->_send_socket_do($statement);
             return($status, $msg, $recv) if $msg;
-            return($self->_read_socket_do($sock, $statement));
+            return(&_read_socket_do($self, $sock, $statement));
         }
         croak($@) if $self->{'errors_are_fatal'};
     }
@@ -1084,7 +1090,7 @@ sub _read_socket_do {
 
     $sock->read($header, 16) or return($self->_socket_error($statement, $sock, 'reading header from socket failed, check your livestatus logfile: '.$!));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
-    my($status, $msg, $content_length) = $self->_parse_header($header, $sock);
+    my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
     return($status, $msg, undef) if !defined $content_length;
     my $json_decoder = JSON::XS->new->utf8->relaxed;
     if($content_length > 0) {

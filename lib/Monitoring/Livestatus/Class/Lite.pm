@@ -59,10 +59,10 @@ Set peer for live tests.
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/croak confess/;
 use Scalar::Util qw/blessed/;
 use List::Util qw/first/;
-use Monitoring::Livestatus;
+use Monitoring::Livestatus qw//;
 
 our $VERSION = '0.05';
 our $TRACE   = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;
