@@ -377,7 +377,7 @@ sub _stateprovider {
         $c->stash->{'json'} = { 'status' => 'failed' };
     }
 
-    $self->_add_misc_details($c);
+    $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
 }
 
