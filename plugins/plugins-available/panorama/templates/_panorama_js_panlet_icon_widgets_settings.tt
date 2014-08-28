@@ -800,6 +800,10 @@ TP.iconShowEditDialog = function(panel) {
                                 text:    'Show Details',
                                 icon:    '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
                                 handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://show_details'}) }
+                            }, {
+                                text:    'Refresh',
+                                icon:    '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                                handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://refresh'}) }
                             }],
                             listeners: {
                                 afterrender: function(This, eOpts) {

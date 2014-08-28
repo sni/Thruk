@@ -2105,6 +2105,11 @@ TP.iconClickHandlerDo = function(id) {
         }
         else if(special[1] == 'show_details') {
             link = TP.getIconDetailsLink(panel);
+        }
+        else if(special[1] == 'refresh') {
+            var el = panel.getEl();
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, undefined, el)
+            el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
         } else {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
         }
