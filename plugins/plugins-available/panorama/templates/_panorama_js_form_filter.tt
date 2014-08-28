@@ -186,6 +186,10 @@ Ext.define('TP.formFilterSelect', {
                     searchStore.panel       = this.up().panel;
                     searchStore.load();
                 }
+            },
+            'select': function(combo, records, eOpts) {
+                /* if something has been selected from the dropdown, change operator to =, because its most likly not regexp */
+                this.up('panel').items.getAt(2).setValue('=');
             }
         }
     }, {
