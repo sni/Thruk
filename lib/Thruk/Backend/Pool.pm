@@ -5,10 +5,10 @@ use warnings;
 use threads;
 use Carp qw/confess/;
 
-use Thruk::Pool::Simple;
-use Thruk::Backend::Peer;
-use Thruk::Utils::IO;
-use Config::General;
+use Thruk::Pool::Simple qw//;
+use Thruk::Backend::Peer qw//;
+use Thruk::Utils::IO qw//;
+use Config::General qw//;
 use Cwd qw/getcwd/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
@@ -251,7 +251,7 @@ sub set_default_config {
     }
 
     # ensure csrf hosts is a list
-    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{Thruk::Utils::list($config->{'csrf_allowed_hosts'})}))];
+    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
 
@@ -270,15 +270,12 @@ init thread connection pool
 
 sub init_backend_thread_pool {
     our($peer_order, $peers, $pool, $pool_size);
+    return if defined $peers;
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
         chdir($ENV{'HOME'});
-    }
-
-    if(defined $peers) {
-        return;
     }
 
     $peer_order  = [];
@@ -533,10 +530,7 @@ sub get_config {
 
     my %config;
     for my $file (@files) {
-        my %conf = Config::General::ParseConfig(-ConfigFile => $file,
-                                                -UTF8       => 1,
-                                                -CComments  => 0,
-        );
+        my %conf = %{read_config_file($file)};
         for my $key (keys %conf) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 $config{$key} = { %{$config{$key}}, %{$conf{$key}} };
@@ -615,6 +609,44 @@ sub array2hash {
     }
 
     return \%hash;
+}
+
+########################################
+
+=head2 list
+
+  list($ref)
+
+return list of ref unless it is already a list
+
+=cut
+
+sub list {
+    my($d) = @_;
+    return [] unless defined $d;
+    return $d if ref $d eq 'ARRAY';
+    return([$d]);
+}
+
+########################################
+
+=head2 read_config_file
+
+  read_config_file($file)
+
+return parsed config file
+
+=cut
+
+sub read_config_file {
+    my($file) = @_;
+    # this is faster than letting Config::General read the file by itself
+    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file)));
+    my %conf = Config::General::ParseConfig(-String     => \@config_lines,
+                                            -UTF8       => 1,
+                                            -CComments  => 0,
+    );
+    return(\%conf);
 }
 
 ########################################

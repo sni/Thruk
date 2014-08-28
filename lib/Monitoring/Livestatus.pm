@@ -9,6 +9,9 @@ use Digest::MD5 qw(md5_hex);
 use Encode qw(encode);
 use JSON::XS qw();
 
+use Monitoring::Livestatus::INET qw//;
+use Monitoring::Livestatus::UNIX qw//;
+
 our $VERSION = '0.76';
 
 
@@ -121,32 +124,32 @@ be a the C<peer> specification. Use either socker OR server.
 
 sub new {
     my $class = shift;
-    unshift(@_, "peer") if scalar @_ == 1;
+    unshift(@_, 'peer') if scalar @_ == 1;
     my(%options) = @_;
 
     my $self = {
-      "verbose"                     => 0,       # enable verbose output
-      "socket"                      => undef,   # use unix sockets
-      "server"                      => undef,   # use tcp connections
-      "peer"                        => undef,   # use for socket / server connections
-      "name"                        => undef,   # human readable name
-      "line_seperator"              => 10,      # defaults to newline
-      "column_seperator"            => 0,       # defaults to null byte
-      "list_seperator"              => 44,      # defaults to comma
-      "host_service_seperator"      => 124,     # defaults to pipe
-      "keepalive"                   => 0,       # enable keepalive?
-      "errors_are_fatal"            => 1,       # die on errors
-      "backend"                     => undef,   # should be keept undef, used internally
-      "timeout"                     => undef,   # timeout for tcp connections
-      "query_timeout"               => 60,      # query timeout for tcp connections
-      "connect_timeout"             => 5,       # connect timeout for tcp connections
-      "timeout"                     => undef,   # timeout for tcp connections
-      "use_threads"                 => undef,   # use threads, default is to use threads where available
-      "warnings"                    => 1,       # show warnings, for example on querys without Column: Header
-      "logger"                      => undef,   # logger object used for statistical informations and errors / warnings
-      "deepcopy"                    => undef,   # copy result set to avoid errors with tied structures
-      "retries_on_connection_error" => 3,       # retry x times to connect
-      "retry_interval"              => 1,       # retry after x seconds
+      'verbose'                     => 0,       # enable verbose output
+      'socket'                      => undef,   # use unix sockets
+      'server'                      => undef,   # use tcp connections
+      'peer'                        => undef,   # use for socket / server connections
+      'name'                        => undef,   # human readable name
+      'line_seperator'              => 10,      # defaults to newline
+      'column_seperator'            => 0,       # defaults to null byte
+      'list_seperator'              => 44,      # defaults to comma
+      'host_service_seperator'      => 124,     # defaults to pipe
+      'keepalive'                   => 0,       # enable keepalive?
+      'errors_are_fatal'            => 1,       # die on errors
+      'backend'                     => undef,   # should be keept undef, used internally
+      'timeout'                     => undef,   # timeout for tcp connections
+      'query_timeout'               => 60,      # query timeout for tcp connections
+      'connect_timeout'             => 5,       # connect timeout for tcp connections
+      'timeout'                     => undef,   # timeout for tcp connections
+      'use_threads'                 => undef,   # use threads, default is to use threads where available
+      'warnings'                    => 1,       # show warnings, for example on querys without Column: Header
+      'logger'                      => undef,   # logger object used for statistical informations and errors / warnings
+      'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
+      'retries_on_connection_error' => 3,       # retry x times to connect
+      'retry_interval'              => 1,       # retry after x seconds
     };
 
     for my $opt_key (keys %options) {
@@ -178,11 +181,9 @@ sub new {
         $options{'name'} = $peer->{'name'};
         $options{'peer'} = $peer->{'peer'};
         if($peer->{'type'} eq 'UNIX') {
-            require Monitoring::Livestatus::UNIX;
             $self->{'CONNECTOR'} = new Monitoring::Livestatus::UNIX(%options);
         }
         elsif($peer->{'type'} eq 'INET') {
-            require Monitoring::Livestatus::INET;
             $self->{'CONNECTOR'} = new Monitoring::Livestatus::INET(%options);
         }
         $self->{'peer'} = $peer->{'peer'};
@@ -353,7 +354,7 @@ sub selectall_hashref {
 
     $opt->{'slice'} = 1;
 
-    croak("key is required for selectall_hashref") if !defined $key_field;
+    croak('key is required for selectall_hashref') if !defined $key_field;
 
     my $result = $self->selectall_arrayref($statement, $opt);
 
@@ -628,7 +629,7 @@ when using multiple backends, a list of all addresses is returned in list contex
 =cut
 sub peer_addr {
     my($self) = @_;
-    return "".$self->{'peer'};
+    return ''.$self->{'peer'};
 }
 
 
@@ -653,7 +654,7 @@ sub peer_name {
         $self->{'name'} = $value;
     }
 
-    return "".$self->{'name'};
+    return ''.$self->{'name'};
 }
 
 
@@ -671,7 +672,7 @@ when using multiple backends, a list of all keys is returned in list context
 sub peer_key {
     my($self) = @_;
 
-    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr." ".$self->peer_name); }
+    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr.' '.$self->peer_name); }
 
     return $self->{'key'};
 }
@@ -684,7 +685,7 @@ sub _send {
 
     delete $self->{'meta_data'};
 
-    my $header     = "";
+    my $header = '';
     my $keys;
 
     $Monitoring::Livestatus::ErrorCode = 0;
@@ -766,20 +767,20 @@ sub _send {
         # add additional headers
         if(defined $opt->{'header'} and ref $opt->{'header'} eq 'HASH') {
             for my $key ( keys %{$opt->{'header'}}) {
-                $header .= $key.": ".$opt->{'header'}->{$key}."\n";
+                $header .= $key.': '.$opt->{'header'}->{$key}."\n";
             }
         }
 
         chomp($statement);
         my $send = "$statement\n$header";
-        $self->{'logger'}->debug("> ".Dumper($send)) if $self->{'verbose'};
+        $self->{'logger'}->debug('> '.Dumper($send)) if $self->{'verbose'};
         ($status,$msg,$body) = &_send_socket($self, $send);
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
-            $self->{'logger'}->debug("status: ".Dumper($status));
-            $self->{'logger'}->debug("msg:    ".Dumper($msg));
-            $self->{'logger'}->debug("< ".Dumper($body));
+            $self->{'logger'}->debug('status: '.Dumper($status));
+            $self->{'logger'}->debug('msg:    '.Dumper($msg));
+            $self->{'logger'}->debug('< '.Dumper($body));
         }
     }
 
@@ -793,9 +794,9 @@ sub _send {
         } else {
             $Monitoring::Livestatus::ErrorMessage = $msg;
         }
-        $self->{'logger'}->error($status." - ".$Monitoring::Livestatus::ErrorMessage." in query:\n'".$statement) if $self->{'verbose'};
+        $self->{'logger'}->error($status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement) if $self->{'verbose'};
         if($self->{'errors_are_fatal'}) {
-            croak("ERROR ".$status." - ".$Monitoring::Livestatus::ErrorMessage." in query:\n'".$statement."'\n");
+            croak('ERROR '.$status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement."\n");
         }
         return;
     }
@@ -829,7 +830,7 @@ sub _send {
             };
         }
         if($@) {
-            my $message = "ERROR ".$@." in text: '".$body."'\" for statement: '$statement'\n";
+            my $message = 'ERROR '.$@." in text: '".$body."'\" for statement: '$statement'\n";
             $self->{'logger'}->error($message) if $self->{'verbose'};
             if($self->{'errors_are_fatal'}) {
                 croak($message);
@@ -848,9 +849,9 @@ sub _send {
 
     # for querys with column header, no separate columns will be returned
     if(!defined $keys) {
-        $self->{'logger'}->warn("got statement without Columns: header!") if $self->{'verbose'};
+        $self->{'logger'}->warn('got statement without Columns: header!') if $self->{'verbose'};
         if($self->{'warnings'}) {
-            carp("got statement without Columns: header! -> ".$statement);
+            carp('got statement without Columns: header! -> '.$statement);
         }
         $keys = shift @{$result};
     }
@@ -898,7 +899,7 @@ sub _open {
 
     # return the current socket in keep alive mode
     if($self->{'keepalive'} and defined $self->{'sock'} and $self->{'sock'}->connected) {
-        $self->{'logger'}->debug("reusing old connection") if $self->{'verbose'};
+        $self->{'logger'}->debug('reusing old connection') if $self->{'verbose'};
         return($self->{'sock'});
     }
 
@@ -909,7 +910,7 @@ sub _open {
         $self->{'sock'} = $sock;
     }
 
-    $self->{'logger'}->debug("using new connection") if $self->{'verbose'};
+    $self->{'logger'}->debug('using new connection') if $self->{'verbose'};
     return($sock);
 }
 
@@ -1029,7 +1030,7 @@ sub _send_socket {
     # try to avoid connection errors
     eval {
         local $SIG{PIPE} = sub {
-            die("broken pipe");
+            die('broken pipe');
         };
 
         if($self->{'retries_on_connection_error'} <= 0) {
@@ -1329,42 +1330,34 @@ sub _get_error {
 sub _get_peer {
     my($self) = @_;
 
-    # set options for our peer(s)
-    my %options;
-    for my $opt_key (keys %{$self}) {
-        $options{$opt_key} = $self->{$opt_key};
-    }
-
-    my $peers = [];
-
     # check if the supplied peer is a socket or a server address
     if(defined $self->{'peer'}) {
         if(ref $self->{'peer'} eq '') {
-            my $name = $self->{'name'} || "".$self->{'peer'};
+            my $name = $self->{'name'} || ''.$self->{'peer'};
             if(index($self->{'peer'}, ':') > 0) {
-                push @{$peers}, { 'peer' => "".$self->{'peer'}, type => 'INET', name => $name };
+                return({ 'peer' => ''.$self->{'peer'}, type => 'INET', name => $name });
             } else {
-                push @{$peers}, { 'peer' => "".$self->{'peer'}, type => 'UNIX', name => $name };
+                return({ 'peer' => ''.$self->{'peer'}, type => 'UNIX', name => $name });
             }
         }
         elsif(ref $self->{'peer'} eq 'ARRAY') {
             for my $peer (@{$self->{'peer'}}) {
                 if(ref $peer eq 'HASH') {
                     next if !defined $peer->{'peer'};
-                    $peer->{'name'} = "".$peer->{'peer'} unless defined $peer->{'name'};
+                    $peer->{'name'} = ''.$peer->{'peer'} unless defined $peer->{'name'};
                     if(!defined $peer->{'type'}) {
                         $peer->{'type'} = 'UNIX';
                         if(index($peer->{'peer'}, ':') >= 0) {
                             $peer->{'type'} = 'INET';
                         }
                     }
-                    push @{$peers}, $peer;
+                    return $peer;
                 } else {
                     my $type = 'UNIX';
                     if(index($peer, ':') >= 0) {
                         $type = 'INET';
                     }
-                    push @{$peers}, { 'peer' => "".$peer, type => $type, name => "".$peer };
+                    return({ 'peer' => ''.$peer, type => $type, name => ''.$peer });
                 }
             }
         }
@@ -1375,32 +1368,24 @@ sub _get_peer {
                 if(index($peer, ':') >= 0) {
                     $type = 'INET';
                 }
-                push @{$peers}, { 'peer' => "".$peer, type => $type, name => "".$name };
+                return({ 'peer' => ''.$peer, type => $type, name => ''.$name });
             }
         } else {
-            confess("type ".(ref $self->{'peer'})." is not supported for peer option");
+            confess('type '.(ref $self->{'peer'}).' is not supported for peer option');
         }
     }
     if(defined $self->{'socket'}) {
-        my $name = $self->{'name'} || "".$self->{'socket'};
-        push @{$peers}, { 'peer' => "".$self->{'socket'}, type => 'UNIX', name => $name };
+        my $name = $self->{'name'} || ''.$self->{'socket'};
+        return({ 'peer' => ''.$self->{'socket'}, type => 'UNIX', name => $name });
     }
     if(defined $self->{'server'}) {
-        my $name = $self->{'name'} || "".$self->{'server'};
-        push @{$peers}, { 'peer' => "".$self->{'server'}, type => 'INET', name => $name };
+        my $name = $self->{'name'} || ''.$self->{'server'};
+        return({ 'peer' => ''.$self->{'server'}, type => 'INET', name => $name });
     }
 
     # check if we got a peer
-    if(scalar @{$peers} == 0) {
-        croak('please specify a peer');
-    }
-
-    # clean up
-    delete $options{'peer'};
-    delete $options{'socket'};
-    delete $options{'server'};
-
-    return $peers->[0];
+    croak('please specify a peer');
+    return;
 }
 
 
@@ -1427,7 +1412,7 @@ sub _lowercase_and_verify_options {
 
     for my $key (keys %{$opts}) {
         if($self->{'warnings'} and !defined $allowed_options->{lc $key}) {
-            carp("unknown option used: $key - please use only: ".join(", ", keys %{$allowed_options}));
+            carp("unknown option used: $key - please use only: ".join(', ', keys %{$allowed_options}));
         }
         $return->{lc $key} = $opts->{$key};
     }

@@ -30,7 +30,8 @@ use Thruk::Utils::INC;
 BEGIN {
     Thruk::Utils::INC::clean();
     ## no critic
-    eval "use Thruk::Template::Context;" if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3);
+    eval "use Time::HiRes qw/gettimeofday tv_interval/;" if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 0);
+    eval "use Thruk::Template::Context;"                 if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3);
     ## use critic
 }
 use Carp;
@@ -42,7 +43,6 @@ use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
 use MRO::Compat;
-use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils;
 use Thruk::Config;
 use Thruk::Utils::Auth;
@@ -392,7 +392,6 @@ after finalize => sub {
     }
     $c->stats->profile(end => "after finalize");
 
-
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
         my $elapsed = tv_interval($c->stash->{'time_begin'});
         $c->stash->{'memory_end'} = Thruk::Utils::get_memory_usage();
@@ -431,7 +430,7 @@ before prepare_body     => sub {
     my($c) = @_;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
         $c->stash->{'memory_begin'} = Thruk::Utils::get_memory_usage();
-        $c->stash->{'time_begin'}   = [gettimeofday];
+        $c->stash->{'time_begin'}   = [gettimeofday()];
     }
     $c->stats->profile(begin => "prepare_body");
     return;

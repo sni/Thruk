@@ -62,7 +62,6 @@ sub new {
         }
     }
 
-    $self->reconnect();
     return $self;
 }
 
@@ -221,6 +220,7 @@ return the process info
 =cut
 sub get_processinfo {
     my $self = shift;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_processinfo');
     $self->{'ua'}->timeout($self->{'timeout'});
@@ -247,6 +247,7 @@ returns if this user is allowed to submit commands
 =cut
 sub get_can_submit_commands {
     my($self,$user) = @_;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_can_submit_commands', [$user]);
     my($typ, $size, $data) = @{$res};
@@ -264,6 +265,7 @@ returns a list of contactgroups by contact
 =cut
 sub get_contactgroups_by_contact {
     my($self,$user) = @_;
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     confess("no user") unless defined $user;
     my $res = $self->_req('get_contactgroups_by_contact', [$user]);
@@ -487,6 +489,7 @@ sub get_logs {
         @options = %options;
     }
     # increased timeout for logs
+    $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
     my($typ, $size, $data) = @{$res};
@@ -682,6 +685,7 @@ sub _req {
         $options->{'auth'} = $args->{'auth'} if defined $args->{'auth'};
     }
 
+    $self->{'ua'} || $self->reconnect();
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},

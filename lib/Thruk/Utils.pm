@@ -13,7 +13,7 @@ Utilities Collection for Thruk
 use strict;
 use warnings;
 use utf8;
-use Carp;
+use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use File::Slurp qw/read_file/;
@@ -21,8 +21,8 @@ use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Utils::IO;
-use Config::General;
+use Thruk::Backend::Pool qw//;
+use Thruk::Utils::IO qw//;
 
 ##############################################
 =head1 METHODS
@@ -231,10 +231,9 @@ sub read_cgi_cfg {
       ) {
         $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
         $c->log->debug("reading $file") if defined $c;
-        $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
+        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
-        my $conf = new Config::General($file);
-        %{$config->{'cgi_cfg'}} = $conf->getall;
+        $config->{'cgi_cfg'}           = Thruk::Backend::Pool::read_config_file($file);
     }
 
     $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;
