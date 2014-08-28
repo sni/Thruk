@@ -30,9 +30,8 @@ returns a filter which can be used for authorization
 
 =cut
 sub get_auth_filter {
-    my $c      = shift;
-    my $type   = shift;
-    my $strict = shift || 0;
+    my($c, $type, $strict) = @_;
+    $strict = 0 unless defined $strict;
 
     return if $type eq 'status';
 

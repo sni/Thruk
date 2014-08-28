@@ -420,6 +420,10 @@ sub _nice_ext_value {
 ##########################################################
 sub _task_status {
     my($self, $c) = @_;
+
+    # make status group filter faster
+    $c->stash->{'cache_groups_filter'} = {};
+
     my $types = {};
     if($c->request->parameters->{'types'}) {
         $types = decode_json($c->request->parameters->{'types'});

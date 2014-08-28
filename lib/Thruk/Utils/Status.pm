@@ -1398,18 +1398,36 @@ sub get_groups_filter {
 
     return(\@hostfilter, \@servicefilter) if $value eq '';
 
-    my $groups;
-    if($type eq 'hostgroup') {
-        $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ] );
+    my @names;
+    if($c->stash->{'cache_groups_filter'}) {
+        my $cache = $c->stash->{'cache_groups_filter'};
+        if($type eq 'hostgroup') {
+            $cache->{$type} = $c->{'db'}->get_hostgroup_names() unless defined $cache->{$type};
+        }
+        elsif($type eq 'servicegroup') {
+            $cache->{$type} = $c->{'db'}->get_servicegroup_names() unless defined $cache->{$type};
+        }
+        elsif($type eq 'contacts') {
+            $cache->{$type} = $c->{'db'}->get_contact_names() unless defined $cache->{$type};
+        }
+        ## no critic
+        @names = grep(/$value/i, @{$cache->{$type}});
+        ## use critic
+        if(scalar @names == 0) { @names = (''); }
+    } else {
+        my $groups;
+        if($type eq 'hostgroup') {
+            $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        elsif($type eq 'servicegroup') {
+            $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        elsif($type eq 'contacts') {
+            $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
+        if(scalar @names == 0) { @names = (''); }
     }
-    elsif($type eq 'servicegroup') {
-        $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ] );
-    }
-    elsif($type eq 'contacts') {
-        $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ] );
-    }
-    my @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
-    if(scalar @names == 0) { @names = (''); }
 
     my $group_op = '!>=';
     if($op eq '=' or $op eq '~~') {
