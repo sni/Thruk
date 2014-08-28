@@ -1121,6 +1121,7 @@ TP.iconShowEditDialog = function(panel) {
                     }
                 }
                 TP.suppressIconTip = false;
+                panel.el.dom.style.outline = "";
                 panel.setIconLabel();
             }
         }
@@ -1147,6 +1148,9 @@ TP.iconShowEditDialog = function(panel) {
     };
     renderUpdate();
     settingsWindow.renderUpdate = renderUpdate;
+
+    /* highlight current icon */
+    panel.el.dom.style.outline = "2px dotted orange";
 
     window.setTimeout(function() {
         TP.iconSettingsWindow.toFront();
