@@ -2084,7 +2084,6 @@ sub _summarize_servicegroup_query {
 ##########################################################
 sub _summarize_query {
     my($self, $c, $incl_hst, $incl_svc, $hostfilter, $servicefilter) = @_;
-    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], columns => [qw/name state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                   hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                 };
