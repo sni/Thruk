@@ -51,7 +51,7 @@ var TP = {
             id = 'new_or_empty';
         }
 
-        TP.log('[global] add_pantab: id:'+id+', replace_id: '+replace_id);
+        TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
 
         /* get tab data from server */
         if(id && cp.state[id] == undefined) {
