@@ -97,5 +97,5 @@ Ext.onReady(function() {
     cleanUnderscoreUrl();
 
     /* preload images */
-    window.setTimeout(preloader, 5000);
+    window.setTimeout(preloader, 3000);
 });
