@@ -189,7 +189,13 @@ Ext.define('TP.formFilterSelect', {
             },
             'select': function(combo, records, eOpts) {
                 /* if something has been selected from the dropdown, change operator to =, because its most likly not regexp */
-                this.up('panel').items.getAt(2).setValue('=');
+                var old = this.up('panel').items.getAt(2).getValue();
+                if(old == '~') {
+                    this.up('panel').items.getAt(2).setValue('=');
+                }
+                if(old == '!~') {
+                    this.up('panel').items.getAt(2).setValue('!=');
+                }
             }
         }
     }, {
