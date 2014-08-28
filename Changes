@@ -2,9 +2,11 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
 next:
+          - livestatus performance improvements
           - updated jquery to 1.11.1
           - added new configuration setting: max_process_memory
           - Panorama View:
+            - added show details link to icons
             - fixed memory leak in generic url panel
             - fixed problem with stopped timers after import
             - reload every x hours to prevent noncatchable memory leaks

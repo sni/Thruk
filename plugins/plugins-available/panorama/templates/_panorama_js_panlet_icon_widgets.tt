@@ -2085,22 +2085,31 @@ TP.iconClickHandlerDo = function(id) {
     }
     var link   = panel.xdata.link.link;
     var newTab = panel.xdata.link.newtab;
-    var matches = link.match(/dashboard:\/\/(\d+)$/);
-    if(matches && matches[1]) {
-        // is that tab already open?
-        var tabpan = Ext.getCmp('tabpan');
-        var tab_id = "tabpan-tab_"+matches[1];
-        var tab    = Ext.getCmp(tab_id);
-        if(tab) {
-            tabpan.setActiveTab(tab);
-        } else {
-            var replace;
-            if(!newTab) {
-                replace = tabpan.getActiveTab().id;
+    var special = link.match(/dashboard:\/\/(.+)$/);
+    if(special && special[1]) {
+        link = undefined;
+        if(special[1].match(/^\d+$/)) {
+            // is that tab already open?
+            var tabpan = Ext.getCmp('tabpan');
+            var tab_id = "tabpan-tab_"+special[1];
+            var tab    = Ext.getCmp(tab_id);
+            if(tab) {
+                tabpan.setActiveTab(tab);
+            } else {
+                var replace;
+                if(!newTab) {
+                    replace = tabpan.getActiveTab().id;
+                }
+                TP.add_pantab(tab_id, replace);
             }
-            TP.add_pantab(tab_id, replace);
         }
-    } else {
+        else if(special[1] == 'show_details') {
+            link = TP.getIconDetailsLink(panel);
+        } else {
+            TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
+        }
+    }
+    if(link) {
         panel.el.dom.href=link;
         panel.passClick = true;
         if(newTab) {

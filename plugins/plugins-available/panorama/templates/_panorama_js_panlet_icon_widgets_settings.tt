@@ -770,9 +770,10 @@ TP.iconShowEditDialog = function(panel) {
                 items: [{
                     fieldLabel: 'Hyperlink',
                     xtype:      'textfield',
-                    name:       'link'
+                    name:       'link',
+                    emptyText:  'http://... or predefined from below'
                 }, {
-                    fieldLabel: 'Link another Dashboard',
+                    fieldLabel: 'Predefined Links',
                     xtype:      'fieldcontainer',
                     items:      [{
                         xtype:      'button',
@@ -795,6 +796,10 @@ TP.iconShowEditDialog = function(panel) {
                                     icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
                                     disabled: true
                                 }]
+                            }, {
+                                text:    'Show Details',
+                                icon:    '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                                handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://show_details'}) }
                             }],
                             listeners: {
                                 afterrender: function(This, eOpts) {
