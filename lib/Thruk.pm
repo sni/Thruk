@@ -25,6 +25,13 @@ BEGIN {
 };
 
 ###################################################
+# load timing class
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('starting thruk');
+};
+
+###################################################
 # clean up env
 use Thruk::Utils::INC;
 BEGIN {
@@ -33,6 +40,7 @@ BEGIN {
     eval "use Time::HiRes qw/gettimeofday tv_interval/;" if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 0);
     eval "use Thruk::Template::Context;"                 if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3);
     ## use critic
+    #&timing_breakpoint('cleaned env');
 }
 use Carp;
 use Moose;
@@ -60,6 +68,7 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 BEGIN {
+    #&timing_breakpoint('loading Catalyst');
     # Compress - temporarily disabled till https://rt.cpan.org/Ticket/Display.html?id=87998 gets fixed
     my @catalyst_plugins = qw/
           Thruk::ConfigLoader
@@ -80,8 +89,11 @@ BEGIN {
         @catalyst_plugins = grep(!/^Static::Simple$/mx, @catalyst_plugins);
     }
     require Catalyst;
+    #&timing_breakpoint('loading Catalyst step 1');
     Catalyst->import(@catalyst_plugins);
+    #&timing_breakpoint('loading Catalyst step 2');
     __PACKAGE__->config( encoding => 'UTF-8' );
+    #&timing_breakpoint('loading Catalyst done');
 };
 
 ###################################################
@@ -91,6 +103,7 @@ our $VERSION = '1.84';
 # load config loader
 __PACKAGE__->config(%Thruk::Config::config);
 __PACKAGE__->config( encoding => 'UTF-8' );
+#&timing_breakpoint('config loaded');
 
 ###################################################
 # install leak checker
@@ -108,6 +121,7 @@ if($ENV{THRUK_LEAK_CHECK}) {
 # override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
 $Thruk::Utils::IO::config = __PACKAGE__->config;
+#&timing_breakpoint('setup done');
 
 ###################################################
 binmode(STDOUT, ":encoding(UTF-8)");
@@ -454,6 +468,8 @@ after finalize_cookies  => sub { my($c) = @_; $c->stats->profile(end   => "final
 
 before finalize_body    => sub { my($c) = @_; $c->stats->profile(begin => "finalize_body");    return; };
 after finalize_body     => sub { my($c) = @_; $c->stats->profile(end   => "finalize_body");    return; };
+
+#&timing_breakpoint('start done');
 
 =head1 SEE ALSO
 

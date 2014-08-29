@@ -5,10 +5,11 @@ use strict;
 use threads;
 use Thread::Queue;
 use JSON::XS qw/decode_json encode_json/;
-use Time::HiRes qw/gettimeofday tv_interval/;
+#use Thruk::Timer qw/timing_breakpoint/;
 
 sub new {
     my ($class, %arg) = @_;
+    #&timing_breakpoint('Pool::Simple::new');
     die('no size given')    unless $arg{'size'};
     die('no handler given') unless $arg{'handler'};
     my $self = {
@@ -22,18 +23,23 @@ sub new {
 
     for(1..$self->{'size'}) {
         threads->create('_handle_work', $self);
+        #&timing_breakpoint('Pool::Simple::new thread created');
     }
+    #&timing_breakpoint('Pool::Simple::new done');
     return $self;
 }
 
 sub add_bulk {
     my($self, $jobs) = @_;
+    #&timing_breakpoint('Pool::Simple::add_bulk');
     my @encoded;
     for my $job (@{$jobs}) {
         push @encoded, encode_json($job);
     }
+    #&timing_breakpoint('Pool::Simple::add_bulk encoded');
     $self->{workq}->enqueue(@encoded);
     $self->{num} += scalar @encoded;
+    #&timing_breakpoint('Pool::Simple::add_bulk done');
     return;
 }
 
@@ -41,17 +47,22 @@ sub remove_all {
     my($self) = @_;
     my @res = $self->{retq}->dequeue($self->{num});
     $self->{num} = 0;
+    #&timing_breakpoint('Pool::Simple::remove_all dequeue');
     my @encoded;
     for my $res (@res) {
         push @encoded, decode_json($res);
     }
+    #&timing_breakpoint('Pool::Simple::remove_all decoded');
     return(\@encoded);
 }
 
 sub shutdown {
+    #&timing_breakpoint('Pool::Simple::shutdown');
     for my $thr (threads->list()) {
         $thr->kill('KILL')->detach();
     }
+    #&timing_breakpoint('Pool::Simple::shutdown done');
+    return;
 }
 
 END {
@@ -62,14 +73,19 @@ sub _handle_work {
     my($self) = @_;
     $SIG{'KILL'} = sub { exit; };
     while(my $job = $self->{workq}->dequeue()) {
-        last if $job eq 'EXIT';
+        #&timing_breakpoint('Pool::Simple::_handle_work waited');
         my $enc = decode_json($job);
+        #&timing_breakpoint('Pool::Simple::_handle_work decoded');
         my $res = $self->{'handler'}(@{$enc});
+        #&timing_breakpoint('Pool::Simple::_handle_work worked');
         $enc = encode_json($res);
+        #&timing_breakpoint('Pool::Simple::_handle_work encoded');
         $self->{retq}->enqueue($enc);
+        #&timing_breakpoint('Pool::Simple::_handle_work enqueued');
     }
     # done
     threads->detach;
+    return;
 }
 
 1;

@@ -119,6 +119,7 @@ lib/Thruk/Controller/trends.pm
 lib/Thruk/Model/Thruk.pm
 lib/Thruk/Pool/Simple.pm
 lib/Thruk/Template/Context.pm
+lib/Thruk/Timer.pm
 lib/Thruk/UserAgent.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
@@ -1130,6 +1131,8 @@ root/thruk/usercontent/sounds/ok.mp3
 root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
 script/append.make
+script/disable_debug_timer.sh
+script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
 script/nagexp
 script/nagimp

@@ -5,6 +5,11 @@ use warnings;
 use threads;
 use Carp qw/confess/;
 
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('starting pool');
+};
+
 use Thruk::Pool::Simple qw//;
 use Thruk::Backend::Peer qw//;
 use Thruk::Utils::IO qw//;
@@ -40,6 +45,8 @@ return config with defaults added
 
 sub set_default_config {
     my( $config ) = @_;
+
+    #&timing_breakpoint('set_default_config');
 
     # defaults
     unless($config->{'url_prefix_fixed'}) {
@@ -256,6 +263,7 @@ sub set_default_config {
 
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
 
+    #&timing_breakpoint('set_default_config done');
     return;
 }
 
@@ -272,6 +280,8 @@ init thread connection pool
 sub init_backend_thread_pool {
     our($peer_order, $peers, $pool, $pool_size);
     return if defined $peers;
+
+    #&timing_breakpoint('creating pool');
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
@@ -334,6 +344,7 @@ sub init_backend_thread_pool {
             }
         }
     }
+    #&timing_breakpoint('configs gathered');
 
     if($num_peers > 0) {
         $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
@@ -348,6 +359,7 @@ sub init_backend_thread_pool {
                 push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
+            #&timing_breakpoint('peer created');
         }
         if($pool_size > 1) {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
@@ -363,6 +375,7 @@ sub init_backend_thread_pool {
         }
     }
 
+    #&timing_breakpoint('creating pool done');
     return;
 }
 
