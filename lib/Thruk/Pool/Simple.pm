@@ -2,8 +2,8 @@ package Thruk::Pool::Simple;
 
 use warnings;
 use strict;
-use threads;
-use Thread::Queue;
+use threads qw/yield/;
+use Thread::Queue qw//;
 use JSON::XS qw/decode_json encode_json/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -39,6 +39,7 @@ sub add_bulk {
     $self->{workq}->enqueue(@encoded);
     $self->{num} += scalar @encoded;
     #&timing_breakpoint('Pool::Simple::add_bulk done');
+    yield;
     return;
 }
 
@@ -81,6 +82,7 @@ sub _handle_work {
         #&timing_breakpoint('Pool::Simple::_handle_work encoded');
         $self->{retq}->enqueue($enc);
         #&timing_breakpoint('Pool::Simple::_handle_work enqueued');
+        yield;
     }
     # done
     threads->detach;
