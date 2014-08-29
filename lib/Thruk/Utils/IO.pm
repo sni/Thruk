@@ -17,6 +17,7 @@ use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
 use JSON::XS;
 use Encode qw/encode_utf8/;
+use File::Temp qw/tempfile/;
 
 $Thruk::Utils::IO::config = undef;
 
