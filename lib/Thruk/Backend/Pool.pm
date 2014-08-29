@@ -12,6 +12,7 @@ use Config::General qw//;
 use Cwd qw/getcwd/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 NAME
 
@@ -352,9 +353,8 @@ sub init_backend_thread_pool {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             $pool = Thruk::Pool::Simple->new(
-                min      => $pool_size,
-                max      => $pool_size,
-                do       => [\&Thruk::Backend::Pool::_do_thread ],
+                size    => $pool_size,
+                handler => \&Thruk::Backend::Pool::_do_thread,
             );
             printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
@@ -383,8 +383,7 @@ sub shutdown_backend_thread_pool {
         eval {
             local $SIG{ALRM} = sub { die "alarm\n" };
             alarm(3);
-            $pool->cancel_all();
-            $pool->detach();
+            $pool->shutdown();
             $pool = undef;
         };
         alarm(0);
@@ -404,7 +403,12 @@ do the work on threads
 
 sub _do_thread {
     my($key, $function, $arg, $use_shadow) = @_;
-    return(do_on_peer($key, $function, $arg, $use_shadow));
+    my $t1 = [gettimeofday];
+    my $res = do_on_peer($key, $function, $arg, $use_shadow);
+    my $elapsed = tv_interval($t1);
+    unshift @{$res}, $elapsed;
+    unshift @{$res}, $key;
+    return($res);
 }
 
 ########################################

@@ -1354,33 +1354,33 @@ sub _get_result_parallel {
 
     $c->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
 
-    my %ids;
+    my @jobs;
     for my $key (@{$peers}) {
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
-            my $id;
-            eval {
-                $id = $Thruk::Backend::Pool::pool->add($key, $function, $arg, $use_shadow);
-                $ids{$id} = $key;
-            };
-            confess($@) if $@;
+            push @jobs, [$key, $function, $arg, $use_shadow];
         }
     }
+    $Thruk::Backend::Pool::pool->add_bulk(\@jobs);
 
-    for my $id (keys %ids) {
-        my @res  = $Thruk::Backend::Pool::pool->remove($id);
-        my($typ, $size, $data, $last_error) = @{$res[0]};
+    my $times = {};
+    my $results = $Thruk::Backend::Pool::pool->remove_all();
+    for my $res (@{$results}) {
+        my($key, $time, $typ, $size, $data, $last_error) = @{$res};
+        $times->{$key} = $time;
         chomp($last_error) if $last_error;
-        my $key  = $ids{$id};
         my $peer = $self->get_peer_by_key($key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
         $peer->{'last_error'} = $last_error;
         if(!$last_error and defined $size) {
             $totalsize += $size;
             $type       = $typ;
-            $result->{ $key } = $data;
+            $result->{$key} = $data;
         }
     }
+
+    my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
+    $c->stats->profile( comment => "slowest site: ".$timessorted[0].' -> '.$times->{$timessorted[0]});
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
