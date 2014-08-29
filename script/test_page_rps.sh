@@ -4,9 +4,9 @@ set -e
 set -u
 
 NUM=10
-REQUESTS=30
+REQUESTS=100
 CONCURRENCY=5
-DELAY=2
+DELAY=3
 
 # clean up
 ps -efl | grep thruk_server | grep perl | awk '{ print $4 }' | xargs -r kill >/dev/null 2>&1
