@@ -23,9 +23,8 @@ sub new {
 
     for(1..$self->{'size'}) {
         threads->create('_handle_work', $self);
-        #&timing_breakpoint('Pool::Simple::new thread created');
     }
-    #&timing_breakpoint('Pool::Simple::new done');
+    #&timing_breakpoint('Pool::Simple::new '.$self->{'size'}.' threads created');
     return $self;
 }
 
@@ -71,7 +70,7 @@ END {
 
 sub _handle_work {
     my($self) = @_;
-    $SIG{'KILL'} = sub { exit; };
+    local $SIG{'KILL'} = sub { exit; };
     while(my $job = $self->{workq}->dequeue()) {
         #&timing_breakpoint('Pool::Simple::_handle_work waited');
         my $enc = decode_json($job);

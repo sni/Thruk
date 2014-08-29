@@ -304,6 +304,7 @@ sub init_backend_thread_pool {
     } else {
         $pool_size   = 1;
     }
+    $pool_size       = 1 if $ENV{'THRUK_NO_CONNECTION_POOL'};
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
 
@@ -359,18 +360,18 @@ sub init_backend_thread_pool {
                 push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
-            #&timing_breakpoint('peer created');
         }
+        #&timing_breakpoint('peers created');
         if($pool_size > 1) {
-            printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             $pool = Thruk::Pool::Simple->new(
                 size    => $pool_size,
                 handler => \&Thruk::Backend::Pool::_do_thread,
             );
-            printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
-            printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
     }
@@ -664,6 +665,31 @@ sub read_config_file {
                                             -CComments  => 0,
     );
     return(\%conf);
+}
+
+########################################
+
+=head2 get_memory_usage
+
+  get_memory_usage([$pid])
+
+return memory usage of pid or own process if no pid specified
+
+=cut
+
+sub get_memory_usage {
+    my($pid) = @_;
+    $pid = $$ unless defined $pid;
+
+    my $rsize;
+    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
+    while(my $line = <$ph>) {
+        if($line =~ m/(\d+)/mx) {
+            $rsize = sprintf("%.2f", $1/1024);
+        }
+    }
+    CORE::close($ph);
+    return($rsize);
 }
 
 ########################################

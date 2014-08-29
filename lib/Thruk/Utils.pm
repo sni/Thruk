@@ -1996,25 +1996,6 @@ sub get_template_variable {
     return $VAR1;
 }
 
-########################################
-
-=head2 format_response_error
-
-  format_response_error($response)
-
-return error from response object
-
-=cut
-
-sub format_response_error {
-    my($response) = @_;
-    if(defined $response) {
-        return $response->code().': '.$response->message();
-    } else {
-        return Dumper($response);
-    }
-}
-
 ##############################################
 
 =head2 precompile_templates
@@ -2123,27 +2104,6 @@ sub find_files {
 
 ##########################################################
 
-=head2 save_logs_to_tempfile
-
-  save_logs_to_tempfile($logs)
-
-save logfiles to tempfile
-
-=cut
-
-sub save_logs_to_tempfile {
-    my($data) = @_;
-    my($fh, $filename) = tempfile();
-    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
-    for my $r (@{$data}) {
-        print $fh encode_utf8($r->{'message'}),"\n";
-    }
-    Thruk::Utils::IO::close($fh, $filename);
-    return($filename);
-}
-
-##########################################################
-
 =head2 beautify_diff
 
   beautify_diff($text)
@@ -2166,31 +2126,6 @@ sub beautify_diff {
 
 ##########################################################
 
-=head2 get_memory_usage
-
-  get_memory_usage([$pid])
-
-return memory usage of pid or own process if no pid specified
-
-=cut
-
-sub get_memory_usage {
-    my($pid) = @_;
-    $pid = $$ unless defined $pid;
-
-    my $rsize;
-    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
-    while(my $line = <$ph>) {
-        if($line =~ m/(\d+)/mx) {
-            $rsize = sprintf("%.2f", $1/1024);
-        }
-    }
-    CORE::close($ph);
-    return($rsize);
-}
-
-##########################################################
-
 =head2 check_memory_usage
 
   check_memory_usage($c)
@@ -2201,7 +2136,7 @@ check if memory limit is above the threshold
 
 sub check_memory_usage {
     my($c) = @_;
-    my $mem = get_memory_usage();
+    my $mem = Thruk::Backend::Pool::get_memory_usage();
     $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
     if($mem > $c->config->{'max_process_memory'}) {
         $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');

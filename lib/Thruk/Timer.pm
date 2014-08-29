@@ -15,7 +15,7 @@ sub timing_breakpoint {
     my $elapsed;
     if($lasttime) {
         $elapsed = tv_interval($lasttime);
-        printf(STDERR "%-8s  %.3fs   %-40s %s:%d\n", (threads->tid()||'global'), $elapsed, $msg, $caller[1], $caller[2]);
+        printf(STDERR "%-8s  %6ss     %-40s %s:%d\n", (threads->tid()||'global'), sprintf("%.2f", $elapsed), $msg, $caller[1], $caller[2]);
     }
     $lasttime = $tmp;
     return $elapsed;

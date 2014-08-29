@@ -10,8 +10,6 @@ use DBI;
 use File::Temp qw/tempfile/;
 use Thruk::Utils;
 use Encode qw/encode_utf8/;
-use Monitoring::Availability 0.48;
-use Monitoring::Availability::Logs;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -1540,6 +1538,8 @@ sub _import_logcache_from_file {
         $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
     }
+
+    require Monitoring::Availability::Logs;
 
     my $log_count = 0;
     for my $f (@{$files}) {

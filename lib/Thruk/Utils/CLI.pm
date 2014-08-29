@@ -303,7 +303,7 @@ sub _run {
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
-            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
+            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
         }
@@ -1416,6 +1416,16 @@ sub _get_user_agent {
     my $ua = Thruk::UserAgent->new($config);
     $ua->agent("thruk_cli");
     return $ua;
+}
+
+##############################################
+sub _format_response_error {
+    my($response) = @_;
+    if(defined $response) {
+        return $response->code().': '.$response->message();
+    } else {
+        return Dumper($response);
+    }
 }
 
 ##############################################

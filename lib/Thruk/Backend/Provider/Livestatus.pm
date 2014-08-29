@@ -6,7 +6,6 @@ use Carp;
 use Data::Dumper;
 use Storable qw/dclone/;
 use Monitoring::Livestatus::Class::Lite;
-use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -596,7 +595,7 @@ sub get_logs {
     }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
-    return(Thruk::Utils::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
+    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
     return \@logs;
 }
 

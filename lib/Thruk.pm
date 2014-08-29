@@ -256,7 +256,7 @@ if($ENV{'SIZEME'}) {
     # add signal handler to print memory information
     # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
     $SIG{'USR1'} = sub {
-        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Utils::get_memory_usage());
+        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
         eval {
             require Devel::SizeMe;
             Devel::SizeMe::perl_size();
@@ -408,7 +408,7 @@ after finalize => sub {
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
         my $elapsed = tv_interval($c->stash->{'time_begin'});
-        $c->stash->{'memory_end'} = Thruk::Utils::get_memory_usage();
+        $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
         my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
         $url     = $c->request->uri unless $url;
         $url     =~ s/^cgi\-bin\///mxo;
@@ -443,7 +443,7 @@ sub use_stats {
 before prepare_body     => sub {
     my($c) = @_;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $c->stash->{'memory_begin'} = Thruk::Utils::get_memory_usage();
+        $c->stash->{'memory_begin'} = Thruk::Backend::Pool::get_memory_usage();
         $c->stash->{'time_begin'}   = [gettimeofday()];
     }
     $c->stats->profile(begin => "prepare_body");

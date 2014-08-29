@@ -6,7 +6,6 @@ use Carp;
 use Data::Dumper;
 use JSON::XS;
 use Thruk::UserAgent;
-use Thruk::Utils;
 use Encode qw/encode_utf8/;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -495,7 +494,7 @@ sub get_logs {
     my($typ, $size, $data) = @{$res};
     $self->{'ua'}->timeout($self->{'timeout'});
 
-    return(Thruk::Utils::save_logs_to_tempfile($data), 'file') if $use_file;
+    return(Thruk::Utils::IO::save_logs_to_tempfile($data), 'file') if $use_file;
     return $data;
 }
 
@@ -735,7 +734,7 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
-    die(Thruk::Utils::format_response_error($response));
+    die(_format_response_error($response));
     return;
 }
 
@@ -820,7 +819,7 @@ sub _replace_peer_key {
     return $data;
 }
 
-##############################################
+##########################################################
 sub _clean_code_refs {
     my($var,$lvl) = @_;
     if(ref $var eq 'ARRAY') {
@@ -842,6 +841,16 @@ sub _clean_code_refs {
         }
     }
     return;
+}
+
+##########################################################
+sub _format_response_error {
+    my($response) = @_;
+    if(defined $response) {
+        return $response->code().': '.$response->message();
+    } else {
+        return Dumper($response);
+    }
 }
 
 ##########################################################

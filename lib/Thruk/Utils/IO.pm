@@ -16,6 +16,7 @@ use Carp;
 use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
 use JSON::XS;
+use Encode qw/encode_utf8/;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -204,6 +205,27 @@ sub json_lock_retrieve {
     alarm(0);
     CORE::close($fh);
     return $data;
+}
+
+##############################################
+
+=head2 save_logs_to_tempfile
+
+  save_logs_to_tempfile($logs)
+
+save logfiles to tempfile
+
+=cut
+
+sub save_logs_to_tempfile {
+    my($data) = @_;
+    my($fh, $filename) = tempfile();
+    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+    for my $r (@{$data}) {
+        print $fh encode_utf8($r->{'message'}),"\n";
+    }
+    &close($fh, $filename);
+    return($filename);
 }
 
 ##############################################
