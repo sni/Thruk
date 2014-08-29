@@ -9,7 +9,12 @@ CONCURRENCY=5
 DELAY=3
 
 # clean up
-ps -efl | grep thruk_server | grep perl | awk '{ print $4 }' | xargs -r kill >/dev/null 2>&1
+cleanup() {
+  ps -efl | grep thruk_server | grep perl | awk '{ print $4 }' | xargs -r kill >/dev/null 2>&1
+}
+
+trap "cleanup" EXIT
+cleanup
 
 for tag in integration master $(git tag -l | tail -$NUM | tac); do
   printf "%-12s  " "$tag"
@@ -47,5 +52,5 @@ for tag in integration master $(git tag -l | tail -$NUM | tac); do
   sleep $DELAY
 done
 
-ps -efl | grep thruk_server | grep perl | awk '{ print $4 }' | xargs -r kill
+cleanup
 git checkout master >/dev/null 2>&1
