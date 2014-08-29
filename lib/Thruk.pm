@@ -68,7 +68,7 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 BEGIN {
-    #&timing_breakpoint('loading Catalyst');
+    #&timing_breakpoint('begin thruk');
     # Compress - temporarily disabled till https://rt.cpan.org/Ticket/Display.html?id=87998 gets fixed
     my @catalyst_plugins = qw/
           Thruk::ConfigLoader
@@ -88,10 +88,9 @@ BEGIN {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         @catalyst_plugins = grep(!/^Static::Simple$/mx, @catalyst_plugins);
     }
+    #&timing_breakpoint('loading Catalyst');
     require Catalyst;
-    #&timing_breakpoint('loading Catalyst step 1');
     Catalyst->import(@catalyst_plugins);
-    #&timing_breakpoint('loading Catalyst step 2');
     __PACKAGE__->config( encoding => 'UTF-8' );
     #&timing_breakpoint('loading Catalyst done');
 };
