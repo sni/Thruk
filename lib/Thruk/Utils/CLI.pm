@@ -278,7 +278,7 @@ sub _read_secret {
                 $var_path = $1;
             }
         }
-        Thruk::Utils::IO::close($fh, $file, 1);
+        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
     my $secret;
     my $secretfile = $var_path.'/secret.key';

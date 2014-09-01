@@ -746,7 +746,7 @@ sub read_resource_file {
             $lastcomment = '';
         }
     }
-    Thruk::Utils::IO::close($fh, $file, 1);
+    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     return($macros) unless $with_comments;
     return($macros, $comments);
 }
@@ -1177,7 +1177,7 @@ sub store_global_user_data {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
         return;
     };
-    CORE::close($fh);
+    CORE::close($fh) or die("cannot close file ".$file.".new: ".$!);;
     write_data_file($file.'.new', $data);
     Thruk::Utils::IO::ensure_permissions('file', $file.'.new');
 
@@ -1535,7 +1535,7 @@ sub update_cron_file {
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
         }
-        Thruk::Utils::IO::close($fh, undef, 1);
+        CORE::close($fh) or die("cannot close file ".$c->config->{'cron_file'}.": ".$!);;
     }
 
     # write out new file

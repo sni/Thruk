@@ -95,7 +95,7 @@ sub write {
     my($path,$content,$mtime) = @_;
     open(my $fh, '>', $path) or die('cannot create file '.$path.': '.$!);
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $path);
+    Thruk::Utils::IO::close($fh, $path) or die("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
@@ -172,7 +172,7 @@ sub json_lock_store {
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
     print $fh $json->encode($data);
-    Thruk::Utils::IO::close($fh, $file);
+    Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);;
     alarm(0);
     return 1;
 }
@@ -201,7 +201,7 @@ sub json_lock_retrieve {
         $json->incr_parse($line);
     }
     $data = $json->incr_parse;
-    CORE::close($fh);
+    CORE::close($fh) or die("cannot close file ".$file.": ".$!);;
     alarm(0);
     return $data;
 }
@@ -223,7 +223,7 @@ sub save_logs_to_tempfile {
     for my $r (@{$data}) {
         print $fh encode_utf8($r->{'message'}),"\n";
     }
-    &close($fh, $filename);
+    &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);;
     return($filename);
 }
 
