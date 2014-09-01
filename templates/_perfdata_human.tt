@@ -28,10 +28,10 @@
         [% END %]
         <td class="[% class %]" align="left">[% p.name %]</td>
         <td class="[% class %]" align="right" style="padding-right: 8px;">[% format_number(p.value) %][% p.unit %]</td>
-        [% IF has_warn %]<td class="[% class %]">[% p.warn %]</td>[% END %]
-        [% IF has_crit %]<td class="[% class %]">[% p.crit %]</td>[% END %]
-        [% IF has_min  %]<td class="[% class %]">[% p.min %]</td>[% END %]
-        [% IF has_max  %]<td class="[% class %]">[% p.max %]</td>[% END %]
+        [% IF has_warn %]<td class="[% class %]">[% format_number(p.warn) %]</td>[% END %]
+        [% IF has_crit %]<td class="[% class %]">[% format_number(p.crit) %]</td>[% END %]
+        [% IF has_min  %]<td class="[% class %]">[% format_number(p.min) %]</td>[% END %]
+        [% IF has_max  %]<td class="[% class %]">[% format_number(p.max) %]</td>[% END %]
         <td class="[% class %]">
           [% PROCESS _perfdata_table write="true" perfdata=p.orig state=0 %]
         </td>
