@@ -313,7 +313,7 @@ sub after_execute {
     }
 
     $c->stats->profile(end => "AddDefaults::after");
-    $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', $c->stash->{'total_backend_waited'}));
+    $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', ($c->stash->{'total_backend_waited'} || 0)));
     return;
 }
 
