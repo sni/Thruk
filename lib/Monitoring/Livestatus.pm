@@ -30,9 +30,9 @@ data from Nagios and Icinga
 
 =head1 DESCRIPTION
 
-This module connects via socket/tcp to the check_mk livestatus addon for Nagios
-and Icinga. You first have to install and activate the mklivestatus addon in your
-monitoring installation.
+This module connects via socket/tcp to the livestatus addon for Naemon, Nagios,
+Icinga and Shinken. You first have to install and activate the livestatus addon
+in your monitoring installation.
 
 =head1 CONSTRUCTOR
 
@@ -1456,32 +1456,6 @@ sub _log_statement {
 
 1;
 
-=head1 EXAMPLES
-
-=head2 Multibackend Configuration
-
-    use Monitoring::Livestatus;
-    my $ml = Monitoring::Livestatus->new(
-      name       => 'multiple connector',
-      verbose   => 0,
-      keepalive => 1,
-      peer      => [
-            {
-                name => 'DMZ Monitoring',
-                peer => '50.50.50.50:9999',
-            },
-            {
-                name => 'Local Monitoring',
-                peer => '/tmp/livestatus.socket',
-            },
-            {
-                name => 'Special Monitoring',
-                peer => '100.100.100.100:9999',
-            }
-      ],
-    );
-    my $hosts = $ml->selectall_arrayref("GET hosts");
-
 =head1 SEE ALSO
 
 For more information about the query syntax and the livestatus plugin installation
@@ -1492,8 +1466,6 @@ see the Livestatus page: http://mathias-kettner.de/checkmk_livestatus.html
 Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2009 by Sven Nierlein
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
