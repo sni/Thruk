@@ -68,6 +68,7 @@ our $TRACE   = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;
 
 our $compining_prefix = '';
 our $filter_mode      = '';
+our $filter_cache     = {};
 
 ################################################################################
 
@@ -218,15 +219,64 @@ sub hashref_array {
 
 ################################################################################
 
+=head2 reset_filter
+
+    reset_filter()
+
+removes all current filter
+
+=cut
+sub reset_filter {
+    my($self) = @_;
+    $self->{'_filter'}      = undef;
+    $self->{'_statsfilter'} = undef;
+    return($self);
+}
+
+################################################################################
+
+=head2 save_filter
+
+    save_filter($name)
+
+save this filter with given name which can be reused later.
+
+=cut
+sub save_filter {
+    my($self, $name) = @_;
+    $filter_cache->{$name} = $self->statement(1);
+    return($self);
+}
+
+################################################################################
+
+=head2 apply_filter
+
+    apply_filter($name)
+
+returns true if a filter with this name has been applied. returns false if filter
+does not exist.
+
+=cut
+sub apply_filter {
+    my($self, $name) = @_;
+    return unless $filter_cache->{$name};
+    $self->{'_extra_stm'} = $filter_cache->{$name};
+    $self->{'_columns'}   = undef;
+    return($self);
+}
+
+################################################################################
+
 =head2 statement
 
-    statement()
+    statement($filter_only)
 
-return query as text
+return query as text.
 
 =cut
 sub statement {
-    my($self) = @_;
+    my($self, $filter_only) = @_;
 
     confess("no table??") unless $self->{'_table'};
 
@@ -242,6 +292,10 @@ sub statement {
     if( $self->{'_statsfilter'} ) {
         push @statements, @{$self->_apply_filter($self->{'_statsfilter'}, 'Stats')};
     }
+    if( $self->{'_extra_stm'} ) {
+        push @statements, @{$self->{'_extra_stm'}};
+    }
+    return(\@statements) if $filter_only;
 
     unshift @statements, sprintf("GET %s", $self->{'_table'});
 

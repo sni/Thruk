@@ -730,6 +730,15 @@ returns the host statistics for the tac page
 sub get_host_stats {
     my($self, %options) = @_;
 
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststats')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_host_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
     my $stats = [
         'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
         'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -762,13 +771,8 @@ sub get_host_stats {
         'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
         'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
     ];
-    my $class = $self->_get_class('hosts', \%options);
-    my $rows  = $class->stats($stats)->hashref_array();
-
-    unless(wantarray) {
-        confess("get_host_stats() should not be called in scalar context");
-    }
-    return(\%{$rows->[0]}, 'SUM');
+    $class->reset_filter()->stats($stats)->save_filter('hoststats');
+    return($self->get_host_stats(%options));
 }
 
 ##########################################################
@@ -963,7 +967,7 @@ sub set_verbose {
 
 =head2 _get_class
 
-  _get_class
+  _get_class($tablename, $options)
 
 generic function to return a table class
 

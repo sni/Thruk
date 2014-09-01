@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 use Data::Dumper qw/Dumper/;
-use Carp qw/croak confess/;
+use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
 use Encode qw(encode);
 use JSON::XS qw();
