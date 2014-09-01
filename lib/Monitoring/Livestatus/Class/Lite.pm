@@ -60,7 +60,6 @@ Set peer for live tests.
 use warnings;
 use strict;
 use Carp qw/croak confess/;
-use Scalar::Util qw/blessed/;
 use List::Util qw/first/;
 use Monitoring::Livestatus qw//;
 
@@ -282,7 +281,7 @@ sub _recurse_cond {
     my($cond, $combining_count) = @_;
     $combining_count = $combining_count || 0;
     print STDERR "#IN _recurse_cond $cond $combining_count\n" if $TRACE > 9;
-    my $method = &_METHOD_FOR_refkind("_cond", $cond);
+    my $method = &_METHOD_FOR_refkind('_cond', $cond);
     my ( $child_combining_count, @statment ) = &{\&$method}($cond,$combining_count);
     $combining_count = $child_combining_count;
     print STDERR "#OUT _recurse_cond $cond $combining_count ( $method )\n" if $TRACE > 9;
@@ -319,22 +318,20 @@ sub _cond_ARRAYREF {
 ################################################################################
 sub _cond_HASHREF {
     my($cond, $combining_count) = @_;
-    $combining_count = $combining_count || 0;
+    $combining_count          = $combining_count || 0;
     print STDERR "#IN _cond_HASHREF $cond $combining_count\n" if $TRACE > 9 ;
-    my @all_statment = ();
+    my @all_statment          = ();
     my $child_combining_count = 0;
-    my @child_statment = ();
+    my @child_statment        = ();
 
-    foreach my $key ( keys %{ $cond } ){
+    for my $key (keys %{ $cond }){
         my $value = $cond->{$key};
-        my $method ;
-
-        if ( $key =~ /^-/mxo ){
+        if(index($key, '-') == 0){
             # Child key for combining filters ( -and / -or )
             ( $child_combining_count, @child_statment ) = &_cond_op_in_hash($key, $value, $combining_count);
             $combining_count = $child_combining_count;
-        } else{
-            $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
+        } else {
+            my $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
             ( $child_combining_count, @child_statment ) = &{\&$method}($key, $value, undef ,$combining_count);
             $combining_count = $child_combining_count;
         }
@@ -501,43 +498,34 @@ sub _cond_compining {
 
 ################################################################################
 sub _refkind {
-  my ($data) = @_;
-  my $suffix = '';
-  my $ref;
-  my $n_steps = 0;
-
-  while (1) {
-    # blessed objects are treated like scalars
-    $ref = (blessed $data) ? '' : ref $data;
-    $n_steps += 1 if $ref;
-    last          if $ref ne 'REF';
-    $data = $$data;
+  my($data) = @_;
+  if(!defined $data) {
+    return('UNDEF');
+  }
+  my $ref = ref $data;
+  if(!$ref) {
+    return('SCALAR');
   }
 
-  my $base = $ref || (defined $data ? 'SCALAR' : 'UNDEF');
-
-  return $base . ('REF' x $n_steps);
+  return(uc($ref).'REF');
 }
 
 ################################################################################
 sub _dispatch_refkind {
-    my $value = shift;
-    my $dispatch_table = shift;
+    my($value, $dispatch_table) = @_;
 
-    my $type = &_refkind($value);
-    my $coderef = $dispatch_table->{$type};
-
-    die sprintf("No coderef for %s ( %s ) found!",$value, $type)
-        unless ( ref $coderef eq 'CODE' );
+    my $type    = &_refkind($value);
+    my $coderef = $dispatch_table->{$type} ||
+        die(sprintf("No coderef for %s ( %s ) found!",$value, $type));
 
     return $coderef->();
 }
 
 ################################################################################
 sub _METHOD_FOR_refkind {
-    my $prefix = shift || '';
-    my $value = shift;
-    my $type = &_refkind($value);
+    my($prefix, $value) = @_;
+    $prefix    = '' unless defined $prefix;
+    my $type   = &_refkind($value);
     my $method = sprintf("%s_%s",$prefix,$type);
     return $method;
 }
