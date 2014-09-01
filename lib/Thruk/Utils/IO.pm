@@ -172,9 +172,8 @@ sub json_lock_store {
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
     print $fh $json->encode($data);
-    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
-    alarm(0);
     Thruk::Utils::IO::close($fh, $file);
+    alarm(0);
     return 1;
 }
 
@@ -202,9 +201,8 @@ sub json_lock_retrieve {
         $json->incr_parse($line);
     }
     $data = $json->incr_parse;
-    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
-    alarm(0);
     CORE::close($fh);
+    alarm(0);
     return $data;
 }
 
