@@ -1380,6 +1380,7 @@ sub _get_result_parallel {
     }
 
     my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
+    $c->stash->{'total_backend_waited'} += $times->{$timessorted[0]};
     $c->stats->profile( comment => "slowest site: ".$timessorted[0].' -> '.$times->{$timessorted[0]});
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");

@@ -412,7 +412,7 @@ after finalize => sub {
         $url     = $c->request->uri unless $url;
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
-        $c->log->info(sprintf("Req: %03d, mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", ($Catalyst::COUNT || 0), $c->stash->{'memory_end'}, ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}), $elapsed, $url));
+        $c->log->info(sprintf("Req: %03d, mem:% 7s MB  % 10.2f MB     %.2fs (%.2fs)    %s\n", ($Catalyst::COUNT || 0), $c->stash->{'memory_end'}, ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}), $elapsed, $c->stash->{'total_backend_waited'}, $url));
     }
 
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2) {
