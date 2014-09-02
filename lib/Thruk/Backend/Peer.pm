@@ -225,6 +225,7 @@ sub _initialise_peer {
                                                 peer_key => $self->{'key'},
                                             });
         $self->{'cacheproxy'}->peer_key($self->{'key'});
+        $self->{'cacheproxy'}->{'naemon_optimizations'} = 1;
     }
 
     return;
