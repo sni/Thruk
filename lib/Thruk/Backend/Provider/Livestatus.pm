@@ -787,6 +787,15 @@ returns the services statistics for the tac page
 sub get_service_stats {
     my($self, %options) = @_;
 
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestats')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_service_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
     my $stats = [
         'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
         'total_active'                      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -827,14 +836,8 @@ sub get_service_stats {
         'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
         'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
     ];
-
-    my $class = $self->_get_class('services', \%options);
-    my $rows  = $class->stats($stats)->hashref_array();
-
-    unless(wantarray) {
-        confess("get_service_stats() should not be called in scalar context");
-    }
-    return(\%{$rows->[0]}, 'SUM');
+    $class->reset_filter()->stats($stats)->save_filter('servicestats');
+    return($self->get_service_stats(%options));
 }
 
 ##########################################################
