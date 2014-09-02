@@ -278,7 +278,7 @@ sub selectall_arrayref {
     }
 
     # trim result set down to excepted row count
-    if(defined $limit and $limit >= 1) {
+    if(!$opt->{'offset'} && defined $limit and $limit >= 1) {
         if(scalar @{$result->{'result'}} > $limit) {
             @{$result->{'result'}} = @{$result->{'result'}}[0..$limit-1];
         }
@@ -753,9 +753,25 @@ sub _send {
             ($statement,$keys) = $self->_extract_keys_from_stats_statement($statement);
         }
 
+        # Offset header (currently naemon only)
+        if(defined $opt->{'offset'}) {
+            $statement .= "\nOffset: ".$opt->{'offset'};
+        }
+
+        # Sort header (currently naemon only)
+        if(defined $opt->{'sort'}) {
+            for my $sort (@{$opt->{'sort'}}) {
+                $statement .= "\nSort: ".$sort;
+            }
+        }
+
         # Commands need no additional header
         if($statement !~ m/^COMMAND/mx) {
-            $header .= "OutputFormat: json\n";
+            if($opt->{'wrapped_json'}) {
+                $header .= "OutputFormat: wrapped_json\n";
+            } else {
+                $header .= "OutputFormat: json\n";
+            }
             $header .= "ResponseHeader: fixed16\n";
             if($self->{'keepalive'}) {
                 $header .= "KeepAlive: on\n";
@@ -863,6 +879,12 @@ sub _send {
 sub _post_processing {
     my($self, $result, $opt, $keys) = @_;
 
+    my $total_count;
+    if($opt->{'wrapped_json'}) {
+        $total_count = $result->{'total_count'};
+        $result = $result->{'data'};
+    }
+
     # add peer information?
     my $with_peers = 0;
     if(defined $opt->{'addpeer'} and $opt->{'addpeer'}) {
@@ -887,7 +909,8 @@ sub _post_processing {
 
     # set some metadata
     $self->{'meta_data'} = {
-                    'result_count' => scalar @{$result},
+        'total_count'  => $total_count,
+        'result_count' => scalar @{$result},
     };
 
     return({ keys => $keys, result => $result });
@@ -1408,6 +1431,9 @@ sub _lowercase_and_verify_options {
         'slice'         => 1,
         'sum'           => 1,
         'callbacks'     => 1,
+        'wrapped_json'  => 1,
+        'sort'          => 1,
+        'offset'        => 1,
     };
 
     for my $key (keys %{$opts}) {

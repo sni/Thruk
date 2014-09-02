@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Storable qw/dclone/;
+#use Thruk::Timer qw/timing_breakpoint/;
 use Monitoring::Livestatus::Class::Lite;
 use parent 'Thruk::Backend::Provider::Base';
 
@@ -38,8 +39,9 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
-        'live'   => Monitoring::Livestatus::Class::Lite->new($peer_config),
-        'config' => $config,
+        'live'                 => Monitoring::Livestatus::Class::Lite->new($peer_config),
+        'config'               => $config,
+        'naemon_optimizations' => 0,
     };
     bless $self, $class;
 
@@ -145,10 +147,10 @@ sub get_processinfo {
                     ->hashref_pk('peer_key');
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
+    $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival
     $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
-
     return($data, 'HASH');
 }
 
@@ -223,9 +225,15 @@ sub get_hosts {
         $self->_replace_callbacks($options{'options'}->{'callbacks'});
     }
 
+    # optimized naemon with wrapped_json output
+    if($self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options);
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
@@ -263,7 +271,13 @@ sub get_hosts {
         $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     }
 
+    # get result
     my $data = $self->_get_table('hosts', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
 
     unless(wantarray) {
         confess("get_hosts() should not be called in scalar context");
@@ -377,9 +391,15 @@ returns a list of services
 sub get_services {
     my($self, %options) = @_;
 
+    # optimized naemon with wrapped_json output
+    if($self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options);
+        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+    }
+
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
@@ -429,11 +449,18 @@ sub get_services {
     if(grep {/^state$/mx} @{$options{'columns'}}) {
         $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
     }
+
+    # get result
     my $data = $self->_get_table('services', \%options);
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
     unless(wantarray) {
         confess("get_services() should not be called in scalar context");
     }
-
     return($data, undef, $size);
 }
 
@@ -1138,6 +1165,43 @@ sub _replace_callbacks {
         confess("no callback for ".$key." -> ".$callbacks->{$key}) unless defined $callback;
         $callbacks->{$key} = $callback;
     }
+    return;
+}
+
+##########################################################
+sub _optimized_for_wrapped_json {
+    my($self, $options) = @_;
+    $self->{'optimized'} = 0;
+
+    if($options->{'sort'}) {
+        $options->{'options'}->{'sort'} = [];
+        for my $order (keys %{$options->{'sort'}}) {
+            for my $key (@{$options->{'sort'}->{$order}}) {
+                push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
+                if(   $key eq 'last_state_change_plus'
+                   || $key eq 'state_order'
+                   || $key eq 'peer_name'
+                ) {
+                    delete $options->{'options'}->{'sort'};
+                    return;
+                }
+            }
+        }
+    }
+
+    $options->{'options'}->{'wrapped_json'} = 1;
+    if($options->{'pager'} && $options->{'pager'}->{'entries'}) {
+        my $page = ($options->{'pager'}->{'page'} || 1);
+        $page++   if $options->{'pager'}->{'next'};
+        $page--   if $options->{'pager'}->{'previous'};
+        $page = 1 if $options->{'pager'}->{'first'};
+        $page = $options->{'pager'}->{'pages'} if $options->{'pager'}->{'last'};
+        # offset can only be used if this is the only backend...
+        # so use the minimal limit for now
+        #$options->{'options'}->{'offset'} = $page * $options->{'pager'}->{'entries'};
+        $options->{'options'}->{'limit'}  = $page * $options->{'pager'}->{'entries'};
+    }
+    $self->{'optimized'} = 1;
     return;
 }
 

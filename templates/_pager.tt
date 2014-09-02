@@ -20,6 +20,7 @@
     [% NEXT IF par == 'update.x' %]
     [% NEXT IF par == 'update.y' %]
     [% NEXT IF par == 'page' %]
+    [% NEXT IF par == 'total_pages' %]
     [% NEXT IF par == 'noheader' %]
     [% FOR value IN c.request.query_params.$par.list %]
       <input type="hidden" name="[% par %]" value="[% value %]">
@@ -80,5 +81,6 @@
       [% END %]
     </select>
   [% END %]
+  <input type="hidden" name="total_pages" value="[% pages %]">
   </form>
 [% END %]
