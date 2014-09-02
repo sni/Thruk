@@ -8,6 +8,7 @@ use Data::Page ();
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils ();
 use Thruk::Pool::Simple ();
 use Thruk::Config ();
@@ -1233,6 +1234,7 @@ sub select_backends {
                     previous => exists $c->{'request'}->{'parameters'}->{'previous'}  || $c->{'request'}->{'parameters'}->{'previous.x'},
                     first    => exists $c->{'request'}->{'parameters'}->{'first'}     || $c->{'request'}->{'parameters'}->{'first.x'},
                     last     => exists $c->{'request'}->{'parameters'}->{'last'}      || $c->{'request'}->{'parameters'}->{'last.x'},
+                    pages    => $c->{'request'}->{'parameters'}->{'total_pages'}      || '',
                 };
             } else {
                 $arg{'pager'} = {};
@@ -1314,6 +1316,7 @@ sub _get_result_serial {
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
 
+    my $t1 = [gettimeofday];
     for my $key (@{$peers}) {
         $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);
@@ -1334,6 +1337,8 @@ sub _get_result_serial {
         }
         $c->stats->profile( end => "_get_result_serial($key)");
     }
+    my $elapsed = tv_interval($t1);
+    $c->stash->{'total_backend_waited'} += $elapsed;
     return($result, $type, $totalsize);
 }
 
