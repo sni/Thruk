@@ -2,6 +2,7 @@ package Thruk::Backend::Provider::Mysql;
 
 use strict;
 use warnings;
+#use Thruk::Timer qw/timing_breakpoint/;
 use Carp;
 use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
@@ -127,6 +128,7 @@ close database connection
 sub _disconnect {
     my($self) = @_;
     if(defined $self->{'mysql'}) {
+        #&timing_breakpoint('disconnect');
         $self->{'mysql'}->disconnect();
         delete $self->{'mysql'};
     }
@@ -143,11 +145,13 @@ try to connect to database and return database handle
 sub _dbh {
     my($self) = @_;
     if(!defined $self->{'mysql'}) {
+        #&timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
         my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
         $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1});
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
+        #&timing_breakpoint('connected');
     }
     return $self->{'mysql'};
 }
@@ -954,6 +958,7 @@ sub _import_logs {
     my $files = $options->{'url'} || [];
     $c->stats->profile(begin => "Mysql::_import_logs($mode)");
 
+    #&timing_breakpoint('_import_logs');
     my $forcestart;
     if($options->{'start'}) {
         $forcestart = time() - Thruk::Utils::Status::convert_time_amount($options->{'start'});
@@ -984,6 +989,7 @@ sub _import_logs {
         my $prefix = $key;
         my $peer   = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'enabled'};
+        #&timing_breakpoint('_import_logs '.$key);
         $c->stats->profile(begin => "$key");
         $backend_count++;
         $peer->{'logcache'}->reconnect();
@@ -1008,6 +1014,7 @@ sub _import_logs {
         print "ERROR: ", $@,"\n" if $@ and $verbose;
 
         $c->stats->profile(end => "$key");
+        #&timing_breakpoint('_import_logs done '.$key);
         print "\n" if $verbose;
     }
 
@@ -1019,6 +1026,7 @@ sub _import_logs {
 sub _update_logcache {
     my($self, $c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart) = @_;
 
+    #&timing_breakpoint('_update_logcache');
     unless(defined $blocksize) {
         $blocksize = 86400;
         $blocksize = 365 if $mode eq 'clean';
@@ -1289,6 +1297,8 @@ sub _plugin_lookup {
     my $id = $hash->{$look};
     return $id if $id;
 
+    #&timing_breakpoint('_plugin_lookup');
+
     # check database first
     unless($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup) {
         my @ids = @{$dbh->selectall_arrayref('SELECT output_id FROM `'.$prefix.'_plugin_output` WHERE output = '.$dbh->quote($look).' LIMIT 1')};
@@ -1456,6 +1466,7 @@ sub _fill_lookup_logs {
 sub _import_peer_logfiles {
     my($self,$c,$mode,$peer,$blocksize,$dbh,$stm,$host_lookup,$service_lookup,$plugin_lookup,$verbose,$prefix,$contact_lookup,$forcestart) = @_;
 
+    #&timing_breakpoint('_import_peer_logfiles');
     # get start / end timestamp
     my($mstart, $mend);
     my $filter = [];
@@ -1633,6 +1644,7 @@ sub _insert_logs {
     my($self,$dbh,$stm,$mode,$logs,$host_lookup,$service_lookup,$plugin_lookup,$duplicate_lookup,$verbose,$prefix,$contact_lookup) = @_;
     my $log_count = 0;
     my @values;
+    #&timing_breakpoint('_insert_logs');
     for my $l (@{$logs}) {
         if($mode eq 'update') {
             next if defined $duplicate_lookup->{$l->{'message'}};

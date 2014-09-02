@@ -9,7 +9,6 @@ our @EXPORT_OK = qw(timing_breakpoint);
 my $starttime = [gettimeofday];
 my $lasttime  = $starttime;
 sub timing_breakpoint {
-    return if !$ENV{'THRUK_PERFORMANCE_DEBUG'} or $ENV{'THRUK_PERFORMANCE_DEBUG'} < 3;
     my($msg) = @_;
     my @caller = caller;
     my $tmp = [gettimeofday];
