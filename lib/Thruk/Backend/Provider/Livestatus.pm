@@ -1175,7 +1175,13 @@ sub _optimized_for_wrapped_json {
 
     if($options->{'sort'}) {
         $options->{'options'}->{'sort'} = [];
+        if(ref $options->{'sort'} eq '') {
+            $options->{'sort'} = { ASC => [ $options->{'sort'} ] };
+        }
         for my $order (keys %{$options->{'sort'}}) {
+            if(ref $options->{'sort'}->{$order} ne 'ARRAY') {
+                $options->{'sort'}->{$order} = [$options->{'sort'}->{$order}];
+            }
             for my $key (@{$options->{'sort'}->{$order}}) {
                 push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
                 if(   $key eq 'last_state_change_plus'
