@@ -147,6 +147,7 @@ sub get_processinfo {
                     ->hashref_pk('peer_key');
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
+    $self->{'naemon_optimizations'} = 0;
     $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival
@@ -1177,6 +1178,9 @@ sub _optimized_for_wrapped_json {
         $options->{'options'}->{'sort'} = [];
         if(ref $options->{'sort'} eq '') {
             $options->{'sort'} = { ASC => [ $options->{'sort'} ] };
+        }
+        elsif(ref $options->{'sort'} eq 'ARRAY') {
+            $options->{'sort'} = { ASC => $options->{'sort'} };
         }
         for my $order (keys %{$options->{'sort'}}) {
             if(ref $options->{'sort'}->{$order} ne 'ARRAY') {
