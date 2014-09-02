@@ -8,6 +8,7 @@ use warnings;
 # has to be done really early to save memory
 use lib 'lib';
 BEGIN {
+    $ENV{'THRUK_SRC'} = 'DebugServer';
     # won't work with automatical restarts
     unless(grep {/^\-r/} @ARGV) {
         require Thruk::Backend::Pool;
@@ -23,7 +24,6 @@ BEGIN {
 }
 
 use Catalyst::ScriptRunner;
-$ENV{'THRUK_SRC'} = 'DebugServer';
 Catalyst::ScriptRunner->run('Thruk', 'Server');
 
 1;
