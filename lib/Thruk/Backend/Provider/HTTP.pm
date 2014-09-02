@@ -61,6 +61,7 @@ sub new {
         }
     }
 
+    $self->reconnect();
     return $self;
 }
 

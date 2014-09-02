@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
+use Thruk::Backend::Provider::Livestatus;
 
 our $AUTOLOAD;
 
@@ -212,7 +213,6 @@ sub _initialise_peer {
         }
     }
     if($use_shadow_naemon) {
-        require Thruk::Backend::Provider::Livestatus;
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
                                                 peer     => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
                                                 peer_key => $self->{'key'},
