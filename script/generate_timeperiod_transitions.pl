@@ -43,6 +43,7 @@ Getopt::Long::GetOptions (
    "n|name=s"           => \$options->{'name'},
    "t|time=s"           => \$options->{'time'},
    "d|days=s"           => \$options->{'days'},
+     "human"            => \$options->{'human'},
 ) or do {
     print "usage: $0 [<options>]\n";
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
@@ -53,16 +54,16 @@ if($options->{'help'}) {
     Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
 }
 
-if(!$options->{'start'}) { print "missing start date\n\n"; exit 3; }
+if(!$options->{'start'}) { print "missing start date - see --help for full usage.\n\n"; exit 3; }
 my $start = parse_date($options->{'start'});
-if(!$start) { print "Could not parse start date\n$@\n"; exit 3; }
+if(!$start) { print "Could not parse start date - see --help for full usage.\n$@\n"; exit 3; }
 
-if(!$options->{'end'}) { print "missing end date\n\n"; exit 3; }
+if(!$options->{'end'}) { $options->{'end'} = 'now'; }
 my $end = parse_date($options->{'end'});
-if(!$end) { print "Could not parse end date\n$@\n"; exit 3; }
+if(!$end) { print "Could not parse end date - see --help for full usage.\n$@\n"; exit 3; }
 
-if(!$options->{'name'}) { print "missing timeperiod name\n\n"; exit 3; }
-if(!$options->{'time'}) { print "missing time definition\n\n"; exit 3; }
+if(!$options->{'name'}) { print "missing timeperiod name - see --help for full usage.\n\n"; exit 3; }
+if(!$options->{'time'}) { print "missing time definition - see --help for full usage.\n\n"; exit 3; }
 my @times;
 for my $t (split/,/mx, $options->{'time'}) {
     my($on, $off) = split(/\-/mx, $t);
@@ -98,18 +99,25 @@ my $cur = $start;
 # round to next 0:00
 my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
 $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
+my $result = {};
+my $last_end;
 while($cur < $end) {
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
 
     if(!$days or $days->{$wday}) {
         for my $t (@times) {
-            my $on = mktime(0, $t->{'on'}->[1], $t->{'on'}->[0], $mday, $mon, $year, $wday, $yday, $isdst);
-            print STDERR "on:  ".(localtime $on)."\n" if $options->{'verbose'};
-            print "[".$on."] TIMEPERIOD TRANSITION: ".$options->{'name'}.";0;1\n";
-
+            my $on  = mktime(0, $t->{'on'}->[1],  $t->{'on'}->[0],  $mday, $mon, $year, $wday, $yday, $isdst);
             my $off = mktime(0, $t->{'off'}->[1], $t->{'off'}->[0], $mday, $mon, $year, $wday, $yday, $isdst);
+            if($result->{$on} && $result->{$on} =~ m/;0$/mx) {
+                delete $result->{$on};
+            } else {
+                print STDERR "on:  ".(localtime $on)."\n" if $options->{'verbose'};
+                $result->{$on} = "[".($options->{'human'} ? scalar localtime $on : $on)."] TIMEPERIOD TRANSITION: ".$options->{'name'}.";0;1";
+            }
+            $last_end = $t->{'off'}->[0];
+
             print STDERR "off:  ".(localtime $off)."\n" if $options->{'verbose'};
-            print "[".$off."] TIMEPERIOD TRANSITION: ".$options->{'name'}.";1;0\n";
+            $result->{$off} = "[".($options->{'human'} ? scalar localtime $off : $off)."] TIMEPERIOD TRANSITION: ".$options->{'name'}.";1;0";
         }
     } else {
         print STDERR "skipping  ".(localtime $cur)."\n" if $options->{'verbose'};
@@ -119,9 +127,20 @@ while($cur < $end) {
     $cur = $cur + 86400;
 }
 
+my @sorted_ts = sort keys %{$result};
+
+# assume open end and remove the last off state if it ends on 24:00
+if($last_end && $last_end == 24) { pop @sorted_ts; }
+
+for my $ts (@sorted_ts) {
+    print $result->{$ts},"\n";
+}
+
 ##############################################
 sub parse_date {
     my($string) = @_;
+    # expand MM-DD-YYYY to MM-DD-YYYY 00:00
+    if($string =~ m/^\d+\-\d+\-\d+$/mx) { $string .= " 00:00"; }
     my $timestamp;
     eval {
         $timestamp = Thruk::Utils::_parse_date(undef, $string);
@@ -154,11 +173,13 @@ generate_timeperiod_transitions - Command line utility to generate simple timepe
                                 YYYY-MM-DD HH:MM:SS
                                 YYYY-MM-DD HH:MM
                                 MM-DD-YYYY HH:MM:SS
+                                MM-DD-YYYY
                                 Today,Yesterday, Last Year, ...
   -e, --end=<end date>          End date which supports the same formats like the
                                 start date.
   -t, --time=<time definition>  Time definition, HH::MM
   -d, --days=<days definition>  Day definition, ex.: 1-5 = Mon-Fri
+      --human                   Display human readable timestamps
 
 =head1 DESCRIPTION
 
@@ -192,6 +213,7 @@ script has the following arguments
     YYYY-MM-DD HH:MM:SS
     YYYY-MM-DD HH:MM
     MM-DD-YYYY HH:MM:SS
+    MM-DD-YYYY
     Today,Yesterday, Last Year, ...
 
 =item B<-e> I<end date>, B<--end>=I<end date>
