@@ -52,6 +52,7 @@ requires 'Catalyst::Plugin::ConfigLoader'         => 0;     # required by Cataly
 requires 'Catalyst::Plugin::Authorization::Roles' => 0;     # required by Catalyst::Plugin::Authorization::ThrukRoles
 requires 'Catalyst::Plugin::CustomErrorMessage'   => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Redirect'             => 0;     # required by Thruk
+requires 'Catalyst::Plugin::Static::Simple'       => 0.30;  # required for reports
 requires 'Catalyst::Action::RenderView'           => 0;     # required by Thruk
 requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
 requires 'Log::Dispatch::File'                    => 0;     # required by Thruk / Log4perl example config
@@ -111,7 +112,6 @@ feature     ('author_test',
   -default                                                                  => 0,
   'Catalyst::Devel'                                                         => 0,
   'Catalyst::Plugin::StackTrace'                                            => 0,
-  'Catalyst::Plugin::Static::Simple'                                        => 0.30,
   'CatalystX::LeakChecker'                                                  => 0,
   'HTML::Lint'                                                              => 0,
   'File::BOM'                                                               => 0,
