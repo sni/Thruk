@@ -1279,7 +1279,7 @@ sub _get_contact_lookup {
 ##########################################################
 sub _get_plugin_lookup {
     my($dbh,$peer,$prefix) = @_;
-    my $max_initial_cache = 10000;
+    my $max_initial_cache = 5000;
 
     my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output` LIMIT $max_initial_cache");
     $sth->execute;
@@ -1548,6 +1548,7 @@ sub _import_logcache_from_file {
     if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
         $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
+        #print "plugin output lookup filled with ".(scalar keys %{$plugin_lookup})." entries\n" if $verbose;
     }
 
     require Monitoring::Availability::Logs;
@@ -1555,24 +1556,27 @@ sub _import_logcache_from_file {
     my $log_count = 0;
     for my $f (@{$files}) {
         print $f if $verbose;
-        my $duplicate_lookup = {};
-        if($mode eq 'update') {
-            my($fstart,$fend) = _get_start_end_from_logfile($f);
-            # get already stored logs to filter duplicates
-            $duplicate_lookup = $self->_fill_lookup_logs($peer,$fstart,$fend);
-        }
-
+        my $duplicate_lookup  = {};
+        my $last_duplicate_ts = 0;
         my @values;
         open(my $fh, '<', $f) or die("cannot open ".$f.": ".$!);
         while(my $line = <$fh>) {
             chomp($line);
             &Thruk::Utils::decode_any($line);
-            if($mode eq 'update') {
-                next if defined $duplicate_lookup->{$line};
-            }
-            $log_count++;
+            my $original_line = $line;
             my $l = &Monitoring::Availability::Logs::parse_line($line);
             next unless $l->{'time'};
+
+            if($mode eq 'update') {
+                if($last_duplicate_ts < $l->{'time'}) {
+                    $duplicate_lookup = $self->_fill_lookup_logs($peer,$l->{'time'},$l->{'time'}+86400);
+                    #print "duplicate output lookup filled with ".(scalar keys %{$duplicate_lookup})." entries (".(scalar localtime $l->{'time'})." till ".(scalar localtime $l->{'time'}+86400).")\n" if $verbose;
+                    $last_duplicate_ts = $l->{'time'}+86400;
+                }
+                next if defined $duplicate_lookup->{$original_line};
+            }
+
+            $log_count++;
             $l->{'state_type'} = '';
             if(exists $l->{'hard'}) {
                 if($l->{'hard'}) {
@@ -1615,28 +1619,6 @@ sub _import_logcache_from_file {
     print "it is recommended to run logcacheoptimize after importing logfiles.\n" if $verbose;
 
     return $log_count;
-}
-
-##########################################################
-sub _get_start_end_from_logfile {
-    my($file) = @_;
-    my($start,$end);
-    open(my $fh, '<', $file) or die("cannot open ".$file.": ".$!);
-    my $first_line = <$fh>;
-    my $pos = -1;
-    my $char;
-    my $already_nonblank = 0;
-    while(seek($fh,$pos--,2)) {
-        read $fh,$char,1;
-        last if ($char eq "\n" and $already_nonblank == 1);
-        $already_nonblank = 1 if ($char ne "\n");
-    }
-    my $last_line = <$fh>;
-    CORE::close($fh);
-
-    if($first_line =~ m/^\[(\d+)\]/mx) { $start = $1; }
-    if($last_line  =~ m/^\[(\d+)\]/mx) { $end   = $1; }
-    return($start,$end);
 }
 
 ##########################################################
