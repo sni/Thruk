@@ -9,6 +9,7 @@ use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use IO::Select;
 use Thruk::Utils ();
 use Thruk::Pool::Simple ();
 use Thruk::Config ();
@@ -1315,11 +1316,40 @@ sub _get_result_serial {
     my($self,$peers, $function, $arg, $use_shadow) = @_;
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
-
     my $t1 = [gettimeofday];
+    my $sel;
+    my $socket2peer = {};
+
+    $c->stats->profile( begin => "_get_result_serial() sending") if $use_shadow;
     for my $key (@{$peers}) {
         $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);
+
+        if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs' and $function ne 'send_command') {
+            $sel = IO::Select->new() unless defined $sel;
+            local $ENV{'THRUK_SELECT'} = 1;
+            my @res = @{$peer->{'cacheproxy'}->$function(@{$arg})};
+            my($socket, $opt, $keys) = @res;
+            my $sockets;
+            if(ref $socket eq 'ARRAY') {
+                $sockets = \@res;
+                $socket  = $sockets->[0]->[0];
+            }
+            if(!defined $socket2peer->{$socket}) {
+                $socket2peer->{$socket} = [];
+                $sel->add($socket);
+            }
+            if($sockets) {
+                for my $socket (@{$sockets}) {
+                    my($socket, $opt, $keys) = @{$socket};
+                    push @{$socket2peer->{$socket}}, [$key, $opt, $keys];
+                }
+            } else {
+                push @{$socket2peer->{$socket}}, [$key, $opt, $keys];
+            }
+            $c->stats->profile( end => "_get_result_serial($key)");
+            next;
+        }
 
         # skip already failed peers for this request
         if(!$c->stash->{'failed_backends'}->{$key}) {
@@ -1337,8 +1367,45 @@ sub _get_result_serial {
         }
         $c->stats->profile( end => "_get_result_serial($key)");
     }
+    $c->stats->profile( end => "_get_result_serial() sending") if $use_shadow;
+
+    # collect select results
+    if($sel) {
+        $c->stats->profile( begin => "_get_result_serial collecting");
+        while($sel->count() > 0) {
+            for my $sock ($sel->can_read(5)) {
+                my($key, $opt, $keys) = @{shift @{$socket2peer->{$sock}}};
+                $sel->remove($sock) if scalar @{$socket2peer->{$sock}} == 0;
+                my $peer = $self->get_peer_by_key($key);
+                # read plain json from socket
+                my($status, $msg, $recv) = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->_read_socket_do($sock);
+                die("Error for: ".$key."\n".$msg."\n".$recv) if !$status or $status != 200;
+                # add peer data
+                my $res= $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($recv, $opt, $keys);
+                # convert into hash
+                $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $opt, undef, $res);
+                my @res = $peer->{'cacheproxy'}->$function(data => $res);
+                my($data,$typ,$size) = @res;
+                if(defined $data and !defined $size) {
+                    if(ref $data eq 'ARRAY') {
+                        $size = scalar @{$data};
+                    }
+                    elsif(ref $data eq 'HASH') {
+                        $size = scalar keys %{$data};
+                    }
+                }
+                $size = 0 unless defined $size;
+                $totalsize += $size;
+                $type       = $typ;
+                $result->{$key} = $data;
+            }
+        }
+        $c->stats->profile( end => "_get_result_serial collecting");
+    }
+
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_backend_waited'} += $elapsed;
+
     return($result, $type, $totalsize);
 }
 

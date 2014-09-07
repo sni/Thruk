@@ -262,7 +262,7 @@ column aliases can be defined with a rename hash
 =cut
 
 sub selectall_arrayref {
-    my($self, $statement, $opt, $limit) = @_;
+    my($self, $statement, $opt, $limit, $result) = @_;
     $limit = 0 unless defined $limit;
 
     # make opt hash keys lowercase
@@ -270,7 +270,10 @@ sub selectall_arrayref {
 
     $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
 
-    my $result = &_send($self, $statement, $opt);
+    unless($result) {
+        $result = &_send($self, $statement, $opt);
+        return $result if $ENV{'THRUK_SELECT'};
+    }
 
     if(!defined $result) {
         return unless $self->{'errors_are_fatal'};
@@ -790,6 +793,7 @@ sub _send {
         my $send = "$statement\n$header";
         $self->{'logger'}->debug('> '.Dumper($send)) if $self->{'verbose'};
         ($status,$msg,$body) = &_send_socket($self, $send);
+        return([$status, $opt, $keys]) if $ENV{'THRUK_SELECT'};
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
@@ -868,17 +872,27 @@ sub _send {
         $keys = shift @{$result};
     }
 
-    return($self->_post_processing($result, $opt, $keys));
+    return(&post_processing($self, $result, $opt, $keys));
 }
 
 ########################################
-sub _post_processing {
+
+=head2 post_processing
+
+ $ml->post_processing($result, $options, $keys)
+
+returns postprocessed result.
+
+Useful when using select based io.
+
+=cut
+sub post_processing {
     my($self, $result, $opt, $keys) = @_;
 
     my $total_count;
     if($opt->{'wrapped_json'}) {
         $total_count = $result->{'total_count'};
-        $result = $result->{'data'};
+        $result      = $result->{'data'};
     }
 
     # add peer information?
@@ -1055,6 +1069,7 @@ sub _send_socket {
         if($self->{'retries_on_connection_error'} <= 0) {
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
+            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
@@ -1063,6 +1078,7 @@ sub _send_socket {
             $retries++;
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
+            return $sock if $ENV{'THRUK_SELECT'};
             ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
@@ -1075,14 +1091,16 @@ sub _send_socket {
     if($@) {
         $self->{'logger'}->debug("try 1 failed: $@") if $self->{'verbose'};
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
+            return $sock if $ENV{'THRUK_SELECT'};
             return(&_read_socket_do($self, $sock, $statement));
         }
         croak($@) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
+    return $sock if $ENV{'THRUK_SELECT'};
     croak($msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);

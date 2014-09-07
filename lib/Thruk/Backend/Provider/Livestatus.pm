@@ -127,24 +127,30 @@ return the process info
 sub get_processinfo {
     my($self, %options) = @_;
     my $key = $self->peer_key();
-    unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-                      accept_passive_host_checks accept_passive_service_checks check_external_commands
-                      check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
-                      enable_notifications execute_host_checks execute_service_checks last_command_check
-                      last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
-                      process_performance_data program_start program_version interval_length
-        /];
-        if(defined $options{'extra_columns'}) {
-            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+    my $data;
+    if(defined $options{'data'}) {
+        $data = { $key => $options{'data'}->[0] };
+    } else {
+        unless(defined $options{'columns'}) {
+            $options{'columns'} = [qw/
+                          accept_passive_host_checks accept_passive_service_checks check_external_commands
+                          check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
+                          enable_notifications execute_host_checks execute_service_checks last_command_check
+                          last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
+                          process_performance_data program_start program_version interval_length
+            /];
+            if(defined $options{'extra_columns'}) {
+                push @{$options{'columns'}}, @{$options{'extra_columns'}};
+            }
         }
-    }
 
-    my $data = $self->{'live'}
-                    ->table('status')
-                    ->columns(@{$options{'columns'}})
-                    ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
-                    ->hashref_pk('peer_key');
+        $data = $self->{'live'}
+                     ->table('status')
+                     ->columns(@{$options{'columns'}})
+                     ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
+                     ->hashref_pk('peer_key');
+        return $data if $ENV{'THRUK_SELECT'};
+    }
 
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
     $self->{'naemon_optimizations'} = 0;
@@ -273,6 +279,7 @@ sub get_hosts {
 
     # get result
     my $data = $self->_get_table('hosts', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -760,6 +767,7 @@ sub get_host_stats {
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststats')) {
         my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_host_stats() should not be called in scalar context");
         }
@@ -817,6 +825,7 @@ sub get_service_stats {
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestats')) {
         my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
         unless(wantarray) {
             confess("get_service_stats() should not be called in scalar context");
         }
@@ -887,6 +896,7 @@ sub get_performance_stats {
     my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
     my $data = {};
+    my $selects = [];
     for my $type (qw{hosts services}) {
         my $stats = [
             $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -906,7 +916,11 @@ sub get_performance_stats {
         $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data = { %{$data}, %{$rows->[0]} }
+        }
 
         # add stats for active checks
         $stats = [
@@ -924,7 +938,11 @@ sub get_performance_stats {
         $rows = $class
                     ->filter([ has_been_checked => 1, check_type => 0 ])
                     ->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data = { %{$data}, %{$rows->[0]} };
+        }
 
         # add stats for passive checks
         $stats = [
@@ -935,9 +953,14 @@ sub get_performance_stats {
         $class = $self->_get_class($type, \%options);
         $rows  = $class->filter([ has_been_checked => 1, check_type => 1 ])
                        ->stats($stats)->hashref_array();
-        $data  = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data  = { %{$data}, %{$rows->[0]} };
+        }
     }
 
+    return $selects if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_performance_stats() should not be called in scalar context");
     }
@@ -965,6 +988,7 @@ sub get_extra_perf_stats {
                         log_messages log_messages_rate forks forks_rate
                   /)
                   ->hashref_array();
+    return $data if $ENV{'THRUK_SELECT'};
 
     if(defined $data) {
         $data = shift @{$data};

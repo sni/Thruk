@@ -219,10 +219,11 @@ sub _initialise_peer {
             undef $use_shadow_naemon;
         }
     }
-    if($use_shadow_naemon) {
+    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
-                                                peer     => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
-                                                peer_key => $self->{'key'},
+                                                peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
+                                                peer_key  => $self->{'key'},
+                                                #keepalive => 1,
                                             });
         $self->{'cacheproxy'}->peer_key($self->{'key'});
         $self->{'cacheproxy'}->{'naemon_optimizations'} = 1;

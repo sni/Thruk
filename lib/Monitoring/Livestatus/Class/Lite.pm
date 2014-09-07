@@ -195,6 +195,7 @@ sub hashref_pk {
 
     my %indexed;
     my @data = $self->hashref_array();
+    return $data[0] if $ENV{'THRUK_SELECT'};
     confess('undefined index: '.$key) if(defined $data[0] and !defined $data[0]->{$key});
     for my $row (@data) {
         $indexed{$row->{$key}} = $row;
@@ -214,6 +215,7 @@ return result as array
 sub hashref_array {
     my($self) = @_;
     my @data = $self->_execute();
+    return $data[0] if $ENV{'THRUK_SELECT'};
     return wantarray ? @data : \@data;
 }
 
@@ -316,6 +318,7 @@ sub _execute {
     $options->{'slice'} = {};
 
     my $return = $self->{'_class'}->selectall_arrayref($statement, $options);
+    return $return if $ENV{'THRUK_SELECT'};
 
     return wantarray ? @{ $return } : $return;
 }
