@@ -75,8 +75,10 @@ trap "cleanup" EXIT
 
 #################################################
 # run tests
+branch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
 tags=$(git tag -l | awk -F- '{ print $1 }' | sort -u | tail -$NUM | tac)
-for tag in master $tags; do
+if [ "$branch" != "master" ]; then tags="master $tags"; fi
+for tag in $branch $tags; do
   if [[ $tag == v* ]]; then
     # get latest sp for this tag
     tag=$(git tag -l | grep $tag | tail -n 1)
@@ -87,4 +89,4 @@ done
 #################################################
 # clean up
 cleanup
-switch_tag "master"
+switch_tag "$branch"
