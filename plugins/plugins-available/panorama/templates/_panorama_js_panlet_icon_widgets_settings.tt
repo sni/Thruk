@@ -1216,14 +1216,21 @@ TP.openLabelEditorWindow = function(panel) {
         fbar: [/* panlet setting cancel button */
                { xtype:  'button',
                  text:   'cancel',
-                 handler: function(This) { Ext.getCmp('label_textfield').setValue(oldValue); This.up('window').destroy(); }
+                 handler: function(This) {
+                    var labelEditorWindow = This.up('window');
+                    TP.modalWin = labelEditorWindow.oldModalWindow;
+                    Ext.getCmp('label_textfield').setValue(oldValue);
+                    labelEditorWindow.destroy();
+                 }
                },
                /* panlet setting save button */
                { xtype:  'button',
                  text:   'save',
                  handler: function(This) {
-                    Ext.getCmp('label_textfield').setValue(This.up('window').down('textarea').getValue())
-                    This.up('window').destroy();
+                    var labelEditorWindow = This.up('window');
+                    TP.modalWin = labelEditorWindow.oldModalWindow;
+                    Ext.getCmp('label_textfield').setValue(labelEditorWindow.down('textarea').getValue())
+                    labelEditorWindow.destroy();
                  }
                }
         ],
@@ -1253,9 +1260,9 @@ TP.openLabelEditorWindow = function(panel) {
                     xtype:   'label',
                     cls:     'labelhelp',
                     html:    '<p>Use HTML to format your label<br>'
-                            +'Ex.: <i>Host &lt;b&gt;name&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
+                            +'Ex.: <i>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/i>, Newlines: <i>&lt;br&gt;<\/i><\/p>'
                             +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
-                            +'Ex.: <i>Host XY: {{plugin_output}}<\/i><\/p>'
+                            +'Ex.: <i>Host {{name}}: {{plugin_output}}<\/i><\/p>'
                             +'<p>You may also do calculations inside placeholders like this:<br>'
                             +'Ex.: <i>Group XY {{totals.ok}}/{{totals.ok + totals.critical + totals.warning + totals.unknown}}<\/i><\/p>'
                             +'<p>use sprintf to format numbers:<br>'
@@ -1323,6 +1330,9 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
+    labelEditorWindow.oldModalWindow = TP.modalWin;
+    TP.modalWin = labelEditorWindow;
+    labelEditorWindow.toFront();
 }
 
 TP.setIconSettingsValues = function(xdata) {
