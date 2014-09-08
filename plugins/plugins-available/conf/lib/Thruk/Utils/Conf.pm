@@ -34,8 +34,14 @@ sub set_object_model {
 
     my $cached_data = $c->cache->get->{'global'} || {};
     Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
-
     $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
+
+    # if this is no obj config yet, try updating process info which updates
+    # configuration information from http backends
+    if(!$c->stash->{has_obj_conf}) {
+        Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, undef, 1);
+        $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
+    }
 
     return unless $c->stash->{has_obj_conf};
 
