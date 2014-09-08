@@ -1128,7 +1128,6 @@ var TP = {
 
     /* do the availability update */
     updateAllLabelAvailabilityDo: function(tab, id, xdata) {
-        if(!TP.initialized)               { return; }
         if(!TP.availabilityUpdateRunning) { TP.availabilityUpdateRunning = {}; }
         if(TP.availabilityUpdateRunning[tab.id]) { return; }
         var statusReq = TP.getStatusReq(tab, id, xdata);
