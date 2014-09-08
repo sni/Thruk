@@ -229,13 +229,15 @@ sub cancel {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    update_status($dir, 99.9, 'canceled');
-
-    my $pid = read_file($dir."/pid");
-    kill(-15, $pid);
-    sleep(1);
-    kill(-2, $pid);
-    sleep(1);
+    my $pidfile = $dir."/pid";
+    if(-f $pidfile) {
+        my $pid = read_file($pidfile);
+        update_status($dir, 99.9, 'canceled');
+        kill(-15, $pid);
+        sleep(1);
+        kill(-2, $pid);
+        sleep(1);
+    }
     return _is_running($dir);
 }
 
