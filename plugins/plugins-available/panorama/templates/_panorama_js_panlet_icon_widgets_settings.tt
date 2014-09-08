@@ -1245,7 +1245,7 @@ TP.openLabelEditorWindow = function(panel) {
             items:        [{
                 xtype:      'textarea',
                 fieldLabel: 'Label',
-                value:       Ext.getCmp('label_textfield').getValue(),
+                value:       Ext.getCmp('label_textfield').getValue().replace(/<br>/g,"<br>\n"),
                 id:         'label_textfield_edit',
                 height:      90,
                 listeners: {
@@ -1318,8 +1318,10 @@ TP.openLabelEditorWindow = function(panel) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
                                         var val = Ext.htmlDecode(e.innerHTML);
                                         if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                        if(val.match(/<br>/)) { val += "\n"; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);
                                         Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
+                                        Ext.getCmp('label_textfield_edit').focus();
                                     }
                                 });
                             }
