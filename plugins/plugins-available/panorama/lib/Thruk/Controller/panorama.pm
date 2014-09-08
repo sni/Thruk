@@ -551,6 +551,10 @@ sub _task_textsave {
 ##########################################################
 sub _task_avail {
     my($self, $c) = @_;
+
+    # make status group filter faster
+    $c->stash->{'cache_groups_filter'} = {};
+
     $c->stats->profile(begin => "_task_avail");
     my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_task_avail_update($c)',
                                                    message    => 'availability is being calculated',
@@ -573,7 +577,6 @@ sub _task_avail_update {
 
     if($c->request->parameters->{'avail'}) { $in    = decode_json($c->request->parameters->{'avail'}); }
     if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
-
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
 
     # cache hit?
@@ -597,6 +600,13 @@ sub _task_avail_update {
     my $now  = time();
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
+            # check if this filter is used in availabilities at all
+            my $found = 0;
+            for my $panel (@{$types->{'filter'}->{$f}}) {
+                if($in->{$panel}) { $found = 1; last; }
+            }
+            next unless $found;
+
             Thruk::Utils::Avail::reset_req_parameters($c);
             my $filtername = "$f"; # results in *** glibc detected *** perl: double free or corruption (!prev): 0x0e482c38 *** otherwise
             my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
