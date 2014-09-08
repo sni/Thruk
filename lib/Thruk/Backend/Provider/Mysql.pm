@@ -985,6 +985,7 @@ sub _import_logs {
         return(0, -1);
     }
 
+    my $errors = [];
     for my $key (@{$backends}) {
         my $prefix = $key;
         my $peer   = $c->{'db'}->get_peer_by_key($key);
@@ -1011,7 +1012,10 @@ sub _import_logs {
                 print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
         };
-        print "ERROR: ", $@,"\n" if $@ and $verbose;
+        if($@) {
+            print "ERROR: ", $@,"\n" if $verbose;
+            push @{$errors}, $@;
+        }
 
         $c->stats->profile(end => "$key");
         #&timing_breakpoint('_import_logs done '.$key);
@@ -1019,7 +1023,7 @@ sub _import_logs {
     }
 
     $c->stats->profile(end => "Mysql::_import_logs($mode)");
-    return($backend_count, $log_count);
+    return($backend_count, $log_count, $errors);
 }
 
 ##########################################################
@@ -1108,14 +1112,16 @@ sub _update_logcache {
             $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
         }
     };
-    if($@) {
-        $c->log->info('logcache '.$mode.' failed: '.$@);
-        die($@);
-    }
+    my $error = $@ || '';
 
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
-    $dbh->commit or die $dbh->errstr;
+    $dbh->commit or $error .= $dbh->errstr;
+
+    if($error) {
+        $c->log->info('logcache '.$mode.' failed: '.$error);
+        die($error);
+    }
 
     return $log_count;
 }

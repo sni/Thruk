@@ -1629,6 +1629,7 @@ sub _import_logs {
     }
     $backends = Thruk::Utils::list($backends);
 
+    my $errors = [];
     for my $key (@{$backends}) {
         my $table = 'logs_'.$key;
         my $peer = $c->{'db'}->get_peer_by_key($key);
@@ -1651,14 +1652,17 @@ sub _import_logs {
                 print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
         };
-        print "ERROR: ", $@,"\n" if $@ and $verbose;
+        if($@) {
+            print "ERROR: ", $@,"\n" if $verbose;
+            push @{$errors}, $@;
+        }
 
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
     }
 
     $c->stats->profile(end => "Mongodb::_import_logs($mode)");
-    return($backend_count, $log_count);
+    return($backend_count, $log_count, $errors);
 }
 
 ##########################################################

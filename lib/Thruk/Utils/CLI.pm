@@ -1068,11 +1068,11 @@ sub _cmd_import_logs {
         return($type." logcache does not support this operation\n", 1);
     } else {
         my $t0 = [gettimeofday];
-        my($backend_count, $log_count);
+        my($backend_count, $log_count, $errors);
         if($type eq 'mysql') {
-            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
+            ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         } else {
-            ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+            ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
         }
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
@@ -1081,14 +1081,28 @@ sub _cmd_import_logs {
         $action    = "removed" if $mode eq 'clean';
         Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
-        return(sprintf("OK - %s %i log items from %i site%s successfully in %.2fs (%i/s)\n",
+        my($rc, $msg) = (0, 'OK');
+        my $res = 'successfully';
+        if(scalar @{$errors} > 0) {
+            $res = 'with '.scalar @{$errors}.' errors';
+            ($rc, $msg) = (1, 'ERROR');
+        }
+        my $details = '';
+        if(!$verbose) {
+            # already printed if verbose
+            $details = join("\n", @{$errors})."\n";
+        }
+        return(sprintf("%s - %s %i log items from %i site%s %s in %.2fs (%i/s)\n%s",
+                       $msg,
                        $action,
                        $log_count,
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
+                       $res,
                        ($elapsed),
                        (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
-                       ), 0);
+                       $details,
+                       ), $rc);
     }
 }
 
