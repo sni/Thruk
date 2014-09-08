@@ -24,9 +24,20 @@ TP.graphStore = Ext.create('Ext.data.Store', {
         type:   'ajax',
         url:    'panorama.cgi?task=pnp_graphs',
         method: 'POST',
+        params: {},
         reader: {
             type: 'json',
             root: 'data'
+        }
+    },
+    listeners: {
+        beforeload: function(store, operation, eOpts) {
+            if(store.panel) {
+                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+            } else {
+                store.proxy.extraParams = {};
+            }
+            return true;
         }
     }
 });
@@ -233,6 +244,7 @@ Ext.define('TP.PanletPNP', {
         });
     },
     gearInitCallback: function(panel) {
+        TP.graphStore.panel = panel;
         TP.graphStore.load();
         panel.updateSource(true);
     }
