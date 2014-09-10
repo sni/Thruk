@@ -364,7 +364,8 @@ sub config_substitutions {
     $subs->{ HOME }    ||= sub { shift->path_to( '' ); };
     $subs->{ ENV }    ||=
         sub {
-            my ( $c, $v ) = @_;
+            #my ( $c, $v )...
+            my ( undef, $v ) = @_;
             if (! defined($ENV{$v})) {
                 Catalyst::Exception->throw( message =>
                     "Missing environment variable: $v" );

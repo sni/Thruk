@@ -189,9 +189,10 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
             else {
                 return $c->detach('/error/index/7');
             }
-            my( $host, $service, $backend ) = split /;/mx, $hostdata;
-            my @backends                    = split /\|/mx, defined $backend ? $backend : '';
-            $c->stash->{'lasthost'}         = $host;
+            #my( $host, $service, $backend )...
+            my( $host, undef, $backend ) = split /;/mx, $hostdata;
+            my @backends                 = split /\|/mx, defined $backend ? $backend : '';
+            $c->stash->{'lasthost'}      = $host;
             $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
@@ -217,7 +218,6 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
         }
 
         # service quick commands
-        my $lastservice;
         for my $servicedata ( split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'} ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
@@ -772,8 +772,6 @@ sub _check_reschedule_alias {
     return unless defined $service;
 
     # only passive services
-    my $has_been_checked = $service->{'has_been_checked'} || 0;
-    my $check_type       = $service->{'check_type'}       || 0;
     return if $service->{'has_been_checked'} == 1 and $service->{'check_type'} == 0;
 
     my $aliases     = ref $c->config->{'command_reschedule_alias'} eq 'ARRAY'
@@ -790,7 +788,8 @@ sub _check_reschedule_alias {
 
         my $commands = $service->{'check_command'};
         next unless defined $commands;
-        my($command, $args) = split(/!/mx, $commands, 2);
+        # my($command, $args)...
+        my($command, undef) = split(/!/mx, $commands, 2);
         next unless defined $command;
         if($command =~ /$pattern/mx) {
             $c->request->parameters->{'service'} = $master;

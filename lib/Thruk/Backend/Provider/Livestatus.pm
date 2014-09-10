@@ -198,7 +198,6 @@ sub get_contactgroups_by_contact {
     my($self,$username) = @_;
     confess("no user") unless defined $username;
 
-    my $contactgroups = {};
     my $data = $self->{'live'}
                     ->table('contactgroups')
                     ->columns(qw/name/)

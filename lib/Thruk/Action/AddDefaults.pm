@@ -195,7 +195,6 @@ sub add_defaults {
     # do we have only icinga backends?
     if(!exists $c->config->{'enable_icinga_features'} and defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
-        my $init = $ENV{'OMD_ROOT'}.'/etc/init.d/core';
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
             my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';

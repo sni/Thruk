@@ -71,7 +71,7 @@ sub restart_shadow_naemon_procs {
         if(-s $pidfile) {
             my $pid = read_file($pidfile);
             kill(15, $pid);
-            for my $x (1..30) {
+            for(1..30) {
                 last if kill(0, $pid) == 0;
                 sleep(1);
             }
@@ -127,7 +127,6 @@ sub shutdown_shadow_naemon_procs {
     my($config) = @_;
     return unless $config->{'shadow_naemon_dir'};
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
-        my $peer    = $Thruk::Backend::Pool::peers->{$key};
         my $pidfile = $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.pid';
         if(-s $pidfile) {
             my $pid = read_file($pidfile);

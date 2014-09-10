@@ -50,7 +50,6 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
         }
     }
 
-    my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
     if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
         return $self->_process_bookmarks($c);
     }
@@ -235,7 +234,8 @@ sub _process_raw_request {
     }
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 0;
@@ -316,7 +316,8 @@ sub _process_details_page {
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
@@ -415,7 +416,8 @@ sub _process_hostdetails_page {
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
@@ -539,7 +541,6 @@ sub _process_overview_page {
             $joined_groups{$name}->{'hosts'} = {};
         }
 
-        my( $hostname, $servicename );
         if( $c->stash->{substyle} eq 'host' ) {
             for my $hostname ( @{ $group->{'members'} } ) {
 
@@ -962,7 +963,8 @@ sub _process_perfmap_page {
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( undef, $servicefilter, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes

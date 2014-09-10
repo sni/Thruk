@@ -799,7 +799,8 @@ sub _renew_logcache {
 
     # check if this is the first import at all
     # and do a external import in that case
-    my($get_results_for, $arg_array, $arg_hash) = $self->select_backends('renew_logcache', \@_);
+    #my($get_results_for, $arg_array, $arg_hash)...
+    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@_);
     my $check = 0;
     $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
     for my $key (@{$get_results_for}) {
@@ -866,7 +867,6 @@ sub _get_macros {
     my $args    = shift;
     my $macros  = shift || {};
 
-    my $string  = $args->{'string'};
     my $host    = $args->{'host'};
     my $service = $args->{'service'};
 

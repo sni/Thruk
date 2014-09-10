@@ -326,7 +326,8 @@ sub _apply_filter {
 
     $compining_prefix = $mode || '';
     $filter_mode      = $mode || 'Filter';
-    my( $combining_count, @statements) = &_recurse_cond($filter);
+    #my( $combining_count, @statements)...
+    my( undef, @statements) = &_recurse_cond($filter);
     return wantarray ? @statements: \@statements;
 }
 
@@ -352,8 +353,6 @@ sub _cond_ARRAYREF {
     print STDERR "#IN _cond_ARRAYREF $conds $combining_count\n" if $TRACE > 9;
     my @statment = ();
 
-    my $child_combining_count = 0;
-    my @child_statment = ();
     my @cp_conds = @{ $conds }; # work with a copy
     while ( my $cond = shift @cp_conds ){
         my ( $child_combining_count, @child_statment ) = &_dispatch_refkind($cond, {
@@ -398,9 +397,10 @@ sub _cond_HASHREF {
 
 ################################################################################
 sub _cond_hashpair_UNDEF {
-    my $key = shift || '';
-    my $value = shift;
-    my $operator = shift || '=';
+    #my($key, $value, $operator)...
+    my($key, undef, $operator) = @_;
+    $key      = '' unless $key;
+    $operator = '=' unless $operator;
     print STDERR "# _cond_hashpair_UNDEF\n" if $TRACE > 9 ;
 
     my $combining_count = shift || 0;
@@ -445,10 +445,11 @@ sub _cond_hashpair_ARRAYREF {
 
 ################################################################################
 sub _cond_hashpair_HASHREF {
-    my $key             = shift || '';
-    my $values          = shift || {};
-    my $combining       = shift || undef;
-    my $combining_count = shift || 0;
+    #my($key, $values, $combining, $combining_count)...
+    my($key, $values, undef, $combining_count) = @_;
+    $key             = '' unless $key;
+    $values          = {} unless $values;
+    $combining_count = 0 unless $combining_count;
 
     print STDERR "#IN Abstract::_cond_hashpair_HASHREF $combining_count\n" if $TRACE > 9;
     my @statment = ();

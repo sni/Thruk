@@ -250,8 +250,8 @@ sub get_can_submit_commands {
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     my $res = $self->_req('get_can_submit_commands', [$user]);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -269,8 +269,8 @@ sub get_contactgroups_by_contact {
     $self->{'ua'}->timeout($self->{'fast_query_timeout'});
     confess("no user") unless defined $user;
     my $res = $self->_req('get_contactgroups_by_contact', [$user]);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -285,7 +285,8 @@ returns a list of hosts
 sub get_hosts {
     my($self, @options) = @_;
     my $res = $self->_req('get_hosts', \@options);
-    my($typ, $size, $data) = @{$res};
+    #my($typ, $size, $data)...
+    my(undef, $size, $data) = @{$res};
     return($data, undef, $size);
 }
 
@@ -301,8 +302,8 @@ returns a list of host by a services query
 sub get_hosts_by_servicequery {
     my($self, @options) = @_;
     my $res = $self->_req('get_hosts_by_servicequery', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, undef);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], undef);
 }
 
 ##########################################################
@@ -317,8 +318,8 @@ returns a list of host names
 sub get_host_names{
     my($self, @options) = @_;
     my $res = $self->_req('get_host_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -333,8 +334,8 @@ returns a list of hostgroups
 sub get_hostgroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_hostgroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -349,8 +350,8 @@ returns a list of hostgroup names
 sub get_hostgroup_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_hostgroup_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -365,8 +366,8 @@ returns a list of services
 sub get_services {
     my($self, @options) = @_;
     my $res = $self->_req('get_services', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, undef, $size);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], undef, $res->[1]);
 }
 
 ##########################################################
@@ -381,8 +382,8 @@ returns a list of service names
 sub get_service_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -397,8 +398,8 @@ returns a list of servicegroups
 sub get_servicegroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_servicegroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -413,8 +414,8 @@ returns a list of servicegroup names
 sub get_servicegroup_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_servicegroup_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -429,8 +430,8 @@ returns a list of comments
 sub get_comments {
     my($self, @options) = @_;
     my $res = $self->_req('get_comments', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -445,8 +446,8 @@ returns a list of downtimes
 sub get_downtimes {
     my($self, @options) = @_;
     my $res = $self->_req('get_downtimes', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -461,8 +462,8 @@ returns a list of contactgroups
 sub get_contactgroups {
     my($self, @options) = @_;
     my $res = $self->_req('get_contactgroups', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -492,11 +493,11 @@ sub get_logs {
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
-    my($typ, $size, $data) = @{$res};
+    #my($typ, $size, $data) = @{$res};
     $self->{'ua'}->timeout($self->{'timeout'});
 
-    return(Thruk::Utils::IO::save_logs_to_tempfile($data), 'file') if $use_file;
-    return $data;
+    return(Thruk::Utils::IO::save_logs_to_tempfile($res->[2]), 'file') if $use_file;
+    return $res->[2];
 }
 
 
@@ -512,8 +513,8 @@ returns a list of timeperiods
 sub get_timeperiods {
     my($self, @options) = @_;
     my $res = $self->_req('get_timeperiods', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -528,8 +529,8 @@ returns a list of timeperiod names
 sub get_timeperiod_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_timeperiod_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -544,8 +545,8 @@ returns a list of commands
 sub get_commands {
     my($self, @options) = @_;
     my $res = $self->_req('get_commands', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -560,8 +561,8 @@ returns a list of contacts
 sub get_contacts {
     my($self, @options) = @_;
     my $res = $self->_req('get_contacts', \@options);
-    my($typ, $size, $data) = @{$res};
-    return $data;
+    #my($typ, $size, $data) = @{$res};
+    return $res->[2];
 }
 
 ##########################################################
@@ -576,8 +577,8 @@ returns a list of contact names
 sub get_contact_names {
     my($self, @options) = @_;
     my $res = $self->_req('get_contact_names', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'uniq');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'uniq');
 }
 
 ##########################################################
@@ -592,8 +593,8 @@ returns the host statistics for the tac page
 sub get_host_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_host_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -608,8 +609,8 @@ returns the services statistics for the tac page
 sub get_service_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_service_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -624,8 +625,8 @@ returns the service / host execution statistics
 sub get_performance_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_performance_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'STATS');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'STATS');
 }
 
 ##########################################################
@@ -640,8 +641,8 @@ returns the service /host execution statistics
 sub get_extra_perf_stats {
     my($self, @options) = @_;
     my $res = $self->_req('get_extra_perf_stats', \@options);
-    my($typ, $size, $data) = @{$res};
-    return($data, 'SUM');
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
 }
 
 ##########################################################
@@ -822,7 +823,7 @@ sub _replace_peer_key {
 
 ##########################################################
 sub _clean_code_refs {
-    my($var,$lvl) = @_;
+    my($var) = @_;
     if(ref $var eq 'ARRAY') {
         for (@{$var}) {
             if(ref $_ eq 'CODE') {

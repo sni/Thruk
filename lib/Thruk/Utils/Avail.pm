@@ -822,7 +822,8 @@ sub get_availability_percents {
     for my $name (sort keys %{$avail->{'breakdown'}}) {
         my $t = $avail->{'breakdown'}->{$name};
 
-        my($percent, $time) = _sum_availability($t, $u);
+        #my($percent, $time)
+        my($percent, undef) = _sum_availability($t, $u);
         confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
         $values->{$name} = [
             $t->{'timestamp'}*1000,

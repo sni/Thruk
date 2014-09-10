@@ -434,7 +434,8 @@ sub job_page {
         $c->stash->{template}              = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        my($out,$err,$time,$dir,$stash) = get_result($c, $job);
+        #my($out,$err,$time,$dir,$stash)...
+        my($out,$err,undef,$dir,$stash) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
         if(defined $err and $err ne '') {

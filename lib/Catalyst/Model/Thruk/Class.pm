@@ -11,7 +11,8 @@ has obj => (
 );
 
 sub BUILD {
-    my ( $self, $args ) = @_;
+    #my ( $self, $args )...
+    my ( $self ) = @_;
     $self->{obj} = Thruk::Backend::Manager->new();
     return;
 }

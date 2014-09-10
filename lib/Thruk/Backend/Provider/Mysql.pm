@@ -966,7 +966,6 @@ sub _import_logs {
 
     my $backend_count = 0;
     my $log_count     = 0;
-    my $log_skipped   = 0;
 
     if(!defined $backends) {
         Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
@@ -1129,7 +1128,8 @@ sub _update_logcache {
 
 ##########################################################
 sub _update_logcache_auth {
-    my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
+    #my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
+    my($self, undef, $peer, $dbh, $prefix, $verbose) = @_;
 
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
     my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix);
@@ -1178,7 +1178,8 @@ sub _update_logcache_auth {
 
 ##########################################################
 sub _update_logcache_optimize {
-    my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
+    #my($self, $c, $peer, $dbh, $prefix, $verbose, $options) = @_;
+    my($self, undef, undef, $dbh, $prefix, $verbose, $options) = @_;
 
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
@@ -1284,7 +1285,7 @@ sub _get_contact_lookup {
 
 ##########################################################
 sub _get_plugin_lookup {
-    my($dbh,$peer,$prefix) = @_;
+    my($dbh,$prefix) = @_;
     my $max_initial_cache = 5000;
 
     my $sth = $dbh->prepare("SELECT output_id, output FROM `".$prefix."_plugin_output` LIMIT $max_initial_cache");
@@ -1498,7 +1499,7 @@ sub _import_peer_logfiles {
 
     # increase plugin output lookup performance for larger updates
     if($end - $start > 86400) {
-        $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+        $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
     }
 
@@ -1534,7 +1535,7 @@ sub _import_peer_logfiles {
 
         # increase plugin output lookup performance for larger updates
         if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0 and scalar @{$logs} > 500) {
-            $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+            $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
             $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         }
 
@@ -1552,7 +1553,7 @@ sub _import_logcache_from_file {
 
     # increase plugin output lookup performance for larger updates
     if($Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup == 0) {
-        $plugin_lookup = _get_plugin_lookup($dbh,$peer,$prefix);
+        $plugin_lookup = _get_plugin_lookup($dbh,$prefix);
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
         #print "plugin output lookup filled with ".(scalar keys %{$plugin_lookup})." entries\n" if $verbose;
     }

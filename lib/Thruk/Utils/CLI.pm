@@ -97,7 +97,8 @@ return L<Catalyst|Catalyst> context object
 sub get_c {
     my($self) = @_;
     return $Thruk::Utils::CLI::c if defined $Thruk::Utils::CLI::c;
-    my($c, $failed) = $self->_dummy_c();
+    #my($c, $failed)
+    my($c, undef) = $self->_dummy_c();
     $Thruk::Utils::CLI::c = $c;
     $c->stats->enable(1);
     return $c;
@@ -297,8 +298,8 @@ sub _read_secret {
 ##############################################
 sub _run {
     my($self) = @_;
+
     my($result, $response);
-    my($c, $failed);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
@@ -309,6 +310,7 @@ sub _run {
         }
     }
 
+    my $c;
     unless(defined $result) {
         # initialize backend pool here to safe some memory
         if($self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ m/livecache/mx) {
@@ -491,7 +493,6 @@ sub _run_commands {
         return(_run_command_action($c, $opt, $src, $actions[0]));
     }
 
-    my($rc, $output) = (0, '');
     for my $action (@actions) {
         my $res = _run_command_action($c, $opt, $src, $action);
         $data->{'rc'}     += $res->{'rc'};
@@ -568,7 +569,7 @@ sub _run_command_action {
 
     # business process daemon
     elsif($action eq 'bpd' or $action eq 'bp' or $action eq 'bpcommit') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt, $action);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $opt, $action);
     }
 
     # cache actions
@@ -607,12 +608,12 @@ sub _run_command_action {
 
     # livestatus proxy cache
     elsif($action =~ /livecache(start|stop|status|restart)/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_livecache($c, $1, $src, $opt);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_livecache($c, $1, $src);
     }
 
     # self check
     elsif($action eq 'selfcheck' or $action =~ /^selfcheck=(.*)$/mx) {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_selfcheck($c, $1, $opt);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_selfcheck($c, $1);
         $data->{'all_stdout'} = 1;
     }
 
@@ -784,7 +785,7 @@ sub _cmd_report {
 
     $c->stats->profile(begin => "_cmd_report()");
 
-    my($output, $rc);
+    my $output;
     eval {
         require Thruk::Utils::Reports;
     };
@@ -813,14 +814,13 @@ sub _cmd_report {
 
 ##############################################
 sub _cmd_bpd {
-    my($c, $src, $opt, $action) = @_;
+    my($c, $opt, $action) = @_;
     $c->stats->profile(begin => "_cmd_bpd($action)");
 
     if(!$c->config->{'use_feature_bp'}) {
         return("ERROR - business process addon is disabled\n", 1);
     }
 
-    my($output, $rc);
     eval {
         require Thruk::BP::Utils;
     };
@@ -869,7 +869,7 @@ sub _cmd_bpd {
     alarm(0);
     my $nr = scalar @{$bps};
     my $elapsed = tv_interval($t0);
-    $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
+    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
 
     $c->stats->profile(end => "_cmd_bpd($action)");
     return($output, 0);
@@ -1108,7 +1108,7 @@ sub _cmd_import_logs {
 
 ##############################################
 sub _cmd_livecache {
-    my($c, $mode, $src, $opt) = @_;
+    my($c, $mode, $src) = @_;
     $c->stats->profile(begin => "_cmd_livecache($mode)");
 
     if($src ne 'local' and $mode ne 'status') {
@@ -1183,7 +1183,7 @@ sub _get_shadownaemon_totals {
     my $total  = scalar @{$sites};
     my $failed = $total;
     eval {
-        my $proc = $c->{'db'}->get_processinfo(backend => $sites);
+        $c->{'db'}->get_processinfo(backend => $sites);
         $failed = scalar keys %{$c->stash->{'failed_backends'}};
     };
     return($total, $failed);
@@ -1194,7 +1194,6 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
-    my $peer       = $Thruk::Backend::Pool::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
 
     if(!Thruk::Utils::Conf::set_object_model($c)) {
@@ -1356,7 +1355,7 @@ sub _cmd_raw {
 
     # result for external job
     elsif($function eq 'job') {
-        return _cmd_ext_job($c, $key, $opt);
+        return _cmd_ext_job($c, $opt);
     }
 
     my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
@@ -1391,7 +1390,7 @@ sub _cmd_raw {
 
 ##############################################
 sub _cmd_ext_job {
-    my($c, $key, $opt) = @_;
+    my($c, $opt) = @_;
     my $jobid       = $opt->{'args'};
     my $res         = "";
     my $last_error  = "";
@@ -1399,13 +1398,14 @@ sub _cmd_ext_job {
         $res = "jobid:".$jobid.":0";
     }
     else {
-        my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $jobid, 1);
+        #my($out,$err,$time,$dir,$stash,$rc)
+        my @res = Thruk::Utils::External::get_result($c, $jobid, 1);
         $res = {
-            'out'   => $out,
-            'err'   => $err,
-            'time'  => $time,
-            'dir'   => $dir,
-            'rc'    => $rc,
+            'out'   => $res[0],
+            'err'   => $res[1],
+            'time'  => $res[2],
+            'dir'   => $res[3],
+            'rc'    => $res[5],
         };
     }
     return([undef, 1, $res, $last_error], 0);
@@ -1413,7 +1413,7 @@ sub _cmd_ext_job {
 
 ##############################################
 sub _cmd_selfcheck {
-    my($c, $type, $opt) = @_;
+    my($c, $type) = @_;
     $c->stats->profile(begin => "_cmd_selfcheck()");
     $type = 'all' unless $type;
 

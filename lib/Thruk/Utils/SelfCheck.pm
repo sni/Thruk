@@ -90,16 +90,6 @@ sub self_check {
 }
 
 ##############################################
-sub _aggregate_result {
-    my($rc, $msg, $details, $sub_result) = @_;
-    my($sub_rc, $sub_msg, $sub_details) = @{$sub_result};
-    $_[1]  = $sub_msg if $sub_rc > $_[0];
-    $_[0]  = $sub_rc  if $sub_rc > $_[0];
-    $_[2] .= $sub_details;
-    return;
-}
-
-##############################################
 
 =head2 _filesystem_checks
 
@@ -162,7 +152,7 @@ sub _logfile_checks  {
     }
 
     my $msg = sprintf('Logfiles %s', $rc_codes->{$rc});
-    return({sub => 'logfiles', rc => $rc, msg => 'Logfiles OK', details => $details});
+    return({sub => 'logfiles', rc => $rc, msg => $msg, details => $details});
 }
 
 
@@ -202,7 +192,7 @@ sub _report_checks  {
     }
 
     my $msg = sprintf('Reports %s', $rc_codes->{$rc});
-    return({sub => 'reports', rc => $rc, msg => 'Reports OK', details => $details});
+    return({sub => 'reports', rc => $rc, msg => $msg, details => $details});
 }
 
 ##############################################
@@ -234,7 +224,7 @@ sub _reccuring_downtime_checks  {
     }
 
     my $msg = sprintf('Recurring Downtimes %s', $rc_codes->{$rc});
-    return({sub => 'recurring_downtimes', rc => $rc, msg => 'Recurring Downtimes OK', details => $details});
+    return({sub => 'recurring_downtimes', rc => $rc, msg => $msg, details => $details});
 }
 
 ##############################################
@@ -249,7 +239,8 @@ verify errors in specific recurring downtime
 sub _check_recurring_downtime  {
     my($c, $downtime) = @_;
 
-    my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
+    #my($backends, $cmd_typ)...
+    my($backends, undef) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
 
     my $errors  = 0;
     my $details = "";

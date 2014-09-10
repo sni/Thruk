@@ -287,7 +287,6 @@ sub selectall_arrayref {
     if($opt->{'slice'}) {
         # make an array of hashes, inplace to safe memory
         my $rnum = scalar @{$result->{'result'}};
-        my $knum = scalar @{$result->{'keys'}};
         my @keys = @{$result->{'keys'}};
         $result  = $result->{'result'};
         for(my $x=0;$x<$rnum;$x++) {
@@ -820,9 +819,6 @@ sub _send {
     # return a empty result set if nothing found
     return({ keys => [], result => []}) if !defined $body;
 
-    my $line_seperator = chr($self->{'line_seperator'});
-    my $col_seperator  = chr($self->{'column_seperator'});
-
     my $limit_start = 0;
     if(defined $opt->{'limit_start'}) { $limit_start = $opt->{'limit_start'}; }
     # body is already parsed
@@ -918,7 +914,7 @@ sub _post_processing {
 
 ########################################
 sub _open {
-    my($self, $statement) = @_;
+    my($self) = @_;
 
     # return the current socket in keep alive mode
     if($self->{'keepalive'} and defined $self->{'sock'} and $self->{'sock'}->connected) {
@@ -1141,7 +1137,8 @@ sub _read_socket_do {
 
 ########################################
 sub _socket_error {
-    my($self, $statement, $sock, $body) = @_;
+    #my($self, $statement, $sock, $body)...
+    my($self, $statement, undef, $body) = @_;
 
     my $message = "\n";
     $message   .= "peer                ".Dumper($self->peer_name);

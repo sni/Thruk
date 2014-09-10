@@ -13,8 +13,6 @@ sub prepare_uploads {
 
     $c->next::method(@_);
 
-    my $enc = $c->encoding;
-
     for my $key ( keys %{ $c->request->{'parameters'} } ) {
         next if $key eq 'data';
         next if $key eq 'referer';

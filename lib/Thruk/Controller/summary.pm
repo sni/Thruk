@@ -99,7 +99,7 @@ sub _create_report {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_create_report()");
 
-    my($timeperiod, $displaytype, $alerttypes, $hoststates, $servicestates);
+    my($displaytype, $alerttypes, $hoststates, $servicestates);
     my $standardreport = $c->{'request'}->{'parameters'}->{'standardreport'};
     if(defined $standardreport) {
         # set options from standard report options

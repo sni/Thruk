@@ -578,7 +578,8 @@ sub set_dynamic_roles {
 
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
-    my($roles, $can_submit_commands, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
+    #my($roles, $can_submit_commands, $alias)...
+    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
 
     if(defined $alias) {
         $c->request->{'user'}->{'alias'} = $alias;
@@ -984,13 +985,15 @@ sub set_custom_vars {
             if($found) {
                 # expand macros in custom vars
                 if (defined $host and defined $service) {
-                        ($cust_value, my $rc) = $c->{'db'}->_replace_macros({
+                        #($cust_value, $rc)...
+                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
                             string  => $cust_value,
                             host    => $host,
                             service => $service
                         });
                 } elsif (defined $host) {
-                        ($cust_value, my $rc) = $c->{'db'}->_replace_macros({
+                        #($cust_value, $rc)...
+                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
                             string  => $cust_value,
                             host    => $host
                         });
@@ -1255,7 +1258,8 @@ sub savexls {
     );
     $template->param(%{ $c->stash });
     if($c->config->{'no_external_job_forks'}) {
-        my($fh, $filename) = tempfile();
+        #my($fh, $filename)...
+        my(undef, $filename) = tempfile();
         $c->stash->{'file_name'} = $filename;
         $c->stash->{job_dir}     = '';
         $c->stash->{cleanfile}   = 1;

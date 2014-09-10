@@ -72,7 +72,8 @@ create a new C<Catalyst::Authentication::Credential::Thruk> object.
 =cut
 
 sub new {
-    my ( $class, $config, $app, $realm ) = @_;
+    #my ( $class, $config, $app, $realm )...
+    my ( $class, undef, undef, $realm ) = @_;
 
     my $self = { };
     bless $self, $class;

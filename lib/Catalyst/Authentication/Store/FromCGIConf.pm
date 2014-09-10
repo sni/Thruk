@@ -9,15 +9,16 @@ use Catalyst::Authentication::User::Hash;
 use Scalar::Util qw( blessed );
 
 sub new {
-    my ( $class, $config, $app, $realm) = @_;
-
+    #my ( $class, $config, $app, $realm)...
+    my ($class) = @_;
     my $self = {};
     bless $self, $class;
     return $self;
 }
 
 sub from_session {
-    my ( $self, $c, $username ) = @_;
+    #my ( $self, $c, $username )...
+    my ( $self, undef, $username ) = @_;
     return $username if ref $username;
     return($self->find_user( { username => $username } ));
 }

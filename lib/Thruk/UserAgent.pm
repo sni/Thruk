@@ -223,7 +223,7 @@ sub requests_redirectable {
 
 ##############################################
 sub _get_cmd_line {
-    my($self, $url) = @_;
+    my($self) = @_;
     my $cmd = [
         'curl',
         '-A',                $self->{'agent'},
