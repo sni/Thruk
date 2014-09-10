@@ -397,13 +397,13 @@ sub _cond_HASHREF {
 
 ################################################################################
 sub _cond_hashpair_UNDEF {
-    #my($key, $value, $operator)...
-    my($key, undef, $operator) = @_;
+    #my($key, $value, $operator, $combining_count)...
+    my($key, undef, $operator, $combining_count) = @_;
+    $combining_count = 0 unless $combining_count;
     $key      = '' unless $key;
     $operator = '=' unless $operator;
     print STDERR "# _cond_hashpair_UNDEF\n" if $TRACE > 9 ;
 
-    my $combining_count = shift || 0;
     my @statment = (
         sprintf("%s: %s %s",$filter_mode,$key,$operator)
     );
