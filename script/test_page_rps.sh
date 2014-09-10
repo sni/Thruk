@@ -42,7 +42,7 @@ switch_tag() {
 #################################################
 test_tag() {
   TAG="$1"
-  printf "%-8s  " "$TAG"
+  printf "%-10s  " "$TAG"
   switch_tag "$TAG"
   pid=$(./script/thruk_server.pl >/dev/null 2>&1 & echo $!);
   sleep $DELAY
@@ -61,7 +61,7 @@ test_tag() {
   test_page 'bp'     "$BASEURL/cgi-bin/bp.cgi"
 
   mem=$(ps -efl | grep "./script/thruk_server.pl" | grep -v 'grep' | awk '{print $10}')
-  load=$(w | grep load | awk '{ print $11 }' | tr -d ,)
+  load=$(w | grep load | awk '{ print $10 }' | tr -d ,)
 
   kill $pid
   printf "     mem: %3d MB     load: %5s\n" $(echo $mem/1000|bc) "$load"

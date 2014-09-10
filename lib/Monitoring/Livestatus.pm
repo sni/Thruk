@@ -685,6 +685,8 @@ sub peer_key {
 sub _send {
     my($self, $statement, $opt) = @_;
 
+    confess('duplicate data') if $opt->{'data'};
+
     delete $self->{'meta_data'};
 
     my $header = '';

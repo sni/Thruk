@@ -481,10 +481,10 @@ sub set_processinfo {
                 last;
             }
         }
-        $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'};
     } else {
         $fetch = 1;
     }
+    $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
@@ -722,7 +722,8 @@ sub delayed_proc_info_update {
     my($c) = @_;
     my $disabled_backends = $c->{'db'}->disable_hidden_backends();
     _set_possible_backends($c, $disabled_backends);
-    set_processinfo($c, undef, undef, undef, 1);
+    my $cached_data = $c->cache->get->{'global'} || {};
+    set_processinfo($c, undef, undef, $cached_data, 1);
     return;
 }
 

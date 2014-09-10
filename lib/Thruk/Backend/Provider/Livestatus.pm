@@ -169,9 +169,10 @@ returns if this user is allowed to submit commands
 
 =cut
 sub get_can_submit_commands {
-    my($self, $user) = @_;
+    my($self, $user, $data) = @_;
     confess("no user") unless defined $user;
-    my $data = $self->{'live'}
+    return $data if $data;
+    $data = $self->{'live'}
                     ->table('contacts')
                     ->columns(qw/can_submit_commands
                                  alias/)
@@ -201,10 +202,11 @@ $VAR1 = [
 
 =cut
 sub get_contactgroups_by_contact {
-    my($self,$username) = @_;
+    my($self,$username, $data) = @_;
     confess("no user") unless defined $username;
+    return $data if $data;
 
-    my $data = $self->{'live'}
+    $data = $self->{'live'}
                     ->table('contactgroups')
                     ->columns(qw/name/)
                     ->filter({ members => { '>=' => $username }})
@@ -225,6 +227,7 @@ returns a list of hosts
 =cut
 sub get_hosts {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
 
     if($options{'options'}->{'callbacks'}) {
         %options = %{dclone(\%options)};
@@ -303,6 +306,7 @@ returns a list of host by a services query
 =cut
 sub get_hosts_by_servicequery {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
 
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -315,6 +319,7 @@ sub get_hosts_by_servicequery {
     }
 
     my $data = $self->_get_table('services', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
@@ -332,8 +337,15 @@ returns a list of host names
 =cut
 sub get_host_names{
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hosts', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -354,6 +366,7 @@ returns a list of hostgroups
 =cut
 sub get_hostgroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
@@ -376,8 +389,15 @@ returns a list of hostgroup names
 =cut
 sub get_hostgroup_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -397,6 +417,7 @@ returns a list of services
 =cut
 sub get_services {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
 
     # optimized naemon with wrapped_json output
     if($self->{'naemon_optimizations'}) {
@@ -459,6 +480,7 @@ sub get_services {
 
     # get result
     my $data = $self->_get_table('services', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
 
     # set total size
     if(!$size && $self->{'optimized'}) {
@@ -482,8 +504,15 @@ returns a list of service names
 =cut
 sub get_service_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'description'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/description/];
     my $data = $self->_get_hash_table('services', 'description', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_service_names() should not be called in scalar context");
@@ -502,6 +531,7 @@ returns a list of servicegroups
 =cut
 sub get_servicegroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
@@ -524,8 +554,15 @@ returns a list of servicegroup names
 =cut
 sub get_servicegroup_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_servicegroup_names() should not be called in scalar context");
@@ -544,6 +581,7 @@ returns a list of comments
 =cut
 sub get_comments {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment entry_time entry_type expires
@@ -568,6 +606,7 @@ returns a list of downtimes
 =cut
 sub get_downtimes {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment end_time entry_time fixed host_name
@@ -593,6 +632,7 @@ returns a list of contactgroups
 =cut
 sub get_contactgroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members
@@ -645,6 +685,7 @@ returns a list of timeperiods
 =cut
 sub get_timeperiods {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias
@@ -678,8 +719,15 @@ returns a list of timeperiod names
 =cut
 sub get_timeperiod_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_timeperiods_names() should not be called in scalar context");
@@ -698,6 +746,7 @@ returns a list of commands
 =cut
 sub get_commands {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name line
@@ -720,6 +769,7 @@ returns a list of contacts
 =cut
 sub get_contacts {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias email pager service_notification_period host_notification_period
@@ -742,8 +792,15 @@ returns a list of contact names
 =cut
 sub get_contact_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('contacts', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -763,6 +820,10 @@ returns the host statistics for the tac page
 =cut
 sub get_host_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
 
     my $class = $self->_get_class('hosts', \%options);
     if($class->apply_filter('hoststats')) {
@@ -821,6 +882,10 @@ returns the services statistics for the tac page
 =cut
 sub get_service_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
 
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicestats')) {
@@ -887,6 +952,14 @@ returns the service /host execution statistics
 =cut
 sub get_performance_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        my $data = {};
+        for my $d (@{$options{'data'}}) {
+            $data = { %{$data}, %{$d->[0]} };
+        }
+        return($data, 'STATS');
+    }
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -978,6 +1051,10 @@ returns the service /host execution statistics
 =cut
 sub get_extra_perf_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
 
     my $class = $self->_get_class('status', \%options);
     my $data  =  $class

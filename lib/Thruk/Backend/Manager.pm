@@ -9,7 +9,6 @@ use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use IO::Select;
 use Thruk::Utils ();
 use Thruk::Pool::Simple ();
 use Thruk::Config ();
@@ -1317,41 +1316,46 @@ sub _get_result_serial {
     my ($totalsize, $result, $type) = (0);
     my $c = $Thruk::Backend::Manager::c;
     my $t1 = [gettimeofday];
-    my $sel;
-    my $socket2peer = {};
 
     $c->stats->profile( begin => "_get_result_serial() sending") if $use_shadow;
+    my @keys;
+    my @opts;
+    my @pool_do;
+    my @peers;
+    my @bulks;
+    my @cache_args;
     for my $key (@{$peers}) {
-        $c->stats->profile( begin => "_get_result_serial($key)");
         my $peer = $self->get_peer_by_key($key);
 
         if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs' and $function ne 'send_command') {
-            $sel = IO::Select->new() unless defined $sel;
             local $ENV{'THRUK_SELECT'} = 1;
-            my @res = @{$peer->{'cacheproxy'}->$function(@{$arg})};
-            my($socket, $opt, $keys) = @res;
-            my $sockets;
-            if(ref $socket eq 'ARRAY') {
-                $sockets = \@res;
-                $socket  = $sockets->[0]->[0];
-            }
-            if(!defined $socket2peer->{$socket}) {
-                $socket2peer->{$socket} = [];
-                $sel->add($socket);
-            }
-            if($sockets) {
-                for my $socket (@{$sockets}) {
-                    my($socket, $opt, $keys) = @{$socket};
-                    push @{$socket2peer->{$socket}}, [$key, $opt, $keys];
+            if(!@cache_args) {
+                @cache_args = @{$peer->{'cacheproxy'}->$function(@{$arg})};
+                my($statement, $keys, $opt) = @cache_args;
+                if(ref $statement ne 'ARRAY') {
+                    @cache_args = ([$statement, $keys, $opt]);
                 }
-            } else {
-                push @{$socket2peer->{$socket}}, [$key, $opt, $keys];
+                for my $tmp (@cache_args) {
+                    if($tmp->[0] =~ m/^Stats:\ (.*)$/mx or $tmp->[0] =~ m/^StatsGroupBy:\ (.*)$/mx) {
+                        ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::_extract_keys_from_stats_statement(undef, $tmp->[0]);
+                    }
+                }
             }
-            $c->stats->profile( end => "_get_result_serial($key)");
+
+            for my $tmp (@cache_args) {
+                push @pool_do, $peer->{'cacheproxy'}->{'live'}->{'peer'};
+                my($statement, $keys, $opt) = @{$tmp};
+                push @pool_do, $statement;
+                push @keys,    $keys;
+                push @peers,   $peer;
+                push @opts,    $opt;
+            }
+            push @bulks, scalar @cache_args;
             next;
         }
 
         # skip already failed peers for this request
+        $c->stats->profile( begin => "_get_result_serial($key)");
         if(!$c->stash->{'failed_backends'}->{$key}) {
             my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
             my $res = shift @res;
@@ -1369,38 +1373,43 @@ sub _get_result_serial {
     }
     $c->stats->profile( end => "_get_result_serial() sending") if $use_shadow;
 
-    # collect select results
-    if($sel) {
-        $c->stats->profile( begin => "_get_result_serial collecting");
-        while($sel->count() > 0) {
-            for my $sock ($sel->can_read(5)) {
-                my($key, $opt, $keys) = @{shift @{$socket2peer->{$sock}}};
-                $sel->remove($sock) if scalar @{$socket2peer->{$sock}} == 0;
-                my $peer = $self->get_peer_by_key($key);
-                # read plain json from socket
-                my($status, $msg, $recv) = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->_read_socket_do($sock);
-                die("Error for: ".$key."\n".$msg."\n".$recv) if !$status or $status != 200;
-                # add peer data
-                my $res= $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($recv, $opt, $keys);
-                # convert into hash
-                $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $opt, undef, $res);
-                my @res = $peer->{'cacheproxy'}->$function(data => $res);
-                my($data,$typ,$size) = @res;
-                if(defined $data and !defined $size) {
-                    if(ref $data eq 'ARRAY') {
-                        $size = scalar @{$data};
-                    }
-                    elsif(ref $data eq 'HASH') {
-                        $size = scalar keys %{$data};
-                    }
-                }
-                $size = 0 unless defined $size;
-                $totalsize += $size;
-                $type       = $typ;
-                $result->{$key} = $data;
+    # collect pool results
+    if(@pool_do) {
+        $c->stats->profile( begin => "_get_result_serial pool_do");
+        my $raw = Thruk::Utils::XS::socket_pool_do(scalar @pool_do, \@pool_do);
+        $c->stats->profile( end => "_get_result_serial pool_do");
+        my $decoder = JSON::XS->new->utf8->relaxed;
+        $c->stats->profile( begin => "_get_result_serial postprocessing");
+        my $resnum = 0;
+        for my $bulk (@bulks) {
+            my($peer, $key);
+            my @bulk_results;
+            for(my $x=0; $x<$bulk;$x++) {
+                $peer = $peers[$resnum];
+                $key  = $peer->{'key'};
+                $opts[$resnum]->{wrapped_json} = 1;
+                $opts[$resnum]->{slice}        = 1 if $keys[$resnum];
+                my $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($decoder->decode($raw->[$resnum]), $opts[$resnum], $keys[$resnum]);
+                $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $opts[$resnum], undef, $res);
+                push @bulk_results, $res;
+                $resnum++;
             }
+            my @res = $peer->{'cacheproxy'}->$function(data => ($bulk == 1 ? $bulk_results[0] : \@bulk_results));
+            my($data,$typ,$size) = @res;
+            if(defined $data and !defined $size) {
+                if(ref $data eq 'ARRAY') {
+                    $size = scalar @{$data};
+                }
+                elsif(ref $data eq 'HASH') {
+                    $size = scalar keys %{$data};
+                }
+            }
+            $size = 0 unless defined $size;
+            $totalsize += $size;
+            $type       = $typ;
+            $result->{$key} = $data;
         }
-        $c->stats->profile( end => "_get_result_serial collecting");
+        $c->stats->profile( end   => "_get_result_serial postprocessing");
     }
 
     my $elapsed = tv_interval($t1);

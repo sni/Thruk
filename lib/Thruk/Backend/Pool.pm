@@ -325,7 +325,11 @@ sub init_backend_thread_pool {
                 Thruk::Utils::IO::mkdir_r($config->{'shadow_naemon_dir'}) ;
             };
             die("could not create shadow_naemon_dir ".$config->{'shadow_naemon_dir'}.': '.$@) if $@;
-            $pool_size         = 1; # no pool required when using caching
+            eval {
+                require Thruk::Utils::XS;
+                Thruk::Utils::XS->import();
+                $pool_size = 1; # no pool required when using xs caching
+            };
         }
     }
 
