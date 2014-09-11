@@ -1137,6 +1137,7 @@ script/generate_timeperiod_transitions.pl
 script/nagexp
 script/nagimp
 script/naglint
+script/test_cpan_modules.pl
 script/test_page_rps.sh
 script/thruk
 script/thruk_auth

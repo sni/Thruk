@@ -6,9 +6,9 @@ set -u
 #################################################
 # settings
 NUM=10
-REQUESTS=100
-CONCURRENCY=5
-DELAY=3
+REQUESTS=${REQUESTS:-100}
+CONCURRENCY=${CONCURRENCY:-5}
+DELAY=${DELAY:-3}
 BASEPORT="3000"
 BASEURL="http://127.0.0.1:$BASEPORT/thruk"
 
