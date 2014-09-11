@@ -1323,14 +1323,13 @@ sub _get_result_serial {
     my $sorted_results = {};
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
-        $sorted_results->{$key} = {
-            'keys'   => [],
-            'res'    => [],
-            'opts'   => [],
-            'failed' => 0,
-        };
-
         if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs' and $function ne 'send_command') {
+            $sorted_results->{$key} = {
+                'keys'   => [],
+                'res'    => [],
+                'opts'   => [],
+                'failed' => 0,
+            };
             local $ENV{'THRUK_SELECT'} = 1;
             if(!@cache_args) {
                 @cache_args = @{$peer->{'cacheproxy'}->$function(@{$arg})};
