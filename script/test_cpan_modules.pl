@@ -17,13 +17,25 @@ my $mainpage  = `wget -q -O - http://search.cpan.org/dist/$module/`;
 
 # get versions
 my @matches = $mainpage =~ m|<option.*?"(.*?)">(.*?)&nbsp;.*?\-\-.*;(.*?)<\/option>|gmx;
+my @versions;
 while(@matches) {
     my $path = shift @matches;
     my $name = shift @matches;
     my $date = shift @matches;
     next if $name =~ m/\-trial/i;
     next if $name =~ m/_\d+/;
-    printf("%-13s %-40s", $date, $name);
+    push @versions, [$path, $name, $date];
+}
+
+my $num = scalar @versions;
+print "testing ".$num." releases of ".$module."\n";
+my $x = 0;
+for my $v (@versions) {
+    my($path, $name, $date) = @{$v};
+    $x++;
+    my $version = $name;
+    $version =~ s/^\Q$module\E\-//gmx;
+    printf("%02d/%d %-13s %-12s", $x, $num, $date, $version);
     my $cpanpage  = `wget -q -O - http://search.cpan.org/$path`;
     my $url;
     if($cpanpage =~ m|(\/CPAN\/authors\/id\/.*?/\Q$name\E\.tar\.gz)|mx) {
