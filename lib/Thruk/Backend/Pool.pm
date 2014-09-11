@@ -2,15 +2,13 @@ package Thruk::Backend::Pool;
 
 use strict;
 use warnings;
-use threads;
-use Carp qw/confess/;
 
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('starting pool');
 };
 
-use Thruk::Pool::Simple qw//;
+use Carp qw/confess/;
 use Thruk::Backend::Peer qw//;
 use Thruk::Utils::IO qw//;
 use Config::General qw//;
@@ -308,6 +306,7 @@ sub init_backend_thread_pool {
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
 
+
     # if we have multiple https backends, make sure we use the thread safe IO::Socket::SSL
     my $https_count = 0;
     for my $peer_config (@{$peer_configs}) {
@@ -331,6 +330,11 @@ sub init_backend_thread_pool {
                 $pool_size = 1; # no pool required when using xs caching
             };
         }
+    }
+
+    if($pool_size > 1) {
+        require threads;
+        require Thruk::Pool::Simple;
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
