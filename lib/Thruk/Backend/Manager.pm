@@ -1318,14 +1318,17 @@ sub _get_result_serial {
     my $t1 = [gettimeofday];
 
     $c->stats->profile( begin => "_get_result_serial() sending") if $use_shadow;
-    my @keys;
-    my @opts;
     my @pool_do;
-    my @peers;
-    my @bulks;
     my @cache_args;
+    my $sorted_results = {};
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
+        $sorted_results->{$key} = {
+            'keys'   => [],
+            'res'    => [],
+            'opts'   => [],
+            'failed' => 0,
+        };
 
         if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs' and $function ne 'send_command') {
             local $ENV{'THRUK_SELECT'} = 1;
@@ -1342,15 +1345,17 @@ sub _get_result_serial {
                 }
             }
 
+            my $x = 0;
             for my $tmp (@cache_args) {
+                push @pool_do, $x;
+                push @pool_do, $peer->{'key'};
                 push @pool_do, $peer->{'cacheproxy'}->{'live'}->{'peer'};
                 my($statement, $keys, $opt) = @{$tmp};
                 push @pool_do, $statement;
-                push @keys,    $keys;
-                push @peers,   $peer;
-                push @opts,    $opt;
+                $sorted_results->{$key}->{'keys'}->[$x] = $keys;
+                $sorted_results->{$key}->{'opts'}->[$x] = $opt;
+                $x++;
             }
-            push @bulks, scalar @cache_args;
             next;
         }
 
@@ -1376,27 +1381,38 @@ sub _get_result_serial {
     # collect pool results
     if(@pool_do) {
         $c->stats->profile( begin => "_get_result_serial pool_do");
-        my $raw = Thruk::Utils::XS::socket_pool_do(scalar @pool_do, \@pool_do);
+        my $thread_num = scalar @pool_do;
+        if($thread_num > 300) { $thread_num = 300; } # limit thread size
+        my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
         $c->stats->profile( end => "_get_result_serial pool_do");
         my $decoder = JSON::XS->new->utf8->relaxed;
         $c->stats->profile( begin => "_get_result_serial postprocessing");
-        my $resnum = 0;
-        for my $bulk (@bulks) {
-            my($peer, $key);
-            my @bulk_results;
-            for(my $x=0; $x<$bulk;$x++) {
-                $peer = $peers[$resnum];
-                $key  = $peer->{'key'};
-                $opts[$resnum]->{wrapped_json} = 1;
-                $opts[$resnum]->{slice}        = 1 if $keys[$resnum];
-                my $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($decoder->decode($raw->[$resnum]), $opts[$resnum], $keys[$resnum]);
-                $res = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $opts[$resnum], undef, $res);
-                push @bulk_results, $res;
-                $resnum++;
+        for my $row (@{$raw}) {
+            if($row->{'success'}) {
+                $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $row->{'result'};
+            } else {
+                $sorted_results->{$row->{'key'}}->{'failed'} = $row->{'result'};
             }
-            my @res = $peer->{'cacheproxy'}->$function(data => ($bulk == 1 ? $bulk_results[0] : \@bulk_results));
+        }
+        for my $key (keys %{$sorted_results}) {
+            my $peer     = $self->get_peer_by_key($key);
+            my $sorted   = $sorted_results->{$key};
+            if($sorted->{'failed'}) {
+                $c->stash->{'failed_backends'}->{$key} = $sorted->{'failed'};
+                $peer->{'last_error'} = $sorted->{'failed'};
+                next;
+            }
+            my $res_size = scalar @{$sorted->{'res'}};
+            for(my $x=0; $x<$res_size;$x++) {
+                $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
+                $sorted->{'opts'}->[$x]->{slice}        = 1 if $sorted->{'keys'}->[$x];
+                $sorted->{'res'}->[$x] = $decoder->decode($sorted->{'res'}->[$x]);
+                $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
+                $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
+            }
+            my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
             my($data,$typ,$size) = @res;
-            if(defined $data and !defined $size) {
+            if(!defined $size) {
                 if(ref $data eq 'ARRAY') {
                     $size = scalar @{$data};
                 }
