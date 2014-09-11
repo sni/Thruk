@@ -280,7 +280,7 @@ sub selectall_arrayref {
 
     $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
 
-    unless($result) {
+    if(!defined $result) {
         $result = &_send($self, $statement, $opt);
         return $result if $ENV{'THRUK_SELECT'};
     }
@@ -298,19 +298,19 @@ sub selectall_arrayref {
     }
 
     if($opt->{'slice'}) {
+        my $renames   = $opt->{'rename'};
+        my $callbacks = $opt->{'callbacks'};
         # make an array of hashes, inplace to safe memory
         my $rnum = scalar @{$result->{'result'}};
         my @keys = @{$result->{'keys'}};
         $result  = $result->{'result'};
         for(my $x=0;$x<$rnum;$x++) {
-            my $row      = $result->[$x];
-            my %hash;
-
             # sort array into hash slices
-            @hash{@keys} = @{$row};
+            my %hash;
+            @hash{@keys} = @{$result->[$x]};
 
             # renamed columns
-            if(exists $opt->{'rename'}) {
+            if($renames) {
                 for my $old (keys %{$opt->{'rename'}}) {
                     my $new = $opt->{'rename'}->{$old};
                     $hash{$new} = delete $hash{$old};
@@ -318,9 +318,9 @@ sub selectall_arrayref {
             }
 
             # add callbacks
-            if(exists $opt->{'callbacks'}) {
-                for my $key (keys %{$opt->{'callbacks'}}) {
-                    $hash{$key} = $opt->{'callbacks'}->{$key}->(\%hash);
+            if($callbacks) {
+                for my $key (keys %{$callbacks}) {
+                    $hash{$key} = $callbacks->{$key}->(\%hash);
                 }
             }
             $result->[$x] = \%hash;

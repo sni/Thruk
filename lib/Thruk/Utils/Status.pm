@@ -480,18 +480,24 @@ sub fill_totals_box {
         };
         my %hosts;
         for my $service (@{$services}) {
-            if($service->{'has_been_checked'} == 1) {
-                $service_stats->{'ok'}++        if $service->{'state'} == 0;
-                $service_stats->{'warning'}++   if $service->{'state'} == 1;
-                $service_stats->{'critical'}++  if $service->{'state'} == 2;
-                $service_stats->{'unknown'}++   if $service->{'state'} == 3;
-
-                $service_stats->{'warning_and_unhandled'}++  if($service->{'state'} == 1 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $service_stats->{'critical_and_unhandled'}++ if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $service_stats->{'unknown_and_unhandled'}++  if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-            }
             if($service->{'has_been_checked'} == 0) {
                 $service_stats->{'pending'}++;
+            } else {
+                if($service->{'state'} == 0) {
+                    $service_stats->{'ok'}++;
+                }
+                elsif($service->{'state'} == 1) {
+                    $service_stats->{'warning'}++;
+                    $service_stats->{'warning_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'state'} == 2) {
+                    $service_stats->{'critical'}++;
+                    $service_stats->{'critical_and_unhandled'}++ if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'state'} == 3) {
+                    $service_stats->{'unknown'}++;
+                    $service_stats->{'unknown_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
             }
             next if defined $hosts{$service->{'host_name'}};
             $hosts{$service->{'host_name'}} = 1;
@@ -499,12 +505,18 @@ sub fill_totals_box {
             if($service->{'host_has_been_checked'} == 0) {
                 $host_stats->{'pending'}++;
             } else{
-                $host_stats->{'up'}++          if $service->{'host_state'} == 0;
-                $host_stats->{'down'}++        if $service->{'host_state'} == 1;
-                $host_stats->{'unreachable'}++ if $service->{'host_state'} == 2;
+                if($service->{'host_state'} == 0) {
+                    $host_stats->{'up'}++;
+                }
+                elsif($service->{'host_state'} == 1) {
+                    $host_stats->{'down'}++;
+                    $host_stats->{'down_and_unhandled'}++        if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'host_state'} == 2) {
+                    $host_stats->{'unreachable'}++;
+                    $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
 
-                $host_stats->{'down_and_unhandled'}++        if($service->{'host_state'} == 1 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_state'} == 2 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
             }
         }
     } else {
