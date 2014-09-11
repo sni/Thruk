@@ -107,14 +107,6 @@ set a query timeout. Used for retrieving querys, Default 60sec
 
 set a connect timeout. Used for initial connections, default 5sec
 
-=item use_threads
-
-only used with multiple backend connections.
-Default is to don't threads where available. As threads in perl
-are causing problems with tied resultset and using more memory.
-Querys are usually faster without threads, except for very slow backends
-connections.
-
 =back
 
 If the constructor is only passed a single argument, it is assumed to
@@ -144,7 +136,6 @@ sub new {
       'query_timeout'               => 60,      # query timeout for tcp connections
       'connect_timeout'             => 5,       # connect timeout for tcp connections
       'timeout'                     => undef,   # timeout for tcp connections
-      'use_threads'                 => undef,   # use threads, default is to use threads where available
       'warnings'                    => 1,       # show warnings, for example on querys without Column: Header
       'logger'                      => undef,   # logger object used for statistical informations and errors / warnings
       'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
