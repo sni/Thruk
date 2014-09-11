@@ -455,7 +455,7 @@ sub fill_totals_box {
     my $service_stats = {};
     if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
-            and ( $c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' )
+            and ( defined $c->stash->{style} and ($c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' ))
           )
       ) {
         # set host status from service query
