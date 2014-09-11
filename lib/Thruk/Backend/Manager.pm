@@ -1936,7 +1936,7 @@ sub _sum_answer {
         $return->{$key} = $data->{$first}->{$key};
 
         if($key eq 'peer_key') {
-            for my $peername ( @peers ) { $return->{$key} .= ','.$data->{$peername}->{$key}; }
+            $return->{$key} .= ','.join(',', @peers);
         }
         elsif ( looks_like_number( $data->{$first}->{$key} ) ) {
             for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
