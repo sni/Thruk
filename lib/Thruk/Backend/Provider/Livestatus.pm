@@ -954,10 +954,8 @@ sub get_performance_stats {
     my($self, %options) = @_;
 
     if($options{'data'}) {
-        my $data = {};
-        for my $d (@{$options{'data'}}) {
-            $data = { %{$data}, %{$d->[0]} };
-        }
+        my $d = $options{'data'};
+        my $data = {%{$d->[0]->[0]}, %{$d->[1]->[0]}, %{$d->[2]->[0]}, %{$d->[3]->[0]}, %{$d->[4]->[0]}, %{$d->[5]->[0]}, };
         return($data, 'STATS');
     }
 

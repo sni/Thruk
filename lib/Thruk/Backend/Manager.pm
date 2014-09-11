@@ -1323,7 +1323,7 @@ sub _get_result_serial {
     my $sorted_results = {};
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
-        if($peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs' and $function ne 'send_command') {
+        if($peer->{'cacheproxy'} and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
             $sorted_results->{$key} = {
                 'keys'   => [],
                 'res'    => [],
@@ -1338,7 +1338,7 @@ sub _get_result_serial {
                     @cache_args = ([$statement, $keys, $opt]);
                 }
                 for my $tmp (@cache_args) {
-                    if($tmp->[0] =~ m/^Stats:\ (.*)$/mx or $tmp->[0] =~ m/^StatsGroupBy:\ (.*)$/mx) {
+                    if($tmp->[0] =~ m/^Stats/mxo) {
                         ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::_extract_keys_from_stats_statement(undef, $tmp->[0]);
                     }
                 }
@@ -1853,30 +1853,26 @@ sub _merge_stats_answer {
 
     $c->stats->profile( begin => "_merge_stats_answer()" );
 
-    for my $peername ( keys %{$data} ) {
-        if( ref $data->{$peername} eq 'HASH' ) {
-            for my $key ( keys %{ $data->{$peername} } ) {
-                if( !defined $return->{$key} ) {
-                    $return->{$key} = $data->{$peername}->{$key};
-                }
-                elsif ( looks_like_number( $data->{$peername}->{$key} ) ) {
-                    if( $key =~ m/_sum$/mx ) {
-                        $return->{$key} += $data->{$peername}->{$key};
-                    }
-                    elsif ( $key =~ m/_min$/mx ) {
-                        $return->{$key} = $data->{$peername}->{$key} if $return->{$key} > $data->{$peername}->{$key};
-                    }
-                    elsif ( $key =~ m/_max$/mx ) {
-                        $return->{$key} = $data->{$peername}->{$key} if $return->{$key} < $data->{$peername}->{$key};
-                    }
-                }
-            }
+    my @peers = keys %{$data};
+    return if scalar @peers == 0;
+
+    my $first = shift @peers;
+    for my $key ( keys %{ $data->{$first} } ) {
+        $return->{$key} = $data->{$first}->{$key};
+        if( $key =~ m/_sum$/mxo ) {
+            for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
+        }
+        elsif ( $key =~ m/_min$/mxo ) {
+            for my $peername ( @peers ) { $return->{$key} = $data->{$peername}->{$key} if $return->{$key} > $data->{$peername}->{$key}; }
+        }
+        elsif ( $key =~ m/_max$/mxo ) {
+            for my $peername ( @peers ) { $return->{$key} = $data->{$peername}->{$key} if $return->{$key} < $data->{$peername}->{$key}; }
         }
     }
 
     # percentages and averages?
     for my $key ( keys %{$return} ) {
-        if( $key =~ m/^(.*)_(\d+|all)_sum$/mx ) {
+        if( $key =~ m/^(.*)_(\d+|all)_sum$/mxo ) {
             my $pkey = $1 . '_sum';
             my $nkey = $1 . '_' . $2 . '_perc';
             if( exists $return->{$pkey} and $return->{$pkey} > 0 ) {
@@ -1897,7 +1893,7 @@ sub _merge_stats_answer {
             if( $key =~ m/(hosts|services)_$akey/mx ) {
                 my $type = $1;
                 my $nkey = $type . '_' . $akey;
-                $nkey =~ s/_sum$/_avg/mx;
+                $nkey =~ s/_sum$/_avg/mxo;
                 $return->{$nkey} = 0;
                 if( $return->{$key} > 0 and $return->{ $type . '_active_sum' } > 0 ) {
                     $return->{$nkey} = $return->{$key} / $return->{ $type . '_active_sum' };
@@ -1910,7 +1906,7 @@ sub _merge_stats_answer {
             if( $key =~ m/(hosts|services)_$akey/mx ) {
                 my $type = $1;
                 my $nkey = $type . '_' . $akey;
-                $nkey =~ s/_sum$/_avg/mx;
+                $nkey =~ s/_sum$/_avg/mxo;
                 $return->{$nkey} = 0;
                 if( $return->{$key} > 0 ) {
                     $return->{$nkey} = $return->{$key} / $return->{ $type . '_passive_sum' };
@@ -1932,22 +1928,18 @@ sub _sum_answer {
 
     $c->stats->profile( begin => "_sum_answer()" );
 
-    for my $peername ( keys %{$data} ) {
-        if( ref $data->{$peername} eq 'HASH' ) {
-            for my $key ( keys %{ $data->{$peername} } ) {
-                if( !defined $return->{$key} ) {
-                    $return->{$key} = $data->{$peername}->{$key};
-                }
-                elsif($key eq 'peer_key') {
-                    $return->{$key} .= ','.$data->{$peername}->{$key};
-                }
-                elsif ( looks_like_number( $data->{$peername}->{$key} ) ) {
-                    $return->{$key} += $data->{$peername}->{$key};
-                }
-            }
+    my @peers = keys %{$data};
+    return if scalar @peers == 0;
+
+    my $first = shift @peers;
+    for my $key ( keys %{ $data->{$first} } ) {
+        $return->{$key} = $data->{$first}->{$key};
+
+        if($key eq 'peer_key') {
+            for my $peername ( @peers ) { $return->{$key} .= ','.$data->{$peername}->{$key}; }
         }
-        else {
-            confess( "not a hash, got: " . ref( $data->{$peername} ) );
+        elsif ( looks_like_number( $data->{$first}->{$key} ) ) {
+            for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
         }
     }
 

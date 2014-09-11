@@ -15,6 +15,25 @@ use Monitoring::Livestatus::UNIX qw//;
 our $VERSION = '0.76';
 
 
+# list of allowed options
+my $allowed_options = {
+        'addpeer'       => 1,
+        'backend'       => 1,
+        'columns'       => 1,
+        'deepcopy'      => 1,
+        'header'        => 1,
+        'limit'         => 1,
+        'limit_start'   => 1,
+        'limit_length'  => 1,
+        'rename'        => 1,
+        'slice'         => 1,
+        'sum'           => 1,
+        'callbacks'     => 1,
+        'wrapped_json'  => 1,
+        'sort'          => 1,
+        'offset'        => 1,
+};
+
 =head1 NAME
 
 Monitoring::Livestatus - Perl API for check_mk livestatus to access runtime
@@ -894,11 +913,11 @@ sub post_processing {
         $with_peers = 1;
     }
 
-    my $peer_name = $self->peer_name;
-    my $peer_addr = $self->peer_addr;
-    my $peer_key  = $self->peer_key;
-
     if(defined $with_peers and $with_peers == 1) {
+        my $peer_name = $self->peer_name;
+        my $peer_addr = $self->peer_addr;
+        my $peer_key  = $self->peer_key;
+
         unshift @{$keys}, 'peer_name';
         unshift @{$keys}, 'peer_addr';
         unshift @{$keys}, 'peer_key';
@@ -1235,22 +1254,26 @@ sub _extract_keys_from_stats_statement {
     my(@header, $new_statement);
 
     for my $line (split/\n/mx, $statement) {
-        if($line =~ m/^Stats:\ (.*)\s+as\s+(.*)$/mxi) {
+        if($line !~ m/^Stats/mxo) { # faster shortcut for non-stats lines
+            $new_statement .= $line."\n";
+            next;
+        }
+        if($line =~ m/^Stats:\ (.*)\s+as\s+(.*?)$/mxo) {
             push @header, $2;
             $line = 'Stats: '.$1;
         }
-        elsif($line =~ m/^Stats:\ (.*)$/mx) {
+        elsif($line =~ m/^Stats:\ (.*)$/mxo) {
             push @header, $1;
         }
 
-        if($line =~ m/^StatsAnd:\ (\d+)\s+as\s+(.*)$/mx) {
+        elsif($line =~ m/^StatsAnd:\ (\d+)\s+as\s+(.*?)$/mxo) {
             for(my $x = 0; $x < $1; $x++) {
                 pop @header;
             }
             $line = 'StatsAnd: '.$1;
             push @header, $2;
         }
-        elsif($line =~ m/^StatsAnd:\ (\d+)$/mx) {
+        elsif($line =~ m/^StatsAnd:\ (\d+)$/mxo) {
             my @to_join;
             for(my $x = 0; $x < $1; $x++) {
                 unshift @to_join, pop @header;
@@ -1258,14 +1281,14 @@ sub _extract_keys_from_stats_statement {
             push @header, join(' && ', @to_join);
         }
 
-        if($line =~ m/^StatsOr:\ (\d+)\s+as\s+(.*)$/mx) {
+        elsif($line =~ m/^StatsOr:\ (\d+)\s+as\s+(.*?)$/mxo) {
             for(my $x = 0; $x < $1; $x++) {
                 pop @header;
             }
             $line = 'StatsOr: '.$1;
             push @header, $2;
         }
-        elsif($line =~ m/^StatsOr:\ (\d+)$/mx) {
+        elsif($line =~ m/^StatsOr:\ (\d+)$/mxo) {
             my @to_join;
             for(my $x = 0; $x < $1; $x++) {
                 unshift @to_join, pop @header;
@@ -1274,11 +1297,11 @@ sub _extract_keys_from_stats_statement {
         }
 
         # StatsGroupBy header are always sent first
-        if($line =~ m/^StatsGroupBy:\ (.*)\s+as\s+(.*)$/mxi) {
+        elsif($line =~ m/^StatsGroupBy:\ (.*)\s+as\s+(.*?)$/mxo) {
             unshift @header, $2;
             $line = 'StatsGroupBy: '.$1;
         }
-        elsif($line =~ m/^StatsGroupBy:\ (.*)$/mx) {
+        elsif($line =~ m/^StatsGroupBy:\ (.*)$/mxo) {
             unshift @header, $1;
         }
         $new_statement .= $line."\n";
@@ -1425,30 +1448,15 @@ sub _lowercase_and_verify_options {
     my($self, $opts) = @_;
     my $return = {};
 
-    # list of allowed options
-    my $allowed_options = {
-        'addpeer'       => 1,
-        'backend'       => 1,
-        'columns'       => 1,
-        'deepcopy'      => 1,
-        'header'        => 1,
-        'limit'         => 1,
-        'limit_start'   => 1,
-        'limit_length'  => 1,
-        'rename'        => 1,
-        'slice'         => 1,
-        'sum'           => 1,
-        'callbacks'     => 1,
-        'wrapped_json'  => 1,
-        'sort'          => 1,
-        'offset'        => 1,
-    };
+    # make keys lowercase
+    %{$return} = map { lc($_) => $opts->{$_} } keys %{$opts};
 
-    for my $key (keys %{$opts}) {
-        if($self->{'warnings'} and !defined $allowed_options->{lc $key}) {
-            carp("unknown option used: $key - please use only: ".join(', ', keys %{$allowed_options}));
+    if($self->{'warnings'}) {
+        for my $key (keys %{$return}) {
+            if(!defined $allowed_options->{$key}) {
+                carp("unknown option used: $key - please use only: ".join(', ', keys %{$allowed_options}));
+            }
         }
-        $return->{lc $key} = $opts->{$key};
     }
 
     # set limits
