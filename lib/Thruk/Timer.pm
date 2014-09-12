@@ -33,6 +33,8 @@ sub timing_breakpoint {
         if($has_threads) {
             $thr = (threads->tid()||'global');
         }
+        my $callfile = $caller[1];
+        $callfile =~ s|^.*lib/||mxo;
         printf(STDERR "%-8s  %6ss    %6ss    %6sMB   %6sMB    %-50s %s:%d\n",
                         $thr,
                         sprintf("%.3f", $total),
@@ -40,7 +42,7 @@ sub timing_breakpoint {
                         sprintf("%.2f", $memory/1024),
                         sprintf("%.3f", $deltamem/1024),
                         $msg,
-                        $caller[1],
+                        $callfile,
                         $caller[2],
         );
     }
