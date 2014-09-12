@@ -6,9 +6,9 @@ set -u
 #################################################
 # settings
 NUM=10
-REQUESTS=${REQUESTS:-100}
+REQUESTS=${REQUESTS:-50}
 CONCURRENCY=${CONCURRENCY:-5}
-DELAY=${DELAY:-3}
+DELAY=${DELAY:-2}
 BASEPORT="3000"
 BASEURL="http://127.0.0.1:$BASEPORT/thruk"
 
@@ -21,12 +21,12 @@ cleanup() {
 test_page() {
   NAME=$1
   URL=$2
+  sleep $DELAY
   pageres=$(ab -c $CONCURRENCY -n $REQUESTS $URL 2>&1)
   page=$(echo "$pageres" | grep 'Requests per second:' | awk '{ print $4 }')
   pageerr=$(echo "$pageres" | grep 'Non-2xx responses:' | awk '{ print $3 }')
   if [ "$pageerr" != "" ]; then if [ $pageerr -gt 5 ]; then page='err'; fi; fi
   printf "     %s: %5s #/sec" "$NAME" "$page"
-  sleep $DELAY
 }
 
 #################################################
@@ -45,7 +45,7 @@ test_tag() {
   printf "%-14s" "$TAG"
   switch_tag "$TAG"
   pid=$(./script/thruk_server.pl >/dev/null 2>&1 & echo $!);
-  sleep $DELAY
+
   while [ $(lsof -i:$BASEPORT | grep -c LISTEN) -ne 1 ]; do
     sleep 0.5
     ps -p $pid >/dev/null 2>&1 || { echo "failed to start!"; exit; }
@@ -53,19 +53,18 @@ test_tag() {
 
   # warm up
   ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1
-  sleep $DELAY
 
   test_page 'tac'    "$BASEURL/cgi-bin/tac.cgi"
   test_page 'status' "$BASEURL/cgi-bin/status.cgi"
+  mem=$(cat /proc/$pid/status | grep VmRSS:  | awk '{print $2}')
   test_page 'json'   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json"
   test_page 'bp'     "$BASEURL/cgi-bin/bp.cgi"
+  max=$(cat /proc/$pid/status | grep VmPeak: | awk '{print $2}')
 
-  mem=$(ps -efl | grep "./script/thruk_server.pl" | grep -v 'grep' | awk '{print $10}')
   load=$(cat /proc/loadavg | awk '{ print $1 }')
 
   kill $pid
-  printf "     mem: %3d MB     load: %5s\n" $(echo $mem/1000|bc) "$load"
-  sleep $DELAY
+  printf "     mem: %3d MB (max. %4dMB)     load: %5s\n" $(echo $mem/1000|bc) $(echo $max/1000|bc) "$load"
 }
 
 #################################################
