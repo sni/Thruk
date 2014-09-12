@@ -2,24 +2,38 @@ package Thruk::Timer;
 
 use warnings;
 use strict;
+use File::Slurp qw/read_file/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Exporter 'import';
 our @EXPORT_OK = qw(timing_breakpoint);
 
-my $starttime = [gettimeofday];
-my $lasttime  = $starttime;
+my $starttime   = [gettimeofday];
+my $lasttime    = $starttime;
+my $has_threads = 0;
+my $has_memory  = 1;
 sub timing_breakpoint {
     my($msg) = @_;
     my @caller = caller;
     my $tmp = [gettimeofday];
     my $elapsed;
     if($lasttime) {
-        my $total = tv_interval($starttime);
-        $elapsed  = tv_interval($lasttime);
-        printf(STDERR "%-8s  %6ss     %6ss     %-40s %s:%d\n",
-                        (threads->tid()||'global'),
+        my $total  = tv_interval($starttime);
+        $elapsed   = tv_interval($lasttime);
+        my $status = read_file('/proc/'.$$.'/status');
+        my $memory = '';
+        if($has_memory) {
+            $status =~ m/^VmRSS:\s*(\d+)\s+kB/smxo;
+            $memory = $1;
+        }
+        my $thr    = 'global';
+        if($has_threads) {
+            $thr = (threads->tid()||'global');
+        }
+        printf(STDERR "%-8s  %6ss    %6ss    %6sMB     %-40s %s:%d\n",
+                        $thr,
                         sprintf("%.3f", $total),
                         sprintf("%.3f", $elapsed),
+                        sprintf("%.2f", $memory/1024),
                         $msg,
                         $caller[1],
                         $caller[2],
