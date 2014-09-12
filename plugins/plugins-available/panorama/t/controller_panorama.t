@@ -123,7 +123,7 @@ sub test_json_page {
         $data = decode_json($page->{'content'});
     };
     is(ref $data, 'HASH', "json result is an array: ".$url->{'url'});
-    if($url !~ m/gearman/mx) {
+    if($url->{'url'} !~ m/gearman/mx) {
         ok(scalar keys %{$data} > 0, "json result has content: ".$url->{'url'});
     }
 }
