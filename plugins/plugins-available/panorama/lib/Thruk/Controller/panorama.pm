@@ -631,9 +631,8 @@ sub _task_avail_update {
                             $c->{request}->{parameters}->{service}  = 'all';
                         }
                     }
-
                     my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts);
+                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts, undef, undef, 1);
                     $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -734,7 +733,7 @@ sub _task_avail_clean_cache {
 
 ##########################################################
 sub _task_avail_calc {
-    my($c, $cached_only, $now, $cached, $opts, $host, $service) = @_;
+    my($c, $cached_only, $now, $cached, $opts, $host, $service, $filter) = @_;
     my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
     my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
@@ -759,7 +758,7 @@ sub _task_avail_calc {
     $c->{request}->{parameters}->{t2}            = time();
     $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;
     $c->{request}->{parameters}->{rpttimeperiod} = $opts->{'tm'};
-    Thruk::Utils::Avail::calculate_availability($c);
+    Thruk::Utils::Avail::calculate_availability($c) unless $filter;
     if($host) {
         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                     $unavailable_states,
@@ -769,26 +768,39 @@ sub _task_avail_calc {
         return $totals->{'total'}->{'percent'};
     } else {
         my($num, $total) = (0,0);
-        if(defined $c->stash->{avail_data}->{'hosts'} && ($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'}))) {
-            for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
-                my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
-                                                                            $unavailable_states,
-                                                                            $host
-                                                                           );
-                $total += $totals->{'total'}->{'percent'};
-                $num++;
-            }
-        }
-        if(defined $c->stash->{avail_data}->{'services'} && ($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'}))) {
-            for my $host (keys %{$c->stash->{avail_data}->{'services'}}) {
-                for my $service (keys %{$c->stash->{avail_data}->{'services'}->{$host}}) {
+        if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+            my $s_filter = delete $c->{request}->{parameters}->{s_filter};
+            Thruk::Utils::Avail::calculate_availability($c) if $filter;
+            if($c->stash->{avail_data}->{'hosts'}) {
+                for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
                     my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                                 $unavailable_states,
-                                                                                $host,
-                                                                                $service
+                                                                                $host
                                                                                );
-                    $total += $totals->{'total'}->{'percent'};
-                    $num++;
+                    if($totals->{'total'}->{'percent'} != -1) {
+                        $total += $totals->{'total'}->{'percent'};
+                        $num++;
+                    }
+                }
+            }
+            $c->{request}->{parameters}->{s_filter} = $s_filter;
+        }
+        if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+            delete $c->{request}->{parameters}->{h_filter};
+            Thruk::Utils::Avail::calculate_availability($c) if $filter;
+            if($c->stash->{avail_data}->{'services'}) {
+                for my $host (keys %{$c->stash->{avail_data}->{'services'}}) {
+                    for my $service (keys %{$c->stash->{avail_data}->{'services'}->{$host}}) {
+                        my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
+                                                                                    $unavailable_states,
+                                                                                    $host,
+                                                                                    $service
+                                                                                   );
+                        if($totals->{'total'}->{'percent'} != -1) {
+                            $total += $totals->{'total'}->{'percent'};
+                            $num++;
+                        }
+                    }
                 }
             }
         }
