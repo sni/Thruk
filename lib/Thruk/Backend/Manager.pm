@@ -1386,7 +1386,7 @@ sub _get_result_serial {
         $c->stats->profile( begin => "_get_result_serial socket_pool_do");
         #&timing_breakpoint('_get_result_serial socket_pool_do');
         my $thread_num = scalar @pool_do;
-        if($thread_num > 300) { $thread_num = 300; } # limit thread size
+        if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
         my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
         #&timing_breakpoint('_get_result_serial socket_pool_do done');
         $c->stats->profile( end => "_get_result_serial socket_pool_do");
