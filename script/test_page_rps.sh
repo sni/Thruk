@@ -42,7 +42,7 @@ switch_tag() {
 #################################################
 test_tag() {
   TAG="$1"
-  printf "%-10s  " "$TAG"
+  printf "%-14s" "$TAG"
   switch_tag "$TAG"
   pid=$(./script/thruk_server.pl >/dev/null 2>&1 & echo $!);
   sleep $DELAY
