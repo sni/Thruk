@@ -37,7 +37,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($action eq 'leak') {
         my $leak = Thruk::Backend::Manager->new();
         $leak->{'test'} = $leak;
-        $c->{stash}->{ctx} = $c;
+        $c->stash->{ctx} = $c;
     }
 
     return 1;

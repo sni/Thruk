@@ -33,6 +33,8 @@ sub read_navigation {
 
     $c->stats->profile(begin => "Utils::Menu::read_navigation()");
 
+    $c->{'stash'} = $c->stash; # required for backwards compatibility on old menu_local.confs
+
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
     if(defined $ENV{'CATALYST_CONFIG'}) {

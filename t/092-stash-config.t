@@ -6,7 +6,9 @@ use Data::Dumper;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $cmds = [
-  "grep -nr '\$c->'\"{'stash'}\" lib/ plugins/plugins-available/*/lib/",
+  "grep -nr '\$c->'\"{'stash'}\"  lib/ plugins/plugins-available/*/lib/ menu.conf | grep -v 'backwards compatibility'",
+  "grep -nr '\$c->'\"{stash}\"    lib/ plugins/plugins-available/*/lib/ menu.conf",
+  "grep -nr '\$c->{\"stash\"}'    lib/ plugins/plugins-available/*/lib/ menu.conf",
   "grep -nr '\$c->'\"{'config'}\" lib/ plugins/plugins-available/*/lib/",
 ];
 
