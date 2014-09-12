@@ -86,7 +86,7 @@ var TP = {
                                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
                             }
                             TP.add_pantab(id, replace_id, hidden);
-                            if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
+                            if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
                                 TP.dashboardsSettingGrid.getView().refresh();
                             }
                             if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
@@ -1287,7 +1287,7 @@ var TP = {
     /* fetch dashboard data from server and reapply settings */
     reconfigureDashboard: function(nr) {
         /* update dashboard managment view */
-        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
+        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
             TP.dashboardsSettingGrid.getView().refresh();
         }
         if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
