@@ -175,6 +175,7 @@ sub get_test_hostgroup_cli {
     sleep           => sleep this amount of seconds after the request
     waitfor         => wait till regex occurs (max 60sec)
     agent           => user agent for requests
+    callback        => content callback
   }
 
 =cut
@@ -399,6 +400,10 @@ sub test_page {
     # sleep after the request?
     if(defined $opts->{'sleep'}) {
         ok(sleep($opts->{'sleep'}), "slept $opts->{'sleep'} seconds");
+    }
+
+    if($opts->{'callback'}) {
+        $opts->{'callback'}($return->{'content'});
     }
 
     return $return;

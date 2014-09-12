@@ -97,7 +97,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             return($self->_task_status($c));
         }
         if($task eq 'availability') {
-            return($self->_task_avail($c));
+            return($self->_task_availability($c));
         }
         elsif($task eq 'dashboard_data') {
             return($self->_task_dashboard_data($c));
@@ -549,29 +549,33 @@ sub _task_textsave {
 }
 
 ##########################################################
-sub _task_avail {
+sub _task_availability {
     my($self, $c) = @_;
 
     # make status group filter faster
     $c->stash->{'cache_groups_filter'} = {};
 
+    if($c->request->parameters->{'force'}) {
+        return(_avail_update($c));
+    }
+
     $c->stats->profile(begin => "_task_avail");
-    my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_task_avail_update($c)',
+    my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
                                                    message    => 'availability is being calculated',
                                                    background => 1
                                                  }
     );
-    my $res = _task_avail_update($c, 1);
+    my $res = _avail_update($c, 1);
     $c->stats->profile(end => "_task_avail");
     return($res);
 }
 
 
 ##########################################################
-sub _task_avail_update {
+sub _avail_update {
     my($c, $cached_only) = @_;
 
-    $c->stats->profile(begin => "_task_avail_update");
+    $c->stats->profile(begin => "_avail_update");
     my $in    = {};
     my $types = {};
 
@@ -632,7 +636,7 @@ sub _task_avail_update {
                         }
                     }
                     my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts, undef, undef, 1);
+                    $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts, undef, undef, 1);
                     $cache->set(@cache_prefix, 'filter', $filtername, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -649,7 +653,7 @@ sub _task_avail_update {
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
                         $c->{request}->{parameters}->{include_host_services} = 1
                     }
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $opts);
+                    $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -662,7 +666,7 @@ sub _task_avail_update {
             for my $panel (@{$types->{'servicegroups'}->{$group}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'servicegroups', $group, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts});
+                    $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts});
                     $cache->set(@cache_prefix, 'servicegroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -675,7 +679,7 @@ sub _task_avail_update {
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
-                    $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
+                    $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host);
                     $cache->set(@cache_prefix, 'hosts', $host, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                 }
             }
@@ -690,7 +694,7 @@ sub _task_avail_update {
                 for my $panel (@{$types->{'services'}->{$host}->{$service}}) {
                     for my $key (keys %{$in->{$panel}}) {
                         my $cached = $cache->get(@cache_prefix, 'services', $host, $service, $key);
-                        $data->{$panel}->{$key} = _task_avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
+                        $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $in->{$panel}->{$key}->{opts}, $host, $service);
                         $cache->set(@cache_prefix, 'services', $host, $service, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
                     }
                 }
@@ -699,20 +703,20 @@ sub _task_avail_update {
     }
 
     # clean up cache
-    $c->stats->profile(begin => "_task_avail_clean_cache");
+    $c->stats->profile(begin => "_avail_clean_cache");
     my $cached = $cache->get();
-    _task_avail_clean_cache($cached, $now - 86400);
+    _avail_clean_cache($cached, $now - 86400);
     $cache->set($cached);
-    $c->stats->profile(end => "_task_avail_clean_cache");
+    $c->stats->profile(end => "_avail_clean_cache");
 
     $c->stash->{'json'} = { data => $data };
 
-    $c->stats->profile(end => "_task_avail_clean_cache");
+    $c->stats->profile(end => "_avail_clean_cache");
     return $c->forward('Thruk::View::JSON');
 }
 
 ##########################################################
-sub _task_avail_clean_cache {
+sub _avail_clean_cache {
     my($data, $expire) = @_;
     for my $key (keys %{$data}) {
         if(ref $data->{$key} eq 'HASH') {
@@ -721,7 +725,7 @@ sub _task_avail_clean_cache {
                     delete $data->{$key};
                 }
             } else {
-                _task_avail_clean_cache($data->{$key}, $expire);
+                _avail_clean_cache($data->{$key}, $expire);
             }
             if(scalar keys %{$data->{$key}} == 0) {
                 delete $data->{$key};
@@ -732,14 +736,14 @@ sub _task_avail_clean_cache {
 }
 
 ##########################################################
-sub _task_avail_calc {
+sub _avail_calc {
     my($c, $cached_only, $now, $cached, $opts, $host, $service, $filter) = @_;
     my $duration = Thruk::Utils::Status::convert_time_amount($opts->{'d'});
     my $unavailable_states = {'down' => 1, 'unreachable' => 1, 'critical' => 1, 'unknown' => 1};
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
 
     # cache hit?
-    if($cached) {
+    if($cached && !$c->request->parameters->{'force'}) {
         my $refresh = 0;
         if($now > $cached->{'time'} + $duration * $cache_retrieve_factor) {
             $refresh = 1;
