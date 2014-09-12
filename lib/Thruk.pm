@@ -341,7 +341,7 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
-    #&timing_breakpoint('request '.$c->request->path);
+    #&timing_breakpoint('request '.$c->request->path) if $c->request->path =~ m/cgi\-bin|html/;
 
     # collect statistics when running external command or if enabled by env variable
     if($ENV{'THRUK_JOB_DIR'} || ($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2)) {
