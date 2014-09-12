@@ -15,6 +15,7 @@ use Thruk::Config ();
 use Thruk::Backend::Peer ();
 use Thruk::Backend::Pool ();
 use Thruk::Utils::IO ();
+#use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;
 
@@ -1076,6 +1077,7 @@ sub _do_on_peers {
     my $selected_backends = scalar @{$get_results_for};
     $c->stash->{'num_selected_backends'} = $selected_backends;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
+    #&timing_breakpoint('_get_result: '.$function);
     if(!defined $result and $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
@@ -1317,6 +1319,7 @@ sub _get_result_serial {
     my $c = $Thruk::Backend::Manager::c;
     my $t1 = [gettimeofday];
 
+    #&timing_breakpoint('_get_result_serial begin: '.$function);
     $c->stats->profile( begin => "_get_result_serial() sending") if $use_shadow;
     my @pool_do;
     my @cache_args;
@@ -1370,6 +1373,7 @@ sub _get_result_serial {
                 $type       = $typ;
                 $result->{ $key } = $data;
             }
+            #&timing_breakpoint('_get_result_serial fetched: '.$key);
             $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
             $peer->{'last_error'} = $last_error;
         }
@@ -1379,20 +1383,23 @@ sub _get_result_serial {
 
     # collect pool results
     if(@pool_do) {
-        $c->stats->profile( begin => "_get_result_serial pool_do");
+        $c->stats->profile( begin => "_get_result_serial socket_pool_do");
+        #&timing_breakpoint('_get_result_serial socket_pool_do');
         my $thread_num = scalar @pool_do;
         if($thread_num > 300) { $thread_num = 300; } # limit thread size
         my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
-        $c->stats->profile( end => "_get_result_serial pool_do");
+        #&timing_breakpoint('_get_result_serial socket_pool_do done');
+        $c->stats->profile( end => "_get_result_serial socket_pool_do");
         my $decoder = JSON::XS->new->utf8->relaxed;
         $c->stats->profile( begin => "_get_result_serial postprocessing");
         for my $row (@{$raw}) {
             if($row->{'success'}) {
-                $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $row->{'result'};
+                $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});
             } else {
                 $sorted_results->{$row->{'key'}}->{'failed'} = $row->{'result'};
             }
         }
+        #&timing_breakpoint('_get_result_serial sorted and decoded');
         for my $key (keys %{$sorted_results}) {
             my $peer     = $self->get_peer_by_key($key);
             my $sorted   = $sorted_results->{$key};
@@ -1405,7 +1412,6 @@ sub _get_result_serial {
             for(my $x=0; $x<$res_size;$x++) {
                 $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
                 $sorted->{'opts'}->[$x]->{slice}        = 1 if $sorted->{'keys'}->[$x];
-                $sorted->{'res'}->[$x] = $decoder->decode($sorted->{'res'}->[$x]);
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
             }
@@ -1430,6 +1436,7 @@ sub _get_result_serial {
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_backend_waited'} += $elapsed;
 
+    #&timing_breakpoint('_get_result_serial end: '.$function);
     return($result, $type, $totalsize);
 }
 
