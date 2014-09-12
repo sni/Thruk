@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use utf8;
 use File::Slurp qw/read_file/;
+#use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
 =head1 METHODS
@@ -47,6 +48,7 @@ sub check_shadow_naemon_procs {
             _start_shadownaemon_for_peer($config, $peer, $key, $basedir, $c, $log_missing);
         }
     }
+    #&timing_breakpoint('check_shadow_naemon_procs');
     return;
 }
 
@@ -149,7 +151,8 @@ sub _start_shadownaemon_for_peer {
                       $config->{'shadow_naemon_dir'}.'/'.$key,
                     );
     $c->log->debug($cmd) if $log_missing;
-    `$cmd`;
+    # starting in background is not faster here since the daemon immediatly backgrounds
+    system($cmd);
     return;
 }
 
