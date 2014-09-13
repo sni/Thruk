@@ -1501,22 +1501,15 @@ sub _get_results_xs_pool {
                 $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
                 $sorted->{'opts'}->[$x]->{slice}        = 1 if $sorted->{'keys'}->[$x];
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
+                $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+                #&timing_breakpoint('_get_results_xs_pool postprocessed');
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
+                #&timing_breakpoint('_get_results_xs_pool selectall_arrayref');
             }
             my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
             my($data,$typ,$size) = @res;
-            if(!defined $size) {
-                if(ref $data eq 'ARRAY') {
-                    $size = scalar @{$data};
-                }
-                elsif(ref $data eq 'HASH') {
-                    $size = scalar keys %{$data};
-                }
-            }
-            $size = 0 unless defined $size;
-            $totalsize += $size;
-            $type       = $typ;
-            $result->{$key} = $data;
+            $type                = $typ;
+            $result->{$key}      = $data;
         }
         $c->stats->profile( end   => "_get_results_xs_pool postprocessing");
     }
