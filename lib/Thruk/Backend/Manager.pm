@@ -1399,6 +1399,7 @@ sub _get_result_serial {
                 $sorted_results->{$row->{'key'}}->{'failed'} = $row->{'result'};
             }
         }
+        $raw = undef;
         #&timing_breakpoint('_get_result_serial sorted and decoded');
         for my $key (keys %{$sorted_results}) {
             my $peer     = $self->get_peer_by_key($key);
