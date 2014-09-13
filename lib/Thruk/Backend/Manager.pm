@@ -1188,6 +1188,8 @@ sub _do_on_peers {
 
     $data = $self->_set_result_defaults($function, $data);
 
+    #&timing_breakpoint('_get_result complete: '.$function);
+
     $c->stats->profile( end => '_do_on_peers('.$function.')');
 
     return $data;

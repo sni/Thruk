@@ -8,6 +8,7 @@ use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
 use Encode qw(encode);
 use JSON::XS qw();
+use Storable qw/dclone/;
 
 use Monitoring::Livestatus::INET qw//;
 use Monitoring::Livestatus::UNIX qw//;
@@ -276,18 +277,18 @@ sub selectall_arrayref {
     $limit = 0 unless defined $limit;
 
     # make opt hash keys lowercase
-    $opt = &_lowercase_and_verify_options($self, $opt);
+    $opt = &_lowercase_and_verify_options($self, $opt) unless $result;
 
     $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
 
     if(!defined $result) {
         $result = &_send($self, $statement, $opt);
         return $result if $ENV{'THRUK_SELECT'};
-    }
 
-    if(!defined $result) {
-        return unless $self->{'errors_are_fatal'};
-        croak("got undef result for: $statement");
+        if(!defined $result) {
+            return unless $self->{'errors_are_fatal'};
+            croak("got undef result for: $statement");
+        }
     }
 
     # trim result set down to excepted row count
@@ -298,25 +299,26 @@ sub selectall_arrayref {
     }
 
     if($opt->{'slice'}) {
-        my $renames   = $opt->{'rename'};
         my $callbacks = $opt->{'callbacks'};
         # make an array of hashes, inplace to safe memory
-        my $rnum = scalar @{$result->{'result'}};
-        my @keys = @{$result->{'keys'}};
+        my $keys = $result->{'keys'};
+        # renamed columns
+        if($opt->{'rename'}) {
+            $keys = dclone($result->{'keys'});
+            my $keysize = scalar @{$keys};
+            for(my $x=0; $x<$keysize;$x++) {
+                my $old = $keys->[$x];
+                if($opt->{'rename'}->{$old}) {
+                    $keys->[$x] = $opt->{'rename'}->{$old};
+                }
+            }
+        }
         $result  = $result->{'result'};
+        my $rnum = scalar @{$result};
         for(my $x=0;$x<$rnum;$x++) {
             # sort array into hash slices
             my %hash;
-            @hash{@keys} = @{$result->[$x]};
-
-            # renamed columns
-            if($renames) {
-                for my $old (keys %{$opt->{'rename'}}) {
-                    my $new = $opt->{'rename'}->{$old};
-                    $hash{$new} = delete $hash{$old};
-                }
-            }
-
+            @hash{@{$keys}} = @{$result->[$x]};
             # add callbacks
             if($callbacks) {
                 for my $key (keys %{$callbacks}) {
