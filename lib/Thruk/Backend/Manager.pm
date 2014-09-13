@@ -1490,6 +1490,7 @@ sub _get_results_xs_pool {
         }
         $raw = undef;
         #&timing_breakpoint('_get_results_xs_pool sorted and decoded');
+        my $post_process = {};
         for my $key (keys %{$sorted_results}) {
             my $peer     = $self->get_peer_by_key($key);
             my $sorted   = $sorted_results->{$key};
@@ -1498,22 +1499,64 @@ sub _get_results_xs_pool {
                 $peer->{'last_error'} = $sorted->{'failed'};
                 next;
             }
+            my $optimized = 0;
             my $res_size = scalar @{$sorted->{'res'}};
             for(my $x=0; $x<$res_size;$x++) {
                 $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
-                $sorted->{'opts'}->[$x]->{slice}        = 1 if $sorted->{'keys'}->[$x];
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
                 $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
                 #&timing_breakpoint('_get_results_xs_pool postprocessed');
-                $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->selectall_arrayref("", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
-                #&timing_breakpoint('_get_results_xs_pool selectall_arrayref');
+                if($res_size == 1 && $sorted->{'keys'}->[$x] && $sorted->{'opts'}->[$x]->{limit} && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY') {
+                #if($function eq 'get_services' || $function eq 'get_hosts') {
+                    # optimized postprocessing
+                    $post_process->{$function} = {
+                        'results'  => [],
+                        'opts'     => $sorted->{'opts'}->[$x],
+                        'keys'     => $sorted->{'keys'}->[$x],
+                        'peer_key' => $key,
+                    } unless defined $post_process->{$function};
+                    push @{$post_process->{$function}->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
+                    $optimized = 1;
+                } else {
+                    $sorted->{'opts'}->[$x]->{slice} = 1 if $sorted->{'keys'}->[$x];
+                    $sorted->{'res'}->[$x] = Monitoring::Livestatus::selectall_arrayref(undef, "", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
+                    #&timing_breakpoint('_get_results_xs_pool selectall_arrayref');
+                }
             }
-            my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
-            my($data,$typ,$size) = @res;
-            $type                = $typ;
-            $result->{$key}      = $data;
+            if(!$optimized) {
+                my @res = $peer->{'cacheproxy'}->$function(data => ($res_size == 1 ? $sorted->{'res'}->[0] : $sorted->{'res'}));
+                my($data,$typ,$size) = @res;
+                $type                = $typ;
+                $result->{$key}      = $data;
+            }
         }
         $c->stats->profile( end   => "_get_results_xs_pool postprocessing");
+
+        if($post_process) {
+            for my $func (keys %{$post_process}) {
+                my $p = $post_process->{$function};
+                # get sort keys
+                my $sortkeys = [];
+                for my $sortk (@{$p->{'opts'}->{sort}}) {
+                    my($key, $dir) = split/\s+/, $sortk;
+                    my $x = 0;
+                    for my $k (@{$p->{'keys'}}) {
+                        if($k eq $key) {
+                            push $sortkeys, $x, $dir;
+                            last;
+                        }
+                        $x++;
+                    }
+                }
+                # sort our arrays
+                $p->{'results'}  = _sort_nr($p->{'results'}, $sortkeys);
+                # apply limit
+                $p->{'results'}  = $self->_limit( $p->{'results'}, $p->{opts}->{'limit'} );
+                # splice result, rename, callbacks and peer_keys are missing...
+                $p->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $p->{keys}, result => $p->{'results'}});
+                $result->{$p->{'peer_key'}} = $p->{'results'};
+            }
+        }
     }
 
     #&timing_breakpoint('_get_results_xs_pool end: '.$function);
@@ -2080,6 +2123,72 @@ sub _sort {
     $c->stats->profile( end => "_sort()" ) if $c;
 
     return ( \@sorted );
+}
+
+########################################
+
+=head2 _sort_nr
+
+  _sort_nr($data, $sortby)
+
+sort a array of array by array nr
+
+  sortby must be an array
+
+  [<nr>, <direction>]
+
+  ex.:
+
+  [5, 'asc']
+  [5, 'asc', 13, 'desc']
+
+=cut
+
+sub _sort_nr {
+    my($data, $sortby) = @_;
+
+    if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
+    if(scalar @{$data} == 0) {
+        return([]);
+    }
+
+    my @compares;
+    while(@{$sortby}) {
+        my $nr  = shift @{$sortby};
+        my $dir = shift @{$sortby};
+
+        # sort numeric
+        if( defined $data->[0]->[$nr] and $data->[0]->[$nr] =~ m/^[\d\.\-]+$/xm ) {
+            if(lc $dir eq 'asc') {
+                push @compares, '$a->["'.$nr.'"] <=> $b->["'.$nr.'"]';
+            } else {
+                push @compares, '$b->["'.$nr.'"] <=> $a->["'.$nr.'"]';
+            }
+        }
+
+        # sort alphanumeric
+        else {
+            if(lc $dir eq 'asc') {
+                push @compares, '$a->["'.$nr.'"] cmp $b->["'.$nr.'"]';
+            } else {
+                push @compares, '$b->["'.$nr.'"] cmp $a->["'.$nr.'"]';
+            }
+        }
+    }
+    my $sortstring = join( ' || ', @compares );
+
+    my @sorted;
+    ## no critic
+    no warnings;    # sorting by undef values generates lots of errors
+    eval '@sorted = sort {'.$sortstring.'} @{$data};';
+    use warnings;
+    ## use critic
+
+    if(scalar @sorted == 0 && $@) {
+        confess($@);
+    }
+
+    return(\@sorted);
 }
 
 ########################################

@@ -279,7 +279,7 @@ sub selectall_arrayref {
     # make opt hash keys lowercase
     $opt = &_lowercase_and_verify_options($self, $opt) unless $result;
 
-    $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
+    $self->_log_statement($statement, $opt, $limit) if !$result && $self->{'verbose'};
 
     if(!defined $result) {
         $result = &_send($self, $statement, $opt);
