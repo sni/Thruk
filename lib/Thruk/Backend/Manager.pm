@@ -1448,7 +1448,7 @@ sub _get_results_xs_pool {
             }
             for my $tmp (@cache_args) {
                 if($tmp->[0] =~ m/^Stats/mxo) {
-                    ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::_extract_keys_from_stats_statement(undef, $tmp->[0]);
+                    ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::extract_keys_from_stats_statement($tmp->[0]);
                 }
             }
         }

@@ -764,7 +764,7 @@ sub _send {
         if($statement =~ m/^Columns:\ (.*)$/mx) {
             ($statement,$keys) = $self->_extract_keys_from_columns_header($statement);
         } elsif($statement =~ m/^Stats:\ (.*)$/mx or $statement =~ m/^StatsGroupBy:\ (.*)$/mx) {
-            ($statement,$keys) = $self->_extract_keys_from_stats_statement($statement);
+            ($statement,$keys) = extract_keys_from_stats_statement($statement);
         }
 
         # Offset header (currently naemon only)
@@ -1248,8 +1248,16 @@ pairs:
 =cut
 
 ########################################
-sub _extract_keys_from_stats_statement {
-    my($self, $statement) = @_;
+
+=head2 extract_keys_from_stats_statement
+
+ extract_keys_from_stats_statement($statement)
+
+Extract column keys from statement.
+
+=cut
+sub extract_keys_from_stats_statement {
+    my($statement) = @_;
 
     my(@header, $new_statement);
 
