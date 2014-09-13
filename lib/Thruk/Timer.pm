@@ -20,10 +20,10 @@ sub timing_breakpoint {
     if($lasttime) {
         my $total    = tv_interval($starttime);
         $elapsed     = tv_interval($lasttime);
-        my $status   = read_file('/proc/'.$$.'/status');
         my $memory   = '';
         my $deltamem = '';
         if($has_memory) {
+            my $status   = read_file('/proc/'.$$.'/status');
             $status     =~ m/^VmRSS:\s*(\d+)\s+kB/smxo;
             $memory     = $1;
             $deltamem   = $memory - $lastmemory;
@@ -35,12 +35,12 @@ sub timing_breakpoint {
         }
         my $callfile = $caller[1];
         $callfile =~ s|^.*lib/||mxo;
-        printf(STDERR "%-8s  %6ss    %6ss    %6sMB   %6sMB    %-50s %s:%d\n",
+        printf(STDERR "%-8s  %7s    %7s    %8s   %8s    %-50s %s:%d\n",
                         $thr,
-                        sprintf("%.3f", $total),
-                        sprintf("%.3f", $elapsed),
-                        sprintf("%.2f", $memory/1024),
-                        sprintf("%.3f", $deltamem/1024),
+                        $elapsed > 0.001 ? sprintf("%.3fs", $total)    : '------',
+                        $elapsed > 0.001 ? sprintf("%.3fs", $elapsed) : '------',
+                        $deltamem > 10 ? sprintf("%.2fMB", $memory/1024)     : '------',
+                        $deltamem > 10 ? sprintf("%.2fMB", $deltamem/1024) : '------',
                         $msg,
                         $callfile,
                         $caller[2],
