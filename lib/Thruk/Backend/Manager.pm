@@ -1509,7 +1509,12 @@ sub _get_results_xs_pool {
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
                 $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
                 #&timing_breakpoint('_get_results_xs_pool postprocessed');
-                if($res_size == 1 && $sorted->{'keys'}->[$x] && $sorted->{'opts'}->[$x]->{limit} && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY' && $function ne 'get_processinfo') {
+                if($res_size == 1
+                   && $sorted->{'keys'}->[$x]
+                   && $sorted->{'opts'}->[$x]->{limit}
+                   && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY'
+                   && $function ne 'get_processinfo'
+                ) {
                 #if($function eq 'get_services' || $function eq 'get_hosts') {
                     # optimized postprocessing
                     if(!defined $post_process) {
