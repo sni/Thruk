@@ -277,7 +277,7 @@ sub get_hosts {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
         my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-        $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+        $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     }
 
     # get result
@@ -472,7 +472,7 @@ sub get_services {
 
 
     my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+    $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     # make it possible to order by state
     if(grep {/^state$/mx} @{$options{'columns'}}) {
         $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
@@ -1286,7 +1286,7 @@ sub _optimized_for_wrapped_json {
             }
             for my $key (@{$options->{'sort'}->{$order}}) {
                 push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
-                if(   $key eq 'last_state_change_plus'
+                if(   $key eq 'last_state_change_order'
                    || $key eq 'state_order'
                    || $key eq 'peer_name'
                 ) {

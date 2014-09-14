@@ -332,9 +332,9 @@ sub _process_details_page {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
         '3' => [ [ 'has_been_checked', 'state_order', 'host_name', 'description' ], 'service status' ],
-        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
-        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_order', 'host_name', 'description' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
@@ -351,7 +351,7 @@ sub _process_details_page {
         $keep_peer_addr   = delete $col_hash->{'peer_addr'};
         $keep_peer_name   = delete $col_hash->{'peer_name'};
         $keep_peer_key    = delete $col_hash->{'peer_key'};
-        $keep_last_state  = delete $col_hash->{'last_state_change_plus'};
+        $keep_last_state  = delete $col_hash->{'last_state_change_order'};
         $keep_state_order = delete $col_hash->{'state_order'};
         @{$columns} = keys %{$col_hash};
     }
@@ -383,11 +383,11 @@ sub _process_details_page {
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
-                delete $s->{'peer_addr'}              unless $keep_peer_addr;
-                delete $s->{'peer_name'}              unless $keep_peer_name;
-                delete $s->{'peer_key'}               unless $keep_peer_key;
-                delete $s->{'last_state_change_plus'} unless $keep_last_state;
-                delete $s->{'state_order'}            unless $keep_state_order;
+                delete $s->{'peer_addr'}               unless $keep_peer_addr;
+                delete $s->{'peer_name'}               unless $keep_peer_name;
+                delete $s->{'peer_key'}                unless $keep_peer_key;
+                delete $s->{'last_state_change_order'} unless $keep_last_state;
+                delete $s->{'state_order'}             unless $keep_state_order;
             }
         }
         $c->stash->{'json'} = $services;
@@ -430,8 +430,8 @@ sub _process_hostdetails_page {
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
         '1' => [ 'name', 'host name' ],
-        '4' => [ [ 'last_check',             'name' ], 'last check time' ],
-        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'name' ], 'last check time' ],
+        '6' => [ [ 'last_state_change_order', 'name' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'name' ], 'site' ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
@@ -449,7 +449,7 @@ sub _process_hostdetails_page {
         $keep_peer_addr  = delete $col_hash->{'peer_addr'};
         $keep_peer_name  = delete $col_hash->{'peer_name'};
         $keep_peer_key   = delete $col_hash->{'peer_key'};
-        $keep_last_state = delete $col_hash->{'last_state_change_plus'};
+        $keep_last_state = delete $col_hash->{'last_state_change_order'};
         @{$columns} = keys %{$col_hash};
     }
 
@@ -468,10 +468,10 @@ sub _process_hostdetails_page {
         # remove unwanted colums
         if($columns) {
             for my $h (@{$hosts}) {
-                delete $h->{'peer_addr'}              unless $keep_peer_addr;
-                delete $h->{'peer_name'}              unless $keep_peer_name;
-                delete $h->{'peer_key'}               unless $keep_peer_key;
-                delete $h->{'last_state_change_plus'} unless $keep_last_state;
+                delete $h->{'peer_addr'}               unless $keep_peer_addr;
+                delete $h->{'peer_name'}               unless $keep_peer_name;
+                delete $h->{'peer_key'}                unless $keep_peer_key;
+                delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
         }
         $c->stash->{'json'} = $hosts;
@@ -891,9 +891,9 @@ sub _process_combined_page {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
         '3' => [ [ 'has_been_checked', 'state', 'host_name', 'description' ], 'service status' ],
-        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
-        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_order', 'host_name', 'description' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
@@ -915,9 +915,9 @@ sub _process_combined_page {
     $order = "DESC" if $sorttype == 2;
     $sortoptions = {
         '1' => [ 'name', 'host name' ],
-        '4' => [ [ 'last_check',             'name' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'name' ], 'attempt number'  ],
-        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration'  ],
+        '4' => [ [ 'last_check',              'name' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'name' ], 'attempt number'  ],
+        '6' => [ [ 'last_state_change_order', 'name' ], 'state duration'  ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
