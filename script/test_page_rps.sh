@@ -6,7 +6,7 @@ set -u
 #################################################
 # settings
 NUM=10
-REQUESTS=${REQUESTS:-50}
+REQUESTS=${REQUESTS:-100}
 CONCURRENCY=${CONCURRENCY:-5}
 DELAY=${DELAY:-2}
 BASEPORT="3000"
@@ -37,6 +37,7 @@ switch_tag() {
     printf "\n$git"
     exit
   fi
+  rm -rf tmp/ttc_*
 }
 
 #################################################
@@ -71,6 +72,7 @@ test_tag() {
 # prepare
 cleanup
 trap "cleanup" EXIT
+test -f .author && echo "WARNING: .author mode active";
 
 #################################################
 # run tests
