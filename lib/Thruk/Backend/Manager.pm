@@ -1491,9 +1491,12 @@ sub _get_results_xs_pool {
         $raw = undef;
         #&timing_breakpoint('_get_results_xs_pool sorted and decoded');
         my $post_process;
-        for my $key (keys %{$sorted_results}) {
-            my $peer     = $self->get_peer_by_key($key);
+        # iterate over original peers to retain order
+        # this keeps identical results in the order of our backends
+        for my $peer ( @{ $self->get_peers() } ) {
+            my $key = $peer->{'key'};
             my $sorted   = $sorted_results->{$key};
+            next if !defined $sorted;
             if($sorted->{'failed'}) {
                 $c->stash->{'failed_backends'}->{$key} = $sorted->{'failed'};
                 $peer->{'last_error'} = $sorted->{'failed'};
@@ -1506,15 +1509,19 @@ sub _get_results_xs_pool {
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
                 $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
                 #&timing_breakpoint('_get_results_xs_pool postprocessed');
-                if($res_size == 1 && $sorted->{'keys'}->[$x] && $sorted->{'opts'}->[$x]->{limit} && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY') {
+                if($res_size == 1 && $sorted->{'keys'}->[$x] && $sorted->{'opts'}->[$x]->{limit} && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY' && $function ne 'get_processinfo') {
                 #if($function eq 'get_services' || $function eq 'get_hosts') {
                     # optimized postprocessing
-                    $post_process = {
-                        'results'  => [],
-                        'opts'     => $sorted->{'opts'}->[$x],
-                        'keys'     => $sorted->{'keys'}->[$x],
-                        'peer_key' => $key,
-                    } unless defined $post_process;
+                    if(!defined $post_process) {
+                        $post_process = {
+                            'results'  => [],
+                            'opts'     => $sorted->{'opts'}->[$x],
+                            'keys'     => $sorted->{'keys'}->[$x],
+                        };
+                        push @{$sorted->{'keys'}->[$x]}, 'peer_key';
+                    }
+                    # add peer key
+                    map { push(@{$_}, $key) } @{$sorted->{'res'}->[$x]->{'result'}};
                     push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
                     $optimized = 1;
                 } else {
@@ -1550,9 +1557,9 @@ sub _get_results_xs_pool {
             $post_process->{'results'}  = _sort_nr($post_process->{'results'}, $sortkeys);
             # apply limit
             $post_process->{'results'}  = $self->_limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
-            # splice result, rename, callbacks and peer_keys are missing...
+            # splice result, callbacks are missing...
             $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
-            $result->{$post_process->{'peer_key'}} = $post_process->{'results'};
+            $result->{'_all_'} = $post_process->{'results'};
         }
     }
 
@@ -1806,6 +1813,10 @@ sub _merge_answer {
     }
 
     $c->stats->profile( begin => "_merge_answer()" );
+
+    if(defined $data->{'_all_'}) {
+        $return = $data->{_all_};
+    }
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
