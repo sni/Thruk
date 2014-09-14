@@ -1490,7 +1490,7 @@ sub _get_results_xs_pool {
         }
         $raw = undef;
         #&timing_breakpoint('_get_results_xs_pool sorted and decoded');
-        my $post_process = {};
+        my $post_process;
         for my $key (keys %{$sorted_results}) {
             my $peer     = $self->get_peer_by_key($key);
             my $sorted   = $sorted_results->{$key};
@@ -1509,13 +1509,13 @@ sub _get_results_xs_pool {
                 if($res_size == 1 && $sorted->{'keys'}->[$x] && $sorted->{'opts'}->[$x]->{limit} && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY') {
                 #if($function eq 'get_services' || $function eq 'get_hosts') {
                     # optimized postprocessing
-                    $post_process->{$function} = {
+                    $post_process = {
                         'results'  => [],
                         'opts'     => $sorted->{'opts'}->[$x],
                         'keys'     => $sorted->{'keys'}->[$x],
                         'peer_key' => $key,
-                    } unless defined $post_process->{$function};
-                    push @{$post_process->{$function}->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
+                    } unless defined $post_process;
+                    push @{$post_process->{'results'}}, @{$sorted->{'res'}->[$x]->{'result'}};
                     $optimized = 1;
                 } else {
                     $sorted->{'opts'}->[$x]->{slice} = 1 if $sorted->{'keys'}->[$x];
@@ -1533,29 +1533,26 @@ sub _get_results_xs_pool {
         $c->stats->profile( end   => "_get_results_xs_pool postprocessing");
 
         if($post_process) {
-            for my $func (keys %{$post_process}) {
-                my $p = $post_process->{$function};
-                # get sort keys
-                my $sortkeys = [];
-                for my $sortk (@{$p->{'opts'}->{sort}}) {
-                    my($key, $dir) = split/\s+/, $sortk;
-                    my $x = 0;
-                    for my $k (@{$p->{'keys'}}) {
-                        if($k eq $key) {
-                            push $sortkeys, $x, $dir;
-                            last;
-                        }
-                        $x++;
+            # get sort keys
+            my $sortkeys = [];
+            for my $sortk (@{$post_process->{'opts'}->{sort}}) {
+                my($key, $dir) = split/\s+/mx, $sortk;
+                my $x = 0;
+                for my $k (@{$post_process->{'keys'}}) {
+                    if($k eq $key) {
+                        push $sortkeys, $x, $dir;
+                        last;
                     }
+                    $x++;
                 }
-                # sort our arrays
-                $p->{'results'}  = _sort_nr($p->{'results'}, $sortkeys);
-                # apply limit
-                $p->{'results'}  = $self->_limit( $p->{'results'}, $p->{opts}->{'limit'} );
-                # splice result, rename, callbacks and peer_keys are missing...
-                $p->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $p->{keys}, result => $p->{'results'}});
-                $result->{$p->{'peer_key'}} = $p->{'results'};
             }
+            # sort our arrays
+            $post_process->{'results'}  = _sort_nr($post_process->{'results'}, $sortkeys);
+            # apply limit
+            $post_process->{'results'}  = $self->_limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
+            # splice result, rename, callbacks and peer_keys are missing...
+            $post_process->{'results'}  = Monitoring::Livestatus::selectall_arrayref(undef, "", { slice => 1 }, undef, { keys => $post_process->{keys}, result => $post_process->{'results'}});
+            $result->{$post_process->{'peer_key'}} = $post_process->{'results'};
         }
     }
 
