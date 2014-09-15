@@ -1064,8 +1064,10 @@ TP.iconShowEditDialog = function(panel) {
 
     /* add current available backends */
     var backendItem = TP.getFormField(Ext.getCmp("generalForm"), 'backends');
-    TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
-    if(backendItem.store.count() <= 1) { backendItem.hide(); }
+    if(backendItem) {
+        TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
+        if(backendItem.store.count() <= 1) { backendItem.hide(); }
+    }
 
     var settingsWindow = new Ext.Window({
         height:  330,
