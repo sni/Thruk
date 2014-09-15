@@ -1552,7 +1552,7 @@ sub _get_results_xs_pool {
                 my $x = 0;
                 for my $k (@{$post_process->{'keys'}}) {
                     if($k eq $key) {
-                        push $sortkeys, $x, $dir;
+                        push(@{$sortkeys}, $x, $dir);
                         last;
                     }
                     $x++;
