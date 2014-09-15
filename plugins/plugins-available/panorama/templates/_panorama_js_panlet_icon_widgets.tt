@@ -1866,7 +1866,7 @@ Ext.define('TP.FilterStatusIcon', {
                 value:      ''
             }, {
                 fieldLabel: 'Backends / Sites',
-                xtype:      'tp_backendcombo',
+                xtype:      'tp_backendcombo'
             },
             new TP.formFilter({
                 fieldLabel: 'Filter',
