@@ -1132,6 +1132,7 @@ root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
 script/append.make
 script/disable_debug_timer.sh
+script/dump_storable.pl
 script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
 script/nagexp
