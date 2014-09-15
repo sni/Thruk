@@ -2010,7 +2010,7 @@ sub _merge_stats_answer {
 ##########################################################
 sub _sum_answer {
     my($self, $data) = @_;
-    my $c    = $Thruk::Backend::Manager::c;
+    #my $c    = $Thruk::Backend::Manager::c;
     my $return;
 
     #$c->stats->profile( begin => "_sum_answer()" );
