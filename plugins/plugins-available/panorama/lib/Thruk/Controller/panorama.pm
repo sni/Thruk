@@ -780,7 +780,16 @@ sub _avail_calc {
     $c->{request}->{parameters}->{t2}            = time();
     $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;
     $c->{request}->{parameters}->{rpttimeperiod} = $opts->{'tm'};
-    Thruk::Utils::Avail::calculate_availability($c) unless $filter;
+    if(!$filter) {
+        eval {
+            Thruk::Utils::Avail::calculate_availability($c)
+        };
+        if($@) {
+            $c->log->error("calculating availability failed for filter:");
+            $c->log->error(Dumper($c->{request}->{parameters}));
+            $c->log->error($@);
+        }
+    }
     if($host) {
         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                     $unavailable_states,
@@ -792,7 +801,17 @@ sub _avail_calc {
         my($num, $total) = (0,0);
         if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
             my $s_filter = delete $c->{request}->{parameters}->{s_filter};
-            Thruk::Utils::Avail::calculate_availability($c) if $filter;
+            if($filter) {
+                delete $c->stash->{avail_data}->{'hosts'};
+                eval {
+                    Thruk::Utils::Avail::calculate_availability($c)
+                };
+                if($@) {
+                    $c->log->error("calculating availability failed for host filter:");
+                    $c->log->error(Dumper($c->{request}->{parameters}));
+                    $c->log->error($@);
+                }
+            }
             if($c->stash->{avail_data}->{'hosts'}) {
                 for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
                     my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
@@ -809,7 +828,17 @@ sub _avail_calc {
         }
         if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
             delete $c->{request}->{parameters}->{h_filter};
-            Thruk::Utils::Avail::calculate_availability($c) if $filter;
+            if($filter) {
+                delete $c->stash->{avail_data}->{'services'};
+                eval {
+                    Thruk::Utils::Avail::calculate_availability($c)
+                };
+                if($@) {
+                    $c->log->error("calculating availability failed for service filter:");
+                    $c->log->error(Dumper($c->{request}->{parameters}));
+                    $c->log->error($@);
+                }
+            }
             if($c->stash->{avail_data}->{'services'}) {
                 for my $host (keys %{$c->stash->{avail_data}->{'services'}}) {
                     for my $service (keys %{$c->stash->{avail_data}->{'services'}->{$host}}) {
