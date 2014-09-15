@@ -424,7 +424,8 @@ sub _task_status {
     # make status group filter faster
     $c->stash->{'cache_groups_filter'} = {};
 
-    my $types = {};
+    my $types        = {};
+    my $tab_backends = $c->request->parameters->{'backends'};
     if($c->request->parameters->{'types'}) {
         $types = decode_json($c->request->parameters->{'types'});
     }
@@ -477,12 +478,20 @@ sub _task_status {
     my $data = {};
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
-            my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
+            my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
+            next if $c->stash->{'has_error'};
+            delete $c->request->parameters->{'backend'};
+            delete $c->request->parameters->{'backends'};
+            if($backends) {
+                Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+            } else {
+                Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+            }
             $c->request->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
-            next if $c->stash->{'has_error'};
             $data->{'filter'}->{$f} = $self->_summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
         }
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
         $data->{'hostgroups'} = [values %{$self->_summarize_hostgroup_query($c, $types->{'hostgroups'})}];
@@ -579,6 +588,7 @@ sub _avail_update {
     my $in    = {};
     my $types = {};
 
+    my $tab_backends = $c->request->parameters->{'backends'};
     if($c->request->parameters->{'avail'}) { $in    = decode_json($c->request->parameters->{'avail'}); }
     if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
@@ -613,7 +623,14 @@ sub _avail_update {
 
             Thruk::Utils::Avail::reset_req_parameters($c);
             my $filtername = "$f"; # results in *** glibc detected *** perl: double free or corruption (!prev): 0x0e482c38 *** otherwise
-            my($incl_hst, $incl_svc, $filter) = @{decode_json($f)};
+            my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
+            delete $c->request->parameters->{'backend'};
+            delete $c->request->parameters->{'backends'};
+            if($backends) {
+                Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
+            } else {
+                Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
+            }
             $c->request->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
             next if $c->stash->{'has_error'};
@@ -641,6 +658,7 @@ sub _avail_update {
                 }
             }
         }
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
         for my $group (keys %{$types->{'hostgroups'}}) {

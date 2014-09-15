@@ -1864,6 +1864,9 @@ Ext.define('TP.FilterStatusIcon', {
                 xtype:      'textfield',
                 name:       'name',
                 value:      ''
+            }, {
+                fieldLabel: 'Backends / Sites',
+                xtype:      'tp_backendcombo',
             },
             new TP.formFilter({
                 fieldLabel: 'Filter',
@@ -2169,6 +2172,9 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         base           = 'panorama.cgi';
     } else {
         return('#');
+    }
+    if(panel.xdata.general.backends) {
+        options.backends = panel.xdata.general.backends;
     }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));

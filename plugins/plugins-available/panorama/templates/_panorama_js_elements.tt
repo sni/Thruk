@@ -1,4 +1,27 @@
-﻿Ext.define('TP.ComboBoxSum', {
+﻿Ext.define('TP.BackendCombo', {
+    extend: 'Ext.form.field.ComboBox',
+
+    alias:  'widget.tp_backendcombo',
+
+    fieldLabel: 'Backends / Sites',
+    emptyText : 'inherited from dashboard',
+    name:       'backends',
+    multiSelect: true,
+    queryMode:  'local',
+    valueField: 'name',
+    displayField: 'value',
+    editable:   false,
+    triggerAction: 'all',
+    store:      { fields: ['name', 'value'], data: [] },
+    listConfig : {
+        getInnerTpl: function(displayField) {
+            return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+        }
+    }
+});
+
+
+Ext.define('TP.ComboBoxSum', {
     extend: 'Ext.form.field.ComboBox',
 
     alias:  'widget.tp_combobox_sum',

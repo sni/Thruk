@@ -28,6 +28,7 @@ TP.iconsetsStore = Ext.create('Ext.data.Store', {
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
     panel.stateful = false;
+    var tab      = Ext.getCmp(panel.panel_id);
     var lastType = panel.xdata.appearance.type;
 
     // make sure only one window is open at a time
@@ -1060,6 +1061,12 @@ TP.iconShowEditDialog = function(panel) {
             sourceTab
         ]
     });
+
+    /* add current available backends */
+    var backendItem = TP.getFormField(Ext.getCmp("generalForm"), 'backends');
+    TP.updateArrayStoreKV(backendItem.store, TP.getAvailableBackendsTab(tab));
+    if(backendItem.store.count() <= 1) { backendItem.hide(); }
+
     var settingsWindow = new Ext.Window({
         height:  330,
         width:   400,

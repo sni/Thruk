@@ -591,6 +591,9 @@ sub _set_enabled_backends {
         $c->{'db'}->enable_backends();
     }
 
+    if($c->{'request'}->{'parameters'}->{'backend'} && $c->{'request'}->{'parameters'}->{'backends'}) {
+        confess("'backend' and 'backends' parameter set!");
+    }
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || $c->{'request'}->{'parameters'}->{'backends'};
     $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};

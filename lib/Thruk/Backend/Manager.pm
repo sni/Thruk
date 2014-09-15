@@ -1329,20 +1329,20 @@ sub _get_result_serial {
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
-        if(!$c->stash->{'failed_backends'}->{$key}) {
-            my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
-            my $res = shift @res;
-            my($typ, $size, $data, $last_error) = @{$res};
-            chomp($last_error) if $last_error;
-            if(!$last_error and defined $size) {
-                $totalsize += $size;
-                $type       = $typ;
-                $result->{ $key } = $data;
-            }
-            #&timing_breakpoint('_get_result_serial fetched: '.$key);
-            $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
-            $peer->{'last_error'} = $last_error;
+        next if $c->stash->{'failed_backends'}->{$key};
+
+        my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
+        my $res = shift @res;
+        my($typ, $size, $data, $last_error) = @{$res};
+        chomp($last_error) if $last_error;
+        if(!$last_error and defined $size) {
+            $totalsize += $size;
+            $type       = $typ;
+            $result->{ $key } = $data;
         }
+        #&timing_breakpoint('_get_result_serial fetched: '.$key);
+        $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
+        $peer->{'last_error'} = $last_error;
     }
 
     my $elapsed = tv_interval($t1);
