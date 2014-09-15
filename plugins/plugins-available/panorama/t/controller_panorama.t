@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 338;
+    plan tests => 358;
 }
 
 BEGIN {
@@ -104,6 +104,47 @@ is(scalar keys %{$subs}, 0, 'all tasks tested') or diag("untested tasks:\n".join
 ok(!-e $var_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file removed: '.$var_path.'/panorama/'.$test_dashboard_nr.'.tab');
 
 #################################################
+# some more availability
+# single host
+my $res = test_json_page({
+    url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
+    post => {
+        'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
+        'types' => '{"filter":{},"hosts":{"'.$host.'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
+        'force' => '1'
+    },
+});
+isnt($res->{'data'}->{'tabpan-tab_4_panlet_1'}->{'{\\"d\\":\\"60m\\"}'}, -1);
+
+# filter
+$res = test_json_page({
+    url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
+    post => {
+        'avail' => encode_json({
+                'tabpan-tab_12_panlet_22' => {
+                    '{"d":"31d","incl_hst":1,"incl_svc":1}' => {
+                        'active'       => 1,
+                        'last'         => -1,
+                        'last_refresh' => 1410810185,
+                        'opts'         => { 'd' => '31d', 'incl_hst' => 1, 'incl_svc' => 1 }
+                    }
+                },
+        }),
+        'types' => encode_json({
+                'filter' => {
+                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.$host.'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",["78bcd","17b32"]]' => [ 'tabpan-tab_12_panlet_22' ],
+                },
+                'hostgroups' => {},
+                'hosts' => {},
+                'servicegroups' => {},
+                'services' => {}
+        }),
+        'force' => '1'
+    }
+});
+isnt($res->{'data'}->{'tabpan-tab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\":1,\\"incl_svc\\":1}'}, -1);
+
+#################################################
 sub test_json_page {
     my($url) = @_;
     if(!ref $url) {
@@ -126,4 +167,5 @@ sub test_json_page {
     if($url->{'url'} !~ m/gearman/mx) {
         ok(scalar keys %{$data} > 0, "json result has content: ".$url->{'url'});
     }
+    return($data);
 }
