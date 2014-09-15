@@ -1408,7 +1408,7 @@ TP.renderTipDetails = function(data) {
                 prefix = 'host_';
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
-            if(host_details_skipped.length > 5) { $skipped++; continue; }
+            if(host_details_skipped.length > 5) { skipped++; continue; }
             uniq_hosts[d[prefix+'name']] = true;
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
