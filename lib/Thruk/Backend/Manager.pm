@@ -1320,6 +1320,7 @@ sub _get_result_serial {
     my ($totalsize, $result, $type) = (0);
     my $c  = $Thruk::Backend::Manager::c;
     my $t1 = [gettimeofday];
+    $c->stats->profile( begin => "_get_result_serial($function)");
 
     if($use_shadow and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
         ($peers, $result, $type, $totalsize) = $self->_get_results_xs_pool($peers, $function, $arg);
@@ -1328,7 +1329,6 @@ sub _get_result_serial {
     for my $key (@{$peers}) {
         my $peer = $self->get_peer_by_key($key);
         # skip already failed peers for this request
-        $c->stats->profile( begin => "_get_result_serial($key)");
         if(!$c->stash->{'failed_backends'}->{$key}) {
             my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $arg, $use_shadow);
             my $res = shift @res;
@@ -1343,12 +1343,12 @@ sub _get_result_serial {
             $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
             $peer->{'last_error'} = $last_error;
         }
-        $c->stats->profile( end => "_get_result_serial($key)");
     }
 
     my $elapsed = tv_interval($t1);
     $c->stash->{'total_backend_waited'} += $elapsed;
 
+    $c->stats->profile( end => "_get_result_serial($function)");
     #&timing_breakpoint('_get_result_serial end: '.$function);
     return($result, $type, $totalsize);
 }
@@ -1418,7 +1418,7 @@ sub _get_results_xs_pool {
     my $c               = $Thruk::Backend::Manager::c;
 
     #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
-    $c->stats->profile( begin => "_get_results_xs_pool() sending");
+    $c->stats->profile( begin => "_get_results_xs_pool()");
 
     my $result          = {};
     my $remaining_peers = [];
@@ -1467,20 +1467,15 @@ sub _get_results_xs_pool {
             $x++;
         }
     }
-    #&timing_breakpoint('_get_results_xs_pool prepared: '.$function);
-    $c->stats->profile( end => "_get_results_xs_pool() sending");
 
     # collect pool results
     if(@pool_do) {
-        $c->stats->profile( begin => "_get_results_xs_pool socket_pool_do");
         #&timing_breakpoint('_get_results_xs_pool socket_pool_do');
         my $thread_num = scalar @pool_do;
         if($thread_num > 100) { $thread_num = 100; } # limit thread size, tests showed that higher number do not increase performance
         my $raw = Thruk::Utils::XS::socket_pool_do($thread_num, \@pool_do);
         #&timing_breakpoint('_get_results_xs_pool socket_pool_do done');
-        $c->stats->profile( end => "_get_results_xs_pool socket_pool_do");
         my $decoder = JSON::XS->new->utf8->relaxed;
-        $c->stats->profile( begin => "_get_results_xs_pool postprocessing");
         for my $row (@{$raw}) {
             if($row->{'success'}) {
                 $sorted_results->{$row->{'key'}}->{'res'}->[$row->{'num'}] = $decoder->decode(delete $row->{'result'});
@@ -1508,7 +1503,6 @@ sub _get_results_xs_pool {
                 $sorted->{'opts'}->[$x]->{wrapped_json} = 1;
                 $sorted->{'res'}->[$x] = $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->post_processing($sorted->{'res'}->[$x], $sorted->{'opts'}->[$x], $sorted->{'keys'}->[$x]);
                 $totalsize += $peer->{'cacheproxy'}->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
-                #&timing_breakpoint('_get_results_xs_pool postprocessed');
                 if($res_size == 1
                    && $sorted->{'keys'}->[$x]
                    && $sorted->{'opts'}->[$x]->{limit}
@@ -1532,7 +1526,6 @@ sub _get_results_xs_pool {
                 } else {
                     $sorted->{'opts'}->[$x]->{slice} = 1 if $sorted->{'keys'}->[$x];
                     $sorted->{'res'}->[$x] = Monitoring::Livestatus::selectall_arrayref(undef, "", $sorted->{'opts'}->[$x], undef, $sorted->{'res'}->[$x]);
-                    #&timing_breakpoint('_get_results_xs_pool selectall_arrayref');
                 }
             }
             if(!$optimized) {
@@ -1542,7 +1535,6 @@ sub _get_results_xs_pool {
                 $result->{$key}      = $data;
             }
         }
-        $c->stats->profile( end   => "_get_results_xs_pool postprocessing");
 
         if($post_process) {
             # get sort keys
@@ -1568,6 +1560,7 @@ sub _get_results_xs_pool {
         }
     }
 
+    $c->stats->profile( end => "_get_results_xs_pool()");
     #&timing_breakpoint('_get_results_xs_pool end: '.$function);
 
     return($remaining_peers, $result, $type, $totalsize);
@@ -2020,7 +2013,7 @@ sub _sum_answer {
     my $c    = $Thruk::Backend::Manager::c;
     my $return;
 
-    $c->stats->profile( begin => "_sum_answer()" );
+    #$c->stats->profile( begin => "_sum_answer()" );
 
     my @peers = keys %{$data};
     return if scalar @peers == 0;
@@ -2037,7 +2030,7 @@ sub _sum_answer {
         }
     }
 
-    $c->stats->profile( end => "_sum_answer()" );
+    #$c->stats->profile( end => "_sum_answer()" );
 
     return $return;
 }
