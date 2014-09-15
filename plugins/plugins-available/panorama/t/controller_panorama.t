@@ -132,7 +132,7 @@ $res = test_json_page({
         }),
         'types' => encode_json({
                 'filter' => {
-                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.$host.'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",["78bcd","17b32"]]' => [ 'tabpan-tab_12_panlet_22' ],
+                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.$host.'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",null]' => [ 'tabpan-tab_12_panlet_22' ],
                 },
                 'hostgroups' => {},
                 'hosts' => {},
