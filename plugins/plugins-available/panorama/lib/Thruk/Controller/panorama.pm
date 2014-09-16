@@ -766,6 +766,12 @@ sub _avail_calc {
         if($now > $cached->{'time'} + $duration * $cache_retrieve_factor) {
             $refresh = 1;
         }
+        # retry unknown values every 2 minutes
+        if(!$refresh && $cached->{'val'} == -1) {
+            if($now > $cached->{'time'} + 120) {
+                $refresh = 1;
+            }
+        }
         if(!$refresh) {
             return($cached->{'val'});
         }
