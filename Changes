@@ -7,6 +7,7 @@ next:
           - added new configuration setting: max_process_memory
           - Panorama View:
             - added show details/refresh links to icons
+            - changeable icon filter types
             - fixed memory leak in generic url panel
             - fixed problem with stopped timers after import
             - reload every x hours to prevent noncatchable memory leaks

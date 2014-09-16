@@ -108,8 +108,8 @@
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
                 cp.clear(this.id);
-                if(this.labelEl) { this.labelEl.destroy(); }
             }
+            if(this.labelEl) { this.labelEl.destroy(); }
         },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();
@@ -251,9 +251,7 @@
         var tab = Ext.getCmp(this.panel_id);
         if(this.locked != val) {
             this.saveState();
-            this.redrawOnly = true;
-            this.destroy();
-            TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
+            TP.redraw_panlet(this, tab);
         }
     },
 
@@ -1667,6 +1665,11 @@ Ext.define('TP.HostgroupStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.hostgroup) {
+            /* makes no sense if nothing selected but happens after switching classes */
+            if(!this.xdata.general.incl_hst && !this.xdata.general.incl_svc) {
+                this.xdata.general.incl_svc = true;
+                this.xdata.general.incl_hst = true;
+            }
             var res = TP.get_group_status({
                 group:          this.hostgroup,
                 incl_ack:       this.xdata.general.incl_ack,

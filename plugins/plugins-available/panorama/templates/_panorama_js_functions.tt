@@ -259,6 +259,15 @@ var TP = {
         tb.getEl().on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY]);
     },
 
+    redraw_panlet: function(panel, tab) {
+        panel.redrawOnly = true;
+        panel.destroy();
+        TP.timeouts['timeout_' + panel.id + '_show_settings'] = window.setTimeout(function() {
+            panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+        }, 50);
+    },
+
     /* return next unused id */
     getNextId: function(prefix, id) {
         if(id != undefined) {
@@ -1500,8 +1509,9 @@ var TP = {
                     var old_window_ids = TP.clone(tab.window_ids);
                     for(var key in data) {
                         var cfg = Ext.JSON.decode(data[key]);
-                        if(key.search(/tabpan-tab_\d+$/) != -1) {
-                            var p = Ext.getCmp(key);
+                        var p   = Ext.getCmp(key);
+                        if(p && key.search(/tabpan-tab_\d+$/) != -1) {
+                            /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
                             delete cfg['readonly'];
                             delete cfg['user'];
@@ -1510,14 +1520,22 @@ var TP = {
                             p.applyXdata();
                             cp.set(key, cfg);
                         }
+
+                        /* panel class changed */
+                        if(p && cfg.xdata.cls != p.xdata.cls) {
+                            cp.set(p.id, cfg);
+                            TP.redraw_panlet(p, tab);
+                            continue;
+                        }
+
+                        /* panel does not yet exist */
                         if(ExtState[key] == undefined) {
                             cp.set(key, cfg);
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
                         }
                         else if(data[key] != ExtState[key]) {
-                            // position and size changes can be applied by animation
-                            var p = Ext.getCmp(key);
+                            /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             cp.set(key, cfg);
                             if(p.applyAnimated) {

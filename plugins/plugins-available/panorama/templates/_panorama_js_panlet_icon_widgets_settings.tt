@@ -24,6 +24,16 @@ TP.iconsetsStore = Ext.create('Ext.data.Store', {
     autoLoad: true,
     data : [% json_encode(iconset_data) %]
 });
+TP.iconTypesStore = Ext.create('Ext.data.Store', {
+    fields: ['name', 'value', 'icon'],
+    autoLoad: false,
+    data : [{value:'TP.HostStatusIcon',         name:'Host',          icon:'[% url_prefix %]plugins/panorama/images/server.png'},
+            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:'[% url_prefix %]plugins/panorama/images/server_link.png'},
+            {value:'TP.ServiceStatusIcon',      name:'Service',       icon:'[% url_prefix %]plugins/panorama/images/computer.png'},
+            {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:'[% url_prefix %]plugins/panorama/images/computer_link.png'},
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:'[% url_prefix %]plugins/panorama/images/page_find.png'}
+    ]
+});
 
 TP.iconSettingsWindow = undefined;
 TP.iconShowEditDialog = function(panel) {
@@ -88,7 +98,48 @@ TP.iconShowEditDialog = function(panel) {
         // update performance data stores
         perfDataUpdate();
     }
+
     var generalItems = panel.getGeneralItems();
+    generalItems.unshift({
+        xtype:        'combobox',
+        name:         'newcls',
+        fieldLabel:   'Filter Type',
+        displayField: 'name',
+        valueField:   'value',
+        store:         TP.iconTypesStore,
+        editable:      false,
+        listConfig : {
+            getInnerTpl: function(displayField) {
+                return '<div class="x-combo-list-item"><img src="{icon}" height=16 width=16 style="vertical-align:top; margin-right: 3px;">{name}<\/div>';
+            }
+        },
+        value: panel.xdata.cls,
+        listeners: {
+            change: function(This, newValue, oldValue, eOpts) {
+                if(TP.iconSettingsWindow == undefined) { return; }
+                TP.iconSettingsWindow.mask('changing...');
+                var key   = panel.id;
+                var xdata = TP.get_icon_form_xdata(settingsWindow);
+                var conf  = {xdata: xdata};
+                conf.xdata.cls = newValue;
+
+                panel.redrawOnly = true;
+                panel.destroy();
+
+                TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
+                    TP.iconSettingsWindow.skipRestore = true;
+                    TP.iconSettingsWindow.destroy();
+
+                    cp.state[key].xdata.cls = newValue;
+                    panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true, state:conf, type:newValue}, false);
+                    panel.xdata = conf.xdata;
+                    panel.classChanged = newValue;
+                    TP.iconShowEditDialog(panel);
+                    cp.state[key].xdata.cls = oldValue;
+                }, 50);
+            }
+        }
+    });
     var generalTab = {
         title : 'General',
         type  : 'panel',
@@ -1096,12 +1147,17 @@ TP.iconShowEditDialog = function(panel) {
                     TP.log('['+this.id+'] icon config updated: '+Ext.JSON.encode(xdata));
                     for(var key in xdata) { panel.xdata[key] = xdata[key]; }
                     panel.applyState({xdata: panel.xdata});
+                    if(panel.classChanged) {
+                        panel.xdata.cls = panel.classChanged;
+                    }
                     panel.saveState();
                     delete TP.iconSettingsWindow;
                     settingsWindow.destroy();
                     panel.firstRun = false;
                     panel.applyXdata();
-                    TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+                    var tab = Ext.getCmp(panel.panel_id);
+                    TP.updateAllIcons(tab, panel.id);
+                    TP.updateAllLabelAvailability(tab, panel.id);
                  }
                }
         ],
@@ -1119,19 +1175,33 @@ TP.iconShowEditDialog = function(panel) {
             destroy: function() {
                 delete TP.iconSettingsWindow;
                 panel.stateful = true;
+                TP.suppressIconTip = false;
+
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
                     if(panel.firstRun) {
                         panel.destroy();
                     } else {
-                        // restore position any layout
-                        if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
-                        if(cp.state[panel.id])  { panel.applyXdata(cp.state[panel.id].xdata); }
+                        if(panel.classChanged) {
+                            var key = panel.id;
+                            panel.redrawOnly = true;
+                            panel.destroy();
+                            TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
+                                panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true}, false);
+                                TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+                            }, 50);
+                            return;
+                        } else {
+                            // restore position and layout
+                            if(panel.setRenderItem) { panel.setRenderItem(undefined, true); }
+                            if(cp.state[panel.id])  { panel.applyXdata(cp.state[panel.id].xdata); }
+                        }
                     }
                 }
-                TP.suppressIconTip = false;
-                panel.el.dom.style.outline = "";
-                panel.setIconLabel();
+                if(panel.el) {
+                    panel.el.dom.style.outline = "";
+                    panel.setIconLabel();
+                }
             }
         }
     }).show();
@@ -1195,6 +1265,9 @@ TP.get_icon_form_xdata = function(settingsWindow) {
     if(xdata.appearance) {
         delete xdata.appearance.speedoshadow;
         delete xdata.appearance.pieshadow;
+    }
+    if(xdata.general) {
+        delete xdata.general.newcls;
     }
     return(xdata);
 }
