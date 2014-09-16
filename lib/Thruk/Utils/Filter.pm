@@ -489,6 +489,7 @@ sub escape_xml {
     $return =~ s/\\n\Z//mx;
     $return =~ s/\\n/\n/gmx;
     $return =~ tr/\x80-\xFF//d;
+    $return =~ s/\p{Cc}//gmx;
     return $return;
 }
 
