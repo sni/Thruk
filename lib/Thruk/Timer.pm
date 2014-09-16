@@ -13,9 +13,12 @@ my $lastmemory  = 0;
 my $has_threads = 0;
 my $has_memory  = 1;
 
-printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
-            "thread", "ttime", "dtime", "tmem", "dmem", "message", "caller");
-printf(STDERR ("-"x140)."\n");
+# do not print column header during tests
+unless($INC{'Test/More.pm'}) {
+    printf(STDERR "%-8s  %7s    %7s    %7s   %8s    %-50s %s\n",
+                "thread", "ttime", "dtime", "tmem", "dmem", "message", "caller");
+    printf(STDERR ("-"x140)."\n");
+}
 
 sub timing_breakpoint {
     my($msg)     = @_;
