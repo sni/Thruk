@@ -86,11 +86,14 @@ sub report_show {
         $c->stash->{'template'} = 'passthrough.tt';
         if($c->{'request'}->{'parameters'}->{'html'}) {
             my $html_file   = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+            if(!-e $html_file) {
+                $html_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+            }
             my $report_text = decode_utf8(read_file($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
             $c->stash->{'text'} = $report_text;
         }
-        elsif($report->{'var'}->{'attachment'}) {
+        elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} or $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             my $name = $report->{'var'}->{'attachment'};
             $name    =~ s/\s+/_/gmx;
             $name    =~ s/[^a-zA-Z0-9-_\.]+//gmx;
@@ -218,7 +221,7 @@ sub report_send {
                      Data     => encode_utf8($mailbody),
         );
 
-        if($report->{'var'}->{'attachment'}) {
+        if($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             $msg->attach(Type    => $report->{'var'}->{'ctype'},
                      Path        => $attachment,
                      Filename    => $report->{'var'}->{'attachment'},
@@ -352,6 +355,9 @@ sub generate_report {
         }
     }
 
+    # clean up first
+    clean_report_tmp_files($c, $nr);
+
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
 
     # empty logfile
@@ -384,7 +390,12 @@ sub generate_report {
             }
         }
         if($options->{'failed_backends'} eq 'cancel') {
-            die("Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n") if scalar @failed > 0;
+            if(scalar @failed > 0) {
+                my $error = "Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n";
+                Thruk::Utils::CLI::_error($error);
+                $Thruk::Utils::Reports::error = $error;
+                return $c->detach('/error/index/13');
+            }
         }
     }
     $c->stash->{'selected_backends'} = [];
@@ -437,7 +448,14 @@ sub generate_report {
     }
 
     # convert to pdf
-    if($Thruk::Utils::PDF::ctype eq 'html2pdf') {
+    if($Thruk::Utils::PDF::ctype eq 'text/html') {
+        $Thruk::Utils::PDF::ctype = "html2pdf";
+        my $htmlfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
+        move($attachment, $htmlfile);
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
+        _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
+    }
+    elsif($Thruk::Utils::PDF::ctype eq 'html2pdf') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 90, 'converting') if $ENV{'THRUK_JOB_DIR'};
         _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
     }
@@ -466,7 +484,10 @@ sub generate_report {
         }
         if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {
             unlink($attachment);
-            die("Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n")
+            my $error = "Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n";
+            Thruk::Utils::CLI::_error($error);
+            $Thruk::Utils::Reports::error = $error;
+            return $c->detach('/error/index/13');
         }
     }
 

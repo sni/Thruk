@@ -5,6 +5,8 @@ next:
           - livestatus performance improvements
           - updated jquery to 1.11.1
           - added new configuration setting: max_process_memory
+          - Reporting:
+            - support url reports from external urls
           - Panorama View:
             - added show details/refresh links to icons
             - changeable icon filter types

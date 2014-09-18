@@ -178,6 +178,23 @@ returns requested url as string. In list context returns ($code, $result)
 sub request_url {
     my($c, $url) = @_;
 
+    # external url?
+    if($url =~ m/^https?:/mx) {
+        my($response) = _external_request($url);
+        my $result = {
+            code    => $response->code(),
+            result  => $response->decoded_content || $response->content,
+            headers => {},
+        };
+        $result->{'result'} = Thruk::Utils::decode_any($result->{'result'});
+        $result->{'result'} =~ s/^\x{FEFF}//mx; # remove BOM
+        for my $field ($response->header_field_names()) {
+            $result->{'headers'}->{$field} = $response->header($field);
+        }
+        return($result->{'code'}, $result) if wantarray;
+        return $result->{'result'};
+    }
+
     local $ENV{'REQUEST_URI'}      = $url;
     local $ENV{'SCRIPT_NAME'}      = $url;
           $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
@@ -201,7 +218,7 @@ sub request_url {
     if($result->{'code'} == 302
        and defined $result->{'headers'}
        and defined $result->{'headers'}->{'Location'}
-       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
+       and $result->{'headers'}->{'Location'} =~ m|/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
         my $x = 0;
         while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
@@ -302,7 +319,7 @@ sub _run {
     my($result, $response);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
-        ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
         if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
@@ -356,7 +373,7 @@ sub _run {
 
 ##############################################
 sub _request {
-    my($self, $credential, $url, $options) = @_;
+    my($credential, $url, $options) = @_;
     _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
     my $ua       = _get_user_agent();
     my $response = $ua->post($url, {
@@ -367,7 +384,7 @@ sub _request {
     });
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
-        my $data_str = $response->decoded_content;
+        my $data_str = $response->decoded_content || $response->content;
         my $data;
         eval {
             $data = decode_json($data_str);
@@ -383,6 +400,20 @@ sub _request {
 
     _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
     return(undef, $response);
+}
+
+##############################################
+sub _external_request {
+    my($url) = @_;
+    _debug("_external_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
+    my $ua       = _get_user_agent();
+    my $response = $ua->get($url);
+    if($response->is_success) {
+        _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
+        return($response);
+    }
+    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+    return($response);
 }
 
 ##############################################
@@ -792,20 +823,29 @@ sub _cmd_report {
     if($@) {
         return("reports plugin is not enabled.\n", 1)
     }
-    if($mail eq 'mail') {
-        if(Thruk::Utils::Reports::report_send($c, $nr)) {
-            $output = "mail send successfully\n";
+    my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    eval {
+        if($mail eq 'mail') {
+            if(Thruk::Utils::Reports::report_send($c, $nr)) {
+                $output = "mail send successfully\n";
+            } else {
+                return("cannot send mail\n", 1)
+            }
         } else {
-            return("cannot send mail\n", 1)
+            my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+            if(defined $report_file and -f $report_file) {
+                $output = read_file($report_file);
+            } else {
+                my $errors = read_file($logfile);
+                return("generating report failed:\n".$errors, 1)
+            }
         }
-    } else {
-        my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
-        if(defined $report_file and -f $report_file) {
-            $output = read_file($report_file);
-        } else {
-            my $errors = read_file($c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
-            return("generating report failed:\n".$errors, 1)
-        }
+    };
+    if($Thruk::Utils::Reports::error || $@) {
+        open(my $fh, '>>', $logfile);
+        print $fh "".($Thruk::Utils::Reports::error || $@);
+        Thruk::Utils::IO::close($fh, $logfile);
+        return("generating report failed:\n".($Thruk::Utils::Reports::error || $@), 1)
     }
 
     $c->stats->profile(end => "_cmd_report()");

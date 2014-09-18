@@ -391,7 +391,11 @@ sub report_email {
     }
 
     $c->stash->{size}    = -s $c->config->{'tmp_path'}.'/reports/'.$r->{'nr'}.'.dat';
-    $c->stash->{attach}  = $r->{'var'}->{'attachment'} || 'report.pdf';
+    if($r->{'var'}->{'attachment'} && (!$r->{'var'}->{'ctype'} || $r->{'var'}->{'ctype'} ne 'html2pdf')) {
+        $c->stash->{attach}  = $r->{'var'}->{'attachment'};
+    } else {
+        $c->stash->{attach}  = 'report.pdf';
+    }
     $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
     $c->stash->{r}       = $r;
 
