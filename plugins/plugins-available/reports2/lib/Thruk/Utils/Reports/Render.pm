@@ -808,7 +808,8 @@ sub _replace_css_img {
 sub _read_static_content_file {
     my($baseurl, $report_base_url, $url) = @_;
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    if(!$baseurl && $url !~ m/^https?:/mx) {
+    my $product_prefix = $c->config->{'product_prefix'};
+    if(!$baseurl && $url !~ m/^https?:/mx && $url !~ m/^\/\Q$product_prefix\E\//mx) {
         confess("no baseurl")
     }
     $url = _get_url($baseurl, $url) if $baseurl;
