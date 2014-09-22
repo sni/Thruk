@@ -970,18 +970,18 @@ sub _absolutize_url {
 ##############################################
 sub _get_datatype {
     my($suffix) = @_;
-    my $datatype = "data:image/".$suffix;
+    my $datatype = "image/".$suffix;
     if($suffix eq 'eot') {
-        $datatype = "data:font/eot";
+        $datatype = "font/eot";
     }
     if($suffix eq 'woff') {
-        $datatype = "data:font/woff";
+        $datatype = "font/woff";
     }
     if($suffix eq 'ttf') {
-        $datatype = "data:font/ttf";
+        $datatype = "font/ttf";
     }
     if($suffix eq 'svg') {
-        $datatype = "data:font/svg";
+        $datatype = "font/svg";
     }
     return($datatype);
 }
