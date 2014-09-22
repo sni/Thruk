@@ -127,7 +127,7 @@ sub process {
         #}
 
         # revalidation disabled
-        if($sessioncachetimeout == 0) {
+        if($sessioncachetimeout == 0 || ($basicauth && $basicauth eq 'none')) {
             # no validation enabled
             print STDERR "thruk_auth: session ok (not revalidated)" if $verbose;
         }

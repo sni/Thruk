@@ -20,6 +20,7 @@ use File::Temp qw/tempfile/;
 use File::Slurp;
 use MIME::Base64;
 use Encode qw/encode_utf8/;
+use Digest::MD5 qw(md5_hex);
 
 $Thruk::Utils::Reports::Render::c      = undef;
 $Thruk::Utils::Reports::Render::locale = {};
@@ -337,10 +338,11 @@ save content from url
 =cut
 sub get_url {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
 
     my $url = $c->stash->{'param'}->{'url'};
     if($url =~ m|^\w+\.cgi|gmx) {
-        $url = '/thruk/cgi-bin/'.$url;
+        $url = '/'.$product_prefix.'/cgi-bin/'.$url;
     }
     if($url !~ m/^https?:/mx) {
         if(defined $c->stash->{'param'}->{'theme'}) {
@@ -355,7 +357,16 @@ sub get_url {
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
 
-    my @res = Thruk::Utils::CLI::request_url($c, $url);
+    # create fake session
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
+    my $sessionid   = md5_hex(rand(1000).time());
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
+    $c->stash->{'fake_session_id'} = $sessionid;
+
+    my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
         $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
@@ -372,7 +383,7 @@ sub get_url {
             } elsif($Thruk::Utils::PDF::ctype =~ m|image/(.*)$|mx) {
                 $ext = $1;
             }
-            if($url =~ m|^/thruk/cgi\-bin/([^\.]+)\.cgi|mx) {
+            if($url =~ m|^/\Q$product_prefix\E/cgi\-bin/([^\.]+)\.cgi|mx) {
                 $Thruk::Utils::PDF::attachment = $1.'.'.$ext;
             } else {
                 $Thruk::Utils::PDF::attachment = 'url_report.'.$ext;
@@ -391,6 +402,7 @@ sub get_url {
         print $fh $result->{'result'};
         Thruk::Utils::IO::close($fh, $attachment);
     }
+    unlink($sessionfile);
     return $result->{'result'};
 }
 
@@ -648,7 +660,9 @@ sub _replace_css_and_images {
 sub _replace_links {
     my($text, $url, $baseurl) = @_;
     return $text unless defined $baseurl;
-    $baseurl =~ s|/thruk/.*||gmx;
+    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
+    $baseurl =~ s|/\Q$product_prefix\E/.*||gmx;
     $baseurl =~ s|/$||gmx;
     $baseurl .= '/thruk/cgi-bin/';
     $text =~ s/(<a[^>]*href=)
@@ -671,13 +685,15 @@ sub _replace_links {
 ##########################################################
 sub _replace_link {
     my($baseurl,$a,$b,$url,$d,$e) = @_;
+    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
     if(    $url !~ m|^\w+://|mx
        and $url !~ m|^\#|mx
        and $url !~ m|^mailto:|mx
       ) {
         # absolute url
         if($url =~ m/^\//mx) {
-            $baseurl =~ s|/thruk/cgi\-bin/$||mx;
+            $baseurl =~ s|/\Q$product_prefix\E/cgi\-bin/$||mx;
             $url = $baseurl.$url;
         }
         # relative url
@@ -692,6 +708,9 @@ sub _replace_link {
 sub _replace_img {
     my($baseurl, $report_base_url, $a,$b,$url,$d,$e) = @_;
     return "" if $url eq '';
+    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
+
     # skip some images
     return "" if $url =~ m/waiting\.gif$/mx;
 
@@ -699,14 +718,12 @@ sub _replace_img {
     $image_cache = {} unless defined $image_cache;
     return $image_cache->{$url} if defined $image_cache->{$url};
 
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-
     # dynamic images
     if($url =~ m/^\w+\.cgi/mx) {
         if($url =~ m|^\w+\.cgi|gmx) {
-            $url = '/thruk/cgi-bin/'.$url;
+            $url = '/'.$product_prefix.'/cgi-bin/'.$url;
         }
-        my @res = Thruk::Utils::CLI::request_url($c, $url);
+        my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $c->stash->{'fake_session_id'} });
         my $result = $res[1];
         my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
         $image_cache->{$url} = $a.$b.$text.$d.$e;
@@ -714,14 +731,18 @@ sub _replace_img {
     }
     # static images
     elsif($url =~ m/\.(\w+)$/mx) {
-        my $datatype = _get_datatype($1);
-        my $data     = _read_static_content_file($baseurl, $report_base_url, $url);
+        my @res      = _read_static_content_file($baseurl, $report_base_url, $url);
+        return('') if $res[0] != 200;
+        my $data     = $res[1]->{'result'};
+        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        confess("no datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) unless $datatype;
+        confess("wrong datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
         eval {
-            $text = $datatype.";base64,".encode_base64($data, '');
+            $text = 'data:'.$datatype.";base64,".encode_base64($data, '');
         };
         if($@) {
-            $text = $datatype.";base64,".encode_base64(encode_utf8($data), '');
+            $text = 'data:'.$datatype.";base64,".encode_base64(encode_utf8($data), '');
         }
         $image_cache->{$url} = $a.$b.$text.$d.$e;
         return $image_cache->{$url};
@@ -732,7 +753,7 @@ sub _replace_img {
     }
 
     #croak("unknown image url: ".$a.$b.$url.$d.$e);
-    return "";
+    return '';
 }
 
 ##########################################################
@@ -782,23 +803,26 @@ sub _replace_css_img {
     $file =~ s/\#.*$//gmx;
 
     return($pre.$post) unless $css;
-
-    if($file =~ m/\.(\w+)$/mx) {
-        my $datatype = _get_datatype($1);
-        my $data     = $datatype.";base64,";
-        $css         = _get_url($baseurl, $css) ;
-        my $content = _read_static_content_file($css, $report_base_url, $file);
-        eval {
-            $data .= encode_base64($content, '');
-        };
-        if($@) {
-            $data .= encode_base64(encode_utf8($content), '');
-        }
-
-        return "$pre$a$data$b$post";
-    }
     if($file =~ m|^data:|mx) {
         return($file);
+    }
+
+    if($file =~ m/\.(\w+)$/mx) {
+        $css         = _absolutize_url($baseurl, $css);
+        my @res      = _read_static_content_file($css, $report_base_url, $file);
+        return($pre.$post) if $res[0] != 200;
+        my $data     = $res[1]->{'result'};
+        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        confess("no datatype in ".$css." - ".$file." - ".Dumper(\@res)) unless $datatype;
+        confess("wrong datatype in ".$css." - ".$file." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
+        my $text;
+        eval {
+            $text = 'data:'.$datatype.";base64,".encode_base64($data, '');
+        };
+        if($@) {
+            $text = 'data:'.$datatype.";base64,".encode_base64(encode_utf8($data), '');
+        }
+        return "$pre$a$text$b$post";
     }
     croak("_replace_css_img($baseurl, ".($report_base_url||'').", $css) $file: unknown url format") if $ENV{'TEST_AUTHOR'};
     return($pre.$post);
@@ -809,21 +833,12 @@ sub _read_static_content_file {
     my($baseurl, $report_base_url, $url) = @_;
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
-    if(!$baseurl && $url !~ m/^https?:/mx && $url !~ m/^\/\Q$product_prefix\E\//mx) {
-        confess("no baseurl")
-    }
-    $url = _get_url($baseurl, $url) if $baseurl;
-
-    our $image_cache;
-    $image_cache = {} unless defined $image_cache;
-    return $image_cache->{$url} if defined $image_cache->{$url};
+    $url = _absolutize_url($baseurl, $url) if $baseurl;
 
     if($url =~ m/^https?:/mx) {
-       my $content  = Thruk::Utils::CLI::request_url($c, $url);
-       $image_cache->{$url} = $content;
-       return($content);
+       return(Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $c->stash->{'fake_session_id'} }));
     }
-    $url =~ s|^.*/thruk/||gmx;
+    $url =~ s|^.*/\Q$product_prefix\E/||gmx;
     while($url =~ m|[^/\.]+/\.\./|mx) {
         $url   =~ s|[^/\.]+/\.\./||mx;
     }
@@ -866,19 +881,24 @@ sub _read_static_content_file {
         $file = $c->config->{'project_root'}."/root/thruk/".$url;
     }
 
-    return '' if $url eq '';
+    if($url eq '') {
+        return(404, { result => ''}) if wantarray;
+        return '';
+    }
     if(-e $file) {
+        return(200, { result => "".read_file($file)}) if wantarray;
         return read_file($file);
     }
 
     croak("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!") if $ENV{'TEST_AUTHOR'};
     $c->log->debug("_read_static_content_file($baseurl, ".($report_base_url||'').", $url) $file: $!");
-    return "";
+    return(404, { result => ''}) if wantarray;
+    return '';
 }
 
 ##############################################
 
-=head2 _get_url
+=head2 _absolutize_url
 
   returns a absolute url
 
@@ -887,28 +907,32 @@ sub _read_static_content_file {
   $VAR2 = target link
 
 =cut
-sub _get_url {
-    my($url, $link) = @_;
+sub _absolutize_url {
+    my($baseurl, $link) = @_;
 
-    confess("blah") if($url eq '' and $link eq '');
+    return($link) if $link =~ m/^https?:/mx;
+
+    confess("empty") if($baseurl eq '' and $link eq '');
+
+    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $product_prefix = $c->config->{'product_prefix'};
 
     # append trailing slash
-    if($url =~ m/^https?:\/\/[^\/]+$/mx) {
-        $url .= '/';
+    if($baseurl =~ m/^https?:\/\/[^\/]+$/mx) {
+        $baseurl .= '/';
     }
 
     if($link !~ m/^https?:/mx) {
-        my $newloc = $url;
+        my $newloc = $baseurl;
         $newloc    =~ s/^(.*\/).*$/$1/gmxo;
         $newloc    .= $link;
         while($newloc =~ s|/[^\/]+/\.\./|/|gmxo) {}
         $link = $newloc;
     }
+    return($link) if $link    =~ m%^(/||[^/]*/|/[^/]*/)\Q$product_prefix\E/%mx;
 
-    return($link) if $url =~ m%/?thruk/(cgi\-bin|themes|plugins|javascript)/%mx;
-
-    # split original url in host, path and file
-    if($url =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
+    # split original baseurl in host, path and file
+    if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
         my $host     = $1."://".$2.$3;
         $host        =~ s/\/$//mx;      # remove last /
         my $fullpath = $4 || '';
@@ -937,7 +961,7 @@ sub _get_url {
         }
     }
 
-    die("unknown url scheme in _get_url('".$url."', '".$link."')");
+    confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
     return;
 }
 

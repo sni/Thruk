@@ -170,17 +170,17 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, [$all_inclusive])
+    request_url($c, $url, $cookies)
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url) = @_;
+    my($c, $url, $cookies) = @_;
 
     # external url?
     if($url =~ m/^https?:/mx) {
-        my($response) = _external_request($url);
+        my($response) = _external_request($url, $cookies);
         my $result = {
             code    => $response->code(),
             result  => $response->decoded_content || $response->content,
@@ -404,9 +404,16 @@ sub _request {
 
 ##############################################
 sub _external_request {
-    my($url) = @_;
+    my($url, $cookies) = @_;
     _debug("_external_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
-    my $ua       = _get_user_agent();
+    my $ua = _get_user_agent();
+    if($cookies) {
+        my $cookie_string = "";
+        for my $key (keys %{$cookies}) {
+            $cookie_string .= $key.'='.$cookies->{$key}.';';
+        }
+        $ua->default_header(Cookie => $cookie_string);
+    }
     my $response = $ua->get($url);
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
