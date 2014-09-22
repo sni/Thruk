@@ -398,7 +398,7 @@ sub get_url {
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
-        binmode $fh, ":encoding(UTF-8)";
+        binmode $fh, ":encoding(UTF-8)" if $Thruk::Utils::PDF::ctype eq 'text/html'; # breaks raw data like pdf otherwise
         print $fh $result->{'result'};
         Thruk::Utils::IO::close($fh, $attachment);
     }
