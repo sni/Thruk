@@ -587,6 +587,8 @@ sub html_all_inclusive {
     my($c, $url, $page, $include_js) = @_;
     $include_js = 0 unless defined $include_js;
     $c->stash->{'param'}->{'js'} = $include_js;
+    # remove html comments to not replace css and js from commented includes
+    $page =~ s/<\!\-\-.*?\-\->//gsmxi;
     my $report_base_url = $c->config->{'Thruk::Plugin::Reports2'}->{'report_base_url'} || $c->config->{'report_base_url'};
     $page = _replace_css_and_images($page, $url, $report_base_url);
     $page = _replace_links($page, $url, $report_base_url);
@@ -922,7 +924,7 @@ sub _absolutize_url {
         $baseurl .= '/';
     }
 
-    if($link !~ m/^https?:/mx) {
+    if($link !~ m/^https?:/mx && $link !~ m|^/|) {
         my $newloc = $baseurl;
         $newloc    =~ s/^(.*\/).*$/$1/gmxo;
         $newloc    .= $link;
