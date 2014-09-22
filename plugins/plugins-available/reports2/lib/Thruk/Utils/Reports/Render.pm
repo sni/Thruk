@@ -924,7 +924,7 @@ sub _absolutize_url {
         $baseurl .= '/';
     }
 
-    if($link !~ m/^https?:/mx && $link !~ m|^/|) {
+    if($link !~ m/^https?:/mx && $link !~ m|^/|mx) {
         my $newloc = $baseurl;
         $newloc    =~ s/^(.*\/).*$/$1/gmxo;
         $newloc    .= $link;

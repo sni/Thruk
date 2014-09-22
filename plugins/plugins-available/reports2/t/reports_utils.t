@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 14;
+    plan tests => 17;
 }
 
 BEGIN {
