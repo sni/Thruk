@@ -460,11 +460,6 @@ sub generate_report {
         _convert_to_pdf($c, $reportdata, $attachment, $nr, $logfile);
     }
 
-    # clean up tmp files
-    for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
-        unlink($file);
-    }
-
     # update report runtime data
     set_running($c, $nr, 0, undef, time());
 
@@ -492,6 +487,11 @@ sub generate_report {
     }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 100, 'finished') if $ENV{'THRUK_JOB_DIR'};
+
+    # clean up tmp files
+    for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
+        unlink($file);
+    }
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;

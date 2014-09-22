@@ -43,6 +43,7 @@ rm -f $OUTPUT
 DISPLAY=:$DISP $WKHTMLTOPDF \
         --use-xserver \
         -l \
+        $WKHTMLTOPDFOPTIONS \
         $EXTRAOPTIONS \
         --image-quality 100 \
         --disable-smart-shrinking \

@@ -18,6 +18,7 @@ use Carp;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
 use File::Slurp;
+use File::Copy qw/move/;
 use MIME::Base64;
 use Encode qw/encode_utf8/;
 use Digest::MD5 qw(md5_hex);
@@ -339,8 +340,30 @@ save content from url
 sub get_url {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
+    my $url            = $c->stash->{'param'}->{'url'};
 
-    my $url = $c->stash->{'param'}->{'url'};
+    # create fake session
+    my $sdir        = $c->config->{'var_path'}.'/sessions';
+    my $sessionid   = md5_hex(rand(1000).time());
+    my $sessionfile = $sdir.'/'.$sessionid;
+    Thruk::Utils::IO::mkdir_r($sdir);
+    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
+    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
+    $c->stash->{'fake_session_id'} = $sessionid;
+
+    # directly convert external urls
+    if($url =~ m/^https?:/mx && $c->stash->{'param'}->{'pdf'}) {
+        $Thruk::Utils::PDF::ctype = "html2pdf";
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
+        my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
+        my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$url.'" "'.$c->stash->{'attachment'}.'.pdf" "" "'.$wkhtmltopdf.'"';
+        `WKHTMLTOPDFOPTIONS='--cookie thruk_auth $sessionid' $cmd`;
+        move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
+        $Thruk::Utils::PDF::ctype      = 'application/pdf';
+        $Thruk::Utils::PDF::attachment = 'report.pdf';
+        return "";
+    }
+
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/'.$product_prefix.'/cgi-bin/'.$url;
     }
@@ -356,15 +379,6 @@ sub get_url {
         }
     }
     if($url !~ m/\?/mx) { $url =~ s/\&/?/mx; }
-
-    # create fake session
-    my $sdir        = $c->config->{'var_path'}.'/sessions';
-    my $sessionid   = md5_hex(rand(1000).time());
-    my $sessionfile = $sdir.'/'.$sessionid;
-    Thruk::Utils::IO::mkdir_r($sdir);
-    Thruk::Utils::IO::write($sessionfile, "none~~~127.0.0.1~~~".$c->stash->{'remote_user'});
-    push @{$c->stash->{'tmp_files_to_delete'}}, $sessionfile;
-    $c->stash->{'fake_session_id'} = $sessionid;
 
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
@@ -394,7 +408,7 @@ sub get_url {
             if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
-            $result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
+            #$result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
@@ -402,7 +416,6 @@ sub get_url {
         print $fh $result->{'result'};
         Thruk::Utils::IO::close($fh, $attachment);
     }
-    unlink($sessionfile);
     return $result->{'result'};
 }
 

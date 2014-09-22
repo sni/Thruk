@@ -414,6 +414,7 @@ sub _external_request {
         }
         $ua->default_header(Cookie => $cookie_string);
     }
+
     my $response = $ua->get($url);
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
