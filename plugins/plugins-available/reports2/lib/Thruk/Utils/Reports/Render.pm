@@ -927,6 +927,7 @@ sub _absolutize_url {
 
     return($link) if $link =~ m/^https?:/mx;
 
+    $baseurl = '' unless defined $baseurl;
     confess("empty") if($baseurl eq '' and $link eq '');
 
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
