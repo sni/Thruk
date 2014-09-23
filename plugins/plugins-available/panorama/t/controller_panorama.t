@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use JSON::XS;
+use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
@@ -44,7 +45,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?readonly=1', like => 'Thruk Panorama' },
     { url => '/thruk/usercontent/backgrounds/world.png', like => 'PNG' },
     { url => '/thruk/cgi-bin/panorama.cgi?task=textsave', post => { 'text' => 'test' } },
-    { url => '/thruk/cgi-bin/panorama.cgi?task=redirect_status', post => { 'filter' => '[{"type":"Host","val_pre":"","op":"=","value":"'.$host.'"}]' }, follow => 1 },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=redirect_status', post => { 'filter' => '[{"type":"Host","val_pre":"","op":"=","value":"'.encode_utf8($host).'"}]' }, follow => 1 },
 ];
 
 for my $page (@{$pages}) {
@@ -58,7 +59,7 @@ my $test_dashboard_nr = 0;
 $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=availability', post => {
           'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
-          'types' => '{"filter":{},"hosts":{"'.$host.'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
+          'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
           'force' => '1'
     }},
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_data', post => { nr => 'new' }, callback => sub {
@@ -110,7 +111,7 @@ my $res = test_json_page({
     url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
     post => {
         'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
-        'types' => '{"filter":{},"hosts":{"'.$host.'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
+        'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
         'force' => '1'
     },
 });
@@ -132,7 +133,7 @@ $res = test_json_page({
         }),
         'types' => encode_json({
                 'filter' => {
-                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.$host.'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",null]' => [ 'tabpan-tab_12_panlet_22' ],
+                    '["on","on","[{\\"hoststatustypes\\":15,\\"hostprops\\":0,\\"servicestatustypes\\":31,\\"serviceprops\\":0,\\"type\\":\\"Host\\",\\"val_pre\\":\\"\\",\\"op\\":\\"=\\",\\"value\\":\\"'.encode_utf8($host).'\\",\\"value_date\\":\\"2014-09-12T13:22:33\\",\\"displayfield-1671-inputEl\\":\\"\\"}]",null]' => [ 'tabpan-tab_12_panlet_22' ],
                 },
                 'hostgroups' => {},
                 'hosts' => {},
