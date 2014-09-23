@@ -804,8 +804,6 @@ sub _replace_js {
 ##############################################
 sub _replace_css_img {
     my($baseurl, $report_base_url,$css, $a,$file,$b,$pre,$post) = @_;
-    $pre  = '' unless defined $pre;
-    $post = '' unless defined $post;
     # static images
     if($file =~ s/^('|")//gmx) {
         $pre  = $1;
@@ -813,6 +811,10 @@ sub _replace_css_img {
     if($file =~ s/('|")$//gmx) {
         $post = $1;
     }
+    $pre  = '' unless defined $pre;
+    $post = '' unless defined $post;
+    $a    = '' unless defined $a;
+    $b    = '' unless defined $b;
 
     $file =~ s/\?.*$//gmx;
     $file =~ s/\#.*$//gmx;
