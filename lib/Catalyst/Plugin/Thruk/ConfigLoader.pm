@@ -2,6 +2,7 @@ package Catalyst::Plugin::Thruk::ConfigLoader;
 
 use strict;
 use Thruk::Backend::Pool;
+use Carp qw/confess/;
 
 ########################################
 
