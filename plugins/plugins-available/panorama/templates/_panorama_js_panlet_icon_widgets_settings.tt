@@ -974,7 +974,7 @@ TP.iconShowEditDialog = function(panel) {
                     items:        [{
                         name:         'position',
                         xtype:        'combobox',
-                        store:        ['below', 'above', 'left', 'right'],
+                        store:        ['below', 'above', 'left', 'right', 'center'],
                         value:        'below',
                         flex:          1,
                         editable:      false

@@ -438,6 +438,10 @@
             }
             top = top - offsety;
         }
+        if(cfg.position == 'center') {
+            top  = top + offsetx + (elHeight/2) - (size.height/2);
+            left = left + (elWidth / 2) - (size.width / 2) - offsety;
+        }
         el.style.left = left+"px";
         el.style.top  = top+"px";
         this.labelEl.oldX = left;
