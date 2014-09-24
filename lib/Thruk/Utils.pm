@@ -967,7 +967,7 @@ sub set_custom_vars {
 
     my $already_added = {};
     for my $test (@{$vars}) {
-        for my $cust_name (%{$custom_vars}) {
+        for my $cust_name (keys %{$custom_vars}) {
             next if defined $already_added->{$cust_name};
             my $cust_value = $custom_vars->{$cust_name};
             my $found      = 0;
@@ -979,7 +979,6 @@ sub set_custom_vars {
                 $v =~ s/\*/.*/gmx;
                 if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
                     $found = 1;
-                    last;
                 }
             }
             if($found) {

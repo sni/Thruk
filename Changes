@@ -17,6 +17,7 @@ next:
             - fixed linking public dashboards
           - Bug Fixes
             - fixed problem with timeperiods in logcache database
+            - fixed show_custom_vars with wildcards
 
 1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:
