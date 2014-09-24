@@ -715,7 +715,7 @@ function toggleAllSubSection(subsection) {
 /* toggle all backends for all sections */
 function toggleAllSections(reverse) {
     var state = 0;
-    if(jQuery('#all_backends').attr('checked')) {
+    if(jQuery('#all_backends').prop('checked')) {
         state = 1;
     }
     if(reverse != undefined) {
@@ -759,12 +759,11 @@ function updateSitePanelCheckBox() {
             total = count_site_section_totals(total, subsection, 'Default');
         }
     });
-
     /* check all button */
     if(total['disabled'] > 0) {
-        jQuery('#all_backends').attr('checked', false);
+        jQuery('#all_backends').prop('checked', false);
     } else {
-        jQuery('#all_backends').attr('checked', true);
+        jQuery('#all_backends').prop('checked', true);
     }
 }
 
@@ -825,9 +824,9 @@ function count_site_section_totals(total, section, subsection) {
 
     /* set section checkbox */
     if(total['subsections'][subsection]['sections'][section]['disabled'] > 0) {
-        jQuery('#all_section_' + cls_subsection + '_' + cls_section).attr('checked', false);
+        jQuery('#all_section_' + cls_subsection + '_' + cls_section).prop('checked', false);
     } else {
-        jQuery('#all_section_' + cls_subsection + '_' + cls_section).attr('checked', true);
+        jQuery('#all_section_' + cls_subsection + '_' + cls_section).prop('checked', true);
     }
     return total;
 }
