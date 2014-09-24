@@ -338,7 +338,7 @@ sub test_page {
             $lint->parse($content);
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
-            is( scalar @errors, 0, "No errors found in HTML" );
+            is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
         }
     }
