@@ -1036,7 +1036,7 @@ function set_select_options(id, options, uniq) {
 /* select all options for given select form field */
 function select_all_options(select_id) {
     // add selected nodes
-    jQuery('#'+select_id+' OPTION').attr('selected',true);
+    jQuery('#'+select_id+' OPTION').prop('selected',true);
 }
 
 /* return array of trimmed pattern */

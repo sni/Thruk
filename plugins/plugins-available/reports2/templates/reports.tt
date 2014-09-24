@@ -153,10 +153,10 @@
     if(typ == undefined) { typ = 'my' }
     if(typ == "")        { typ = 'my' }
     reports_view(typ);
-    if(typ == 'my')          { jQuery('#view1').attr('checked', 'checked') }
-    else if(typ == 'public') { jQuery('#view2').attr('checked', 'checked') }
-    else if(typ == 'all')    { jQuery('#view3').attr('checked', 'checked') }
-    else                     { jQuery('#view1').attr('checked', 'checked') }
+    if(typ == 'my')          { jQuery('#view1').prop('checked', true) }
+    else if(typ == 'public') { jQuery('#view2').prop('checked', true) }
+    else if(typ == 'all')    { jQuery('#view3').prop('checked', true) }
+    else                     { jQuery('#view1').prop('checked', true) }
     init_report_tool_buttons();
     [% IF highlight %]
     jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);

@@ -20,7 +20,7 @@
   <tr>
     <td align="left">
       <hr>
-      select <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', false); return false;">none</a>
+      select <a href="#" onclick="jQuery('INPUT[name=files]').prop('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').prop('checked', false); return false;">none</a>
       <select name="action" onChange="jQuery('#path').attr('value', location.hash); this.form.submit()">
         <option>--- please select action ---</option>
         <option value="deletefiles">delete selected files</option>
