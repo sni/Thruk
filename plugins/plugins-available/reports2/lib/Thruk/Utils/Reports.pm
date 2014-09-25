@@ -422,6 +422,10 @@ sub generate_report {
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 4, 'initializing') if $ENV{'THRUK_JOB_DIR'};
     _initialize_report_templates($c, $options);
 
+    # disable tt cache to read custom templates every time
+    my $orig_stat_ttl = $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
+    $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
+
     # prepage stage, functions here could still change stash
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
@@ -492,6 +496,9 @@ sub generate_report {
     for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
         unlink($file);
     }
+
+    # restore tt cache settings
+    $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = $orig_stat_ttl;
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $attachment;
