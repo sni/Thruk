@@ -956,7 +956,7 @@ sub _get_report_cmd {
 ##########################################################
 sub _get_required_fields {
     my($c, $report) = @_;
-
+    confess("no template in ".Dumper($report)) unless $report->{'template'};
     my $fields = Thruk::Utils::get_template_variable($c, 'reports/'.$report->{'template'}, 'required_fields', { block => 'edit' });
     confess("no fields? -> ".Dumper($report)) unless(defined $fields and ref $fields eq 'ARRAY');
     return $fields;
