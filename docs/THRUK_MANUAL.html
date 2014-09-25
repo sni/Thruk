@@ -22844,20 +22844,74 @@ new file <em>reports/style/custom.tt</em> below your <em>user_template_path</em>
 <pre><tt>&lt;style type="text/css"&gt;
 /* override css styles */
 BODY {
-    font-family: arial, sans-serif;
-    font-size: 11px;
-    line-height: 18px;
-    font-size: 16px;
+  color: black; /* change font color to black*/
 }
 &lt;/style&gt;
 
 &lt;script language="javascript" type="text/javascript"&gt;
-/* add complete new elements by javascript */
+  /* add complete new elements with javascript */
   jQuery(document).ready(function() {
-    jQuery('&lt;img src="' + url_prefix + 'themes/Thruk/images/logo_thruk.png"&gt;').insertBefore('DIV.page.cover DIV.titletext');
+    jQuery('&lt;img src="' + url_prefix + 'usercontent/images/companylogo.png"&gt;').insertBefore('DIV.page.cover DIV.titletext');
   });
 &lt;/script&gt;</tt></pre>
 </div></div>
+<div class="paragraph"><p>Place the companylogo.png in your usercontent folder (ex.: /etc/thruk/usercontent).</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">
+<div class="title">html preview</div>
+<div class="paragraph"><p>Use a small reporting timeframe and the html preview (change refresh=1 in the
+url) to quickly work on the report design.</p></div>
+</td>
+</tr></table>
+</div>
 <div class="paragraph"><p>If thats not enough, you still can change each and every template used to create the reports.</p></div>
 </div>
 <div class="sect3">
@@ -25256,7 +25310,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-08-25 15:12:11 CEST
+Last updated 2014-09-25 15:22:31 CEST
 </div>
 </div>
 </body>

@@ -3158,23 +3158,30 @@ For example:
 <style type="text/css">
 /* override css styles */
 BODY {
-    font-family: arial, sans-serif;
-    font-size: 11px;
-    line-height: 18px;
-    font-size: 16px;
+  color: black; /* change font color to black*/
 }
 </style>
 
 <script language="javascript" type="text/javascript">
-/* add complete new elements by javascript */
+  /* add complete new elements with javascript */
   jQuery(document).ready(function() {
-    jQuery('<img src="' + url_prefix + 'themes/Thruk/images/logo_thruk.png">').insertBefore('DIV.page.cover DIV.titletext');
+    jQuery('<img src="' + url_prefix + 'usercontent/images/companylogo.png">').insertBefore('DIV.page.cover DIV.titletext');
   });
 </script>
 ------
 
-If thats not enough, you still can change each and every template used to create the reports.
+Place the companylogo.png in your usercontent folder (ex.: /etc/thruk/usercontent).
 
+[TIP]
+.html preview
+=======
+Use a small reporting timeframe and the html preview (change refresh=1 in the
+url) to quickly work on the report design.
+=======
+
+
+
+If thats not enough, you still can change each and every template used to create the reports.
 
 
 ==== Edit Block
