@@ -537,6 +537,8 @@ sub _task_redirect_status {
     my $types = {};
     if($c->request->parameters->{'filter'}) {
         _do_filter($c);
+        $c->request->parameters->{'filter'} = '';
+        $c->request->parameters->{'task'}   = '';
         my $url = Thruk::Utils::Filter::uri_with($c, $c->request->parameters);
         $url    =~ s/^panorama.cgi/status.cgi/gmx;
         $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
