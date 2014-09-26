@@ -2191,7 +2191,7 @@ sub _sort_nr {
     ## use critic
 
     if(scalar @sorted == 0 && $@) {
-        confess($@);
+        confess(Dumper($sortstring, $sortby, $@));
     }
 
     return(\@sorted);
