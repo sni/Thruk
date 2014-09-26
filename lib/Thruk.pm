@@ -136,6 +136,7 @@ __PACKAGE__->cache(__PACKAGE__->config->{'tmp_path'}.'/thruk.cache');
 # save pid
 my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
+    $SIG{PIPE} = 'IGNORE';
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
