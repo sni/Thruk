@@ -1772,6 +1772,8 @@ Enable usage of shadownaemon. This is a daemon which shadows a remote
 core via livestatus and therefor removes network latency from accessing
 remote sites. It also reduces network bandwidth usage. Best used together
 with the logcache. Enabled with any true value, disabled when set to '0'.
+Usually the shadownaemon processes are stopped when the last thruk
+process exists, this can be changed by setting this option to 'start_only'.
 
 Default: 0
 
