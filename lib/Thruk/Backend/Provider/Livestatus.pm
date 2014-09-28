@@ -1298,7 +1298,7 @@ sub _optimized_for_wrapped_json {
     }
 
     $options->{'options'}->{'wrapped_json'} = 1;
-    if($options->{'pager'} && $options->{'pager'}->{'entries'}) {
+    if($options->{'pager'} && $options->{'pager'}->{'entries'} && $options->{'pager'}->{'entries'} =~ m/^\d+$/mx) {
         my $page = ($options->{'pager'}->{'page'} || 1);
         $page++   if $options->{'pager'}->{'next'};
         $page--   if $options->{'pager'}->{'previous'};
