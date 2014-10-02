@@ -1123,7 +1123,7 @@ sub _send_socket {
 ########################################
 sub _send_socket_do {
     my($self, $statement) = @_;
-    my $sock = $self->_open() or return(491, $self->_get_error(491), $!);
+    my $sock = $self->_open() or return(491, $self->_get_error(491, $!), $!);
     utf8::decode($statement);
     print $sock encode('utf-8' => $statement) or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
     print $sock "\n";
@@ -1360,7 +1360,7 @@ Errorhandling can be done like this:
 
 =cut
 sub _get_error {
-    my($self, $code) = @_;
+    my($self, $code, $append) = @_;
 
     my $codes = {
         '200' => 'OK. Reponse contains the queried data.',
@@ -1386,8 +1386,10 @@ sub _get_error {
     };
 
     confess('non existant error code: '.$code) if !defined $codes->{$code};
+    my $msg = $codes->{$code};
+    $msg .= ' - '.$append if $append;
 
-    return($codes->{$code});
+    return($msg);
 }
 
 ########################################
