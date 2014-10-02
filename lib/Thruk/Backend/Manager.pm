@@ -1420,7 +1420,7 @@ sub _get_results_xs_pool {
     #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
     $c->stats->profile( begin => "_get_results_xs_pool()");
 
-    my $result          = {};
+    my $result;
     my $remaining_peers = [];
     my $totalsize       = 0;
     my $type;
