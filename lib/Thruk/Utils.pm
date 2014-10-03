@@ -1922,7 +1922,7 @@ returns path to program or undef
 =cut
 sub which {
     my($prog) = @_;
-    my $path = `which $prog`;
+    my $path = `which $prog 2>/dev/null`;
     return unless $path;
     chomp($path);
     return($path);

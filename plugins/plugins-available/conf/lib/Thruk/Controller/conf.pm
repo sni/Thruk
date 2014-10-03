@@ -626,7 +626,7 @@ sub _process_users_page {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->response->redirect($redirect);
         }
-        my $msg      = $self->_update_password($c);
+        my $msg = $self->_update_password($c);
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
             return $c->response->redirect($redirect);
@@ -1251,8 +1251,10 @@ sub _update_password {
     my $user = $c->{'request'}->{'parameters'}->{'data.username'};
     my $send = $c->{'request'}->{'parameters'}->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+        # htpasswd is usually somewhere in sbin
+        local $ENV{'PATH'} = $ENV{'PATH'}.':/usr/sbin:/sbin';
         my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
-        return('could not find htpasswd or htpasswd2 in path, cannot update passwords') unless $htpasswd;
+        return('could not find htpasswd or htpasswd2 in '.$ENV{'PATH'}.', cannot update passwords') unless $htpasswd;
 
         # remove password?
         if($send eq 'remove password') {
