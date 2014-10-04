@@ -151,23 +151,26 @@ sub begin : Private {
         or ref $c->{'db'}->{'backends'} ne 'ARRAY'
         or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
 
+        my $product_prefix = $c->config->{'product_prefix'};
+
         # return here for static content, no backend needed
-        if(   $c->request->action =~ m|thruk/\w+\.html|mx
-           or $c->request->action =~ m|thruk\/\w+\.html|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/conf\.cgi\?sub=backends|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/remote\.cgi|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/login\.cgi|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/restricted\.cgi|mx
-           or $c->request->action =~ m|^/$|mx
-           or $c->request->action eq 'thruk$'
-           or $c->request->action eq 'thruk\\/docs\\/' ) {
+        if(   $c->request->action =~ m|$product_prefix/\w+\.html|mx
+           or $c->request->action =~ m|$product_prefix\/\w+\.html|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/conf\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/remote\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/login\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/restricted\.cgi|mx
+           or $c->request->action eq '/'
+           or $c->request->action eq $product_prefix
+           or $c->request->action eq $product_prefix.'/docs'
+           or $c->request->action eq $product_prefix.'\\/docs\\/' ) {
             $c->stash->{'no_auto_reload'} = 1;
             return;
         }
         # redirect to backends manager if admin user
         if( $c->config->{'use_feature_configtool'} ) {
             $c->{'request'}->{'parameters'}->{'sub'} = 'backends';
-            return $c->detach('/conf/index');
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/conf.cgi?sub=backends");
         } else {
             return $c->detach("/error/index/14");
         }
