@@ -747,7 +747,7 @@ sub _check_startup_redirect {
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
         sleep(3);
-        if($link !~ m/\?/mx && $link !~ m/\&/mx) { $link =~ s/\&/?/mx; }
+        if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
         $request = _request($link);
         #diag("original request:");
         #diag(Dumper($request));
