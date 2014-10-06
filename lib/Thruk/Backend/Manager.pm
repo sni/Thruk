@@ -828,8 +828,8 @@ sub _renew_logcache {
                                                       nofork    => $noforks,
                                                     });
         }
+        $self->_do_on_peers( 'renew_logcache', \@_, 1);
     }
-    $self->_do_on_peers( 'renew_logcache', \@_, 1);
     return;
 }
 
