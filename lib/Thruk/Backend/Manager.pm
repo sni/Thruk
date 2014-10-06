@@ -1551,7 +1551,9 @@ sub _get_results_xs_pool {
                 }
             }
             # sort our arrays
-            $post_process->{'results'}  = _sort_nr($post_process->{'results'}, $sortkeys);
+            if((!$type or $type ne 'sorted') and scalar @{$sortkeys} > 0) {
+                $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
+            }
             # apply limit
             $post_process->{'results'}  = $self->_limit( $post_process->{'results'}, $post_process->{opts}->{'limit'} );
             # splice result, callbacks are missing...

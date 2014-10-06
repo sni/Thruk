@@ -63,7 +63,7 @@ sub cmd {
     my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
-    if ($pid) {
+    if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
@@ -126,7 +126,7 @@ sub perl {
     my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
-    if ($pid) {
+    if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         if(defined $conf->{'backends'}) {
