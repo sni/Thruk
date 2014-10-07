@@ -210,6 +210,9 @@ sub request_url {
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();
 
+    # fork setting may be overriden in child requests
+    my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
+
     require Catalyst::ScriptRunner;
     Catalyst::ScriptRunner->import();
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
@@ -235,6 +238,9 @@ sub request_url {
             $x++;
         }
     }
+
+    # restore fork setting
+    $c->config->{'no_external_job_forks'} = $old_no_external_job_forks;
 
     if($result->{'code'} == 302
           and defined $result->{'headers'}->{'Set-Cookie'}
