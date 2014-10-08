@@ -747,9 +747,9 @@ sub _get_subfilter {
             my $v = [values %{$inp}]->[0];
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
-            if($k eq '~')                           { return 'RLIKE '._quote($v); }
-            if($k eq '~~')                          { return 'RLIKE '._quote($v); }
-            if($k eq '!~~')                         { return 'NOT RLIKE '._quote($v); }
+            if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote($v)); }
+            if($k eq '~~')                          { return 'RLIKE '._quote_backslash(_quote($v)); }
+            if($k eq '!~~')                         { return 'NOT RLIKE '._quote_backslash(_quote($v)); }
             if($k eq '>='  and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '= '.join(' OR '.$f.' = ', @{_quote($v)}); }
             if($k eq '!>=' and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '!= '.join(' OR '.$f.' != ', @{_quote($v)}); }
             if($k eq '!>=')                         { return '!= '._quote($v); }
@@ -820,6 +820,13 @@ sub _quote {
     }
     $_[0] =~ s/'/\'/gmx;
     return("'".$_[0]."'");
+}
+
+##########################################################
+sub _quote_backslash {
+    return '' unless defined $_[0];
+    $_[0] =~ s|\\|\\\\|gmx;
+    return($_[0]);
 }
 
 ##########################################################

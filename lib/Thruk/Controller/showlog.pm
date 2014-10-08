@@ -91,7 +91,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                         ]},
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.$host.';'.$service.'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }}
                         ]},
                 ]
         };
@@ -102,7 +102,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                         { host_name => $host },
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.$host.'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }}
                         ]},
                 ]
         };
