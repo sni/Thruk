@@ -493,6 +493,19 @@ sub escape_xml {
     return $return;
 }
 
+########################################
+
+=head2 escape_regex
+
+  escape_regex($text)
+
+returns an escaped string for regular expression
+
+=cut
+sub escape_regex {
+    return(quotemeta($_[0]));
+}
+
 
 ########################################
 
