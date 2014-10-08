@@ -19,6 +19,7 @@ next:
             - fixed problem with timeperiods in logcache database
             - fixed show_custom_vars with wildcards
             - fixed adding dummy function in business processes
+            - fixed startup page in safari browser
 
 1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:
