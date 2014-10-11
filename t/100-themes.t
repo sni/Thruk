@@ -30,6 +30,7 @@ my $pages = [
 
 for my $theme (@themes) {
     for my $url (@{$pages}) {
+        next if $url =~ m/status.cgi/mx and !-s 'thruk_local.conf';
         TestUtils::test_page(
             'url'     => $url."?theme=".$theme,
         );
