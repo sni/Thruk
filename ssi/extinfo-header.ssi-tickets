@@ -12,7 +12,7 @@ jQuery(document).ready(function() {
         index++;
 
         jQuery(this).find("TD:nth-child(" + index + ")").each(function() {
-            jQuery(this).html(jQuery(this).html().replace(/(\d{6})/g, "<a href='http://example.com?ticket=$1' target='_blank'>$1</a>"));
+            jQuery(this).html(jQuery(this).html().replace(/(\b\d{6}\b)/g, "<a href='http://example.com?ticket=$1' target='_blank'>$1</a>"));
         });
     });
 });
