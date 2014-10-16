@@ -1,0 +1,19 @@
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery("TABLE.comment, TABLE.downtime").each(function() {
+        var index = jQuery(this).find("th").filter(function() {
+            return jQuery.trim(jQuery(this).text()) === "Comment";
+        }).index();
+
+        if (index === -1) {
+            return;
+        }
+
+        index++;
+
+        jQuery(this).find("TD:nth-child(" + index + ")").each(function() {
+            jQuery(this).html(jQuery(this).html().replace(/(\d{6})/g, "<a href='http://example.com?ticket=$1' target='_blank'>$1</a>"));
+        });
+    });
+});
+</script>
