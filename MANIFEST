@@ -1162,6 +1162,7 @@ script/thruk_version.sh
 script/waitmax
 ssi/README
 ssi/status-header.ssi-pnp
+ssi/extinfo-header.ssi-tickets
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0003-thruk-scripts.patch
