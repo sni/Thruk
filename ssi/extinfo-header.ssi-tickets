@@ -1,7 +1,10 @@
 <script type="text/javascript">
 jQuery(document).ready(function() {
     jQuery("TABLE.comment, TABLE.downtime").each(function() {
-        var index = jQuery(this).find("th").filter(function() {
+        var headers = jQuery(this).find("th");
+        var count = headers.length;
+
+        var index = headers.filter(function() {
             return jQuery.trim(jQuery(this).text()) === "Comment";
         }).index();
 
@@ -9,10 +12,10 @@ jQuery(document).ready(function() {
             return;
         }
 
-        index++;
+        index = count - index;
 
-        jQuery(this).find("TD:nth-child(" + index + ")").each(function() {
-            jQuery(this).html(jQuery(this).html().replace(/(\d{6})/g, "<a href='http://example.com?ticket=$1' target='_blank'>$1</a>"));
+        jQuery(this).find("TD:nth-last-child(" + index + ")").each(function() {
+            jQuery(this).html(jQuery(this).html().replace(/(\b\d{6}\b)/g, "<a href='http://example.com?ticket=$1' target='_blank'>$1</a>"));
         });
     });
 });
