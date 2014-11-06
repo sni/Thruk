@@ -56,7 +56,6 @@
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service' width="20" height="20"></td>
                 <td class='command' nowrap><a href='cmd.cgi?cmd_typ=40&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Stop accepting passive checks for this service</a></td>
               </tr>
-              [% END %]
               [% ELSE %]
               [% UNLESS c.config.command_disabled.exists('39') %]
               <tr class='command'>
