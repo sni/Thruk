@@ -130,10 +130,6 @@ TABLE.command TR.command TD, TABLE.command TR.data TD {
 }
 TABLE.command TR.command TD.command, TABLE.command TR.data TD.command {
 }
-TD.command A {
- display: block;
- padding: 0.1em 0.5em 0.1em 0.5em;
-}
 TD.command A:hover {
  background-color: #FFFFCC;
 }
