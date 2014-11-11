@@ -1263,11 +1263,12 @@ sub _cmd_configtool {
         my $remotefiles = $opt->{'args'}->{'args'}->{'files'};
         for my $f (@{$c->{'obj_db'}->{'files'}}) {
             $f->get_meta_data() unless defined $f->{'mtime'};
-            $transfer->{$f->{'path'}} = { mtime => $f->{'mtime'} };
-            if(   !defined $remotefiles->{$f->{'path'}}
-               or !defined $remotefiles->{$f->{'path'}}->{'mtime'}
-               or $f->{'mtime'} != $remotefiles->{$f->{'path'}}->{'mtime'}) {
-                $transfer->{$f->{'path'}}->{'content'} = read_file($f->{'path'});
+            # use display instead of path to make cascaded http backends work
+            $transfer->{$f->{'display'}} = { mtime => $f->{'mtime'} };
+            if(   !defined $remotefiles->{$f->{'display'}}
+               or !defined $remotefiles->{$f->{'display'}}->{'mtime'}
+               or $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
+                $transfer->{$f->{'display'}}->{'content'} = read_file($f->{'path'});
             }
         }
         $res = $transfer;
