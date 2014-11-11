@@ -1249,9 +1249,11 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
-    $c->stash->{'param_backend'} = $peerkey;
 
-    if(!Thruk::Utils::Conf::set_object_model($c)) {
+    $c->stash->{'param_backend'}                 = $peerkey;
+    $c->{'request'}->{'parameters'}->{'backend'} = $peerkey;
+
+    if(!Thruk::Utils::Conf::set_object_model($c) || $peerkey ne $c->stash->{'param_backend'}) {
         return("failed to set objects model", 1);
     }
     # outgoing file sync
