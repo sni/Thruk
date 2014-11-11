@@ -9,7 +9,7 @@
     <th class='data'>Filesystem</th>
   </tr>
   <tr>
-    <td class="dataVar" style="text-align: center"><input type="text" class="deletable" style="width:95%; margin-top: 5px;" onchange="set_browser_filter(this.value)" onkeyup="set_browser_filter(this.value)" onfocus="set_browser_filter(this.value)"></td>
+    <td class="dataVar" style="text-align: center"><input type="text" class="deletable" onchange="set_browser_filter(this.value)" onkeyup="set_browser_filter(this.value)" onfocus="set_browser_filter(this.value)" placeholder="filter"></td>
   </tr>
   <tr>
     <td class="dataVar" id="filepath"></td>
