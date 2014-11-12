@@ -82,7 +82,7 @@
           </tr>
           [% END %]
           [% IF host.action_url_expanded %]
-          [% action_url = get_action_url(2, 1, host.action_url_expanded, host.name) %]
+          [% action_url = get_action_url(c, 2, 1, host.action_url_expanded, host.name) %]
             <tr>
               <td align='right'>
                 <a href='[% action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(host, host_action_icon) %]' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">

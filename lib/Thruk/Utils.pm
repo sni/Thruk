@@ -1322,11 +1322,11 @@ sub get_graph_url {
 
     if(defined $obj->{'name'}) {
         #host obj
-        return get_action_url(1, 0, $action_url, $obj->{'name'});
+        return get_action_url($c, 1, 0, $action_url, $obj->{'name'});
     }
     elsif(defined $obj->{'host_name'} && defined $obj->{'description'}) {
         #service obj
-        return get_action_url(1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
+        return get_action_url($c, 1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
     }
     else {
         #unknown host
@@ -1339,7 +1339,7 @@ sub get_graph_url {
 
 =head2 get_action_url
 
-  get_action_url($escape_fun, $remove_render, $action_url, $host, $svc)
+  get_action_url($c, $escape_fun, $remove_render, $action_url, $host, $svc)
 
 return action_url modified for object (host/service) if we use graphite
 escape_fun is use to escape special char (html or quotes)
@@ -1348,9 +1348,10 @@ remove_render remove /render in action url
 =cut
 
 sub get_action_url {
-    my($escape_fun, $remove_render, $action_url, $host, $svc) = @_;
+    my($c, $escape_fun, $remove_render, $action_url, $host, $svc) = @_;
 
     my $new_action_url = $action_url;
+    my $graph_word = $c->config->{'graph_word'};
 
     # don't escape pnp links, they often contain quotes on purpose
     if($action_url =~ m/\/pnp(|4nagios)\//mx) {
@@ -1363,15 +1364,21 @@ sub get_action_url {
         return($action_url);
     }
 
-    if ($action_url =~ m|/render/\|/graphlot/|mx) {
-        my $new_host = $host;
-        $new_host =~ s/[^\w\-]/_/gmx;
-        $new_action_url =~ s/\Q$host\E/$new_host/gmx;
+    if ($graph_word) {
+        for my $regex (@{list($graph_word)}) {
+            if ($action_url =~ m|$regex|mx){
+                my $new_host = $host;
+                $new_host =~ s/[^\w\-]/_/gmx;
+                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
-        if ($svc) {
-            my $new_svc = $svc;
-            $new_svc =~ s/[^\w\-]/_/gmx;
-            $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
+                if ($svc) {
+                    my $new_svc = $svc;
+                    $new_svc =~ s/[^\w\-]/_/gmx;
+                    $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
+                }
+
+                last;
+            }
         }
     }
 
