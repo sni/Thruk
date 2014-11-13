@@ -1130,7 +1130,10 @@ sub _do_on_peers {
             next unless defined $res;
             next unless defined $res->{'configtool'};
             my $peer = $self->get_peer_by_key($key);
-            $peer->{'configtool'} = {};
+            # do not overwrite local configuration with remote configtool settings
+            # only use remote if the local one is empty
+            next if(scalar keys %{$peer->{'configtool'}} != 0 and !$peer->{'configtool'}->{'remote'});
+            $peer->{'configtool'} = { remote => 1 };
             for my $attr (keys %{$res->{'configtool'}}) {
                 $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
             }
