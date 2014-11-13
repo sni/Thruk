@@ -911,19 +911,13 @@ sub get_custom_vars {
     my($data,$prefix) = @_;
     $prefix = '' unless defined $prefix;
 
-    my $custom_vars = {};
+    return {} unless defined $data;
+    return {} unless defined $data->{$prefix.'custom_variable_names'};
 
-    return unless defined $data;
-    return unless defined $data->{$prefix.'custom_variable_names'};
-
-    my $x = 0;
-    while(defined $data->{$prefix.'custom_variable_names'}->[$x]) {
-        my $cust_name  = $data->{$prefix.'custom_variable_names'}->[$x];
-        my $cust_value = $data->{$prefix.'custom_variable_values'}->[$x];
-        $custom_vars->{$cust_name} = $cust_value;
-        $x++;
-    }
-    return $custom_vars;
+    # merge custom variables into a hash
+    my %hash;
+    @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+    return \%hash;
 }
 
 
