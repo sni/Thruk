@@ -1,6 +1,9 @@
 /* create tool tip content */
 function makeHTMLFromData(name, data){
   var html = '';
+  if (data.icon_image != undefined) {
+    html += '<img class="tip-icon" src="../../check_mk/images/icons/' + data.icon_image + '" />';
+  }
   if(data.status != undefined) {
     // real host leaf
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
