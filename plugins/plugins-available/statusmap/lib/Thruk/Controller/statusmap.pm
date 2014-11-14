@@ -549,6 +549,12 @@ sub _get_json_host {
             'state_pending'     => $state_pending,
         },
     };
+    if (defined $host->{'icon_image'}) {
+           my $icon_image = $host->{'icon_image'};
+           $icon_image =~ s/"//gmx;
+           $icon_image =~ s/'//gmx;
+           $json_host->{'data'}->{'icon_image'} = $icon_image;
+    }
     $self->{'all_nodes'}->{$host->{'name'}} = 1;
 
     return $json_host;
