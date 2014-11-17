@@ -81,7 +81,7 @@
              </tr>
               <tr>
                 <td align="right">
-                  <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); jQuery('#excel_export_url').val('[% uri_path(uri(c)) %]?' + jQuery(this).parents('FORM').serialize() + '[% view_mode %]'); console.log('[% uri_path(uri(c)) %]');">
+                  <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); jQuery('#excel_export_url').val('[% uri_path(uri(c)) %]?' + jQuery(this).parents('FORM').serialize() + '[% view_mode %]');">
                 </td>
              </tr>
             </table>
