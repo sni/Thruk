@@ -4,7 +4,7 @@
     [% FOR column IN columns %]
     [% counter = counter + 1 %]
     <tr>
-      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id)">[% column %]</td>
+      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id);" width="90%">[% column %]</td>
       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" checked></td>
     </tr>
     [% END %]
@@ -66,6 +66,28 @@
               [% PROCESS checkall prefix='service_' %]
             </td>
           [% END %]
+        </tr>
+        <tr>
+          <td colspan=2><hr></td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table border=0 cellspacing=2 cellpadding=0 width="100%">
+              <tr>
+                <td align="right">
+                  <input type="text" value="" id="excel_export_url">
+                </td>
+              </tr>
+              <tr>
+                <td align="right">
+                  <input type="button" value="create url" onclick="data = jQuery(this).parents('FORM').find('input[name=columns], input[name=service_columns], input[name=host_columns]').serialize(); jQuery('#excel_export_url').val(location.pathname + (location.search ? location.search + '&' : '?') + 'view_mode=xls' + (data ? '&' + data : ''));">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2><hr></td>
         </tr>
         <tr>
           <td colspan=2 align="center">
