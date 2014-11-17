@@ -78,12 +78,12 @@
                 <td align="right">
                   <input type="text" value="" id="excel_export_url">
                 </td>
-             </tr>
+              </tr>
               <tr>
                 <td align="right">
                   <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); jQuery('#excel_export_url').val('[% uri_path(uri(c)) %]?' + jQuery(this).parents('FORM').serialize() + '[% view_mode %]');">
                 </td>
-             </tr>
+              </tr>
             </table>
           </td>
         <tr>
