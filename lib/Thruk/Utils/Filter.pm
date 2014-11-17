@@ -229,6 +229,25 @@ sub full_uri {
 
 ########################################
 
+=head2 uri_path
+
+  uri_path($uri)
+
+returns a correct uri path
+
+=cut
+sub uri_path {
+    my $uri = shift;
+    $uri    =~ /^((http|https):\/\/.*?\/)?(.*?(\?|\s?$))/;
+    $uri    =  $3;
+    $uri    =~ s/\?//gmx;
+    $uri    = escape_ampersand($uri);
+    return $uri;
+}
+
+
+########################################
+
 =head2 as_url_arg
 
   as_url_arg($str)

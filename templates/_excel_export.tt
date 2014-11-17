@@ -26,6 +26,7 @@
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
 <div class="shadow"><div class="shadowcontent">
 [% IF style != 'combined' %]
+[% view_mode = '&view_mode=xls' %]
 <form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST">
 [% ELSE %]
 <input type="hidden" name="view_mode" value="html" id="view_mode">
@@ -66,6 +67,27 @@
               [% PROCESS checkall prefix='service_' %]
             </td>
           [% END %]
+        </tr>
+        <tr>
+          <td colspan=2><hr></td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table border=0 cellspacing=2 cellpadding=0 width="100%">
+              <tr>
+                <td align="right">
+                  <input type="text" value="" id="excel_export_url">
+                </td>
+             </tr>
+              <tr>
+                <td align="right">
+                  <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); jQuery('#excel_export_url').val('[% uri_path(uri(c)) %]?' + jQuery(this).parents('FORM').serialize() + '[% view_mode %]'); console.log('[% uri_path(uri(c)) %]');">
+                </td>
+             </tr>
+            </table>
+          </td>
+        <tr>
+          <td colspan=2><hr></td>
         </tr>
         <tr>
           <td colspan=2 align="center">
