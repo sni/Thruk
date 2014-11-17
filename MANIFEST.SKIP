@@ -5,6 +5,7 @@ notes.txt
 .DS_Store
 \.docx
 \.swp
+\.orig
 blib
 tmp
 \.git

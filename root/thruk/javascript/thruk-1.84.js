@@ -1506,25 +1506,39 @@ function hilight_area(x1, y1, x2, y2, duration, color) {
 /* fade out using jquery ui, ensure jquery ui loaded */
 function fade(id, duration) {
     var success = function(script, textStatus, jqXHR) {
-        has_jquery_ui = true;
         jQuery('#'+id).hide('fade', {}, duration);
     };
 
     if(has_jquery_ui) {
         success();
     } else {
-        jQuery.ajax({
-            url:       jquery_ui_url,
-            dataType: 'script',
-            success:   success,
-            cache:     true
-        });
+        load_jquery_ui(success);
     }
 
     // completly remove message from dom after fading out
     if(id == 'thruk_message') {
         window.setTimeout("jQuery('#"+id+"').remove()", duration + 1000);
     }
+}
+
+function load_jquery_ui(callback) {
+    if(has_jquery_ui) {
+        return;
+    }
+    var css  = document.createElement('link');
+    css.href = jquery_ui_css;
+    css.rel  = 'stylesheet';
+    css.type = 'text/css';
+    document.body.appendChild(css);
+    jQuery.ajax({
+        url:       jquery_ui_url,
+        dataType: 'script',
+        success:   function(script, textStatus, jqXHR) {
+            has_jquery_ui = true;
+            callback(script, textStatus, jqXHR);
+        },
+        cache:     true
+    });
 }
 
 
@@ -1694,6 +1708,213 @@ function load_overlib_content(id, url, add_pre) {
             debug(textStatus);
         }
     });
+}
+
+/*******************************************************************************
+*        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
+*       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
+*      d8'`8b    d8'               88      88 d8'        `8b 88 `8b    88
+*     d8'  `8b   88                88      88 88          88 88  `8b   88
+*    d8YaaaaY8b  88                88      88 88          88 88   `8b  88
+*   d8""""""""8b Y8,               88      88 Y8,        ,8P 88    `8b 88
+*  d8'        `8b Y8a.    .a8P     88      88  Y8a.    .a8P  88     `8888
+* d8'          `8b `"Y8888Y"'      88      88   `"Y8888Y"'   88      `888
+*******************************************************************************/
+
+/* print the action menu icons and action icons */
+var menu_nr = 0;
+function print_action_menu(src, backend, host, service) {
+    try {
+        src = is_array(src) ? src : [src];
+        jQuery(src).each(function(i, e) {
+            var icon       = document.createElement('img');
+            icon.src       = replace_macros(e.icon);
+            icon.className = 'action_icon '+(e.menu ? 'clickable' : '' );
+            icon.title     = e.title ? e.title : '';
+            if(e.menu) {
+                icon.nr = menu_nr;
+                icon.onclick = function() {
+                    // open and show menu
+                    show_action_menu(icon, e.menu, icon.nr, backend, host, service);
+                }
+                menu_nr++;
+            }
+            var item = icon;
+
+            if(e.action) {
+                var link = document.createElement('a');
+                link.href = replace_macros(e.action);
+                if(e.target) { link.target = e.target; }
+                link.appendChild(icon);
+                item = link;
+                check_server_action(undefined, link, backend, host, service);
+            }
+
+            // obtain reference to current script tag so we could insert the icons here
+            var scriptTag = document.scripts[document.scripts.length - 1];
+            scriptTag.parentNode.appendChild(item);
+        });
+    }
+    catch(e) {
+        document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+e+'">');
+    }
+}
+
+/* renders the action menu when openend */
+function show_action_menu(icon, items, nr, backend, host, service) {
+    resetRefresh();
+
+    var id = 'actionmenu_'+nr;
+    window.setTimeout(function() {
+        // otherwise the reset comes before we add our new class
+        jQuery(icon).addClass('active');
+    }, 30);
+    if(document.getElementById(id)) {
+        showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
+        return;
+    }
+    var container = document.createElement('div');
+    container.className     = 'action_menu';
+    container.id            = id;
+    container.style.visible = 'hidden';
+
+    var s1 = document.createElement('div');
+    container.appendChild(s1);
+    s1.className = 'shadow';
+
+    var s2 = document.createElement('div');
+    s2.className = 'shadowcontent';
+    s1.appendChild(s2);
+
+    var menu = document.createElement('ul');
+    s2.appendChild(menu);
+    menu.className = 'action_menu';
+
+    jQuery(items).each(function(i, e) {
+        var item = document.createElement('li');
+        menu.appendChild(item);
+        if(e == "-") {
+            var hr = document.createElement('hr');
+            item.appendChild(hr);
+            item.className = 'nohover';
+            return(true);
+        }
+
+        item.className = 'clickable';
+        var link = document.createElement('a');
+        if(e.icon) {
+            var span = document.createElement('span');
+            span.className = 'icon';
+            var img  = document.createElement('img');
+            img.src       = replace_macros(e.icon);
+            img.title     = e.title ? e.title : '';
+            span.appendChild(img);
+            link.appendChild(span);
+        }
+        var label = document.createElement('span');
+        label.innerHTML = e.label;
+        link.appendChild(label);
+        link.href      = replace_macros(e.action);
+        link.target    = e.target ? e.target : '';
+        item.appendChild(link);
+        check_server_action(id, link, backend, host, service);
+        return(true);
+    });
+
+    var coords = jQuery(icon).offset();
+    container.style.left = (Math.floor(coords.left)+12) + "px";
+    container.style.top  = (Math.floor(coords.top) + icon.offsetHeight + 14) + "px";
+
+    document.body.appendChild(container);
+    showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
+}
+
+/* set onclick handler for server actions */
+function check_server_action(id, link, backend, host, service) {
+    // server action urls
+    if(link.href.match(/^server:\/\//)) {
+        link.onclick = function() {
+            jQuery(link).find('IMG').attr({src:  url_prefix + 'themes/' +  theme + '/images/loading-icon.gif', width: 16, height: 16 }).css('margin', '2px 0px');
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/status.cgi?serveraction=1',
+                data: {
+                    host:    host,
+                    service: service,
+                    backend: backend,
+                    link:    link.href,
+                    token:   user_token
+                },
+                type: 'POST',
+                success: function(data) {
+                    thruk_message(data.rc, data.msg);
+                    if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
+                    reset_action_menu_icons();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    thruk_message(1, 'server action failed: '+ textStatus);
+                    if(id) { remove_close_element(id); jQuery('#'+id).remove();  }
+                    reset_action_menu_icons();
+                }
+            });
+            return(false);
+        }
+    }
+    // normal urls
+    else {
+        if(!link.href.match(/\$/)) {
+            // no macros, no problems
+            return;
+        }
+        link.onclick = function() {
+            if(!link.href.match(/\$/)) {
+                // no macros, no problems
+                return(true);
+            }
+            var href;
+            if(link.hasAttribute('orighref')) {
+                href = link.getAttribute('orighref');
+            } else {
+                link.setAttribute('orighref', ""+link.href);
+                href = link.href;
+            }
+            jQuery.ajax({
+                url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
+                data: {
+                    host:    host,
+                    service: service,
+                    backend: backend,
+                    data:    href,
+                    token:   user_token
+                },
+                type: 'POST',
+                success: function(data) {
+                    if(data.rc != 0) {
+                        thruk_message(1, 'could not replace macros: '+ data.data);
+                    } else {
+                        link.href = data.data
+                        link.click();
+                        link.href = link.getAttribute('orighref');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    thruk_message(1, 'could not replace macros: '+ textStatus);
+                }
+            });
+            return(false);
+        }
+    }
+}
+
+/* replace common macros */
+function replace_macros(input) {
+    var out = input;
+    out = out.replace(/\{\{\s*theme\s*\}\}/g, theme)
+    return(out);
+}
+
+/* remove active class from action menu icons */
+function reset_action_menu_icons() {
+    jQuery('IMG.action_icon').removeClass('active');
 }
 
 /*******************************************************************************

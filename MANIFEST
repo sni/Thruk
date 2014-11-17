@@ -1160,9 +1160,9 @@ script/thruk_update.sh
 script/thruk_update_help.pl
 script/thruk_version.sh
 script/waitmax
+ssi/extinfo-header.ssi-tickets
 ssi/README
 ssi/status-header.ssi-pnp
-ssi/extinfo-header.ssi-tickets
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0003-thruk-scripts.patch
@@ -1584,6 +1584,7 @@ themes/themes-available/Classic/images/down.png
 themes/themes-available/Classic/images/downtime.gif
 themes/themes-available/Classic/images/drag.png
 themes/themes-available/Classic/images/drag_hover.png
+themes/themes-available/Classic/images/dropdown.png
 themes/themes-available/Classic/images/edit.png
 themes/themes-available/Classic/images/email_attach.png
 themes/themes-available/Classic/images/empty.gif
@@ -1741,6 +1742,7 @@ themes/themes-available/Exfoliation/images/down.png
 themes/themes-available/Exfoliation/images/downtime.gif
 themes/themes-available/Exfoliation/images/drag.png
 themes/themes-available/Exfoliation/images/drag_hover.png
+themes/themes-available/Exfoliation/images/dropdown.png
 themes/themes-available/Exfoliation/images/edit.png
 themes/themes-available/Exfoliation/images/email_attach.png
 themes/themes-available/Exfoliation/images/empty.gif
@@ -1955,6 +1957,7 @@ themes/themes-available/Nuvola/images/down.png
 themes/themes-available/Nuvola/images/downtime.gif
 themes/themes-available/Nuvola/images/drag.png
 themes/themes-available/Nuvola/images/drag_hover.png
+themes/themes-available/Nuvola/images/dropdown.png
 themes/themes-available/Nuvola/images/edit.png
 themes/themes-available/Nuvola/images/email_attach.png
 themes/themes-available/Nuvola/images/empty.gif
@@ -2162,6 +2165,7 @@ themes/themes-available/Thruk/images/down.png
 themes/themes-available/Thruk/images/downtime.gif
 themes/themes-available/Thruk/images/drag.png
 themes/themes-available/Thruk/images/drag_hover.png
+themes/themes-available/Thruk/images/dropdown.png
 themes/themes-available/Thruk/images/edit.png
 themes/themes-available/Thruk/images/email_attach.png
 themes/themes-available/Thruk/images/empty.gif
@@ -2309,6 +2313,7 @@ themes/themes-available/Vautour/images/down.png
 themes/themes-available/Vautour/images/downtime.gif
 themes/themes-available/Vautour/images/drag.png
 themes/themes-available/Vautour/images/drag_hover.png
+themes/themes-available/Vautour/images/dropdown.png
 themes/themes-available/Vautour/images/edit.png
 themes/themes-available/Vautour/images/email_attach.png
 themes/themes-available/Vautour/images/empty.gif
@@ -2513,6 +2518,7 @@ themes/themes-available/Wakizashi/images/down.png
 themes/themes-available/Wakizashi/images/downtime.gif
 themes/themes-available/Wakizashi/images/drag.png
 themes/themes-available/Wakizashi/images/drag_hover.png
+themes/themes-available/Wakizashi/images/dropdown.png
 themes/themes-available/Wakizashi/images/edit.png
 themes/themes-available/Wakizashi/images/email_attach.png
 themes/themes-available/Wakizashi/images/empty.gif

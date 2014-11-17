@@ -16,8 +16,9 @@ use Carp;
 use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
 use JSON::XS;
-use Encode qw/encode_utf8/;
+use Encode qw(decode_utf8 encode_utf8);
 use File::Temp qw/tempfile/;
+use IPC::Open3 qw/open3/;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -225,6 +226,49 @@ sub save_logs_to_tempfile {
     }
     &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);;
     return($filename);
+}
+
+##############################################
+
+=head2 cmd
+
+  cmd($command)
+
+run command and return exit code and output
+
+$command can be either a string like '/bin/prog arg1 arg2' or an
+array like ['/bin/prog', 'arg1', 'arg2']
+
+=cut
+
+sub cmd {
+    my($c, $cmd) = @_;
+
+    local $SIG{CHLD}='';
+    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
+    my($rc, $output);
+    if(ref $cmd eq 'ARRAY') {
+        my $prog = shift @{$cmd};
+        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
+        my($pid, $wtr, $rdr);
+        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        waitpid( $pid, 0 );
+        $rc = $?;
+        my @lines = <$rdr>;
+        chomp($output = join('', @lines) || '');
+    } else {
+        $c->log->debug( "running cmd: ". $cmd );
+        $output = `$cmd 2>&1`;
+        $rc = $?;
+    }
+    if($rc == -1) {
+        $output .= "[".$!."]";
+    } else {
+        $rc = $rc>>8;
+    }
+    $c->log->debug( "rc:     ". $rc );
+    $c->log->debug( "output: ". $output );
+    return($rc, $output);
 }
 
 ##############################################

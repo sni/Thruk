@@ -16,6 +16,7 @@
   peer_key                      = host.peer_key
   passive_icon                  = 'passiveonly.gif'
   has_bp                        = has_business_process(host, hostprefix)
+  custom_vars                   = get_custom_vars(host, hostprefix)
 %]
 
 [% IF hide_passive_icon %]
@@ -45,6 +46,7 @@
 [% IF with_status && show_config_edit_buttons && backends_with_obj_config.$peer_key %]<td><a href='conf.cgi?edit&amp;host=[% host.$host_name | uri %]&amp;backend=[% host.peer_key %]'><img class="clickable" src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt='Configure This Host' title='Configure This Host' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
 [% IF has_bp                                  %]<td align="center" valign="middle"><a href="bp.cgi?action=details&amp;bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
 [% IF with_status                             %]<td align="center" valign="middle"><a href='status.cgi?host=[% host.$host_name | uri %]'><img class="clickable" src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="[% imgsize %]" height="[% imgsize %]"></a></td>[% END %]
+[% IF custom_vars.exists('THRUK_ACTION_MENU') %]<td align="center" valign="middle">[% tmp = get_action_menu(c, custom_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% host.peer_key %]', '[% host.$host_name %]');</script></td>[% END %][% END %]
 </tr>
 </table>
 [% END %]
@@ -56,6 +58,7 @@
 [%
   peer_key     = service.peer_key
   passive_icon = 'passiveonly.gif'
+  custom_vars  = get_custom_vars(service)
 %]
 
 [% IF hide_passive_icon %]
@@ -84,6 +87,7 @@
 [% IF service.notes_url_expanded           %]<td align="center" valign="middle"><a href='[% service.notes_url_expanded.replace('&', '&amp;') %]'[% IF c.config.cgi_cfg.notes_url_target %] target='[% c.config.cgi_cfg.notes_url_target %]'[% END %]><img class="clickable" src='[% url_prefix %]themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Service Notes' title='View Extra Service Notes'></a></td>[% END %]
 [% IF service.icon_image_expanded          %]<td align="center" valign="middle"><img class="notclickable" src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" width="20" height="20" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'></td>[% END %]
 [% IF show_config_edit_buttons  && backends_with_obj_config.$peer_key %]<td align="center" valign="middle"><a href='conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'><img class="clickable" src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt='Configure This Service' title='Configure This Service' width="20" height="20"></a></td>[% END %]
+[% IF custom_vars.exists('THRUK_ACTION_MENU') %]<td align="center" valign="middle">[% tmp = get_action_menu(c, custom_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]');</script></td>[% END %][% END %]
 </tr>
 </table>
 [% END %]

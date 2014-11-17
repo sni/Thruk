@@ -910,14 +910,54 @@ sub _get_macros {
 
 ########################################
 
-=head2 _replace_macros
+=head2 replace_macros
 
-  _replace_macros
+  replace_macros($string, $args, [$macros])
 
-returns a result for a sub called on all peers
+replace macros in given string.
+
+returns ($result, $rc)
+
+$args should be:
+{
+    host      => host object (or service object)
+    service   => service object
+    skip_user => 0/1   # skips user macros
+    args      => list of arguments
+}
 
 =cut
 
+sub replace_macros {
+    my( $self, $string, $args, $macros ) = @_;
+    $macros  = $self->_get_macros($args) unless defined $macros;
+    return $self->_get_replaced_string($string, $macros);
+}
+
+########################################
+
+=head2 get_macros
+
+  get_macros($args)
+
+returns a hash of macros
+
+$args should be:
+{
+    host      => host object (or service object)
+    service   => service object
+    skip_user => 0/1   # skips user macros
+    args      => list of arguments
+}
+
+=cut
+
+sub get_macros {
+    my $self    = shift;
+    return($self->_get_macros(@_));
+}
+
+########################################
 sub _replace_macros {
     my( $self, $args ) = @_;
 

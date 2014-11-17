@@ -18,7 +18,6 @@ use File::Slurp;
 use Encode qw(decode_utf8 encode_utf8);
 use Config::General qw(ParseConfig);
 use Digest::MD5 qw(md5_hex);
-use IPC::Open3;
 
 =head1 NAME
 
@@ -1324,30 +1323,8 @@ sub _store_changes {
 sub _cmd {
     my ( $self, $c, $cmd ) = @_;
 
-    local $SIG{CHLD}='';
-    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-    my($rc, $output);
-    if(ref $cmd eq 'ARRAY') {
-        my $prog = shift @{$cmd};
-        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
-        my($pid, $wtr, $rdr);
-        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-        waitpid( $pid, 0 );
-        $rc = $?;
-        chomp($output = <$rdr> || '');
-    } else {
-        $c->log->debug( "running cmd: ". $cmd );
-        $output = `$cmd 2>&1`;
-        $rc = $?;
-    }
-    if($rc == -1) {
-        $output .= "[".$!."]";
-    } else {
-        $rc = $rc>>8;
-    }
-    $c->stash->{'output'} = decode_utf8($output);
-    $c->log->debug( "rc:     ". $rc );
-    $c->log->debug( "output: ". $output );
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    $c->stash->{'output'} = $output;
     if($rc != 0) {
         return 0;
     }

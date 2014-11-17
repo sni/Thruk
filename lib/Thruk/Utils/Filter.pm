@@ -408,6 +408,53 @@ sub remove_html_comments {
 
 ########################################
 
+=head2 validate_json
+
+  validate_json(...)
+
+returns error if json is invalid
+
+=cut
+sub validate_json {
+    my($str) = @_;
+    eval {
+        JSON::XS->new->decode($str);
+    };
+    if($@) {
+        my $err = $@;
+        chomp($err);
+        return($err);
+    }
+    return("");
+}
+
+########################################
+
+=head2 get_action_menu
+
+  get_action_menu(c, [name|menu])
+
+returns menu and error
+
+=cut
+sub get_action_menu {
+    my($c, $menu) = @_;
+    our $already_checked_action_menus;
+    $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+    if($menu !~ m/^[\[\{]/mx) {
+        my $new = $c->config->{'action_menu_items'}->{$menu};
+        if(!$menu) {
+            return(["no $menu in action_menu_items", "{}"]);
+        }
+        $already_checked_action_menus->{$menu} = validate_json($new) unless exists $already_checked_action_menus->{$menu};
+        return([$already_checked_action_menus->{$menu}, $new]);
+    }
+    my $err = validate_json($menu);
+    return([$err, $menu]);
+}
+
+########################################
+
 =head2 json_encode
 
   json_encode(...)
