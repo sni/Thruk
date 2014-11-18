@@ -83,7 +83,7 @@
                   [% IF style != 'combined' %]
                   <input type="button" value="create url" onclick="data = jQuery(this).parents('FORM').find('input[name=columns]').serialize(); jQuery('#excel_export_url').val(location.pathname + (location.search ? location.search + '&' : '?') + 'view_mode=xls' + (data ? '&' + data : ''));">
                   [% ELSE %]
-                  <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); data = jQuery(this).parents('FORM').serialize(); jQuery('#excel_export_url').val(location.pathname + (data ? '?' + data : ''));">
+                  <input type="button" value="create url" onclick="jQuery('#view_mode').val('xls'); data = jQuery(this).parents('FORM').find('input[name!=bookmark][name!=referer]').serialize(); jQuery('#excel_export_url').val(location.pathname + (data ? '?' + data : ''));">
                   [% END %]
                 </td>
               </tr>
