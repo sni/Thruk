@@ -1770,11 +1770,12 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
         // otherwise the reset comes before we add our new class
         jQuery(icon).addClass('active');
     }, 30);
-    if(document.getElementById(id)) {
-        showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
+    var container = document.getElementById(id);
+    if(container) {
+        check_position_and_show_action_menu(id, icon, container, orientation);
         return;
     }
-    var container = document.createElement('div');
+    container               = document.createElement('div');
     container.className     = 'action_menu';
     container.id            = id;
     container.style.visible = 'hidden';
@@ -1823,7 +1824,10 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     });
 
     document.body.appendChild(container);
+    check_position_and_show_action_menu(id, icon, container, orientation);
+}
 
+function check_position_and_show_action_menu(id, icon, container, orientation) {
     var coords = jQuery(icon).offset();
     if(orientation == 'b-r') {
         container.style.left = (Math.floor(coords.left)+12) + "px";
