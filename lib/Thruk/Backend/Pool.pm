@@ -485,6 +485,7 @@ sub do_on_peer {
             if($use_shadow and $peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
                 ($data,$type,$size) = $peer->{'cacheproxy'}->$function(@{$arg});
             } else {
+                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
                 if($use_shadow and $peer->{'cacheproxy'} and $function eq 'send_command') {
                     # duplicate command to cache, otherwise we would have to wait
                     # for a full sync of this host/service
@@ -500,7 +501,6 @@ sub do_on_peer {
                     Thruk::Utils::IO::close($fh, $filename);
                     move($tmpfile, $filename);
                 }
-                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
             }
             if(defined $data and !defined $size) {
                 if(ref $data eq 'ARRAY') {
