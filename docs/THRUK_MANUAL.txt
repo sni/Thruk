@@ -2078,6 +2078,127 @@ ex.:
 
 
 
+=== Action Menu Settings
+
+The Action Menu is a way to create custom icons and menus for every host or service. There
+are two ways to set the menu. First one is to directly assign the menu json data
+into the _THRUK_ACTION_MENU custom variable of your host or service. Or you can
+just put a placeholder into the _THRUK_ACTION_MENU custom variable and define the
+actual menu in 'action_menu_items'. You may add multiple action icons or even
+multiple menus for each host or service.
+
+image:source/action_menu.png[Custom Action Menu]
+
+==== action_menu_items
+
+Defines the menu used by placeholders from the '_THRUK_ACTION_MENU' custom variable.
+The menu is a key/value pair with the name and the menu description in json format.
+The menu can either be a single icon/menu or a list of menus and icons.
+
+A simple menu could look like this, note that the menu has to be in a single line
+without newlines and all newlines from the example have to be removed in order
+to try that. But its more readable this way.
+
+Sample menu with two items and a seperator:
+
+  {
+    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "title": "sample menu",
+    "menu": [
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/arrow_refresh.png",
+        "label":  "refresh",
+        "action": "server://refresh/$HOSTNAME$"
+      },
+      "-",
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/page_white_text.png",
+        "label":  "wiki",
+        "action": "http://company-wiki/pages/$HOSTNAME$"
+      }
+    ]
+  }
+
+A menu has the following attributes:
+
+     ** `icon`          icon for the menu itself. You can use `{{theme}}` as placeholder in the url.
+     ** `title`         title of the menu, will be display on mouse over.
+     ** `menu`          the actual menu definition as a list '[...]' of sub items.
+
+A single `"-"` item can be used as a menu item seperator.
+
+
+The menu item can have the following attributes:
+
+     ** `icon`          icon for the menu item. You can use `{{theme}}` as placeholder in the url.
+     ** `label`         label name of the menu item.
+     ** `action`        url or action which will be run or openend. This can either be a
+                        http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
+                        the actionname must be a reference to a command from 'action_menu_actions'.
+
+Sample icons with two action icons:
+
+  [
+    {
+      "icon":"/thruk/themes/{{theme}}/images/criticity_1.png",
+      "action":"http://splunk/abc/hostid=$_HOSTHOSTID$",
+      "target":"_blank"
+    },
+    {
+      "icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",
+      "action":"server://refresh/$HOSTNAME$",
+    }
+  ]
+
+
+Variant 1 - reference to a pre defined menu:
+
+.....
+  *thruk_local.conf:*
+
+    <action_menu_items>
+        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+    </action_menu_items>
+
+  *host.cfg:*
+
+    define host {
+      host_name            localhost
+      ...
+      _THRUK_ACTION_MENU   standardmenu
+    }
+.....
+
+
+Variant 2 - define the menu in object config only:
+
+.....
+  *host.cfg:*
+
+    define host {
+      host_name            localhost
+      ...
+      _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+    }
+.....
+
+
+==== action_menu_actions
+
+Defines the available server commands from action_menu_items. Key/Value pair of the name
+of the script and the corresponding command. The command has to be a full path program
+and *not* just a shell command. Therefor you do not have to use quotes because the arguments
+are not interpreted by a shell before execution due to security reasons.
+
+ex.:
+
+  <action_menu_actions>
+      example_action   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$
+      refresh_action   = /usr/local/bin/refresh.sh otherargs
+  </action_menu_actions>
+
+
+
 
 
 === Icinga Settings
