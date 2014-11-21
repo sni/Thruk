@@ -1723,8 +1723,9 @@ function load_overlib_content(id, url, add_pre) {
 
 /* print the action menu icons and action icons */
 var menu_nr = 0;
-function print_action_menu(src, backend, host, service) {
+function print_action_menu(src, backend, host, service, orientation) {
     try {
+        if(orientation == undefined) { orientation = 'b-r'; }
         src = is_array(src) ? src : [src];
         jQuery(src).each(function(i, e) {
             var icon       = document.createElement('img');
@@ -1735,7 +1736,7 @@ function print_action_menu(src, backend, host, service) {
                 icon.nr = menu_nr;
                 icon.onclick = function() {
                     // open and show menu
-                    show_action_menu(icon, e.menu, icon.nr, backend, host, service);
+                    show_action_menu(icon, e.menu, icon.nr, backend, host, service, orientation);
                 }
                 menu_nr++;
             }
@@ -1761,7 +1762,7 @@ function print_action_menu(src, backend, host, service) {
 }
 
 /* renders the action menu when openend */
-function show_action_menu(icon, items, nr, backend, host, service) {
+function show_action_menu(icon, items, nr, backend, host, service, orientation) {
     resetRefresh();
 
     var id = 'actionmenu_'+nr;
@@ -1821,11 +1822,20 @@ function show_action_menu(icon, items, nr, backend, host, service) {
         return(true);
     });
 
+    document.body.appendChild(container);
+
     var coords = jQuery(icon).offset();
-    container.style.left = (Math.floor(coords.left)+12) + "px";
+    if(orientation == 'b-r') {
+        container.style.left = (Math.floor(coords.left)+12) + "px";
+    }
+    else if(orientation == 'b-l') {
+        var w = jQuery(container).outerWidth();
+        container.style.left = (Math.floor(coords.left)-w+33) + "px";
+    } else {
+        if(thruk_debug_js) { alert("ERROR: unknown orientation in show_action_menu(): " + orientation); }
+    }
     container.style.top  = (Math.floor(coords.top) + icon.offsetHeight + 14) + "px";
 
-    document.body.appendChild(container);
     showElement(id, undefined, true, 'DIV#'+id+' DIV.shadowcontent', reset_action_menu_icons);
 }
 

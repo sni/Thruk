@@ -107,6 +107,14 @@
               </td>
             </tr>
           [% END %]
+          [% cust_vars = get_custom_vars(service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <tr>
+              <td align='left'>
+                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l');</script></td>[% END %]
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
           [% IF custom_vars.size > 0 %]
             <tr>
               <td align='right'>
