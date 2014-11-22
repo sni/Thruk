@@ -1403,6 +1403,11 @@ sub _cmd_raw {
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
+        # fake remote user unless we have one. renewing the logcache requires
+        # a remote user for starting external job
+        if(!defined $c->stash->{'remote_user'}) {
+            $c->stash->{'remote_user'} = 'cli';
+        }
         $c->{'db'}->renew_logcache($c);
     }
 
