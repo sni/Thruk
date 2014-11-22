@@ -1243,10 +1243,12 @@ sub _serveraction {
     my $obj = $objs->[0];
     return(1, 'no such object') unless $obj;
 
-    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, skip_user => 1});
+    my $remote_user = $c->stash->{'remote_user'};
+    my $macros      = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, skip_user => 1});
     for my $arg (@cmdline, @args) {
         my $rc;
         ($arg, $rc) = $c->{'db'}->replace_macros($arg, {}, $macros);
+        $arg =~ s/\$REMOTE_USER\$/$remote_user/gmx;
     }
 
     my($rc, $output);

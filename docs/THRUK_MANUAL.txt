@@ -2121,7 +2121,8 @@ Sample menu with two items and a seperator:
 
 A menu has the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{{theme}}` as placeholder in the url.
+     ** `icon`          icon for the menu itself. You can use `{{theme}}` as placeholder in the url
+                        and `{{remote_user}}` for the user name.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
 

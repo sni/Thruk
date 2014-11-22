@@ -16,6 +16,7 @@
   var thruk_debug_js         = [% IF thruk_debug %]1[% ELSE %]0[% END %];
   var minimal                = [% IF minimal %]true[% ELSE %]false[% END %];
   var user_token             = '[% get_user_token(c) %]';
+  var remote_user            = '[% remote_user %]';
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->

@@ -1923,6 +1923,7 @@ function check_server_action(id, link, backend, host, service) {
 function replace_macros(input) {
     var out = input;
     out = out.replace(/\{\{\s*theme\s*\}\}/g, theme)
+    out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user)
     return(out);
 }
 
