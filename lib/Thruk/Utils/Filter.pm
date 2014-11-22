@@ -443,7 +443,7 @@ sub get_action_menu {
     $already_checked_action_menus = {} unless defined $already_checked_action_menus;
     if($menu !~ m/^[\[\{]/mx) {
         my $new = $c->config->{'action_menu_items'}->{$menu};
-        if(!$menu) {
+        if(!$new) {
             return(["no $menu in action_menu_items", "{}"]);
         }
         $already_checked_action_menus->{$menu} = validate_json($new) unless exists $already_checked_action_menus->{$menu};
