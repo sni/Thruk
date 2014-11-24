@@ -2191,6 +2191,9 @@ of the script and the corresponding command. The command has to be a full path p
 and *not* just a shell command. Therefor you do not have to use quotes because the arguments
 are not interpreted by a shell before execution due to security reasons.
 
+It is possible to use most standard macros and the username is available in the `REMOTE_USER`
+environment variable.
+
 ex.:
 
   <action_menu_actions>
