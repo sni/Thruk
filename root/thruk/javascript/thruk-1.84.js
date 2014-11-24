@@ -1766,15 +1766,26 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     resetRefresh();
 
     var id = 'actionmenu_'+nr;
+    var container = document.getElementById(id);
+    if(container) {
+        if(container.style.display == '') {
+            /* close if already open */
+            reset_action_menu_icons();
+            container.style.display = 'none';
+            return;
+        }
+        check_position_and_show_action_menu(id, icon, container, orientation);
+    }
+
     window.setTimeout(function() {
         // otherwise the reset comes before we add our new class
         jQuery(icon).addClass('active');
     }, 30);
-    var container = document.getElementById(id);
+
     if(container) {
-        check_position_and_show_action_menu(id, icon, container, orientation);
         return;
     }
+
     container               = document.createElement('div');
     container.className     = 'action_menu';
     container.id            = id;
