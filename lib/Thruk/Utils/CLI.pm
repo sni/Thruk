@@ -356,6 +356,7 @@ sub _run {
             Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
             $ENV{'THRUK_JOB_ID'}  = $id;
             $ENV{'THRUK_JOB_DIR'} = $dir;
+            Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
         }
         $result = $self->_from_local($c, $self->{'opt'})
     }
