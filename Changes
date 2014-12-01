@@ -6,6 +6,7 @@ next:
           - livestatus performance improvements
           - updated jquery to 1.11.1
           - added new configuration setting: max_process_memory
+          - add excel export permanent link (awiddersheim)
           - Reporting:
             - support url reports from external urls
           - Panorama View:

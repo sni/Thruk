@@ -1710,6 +1710,13 @@ function load_overlib_content(id, url, add_pre) {
     });
 }
 
+/* update permanent link of excel export */
+function updateExcelPermanentLink() {
+    var inp  = jQuery('#excel_export_url');
+    var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode]').serialize();
+    jQuery(inp).val(jQuery('#excelexportlink')[0].href + (data ? '?' + data : ''));
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88
