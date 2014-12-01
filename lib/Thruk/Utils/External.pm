@@ -376,6 +376,8 @@ sub get_result {
     unless(defined $end[9]) {
         $end[9] = time();
         $err    = 'job was killed';
+        $c->log->error('killed job: '.$dir);
+        $c->log->error(`ls -la $dir`);
     }
 
     my $time = $end[9] - $start[9];
