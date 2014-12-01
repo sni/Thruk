@@ -535,7 +535,7 @@ sub get_day_name {
 
 =head2 get_pnp_image
 
-  get_pnp_image(hst, svc, start, end, width, height)
+  get_pnp_image(hst, svc, start, end, width, height, source)
 
 return base64 encoded pnp image if possible.
 A string will be returned if no PNP graph can be exported.
@@ -546,6 +546,7 @@ sub get_pnp_image {
     my $c        = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} || $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
     my $pnpurl   = "";
+    $source      = 0 unless defined $source;
 
     if($svc) {
         my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
