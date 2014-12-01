@@ -370,6 +370,8 @@ sub get_result {
         @end = stat($dir."/stdout")
     } elsif(-f $dir."/stderr") {
         @end = stat($dir."/stderr")
+    } elsif(-f $dir."/rc") {
+        @end = stat($dir."/rc")
     }
     unless(defined $end[9]) {
         $end[9] = time();
