@@ -366,14 +366,23 @@ sub get_result {
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir.'/start');
     my @end;
-    if(-f $dir."/stdout") {
-        @end = stat($dir."/stdout")
-    } elsif(-f $dir."/stderr") {
-        @end = stat($dir."/stderr")
-    } elsif(-f $dir."/rc") {
-        @end = stat($dir."/rc")
+    my $retries = 10;
+    while($retries > 0) {
+        if(-f $dir."/stdout") {
+            @end = stat($dir."/stdout")
+        } elsif(-f $dir."/stderr") {
+            @end = stat($dir."/stderr")
+        } elsif(-f $dir."/rc") {
+            @end = stat($dir."/rc")
+        }
+        if(!defined $end[9]) {
+            sleep(1);
+            $retries--;
+        } else {
+            last;
+        }
     }
-    unless(defined $end[9]) {
+    if(!defined $end[9]) {
         $end[9] = time();
         $err    = 'job was killed';
         $c->log->error('killed job: '.$dir);
