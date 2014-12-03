@@ -4569,7 +4569,7 @@ var ajax_search = {
                     var id = "suggest_item_"+x
                     if(type.name == 'icons') {
                         file = data.display.split(" - ");
-                        name = "<img src='" + file[1] + "' style='vertical-align: text-bottom'> " + file[0];
+                        name = "<img src='" + file[1] + "' style='vertical-align: text-bottom; width: 16px; height: 16px;'> " + file[0];
                     }
                     name        = name.replace(/\ \(disabled\)$/, '<span style="color: #EB6900; margin-left: 20px;"> (disabled)<\/span>');
                     resultHTML += '<li><a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="ajax_search.set_result(this.rev); return false;" title="' + data.display + '"> ' + name +'<\/a><\/li>';
