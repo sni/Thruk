@@ -807,11 +807,18 @@ sub _read_report_file {
     $report->{'nr'} = $nr;
     $report = _get_new_report($c, $report);
 
+    my $needs_save = 0;
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
     if($report->{'template'} and !defined $available_templates->{$report->{'template'}}) {
         my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
         $report->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
-        Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available, using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
+        $needs_save = 1;
+        Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
+    }
+    if(!$report->{'template'}) {
+        $report->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $needs_save = 1;
+        Thruk::Utils::set_message( $c, 'fail_message', 'No Report Template set in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
     $c->stash->{'available_templates'} = $available_templates;
 
@@ -841,7 +848,6 @@ sub _read_report_file {
     $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
 
     # check if its really running
-    my $needs_save = 0;
     if($report->{'var'}->{'is_running'} and kill(0, $report->{'var'}->{'is_running'}) != 1) {
         $report->{'var'}->{'is_running'} = 0;
         $needs_save = 1;
