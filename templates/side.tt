@@ -15,7 +15,7 @@
     <style type="text/css">
     <!--
     HTML {
-        overflow: inherit;
+        overflow-x: hidden;
         overflow-y: auto;
     }
     -->
