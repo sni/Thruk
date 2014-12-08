@@ -18,6 +18,7 @@ use Thruk::Backend::Pool;
 use JSON::XS;
 use Encode qw(decode_utf8 encode_utf8);
 use File::Temp qw/tempfile/;
+use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 
 $Thruk::Utils::IO::config = undef;
