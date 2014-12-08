@@ -250,11 +250,13 @@ sub cmd {
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
         $c->log->debug('running cmd: '.join(' ', @{$cmd}));
-        my($pid, $wtr, $rdr);
+        my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-        waitpid( $pid, 0 );
+        while(waitpid($pid, WNOHANG) == 0) {
+            push @lines, <$rdr>;
+        }
         $rc = $?;
-        my @lines = <$rdr>;
+        push @lines, <$rdr>;
         chomp($output = join('', @lines) || '');
     } else {
         $c->log->debug( "running cmd: ". $cmd );
