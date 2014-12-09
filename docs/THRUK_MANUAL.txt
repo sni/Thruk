@@ -2097,7 +2097,8 @@ The menu can either be a single icon/menu or a list of menus and icons.
 
 A simple menu could look like this, note that the menu has to be in a single line
 without newlines and all newlines from the example have to be removed in order
-to try that. But its more readable this way.
+to try that. But its more readable this way. You can also use a trailing
+backslash to write the menus on multiple lines.
 
 Sample menu with two items and a seperator:
 
@@ -2136,6 +2137,7 @@ The menu item can have the following attributes:
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
+     ** `target`        Use '_blank' here to open link in a new window.
 
 Sample icons with two action icons:
 
@@ -2158,7 +2160,14 @@ Variant 1 - reference to a pre defined menu:
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                             "title": "test title",\
+                             "menu":[\
+                                {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                                 "label":"refresh",\
+                                 "action":"server://refresh/$HOSTNAME$"}\
+                             ]\
+                            }
     </action_menu_items>
 
   *host.cfg:*

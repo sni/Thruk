@@ -22080,7 +22080,8 @@ The menu is a key/value pair with the name and the menu description in json form
 The menu can either be a single icon/menu or a list of menus and icons.</p></div>
 <div class="paragraph"><p>A simple menu could look like this, note that the menu has to be in a single line
 without newlines and all newlines from the example have to be removed in order
-to try that. But its more readable this way.</p></div>
+to try that. But its more readable this way. You can also use a trailing
+backslash to write the menus on multiple lines.</p></div>
 <div class="paragraph"><p>Sample menu with two items and a seperator:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -22141,6 +22142,11 @@ to try that. But its more readable this way.</p></div>
                         the actionname must be a reference to a command from <em>action_menu_actions</em>.
 </p>
 </li>
+<li>
+<p>
+<tt>target</tt>        Use <em>_blank</em> here to open link in a new window.
+</p>
+</li>
 </ul></div>
 <div class="paragraph"><p>Sample icons with two action icons:</p></div>
 <div class="literalblock">
@@ -22163,7 +22169,14 @@ to try that. But its more readable this way.</p></div>
 <pre><tt>  *thruk_local.conf:*
 
     &lt;action_menu_items&gt;
-        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                             "title": "test title",\
+                             "menu":[\
+                                {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                                 "label":"refresh",\
+                                 "action":"server://refresh/$HOSTNAME$"}\
+                             ]\
+                            }
     &lt;/action_menu_items&gt;
 
   *host.cfg:*
@@ -26572,7 +26585,7 @@ EzABEzCBdgQ8AGnHzb5MwARMwARMwARMwARMwARaEPgfKeP/z2smrv8AAAAASUVORK5CYII=" />
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-11-24 14:46:54 CET
+Last updated 2014-12-09 16:11:54 CET
 </div>
 </div>
 </body>
