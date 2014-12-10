@@ -1006,7 +1006,8 @@ sub _set_downtime {
     my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
 
     # convert to normal url request
-    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
+    my $product = $c->config->{'product_prefix'} || 'thruk';
+    my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
                       $cmd_typ,
                       URI::Escape::uri_escape($downtime->{'comment'}),
                       '(cron)',
