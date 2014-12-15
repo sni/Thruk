@@ -3,14 +3,6 @@ jQuery(document).bind("mobileinit", function(){
     jQuery.mobile.page.prototype.options.backBtnText = "back";
     jQuery.mobile.page.prototype.options.addBackBtn  = true;
 
-    // theme?
-    var theme = readCookie('thruk_mtheme');
-    if(theme != undefined) {
-        set_theme(theme);
-    } else {
-        set_theme('e');
-    }
-
     jQuery(document).ajaxError(function() {
         fail_all_backends();
     });
@@ -18,6 +10,8 @@ jQuery(document).bind("mobileinit", function(){
 
 /* initialize all events */
 jQuery(document).ready(function(e){
+    set_default_theme();
+
     /* refresh button on start page */
     jQuery("#refresh").bind( "vclick", function(event, ui) {
         refresh_host_status(true);
@@ -27,10 +21,7 @@ jQuery(document).ready(function(e){
 
     /* bind option theme button */
     jQuery("A.theme_button").bind("vclick", function(event, ui) {
-        var now         = new Date();
-        var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-        document.cookie = "thruk_mtheme=" + this.dataset.theme + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
-        window.location.reload();
+        set_theme(this.dataset.val);
     });
 
     /* bind full client button */
@@ -48,6 +39,10 @@ jQuery(document).ready(function(e){
             current_backend_states[backend] = 2;
         }
     });
+    jQuery('#button_options_back').bind('vclick', function(event){
+        /* back from options, alias cancel */
+        set_default_theme();
+    });
     jQuery('#options_save').bind('vclick', function(event){
         var serialized = "";
         for(var key in current_backend_states){
@@ -59,6 +54,12 @@ jQuery(document).ready(function(e){
         };
         serialized = serialized.substring(1);
         document.cookie = "thruk_backends="+serialized+ "; path="+cookie_path+";";
+
+        /* save theme */
+        var now         = new Date();
+        var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+        document.cookie = "thruk_mtheme=" + thruk_theme + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
+
         refresh_host_status(true, true);
         refresh_service_status(true, true);
     });
@@ -200,19 +201,10 @@ function filter_duration(duration) {
 }
 
 /* set theme */
+var thruk_theme;
 function set_theme(theme) {
-    jQuery.mobile.page.prototype.options.backBtnTheme     = theme;
-    jQuery.mobile.page.prototype.options.headerTheme      = theme;
-    jQuery.mobile.page.prototype.options.contentTheme     = theme;
-    jQuery.mobile.page.prototype.options.footerTheme      = theme;
-
-    jQuery.mobile.listview.prototype.options.headerTheme  = theme;
-    jQuery.mobile.listview.prototype.options.theme        = theme;
-    jQuery.mobile.listview.prototype.options.dividerTheme = theme;
-
-    jQuery.mobile.listview.prototype.options.splitTheme   = theme;
-    jQuery.mobile.listview.prototype.options.countTheme   = theme;
-    jQuery.mobile.listview.prototype.options.filterTheme  = theme;
+    jQuery('DIV[data-role="page"]').removeClass("ui-page-theme-a ui-page-theme-b").addClass("ui-page-theme-" + theme);
+    thruk_theme = theme;
 }
 
 /* set hosts status */
@@ -515,20 +507,20 @@ ThrukMobile = {
     page_problems: function(eventType, matchObj, ui, page, evt) {
         refresh_host_status();
         refresh_service_status();
-        jQuery('DIV#problems UL.hosts_by_status_list').listview('refresh');
-        jQuery('DIV#problems UL.services_by_status_list').listview('refresh');
+        jQuery('DIV#problems:visible UL.hosts_by_status_list').listview('refresh');
+        jQuery('DIV#problems:visible UL.services_by_status_list').listview('refresh');
     },
 
     /* Hosts Page */
     page_hosts: function(eventType, matchObj, ui, page, evt) {
         refresh_host_status();
-        jQuery('DIV#hosts .hosts_by_status_list').listview('refresh');
+        jQuery('DIV#hosts:visible .hosts_by_status_list').listview('refresh');
     },
 
     /* Services Page */
     page_services: function(eventType, matchObj, ui, page, evt) {
         refresh_service_status();
-        jQuery('DIV#services .services_by_status_list').listview('refresh');
+        jQuery('DIV#services:visible .services_by_status_list').listview('refresh');
     },
 
     /* Host Cmd Page */
@@ -588,8 +580,8 @@ function list_pager_init(page, list) {
     } else {
         jQuery('.more').find('A').text('loading...');
     }
-    jQuery.mobile.showPageLoadingMsg();
-    jQuery('#'+list).listview('refresh');
+    jQuery.mobile.loading('show');
+    jQuery('#'+list+':visible').listview('refresh');
     return page;
 }
 
@@ -601,7 +593,7 @@ function list_pager_data(page, data, list, more_callback, row_callback) {
     } else {
         jQuery('.more').remove();
     }
-    jQuery.mobile.hidePageLoadingMsg();
+    jQuery.mobile.loading('hide');
     jQuery.each(data.data, function(index, entry) {
         row_callback(entry);
     });
@@ -609,12 +601,12 @@ function list_pager_data(page, data, list, more_callback, row_callback) {
         jQuery('#'+list).append('<li data-icon="false" class="more"><a href="#">more...</a></li>');
         jQuery('.more').bind('vclick', more_callback);
     }
-    jQuery('#'+list).listview('refresh');
+    jQuery('#'+list+':visible').listview('refresh');
 }
 
 /* hide elements from extinfo pages */
 function hide_common_extinfo(typ) {
-    jQuery.mobile.showPageLoadingMsg();
+    jQuery.mobile.loading('show');
     ['attempt', 'name', 'state', 'duration', 'exec_time', 'last_check', 'next_check', 'check_type', 'plugin_output', 'current_notification_number'].forEach(function(el){
         jQuery('#'+typ+'_'+el).text('');
     });
@@ -626,7 +618,7 @@ function hide_common_extinfo(typ) {
 /* show common elements from extinfo pages */
 function show_common_extinfo(typ, data, comments) {
     extract_data(data);
-    jQuery.mobile.hidePageLoadingMsg();
+    jQuery.mobile.loading('hide');
     var obj = data.data[0];
     if(obj != undefined) {
         var state_type = "SOFT";
@@ -765,6 +757,16 @@ function get_list_icons(obj) {
     return(icons);
 }
 
+/* set default theme */
+function set_default_theme() {
+    // theme?
+    var theme = readCookie('thruk_mtheme');
+    if(theme != undefined && (theme == 'a' || theme == 'b')) {
+        set_theme(theme);
+    } else {
+        set_theme('a');
+    }
+}
 
 
 // URL: http://blog.stevenlevithan.com/archives/date-time-format

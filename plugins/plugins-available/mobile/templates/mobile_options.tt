@@ -8,11 +8,8 @@
     <div data-role="fieldcontain" id="theme_chooser">
       <h4>Choose Theme</h4>
       <div data-role="controlgroup" data-type="horizontal" class="theme_buttons">
-        <a href="#" data-role="button" data-theme="a" class="theme_button">A</a>
-        <a href="#" data-role="button" data-theme="b" class="theme_button">B</a>
-        <a href="#" data-role="button" data-theme="c" class="theme_button">C</a>
-        <a href="#" data-role="button" data-theme="d" class="theme_button">D</a>
-        <a href="#" data-role="button" data-theme="e" class="theme_button">E</a>
+        <a href="#" data-role="button" data-val="a" data-theme="a" class="theme_button">A</a>
+        <a href="#" data-role="button" data-val="b" data-theme="b" class="theme_button">B</a>
       </div>
     </div>
 

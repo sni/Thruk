@@ -7,6 +7,9 @@ next:
           - updated jquery to 1.11.1
           - added new configuration setting: max_process_memory
           - add excel export permanent link (awiddersheim)
+          - Mobile:
+            - updated jquery mobile
+            - old themes have been replaced with 2 new ones
           - Reporting:
             - support url reports from external urls
           - Panorama View:
@@ -22,6 +25,7 @@ next:
             - fixed show_custom_vars with wildcards
             - fixed adding dummy function in business processes
             - fixed startup page in safari browser
+            - fixed css problem in mobile client
 
 1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:

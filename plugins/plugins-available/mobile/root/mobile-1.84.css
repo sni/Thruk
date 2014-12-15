@@ -11,6 +11,18 @@
 .hostTotalsPROBLEMS    { background: orange  !important; }
 .serviceTotalsPROBLEMS { background: orange  !important; }
 
+.servicePENDING        A { background: #ACACAC !important; }
+.serviceOK             A { background: #33FF00 !important; }
+.serviceUNKNOWN        A { background: #FF9900 !important; text-shadow: none !important; }
+.serviceWARNING        A { background: #FFFF00 !important; }
+.serviceCRITICAL       A { background: #F83838 !important; text-shadow: none !important; }
+
+.hostUP                A { background: #33FF00 !important; }
+.hostDOWN              A { background: #F83838 !important; text-shadow: none !important; }
+.hostUNREACHABLE       A { background: #F83838 !important; }
+.hostPENDING           A { background: #ACACAC !important; }
+.hostTotalsPROBLEMS    A { background: orange  !important; }
+.serviceTotalsPROBLEMS A { background: orange  !important; }
 
 .hidden {
   display: none;
