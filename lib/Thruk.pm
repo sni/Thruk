@@ -142,6 +142,7 @@ sub _remove_pid {
             my $pids = [split(/\s/mx, read_file($pidfile))];
             my $remaining = [];
             for my $pid (@{$pids}) {
+                next unless($pid and $pid =~ m/^\d+$/mx);
                 next if $pid == $$;
                 next if kill(0, $pid) == 0;
                 push @{$remaining}, $pid;
