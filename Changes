@@ -7,6 +7,7 @@ next:
           - updated jquery to 1.11.1
           - added new configuration setting: max_process_memory
           - add excel export permanent link (awiddersheim)
+          - increased logcache int size
           - Mobile:
             - updated jquery mobile
             - old themes have been replaced with 2 new ones

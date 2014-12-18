@@ -1767,7 +1767,7 @@ sub _get_create_statements {
     # contact
         "DROP TABLE IF EXISTS `".$prefix."_contact`",
         "CREATE TABLE `".$prefix."_contact` (
-          contact_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+          contact_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
           name varchar(150) NOT NULL,
           PRIMARY KEY (contact_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
@@ -1775,23 +1775,23 @@ sub _get_create_statements {
     # contact_host_rel
         "DROP TABLE IF EXISTS `".$prefix."_contact_host_rel`",
         "CREATE TABLE `".$prefix."_contact_host_rel` (
-          contact_id mediumint(8) unsigned NOT NULL,
-          host_id mediumint(8) unsigned NOT NULL,
+          contact_id mediumint(9) unsigned NOT NULL,
+          host_id mediumint(9) unsigned NOT NULL,
           PRIMARY KEY (contact_id,host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # contact_service_rel
         "DROP TABLE IF EXISTS `".$prefix."_contact_service_rel`",
         "CREATE TABLE `".$prefix."_contact_service_rel` (
-          contact_id mediumint(8) unsigned NOT NULL,
-          service_id mediumint(8) unsigned NOT NULL,
+          contact_id mediumint(9) unsigned NOT NULL,
+          service_id mediumint(9) unsigned NOT NULL,
           PRIMARY KEY (contact_id,service_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 
     # host
         "DROP TABLE IF EXISTS `".$prefix."_host`",
         "CREATE TABLE `".$prefix."_host` (
-          host_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+          host_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
           host_name varchar(150) NOT NULL,
           PRIMARY KEY (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
@@ -1799,16 +1799,16 @@ sub _get_create_statements {
     # log
         "DROP TABLE IF EXISTS `".$prefix."_log`",
         "CREATE TABLE IF NOT EXISTS `".$prefix."_log` (
-          time int(10) unsigned NOT NULL,
-          class tinyint(3) unsigned NOT NULL,
+          time int(11) unsigned NOT NULL,
+          class tinyint(4) unsigned NOT NULL,
           type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
-          state tinyint(2) unsigned DEFAULT NULL,
+          state tinyint(4) unsigned DEFAULT NULL,
           state_type enum('HARD','SOFT') NOT NULL,
-          contact_id mediumint(8) unsigned DEFAULT NULL,
-          host_id mediumint(8) unsigned DEFAULT NULL,
-          service_id mediumint(8) unsigned DEFAULT NULL,
-          plugin_output mediumint(8) NOT NULL,
-          message mediumint(8) NOT NULL,
+          contact_id mediumint(9) unsigned DEFAULT NULL,
+          host_id mediumint(9) unsigned DEFAULT NULL,
+          service_id mediumint(9) unsigned DEFAULT NULL,
+          plugin_output bigint(20) unsigned NOT NULL,
+          message bigint(20) unsigned NOT NULL,
           KEY time (time),
           KEY host_id (host_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin PACK_KEYS=1",
@@ -1816,7 +1816,7 @@ sub _get_create_statements {
     # plugin_output
         "DROP TABLE IF EXISTS `".$prefix."_plugin_output`",
         "CREATE TABLE `".$prefix."_plugin_output` (
-          output_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+          output_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
           output mediumtext NOT NULL,
           PRIMARY KEY (output_id)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
@@ -1824,8 +1824,8 @@ sub _get_create_statements {
     # service
         "DROP TABLE IF EXISTS `".$prefix."_service`",
         "CREATE TABLE `".$prefix."_service` (
-          service_id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-          host_id mediumint(8) unsigned NOT NULL,
+          service_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+          host_id mediumint(9) unsigned NOT NULL,
           service_description varchar(150) NOT NULL,
           PRIMARY KEY (service_id),
           KEY host_id (host_id)
@@ -1834,7 +1834,7 @@ sub _get_create_statements {
     # status
         "DROP TABLE IF EXISTS `".$prefix."_status`",
         "CREATE TABLE `".$prefix."_status` (
-          status_id smallint(4) unsigned NOT NULL AUTO_INCREMENT,
+          status_id smallint(6) unsigned NOT NULL AUTO_INCREMENT,
           name varchar(150) NOT NULL,
           value varchar(150) DEFAULT NULL,
           PRIMARY KEY (status_id)
