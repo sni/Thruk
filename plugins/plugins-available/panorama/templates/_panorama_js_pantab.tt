@@ -174,7 +174,7 @@
                     listeners: {
                         beforehide: function(menu, eOpts) { menu.destroy(); }
                     }
-                }).showAt(e.getXY());
+                }).showAt(pos);
             });
         },
         beforerender: function(This, eOpts) {
