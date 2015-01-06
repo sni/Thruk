@@ -20,7 +20,7 @@ before_install:
   - cpanm -q -f --installdeps --notest --no-man-pages .
   - git config --global user.email "travis@localhost"
   - git config --global user.name "Travis Testuser"
-  - wget "http://www.thruk.org/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz" -O /tmp/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz
+  - wget "http://download.thruk.org/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz" -O /tmp/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz
   - cd /tmp/ && tar zxf wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz && mv wkhtmltopdf-amd64 wkhtmltopdf && cd -
   - echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' > ~/.thruk
   # ensure we have a test database in place for tests
