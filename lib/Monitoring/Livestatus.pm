@@ -59,8 +59,7 @@ in your monitoring installation.
 =head2 new ( [ARGS] )
 
 Creates an C<Monitoring::Livestatus> object. C<new> takes at least the
-socketpath.  Arguments are in key-value pairs.
-See L<EXAMPLES> for more complex variants.
+socketpath. Arguments are in key-value pairs.
 
 =over 4
 
