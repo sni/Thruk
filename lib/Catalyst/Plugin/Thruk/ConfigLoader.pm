@@ -226,7 +226,8 @@ sub switch_user {
 ## no critic
 ######################################
 
-=head2 setup( )
+=head2 setup()
+
 =cut
 
 sub setup {
@@ -264,6 +265,7 @@ sub setup {
 }
 
 =head2 load_config
+
 =cut
 
 sub load_config {
@@ -280,6 +282,7 @@ sub load_config {
 }
 
 =head2 find_files
+
 =cut
 
 sub find_files {
@@ -302,6 +305,7 @@ sub find_files {
 }
 
 =head2 get_config_path
+
 =cut
 
 sub get_config_path {
@@ -325,6 +329,7 @@ sub get_config_path {
 }
 
 =head2 get_config_local_suffix
+
 =cut
 
 sub get_config_local_suffix {
@@ -358,7 +363,9 @@ sub _fix_syntax {
 }
 
 =head2 config_substitutions( $value )
+
 =cut
+
 sub config_substitutions {
     my $c    = shift;
     my $subs = $c->config->{ 'Plugin::ConfigLoader' }->{ substitutions }
