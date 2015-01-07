@@ -6,7 +6,9 @@ use Data::Dumper;
 use File::Temp qw/tempfile/;
 
 # ensure that all config options are well documented
+my $src = 'https://raw.githubusercontent.com/sni/thruk_org/master/documentation/configuration.asciidoc';
 
+plan skip_all => 'skipped by TEST_SKIP_DOC_COVERAGE' if $ENV{TEST_SKIP_DOC_COVERAGE};
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 # read our config and enable everything
@@ -44,7 +46,7 @@ sub get_thruk_conf {
 sub get_docs {
     my($fh, $tmpfile) = tempfile();
     my $doc_header;
-    `wget https://raw.githubusercontent.com/sni/thruk_org/master/documentation/configuration.asciidoc -q -O $tmpfile`;
+    `wget $src -q -O $tmpfile`;
     open(my $ph, '<', $tmpfile) or die("cannot open ".$tmpfile.": ".$!);
     while(<$ph>) {
     my $line = $_;
