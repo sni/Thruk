@@ -147,7 +147,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '14'  => {
             'mess' => 'missing backend configuration',
-            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please read the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_configuration_2">setup instructions</a>.',
+            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please read the <a href="http://www.thruk.org/documentation/install.html" target="_blank">setup instructions</a>.',
             'code' => 500, # internal server error
         },
         '15'  => {
