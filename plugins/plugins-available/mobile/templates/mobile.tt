@@ -12,6 +12,7 @@
       var current_backend_states = undefined;
       var failed_backends        = 0;
       var program_starts         = undefined;
+      var escape_html_tags       = [% escape_html_tags %];
       document.cookie            = "thruk_mobile=1; path="+cookie_path+";";
       var strict_passive_mode    = [% strict_passive_mode %];
     </script>

@@ -641,7 +641,11 @@ function show_common_extinfo(typ, data, comments) {
         } else {
             jQuery('#'+typ+'_check_type').text('PASSIVE');
         }
-        jQuery('#'+typ+'_plugin_output').text(obj.plugin_output);
+        if(escape_html_tags) {
+            jQuery('#'+typ+'_plugin_output').text(obj.plugin_output);
+        } else {
+            jQuery('#'+typ+'_plugin_output').html(obj.plugin_output);
+        }
         if(obj.current_notification_number > 0) {
             jQuery('#'+typ+'_current_notification_number').text(obj.current_notification_number);
         } else {

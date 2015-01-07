@@ -10,6 +10,7 @@ next:
           - increased logcache int size
           - Mobile:
             - updated jquery mobile
+            - respect escape_html_tags setting from cgi.cfg
             - old themes have been replaced with 2 new ones
           - Reporting:
             - support url reports from external urls
