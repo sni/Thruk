@@ -100,11 +100,6 @@ local_install: local_patches
 	cp -p docs/naglint.3 ${DESTDIR}${MANDIR}/man3/naglint.3
 	cp -p docs/nagexp.3 ${DESTDIR}${MANDIR}/man3/nagexp.3
 	############################################################################
-	# docs
-	mkdir -p                     ${DESTDIR}${DATADIR}/docs
-	cp -p docs/FAQ.html          ${DESTDIR}${DATADIR}/docs/FAQ.html
-	cp -p docs/THRUK_MANUAL.html ${DESTDIR}${DATADIR}/docs/THRUK_MANUAL.html
-	############################################################################
 	# logfiles
 	mkdir -p ${DESTDIR}${LOGDIR}
 	############################################################################
