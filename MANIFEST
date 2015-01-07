@@ -1631,6 +1631,7 @@ themes/themes-available/Classic/images/tacdisabled.png
 themes/themes-available/Classic/images/tacdiverse.png
 themes/themes-available/Classic/images/tacenabled.png
 themes/themes-available/Classic/images/thermcrit.png
+themes/themes-available/Classic/images/thermgrey.png
 themes/themes-available/Classic/images/thermok.png
 themes/themes-available/Classic/images/thermwarn.png
 themes/themes-available/Classic/images/tick.png
@@ -1794,6 +1795,7 @@ themes/themes-available/Exfoliation/images/tacdisabled.png
 themes/themes-available/Exfoliation/images/tacdiverse.png
 themes/themes-available/Exfoliation/images/tacenabled.png
 themes/themes-available/Exfoliation/images/thermcrit.png
+themes/themes-available/Exfoliation/images/thermgrey.png
 themes/themes-available/Exfoliation/images/thermok.png
 themes/themes-available/Exfoliation/images/thermwarn.png
 themes/themes-available/Exfoliation/images/tick.png
@@ -2009,6 +2011,7 @@ themes/themes-available/Nuvola/images/tacdisabled.png
 themes/themes-available/Nuvola/images/tacdiverse.png
 themes/themes-available/Nuvola/images/tacenabled.png
 themes/themes-available/Nuvola/images/thermcrit.png
+themes/themes-available/Nuvola/images/thermgrey.png
 themes/themes-available/Nuvola/images/thermok.png
 themes/themes-available/Nuvola/images/thermwarn.png
 themes/themes-available/Nuvola/images/tick.png
@@ -2219,6 +2222,7 @@ themes/themes-available/Thruk/images/tacdisabled.png
 themes/themes-available/Thruk/images/tacdiverse.png
 themes/themes-available/Thruk/images/tacenabled.png
 themes/themes-available/Thruk/images/thermcrit.png
+themes/themes-available/Thruk/images/thermgrey.png
 themes/themes-available/Thruk/images/thermok.png
 themes/themes-available/Thruk/images/thermwarn.png
 themes/themes-available/Thruk/images/tick.png
@@ -2369,6 +2373,7 @@ themes/themes-available/Vautour/images/tacdiverse.jpg
 themes/themes-available/Vautour/images/tacdiverse.png
 themes/themes-available/Vautour/images/tacenabled.png
 themes/themes-available/Vautour/images/thermcrit.png
+themes/themes-available/Vautour/images/thermgrey.png
 themes/themes-available/Vautour/images/thermok.png
 themes/themes-available/Vautour/images/thermwarn.png
 themes/themes-available/Vautour/images/tick.png
@@ -2624,6 +2629,7 @@ themes/themes-available/Wakizashi/images/tacdiverse.jpg
 themes/themes-available/Wakizashi/images/tacdiverse.png
 themes/themes-available/Wakizashi/images/tacenabled.png
 themes/themes-available/Wakizashi/images/thermcrit.png
+themes/themes-available/Wakizashi/images/thermgrey.png
 themes/themes-available/Wakizashi/images/thermok.png
 themes/themes-available/Wakizashi/images/thermwarn.png
 themes/themes-available/Wakizashi/images/tick.png
