@@ -2074,6 +2074,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             var pic = 'thermok.png';
             if(state == 1) { var pic = 'thermwarn.png'; }
             if(state == 2) { var pic = 'thermcrit.png'; }
+            if(state == 4) { var pic = 'thermgrey.png'; }
             perc = Math.round(perc / 100 * size);
             var warn_perc_min = null;
             if(d.warn_min != '' && d.warn_min > d.min) {

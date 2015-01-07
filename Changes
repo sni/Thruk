@@ -8,6 +8,7 @@ next:
           - added new configuration setting: max_process_memory
           - add excel export permanent link (awiddersheim)
           - increased logcache int size
+          - use grey performance bars on extinfo page
           - Mobile:
             - updated jquery mobile
             - respect escape_html_tags setting from cgi.cfg

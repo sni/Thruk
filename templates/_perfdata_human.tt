@@ -33,7 +33,7 @@
         [% IF has_min  %]<td class="[% class %]">[% format_number(p.min) %]</td>[% END %]
         [% IF has_max  %]<td class="[% class %]">[% format_number(p.max) %]</td>[% END %]
         <td class="[% class %]">
-          [% PROCESS _perfdata_table write="true" perfdata=p.orig state=0 %]
+          [% PROCESS _perfdata_table write="true" perfdata=p.orig state=4 %]
         </td>
       </tr>
       [% END %]
