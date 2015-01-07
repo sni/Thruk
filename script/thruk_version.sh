@@ -66,13 +66,10 @@ if [ -n "$newversion" -a "$newversion" != "$VERSION" ]; then
                 -i script/naglint        \
                 -i script/nagexp         \
                 -i script/nagimp
-    sed -r "s/_"$VERSION"_/_$newversion\_/" -i docs/THRUK_MANUAL.txt
     sed -r "s/\-$VERSION\./-$newversion\./" \
                 -i MANIFEST                 \
-                -i docs/THRUK_MANUAL.txt    \
                 -i root/thruk/startup.html  \
                 -i .gitignore
-    sed -r "s/\-$VERSION\-/-$newversion\-/" -i docs/THRUK_MANUAL.txt
     sed -r "s/$VERSION\s*not yet released/$newversion     $fulldate/"    -i Changes
     sed -r "s/^next:/$newversion     $fulldate/"                         -i Changes
     sed -r "s/$newversion\s*not yet released/$newversion     $fulldate/" -i Changes
@@ -96,8 +93,6 @@ yes n | perl Makefile.PL > /dev/null
 git add                     \
     MANIFEST                \
     support/thruk.spec      \
-    docs/THRUK_MANUAL.txt   \
-    docs/THRUK_MANUAL.html  \
     lib/Thruk.pm            \
     docs/thruk.3            \
     root/thruk/startup.html \
@@ -108,5 +103,4 @@ git add                     \
     script/nagexp           \
     script/nagimp           \
     .gitignore
-git checkout docs/FAQ.html
 git status

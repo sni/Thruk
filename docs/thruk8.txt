@@ -24,9 +24,7 @@ You probably have to change the backend configuration in
 
 NOTES
 -----
-Complete documentation is online at <http://www.thruk.org/documentation.html>
-
-And in /usr/share/thruk/docs/THRUK_MANUAL.txt
+Complete documentation is online at <http://www.thruk.org/documentation/>
 
 
 BUGS
