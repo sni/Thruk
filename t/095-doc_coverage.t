@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 use Config::General;
 use Data::Dumper;
+use File::Temp qw/tempfile/;
 
 # ensure that all config options are well documented
 
@@ -41,17 +42,20 @@ sub get_thruk_conf {
 
 
 sub get_docs {
+    my($fh, $tmpfile) = tempfile();
     my $doc_header;
-    open(my $ph, '<', 'docs/THRUK_MANUAL.txt') or die("cannot open docs/THRUK_MANUAL.txt");
+    `wget https://raw.githubusercontent.com/sni/thruk_org/master/documentation/configuration.asciidoc -q -O $tmpfile`;
+    open(my $ph, '<', $tmpfile) or die("cannot open ".$tmpfile.": ".$!);
     while(<$ph>) {
     my $line = $_;
-        if($line =~ m/^====\s+(.*)$/) {
+        if($line =~ m/^===\s+(.*)$/) {
             $doc_header->{$1} = 1;
         }
-        if($line =~ m/^===\s+(.*)$/) {
+        if($line =~ m/^==\s+(.*)$/) {
             $doc_header->{$1} = 1;
         }
     }
     close($ph);
+    unlink($tmpfile);
     return $doc_header;
 }
