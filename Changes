@@ -9,6 +9,8 @@ next:
           - add excel export permanent link (awiddersheim)
           - increased logcache int size
           - use grey performance bars on extinfo page
+          - Business Process:
+            - fix zoom on large business objects
           - Mobile:
             - updated jquery mobile
             - respect escape_html_tags setting from cgi.cfg

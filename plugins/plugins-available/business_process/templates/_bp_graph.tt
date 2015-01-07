@@ -1,9 +1,11 @@
 ﻿[% USE date %]
-<div style="position: relative;">
-<a href="#" onclick="bp_zoom_rel(0.05)" class="bp_container_zoom plus">+</a>
-<a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus">-</a>
+<div style="position: absolute; height: 1px; width: 100%;">
+  <a href="#" onclick="bp_zoom_rel(0.05)" class="bp_container_zoom plus" style="z-index: 5;">+</a>
+  <a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus" style="z-index: 5;">-</a>
+</div>
+<div style="position: relative; height: 100%; width: 100%; overflow: auto; z-index: 1;">
 <div id='zoom[% bp.id %]'>
-<div id='container[% bp.id %]' class="bp_container" style="height: 2000px; width: 2000px;">
+<div id='container[% bp.id %]' class="bp_container" style="height: 100%; width: 100%;">
   <div id='inner_container[% bp.id %]' class="bp_container_inner">
     [% FOREACH n IN bp.nodes %]
     [% statusClass = 'statusUNKNOWN' %]
