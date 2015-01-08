@@ -33,13 +33,14 @@ Requires:      perl logrotate gd wget
 # sles specific requirements
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
-%else
-# rhel specific requirements
-Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-fonts-common
-# rhel6 specific requirements
-%if 0%{?el6}
-Requires: cronie
 %endif
+# rhel5 specific requirements
+%if 0%{?el5}
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
+%endif
+# >rhel6 specific requirements
+%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext cronie dejavu-fonts-common
 %endif
 
 %description
