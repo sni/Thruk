@@ -41,9 +41,9 @@ panorama_default_view
 notes.txt
 themes/themes-available/*/images/logos/*.png
 .~ko-*-perllint~
-root/thruk/javascript/all_in_one-1.84.js
-themes/themes-available/Thruk/stylesheets/all_in_one-1.84.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.84.css
+root/thruk/javascript/all_in_one-1.86.js
+themes/themes-available/Thruk/stylesheets/all_in_one-1.86.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.86.css
 test_hook.sh
 bp/*.tbp
 bp/*.tbp.edit

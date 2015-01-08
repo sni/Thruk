@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-next:
+1.86     Thu Jan  8 14:10:41 CET 2015
           - add custom action menu
           - livestatus performance improvements
           - updated jquery to 1.11.1
