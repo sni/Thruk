@@ -443,7 +443,9 @@ switch for various internal catalyst sub wether to gather statistics or not
 =cut
 sub use_stats {
     my($c) = @_;
-    if($c->stash->{'no_more_profile'})  { return(0); }
+    eval { # newer Catalyst::Middleware::Stash versions die if called to early
+        if($c->stash->{'no_more_profile'})  { return(0); }
+    };
     if($ENV{'THRUK_PERFORMANCE_DEBUG'}) { return(1); }
     return(0);
 }
