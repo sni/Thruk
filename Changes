@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+next:
+          - Reporting:
+            - add option for maximum number of concurrent reports
+
 1.86     Thu Jan  8 14:10:41 CET 2015
           - add custom action menu
           - livestatus performance improvements

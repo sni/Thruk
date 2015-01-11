@@ -321,6 +321,7 @@ sub generate_report {
     $Thruk::Utils::PDF::ctype         = 'html2pdf';
 
     $c->stash->{'tmp_files_to_delete'} = [];
+    set_waiting($c, $nr, 0);
 
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
@@ -329,21 +330,12 @@ sub generate_report {
         return;
     }
 
-    # do we have errors in our options, ex.: missing required fields?
-    if(defined $options->{'var'}->{'opt_errors'}) {
-        print STDERR join("\n", @{$options->{'var'}->{'opt_errors'}});
-        exit 1;
-    }
-
-    Thruk::Utils::set_user($c, $options->{'user'});
-    $ENV{'REMOTE_USER'} = $options->{'user'};
-
     Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
     my $attachment = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
     $c->stash->{'attachment'} = $attachment;
 
     # report is already beeing generated
-    if($options->{'var'}->{'is_running'} > 0) {
+    if($options->{'var'}->{'is_running'} > 0 && $options->{'var'}->{'is_running'} != $$) {
         while($options->{'var'}->{'is_running'} > 0) {
             if(kill(0, $options->{'var'}->{'is_running'}) != 1) {
                 unlink($attachment);
@@ -357,8 +349,22 @@ sub generate_report {
         }
     }
 
+    Thruk::Utils::set_user($c, $options->{'user'});
+    $ENV{'REMOTE_USER'} = $options->{'user'};
+    $c->stash->{'remote_user'} = $options->{'user'};
+
     # clean up first
     clean_report_tmp_files($c, $nr);
+
+    # update report runtime data
+    set_running($c, $nr, $$, time());
+
+    # do we have errors in our options, ex.: missing required fields?
+    if(defined $options->{'var'}->{'opt_errors'}) {
+        set_running($c, $nr, 0, undef, time());
+        print STDERR join("\n", @{$options->{'var'}->{'opt_errors'}});
+        exit 1;
+    }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 1, 'starting') if $ENV{'THRUK_JOB_DIR'};
 
@@ -366,9 +372,6 @@ sub generate_report {
     my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     open(my $fh, '>', $logfile);
     Thruk::Utils::IO::close($fh, $logfile);
-
-    # update report runtime data
-    set_running($c, $nr, $$, time());
 
     if(defined $options->{'backends'}) {
         $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];
@@ -396,6 +399,7 @@ sub generate_report {
                 my $error = "Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n";
                 Thruk::Utils::CLI::_error($error);
                 $Thruk::Utils::Reports::error = $error;
+                _check_for_waiting_reports($c);
                 return $c->detach('/error/index/13');
             }
         }
@@ -437,6 +441,7 @@ sub generate_report {
     if($@) {
         Thruk::Utils::CLI::_error($@);
         $Thruk::Utils::Reports::error = $@;
+        _check_for_waiting_reports($c);
         return $c->detach('/error/index/13');
     }
 
@@ -450,6 +455,7 @@ sub generate_report {
     if($@) {
         Thruk::Utils::CLI::_error($@);
         $Thruk::Utils::Reports::error = $@;
+        _check_for_waiting_reports($c);
         return $c->detach('/error/index/13');
     }
 
@@ -488,6 +494,7 @@ sub generate_report {
             my $error = "Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n";
             Thruk::Utils::CLI::_error($error);
             $Thruk::Utils::Reports::error = $error;
+            _check_for_waiting_reports($c);
             return $c->detach('/error/index/13');
         }
     }
@@ -503,8 +510,68 @@ sub generate_report {
     $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = $orig_stat_ttl;
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
+
+    if($options->{'var'}->{'send_mails_next_time'}) {
+        set_waiting($c, $nr, 0, 0);
+        Thruk::Utils::Reports::report_send($c, $nr);
+    }
+
+    _check_for_waiting_reports($c);
     return $attachment;
 }
+
+##########################################################
+
+=head2 queue_report_if_busy
+
+  queue_report_if_busy($c, $nr, [$callback])
+
+queue a report for update with optional callback which will be run
+after the report is ready.
+Queue will only be used if all slots are busy.
+returns 1 if queue is used or undef if there are free slots.
+
+=cut
+sub queue_report_if_busy {
+    my($c, $nr, $with_mails) = @_;
+
+    my $options = _read_report_file($c, $nr);
+    if(!$c->stash->{'remote_user'}) {
+        $c->stash->{'remote_user'} = $options->{'user'};
+    }
+    my $max_concurrent_reports = $c->config->{'Thruk::Plugin::Reports2'}->{'max_concurrent_reports'} || 2;
+    my($running, $waiting) = get_running_reports_number($c);
+    return if $running < $max_concurrent_reports;
+    set_waiting($c, $nr, time(), $with_mails);
+    return 1;
+}
+
+##########################################################
+
+=head2 generate_report_background
+
+  generate_report_background($c, $report_nr, $with_mails, $report, $force)
+
+start a report in the background and queue it if all slots are busy
+
+=cut
+sub generate_report_background {
+    my($c, $report_nr, $with_mails, $report, $force) = @_;
+
+    # using queue
+    if(!$force and Thruk::Utils::Reports::queue_report_if_busy($c, $report_nr)) {
+        return;
+    }
+
+    $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr) unless $report;
+    Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
+    my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
+    Thruk::Utils::Reports::clean_report_tmp_files($c, $report_nr);
+    my $job = Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1, 'no_shell' => 1 });
+    Thruk::Utils::Reports::set_running($c, $report_nr, undef, undef, undef, $job);
+    return;
+}
+
 
 ##########################################################
 
@@ -600,6 +667,34 @@ sub set_running {
     $options->{'var'}->{'job'}        = $job   if defined $job;
     $options->{'var'}->{'attachment'} = $Thruk::Utils::PDF::attachment if $Thruk::Utils::PDF::attachment;
     $options->{'var'}->{'ctype'}      = $Thruk::Utils::PDF::ctype      if $Thruk::Utils::PDF::ctype;
+    _report_save($c, $nr, $options);
+    return;
+}
+
+##########################################################
+
+=head2 set_waiting
+
+  set_waiting($c, $nr, $with_mails)
+
+set waiting status of job
+
+=cut
+sub set_waiting {
+    my($c, $nr, $waiting, $with_mails) = @_;
+    my $options = _read_report_file($c, $nr);
+    if($waiting) {
+        $options->{'var'}->{'is_waiting'} = $waiting;
+    } else {
+        delete $options->{'var'}->{'is_waiting'};
+    }
+    if(defined $with_mails) {
+        if($with_mails) {
+            $options->{'var'}->{'send_mails_next_time'} = 1;
+        } else {
+            delete $options->{'var'}->{'send_mails_next_time'};
+        }
+    }
     _report_save($c, $nr, $options);
     return;
 }
@@ -721,6 +816,30 @@ sub add_report_defaults {
 }
 
 ##########################################################
+
+=head2 get_running_reports_number
+
+  get_running_reports_number($c)
+
+returns list ($running, $waiting)
+
+=cut
+sub get_running_reports_number {
+    my($c) = @_;
+    my $reports = get_report_list($c, 1);
+    my $running = 0;
+    my $waiting = 0;
+    for my $r (@{$reports}) {
+        if($r->{'var'}->{'is_waiting'}) {
+            $waiting++
+        } elsif($r->{'var'}->{'is_running'} > 0) {
+            $running++
+        }
+    }
+    return($running, $waiting);
+}
+
+##########################################################
 sub _get_locale_name {
     my($c, $template) = @_;
     return Thruk::Utils::get_template_variable($c, 'reports/locale/'.$template, 'locale_name');
@@ -789,7 +908,7 @@ sub _read_report_file {
     my($c, $nr, $rdata, $noauth, $simple) = @_;
     $Thruk::Utils::CLI::c = $c;
 
-    unless($nr =~ m/^\d+$/mx) {
+    if(!defined $nr || $nr !~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");
         $c->stash->{errorMessage}       = "report does not exist";
         $c->stash->{errorDescription}   = "not a valid report number.";
@@ -1099,6 +1218,21 @@ sub _initialize_report_templates {
             for my $key (keys %{$overrides}) {
                 $Thruk::Utils::Reports::Render::locale->{$key} = $overrides->{$key};
             }
+        }
+    }
+    return;
+}
+
+##########################################################
+sub _check_for_waiting_reports {
+    my($c) = @_;
+    my $reports = get_report_list($c, 1);
+    for my $r (@{$reports}) {
+        if($r->{'var'}->{'is_waiting'}) {
+            set_waiting($c, $r->{'nr'}, 0);
+            delete $c->config->{'no_external_job_forks'};
+            generate_report_background($c, $r->{'nr'}, undef, $r, 1);
+            return;
         }
     }
     return;

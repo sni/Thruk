@@ -842,18 +842,25 @@ sub _cmd_report {
     # breaks tests on centos 6/7
     #eval {
         if($mail eq 'mail') {
-            if(Thruk::Utils::Reports::report_send($c, $nr)) {
+            if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
+                $output = "report queued successfully\n";
+            }
+            elsif(Thruk::Utils::Reports::report_send($c, $nr)) {
                 $output = "mail send successfully\n";
             } else {
                 return("cannot send mail\n", 1)
             }
         } else {
-            my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
-            if(defined $report_file and -f $report_file) {
-                $output = read_file($report_file);
+            if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {
+                $output = "report queued successfully\n";
             } else {
-                my $errors = read_file($logfile);
-                return("generating report failed:\n".$errors, 1)
+                my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+                if(defined $report_file and -f $report_file) {
+                    $output = read_file($report_file);
+                } else {
+                    my $errors = read_file($logfile);
+                    return("generating report failed:\n".$errors, 1)
+                }
             }
         }
     #};

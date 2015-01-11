@@ -66,7 +66,9 @@
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
     <td class="status [% rowclass %] report_progessbar">
-      [% IF r.failed %]
+      [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
+        queued
+      [% ELSIF r.failed %]
         <span style="color: red;">failed</span>
       [% ELSE %]
         [% IF r.var.start_time %]
@@ -97,7 +99,7 @@
       [% END %]
     </td>
     <td class="status [% rowclass %]">
-      [% IF r.var.is_running != 0 %]
+      [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=cancel" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/stop.png' border="0" alt='Cancel Report' title='Cancel Report' width=16 height=16></a>
       [% ELSE %]
         <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
