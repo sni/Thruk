@@ -325,7 +325,7 @@ sub report_cancel {
     if($report) {
         if($report->{'var'}->{'is_waiting'}) {
             Thruk::Utils::Reports::set_running($c, $report_nr, 0);
-            Thruk::Utils::Reports::set_waiting($c, $report_nr, 0);
+            Thruk::Utils::Reports::set_waiting($c, $report_nr, 0, 0);
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report canceled' });
         }
         elsif($report->{'var'}->{'job'}) {
