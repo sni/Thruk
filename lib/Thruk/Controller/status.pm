@@ -328,6 +328,7 @@ sub _process_details_page {
     my( $self, $c ) = @_;
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
@@ -335,7 +336,7 @@ sub _process_details_page {
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
@@ -428,6 +429,7 @@ sub _process_hostdetails_page {
     my( $self, $c ) = @_;
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
@@ -435,7 +437,7 @@ sub _process_hostdetails_page {
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
@@ -893,8 +895,10 @@ sub _process_combined_page {
     my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
     return if $c->stash->{'has_error'};
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';;
 
     # services
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
@@ -946,7 +950,6 @@ sub _process_combined_page {
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
