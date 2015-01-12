@@ -299,6 +299,7 @@ sub get_status {
         $remaining = $2;
         $message   = $3;
     }
+    if($percent eq "") { $percent = 0; }
 
     return($is_running,$time,$percent,$message,$forward,$remaining);
 }
