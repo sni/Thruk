@@ -6,6 +6,7 @@ next:
             - add option for maximum number of concurrent reports
             - start reports from cron serial instead of all at once
           - Bug Fixes
+            - fixed error in cluetip library by shiping a new version
             - fixed problem with shadownaemon in non-xs env
             - fixed error: Can't use string xxx as an ARRAY
 
