@@ -609,7 +609,8 @@ sub _set_enabled_backends {
             $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
         }
         if(ref $backends eq '') {
-            @{$backends} = split(/\s*,\s*/mx, $backends);
+            my @tmp = split(/\s*,\s*/mx, $backends);
+            $backends = \@tmp;
         }
         for my $b (@{$backends}) {
             # peer key can be name too

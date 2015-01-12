@@ -6,6 +6,7 @@ next:
             - add option for maximum number of concurrent reports
           - Bug Fixes
             - fixed problem with shadownaemon in non-xs env
+            - fixed error: Can't use string xxx as an ARRAY
 
 1.86     Thu Jan  8 14:10:41 CET 2015
           - add custom action menu
