@@ -446,7 +446,7 @@ sub use_stats {
     eval { # newer Catalyst::Middleware::Stash versions die if called to early
         if($c->stash->{'no_more_profile'})  { return(0); }
     };
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) { return(1); }
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1) { return(1); }
     return(0);
 }
 
