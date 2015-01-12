@@ -22,6 +22,7 @@ use MIME::Lite;
 use File::Copy;
 use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
+use File::Temp qw/tempfile/;
 
 ##########################################################
 
@@ -559,16 +560,16 @@ sub generate_report_background {
     my($c, $report_nr, $with_mails, $report, $force) = @_;
 
     # using queue
-    if(!$force and Thruk::Utils::Reports::queue_report_if_busy($c, $report_nr)) {
+    if(!$force && queue_report_if_busy($c, $report_nr)) {
         return;
     }
 
-    $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr) unless $report;
-    Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
-    my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
-    Thruk::Utils::Reports::clean_report_tmp_files($c, $report_nr);
+    $report = _read_report_file($c, $report_nr) unless $report;
+    set_running($c, $report_nr, -1, time());
+    my $cmd = _get_report_cmd($c, $report->{'nr'}, 0);
+    clean_report_tmp_files($c, $report_nr);
     my $job = Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1, 'no_shell' => 1 });
-    Thruk::Utils::Reports::set_running($c, $report_nr, undef, undef, undef, $job);
+    set_running($c, $report_nr, undef, undef, undef, $job);
     return;
 }
 
@@ -630,7 +631,7 @@ sub update_cron_file {
     my($c) = @_;
 
     # gather reporting send types from all reports
-    my $cron_entries = [];
+    my $cron_entries = {};
     my $reports = get_report_list($c, 1);
     @{$reports} = sort { $a->{'nr'} <=> $b->{'nr'} } @{$reports};
     for my $r (@{$reports}) {
@@ -640,11 +641,29 @@ sub update_cron_file {
         $mail = 1 if ($r->{'to'} or $r->{'cc'});
         for my $st (@{$r->{'send_types'}}) {
             $st->{'nr'} = $r->{'nr'};
-            push @{$cron_entries}, [_get_cron_entry($c, $r, $st, $mail)];
+            my $cmd = _get_report_cmd($c, $r->{'nr'}, $mail);
+            my $time = Thruk::Utils::get_cron_time_entry($st);
+            $cron_entries->{$time} = [] unless defined $cron_entries->{$time};
+            push @{$cron_entries->{$time}}, $cmd;
         }
     }
-
-    Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
+    my $max_concurrent_reports = $c->config->{'Thruk::Plugin::Reports2'}->{'max_concurrent_reports'} || 2;
+    my $combined = [];
+    my $dir = $c->config->{'var_path'}."/reports/";
+    unlink(glob($dir.'/*.sh'));
+    for my $time (keys %{$cron_entries}) {
+        if(scalar @{$cron_entries->{$time}} <= $max_concurrent_reports) {
+            for my $entry (@{$cron_entries->{$time}}) {
+                push @{$combined}, [$time, $entry];
+            }
+        } else {
+            my(undef, $filename) = tempfile( 'reportXXXXX', DIR => $dir, SUFFIX => '.sh');
+            Thruk::Utils::IO::write($filename, "#!/bin/sh\n\n".join("\n", @{$cron_entries->{$time}}));
+            push @{$combined}, [$time, 'cd '.$c->config->{'project_root'}.' && '.$filename];
+            Thruk::Utils::IO::ensure_permissions(oct(770), $filename);
+        }
+    }
+    Thruk::Utils::update_cron_file($c, 'reports', $combined);
     return 1;
 }
 
@@ -843,15 +862,6 @@ sub get_running_reports_number {
 sub _get_locale_name {
     my($c, $template) = @_;
     return Thruk::Utils::get_template_variable($c, 'reports/locale/'.$template, 'locale_name');
-}
-
-##########################################################
-sub _get_cron_entry {
-    my($c, $report, $st, $mail) = @_;
-
-    my $cmd = _get_report_cmd($c, $report, $mail);
-    my $time = Thruk::Utils::get_cron_time_entry($st);
-    return($time, $cmd);
 }
 
 ##########################################################
@@ -1054,7 +1064,7 @@ sub _is_authorized_for_report {
 
 ##########################################################
 sub _get_report_cmd {
-    my($c, $report, $mail) = @_;
+    my($c, $nr, $mail) = @_;
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/',
                             $c->config->{'tmp_path'}.'/reports/');
     my $thruk_bin = $c->config->{'thruk_bin'};
@@ -1073,9 +1083,9 @@ sub _get_report_cmd {
                             $c->config->{'thruk_shell'},
                             $thruk_bin,
                             $type,
-                            $report->{'nr'},
+                            $nr,
                             $c->config->{'tmp_path'},
-                            $report->{'nr'},
+                            $nr,
                     );
     return $cmd;
 }
