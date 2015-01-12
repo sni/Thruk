@@ -324,6 +324,9 @@ sub generate_report {
     $c->stash->{'tmp_files_to_delete'} = [];
     set_waiting($c, $nr, 0);
 
+    # set waiting flag on queued reports
+    process_queue_file($c);
+
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
     unless(defined $options) {
@@ -523,9 +526,28 @@ sub generate_report {
 
 ##########################################################
 
+=head2 queue_report
+
+  queue_report($c, $nr, [$mail])
+
+queue a report for update.
+
+=cut
+sub queue_report {
+    my($c, $nr, $with_mails) = @_;
+    my $options = _read_report_file($c, $nr);
+    if(!$c->stash->{'remote_user'}) {
+        $c->stash->{'remote_user'} = $options->{'user'};
+    }
+    set_waiting($c, $nr, time(), $with_mails);
+    return 1;
+}
+
+##########################################################
+
 =head2 queue_report_if_busy
 
-  queue_report_if_busy($c, $nr, [$callback])
+  queue_report_if_busy($c, $nr, [$mail])
 
 queue a report for update with optional callback which will be run
 after the report is ready.
@@ -546,6 +568,36 @@ sub queue_report_if_busy {
     set_waiting($c, $nr, time(), $with_mails);
     return 1;
 }
+
+##########################################################
+
+=head2 process_queue_file
+
+  process_queue_file($c)
+
+read queue file and set waiting flag for all reports found.
+
+=cut
+sub process_queue_file {
+    my($c) = @_;
+    my $queue_file = $c->config->{'var_path'}."/reports/queue";
+    if(-e $queue_file) {
+        my(undef, $tmpfile) = tempfile();
+        move($queue_file, $tmpfile);
+        sleep(3);
+        my $queue = read_file($tmpfile);
+        unlink($tmpfile);
+        for my $line (split/\n/mx, $queue) {
+            if($line =~ m/^(report|reportmail)=(\d+)$/mx) {
+                my $nr   = $2;
+                my $mail = $1 eq 'reportmail' ? 1 : 0;
+                Thruk::Utils::Reports::queue_report($c, $nr, $mail);
+            }
+        }
+    }
+    return;
+}
+
 
 ##########################################################
 
@@ -657,6 +709,23 @@ sub update_cron_file {
                 push @{$combined}, [$time, $entry];
             }
         } else {
+            my $num = scalar @{$cron_entries->{$time}};
+            my $x   = 0;
+            my $queue_file = $c->config->{'var_path'}."/reports/queue";
+            for my $e (@{$cron_entries->{$time}}) {
+                if($x < $num - $max_concurrent_reports) {
+                    if($e =~ m|\-a\s+(report.*?=\d+)|mx) {
+                        $e = sprintf('cd %s && echo %s >> %s',
+                                        $c->config->{'project_root'},
+                                        $1,
+                                        $queue_file
+                                    );
+                    }
+                } else {
+                    $e = $e.' &';
+                }
+                $x++;
+            }
             my(undef, $filename) = tempfile( 'reportXXXXX', DIR => $dir, SUFFIX => '.sh');
             Thruk::Utils::IO::write($filename, "#!/bin/sh\n\n".join("\n", @{$cron_entries->{$time}}));
             push @{$combined}, [$time, 'cd '.$c->config->{'project_root'}.' && '.$filename];

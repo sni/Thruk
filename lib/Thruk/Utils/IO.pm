@@ -87,15 +87,16 @@ sub mkdir_r {
 
 =head2 write
 
-  write($path, $content, [ $mtime ])
+  write($path, $content, [ $mtime ], [ $append ])
 
 creates file and ensure permissions
 
 =cut
 
 sub write {
-    my($path,$content,$mtime) = @_;
-    open(my $fh, '>', $path) or die('cannot create file '.$path.': '.$!);
+    my($path,$content,$mtime,$append) = @_;
+    my $mode = $append ? '>>' : '>';
+    open(my $fh, $mode, $path) or die('cannot create file '.$path.': '.$!);
     print $fh $content;
     Thruk::Utils::IO::close($fh, $path) or die("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;

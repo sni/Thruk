@@ -841,6 +841,8 @@ sub _cmd_report {
     my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     # breaks tests on centos 6/7
     #eval {
+        # set waiting flag for queued reports, so the show up nicely in the gui
+        Thruk::Utils::Reports::process_queue_file($c);
         if($mail eq 'mail') {
             if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
                 $output = "report queued successfully\n";
