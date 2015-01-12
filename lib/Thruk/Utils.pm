@@ -1102,19 +1102,20 @@ sub store_user_data {
     }
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    open(my $fh, '>', $file.'.new') or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
+    my(undef, $tmpfile) = tempfile();
+    open(my $fh, '>', $tmpfile) or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$tmpfile.' : '.$! );
         return;
     };
     print $fh Dumper($data);
-    Thruk::Utils::IO::close($fh, $file.'.new');
+    Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $file);
 
     # update cached data
     $c->stash->{'user_data_cached'} = $data;
 
-    move($file.'.new', $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
+    move($tmpfile, $file) or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$tmpfile.' '.$file.': '.$! );
         return;
     };
 
@@ -1872,11 +1873,15 @@ sub write_data_file {
     # save some disk space
     local $Data::Dumper::Indent   = 1;
 
+    my(undef, $tmpfile) = tempfile();
+
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
-    open(my $fh, '>:encoding(UTF-8)', $filename) or confess('cannot write to '.$filename.": ".$!);
+    open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
     print $fh $d;
-    Thruk::Utils::IO::close($fh, $filename);
+    Thruk::Utils::IO::close($fh, $tmpfile);
+    Thruk::Utils::IO::ensure_permissions('file', $filename);
+    move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
 
     return;
 }
