@@ -1365,7 +1365,7 @@ sub _get_result_serial {
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_serial($function)");
 
-    if($use_shadow and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
+    if($Thruk::Backend::Pool::xs and $use_shadow and $function =~ m/^get_/mxo and $function ne 'get_logs' and $function ne 'send_command') {
         ($peers, $result, $type, $totalsize) = $self->_get_results_xs_pool($peers, $function, $arg);
     }
 

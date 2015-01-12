@@ -276,8 +276,9 @@ init thread connection pool
 =cut
 
 sub init_backend_thread_pool {
-    our($peer_order, $peers, $pool, $pool_size);
+    our($peer_order, $peers, $pool, $pool_size, $xs);
     return if defined $peers;
+    $xs = 0;
 
     #&timing_breakpoint('creating pool');
 
@@ -328,6 +329,7 @@ sub init_backend_thread_pool {
                 require Thruk::Utils::XS;
                 Thruk::Utils::XS->import();
                 $pool_size = 1; # no pool required when using xs caching
+                $xs        = 1;
             };
         }
     }
