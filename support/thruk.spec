@@ -28,6 +28,8 @@ Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd wget
+BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(File::Copy::Recursive)
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 # sles specific requirements
