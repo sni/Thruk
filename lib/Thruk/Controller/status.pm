@@ -1237,14 +1237,17 @@ sub _serveraction {
     }
 
     # replace macros
-    my $objs;
-    if($service) {
-        $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
-    } else {
-        $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
+    my $obj;
+    if($host || $service) {
+        my $objs;
+        if($service) {
+            $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
+        } else {
+            $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
+        }
+        $obj = $objs->[0];
+        return(1, 'no such object') unless $obj;
     }
-    my $obj = $objs->[0];
-    return(1, 'no such object') unless $obj;
 
     my $remote_user = $c->stash->{'remote_user'};
     my $macros      = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, skip_user => 1});

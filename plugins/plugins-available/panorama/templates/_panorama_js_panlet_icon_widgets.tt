@@ -2137,6 +2137,37 @@ TP.iconClickHandlerDo = function(id) {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
         }
     }
+    var action = link.match(/server:\/\/(.+)$/);
+    if(action && action[1]) {
+        var params = {
+            host:    panel.xdata.general.host,
+            service: panel.xdata.general.service,
+            link:    link,
+            token:   user_token
+        };
+        Ext.Ajax.request({
+            url:    '[% url_prefix %]cgi-bin/status.cgi?serveraction=1',
+            params:  params,
+            method: 'POST',
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(response.status == 0) {
+                        TP.Msg.msg("fail_message~~server action failed");
+                    } else {
+                        TP.Msg.msg("fail_message~~server action failed: "+response.status+' - '+response.statusText);
+                    }
+                } else {
+                    var data = TP.getResponse(undefined, response);
+                    if(data.rc == 0) {
+                        TP.Msg.msg("success_message~~"+data.msg);
+                    } else {
+                        TP.Msg.msg("fail_message~~"+data.msg);
+                    }
+                }
+            }
+        });
+        return(false);
+    }
     if(link) {
         panel.el.dom.href=link;
         panel.passClick = true;

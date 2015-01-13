@@ -876,6 +876,21 @@ TP.iconShowEditDialog = function(panel) {
                                 text:    'Refresh',
                                 icon:    '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                                 handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://refresh'}) }
+                            }, {
+                                text: 'Server Actions',
+                                icon: '[% url_prefix %]plugins/panorama/images/lightning_go.png',
+                                menu: [
+                                [% IF c.config.exists('action_menu_actions') %]
+                                [% FOREACH action = c.config.action_menu_actions.keys.sort %]
+                                {
+                                    text:    '[% action %]',
+                                    icon:    '[% url_prefix %]plugins/panorama/images/cog.png',
+                                    handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'server://[% action %]/'}) }
+                                }[% UNLESS loop.last %],[% END %]
+                                [% END %]
+                                [% END %]
+                                ],
+                                disabled: [% IF c.config.exists('action_menu_actions') %]false[% ELSE %]true[% END %]
                             }],
                             listeners: {
                                 afterrender: function(This, eOpts) {
