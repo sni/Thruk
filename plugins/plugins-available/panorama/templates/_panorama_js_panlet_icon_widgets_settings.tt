@@ -194,9 +194,27 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'fieldcontainer',
                     layout:     'table',
                     items: [{ xtype: 'label', text:  'x:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'x', width: 55, value: panel.xdata.layout.x, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(This.value, pos[1]); }} },
+                            { xtype: 'numberfield', name:  'x', width: 55, value: panel.xdata.layout.x, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    if(!panel.noMoreMoves) {
+                                        panel.noMoreMoves = true;
+                                        var y = Number(This.up('panel').getValues().y);
+                                        panel.setPosition(newValue, y);
+                                        panel.noMoreMoves = false;
+                                    }
+                                }
+                            }},
                             { xtype: 'label', text:  'y:', style: 'margin-left: 10px; margin-right: 2px;' },
-                            { xtype: 'numberfield', name:  'y', width: 55, value: panel.xdata.layout.y, listeners: { change: function(This) { var pos = panel.getPosition(); panel.setPosition(pos[0], This.value); }} },
+                            { xtype: 'numberfield', name:  'y', width: 55, value: panel.xdata.layout.y, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    if(!panel.noMoreMoves) {
+                                        panel.noMoreMoves = true;
+                                        var x = Number(This.up('panel').getValues().x);
+                                        panel.setPosition(x, newValue);
+                                        panel.noMoreMoves = false;
+                                    }
+                                }
+                            }},
                             { xtype: 'label', text: '(use cursor keys)', style: 'margin-left: 10px;', cls: 'form-hint' }
                     ]
                 }, {
@@ -1164,12 +1182,13 @@ TP.iconShowEditDialog = function(panel) {
                }
         ],
         listeners: {
-            afterRender: function () {
+            afterRender: function (This) {
+                var form = This.items.getAt(0).items.getAt(1).down('form').getForm();
                 this.nav = Ext.create('Ext.util.KeyNav', this.el, {
-                    'left':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]-1, pos[1]);   },
-                    'right': function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0]+1, pos[1]);   },
-                    'up':    function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]-1); },
-                    'down':  function(e){ var pos = panel.getPosition(); panel.setPosition(pos[0],   pos[1]+1); },
+                    'left':  function(e){ form.setValues({x: Number(form.getValues().x)-1}); },
+                    'right': function(e){ form.setValues({x: Number(form.getValues().x)+1}); },
+                    'up':    function(e){ form.setValues({y: Number(form.getValues().y)-1}); },
+                    'down':  function(e){ form.setValues({y: Number(form.getValues().y)+1}); },
                     ignoreInputFields: true,
                     scope: panel
                 });

@@ -568,7 +568,9 @@
                 /* prevents opening link after draging */
                 if(TP.isShift) {
                     var pos = el.getPosition();
+                    panel.noMoreMoves = true;
                     el.setPosition(TP.get_snap(pos[0], pos[1]));
+                    panel.noMoreMoves = false;
                 }
                 TP.isShift = false;
                 if(el.ddShadow) { el.ddShadow.dom.style.display = 'none'; }
