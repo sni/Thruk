@@ -397,7 +397,7 @@ sub _request {
             $data = decode_json($data_str);
         };
         if($@) {
-            _error(" -> decode failed: ".Dumper($response));
+            _error(" -> decode failed: ".Dumper($@, $data_str, $response));
             return(undef, $response);
         }
         _debug("   -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
