@@ -999,7 +999,7 @@ var TP = {
                         if(response.status == 0) {
                             TP.Msg.msg("fail_message~~refreshing status failed");
                         } else {
-                            TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText);
+                            TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText+'<br>please have a look at the server logfile.');
                         }
                     }
                 } else {
