@@ -123,8 +123,8 @@ a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-if [ /usr/sbin/systemctl ]; then
-    systemctl restart httpd
+if [ -x /usr/sbin/systemctl ]; then
+    /usr/sbin/systemctl restart httpd
 else
     /etc/init.d/httpd restart || /etc/init.d/httpd start
 fi
