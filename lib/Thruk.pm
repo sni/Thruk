@@ -443,11 +443,16 @@ switch for various internal catalyst sub wether to gather statistics or not
 =cut
 sub use_stats {
     my($c) = @_;
+    # save previous error, otherwise we would
+    # overwrite real error which has not yet been thrown
+    my $error = $@;
     eval { # newer Catalyst::Middleware::Stash versions die if called to early
-        if($c->stash->{'no_more_profile'})  { return(0); }
+        if($c->stash->{'no_more_profile'})  { return; }
     };
+    # restore original error
+    $@ = $error;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1) { return(1); }
-    return(0);
+    return;
 }
 
 ###################################################
