@@ -29,7 +29,6 @@ AutoReqProv:   no
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd wget
 BuildRequires: perl(ExtUtils::MakeMaker)
-BuildRequires: perl(File::Copy::Recursive)
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 # sles specific requirements
@@ -38,9 +37,11 @@ Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
 %else
 # >rhel6 specific requirements
 %if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+BuildRequires: perl(File::Copy::Recursive)
 Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext cronie dejavu-fonts-common
 %else
 # rhel5 specific requirements (centos support no el5 tag)
+BuildRequires: perl(File::Copy::Recursive)
 Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
 %endif
 %endif
