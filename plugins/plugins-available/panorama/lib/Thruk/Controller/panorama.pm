@@ -565,7 +565,13 @@ sub _task_textsave {
 ##########################################################
 sub _task_serveraction {
     my($self, $c) = @_;
-    my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
+    my($rc, $msg);
+    # if there is a dashboard in our parameters, make sure we have proper permissions
+    if($c->{'request'}->{'parameters'}->{'dashboard'} && !$self->_is_authorized_for_dashboard($c, $c->{'request'}->{'parameters'}->{'dashboard'})) {
+        ($rc, $msg) = (1, 'no permission for this dashboard');
+    } else {
+        ($rc, $msg) = Thruk::Utils::Status::serveraction($c);
+    }
     my $json = { 'rc' => $rc, 'msg' => $msg };
     $c->stash->{'json'} = $json;
     $self->_add_misc_details($c, 1);

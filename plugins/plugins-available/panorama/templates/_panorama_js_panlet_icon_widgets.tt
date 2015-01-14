@@ -2139,11 +2139,14 @@ TP.iconClickHandlerDo = function(id) {
     }
     var action = link.match(/server:\/\/(.+)$/);
     if(action && action[1]) {
+        var panel_id = panel.panel_id.replace(/^tabpan\-tab_/, '');
         var params = {
-            host:    panel.xdata.general.host,
-            service: panel.xdata.general.service,
-            link:    link,
-            token:   user_token
+            host:      panel.xdata.general.host,
+            service:   panel.xdata.general.service,
+            link:      link,
+            dashboard: panel_id,
+            icon:      id,
+            token:     user_token
         };
         Ext.Ajax.request({
             url:    '[% url_prefix %]cgi-bin/panorama.cgi?task=serveraction',
