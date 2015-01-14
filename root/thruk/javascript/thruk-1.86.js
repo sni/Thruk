@@ -1907,7 +1907,7 @@ function check_server_action(id, link, backend, host, service) {
                 href = link.getAttribute('orighref');
             } else {
                 link.setAttribute('orighref', ""+link.href);
-                href = link.href;
+                href = link.getAttribute('href');
             }
             jQuery.ajax({
                 url: url_prefix + 'cgi-bin/status.cgi?replacemacros=1',
