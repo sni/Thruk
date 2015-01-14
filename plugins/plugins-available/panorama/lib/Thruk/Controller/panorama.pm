@@ -186,6 +186,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'textsave') {
             return($self->_task_textsave($c));
         }
+        elsif($task eq 'serveraction') {
+            return($self->_task_serveraction($c));
+        }
     }
 
     # find images for preloader
@@ -557,6 +560,16 @@ sub _task_textsave {
     $c->stash->{text}         = $c->request->parameters->{'text'};
     $c->stash->{template}     = 'passthrough.tt';
     return;
+}
+
+##########################################################
+sub _task_serveraction {
+    my($self, $c) = @_;
+    my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
+    my $json = { 'rc' => $rc, 'msg' => $msg };
+    $c->stash->{'json'} = $json;
+    $self->_add_misc_details($c, 1);
+    return $c->forward('Thruk::View::JSON');
 }
 
 ##########################################################

@@ -2146,7 +2146,7 @@ TP.iconClickHandlerDo = function(id) {
             token:   user_token
         };
         Ext.Ajax.request({
-            url:    '[% url_prefix %]cgi-bin/status.cgi?serveraction=1',
+            url:    '[% url_prefix %]cgi-bin/panorama.cgi?task=serveraction',
             params:  params,
             method: 'POST',
             callback: function(options, success, response) {

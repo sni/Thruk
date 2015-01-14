@@ -59,7 +59,7 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
     }
 
     if($c->{'request'}->{'parameters'}->{'serveraction'}) {
-        my($rc, $msg) = $self->_serveraction($c);
+        my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
         my $json = { 'rc' => $rc, 'msg' => $msg };
         $c->stash->{'json'} = $json;
         return $c->forward('Thruk::View::JSON');
@@ -1208,64 +1208,6 @@ sub _process_verify_time {
     return;
 }
 
-##########################################################
-# run server action from custom action menu
-sub _serveraction {
-    my( $self, $c ) = @_;
-
-    return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
-
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
-    my $link    = $c->{'request'}->{'parameters'}->{'link'};
-
-    $link =~ m/^server:\/\/(.*)$/mx;
-    my $action = $1;
-    if(!$action) {
-        return(1, 'not a valid customaction url');
-    }
-
-    my @args = split(/\//mx, $action);
-    $action = shift @args;
-    if(!defined $c->config->{'action_menu_actions'}->{$action}) {
-        return(1, 'customaction '.$action.' is not defined');
-    }
-    my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
-    my $cmd = shift @cmdline;
-    if(!-x $cmd) {
-        return(1, $cmd.' is not executable');
-    }
-
-    # replace macros
-    my $obj;
-    if($host || $service) {
-        my $objs;
-        if($service) {
-            $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
-        } else {
-            $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
-        }
-        $obj = $objs->[0];
-        return(1, 'no such object') unless $obj;
-    }
-
-    my $remote_user = $c->stash->{'remote_user'};
-    my $macros      = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, skip_user => 1});
-    for my $arg (@cmdline, @args) {
-        my $rc;
-        ($arg, $rc) = $c->{'db'}->replace_macros($arg, {}, $macros);
-        $arg =~ s/\$REMOTE_USER\$/$remote_user/gmx;
-    }
-
-    my($rc, $output);
-    eval {
-        ($rc, $output) = Thruk::Utils::IO::cmd($c, [$cmd, @cmdline, @args]);
-    };
-    if($@) {
-        return('1', $@);
-    }
-    return($rc, $output);
-}
 
 ##########################################################
 # replace macros in given string for a host/service
