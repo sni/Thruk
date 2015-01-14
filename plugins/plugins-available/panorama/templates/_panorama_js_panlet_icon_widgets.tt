@@ -214,6 +214,11 @@
         }, win, []), delay);
 
         layout = this.xdata.layout;
+        if(layout.rotation) {
+            // animations with rotated elements results in wrong position,
+            // ex.: rotated shapes return wrong position on getPosition()
+            return;
+        }
         animated.to = {x:layout.x, y:layout.y};
         this.animate(animated);
     },
