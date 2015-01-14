@@ -913,6 +913,7 @@ sub get_custom_vars {
 
     return {} unless defined $data;
     return {} unless defined $data->{$prefix.'custom_variable_names'};
+    return {} unless defined $data->{$prefix.'custom_variable_values'};
 
     # merge custom variables into a hash
     my %hash;
