@@ -1534,7 +1534,7 @@ var TP = {
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
                         }
-                        else if(data[key] != ExtState[key]) {
+                        else if(!TP.JSONequals(ExtState[key], data[key])) {
                             /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             cp.set(key, cfg);
@@ -1600,6 +1600,26 @@ var TP = {
         while(TP.logHistory.length > 50000) {
             TP.logHistory.shift();
         }
+    },
+    JSONequals: function(str1, str2) {
+        if(!str1) {
+            return(false);
+        }
+        if(str2 != str1) {
+            if(str1.length != str2.length) {
+                return(false);
+            }
+            var dec1 = Ext.JSON.decode(str1);
+            var dec2 = Ext.JSON.decode(str2);
+            for(var key2 in dec1) {
+                var obj1 = dec1[key2]; if(Ext.isString(dec1[key2]) && dec1[key2].match(/^\{/)) { obj1 = Ext.JSON.decode(dec1[key2]); }
+                var obj2 = dec2[key2]; if(Ext.isString(dec2[key2]) && dec2[key2].match(/^\{/)) { obj2 = Ext.JSON.decode(dec2[key2]); }
+                if(!Object.my_equals(obj1, obj2)) {
+                    return(false);
+                }
+            }
+        }
+        return(true);
     }
 }
 TP.log('[global] starting');
