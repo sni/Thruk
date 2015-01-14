@@ -2162,7 +2162,9 @@ TP.iconClickHandlerDo = function(id) {
                 } else {
                     var data = TP.getResponse(undefined, response);
                     if(data.rc == 0) {
-                        TP.Msg.msg("success_message~~"+data.msg);
+                        if(data.msg != "") {
+                            TP.Msg.msg("success_message~~"+data.msg);
+                        }
                     } else {
                         TP.Msg.msg("fail_message~~"+data.msg);
                     }
