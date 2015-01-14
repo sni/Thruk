@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 358;
+    plan tests => 367;
 }
 
 BEGIN {
@@ -95,6 +95,7 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=userdata_images',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_shapes',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_sounds',
+    { url => '/thruk/cgi-bin/panorama.cgi?task=serveraction', post => { dashboard => '__DASHBOARD__', link => 'server://test' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_update', post => { nr => '__DASHBOARD__', action => 'remove' } },
 ];
 
