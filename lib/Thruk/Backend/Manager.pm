@@ -982,7 +982,7 @@ sub _get_replaced_string {
     my $rc  = 1;
     my $res = "";
     return($res, $rc) unless defined $string;
-    for my $block (split/(\$[\w\d_:]+\$)/mx, $string) {
+    for my $block (split/(\$[\w\d_:\-]+\$)/mx, $string) {
         next if $block eq '';
         if(substr($block,0,1) eq '$' and substr($block, -1) eq '$') {
             if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
