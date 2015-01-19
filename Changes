@@ -1,5 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - add option for default service filter
 
 1.86-2   Sun Jan 18 17:45:37 CET 2015
           - Reporting:

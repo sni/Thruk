@@ -304,6 +304,19 @@ sub classic_filter {
         $c->stash->{'has_service_filter'} = 1;
     }
 
+    # apply default filter
+    my $default_service_filter_op;
+    my $default_service_filter_val;
+    if($c->config->{'default_service_filter'}) {
+        $default_service_filter_op  = '~';
+        $default_service_filter_val = $c->config->{'default_service_filter'};
+        if($default_service_filter_val =~ m/^\!(.*)$/mx) {
+            $default_service_filter_op  = '!~';
+            $default_service_filter_val = $1;
+        }
+        push @servicefilter, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
+    }
+
     my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     my $hostgroupfilter    = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
     my $servicefilter      = Thruk::Utils::combine_filter( '-and', \@servicefilter );
@@ -365,6 +378,17 @@ sub classic_filter {
             'op'      => '=',
             };
         $c->stash->{'has_service_filter'} = 1;
+    }
+
+    # put our default filter into the search box
+    if($default_service_filter_op) {
+        push @{ $search->{'text_filter'} },
+            {
+            'val_pre' => '',
+            'type'    => 'service',
+            'value'   => $default_service_filter_val,
+            'op'      => $default_service_filter_op,
+            };
     }
 
     if($errors) {
