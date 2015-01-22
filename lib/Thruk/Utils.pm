@@ -1881,7 +1881,7 @@ sub write_data_file {
     open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $tmpfile);
-    Thruk::Utils::IO::ensure_permissions('file', $filename);
+    Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
     move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
 
     return;
