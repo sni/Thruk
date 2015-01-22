@@ -199,7 +199,6 @@ our %config = ('name'                   => 'Thruk',
               },
               'View::JSON'               => {
                   expose_stash       => 'json',
-                  json_driver        => 'XS',
               },
               'Plugin::Thruk::ConfigLoader' => { file => $project_root.'/thruk.conf' },
               'Plugin::Authentication' => {
