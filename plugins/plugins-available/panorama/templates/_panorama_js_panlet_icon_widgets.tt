@@ -2111,9 +2111,10 @@ TP.iconClickHandlerDo = function(id) {
     if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
         return;
     }
-    var link   = panel.xdata.link.link;
-    var newTab = panel.xdata.link.newtab;
+    var link    = panel.xdata.link.link;
+    var newTab  = panel.xdata.link.newtab;
     var special = link.match(/dashboard:\/\/(.+)$/);
+    var action  = link.match(/server:\/\/(.+)$/);
     if(special && special[1]) {
         link = undefined;
         if(special[1].match(/^\d+$/)) {
@@ -2142,7 +2143,6 @@ TP.iconClickHandlerDo = function(id) {
             TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
         }
     }
-    var action = link.match(/server:\/\/(.+)$/);
     if(action && action[1]) {
         var panel_id = panel.panel_id.replace(/^tabpan\-tab_/, '');
         var params = {

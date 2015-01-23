@@ -4,6 +4,7 @@ next:
           - add option for default service filter
           - Bug Fixes
             - fix icon logo path in statusmap parent view
+            - fixed links to other dashboards in panorama plugin
 
 1.86-2   Sun Jan 18 17:45:37 CET 2015
           - Reporting:
