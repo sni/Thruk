@@ -1030,16 +1030,24 @@ sub _set_host_macros {
     my $c = $Thruk::Backend::Manager::c;
 
     # normal host macros
-    $macros->{'$HOSTADDRESS$'}       = (defined $host->{'host_address'})         ? $host->{'host_address'}         : $host->{'address'};
-    $macros->{'$HOSTNAME$'}          = (defined $host->{'host_name'})            ? $host->{'host_name'}            : $host->{'name'};
-    $macros->{'$HOSTALIAS$'}         = (defined $host->{'host_alias'})           ? $host->{'host_alias'}           : $host->{'alias'};
-    $macros->{'$HOSTSTATEID$'}       = (defined $host->{'host_state'})           ? $host->{'host_state'}           : $host->{'state'};
-    $macros->{'$HOSTLATENCY$'}       = (defined $host->{'host_latency'})         ? $host->{'host_latency'}         : $host->{'latency'};
-    $macros->{'$HOSTOUTPUT$'}        = (defined $host->{'host_plugin_output'})   ? $host->{'host_plugin_output'}   : $host->{'plugin_output'};
-    $macros->{'$HOSTPERFDATA$'}      = (defined $host->{'host_perf_data'})       ? $host->{'host_perf_data'}       : $host->{'perf_data'};
-    $macros->{'$HOSTATTEMPT$'}       = (defined $host->{'host_current_attempt'}) ? $host->{'host_current_attempt'} : $host->{'current_attempt'};
-    $macros->{'$HOSTCHECKCOMMAND$'}  = (defined $host->{'host_check_command'})   ? $host->{'host_check_command'}   : $host->{'check_command'};
-    $macros->{'$HOSTSTATE$'}         = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
+    $macros->{'$HOSTADDRESS$'}        = (defined $host->{'host_address'})         ? $host->{'host_address'}         : $host->{'address'};
+    $macros->{'$HOSTNAME$'}           = (defined $host->{'host_name'})            ? $host->{'host_name'}            : $host->{'name'};
+    $macros->{'$HOSTALIAS$'}          = (defined $host->{'host_alias'})           ? $host->{'host_alias'}           : $host->{'alias'};
+    $macros->{'$HOSTSTATEID$'}        = (defined $host->{'host_state'})           ? $host->{'host_state'}           : $host->{'state'};
+    $macros->{'$HOSTLATENCY$'}        = (defined $host->{'host_latency'})         ? $host->{'host_latency'}         : $host->{'latency'};
+    $macros->{'$HOSTOUTPUT$'}         = (defined $host->{'host_plugin_output'})   ? $host->{'host_plugin_output'}   : $host->{'plugin_output'};
+    $macros->{'$HOSTPERFDATA$'}       = (defined $host->{'host_perf_data'})       ? $host->{'host_perf_data'}       : $host->{'perf_data'};
+    $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'}) ? $host->{'host_current_attempt'} : $host->{'current_attempt'};
+    $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})   ? $host->{'host_check_command'}   : $host->{'check_command'};
+    $macros->{'$HOSTSTATE$'}          = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
+    $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
+    $macros->{'$HOSTBACKENDNAME$'}    = '';
+    $macros->{'$HOSTBACKENDADDRESS$'} = '';
+    my $peer = $self->get_peer_by_key($host->{'peer_key'});
+    if($peer) {
+        $macros->{'$HOSTBACKENDNAME$'}    = (defined $peer->{'name'})             ? $peer->{'name'}                 : '';
+        $macros->{'$HOSTBACKENDADDRESS$'} = (defined $peer->{'addr'})             ? $peer->{'addr'}                 : '';
+    }
 
     my $prefix = (defined $host->{'host_custom_variable_names'}) ? 'host_' : '';
 
@@ -1068,14 +1076,20 @@ sub _set_service_macros {
     my $c = $Thruk::Backend::Manager::c;
 
     # normal service macros
-    $macros->{'$SERVICEDESC$'}         = $service->{'description'};
-    $macros->{'$SERVICESTATEID$'}      = $service->{'state'};
-    $macros->{'$SERVICESTATE$'}        = $c->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
-    $macros->{'$SERVICELATENCY$'}      = $service->{'latency'};
-    $macros->{'$SERVICEOUTPUT$'}       = $service->{'plugin_output'};
-    $macros->{'$SERVICEPERFDATA$'}     = $service->{'perf_data'};
-    $macros->{'$SERVICEATTEMPT$'}      = $service->{'current_attempt'};
-    $macros->{'$SERVICECHECKCOMMAND$'} = $service->{'check_command'};
+    $macros->{'$SERVICEDESC$'}           = $service->{'description'};
+    $macros->{'$SERVICESTATEID$'}        = $service->{'state'};
+    $macros->{'$SERVICESTATE$'}          = $c->config->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
+    $macros->{'$SERVICELATENCY$'}        = $service->{'latency'};
+    $macros->{'$SERVICEOUTPUT$'}         = $service->{'plugin_output'};
+    $macros->{'$SERVICEPERFDATA$'}       = $service->{'perf_data'};
+    $macros->{'$SERVICEATTEMPT$'}        = $service->{'current_attempt'};
+    $macros->{'$SERVICECHECKCOMMAND$'}   = $service->{'check_command'};
+    $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
+    my $peer = $self->get_peer_by_key($service->{'peer_key'});
+    if($peer) {
+        $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
+        $macros->{'$SERVICEBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
+    }
 
     # service user macros...
     my $x = 0;

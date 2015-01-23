@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add option for default service filter
+          - add host/servce connection macros
           - Bug Fixes
             - fix icon logo path in statusmap parent view
             - fixed links to other dashboards in panorama plugin
