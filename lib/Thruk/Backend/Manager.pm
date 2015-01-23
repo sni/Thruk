@@ -1043,7 +1043,7 @@ sub _set_host_macros {
     $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
-    my $peer = $self->get_peer_by_key($host->{'peer_key'});
+    my $peer = defined $host->{'peer_key'} ? $self->get_peer_by_key($host->{'peer_key'}) : undef;
     if($peer) {
         $macros->{'$HOSTBACKENDNAME$'}    = (defined $peer->{'name'})             ? $peer->{'name'}                 : '';
         $macros->{'$HOSTBACKENDADDRESS$'} = (defined $peer->{'addr'})             ? $peer->{'addr'}                 : '';
@@ -1085,7 +1085,7 @@ sub _set_service_macros {
     $macros->{'$SERVICEATTEMPT$'}        = $service->{'current_attempt'};
     $macros->{'$SERVICECHECKCOMMAND$'}   = $service->{'check_command'};
     $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
-    my $peer = $self->get_peer_by_key($service->{'peer_key'});
+    my $peer = defined $service->{'peer_key'} ? $self->get_peer_by_key($service->{'peer_key'}) : undef;
     if($peer) {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
         $macros->{'$SERVICEBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
