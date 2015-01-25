@@ -37,6 +37,9 @@ thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/x86_64-linux-gnu-thread
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Crypt/SSLeay/SSLeay.so /usr/lib/x86_64-linux-gnu
 # Debian 8 32
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i486-linux-gnu-thread-multi-64int/auto/Crypt/SSLeay/SSLeay.so /lib/i386-linux-gnu:/usr/lib/i386-linux-gnu
+thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i586-linux-gnu-thread-multi-64int/auto/DBD/mysql/mysql.so /usr/lib/i386-linux-gnu
+thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i586-linux-gnu-thread-multi-64int/auto/GD/GD.so /usr/lib/i386-linux-gnu
+thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i586-linux-gnu-thread-multi-64int/auto/XML/Parser/Expat/Expat.so /lib/i386-linux-gnu
 # Debian 8 64
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Crypt/SSLeay/SSLeay.so /lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
 # Ubuntu 10.04 32
