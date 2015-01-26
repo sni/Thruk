@@ -6,6 +6,7 @@ next:
           - Bug Fixes
             - fix icon logo path in statusmap parent view
             - fixed links to other dashboards in panorama plugin
+            - fix listing all backends with object config when using http backends
 
 1.86-2   Sun Jan 18 17:45:37 CET 2015
           - Reporting:

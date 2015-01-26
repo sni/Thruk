@@ -1179,17 +1179,18 @@ sub _do_on_peers {
     if($function eq 'get_processinfo') {
         # update configtool settings
         # and update last_program_starts
+        # (set in Thruk::Utils::CLI::_cmd_raw)
         for my $key (keys %{$result}) {
             my $res = $result->{$key}->{$key};
-            next unless defined $res;
-            next unless defined $res->{'configtool'};
-            my $peer = $self->get_peer_by_key($key);
-            # do not overwrite local configuration with remote configtool settings
-            # only use remote if the local one is empty
-            next if(scalar keys %{$peer->{'configtool'}} != 0 and !$peer->{'configtool'}->{'remote'});
-            $peer->{'configtool'} = { remote => 1 };
-            for my $attr (keys %{$res->{'configtool'}}) {
-                $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
+            if($res && $res->{'configtool'}) {
+                my $peer = $self->get_peer_by_key($key);
+                # do not overwrite local configuration with remote configtool settings
+                # only use remote if the local one is empty
+                next if(scalar keys %{$peer->{'configtool'}} != 0 && !$peer->{'configtool'}->{'remote'});
+                $peer->{'configtool'} = { remote => 1 };
+                for my $attr (keys %{$res->{'configtool'}}) {
+                    $peer->{'configtool'}->{$attr} = $res->{'configtool'}->{$attr};
+                }
             }
         }
     }
@@ -1321,17 +1322,17 @@ sub select_backends {
     # send query to selected backends
     my $get_results_for = [];
     for my $peer ( @{ $self->get_peers() } ) {
+        if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
+            #$c->log->debug("skipped peer (down): ".$peer->{'name'});
+            next;
+        }
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
                 #$c->log->debug("skipped peer (undef): ".$peer->{'name'});
                 next;
             }
         }
-        if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-            #$c->log->debug("skipped peer (down): ".$peer->{'name'});
-            next;
-        }
-        unless($peer->{'enabled'} == 1) {
+        elsif($peer->{'enabled'} != 1) {
             #$c->log->debug("skipped peer (disabled): ".$peer->{'name'});
             next;
         }
