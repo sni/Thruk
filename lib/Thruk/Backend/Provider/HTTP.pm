@@ -848,8 +848,12 @@ sub _clean_code_refs {
 ##########################################################
 sub _format_response_error {
     my($response) = @_;
+    my $message = "";
+    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)\-\->|sxm) {
+        $message = "\n".$1;
+    }
     if(defined $response) {
-        return $response->code().': '.$response->message();
+        return $response->code().': '.$response->message().$message;
     } else {
         return Dumper($response);
     }
