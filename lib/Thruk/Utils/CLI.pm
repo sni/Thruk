@@ -1050,7 +1050,8 @@ sub _cmd_url {
     }
 
     if($url =~ m|^\w+\.cgi|gmx) {
-        $url = '/thruk/cgi-bin/'.$url;
+        my $product = $c->config->{'product_prefix'} || 'thruk';
+        $url = '/'.$product.'/cgi-bin/'.$url;
     }
     my @res = request_url($c, $url);
 
