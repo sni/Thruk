@@ -154,6 +154,7 @@ sub get_search_from_param {
         }
     }
 
+    # add other filter
     for my $key (keys %{$globals}) {
         if(defined $globals->{$key} and $globals->{$key} ne '') {
             my $text_filter = {
@@ -163,6 +164,17 @@ sub get_search_from_param {
                 op      => '=',
             };
             push @{ $search->{'text_filter'} }, $text_filter;
+        }
+    }
+
+    # put our default filter into the search box
+    if($c->{'request'}->{'parameters'}->{'add_default_service_filter'}) {
+        my $default_service_text_filter = set_default_filter($c);
+        if($default_service_text_filter) {
+            # not for service searches
+            if(!defined $c->{'request'}->{'parameters'}->{'s0_value'} || $c->{'request'}->{'parameters'}->{'s0_value'} !~ m/^se:/mx) {
+                unshift @{ $search->{'text_filter'} }, $default_service_text_filter;
+            }
         }
     }
 
@@ -305,17 +317,7 @@ sub classic_filter {
     }
 
     # apply default filter
-    my $default_service_filter_op;
-    my $default_service_filter_val;
-    if($c->config->{'default_service_filter'}) {
-        $default_service_filter_op  = '~';
-        $default_service_filter_val = $c->config->{'default_service_filter'};
-        if($default_service_filter_val =~ m/^\!(.*)$/mx) {
-            $default_service_filter_op  = '!~';
-            $default_service_filter_val = $1;
-        }
-        push @servicefilter, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
-    }
+    my $default_service_text_filter = set_default_filter($c, \@servicefilter);
 
     my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     my $hostgroupfilter    = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
@@ -351,6 +353,11 @@ sub classic_filter {
         'text_filter'                   => [],
     };
 
+    # put our default filter into the search box
+    if($default_service_text_filter) {
+        push @{ $search->{'text_filter'} }, $default_service_text_filter;
+    }
+
     if( $host ne '' ) {
         push @{ $search->{'text_filter'} },
             {
@@ -378,17 +385,6 @@ sub classic_filter {
             'op'      => '=',
             };
         $c->stash->{'has_service_filter'} = 1;
-    }
-
-    # put our default filter into the search box
-    if($default_service_filter_op) {
-        push @{ $search->{'text_filter'} },
-            {
-            'val_pre' => '',
-            'type'    => 'service',
-            'value'   => $default_service_filter_val,
-            'op'      => $default_service_filter_op,
-            };
     }
 
     if($errors) {
@@ -2014,6 +2010,40 @@ sub serveraction {
         return('1', $@);
     }
     return($rc, $output);
+}
+
+##############################################
+
+=head2 set_default_filter
+
+  set_default_filter($c, [$servicefilter])
+
+checks if a global default service should be users. Returns textfilter
+and optionally adds that filter to a list of servicefilters.
+
+=cut
+sub set_default_filter {
+    my($c, $servicefilter ) = @_;
+    my $default_service_filter_op;
+    my $default_service_filter_val;
+    if($c->config->{'default_service_filter'}) {
+        $default_service_filter_op  = '~';
+        $default_service_filter_val = $c->config->{'default_service_filter'};
+        if($default_service_filter_val =~ m/^\!(.*)$/mx) {
+            $default_service_filter_op  = '!~';
+            $default_service_filter_val = $1;
+        }
+        if($servicefilter) {
+            push @{$servicefilter}, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
+        }
+    }
+    my $default_service_text_filter = {
+            'val_pre' => '',
+            'type'    => 'service',
+            'value'   => $default_service_filter_val,
+            'op'      => $default_service_filter_op,
+    };
+    return($default_service_text_filter);
 }
 
 ##############################################

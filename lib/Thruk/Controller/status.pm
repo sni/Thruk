@@ -235,7 +235,9 @@ sub _process_raw_request {
             push @json, { 'name' => 'hosts', 'data'=> $hosts };
         }
         if( $c->config->{ajax_search_services} ) {
-            $services = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
+            Thruk::Utils::Status::set_default_filter($c, \@servicefilter);
+            $services = $c->{'db'}->get_service_names( filter => @servicefilter );
             push @json, { 'name' => 'services', 'data' => $services };
         }
         if( $c->config->{ajax_search_timeperiods} ) {
@@ -383,6 +385,7 @@ sub _process_details_page {
         if($c->stash->{'num_hosts'} > 0) {
             my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail'});
             $url =~ s/&amp;/&/gmx;
+            Thruk::Utils::set_message( $c, 'info_message', 'No services found for this filter, redirecting to host view.' );
             return $c->response->redirect($url)
         }
     }
