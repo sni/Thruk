@@ -206,7 +206,7 @@ sub save_bp_objects {
             $c->{'db'}->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
         }
-        Thruk::Utils::wait_after_reload($c, $pkey, $time);
+        Thruk::Utils::wait_after_reload($c, $pkey, $time-1);
     } else {
         # discard file
         unlink($filename);
