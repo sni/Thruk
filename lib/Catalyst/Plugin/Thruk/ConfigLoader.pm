@@ -95,8 +95,8 @@ sub _do_finalize_config {
         $addon_name =~ s/\/+$//gmx;
         $addon_name =~ s/^.*\///gmx;
 
-        # does the plugin directory exist?
-        if(! -d $config->{home}.'/root/thruk/plugins/' and -w $config->{home}.'/root/thruk' ) {
+        # does the plugin directory exist? (only when running as normal user)
+        if($> != 0 and ! -d $config->{home}.'/root/thruk/plugins/' and -w $config->{home}.'/root/thruk' ) {
             CORE::mkdir($config->{home}.'/root/thruk/plugins');
         }
 
