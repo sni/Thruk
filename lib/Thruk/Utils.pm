@@ -1755,14 +1755,13 @@ wait up to 60 seconds till the core responds
 
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
-    sleep(3);
     $pkey = $c->stash->{'param_backend'} unless $pkey;
+    if(!$pkey) { sleep 5; }
 
     # wait until core responds again
     my $start    = time();
     my $procinfo = {};
     while($start > time() - 60) {
-        sleep(2);
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
@@ -1771,14 +1770,16 @@ sub wait_after_reload {
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if(!$@ and !$c->stash->{'failed_backends'}->{$pkey}) {
-            if($pkey and $time and $procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
-                # not yet restarted
-            } else {
-                last;
-            }
+        if($@ or $c->stash->{'failed_backends'}->{$pkey}) {
+            $c->log->info('still waiting for core reload for '.(time()-$start).'s: '.($@ || $c->stash->{'failed_backends'}->{$pkey}));
         }
-        $c->log->debug('waiting for core reload for '.($start-time()).'s: '.$@);
+        elsif($pkey and $time and $procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
+            # not yet restarted
+            $c->log->info('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+        } else {
+            last;
+        }
+        sleep(1);
     }
     return;
 }
