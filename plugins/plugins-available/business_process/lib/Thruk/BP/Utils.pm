@@ -5,6 +5,7 @@ use warnings;
 use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
+use File::Slurp qw/read_file/;
 use Thruk::BP::Components::BP;
 
 use Carp;
@@ -174,8 +175,8 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = md5_hex($filename);
-    my $old_hex = md5_hex($file);
+    my $new_hex = md5_hex(read_file($filename));
+    my $old_hex = md5_hex(read_file($file));
 
     # check if something changed
     if($new_hex ne $old_hex) {
@@ -184,29 +185,28 @@ sub save_bp_objects {
             return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         # and reload
+        my $time = time();
+        my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+        my $peer = $c->{'db'}->get_peer_by_key($name);
+        my $pkey = $peer->peer_key();
+        die("no backend found by name ".$name) unless $peer;
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         if($cmd) {
             local $SIG{CHLD}='';
             local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
             my $out = `$cmd 2>&1`;
             ($rc, $msg) = ($?, $out);
-            Thruk::Utils::wait_after_reload($c);
         }
         elsif($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
             # restart by livestatus
-            my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-            my $peer = $c->{'db'}->get_peer_by_key($name);
-            my $pkey = $peer->peer_key();
-            die("no backend found by name ".$name) unless $peer;
-            my $time = time();
             my $options = {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
             };
             $c->{'db'}->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
-            Thruk::Utils::wait_after_reload($c, $pkey, $time);
         }
+        Thruk::Utils::wait_after_reload($c, $pkey, $time);
     } else {
         # discard file
         unlink($filename);
