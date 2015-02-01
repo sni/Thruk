@@ -194,7 +194,7 @@ sub save_bp_objects {
             my $peers = $c->{'db'}->get_peers();
             if(scalar @{$peers} > 1) {
                 if($c->{'db'}->{'local_hosts'} && scalar keys %{$c->{'db'}->{'local_hosts'}} == 1) {
-                    my @keys = keys %{$c->{'db'}->{'local_hosts'};
+                    my @keys = keys %{$c->{'db'}->{'local_hosts'}};
                     $peer = $c->{'db'}->get_peer_by_key($keys[0]);
                 } else {
                     die("must set result_backend in thruk_local.conf when using multiple backends");
