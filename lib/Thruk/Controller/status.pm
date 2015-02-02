@@ -237,7 +237,7 @@ sub _process_raw_request {
         if( $c->config->{ajax_search_services} ) {
             my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
             Thruk::Utils::Status::set_default_filter($c, \@servicefilter);
-            $services = $c->{'db'}->get_service_names( filter => @servicefilter );
+            $services = $c->{'db'}->get_service_names( filter => \@servicefilter );
             push @json, { 'name' => 'services', 'data' => $services };
         }
         if( $c->config->{ajax_search_timeperiods} ) {
