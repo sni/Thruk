@@ -186,24 +186,7 @@ sub save_bp_objects {
         }
         # and reload
         my $time = time();
-        my $peer;
-        if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
-            $peer = $c->{'db'}->get_peer_by_key($c->config->{'Thruk::Plugin::BP'}->{'result_backend'});
-            die("no backend found by name ".$c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) unless $peer;
-        } else {
-            my $peers = $c->{'db'}->get_peers();
-            if(scalar @{$peers} > 1) {
-                if($c->{'db'}->{'local_hosts'} && scalar keys %{$c->{'db'}->{'local_hosts'}} == 1) {
-                    my @keys = keys %{$c->{'db'}->{'local_hosts'}};
-                    $peer = $c->{'db'}->get_peer_by_key($keys[0]);
-                } else {
-                    die("must set result_backend in thruk_local.conf when using multiple backends");
-                }
-            }
-            $peer = $peers->[0];
-        }
-        die("no backend found") unless $peer;
-        my $pkey = $peer->peer_key();
+        my $pkey;
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         if($cmd) {
             local $SIG{CHLD}='';
@@ -213,6 +196,9 @@ sub save_bp_objects {
         }
         elsif($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
             # restart by livestatus
+            my $peer = $c->{'db'}->get_peer_by_key($c->config->{'Thruk::Plugin::BP'}->{'result_backend'});
+            die("no backend found by name ".$c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) unless $peer;
+            $pkey = $peer->peer_key();
             my $options = {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
                 'backend' => [ $pkey ],
@@ -220,7 +206,7 @@ sub save_bp_objects {
             $c->{'db'}->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
         }
-        Thruk::Utils::wait_after_reload($c, $pkey, $time-1);
+        Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if $rc == 0;
     } else {
         # discard file
         unlink($filename);

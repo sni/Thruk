@@ -1756,11 +1756,12 @@ wait up to 60 seconds till the core responds
 sub wait_after_reload {
     my($c, $pkey, $time) = @_;
     $pkey = $c->stash->{'param_backend'} unless $pkey;
-    if(!$pkey) { sleep 5; }
+    if(!$pkey && !$time) { sleep 5; }
 
     # wait until core responds again
     my $start    = time();
     my $procinfo = {};
+    my $done     = 0;
     while($start > time() - 60) {
         $procinfo = {};
         eval {
@@ -1770,16 +1771,42 @@ sub wait_after_reload {
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if($@ or $c->stash->{'failed_backends'}->{$pkey}) {
-            $c->log->info('still waiting for core reload for '.(time()-$start).'s: '.($@ || $c->stash->{'failed_backends'}->{$pkey}));
+        if($@) {
+            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
         }
-        elsif($pkey and $time and $procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
+        elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
+            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
+        }
+        elsif($pkey and $time) {
             # not yet restarted
-            $c->log->info('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+            if($procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
+                $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+            } else {
+                $done = 1;
+                last;
+            }
+        }
+        elsif($time) {
+            my $newest_core = 0;
+            if($procinfo) {
+                for my $key (keys %{$procinfo}) {
+                    if($procinfo->{$key}->{'program_start'} > $newest_core) { $newest_core = $procinfo->{$key}->{'program_start'}; }
+                }
+                if($newest_core > $time) {
+                    $done = 1;
+                    last;
+                } else {
+                    $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
+                }
+            }
         } else {
+            $done = 1;
             last;
         }
         sleep(1);
+    }
+    if(!$done) {
+        $c->log->error('waiting for core reload failed');
     }
     return;
 }
