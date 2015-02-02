@@ -1169,6 +1169,7 @@ t/090-io.t
 t/091-moose.t
 t/092-clean_debug.t
 t/092-stash-config.t
+t/092-thruk-view-json.t
 t/092-todo.t
 t/093-manifest.t
 t/094-template_encoding.t
