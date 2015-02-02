@@ -175,7 +175,7 @@ sub _process_comments_page {
             'host'    => $c->stash->{'hostcomments'},
             'service' => $c->stash->{'servicecomments'},
         };
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
     return 1;
 }
@@ -224,7 +224,7 @@ sub _process_downtimes_page {
             'host'    => $c->stash->{'hostdowntimes'},
             'service' => $c->stash->{'servicedowntimes'},
         };
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
     return 1;
 }

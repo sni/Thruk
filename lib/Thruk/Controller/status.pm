@@ -409,7 +409,7 @@ sub _process_details_page {
             }
         }
         $c->stash->{'json'} = $services;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -494,7 +494,7 @@ sub _process_hostdetails_page {
             }
         }
         $c->stash->{'json'} = $hosts;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
@@ -966,7 +966,7 @@ sub _process_combined_page {
             'hosts'    => $hosts,
             'services' => $services,
         };
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     # set audio file to play
@@ -1046,7 +1046,7 @@ sub _process_perfmap_page {
             }
         }
         $c->stash->{'json'} = $data;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     # sort things?
@@ -1207,7 +1207,7 @@ sub _process_verify_time {
 
     my $json = { 'verified' => $verified, 'error' => $error };
     $c->stash->{'json'} = $json;
-    $c->forward('Thruk::View::JSON');
+    $c->forward('Thruk::Thruk::View::JSON');
     return;
 }
 

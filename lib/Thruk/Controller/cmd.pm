@@ -266,7 +266,7 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 
     if($c->{'request'}->{'parameters'}->{'json'} and $c->stash->{'form_errors'}) {
         $c->stash->{'json'} = {'success' => 0, errors => $c->stash->{'form_errors'} };
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     return 1;
@@ -483,7 +483,7 @@ sub _redirect_or_success {
         return if $just_return;
         if($c->{'request'}->{'parameters'}->{'json'}) {
             $c->stash->{'json'} = {'success' => 1};
-            return $c->detach('View::JSON');
+            return $c->detach('Thruk::View::JSON');
         }
         else {
             $c->response->redirect($referer);
@@ -493,7 +493,7 @@ sub _redirect_or_success {
         return if $just_return;
         if($c->{'request'}->{'parameters'}->{'json'}) {
             $c->stash->{'json'} = {'success' => 1};
-            return $c->detach('View::JSON');
+            return $c->detach('Thruk::View::JSON');
         }
         $c->stash->{template} = 'cmd_success.tt';
     }
