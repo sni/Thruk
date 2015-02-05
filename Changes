@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fix using comma separated backend list in CLI tool
+
 1.86-3   Thu Jan 29 19:57:35 CET 2015
           - add option for default service filter
           - add host/servce connection macros

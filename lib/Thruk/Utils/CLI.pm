@@ -54,6 +54,15 @@ sub new {
     };
     bless $self, $class;
 
+    # backends can be comma separated
+    if($options->{'backends'}) {
+        my @backends;
+        for my $b (@{$options->{'backends'}}) {
+            push @backends, split(/\s*,\s*/mx, $b);
+        }
+        $options->{'backends'} = \@backends;
+    }
+
     # set some env defaults
     $ENV{'THRUK_SRC'}        = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
