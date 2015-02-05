@@ -516,7 +516,7 @@ sub wait_for_job {
         return;
     }
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
-    alarm(60);
+    alarm(120);
     eval {
         while(Thruk::Utils::External::_is_running($jobdir)) {
             sleep(1);
@@ -524,7 +524,7 @@ sub wait_for_job {
     };
     alarm(0);
     my $end  = time();
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds') or diag(Dumper(`find $jobdir/ -ls -exec cat {} \\;`));
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds') or diag(Dumper("ps:\n".`ps -efl`."\njobs:\n".`find $jobdir/ -ls -exec cat {} \\;`));
     return;
 }
 
