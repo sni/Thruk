@@ -151,11 +151,11 @@ sub init {
         }
     }
 
+    # read rc file, must be read every time, otherwise key_sort is not defined
+    $self->read_rc_file();
+
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
-
-    # read rc file
-    $self->read_rc_file();
 
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
