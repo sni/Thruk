@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]plugins/panorama/extjs-4.1.1/resources/css/ext-all-gray.css">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %]-[% filebranch %].css' />
     [% IF thruk_debug %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
     [% ELSE %]
@@ -28,7 +28,7 @@
         <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
     [% ELSE %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]_panorama.js"></script>
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
     [% END %]
 </head>
 <body onunload="TP.unload()">

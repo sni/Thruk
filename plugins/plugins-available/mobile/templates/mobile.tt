@@ -3,7 +3,7 @@
   <head>
     <title>[% title_prefix %]Mobile Thruk</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% version %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/mobile/mobile-[% version %]-[% filebranch %].css' />
     <link rel="stylesheet" href="[% url_prefix %]plugins/mobile/jqm/jquery.mobile-1.4.5.min.css" />
     <script src="[% url_prefix %]javascript/jquery-1.11.1.min.js"></script>
     <script type="application/x-javascript">
@@ -16,7 +16,7 @@
       document.cookie            = "thruk_mobile=1; path="+cookie_path+";";
       var strict_passive_mode    = [% strict_passive_mode %];
     </script>
-    <script src="[% url_prefix %]plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]plugins/mobile/mobile-[% version %]-[% filebranch %].js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]plugins/mobile/jquery.mobile.router.min.js"></script>
     <script src="[% url_prefix %]plugins/mobile/jqm/jquery.mobile-1.4.5.min.js"></script>
     <link rel="apple-touch-icon" href="[% url_prefix %]plugins/mobile/img/thruk.png" />

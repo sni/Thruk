@@ -26,6 +26,7 @@ our $VERSION = '1.86';
 my $project_root = home('Thruk::Config');
 my $branch       = '3';
 my $gitbranch    = get_git_name($project_root);
+my $filebranch   = $branch || 1;
 $branch          = $gitbranch if($gitbranch ne '' and $branch eq '');
 $branch          = $branch.'~'.$gitbranch if($gitbranch ne '' and $branch ne '');
 confess('got no project_root') unless $project_root;
@@ -101,6 +102,7 @@ our %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
+                                          'filebranch'     => $filebranch,
                                           'starttime'      => time(),
                                           'debug_details'  => get_debug_details(),
                                           'stacktrace'     => '',
@@ -155,7 +157,7 @@ our %config = ('name'                   => 'Thruk',
                                           },
                                           'all_in_one_javascript' => [
                                               'jquery-1.11.1.min.js',
-                                              'thruk-'.$VERSION.'.js',
+                                              'thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'cal/jscal2.js',
                                               'overlib.js',
                                               'jquery-fieldselection.js',
@@ -172,11 +174,11 @@ our %config = ('name'                   => 'Thruk',
                                           ],
                                           'jquery_ui' => '1.10.3',
                                           'all_in_one_javascript_panorama' => [
-                                              'thruk-'.$VERSION.'.js',
+                                              'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'plugins/panorama/ux/form/MultiSelect.js',
                                               'plugins/panorama/ux/form/ItemSelector.js',
                                               'plugins/panorama/sprintf.js',
-                                              'strftime-min.js',
+                                              'javascript/strftime-min.js',
                                           ],
                                       },
                   PRE_CHOMP          => 1,

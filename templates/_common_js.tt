@@ -21,7 +21,7 @@
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
 [%+ UNLESS thruk_debug %]
-<script type="text/javascript" src="[% url_prefix %]javascript/all_in_one-[% version %].js"></script>
+<script type="text/javascript" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %].js"></script>
 [% ELSE %]
   [% FOREACH jsfiles = all_in_one_javascript %]
     <script type="text/javascript" src="[% url_prefix %]javascript/[% jsfiles %]"></script>
