@@ -200,8 +200,6 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         push @{$c->stash->{preload_img}}, $i;
     }
 
-    $self->_js($c, 1) if $c->config->{'thruk_debug'};
-
     # clean up?
     if($c->request->parameters->{'clean'}) {
         my $data = Thruk::Utils::get_user_data($c);
@@ -209,6 +207,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         Thruk::Utils::store_user_data($c, $data);
         return $c->response->redirect("panorama.cgi");
     }
+
+    $self->_js($c, 1);
 
     $c->stash->{template} = 'panorama.tt';
     return 1;

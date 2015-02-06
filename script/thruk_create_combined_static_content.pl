@@ -59,7 +59,30 @@ if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::C
     }
 }
 
-if(!$js_required and !$css_required and !$skip_compress) {
+my @panorama_files;
+$newest = 0;
+for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}) {
+    my @s;
+    if($file =~ m/^plugins\//mx) {
+        my $tmp = $file;
+        $tmp =~ s|plugins/|root/thruk/plugins/|gmx;
+        @s = stat($tmp);
+        push @panorama_files, $tmp;
+    } else {
+        @s = stat('root/thruk/javascript/'.$file);
+        push @panorama_files, 'root/thruk/javascript/'.$file;
+    }
+    $newest = $s[9] if $newest < $s[9];
+}
+my $panorama_required = 1;
+if(-e 'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'_panorama.js') {
+    my @s = stat('root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'_panorama.js');
+    if($s[9] >= $newest) {
+        $panorama_required = 0;
+    }
+}
+
+if(!$js_required and !$css_required and !$skip_compress and !$panorama_required) {
     print STDERR "no update necessary\n";
     exit;
 }
@@ -78,8 +101,10 @@ my $cmds = [
     'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.js',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$Thruk::Config::VERSION.'.css',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.css',
+    'cat '.join(' ', @panorama_files).' > root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'_panorama.js',
 ];
-push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'.js' if $dos2unix;
+push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'.js'          if $dos2unix;
+push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'_panorama.js' if $dos2unix;
 for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
@@ -110,6 +135,7 @@ unlink('tmp.css');
 # try to minify js
 my $jsfiles = [
     'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js',
+    'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'_panorama.js',
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
