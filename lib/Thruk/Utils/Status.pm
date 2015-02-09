@@ -2024,18 +2024,15 @@ and optionally adds that filter to a list of servicefilters.
 =cut
 sub set_default_filter {
     my($c, $servicefilter ) = @_;
-    my $default_service_filter_op;
-    my $default_service_filter_val;
-    if($c->config->{'default_service_filter'}) {
-        $default_service_filter_op  = '~';
-        $default_service_filter_val = $c->config->{'default_service_filter'};
-        if($default_service_filter_val =~ m/^\!(.*)$/mx) {
-            $default_service_filter_op  = '!~';
-            $default_service_filter_val = $1;
-        }
-        if($servicefilter) {
-            push @{$servicefilter}, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
-        }
+    return unless $c->config->{'default_service_filter'};
+    my $default_service_filter_op  = '~';
+    my $default_service_filter_val = $c->config->{'default_service_filter'};
+    if($default_service_filter_val =~ m/^\!(.*)$/mx) {
+        $default_service_filter_op  = '!~';
+        $default_service_filter_val = $1;
+    }
+    if($servicefilter) {
+        push @{$servicefilter}, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
     }
     my $default_service_text_filter = {
             'val_pre' => '',
