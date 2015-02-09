@@ -93,6 +93,10 @@ TD.icon_column DIV.x-grid-cell-inner {
   padding-top:0px;
 }
 
+TD.icon_column IMG {
+  padding-right: 3px;
+}
+
 .clickable:hover {
   cursor: pointer;
 }

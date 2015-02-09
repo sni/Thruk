@@ -1927,6 +1927,10 @@ sub _task_dashboard_list {
             { 'header' => 'Actions',     width => 50,
                       xtype => 'actioncolumn',
                       items => [{
+                            icon => '../plugins/panorama/images/edit.png',
+                            handler => 'TP.dashboardActionHandler',
+                            action  => 'edit'
+                      }, {
                             icon => '../plugins/panorama/images/delete.png',
                             handler => 'TP.dashboardActionHandler',
                             action  => 'remove'

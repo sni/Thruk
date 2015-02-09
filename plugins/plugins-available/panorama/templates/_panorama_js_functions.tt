@@ -38,7 +38,7 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden) {
+    add_pantab: function(id, replace_id, hidden, callback) {
         var tabpan = Ext.getCmp('tabpan');
 
         if(TP.dashboardsSettingWindow) {
@@ -63,8 +63,7 @@ var TP = {
                 async: false,
                 callback: function(options, success, response) {
                     if(id != 'new') {
-                        id = String(id).replace(/^tabpan-tab_/, '');
-                        id = "tabpan-tab_"+id;
+                        id = TP.nr2TabId(id);
                     }
                     if(!success) {
                         if(response.status == 0) {
@@ -95,6 +94,7 @@ var TP = {
                             tabpan.saveState();
                         }
                     }
+                    if(callback) { callback(id); }
                 }
             });
             return;
@@ -141,6 +141,9 @@ var TP = {
 
         /* save tabs state */
         Ext.getCmp('tabpan').saveState();
+
+        /* any callbacks? */
+        if(callback) { callback(id); }
 
         /* return false to prevent newtab button being activated */
         return false;
@@ -1336,15 +1339,15 @@ var TP = {
     dashboardActionHandler: function(grid, rowIndex, colIndex, item, e, record, row, confirmed) {
         var action = item.action;
         var nr     = record.data.nr;
-        if(confirmed == undefined || confirmed == 0) {
-            Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
-                if (button === 'yes') {
-                    TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
-                }
-            });
-            return false;
-        }
         if(action == 'remove') {
+            if(confirmed == undefined || confirmed == 0) {
+                Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
+                    if (button === 'yes') {
+                        TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
+                    }
+                });
+                return false;
+            }
             Ext.Ajax.request({
                 url: 'panorama.cgi?task=dashboard_update',
                 method: 'POST',
@@ -1361,13 +1364,14 @@ var TP = {
                         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                             TP.dashboardsSettingGrid.loader.load();
                         }
-                        nr = String(nr).replace(/^tabpan-tab_/, '');
-                        nr = "tabpan-tab_"+nr;
-                        var tab = Ext.getCmp(nr);
+                        var tab = Ext.getCmp(TP.nr2TabId(nr));
                         if(tab) { tab.close(); }
                     }
                 }
             });
+        }
+        if(action == 'edit') {
+            TP.tabSettingsWindow(nr);
         }
         return false;
     },
@@ -1624,6 +1628,12 @@ var TP = {
     /* remove row from gridpanel */
     removeGridRow: function(grid, rowIndex, colIndex) {
         grid.getStore().removeAt(rowIndex);
+    },
+    /* convert number to tab id */
+    nr2TabId: function(nr) {
+        nr = String(nr).replace(/^tabpan-tab_/, '');
+        nr = "tabpan-tab_"+nr;
+        return(nr);
     }
 }
 TP.log('[global] starting');

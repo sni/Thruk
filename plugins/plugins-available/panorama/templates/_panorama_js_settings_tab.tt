@@ -130,22 +130,33 @@ TP.getExportTab = function(options) {
 
 
 /* show settings window */
-TP.tabSettingsWindow = function() {
+TP.tabSettingsWindow = function(nr, closeAfterEdit) {
     new Ext.LoadMask(Ext.getBody(), {
         msg: 'loading settings...',
         listeners: {
             show: function(mask, eOpts) {
                 window.setTimeout(function() {
-                    TP.tabSettingsWindowDo(mask);
+                    TP.tabSettingsWindowDo(mask, nr, closeAfterEdit);
                 }, 100);
             }
         }
     }).show();
 }
 
-TP.tabSettingsWindowDo = function(mask) {
+TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     var tabpan = Ext.getCmp('tabpan');
-    var tab    = tabpan.getActiveTab();
+    var tab;
+    if(nr != undefined) {
+        tab = Ext.getCmp(TP.nr2TabId(nr));
+        if(tab == undefined) {
+            TP.add_pantab(nr, undefined, true, function() {
+                TP.tabSettingsWindow(nr, true);
+            });
+            return(false);
+        }
+    } else {
+        tab = tabpan.getActiveTab();
+    }
 
     /* stop rotation */
     TP.stopRotatingTabs();
@@ -612,6 +623,7 @@ TP.tabSettingsWindowDo = function(mask) {
                         // restore old values
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
+                        if(closeAfterEdit) { tab.destroy(); }
                     }
                 }, {
                 /* save button */
@@ -686,6 +698,7 @@ TP.tabSettingsWindowDo = function(mask) {
                         }
 
                         tab_win_settings.destroy();
+                        if(closeAfterEdit) { tab.destroy(); }
                         return true;
                     }
                }
