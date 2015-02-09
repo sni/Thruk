@@ -68,7 +68,7 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
                 -i script/naglint        \
                 -i script/nagexp         \
                 -i script/nagimp
-    sed -r "s/\-${VERSION}-${BRANCH}\./-$fileversion\./" \
+    sed -r "s/\-${VERSION}-${BRANCH}(\.|_)/-$fileversion\1/" \
                 -i MANIFEST                 \
                 -i root/thruk/startup.html  \
                 -i .gitignore
