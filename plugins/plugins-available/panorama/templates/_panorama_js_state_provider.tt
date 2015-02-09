@@ -223,6 +223,11 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             success: function(response, opts) {
                 // allow response to contain cookie messages
                 TP.getResponse(undefined, response, false, true);
+
+                /* refresh dashboard manager */
+                if(TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
+                    TP.dashboardsSettingGrid.loader.load();
+                }
             }
         });
     }
