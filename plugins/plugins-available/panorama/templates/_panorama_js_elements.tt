@@ -497,6 +497,7 @@ Ext.define('Ext.ux.SearchCombobox', {
     triggerAction:  'all',
     pageSize:       true,
     selectOnFocus:  true,
+    selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
     initComponent: function() {
@@ -507,10 +508,13 @@ Ext.define('Ext.ux.SearchCombobox', {
             searchStore.panel = me.panel;
             var type          = me.name;
             searchStore.search_type = type;
+            var proxy         = searchStore.getProxy();
+            proxy.addParams   = Ext.Object.merge({}, me.storeExtraParams);
+            if(me.storeExtraParams) {
+                proxy.addParams = Ext.Object.merge({}, me.storeExtraParams);
+            }
             if(type == 'service') {
-                searchStore.getProxy().extraParams.host = this.up('form').getForm().getFieldValues().host;
-            } else {
-                delete searchStore.getProxy().extraParams.host;
+                proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
             }
             searchStore.load();
         };

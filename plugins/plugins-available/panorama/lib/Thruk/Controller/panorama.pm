@@ -39,6 +39,14 @@ Thruk::Utils::Menu::insert_item('General', {
                          });
 
 ##########################################################
+use constant {
+    ACCESS_NONE      => 0,
+    ACCESS_READONLY  => 1,
+    ACCESS_READWRITE => 2,
+    ACCESS_OWNER     => 3,
+};
+
+##########################################################
 
 =head2 panorama_cgi
 
@@ -567,7 +575,7 @@ sub _task_serveraction {
     my($self, $c) = @_;
     my($rc, $msg);
     # if there is a dashboard in our parameters, make sure we have proper permissions
-    if($c->{'request'}->{'parameters'}->{'dashboard'} && !$self->_is_authorized_for_dashboard($c, $c->{'request'}->{'parameters'}->{'dashboard'})) {
+    if($c->{'request'}->{'parameters'}->{'dashboard'} && $self->_is_authorized_for_dashboard($c, $c->{'request'}->{'parameters'}->{'dashboard'}) == ACCESS_NONE) {
         ($rc, $msg) = (1, 'no permission for this dashboard');
     } else {
         ($rc, $msg) = Thruk::Utils::Status::serveraction($c);
@@ -1857,17 +1865,28 @@ sub _get_dashboard_list {
                     # all
                 } elsif($type eq 'public') {
                     # public
-                    next if !$d->{'public'};
+                    next if $d->{'user'} eq $c->stash->{'remote_user'};
                 } else {
                     # my
                     next if $d->{'user'} ne $c->stash->{'remote_user'};
+                }
+                my $groups_rw = [];
+                my $groups_ro = [];
+                for my $group (@{$d->{'tab'}->{'xdata'}->{'groups'}}) {
+                    my $name = (keys %{$group})[0];
+                    if($group->{$name} eq 'read-write') {
+                        push(@{$groups_rw}, $name);
+                    } else {
+                        push(@{$groups_ro}, $name);
+                    }
                 }
                 push @{$dashboards}, {
                     id          => $d->{'id'},
                     nr          => $d->{'nr'},
                     name        => $d->{'tab'}->{'xdata'}->{'title'},
                     user        => $d->{'user'},
-                    public      => $d->{'public'}   ? JSON::XS::true : JSON::XS::false,
+                    groups_rw   => join(', ', @{$groups_rw}),
+                    groups_ro   => join(', ', @{$groups_ro}),
                     readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
                     description => $d->{'description'} || '',
                     objects     => $d->{'objects'},
@@ -1896,15 +1915,16 @@ sub _task_dashboard_list {
             { 'header' => '',            width => 20,  dataIndex => 'visible',      align => 'left', tdCls => 'icon_column', renderer => 'TP.render_dashboard_toggle_visible' },
             { 'header' => 'Name',        width => 120, dataIndex => 'name',         align => 'left', editor => {}, tdCls => 'editable'   },
             { 'header' => 'Description', flex  => 1,   dataIndex => 'description',  align => 'left', editor => {}, tdCls => 'editable'   },
-            { 'header' => 'User',        width => 120, dataIndex => 'user',         align => 'center',
+            { 'header' => 'Owner',        width => 120, dataIndex => 'user',        align => 'center',
                                          editor => $c->stash->{'is_admin'} ? {} : undef,
                                          hidden => $type eq 'my' ? JSON::XS::true : JSON::XS::false,
                                          tdCls => $c->stash->{'is_admin'} ? 'editable' : '',
             },
+            { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },
+            { 'header' => 'Read-Only Groups',   width => 120, dataIndex => 'groups_ro',    align => 'left' },
             { 'header' => 'Objects',     width => 45,  dataIndex => 'objects',      align => 'center' },
-            { 'header' => 'Public',      width => 60,  dataIndex => 'public',       align => 'center', tdCls => 'icon_column', renderer => 'TP.render_dashboard_option_public' },
             { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
-            { 'header' => 'Actions',     width => 100,
+            { 'header' => 'Actions',     width => 50,
                       xtype => 'actioncolumn',
                       items => [{
                             icon => '../plugins/panorama/images/delete.png',
@@ -1941,11 +1961,6 @@ sub _task_dashboard_update {
             my $value = $c->request->parameters->{'value'};
             if($field eq 'description') {
                 $extra_settings->{$field} = $value;
-            }
-            elsif($field eq 'public') {
-                if($value eq 'toggle') {
-                    $extra_settings->{$field} = !$dashboard->{$field};
-                }
             }
             elsif($field eq 'name') {
                 $dashboard->{'tab'}->{'xdata'}->{'title'} = $value;
@@ -2223,7 +2238,7 @@ sub _save_dashboard {
     my $file = $self->{'var'}.'/'.$nr.'.tab';
 
     my $existing = $nr eq 'new' ? $dashboard : $self->_load_dashboard($c, $nr);
-    return unless $self->_is_authorized_for_dashboard($c, $nr, $existing) == 1;
+    return unless $self->_is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
     if($nr eq 'new') {
         # find next free number
@@ -2238,7 +2253,6 @@ sub _save_dashboard {
     # preserve some settings
     if($existing) {
         $dashboard->{'user'}   = $existing->{'user'} || $c->stash->{'remote_user'};
-        $dashboard->{'public'} = defined $existing->{'public'} ? $existing->{'public'} : 0;
     }
 
     if($extra_settings) {
@@ -2250,6 +2264,8 @@ sub _save_dashboard {
     delete $dashboard->{'nr'};
     delete $dashboard->{'id'};
     delete $dashboard->{'file'};
+    delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
+    delete $dashboard->{'tab'}->{'xdata'}->{''};
 
     Thruk::Utils::write_data_file($file, $dashboard);
     $dashboard->{'nr'} = $nr;
@@ -2266,10 +2282,10 @@ sub _load_dashboard {
     my $dashboard  = Thruk::Utils::read_data_file($file);
     $dashboard->{'objects'} = (scalar keys %{$dashboard}) -3;
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
-    return unless $permission;
-    if($permission == 2) {
+    return unless $permission >= ACCESS_READONLY;
+    if($permission == ACCESS_READONLY) {
         $dashboard->{'readonly'} = 1;
-    } elsif($permission == 1) {
+    } else {
         $dashboard->{'readonly'} = 0;
     }
     my @stat = stat($file);
@@ -2277,37 +2293,55 @@ sub _load_dashboard {
     $dashboard->{'nr'}   = $nr;
     $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
     $dashboard->{'file'} = $file;
+    my $public = delete $dashboard->{'public'};
+    $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
+    if($public) {
+        push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
+    }
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
     if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = $self->_get_default_tab_xdata($c) }
+    $dashboard->{'tab'}->{'xdata'}->{'owner'} = $dashboard->{'user'};
     return $dashboard;
 }
 
 ##########################################################
 # returns:
 #     0        no access
-#     1        private dashboard, readwrite access
-#     2        public dashboard, readonly access
+#     1        public dashboard, readonly access
+#     2        private dashboard, readwrite access
+#     3        private dashboard, owner/admin access
 sub _is_authorized_for_dashboard {
     my($self, $c, $nr, $dashboard) = @_;
     $nr =~ s/^tabpan-tab_//gmx;
     my $file = $self->{'var'}.'/'.$nr.'.tab';
 
     # super user have permission for all reports
-    return 1 if $c->stash->{'is_admin'};
+    return ACCESS_OWNER if $c->stash->{'is_admin'};
 
     # does that dashboard already exist?
     if(-s $file) {
+        my $contactgroups = keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}};
         $dashboard = $self->_load_dashboard($c, $nr) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
-            return 2 if $c->stash->{'readonly'};
-            return 1;
+            return ACCESS_READONLY if $c->stash->{'readonly'};
+            return ACCESS_OWNER;
         }
-        return 2 if $dashboard->{'public'};
-        return 0;
+        my $access = ACCESS_NONE;
+        $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
+        for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
+            my $name = (keys %{$group})[0];
+            my $lvl  = $group->{$name} eq 'read-write' ? ACCESS_READWRITE : ACCESS_READONLY;
+            for my $test (@{$contactgroups}) {
+                if($name eq '*' || $name eq $test) {
+                    $access = $lvl if $lvl > $access;
+                }
+            }
+        }
+        return $access;
     }
-    return 2 if $c->stash->{'readonly'};
-    return 1;
+    return ACCESS_READONLY if $c->stash->{'readonly'};
+    return ACCESS_OWNER;
 }
 
 ##########################################################
@@ -2344,6 +2378,7 @@ sub _get_default_tab_xdata {
         background      => 'none',
         autohideheader  => 1,
         defaulticonset  => 'default',
+        groups          => [],
     });
 }
 

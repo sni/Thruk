@@ -168,6 +168,10 @@
                             TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
                         },
                         disabled: (This.locked || TP.clipboard == undefined)
+                    }, '-', {
+                        text:   'Dashboard Settings',
+                        icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                        handler: function() { TP.tabSettingsWindow() }
                     }
                     [% END %]
                     ],

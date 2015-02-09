@@ -197,6 +197,16 @@ sub _process_raw_request {
             elsif($type eq 'custom variable') {
                 $data = [];
             }
+            elsif($type eq 'contactgroup') {
+                $data = [];
+                if($c->{'request'}->{'parameters'}->{'wildcards'}) {
+                    push @{$data}, '*';
+                }
+                my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'});
+                for my $g (@{$groups}) {
+                    push @{$data}, $g->{'name'};
+                }
+            }
             elsif($type eq 'site') {
                 $data = [];
                 for my $key (@{$c->stash->{'backends'}}) {

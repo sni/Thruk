@@ -1620,6 +1620,10 @@ var TP = {
             }
         }
         return(true);
+    },
+    /* remove row from gridpanel */
+    removeGridRow: function(grid, rowIndex, colIndex) {
+        grid.getStore().removeAt(rowIndex);
     }
 }
 TP.log('[global] starting');

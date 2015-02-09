@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add group based permissions for dashboards
           - Bug Fixes
             - fix using comma separated backend list in CLI tool
             - fix undefined key_sort in CLI config parser

@@ -21,6 +21,7 @@
         var data = TP.getResponse(this, response);
         if(data) {
             TP.log('['+panel.id+'] loaded');
+            if(!this.grid) {this.grid = this.target };
             var b = Ext.get(this.grid.id+"-body");
             var body;
             if(b) { body = b.dom.firstChild }
@@ -73,6 +74,7 @@
                     }
                 }
             }
+            if(this.xdata == undefined) { this.xdata = { pageSize: 20 }; }
             this.gridStore = Ext.create('Ext.data.Store', {
                 data:  {'items': data.data },
                 fields: fields,

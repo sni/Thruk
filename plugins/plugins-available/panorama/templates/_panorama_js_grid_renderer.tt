@@ -399,13 +399,6 @@ TP.render_perfbar = function(v, td, item, row, col, store, view) {
     return r;
 }
 
-/* render public on/off button */
-TP.render_dashboard_option_public = function(v, td, item) {
-    var img = 'bullet_white.png';
-    if(v) { img = 'world.png'; }
-    return "<div class='clickable' title='Change public flag for this dashboard' onclick='TP.toggleDashboardOption(\""+item.data.nr+"\", \"public\"); return false;' style='margin-left: 12px;width:20px;height:20px;background-image:url(../plugins/panorama/images/"+img+");background-position:center center;background-repeat:no-repeat;'>&nbsp;<\/div>";
-}
-
 /* toggle visibility of dashboards */
 TP.render_dashboard_toggle_visible = function(v, td, item, row, col, store, view) {
     var actions = "";
