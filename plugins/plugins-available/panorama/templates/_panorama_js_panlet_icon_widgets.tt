@@ -96,7 +96,7 @@
             this.setIconLabel();
             if(this.labelEl) { this.labelEl.show(); }
             /* make sure we don't overlap dashboard settings window */
-            if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
+            TP.checkModalWindows();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
@@ -374,7 +374,7 @@
                     show: function( This, eOpts ) {
                         panel.addDDListener(This);
                         /* make sure we don't overlap dashboard settings window */
-                        if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
+                        TP.checkModalWindows();
                     }
                 }
             });

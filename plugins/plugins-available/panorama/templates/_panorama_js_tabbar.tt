@@ -550,5 +550,5 @@ TP.openLogWindow = function() {
             }
         }
     }).toFront();
-    TP.modalWin = debug_win;
+    TP.modalWindows.push(debug_win);
 }

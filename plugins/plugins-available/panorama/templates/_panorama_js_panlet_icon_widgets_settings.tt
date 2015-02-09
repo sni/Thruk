@@ -1270,7 +1270,7 @@ TP.iconShowEditDialog = function(panel) {
     window.setTimeout(function() {
         TP.iconSettingsWindow.toFront();
     }, 100);
-    TP.modalWin = settingsWindow;
+    TP.modalWindows.push(settingsWindow);
 };
 
 TP.get_icon_form_xdata = function(settingsWindow) {
@@ -1336,7 +1336,6 @@ TP.openLabelEditorWindow = function(panel) {
                  text:   'cancel',
                  handler: function(This) {
                     var labelEditorWindow = This.up('window');
-                    TP.modalWin = labelEditorWindow.oldModalWindow;
                     Ext.getCmp('label_textfield').setValue(oldValue);
                     labelEditorWindow.destroy();
                  }
@@ -1346,7 +1345,6 @@ TP.openLabelEditorWindow = function(panel) {
                  text:   'save',
                  handler: function(This) {
                     var labelEditorWindow = This.up('window');
-                    TP.modalWin = labelEditorWindow.oldModalWindow;
                     Ext.getCmp('label_textfield').setValue(labelEditorWindow.down('textarea').getValue())
                     labelEditorWindow.destroy();
                  }
@@ -1450,8 +1448,7 @@ TP.openLabelEditorWindow = function(panel) {
     }).show();
     Ext.getCmp('label_textfield').setValue(" ");
     Ext.getCmp('label_textfield').setValue(Ext.getCmp('label_textfield_edit').getValue());
-    labelEditorWindow.oldModalWindow = TP.modalWin;
-    TP.modalWin = labelEditorWindow;
+    TP.modalWindows.push(labelEditorWindow);
     labelEditorWindow.toFront();
 }
 

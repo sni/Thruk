@@ -412,7 +412,7 @@ TP.filterWindow = function(ftype, base_el, panel) {
         items:       [],
         buttonAlign: 'center',
         bodyStyle:   'background: white;',
-        fbar: [{ xtype:  'button', text: 'cancel', handler: function() { TP.modalWin = win.oldModal; this.up('window').destroy() } },
+        fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
                { xtype:  'button',
                  text:    'save',
                  handler: function(This) {
@@ -429,7 +429,6 @@ TP.filterWindow = function(ftype, base_el, panel) {
                         }
                     });
                     base_el.setValue(Ext.JSON.encode(filter));
-                    TP.modalWin = win.oldModal;
                     this.up('window').destroy();
                  }
                }
@@ -540,6 +539,5 @@ TP.filterWindow = function(ftype, base_el, panel) {
     /* show the window */
     win.show();
     win.toFront();
-    win.oldModal = TP.modalWin;
-    TP.modalWin = win;
+    TP.modalWindows.push(win);
 }

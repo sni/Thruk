@@ -711,7 +711,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
     tab_win_settings.show();
     mask.destroy();
-    TP.modalWin = tab_win_settings;
+    TP.modalWindows.push(tab_win_settings);
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {

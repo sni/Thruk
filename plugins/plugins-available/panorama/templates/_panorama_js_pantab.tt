@@ -365,7 +365,7 @@
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
         }
-        if(TP.modalWin && TP.modalWin.el) { TP.modalWin.toFront(); }
+        TP.checkModalWindows();
     },
 
     /* stop all timed actions for this tab and its panels */
