@@ -34,6 +34,7 @@ install:
   - cp t/travis/thruk_local.conf .
   - sudo chmod 660 /var/cache/naemon/live
   - sudo gpasswd -a $(id -un) naemon
+  - touch .author
 
 script:
   - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
