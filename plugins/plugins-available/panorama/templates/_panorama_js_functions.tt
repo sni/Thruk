@@ -1540,7 +1540,7 @@ var TP = {
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
                         }
-                        else if(!TP.JSONequals(ExtState[key], data[key])) {
+                        else if(p && !TP.JSONequals(ExtState[key], data[key])) {
                             /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             cp.set(key, cfg);
