@@ -2325,12 +2325,13 @@ sub _is_authorized_for_dashboard {
 
     # does that dashboard already exist?
     if(-s $file) {
-        my $contactgroups = keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}};
         $dashboard = $self->_load_dashboard($c, $nr) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
             return ACCESS_READONLY if $c->stash->{'readonly'};
             return ACCESS_OWNER;
         }
+        # access from contactgroups
+        my $contactgroups = [keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}];
         my $access = ACCESS_NONE;
         $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
         for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
