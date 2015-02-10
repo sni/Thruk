@@ -699,7 +699,14 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
 
                         tab_win_settings.destroy();
-                        if(closeAfterEdit) { tab.destroy(); }
+                        if(closeAfterEdit) {
+                            tab.destroy();
+                        } else {
+                            /* permissions might have changed */
+                            window.setTimeout(function() {
+                                TP.renewDashboard(tab);
+                            }, 2000);
+                        }
                         return true;
                     }
                }

@@ -221,7 +221,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             params: params,
             async:  async,
             success: function(response, opts) {
-                // allow response to contain cookie messages
+                /* allow response to contain cookie messages */
                 TP.getResponse(undefined, response, false, true);
 
                 /* refresh dashboard manager */
