@@ -293,6 +293,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         items: [{
             xtype:      'gridpanel',
             name:       'permissions',
+            id:         'permissionsGrid',
             columns:    [
                     { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
                             xtype:            'searchCbo',
@@ -744,6 +745,18 @@ TP.tabSettingsWindowLocked = function(tab, val) {
             item.setDisabled(val);
             if(item.name == "backends" && !tab.xdata.select_backends) {
                 item.setDisabled(true);
+            }
+        });
+    }
+    /* apply to permissions tab */
+    var permissionsForm = Ext.getCmp('permissionsForm');
+    if(permissionsForm) {
+        permissionsForm.items.each(function(item, idx, len) {
+            item.setDisabled(val);
+            Ext.getCmp('permissionsGrid').setDisabled(val);
+            if(tab.readonly == 1) {
+                item.setDisabled(true);
+                Ext.getCmp('permissionsGrid').setDisabled(true);
             }
         });
     }
