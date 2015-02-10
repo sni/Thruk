@@ -11,6 +11,23 @@ BEGIN {
   $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
 }
 
+###################################################
+# create connection pool
+# has to be done really early to save memory
+use lib 'lib';
+use Thruk::Backend::Pool;
+BEGIN {
+    Thruk::Backend::Pool::init_backend_thread_pool();
+}
+
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
+###################################################
 use strict;
 use Data::Dumper;
 use Test::More;
@@ -524,7 +541,12 @@ sub wait_for_job {
     };
     alarm(0);
     my $end  = time();
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds') or diag(Dumper("ps:\n".`ps -efl`."\njobs:\n".`find $jobdir/ -ls -exec cat {} \\;`));
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+        or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
+                            `uptime`,
+                            `ps -efl`,
+                            `find $jobdir/ -ls -exec cat {} \\;`,
+               ));
     return;
 }
 
