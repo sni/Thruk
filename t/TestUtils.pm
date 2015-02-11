@@ -190,7 +190,7 @@ sub get_test_hostgroup_cli {
     skip_doctype    => skip doctype check, even if its an html page
     skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
-    waitfor         => wait till regex occurs (max 60sec)
+    waitfor         => wait till regex occurs (max 120sec)
     agent           => user agent for requests
     callback        => content callback
   }
@@ -243,7 +243,7 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now < $start + 60) {
+        while($now < $start + 120) {
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -264,7 +264,7 @@ sub test_page {
             $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
         }
-        fail("content did not occur within 60 seconds") unless $found;
+        fail("content did not occur within 120 seconds") unless $found;
         return $return;
     }
 
