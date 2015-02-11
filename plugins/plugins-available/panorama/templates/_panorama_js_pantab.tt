@@ -135,6 +135,7 @@
             this.el.on("contextmenu", function(e) {
                 /* right click context menu on tab body */
                 e.preventDefault();
+                TP.resetMoveIcons();
                 var pos = [e.getX(), e.getY()];
                 Ext.create('Ext.menu.Menu', {
                     margin: '0 0 10 0',
@@ -179,6 +180,9 @@
                         beforehide: function(menu, eOpts) { menu.destroy(); }
                     }
                 }).showAt(pos);
+            });
+            this.el.on("click", function(e) {
+                TP.resetMoveIcons();
             });
         },
         beforerender: function(This, eOpts) {

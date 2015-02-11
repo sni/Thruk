@@ -46,6 +46,8 @@ TP.iconShowEditDialog = function(panel) {
         TP.iconSettingsWindow.destroy();
     }
 
+    TP.resetMoveIcons();
+
     var defaultSpeedoSource = 'problems';
     var perfDataUpdate = function() {
         // ensure fresh and correct performance data

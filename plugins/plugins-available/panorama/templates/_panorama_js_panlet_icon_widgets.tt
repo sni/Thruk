@@ -40,9 +40,9 @@
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
-            href:    '#',
+            href:    '',
             target:  '',
-            onclick: "return(TP.iconClickHandler('"+this.id+"'));"
+            onclick: "return(false);"
         };
 
         if(!this.locked) {
@@ -116,7 +116,7 @@
             if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
             if(y != undefined) { y = Math.floor(y); } else { y = pos[1]; }
 
-            // snap to roaster when shift key is hold
+            /* snap to roaster when shift key is hold */
             if(TP.isShift) {
                 var pos = TP.get_snap(x, y);
                 if(This.ddShadow) {
@@ -130,7 +130,10 @@
                 }
             }
 
-            // update settings window
+            var deltaX = x - this.xdata.layout.x;
+            var deltaY = y - this.xdata.layout.y;
+
+            /* update settings window */
             if(TP.iconSettingsWindow) {
                 TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
             }
@@ -139,6 +142,21 @@
             if(This.stateful) {
                 this.xdata.layout.x = Math.floor(x);
                 this.xdata.layout.y = Math.floor(y);
+            }
+
+            /* move aligned items too */
+            if(TP.moveIcons && This.stateful) {
+                Ext.Array.each(TP.moveIcons, function(item) {
+                    if(item.id != This.id) {
+                        item.suspendEvents();
+                        item.xdata.layout.x += deltaX;
+                        item.xdata.layout.y += deltaY;
+                        item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                        item.setIconLabel();
+                        item.resumeEvents();
+                        item.saveState();
+                    }
+                });
             }
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
@@ -193,10 +211,10 @@
                 this.removeCls('clickable');
                 this.addCls('notclickable');
             }
-            if(this.el) { this.el.dom.href='#'; }
-            this.autoEl.href='#';
+            if(this.el) { this.el.dom.href=''; }
+            this.autoEl.href='';
             if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href='#';
+                this.labelEl.el.dom.href='';
                 this.labelEl.removeCls('clickable');
                 this.labelEl.addCls('notclickable');
             }
@@ -349,7 +367,7 @@
                     tag:     'a',
                     href:    panel.xdata.link.link,
                     target:  '',
-                    onclick: "return(TP.iconClickHandler('"+panel.id+"'));"
+                    onclick: "return(false);"
                 },
                 listeners: {
                     /* move parent element according to our drag / drop */
@@ -456,6 +474,21 @@
     /* add dbl click and context menu events */
     addClickEventhandler: function(el) {
         var This = this;
+
+        el.on("click", function(e) {
+            [% UNLESS readonly %]
+            if(e.ctrlKey) {
+                if(TP.moveIcons == undefined) {
+                    TP.moveIcons = [];
+                }
+                This.el.dom.style.outline = "2px dotted orange";
+                TP.moveIcons.push(This);
+                return(false);
+            }
+            [% END %]
+            return(TP.iconClickHandler(This.id));
+        });
+
         /* open edit box on double or right click */
         [% UNLESS readonly %]
         el.on("dblclick", function(e) {
@@ -469,6 +502,7 @@
         /* right click context menu on icon widgets */
         el.on("contextmenu", function(e) {
             e.preventDefault();
+            TP.resetMoveIcons();
             Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -2095,6 +2129,13 @@ Ext.define('TP.StaticIcon', {
         this.callParent([xdata, forceRecreate]);
     }
 });
+
+TP.resetMoveIcons = function() {
+    Ext.Array.each(TP.moveIcons, function(item) {
+        item.el.dom.style.outline = "";
+    });
+    TP.moveIcons = undefined;
+}
 
 /* delay link opening to allow double click menu */
 TP.iconClickHandler = function(id) {
