@@ -543,9 +543,9 @@ sub wait_for_job {
     my $end  = time();
     is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
-                            `uptime`,
-                            `ps -efl`,
-                            `find $jobdir/ -ls -exec cat {} \\;`,
+                            scalar `uptime`,
+                            scalar `ps -efl`,
+                            scalar `find $jobdir/ -ls -exec cat {} \\;`,
                ));
     return;
 }
