@@ -1648,6 +1648,24 @@ var TP = {
             }
         });
         TP.modalWindows = newModelWindows;
+    },
+    reduceDelayEvents: function(scope, callback, delay, timeoutName) {
+        var now = (new Date()).getTime();
+        if(!scope.lastEventRun)              { scope.lastEventRun = {}; }
+        if(!scope.lastEventRun[timeoutName]) { scope.lastEventRun[timeoutName] = 0; }
+        window.clearTimeout(TP.timeouts[timeoutName]);
+        if(now > scope.lastEventRun[timeoutName] + delay) {
+            scope.lastEventRun[timeoutName] = now;
+            callback();
+        } else {
+            TP.timeouts[timeoutName] = window.setTimeout(function() {
+                if(scope) {
+                    var now = (new Date()).getTime();
+                    scope.lastEventRun[timeoutName] = now;
+                    callback();
+                }
+            }, delay);
+        }
     }
 }
 TP.log('[global] starting');

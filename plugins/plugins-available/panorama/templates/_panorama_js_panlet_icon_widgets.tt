@@ -130,34 +130,9 @@
                 }
             }
 
-            var deltaX = x - this.xdata.layout.x;
-            var deltaY = y - this.xdata.layout.y;
-
-            /* update settings window */
-            if(TP.iconSettingsWindow) {
-                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
-            }
-            /* update label */
-            this.setIconLabel();
-            if(This.stateful) {
-                this.xdata.layout.x = Math.floor(x);
-                this.xdata.layout.y = Math.floor(y);
-            }
-
-            /* move aligned items too */
-            if(TP.moveIcons && This.stateful) {
-                Ext.Array.each(TP.moveIcons, function(item) {
-                    if(item.id != This.id) {
-                        item.suspendEvents();
-                        item.xdata.layout.x += deltaX;
-                        item.xdata.layout.y += deltaY;
-                        item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
-                        item.setIconLabel();
-                        item.resumeEvents();
-                        item.saveState();
-                    }
-                });
-            }
+            TP.reduceDelayEvents(This, function() {
+                TP.iconMoveHandler(This, x, y);
+            }, 50, 'timeout_icon_move');
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
@@ -2370,4 +2345,38 @@ function availability(panel, opts) {
         TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
     }
     return(TP.availabilities[panel.id][opts_enc]['last']);
+}
+
+
+TP.iconMoveHandler = function(icon, x, y) {
+    window.clearTimeout(TP.timeouts['timeout_icon_move']);
+    /* update settings window */
+    if(TP.iconSettingsWindow) {
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+    }
+    /* update label */
+    icon.setIconLabel();
+
+    var deltaX = x - icon.xdata.layout.x;
+    var deltaY = y - icon.xdata.layout.y;
+
+    if(icon.stateful) {
+        icon.xdata.layout.x = Math.floor(x);
+        icon.xdata.layout.y = Math.floor(y);
+
+        /* move aligned items too */
+        if(TP.moveIcons) {
+            Ext.Array.each(TP.moveIcons, function(item) {
+                if(item.id != icon.id) {
+                    item.suspendEvents();
+                    item.xdata.layout.x += deltaX;
+                    item.xdata.layout.y += deltaY;
+                    item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                    item.setIconLabel();
+                    item.resumeEvents();
+                    item.saveState();
+                }
+            });
+        }
+    }
 }

@@ -182,8 +182,46 @@
                 }).showAt(pos);
             });
             this.el.on("click", function(e) {
-                TP.resetMoveIcons();
+                if(!TP.skipResetMoveIcons) {
+                    TP.resetMoveIcons();
+                }
+                TP.skipResetMoveIcons = false;
             });
+
+[% UNLESS readonly %]
+            /* lasso for element selection */
+            Ext.getBody().on("mouseup", function(e) {
+                if(TP.lassoEl) {
+                    TP.lassoEl.destroy();
+                    TP.lassoEl = undefined;
+                    Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
+                    TP.skipResetMoveIcons = true;
+                    window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
+                }
+            });
+            Ext.getBody().on("dragstart", function(e) {
+                e.preventDefault();
+                var pos = e.getXY();
+                if(TP.lassoEl) { TP.lassoEl.destroy(); }
+                TP.lassoEl = Ext.create('Ext.Component', {
+                    'html':     ' ',
+                    autoRender: true,
+                    autoShow:   true,
+                    shadow:     false,
+                    style: {
+                        position: 'absolute',
+                        border: '1px grey dashed',
+                        top:     pos[1]+'px',
+                        left:    pos[0]+'px',
+                        width:   '1px',
+                        height:  '1px'
+                    }
+                });
+                TP.lassoEl.startPosition = pos;
+                Ext.getBody().on("mousemove", TP.lassoDragHandler);
+                return(false);
+            });
+[% END %]
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -391,6 +429,14 @@
         if(retries >= 5)         { return;      }
         var body = This.body;
         if(body == undefined)    { return; }
+        if(!This.bgDragEl) {
+            This.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
+            This.bgDragEl.dom.src            = background;
+            This.bgDragEl.dom.style.position = "absolute";
+            This.bgDragEl.dom.style.width    = "100%";
+            This.bgDragEl.dom.style.height   = "100%";
+            This.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
+        }
         if(background != undefined && background != 'none') {
             if(!This.bgImgEl) {
                 This.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
@@ -437,3 +483,65 @@
         }
     }
 });
+
+/* handles dragging a lasso around icon elements to move them together */
+TP.lassoDragHandler = function(e) {
+    e.preventDefault();
+    var mouse = e.getXY();
+    TP.reduceDelayEvents(TP.lassoEl, function() {
+        TP.lassoDragHandlerDo(mouse);
+    }, 50, 'timeout_icon_lasso');
+}
+
+TP.lassoDragHandlerDo = function(mouse) {
+    /* set new lasso size */
+    window.clearTimeout(TP.timeouts['timeout_icon_lasso']);
+    if(!TP.lassoEl) { return; }
+    var start = TP.lassoEl.startPosition;
+    var x = mouse[0]-start[0];
+    var y = mouse[1]-start[1];
+    if(x < 0 && y < 0) {
+        TP.lassoEl.setPosition(mouse[0], mouse[1]);
+        x = -x;
+        y = -y;
+    }
+    else if(x < 0) {
+        TP.lassoEl.setPosition(mouse[0], start[1]);
+        x = -x;
+    }
+    else if(y < 0) {
+        TP.lassoEl.setPosition(start[0], mouse[1]);
+        y = -y;
+    }
+    TP.lassoEl.setSize(x, y);
+
+    TP.reduceDelayEvents(TP.lassoEl, function() {
+        TP.lassoMarkIcons(x, y);
+    }, 50, 'timeout_icon_mark_update');
+}
+
+TP.lassoMarkIcons = function(x, y) {
+    /* check marked elements */
+    window.clearTimeout(TP.timeouts['timeout_icon_mark_update']);
+    if(!TP.lassoEl) { return; }
+    var lassoPos = TP.lassoEl.getPosition();
+    var tabpan = Ext.getCmp('tabpan');
+    var tab    = tabpan.getActiveTab();
+    var panels = TP.getAllPanel(tab);
+    TP.moveIcons = [];
+    for(var nr=0; nr<panels.length; nr++) {
+        var panel = panels[nr];
+        if(panel.xdata.layout) {
+            var center = panel.getPosition();
+            var size   = panel.getSize();
+            center[0]  = center[0] + size.width;
+            center[1]  = center[1] + size.height;
+            if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
+                panel.el.dom.style.outline = "2px dotted orange";
+                TP.moveIcons.push(panel);
+            } else {
+                panel.el.dom.style.outline = "";
+            }
+        }
+    }
+}

@@ -4,6 +4,7 @@ next:
           - Panorama View:
             - add group based permissions for dashboards
             - move multiple icons by selecting them with ctrl click
+            - also move multiple icons by mouse lasso
           - Bug Fixes
             - fix using comma separated backend list in CLI tool
             - fix undefined key_sort in CLI config parser
