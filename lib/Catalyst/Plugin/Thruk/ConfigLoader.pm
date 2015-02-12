@@ -168,6 +168,17 @@ sub _do_finalize_config {
     # make this setting available in env
     $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
 
+    if($config->{'action_menu_apply'}) {
+        for my $menu (keys %{$config->{'action_menu_apply'}}) {
+            for my $pattern (ref $config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$config->{'action_menu_apply'}->{$menu}} : ($config->{'action_menu_apply'}->{$menu})) {
+                if($pattern !~ m/;/mx) {
+                    $pattern .= '.*;$';
+                }
+            }
+        }
+    }
+
+
     # set default config
     Thruk::Backend::Pool::set_default_config($config);
 

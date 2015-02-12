@@ -902,22 +902,52 @@ sub set_paging_steps {
 
 =head2 get_custom_vars
 
-  get_custom_vars($obj)
+  get_custom_vars($c, $obj, [$prefix])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($data,$prefix) = @_;
+    my($c, $data,$prefix) = @_;
     $prefix = '' unless defined $prefix;
 
-    return {} unless defined $data;
-    return {} unless defined $data->{$prefix.'custom_variable_names'};
-    return {} unless defined $data->{$prefix.'custom_variable_values'};
-
-    # merge custom variables into a hash
     my %hash;
-    @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+
+    if(   defined $data
+      and defined $data->{$prefix.'custom_variable_names'}
+      and defined $data->{$prefix.'custom_variable_values'})
+    {
+        # merge custom variables into a hash
+        @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+    }
+
+    # add action menu from apply rules
+    if($c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+        APPLY:
+        for my $menu (keys %{$c->config->{'action_menu_apply'}}) {
+            for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
+                if(!$prefix && $data->{'description'}) {
+                    my $test = $data->{'host_name'}.';'.$data->{'description'};
+                    ## no critic
+                    if($test =~ m/$pattern/) {
+                    ## use critic
+                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        last APPLY;
+                    }
+                }
+                elsif($data->{$prefix.'name'}) {
+                    my $test = $data->{$prefix.'name'}.';';
+                    ## no critic
+                    if($test =~ m/$pattern/) {
+                    ## use critic
+                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        last APPLY;
+                    }
+                }
+            }
+        }
+    }
+
     return \%hash;
 }
 

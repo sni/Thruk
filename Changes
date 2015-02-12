@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add action_menu_apply option to apply action menus on the fly
           - Panorama View:
             - add group based permissions for dashboards
             - move multiple icons by selecting them with ctrl click

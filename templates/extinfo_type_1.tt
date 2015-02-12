@@ -110,7 +110,7 @@
               </td>
             </tr>
           [% END %]
-          [% cust_vars = get_custom_vars(host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+          [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
                 [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l');</script></td>[% END %]

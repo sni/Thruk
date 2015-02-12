@@ -16,7 +16,7 @@
   peer_key                      = host.peer_key
   passive_icon                  = 'passiveonly.gif'
   has_bp                        = has_business_process(host, hostprefix)
-  custom_vars                   = get_custom_vars(host, hostprefix)
+  custom_vars                   = get_custom_vars(c, host, hostprefix)
 %]
 
 [% IF hide_passive_icon %]
@@ -58,7 +58,7 @@
 [%
   peer_key     = service.peer_key
   passive_icon = 'passiveonly.gif'
-  custom_vars  = get_custom_vars(service)
+  custom_vars  = get_custom_vars(c, service)
 %]
 
 [% IF hide_passive_icon %]
