@@ -573,7 +573,7 @@ sub expand_command {
     if(defined $source and $source ne 'check_command') {
         $source  = uc($source);
         $source  =~ s/^_//mx;
-        my $vars = Thruk::Utils::get_custom_vars($c, $obj);
+        my $vars = Thruk::Utils::get_custom_vars(undef, $obj);
         $command_name = $vars->{$source} || '';
     }
 

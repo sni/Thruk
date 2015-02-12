@@ -922,7 +922,7 @@ sub get_custom_vars {
     }
 
     # add action menu from apply rules
-    if($c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+    if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
         APPLY:
         for my $menu (keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
