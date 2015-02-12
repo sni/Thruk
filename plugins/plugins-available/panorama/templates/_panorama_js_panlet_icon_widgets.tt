@@ -453,6 +453,8 @@
         el.on("click", function(e) {
             [% UNLESS readonly %]
             if(e.ctrlKey) {
+                var tab = Ext.getCmp(This.panel_id);
+                if(This.locked) { return; }
                 if(TP.moveIcons == undefined) {
                     TP.moveIcons = [];
                 }

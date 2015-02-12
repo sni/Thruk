@@ -125,16 +125,16 @@
             This.hidePanlets();
         },
         afterrender: function(This, eOpts) {
-            TP.log('['+this.id+'] added tab - refresh: '+this.xdata.refresh);
-            if(!this.title) {
-                this.applyXdata();
-            } else {
-                this.setBackground(this.xdata.background, this.xdata.backgroundscale, this.xdata.backgroundoffset_x, this.xdata.backgroundoffset_y);
-            }
-            var header = This.getDockedItems()[0];
-            if(header) { header.hide() }
             var tab = This;
-            this.el.on("contextmenu", function(e) {
+            TP.log('['+tab.id+'] added tab - refresh: '+tab.xdata.refresh);
+            if(!tab.title) {
+                tab.applyXdata();
+            } else {
+                tab.setBackground(tab.xdata.background, tab.xdata.backgroundscale, tab.xdata.backgroundoffset_x, tab.xdata.backgroundoffset_y);
+            }
+            var header = tab.getDockedItems()[0];
+            if(header) { header.hide() }
+            tab.el.on("contextmenu", function(e) {
                 /* right click context menu on tab body */
                 e.preventDefault();
                 TP.resetMoveIcons();
@@ -151,7 +151,8 @@
                         text:   'New',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
                         hideOnClick: false,
-                        menu:    TP.addPanletsMenu({open: 'right'})
+                        menu:    TP.addPanletsMenu({open: 'right'}),
+                        disabled: tab.xdata.locked
                     }, {
                         text:   'Paste',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
@@ -170,7 +171,7 @@
                             pos[1] = pos[1] - 8;
                             TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
                         },
-                        disabled: (This.locked || TP.clipboard == undefined)
+                        disabled: (tab.xdata.locked || TP.clipboard == undefined)
                     }, '-', {
                         text:   'Dashboard Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
@@ -183,7 +184,7 @@
                     }
                 }).showAt(pos);
             });
-            this.el.on("click", function(e) {
+            tab.el.on("click", function(e) {
                 if(!TP.skipResetMoveIcons) {
                     TP.resetMoveIcons();
                 }
@@ -204,6 +205,7 @@
             });
             Ext.getBody().on("dragstart", function(e) {
                 e.preventDefault();
+                if(tab.xdata.locked) { return(false); };
                 var pos = e.getXY();
                 if(TP.lassoEl) { TP.lassoEl.destroy(); }
                 TP.lassoEl = Ext.create('Ext.Component', {
