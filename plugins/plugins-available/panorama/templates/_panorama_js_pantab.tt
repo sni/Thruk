@@ -70,6 +70,8 @@
                     }
                 }
             }
+            if(This.bgDragEl) { This.bgDragEl.destroy(); }
+            if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
