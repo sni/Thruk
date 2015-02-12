@@ -175,7 +175,18 @@
                     }, '-', {
                         text:   'Dashboard Settings',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
-                        handler: function() { TP.tabSettingsWindow() }
+                        handler: function() { TP.tabSettingsWindow() },
+                        hidden:  tab.xdata.locked       // only show when not locked
+                    }, {
+                        text:   'Unlock Dashboard',
+                        icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                        handler: function() { tab.setLock(false); },
+                        hidden:  !tab.xdata.locked      // only show when locked
+                    }, {
+                        text:   'Lock Dashboard',
+                        icon:   '[% url_prefix %]plugins/panorama/images/lock.png',
+                        handler: function() { tab.setLock(true); },
+                        hidden:  tab.xdata.locked       // only show when not locked
                     }
                     [% END %]
                     ],
