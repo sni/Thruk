@@ -463,6 +463,10 @@
                 } else {
                     This.el.dom.style.outline = "2px dotted orange";
                     TP.moveIcons.push(This);
+                    TP.createIconMoveKeyNav();
+                }
+                if(TP.moveIcons.length == 0) {
+                    TP.resetMoveIcons();
                 }
                 return(false);
             }
@@ -2116,7 +2120,24 @@ TP.resetMoveIcons = function() {
         item.el.dom.style.outline = "";
     });
     TP.moveIcons = undefined;
+    if(TP.keynav) {
+        TP.keynav.destroy();
+        TP.keynav = undefined;
+    }
 }
+
+TP.createIconMoveKeyNav = function() {
+    if(TP.keynav) { return; }
+    TP.keynav = Ext.create('Ext.util.KeyNav', Ext.getBody(), {
+        'left':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]-1, pos[1]); }},
+        'right': function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]+1, pos[1]); }},
+        'up':    function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]-1); }},
+        'down':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]+1); }},
+        'esc':   function(e){ TP.resetMoveIcons(); },
+        ignoreInputFields: true
+    });
+}
+
 
 /* delay link opening to allow double click menu */
 TP.iconClickHandler = function(id) {

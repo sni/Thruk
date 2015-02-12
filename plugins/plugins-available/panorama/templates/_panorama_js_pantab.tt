@@ -197,6 +197,7 @@
                     TP.lassoEl.destroy();
                     TP.lassoEl = undefined;
                     Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
+                    TP.createIconMoveKeyNav();
                     TP.skipResetMoveIcons = true;
                     window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
                 }
@@ -212,7 +213,7 @@
                     shadow:     false,
                     style: {
                         position: 'absolute',
-                        border: '1px grey dashed',
+                        border: '1px black dashed',
                         top:     pos[1]+'px',
                         left:    pos[0]+'px',
                         width:   '1px',
