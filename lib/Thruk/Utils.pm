@@ -988,7 +988,7 @@ sub set_custom_vars {
 
     my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
-    my $custom_vars = get_custom_vars($data, $prefix);
+    my $custom_vars = get_custom_vars($c, $data, $prefix);
 
     my $already_added = {};
     for my $test (@{$vars}) {

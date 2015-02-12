@@ -469,7 +469,7 @@ sub _process_host_page {
     }
 
     # object source
-    my $custvars = Thruk::Utils::get_custom_vars($host);
+    my $custvars = Thruk::Utils::get_custom_vars($c, $host);
     $c->stash->{'source'}  = $custvars->{'SRC'}  || '';
     $c->stash->{'source2'} = $custvars->{'SRC2'} || '';
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
@@ -598,7 +598,7 @@ sub _process_service_page {
     }
 
     # object source
-    my $custvars = Thruk::Utils::get_custom_vars($service);
+    my $custvars = Thruk::Utils::get_custom_vars($c, $service);
     $c->stash->{'source'}  = $custvars->{'SRC'}  || '';
     $c->stash->{'source2'} = $custvars->{'SRC2'} || '';
     $c->stash->{'source3'} = $custvars->{'SRC3'} || '';
