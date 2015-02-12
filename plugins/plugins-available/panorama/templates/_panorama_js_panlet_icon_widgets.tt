@@ -456,8 +456,14 @@
                 if(TP.moveIcons == undefined) {
                     TP.moveIcons = [];
                 }
-                This.el.dom.style.outline = "2px dotted orange";
-                TP.moveIcons.push(This);
+                if(This.el.dom.style.outline) {
+                    /* already selected -> unselect */
+                    This.el.dom.style.outline = "";
+                    TP.moveIcons = TP.removeFromList(TP.moveIcons, This);
+                } else {
+                    This.el.dom.style.outline = "2px dotted orange";
+                    TP.moveIcons.push(This);
+                }
                 return(false);
             }
             [% END %]
