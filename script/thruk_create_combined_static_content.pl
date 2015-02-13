@@ -85,7 +85,7 @@ if(-e 'root/thruk/javascript/all_in_one-'.$version.'_panorama.js') {
     }
 }
 
-if(!$js_required and !$css_required and !$skip_compress and !$panorama_required) {
+if(!$js_required and !$css_required and !$skip_compress and !$panorama_required and (!$ARGV[0] or $ARGV[0] ne '-f')) {
     print STDERR "no update necessary\n";
     exit;
 }
