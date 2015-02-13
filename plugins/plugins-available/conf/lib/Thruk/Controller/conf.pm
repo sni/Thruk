@@ -1251,7 +1251,7 @@ sub _update_password {
     my $send = $c->{'request'}->{'parameters'}->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
         # htpasswd is usually somewhere in sbin
-        local $ENV{'PATH'} = $ENV{'PATH'}.':/usr/sbin:/sbin';
+        local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
         my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
         return('could not find htpasswd or htpasswd2 in '.$ENV{'PATH'}.', cannot update passwords') unless $htpasswd;
 
