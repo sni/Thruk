@@ -12,6 +12,7 @@ Utilities Collection for Reporting
 
 use warnings;
 use strict;
+use utf8;
 use Carp;
 use Class::Inspector;
 use File::Slurp;
@@ -97,7 +98,7 @@ sub report_show {
         elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} or $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             my $name = $report->{'var'}->{'attachment'};
             $name    =~ s/\s+/_/gmx;
-            $name    =~ s/[^a-zA-Z0-9-_\.]+//gmx;
+            $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
             $c->res->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
             $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
             open(my $fh, '<', $report_file);
