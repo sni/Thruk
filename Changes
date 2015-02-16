@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fix accessing performance data page in author mode
+            - fix accessing reports page in author mode
+
 1.86-4   Thu Feb 12 21:47:53 CET 2015:
           - add action_menu_apply option to apply action menus on the fly
           - Panorama View:
