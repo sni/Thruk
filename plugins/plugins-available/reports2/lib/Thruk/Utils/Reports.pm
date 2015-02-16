@@ -43,6 +43,7 @@ sub get_report_list {
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $r = _read_report_file($c, $1, undef, $noauth, 1);
+            next unless $r;
             if($r->{'var'} and $r->{'var'}->{'job'}) {
                 my($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $r->{'var'}->{'job'});
                 $r->{'var'}->{'job_data'} = {
@@ -51,7 +52,7 @@ sub get_report_list {
                     message => $message,
                 } if defined $time;
             }
-            push @{$reports}, $r if defined $r;
+            push @{$reports}, $r;
         }
     }
 
