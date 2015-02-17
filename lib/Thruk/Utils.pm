@@ -2280,6 +2280,25 @@ sub check_csrf {
     return;
 }
 
+
+########################################
+
+=head2 get_plugin_name
+
+    get_plugin_name(__FILE__, __PACKAGE__)
+
+returns the name of the plugin
+
+=cut
+sub get_plugin_name {
+    my($file, $pkg) = @_;
+    $pkg =~ s|::|/|gmx;
+    $pkg .= '.pm';
+    $file =~ s|/lib/\Q$pkg\E$||gmx;
+    $file =~ s|^.*/||gmx;
+    return($file);
+}
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
