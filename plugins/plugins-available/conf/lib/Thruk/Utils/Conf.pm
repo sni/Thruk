@@ -815,7 +815,15 @@ sub get_backends_with_obj_config {
     if(scalar @fetch > 0) {
         # make sure we have uptodate information about config section of http backends
         local $ENV{'THRUK_USE_SHADOW'} = 0;
-        $c->{'db'}->get_processinfo(backend => \@fetch);
+        eval {
+            $c->{'db'}->get_processinfo(backend => \@fetch);
+        };
+        for my $key (@fetch) {
+            if($c->stash->{'failed_backends'}->{$key}) {
+                my $peer = $c->{'db'}->get_peer_by_key($key);
+                delete $peer->{'configtool'}->{remote};
+            }
+        }
     }
 
     # first hide all of them
