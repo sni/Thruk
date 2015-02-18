@@ -813,6 +813,8 @@ sub get_backends_with_obj_config {
         }
     }
     if(scalar @fetch > 0) {
+        # make sure we have uptodate information about config section of http backends
+        local $ENV{'THRUK_USE_SHADOW'} = 0;
         $c->{'db'}->get_processinfo(backend => \@fetch);
     }
 
