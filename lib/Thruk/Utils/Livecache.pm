@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use utf8;
 use File::Slurp qw/read_file/;
+use Time::HiRes qw/sleep/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -68,17 +69,21 @@ sub restart_shadow_naemon_procs {
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
+        #&timing_breakpoint("restarting $key");
         my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
         my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         if(-s $pidfile) {
             my $pid = read_file($pidfile);
-            kill(15, $pid);
-            for(1..30) {
+            #&timing_breakpoint("pidfile exists: $pid");
+            kill(2, $pid);
+            for(1..300) {
                 last if kill(0, $pid) == 0;
-                sleep(1);
+                sleep(0.1);
             }
+            #&timing_breakpoint("stopped");
         }
         _start_shadownaemon_for_peer($config, $peer, $key, $basedir);
+        #&timing_breakpoint("started");
     }
     return;
 }
