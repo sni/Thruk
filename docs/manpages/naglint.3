@@ -132,37 +132,44 @@
 .rm #[ #] #H #V #F C
 .\" ========================================================================
 .\"
-.IX Title "nagexp 3"
-.TH nagexp 3 "2015-02-12" "perl v5.10.1" "User Contributed Perl Documentation"
+.IX Title "naglint 3"
+.TH naglint 3 "2015-02-16" "perl v5.14.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH "NAME"
-nagexp \- create export of your nagios installation used for later import in OMD
+naglint \- beautify nagios config files
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 .Vb 1
-\&  Usage: nagexp [options] <nagios.cfg>
+\&  Usage: naglint [options] <file> [<files...>]
 \&
 \&  Options:
 \&  \-h, \-\-help                    Show this help message and exit
 \&  \-v, \-\-verbose                 Print verbose output
 \&  \-V, \-\-version                 Print version
-\&  \-f, \-\-file                    export output file
-\&  \-a, \-\-all                     export all types, synonym for \-pclAs
-\&  \-s, \-\-status                  export status files
-\&  \-p, \-\-plugins                 export plugins
-\&  \-c, \-\-config                  export config files
-\&  \-l, \-\-logfile                 export current logfile
-\&  \-A, \-\-archive                 export logfile archive
+\&  \-c, \-\-config                  config file. Default is ~/.naglintrc
+\&  \-i                            replace content inline instead of printing to stdout
+\&  \-r                            read directories recursivly
+\&      \-\-core                    core type can be nagios, icinga or shinken. Will be
+\&                                autodetected unless specified.
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-This script exports your nagios installation for later import in \s-1OMD.\s0
+This script beautifies nagios config files.
+.PP
+.Vb 6
+\&  \- clean whitespace
+\&  \- clean indention
+\&  \- remove deprecated attributes
+\&  \- validate duplicate or invalid attributes
+\&  \- break long command lines into shorter pieces
+\&  \- sort attributes naturally
+.Ve
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-nagexp has the following arguments:
+naglint has the following arguments:
 .IP "\fB\-h\fR , \fB\-\-help\fR" 4
 .IX Item "-h , --help"
 .Vb 1
@@ -173,63 +180,105 @@ nagexp has the following arguments:
 .Vb 1
 \&    print verbose output too
 .Ve
+.IP "\fB\-c\fR , \fB\-\-config\fR" 4
+.IX Item "-c , --config"
+.Vb 1
+\&    use different config file. Default locations are ~/.naglintrc and /etc/thruk/naglint.conf
+.Ve
 .IP "\fB\-V\fR , \fB\-\-version\fR" 4
 .IX Item "-V , --version"
 .Vb 1
 \&    print version and exit
 .Ve
-.IP "\fB\-f\fR , \fB\-\-file\fR" 4
-.IX Item "-f , --file"
-.Vb 2
-\&    export file. Will generate a generic filename like
-\&    export\-2012\-11\-08.tgz otherwise.
+.IP "\fB\-\-core\fR" 4
+.IX Item "--core"
+.Vb 3
+\&    use specific config type. can be \*(Aqnagios\*(Aq, \*(Aqicinga\*(Aq or \*(Aqshinken\*(Aq.
+\&    enables core type specific attributes. Will be autodetected unless
+\&    specified.
 .Ve
-.IP "\fB\-a\fR , \fB\-\-all\fR" 4
-.IX Item "-a , --all"
+.IP "\fB\-i\fR" 4
+.IX Item "-i"
 .Vb 1
-\&    export all types, synonym for \-pclAs
+\&    edit given files inline and overwrite them with their beautified objects
 .Ve
-.IP "\fB\-s\fR , \fB\-\-status\fR" 4
-.IX Item "-s , --status"
+.IP "\fB\-r\fR" 4
+.IX Item "-r"
 .Vb 1
-\&    export status files like status.dat and retention.dat.
-.Ve
-.IP "\fB\-p\fR , \fB\-\-plugins\fR" 4
-.IX Item "-p , --plugins"
-.Vb 1
-\&    export plugins. Export will contain the complete folder for found plugins.
-.Ve
-.IP "\fB\-c\fR , \fB\-\-config\fR" 4
-.IX Item "-c , --config"
-.Vb 2
-\&    export config files. This will contain config object configuration and
-\&    general config files like resource.cfg.
-.Ve
-.IP "\fB\-l\fR , \fB\-\-logfile\fR" 4
-.IX Item "-l , --logfile"
-.Vb 1
-\&    export logfile
-.Ve
-.IP "\fB\-A\fR , \fB\-\-archive\fR" 4
-.IX Item "-A , --archive"
-.Vb 1
-\&    export logfile archive
+\&    read directories recursivly
 .Ve
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
-returns 0 on successful export or number of errors otherwise
+returns 0 on success or number of errors otherwise
+.SH "CONFIG"
+.IX Header "CONFIG"
+see \s-1FILES\s0 section for where to store config options.
+.IP "indent_object_key" 4
+.IX Item "indent_object_key"
+.Vb 1
+\&    Number of spaces before object attribute names. Default 2
+.Ve
+.IP "indent_object_value" 4
+.IX Item "indent_object_value"
+.Vb 1
+\&    Number of spaces before objects attribute values. Default 30
+.Ve
+.IP "indent_object_comments" 4
+.IX Item "indent_object_comments"
+.Vb 1
+\&    Number of spaces before inline comments. Default 68
+.Ve
+.IP "list_join_string" 4
+.IX Item "list_join_string"
+.Vb 1
+\&    Should list attributes be joined with space or not. Default \*(Aq,\*(Aq
+.Ve
+.IP "break_long_arguments" 4
+.IX Item "break_long_arguments"
+.Vb 1
+\&    Should long arguments be broken into multiple lines. Default 1
+.Ve
+.IP "object_attribute_key_order" 4
+.IX Item "object_attribute_key_order"
+.Vb 1
+\&    list of attributes which should be on top of the object
+.Ve
+.IP "object_cust_var_order" 4
+.IX Item "object_cust_var_order"
+.Vb 1
+\&    list of custom variables which will be put on top of other custom variables
+.Ve
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-export everything
+Beautify single config file
 .PP
 .Vb 1
-\&  %> nagexp \-a \-f /tmp/export.tgz /etc/nagios3/nagios.cfg
+\&  %> naglint objects.cfg > beauty.cfg
 .Ve
 .PP
-export everything except logfile archive
+Beautify and replace single config file inline
 .PP
 .Vb 1
-\&  %> nagexp \-lpc /etc/nagios3/nagios.cfg
+\&  %> naglint \-i objects.cfg
+.Ve
+.PP
+Process objects from \s-1STDIN\s0
+.PP
+.Vb 1
+\&  %> cat objects.cfg | naglint > beauty.cfg
+.Ve
+.SH "FILES"
+.IX Header "FILES"
+~/.naglintrc
+.PP
+.Vb 1
+\&  user config file
+.Ve
+.PP
+/etc/thruk/naglint.conf
+.PP
+.Vb 1
+\&  global config file
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"

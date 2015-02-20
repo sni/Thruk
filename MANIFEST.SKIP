@@ -26,12 +26,8 @@ logs/thruk.log
 ^thruk_local.conf\.
 ^thruk_local.conf\-
 ^menu_local.conf
-docs/development/git.txt
-docs/images
 script/thruk.lib
 script/thruk_update_docs.sh
-script/thruk_update_table_docs.pl
-script/thruk_extract_cmd_templates.pl
 script/wkhtmltopdf
 t/xt
 root/thruk/plugins/.*
@@ -49,6 +45,7 @@ inc/File/Copy/Recursive.pm
 ^log4perl.conf$
 TODO
 docs/development
+docs/documentation/
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
 thruk_.*.changes

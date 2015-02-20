@@ -8,7 +8,7 @@ fi
 
 DOS2UNIX=$(which dos2unix || which fromdos)
 
-cd docs || ( echo "please run from the project root dir"; exit 1; )
+cd docs/manpages || ( echo "please run from the project root dir"; exit 1; )
 
 # man pages from asciidoc
 if [ thruk8.txt -nt thruk.8 ]; then
@@ -24,7 +24,7 @@ FILES="thruk
        nagimp
 "
 for file in $FILES; do
-    [ ! -e $file.3 -o ../script/$file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
+    [ ! -e $file.3 -o ../../script/$file -nt $file.3 ] && pod2man -s 3 -n $file ../../script/$file > $file.3
 done
 
 exit 0

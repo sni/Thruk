@@ -1,0 +1,211 @@
+---
+layout: docs
+title: Installation
+---
+
+
+== Installation
+
+There are several ways of installing Thruk.
+
+=== Labs Consol Repository
+The https://labs.consol.de/repo/[Labs Repository] provides packages of
+latest Thruk releases (including daily development builds) and other
+Tools like Mod-Gearman. Just follow the guide on the labs page for
+your distribution.
+
+
+=== OMD
+An easy way of installing Thruk is using OMD from
+http://omdistro.org[omdistro.org]. There are Debian, Ubuntu, Centos
+and Suse Packages containing preconfigured latest versions of Nagios
+and Thruk. The package also includes Icinga, Shinken, pnp4nagios,
+check_mk and Nagvis. OMD is the recommended way of installing new
+Nagios / Thruk setups when you want to install several addons at once.
+
+
+=== Use Packages
+Standalone installation from a binary package is another easy way
+to get Thruk running.
+
+Download packages from the link:../download.html[download page].
+
+All packages have the following filesystem structure:
+
+-------
+  /etc/thruk                       Thruks config
+  /etc/httpd/conf.d/thruk.conf     Apache config
+  /usr/share/thruk                 shared files
+  /usr/lib/thruk/perl5             Perl libraries
+  /var/cache/thruk                 temporary files
+  /var/lib/thruk                   stored user settings
+-------
+
+After installation, Thruk is available at http://your-host/thruk/ and
+has a default user 'thrukadmin' with password 'thrukadmin' configured.
+You may need to change backend configuration. This should be done in
+the thruk_local.conf where all settings can be overridden.
+
+
+
+==== Debian / Ubuntu
+
+-------
+  #> dpkg -i thruk_1.84_debian6_amd64.deb
+-------
+
+In case of dependency errors, run 'apt-get -f install' and try the
+'dpkg -i...' again.
+
+
+==== Centos / Redhat
+
+-------
+  #> yum install --nogpgcheck thruk-1.84-1.rhel6.x86_64.rpm
+-------
+
+You may need to include an external repository for mod_fastcgi module.
+Epel or Rpmforge should do it.
+
+
+==== SLES
+
+-------
+  #> zypper install thruk-1.84-1.sles11.x86_64.rpm
+-------
+
+You may need the SLES sdk dvd for additional dependencies.
+
+
+=== Source Installation
+
+A link:install_from_source.html[Source Installation] can sometimes be usefull if you
+have special requirements to paths and users. This is only for experienced users
+and should be considered as last resort.
+
+There is a separate page with link:install_from_source.html[detailed  Instructions].
+
+
+== Configuration
+
+The `thruk.conf` will be overwritten with new defaults on updates. The
+thruk_local.conf contains the local overrides and will never be
+overwritten.
+
+-------
+    /etc/thruk/thruk_local.conf
+    /etc/thruk/cgi.cfg
+-------
+
+See the link:configuration.html[Thruk Configuration] section for detailed explaination of options from the `thruk_local.conf`.
+
+See the link:cgi-cfg.html[CGI Configuration] section for options from the `cgi.cfg` file.
+
+
+
+
+== Apache Configuration
+
+[TIP]
+.apache is preconfigured when using packages
+=======
+Apache configuration is not needed if you use OMD or packages. Apache
+is already preconfigured in that case.
+=======
+
+Apache configuration is covered in the link:install-webserver.html[Webserver Integration] section.
+
+
+
+
+== Backend Configuration
+
+You may connect multiple backends into one Thruk interface. Just specify
+multiple 'peer' items.
+
+=== Livestatus
+
+Livestatus is a addon for Naemon, Nagios or Icinga which provides real time
+status data. Contrary to database addons it adds very little overhead to the
+Naemon core which makes livestatus based gui fast and real time.
+
+[TIP]
+.Shinken
+=======
+Shinken has livestatus support built-in and does not require additional
+modules.
+=======
+
+Refer to http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus
+on how to install livestatus onto your monitoring box. The
+<<labs-consol-repository,Lab Consol Repository>> has livestatus rpm
+packages. For debian based Linux systems just use the provided
+packages of your distribution.
+
+Basically you have to build the NEB module and add it to your naemon.cfg,
+nagios.cfg or icinga.cfg.
+
+-------
+ broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock
+-------
+
+Then use the socket as 'peer' parameter in your backend configuration.
+
+.Thruk Backends
+image:source/backends.png[Thruk Backends Manager]
+
+.Livestatus Architecture
+image:source/livestatus.png[Livestatus Architecture]
+
+
+
+=== HTTP
+
+A HTTP connection is possible between multiple Thruk installations. A
+HTTP connection not only makes live data available, it also offers a
+secure way to manage object configuration from remote. To authenticate
+the central Thruk installation, you need to provide the secret key from the
+slave instance. This setup is perfect for managing several independent
+installations from a central point of view.
+
+[TIP]
+.use SSL
+=======
+It's strongly recommended to use HTTPS for remote connections.
+=======
+
+-------
+    # package installation
+    %> cat /var/lib/thruk/secret.key
+
+    # omd site
+    OMD[site]:~$ cat var/thruk/secret.key
+-------
+
+.HTTP Architecture
+image:source/livestatus_http.png[HTTP Architecture]
+
+
+
+=== MongoDB
+The MongoDB is not a real backend for status data, but it can be used as a
+logfile cache. If unsure whether to use MongoDB or MySQL, use MySQL which is
+newer and faster. The MongoDB logfile cache may be deprecated in the future.
+
+ex.:
+
+  logcache = mongodb://localhost:27017/thruk_logs
+
+Details are explained in the link:logfile-cache.html[Logfile Cache] section.
+
+
+=== MySQL
+The MySQL Database is not a real backend for status data, but it can be used as a
+logfile cache. If unsure whether to use MongoDB or MySQL, use MySQL which is
+newer and faster. The MongoDB logfile cache may be deprecated in the future.
+
+ex.:
+
+  logcache = mysql://username:password@localhost:3306/thruk_logs
+
+Details are explained in the link:logfile-cache.html[Logfile Cache] section.
