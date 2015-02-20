@@ -64,9 +64,13 @@ sub new {
 
         'exported_nodes'    => {},
         'testmode'          => 0,
+        'draft'             => 0,
     };
     bless $self, $class;
     $self->set_file($c, $file);
+    if(!-e $file) {
+        $self->{'draft'} = 1;
+    }
 
     if($editmode and -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
     if(-e $file) {

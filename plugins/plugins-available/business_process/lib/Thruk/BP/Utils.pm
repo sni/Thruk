@@ -27,20 +27,24 @@ Helper for the business process addon
 
 =head2 load_bp_data
 
-    load_bp_data($c, [$num], [$editmode])
+    load_bp_data($c, [$num], [$editmode], [$drafts])
 
 editmode:
     - 0/undef:    no edit mode
     - 1:          only edit mode
 
+drafts:
+    - 0/undef:    skip drafts
+    - 1:          load drafts too
+
 load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num, $editmode) = @_;
+    my($c, $num, $editmode, $drafts) = @_;
 
     # make sure our folders exist
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
 
@@ -50,10 +54,29 @@ sub load_bp_data {
         return($bps) unless $num =~ m/^\d+$/mx;
         $pattern = $num.'.tbp';
     }
-    my @files = glob($base_folder.'/'.$pattern);
+    my $numbers = {};
+    my @files   = glob($base_folder.'/'.$pattern);
     for my $file (@files) {
         my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
-        push @{$bps}, $bp if $bp;
+        if($bp) {
+            push @{$bps}, $bp;
+            $numbers->{$bp->{'id'}} = 1;
+        }
+    }
+    if($drafts) {
+        # load drafts too
+        my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
+        for my $file (@files) {
+            my $nr = $file;
+            $nr =~ s|^.*/(\d+)\.tbp\.edit$|$1|mx;
+            next if $numbers->{$nr};
+            $file  = $base_folder.'/'.$nr.'.tbp';
+            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
+            if($bp) {
+                push @{$bps}, $bp;
+                $numbers->{$bp->{'id'}} = 1;
+            }
+        }
     }
 
     # sort by name
@@ -74,7 +97,7 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
     while(-e $base_folder.'/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
@@ -97,7 +120,7 @@ sub make_uniq_label {
 
     # gather names of all BPs and editBPs
     my $names = {};
-    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
+    my @files = glob(base_folder($c).'/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
     for my $file (@files) {
         next if $bp_id and $file =~ m#/$bp_id\.tbp(.edit|)$#mx;
         my $data = Thruk::Utils::IO::json_lock_retrieve($file);
@@ -250,7 +273,7 @@ remove old edit files
 sub clean_orphaned_edit_files {
     my($c, $threshold) = @_;
     $threshold = 86400 unless defined $threshold;
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     for my $pattern (qw/edit runtime/) {
     my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.'.$pattern);
         for my $file (@files) {
@@ -283,7 +306,7 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp');
+    my @files = glob(base_folder($c).'/*.tbp');
     if(scalar @files > 0) {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
@@ -315,7 +338,7 @@ sub get_custom_functions {
 
     # get required files
     my $functions = [];
-    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.pm');
+    my @files = glob(base_folder($c).'/*.pm');
     for my $filename (@files) {
         next unless -s $filename;
         my $f = _parse_custom_functions($filename);

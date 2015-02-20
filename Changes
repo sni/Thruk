@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add host and service notes url macros (Andrew Widdersheim)
+          - Business Process:
+            - show draft edits in overview
           - Bug Fixes
             - fix accessing performance data page in author mode
             - fix accessing reports page in author mode

@@ -356,7 +356,8 @@ sub _bp_start_page {
     $c->stash->{editmode} = 0;
 
     # load business processes
-    my $bps = Thruk::BP::Utils::load_bp_data($c);
+    my $drafts_too = $c->stash->{allowed_for_edit} ? 1 : 0;
+    my $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
     $c->stash->{'bps'} = $bps;
 
     if($c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'json') {
