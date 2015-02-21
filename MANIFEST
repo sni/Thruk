@@ -20,6 +20,7 @@ docs/manpages/naglint.3
 docs/manpages/thruk.3
 docs/manpages/thruk.8
 docs/manpages/thruk8.txt
+docs/documentation/configuration.asciidoc
 examples/bp_functions.pm
 examples/contacts2csv
 examples/dump_services
