@@ -92,7 +92,7 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     if [ -e root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
         mv root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}_panorama.js root/thruk/javascript/all_in_one-${fileversion}_panorama.js
     fi
-    git add docs/nagexp.3 docs/nagimp.3 docs/naglint.3
+    git add docs/manpages/nagexp.3 docs/manpages/nagimp.3 docs/manpages/naglint.3
 fi
 ./script/thruk_update_docs.sh > /dev/null
 yes n | perl Makefile.PL > /dev/null
@@ -100,7 +100,7 @@ git add                     \
     MANIFEST                \
     support/thruk.spec      \
     lib/Thruk.pm            \
-    docs/thruk.3            \
+    docs/manpages/thruk.3   \
     root/thruk/startup.html \
     script/thruk            \
     dist.ini                \
