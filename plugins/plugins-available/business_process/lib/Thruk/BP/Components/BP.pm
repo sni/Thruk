@@ -627,8 +627,8 @@ sub _submit_results_to_core_backend {
 
     my $name = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
     my $peer = $c->{'db'}->get_peer_by_key($name);
-    my $pkey = $peer->peer_key();
     die("no backend found by name ".$name) unless $peer;
+    my $pkey = $peer->peer_key();
 
     for my $id (@{$results}) {
         my $cmds = $self->{'nodes_by_id'}->{$id}->result_to_cmd($self);
