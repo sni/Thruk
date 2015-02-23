@@ -278,9 +278,14 @@ init thread connection pool
 sub init_backend_thread_pool {
     our($peer_order, $peers, $pool, $pool_size, $xs);
     return if defined $peers;
-    $xs = 0;
-
     #&timing_breakpoint('creating pool');
+
+    $xs = 0;
+    eval {
+        require Thruk::Utils::XS;
+        Thruk::Utils::XS->import();
+        $xs = 1;
+    };
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
@@ -325,12 +330,9 @@ sub init_backend_thread_pool {
                 Thruk::Utils::IO::mkdir_r($config->{'shadow_naemon_dir'}) ;
             };
             die("could not create shadow_naemon_dir ".$config->{'shadow_naemon_dir'}.': '.$@) if $@;
-            eval {
-                require Thruk::Utils::XS;
-                Thruk::Utils::XS->import();
+            if($xs) {
                 $pool_size = 1; # no pool required when using xs caching
-                $xs        = 1;
-            };
+            }
         }
     }
 

@@ -1398,13 +1398,13 @@ sub _get_log_service_auth {
 
 ##########################################################
 sub _service_lookup {
-    my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix) = @_;
+    my($service_lookup, $host_lookup, $host_name, $service_description, $dbh, $prefix, $host_id) = @_;
     return 'NULL' unless $service_description;
 
     my $id = $service_lookup->{$host_name}->{$service_description};
     return $id if $id;
 
-    my $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix);
+    $host_id = &_host_lookup($host_lookup, $host_name, $dbh, $prefix) unless $host_id;
 
     $dbh->do("INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
@@ -1510,6 +1510,7 @@ sub _import_peer_logfiles {
         $Thruk::Backend::Provider::Mysql::skip_plugin_db_lookup = 1;
     }
 
+    my @columns = qw/class time type state host_name service_description plugin_output message state_type contact_name/;
     while($time <= $end) {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
@@ -1523,9 +1524,7 @@ sub _import_peer_logfiles {
                                                                     { time => { '>=' => $time } },
                                                                     { time => { '<'  => $time + $blocksize } }
                                                             ]}],
-                                                 columns => [qw/
-                                                                class time type state host_name service_description plugin_output message state_type contact_name
-                                                           /],
+                                                 columns => \@columns,
                                                 );
             if($mode eq 'update') {
                 # get already stored logs to filter duplicates
@@ -1566,6 +1565,10 @@ sub _import_logcache_from_file {
     }
 
     require Monitoring::Availability::Logs;
+    my $parse_line = &Monitoring::Availability::Logs::parse_line;
+    if($Thruk::Backend::Pool::xs) {
+        $parse_line = &Thruk::Utils::XS::parse_line;
+    }
 
     my $log_count = 0;
     for my $f (@{$files}) {
@@ -1578,8 +1581,8 @@ sub _import_logcache_from_file {
             chomp($line);
             &Thruk::Utils::decode_any($line);
             my $original_line = $line;
-            my $l = &Monitoring::Availability::Logs::parse_line($line);
-            next unless $l->{'time'};
+            my $l = &{$parse_line}($line);
+            next unless($l && $l->{'time'});
 
             if($mode eq 'update') {
                 if($last_duplicate_ts < $l->{'time'}) {
@@ -1608,13 +1611,21 @@ sub _import_logcache_from_file {
             &_set_class($l);
             if($state eq '')      { $state      = 'NULL'; }
             if($state_type eq '') { $state_type = 'NULL'; }
-            my $host    = &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-            my $svc     = &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
-            my $contact = 'NULL';
-            $contact    = &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix) if $l->{'contact_name'};
+
+            my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
+            if($l->{'service_description'}) {
+                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+                $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host);
+            }
+            elsif($l->{'host_name'}) {
+                $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+            }
+            if($l->{'contact_name'}) {
+                $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix);
+            }
             &_trim_log_entry($l);
-            my $plugin  = &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-            my $message = &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+            my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
+            my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
 
             push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($l->{'type'}).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
@@ -1647,25 +1658,32 @@ sub _insert_logs {
         }
         $log_count++;
         print '.' if $log_count%100 == 0 and $verbose;
-        my $type    = $l->{'type'};
-        $type = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
+        my $type = $l->{'type'};
+        $type    = 'TIMEPERIOD TRANSITION' if $type =~ m/^TIMEPERIOD\ TRANSITION/mxo;
         if($type eq 'TIMEPERIOD TRANSITION') {
             $l->{'plugin_output'} = '';
         }
-        if($type eq 'SERVICE NOTIFICATION' or $type eq 'HOST NOTIFICATION') {
+        elsif($type eq 'SERVICE NOTIFICATION' or $type eq 'HOST NOTIFICATION') {
             $l->{'plugin_output'} = ''; # would result in duplicate output otherwise
         }
-        my $state       = $l->{'state'};
-        $state          = 'NULL' if $state eq '';
-        my $state_type  = $l->{'state_type'};
-        $state_type     = 'NULL' if $state_type eq '';
-        my $host        = &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
-        my $svc         = &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix);
-        my $contact     = 'NULL';
-        $contact        = &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix) if $l->{'contact_name'};
+        my $state             = $l->{'state'};
+        my $state_type        = $l->{'state_type'};
+        if($state eq '')      { $state      = 'NULL'; }
+        if($state_type eq '') { $state_type = 'NULL'; }
+        my($host, $svc, $contact) = ('NULL', 'NULL', 'NULL');
+        if($l->{'service_description'}) {
+            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+            $svc  = $service_lookup->{$l->{'host_name'}}->{$l->{'service_description'}} || &_service_lookup($service_lookup, $host_lookup, $l->{'host_name'}, $l->{'service_description'}, $dbh, $prefix, $host);
+        }
+        elsif($l->{'host_name'}) {
+            $host = $host_lookup->{$l->{'host_name'}} || &_host_lookup($host_lookup, $l->{'host_name'}, $dbh, $prefix);
+        }
+        if($l->{'contact_name'}) {
+            $contact = $contact_lookup->{$l->{'contact_name'}} || &_contact_lookup($contact_lookup, $l->{'contact_name'}, $dbh, $prefix);
+        }
         &_trim_log_entry($l);
-        my $plugin      = &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
-        my $message     = &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
+        my $plugin      = $plugin_lookup->{$l->{'plugin_output'}} || &_plugin_lookup($plugin_lookup, $l->{'plugin_output'}, $dbh, $prefix);
+        my $message     = $plugin_lookup->{$l->{'message'}}       || &_plugin_lookup($plugin_lookup, $l->{'message'}, $dbh, $prefix);
         push @values, '('.$l->{'time'}.','.$l->{'class'}.','.$dbh->quote($type).','.$state.','.$dbh->quote($state_type).','.$contact.','.$host.','.$svc.','.$plugin.','.$message.')';
 
         # commit every 1000th to avoid to large blocks
