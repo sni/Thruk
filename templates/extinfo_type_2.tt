@@ -25,7 +25,7 @@
                 [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
                 [% END %]
-                <br><a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]&style=perfmap'>As Performance Map</a>)
+                <br><a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap'>As Performance Map</a>)
                 <br>
               </td>
             </tr>
@@ -110,7 +110,7 @@
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <tr>
               <td align='left'>
-                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l');</script></td>[% END %]
+                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l');</script>[% END %]
                 <br clear="all">
               </td>
             </tr>
