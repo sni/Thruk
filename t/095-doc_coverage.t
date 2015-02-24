@@ -28,9 +28,11 @@ done_testing();
 sub get_thruk_conf {
     my $conf_string = "";
     open(my $ph, '<', 'thruk.conf') or die("cannot open thruk.conf");
+    my $amend = 0;
     while(<$ph>) {
-    my $line = $_;
-        next if $line !~ m/(=\s+|<)/mx;
+        my $line = $_;
+        next if !$amend && $line !~ m/(=\s+|<)/mx;
+        $amend = $line =~ m/\\$/mx ? 1 : 0;
         $line =~ s/^\s*#//g;
         $conf_string .= $line;
     }
