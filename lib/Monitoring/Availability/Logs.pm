@@ -162,9 +162,9 @@ sub parse_line {
 sub _store_logs_from_string {
     my($self, $string) = @_;
     return unless defined $string;
-    my $parse_line = &parse_line;
+    my $parse_line = \&parse_line;
     if($self->{xs}) {
-        $parse_line = &Thruk::Utils::XS::parse_line;
+        $parse_line = \&Thruk::Utils::XS::parse_line;
     }
     for my $line (split/\n/mxo, $string) {
         my $data = &{$parse_line}($line);
@@ -177,9 +177,9 @@ sub _store_logs_from_string {
 sub _store_logs_from_file {
     my($self, $file) = @_;
     return unless defined $file;
-    my $parse_line = &parse_line;
+    my $parse_line = \&parse_line;
     if($self->{xs}) {
-        $parse_line = &Thruk::Utils::XS::parse_line;
+        $parse_line = \&Thruk::Utils::XS::parse_line;
     }
     open(my $FH, '<', $file) or croak('cannot read file '.$file.': '.$!);
     binmode($FH);
@@ -232,9 +232,9 @@ sub _parse_livestatus_entry {
         return $entry;
     }
 
-    my $parse_line = &parse_line;
+    my $parse_line = \&parse_line;
     if($self->{xs}) {
-        $parse_line = &Thruk::Utils::XS::parse_line;
+        $parse_line = \&Thruk::Utils::XS::parse_line;
     }
 
     # extract more information from our options

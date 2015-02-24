@@ -1565,9 +1565,9 @@ sub _import_logcache_from_file {
     }
 
     require Monitoring::Availability::Logs;
-    my $parse_line = &Monitoring::Availability::Logs::parse_line;
+    my $parse_line = \&Monitoring::Availability::Logs::parse_line;
     if($Thruk::Backend::Pool::xs) {
-        $parse_line = &Thruk::Utils::XS::parse_line;
+        $parse_line = \&Thruk::Utils::XS::parse_line;
     }
 
     my $log_count = 0;
