@@ -1565,10 +1565,6 @@ sub _import_logcache_from_file {
     }
 
     require Monitoring::Availability::Logs;
-    my $parse_line = \&Monitoring::Availability::Logs::parse_line;
-    if($Thruk::Backend::Pool::xs) {
-        $parse_line = \&Thruk::Utils::XS::parse_line;
-    }
 
     my $log_count = 0;
     for my $f (@{$files}) {
@@ -1581,7 +1577,7 @@ sub _import_logcache_from_file {
             chomp($line);
             &Thruk::Utils::decode_any($line);
             my $original_line = $line;
-            my $l = &{$parse_line}($line);
+            my $l = &Monitoring::Availability::Logs::parse_line($line); # do not use xs here, unchanged $line breaks the _set_class later
             next unless($l && $l->{'time'});
 
             if($mode eq 'update') {
