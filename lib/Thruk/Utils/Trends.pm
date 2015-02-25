@@ -281,7 +281,7 @@ sub _create_image {
             _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
 
             # draw text
-            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_height, $drawing_x_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_x_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
         }
 
         # draw a border
