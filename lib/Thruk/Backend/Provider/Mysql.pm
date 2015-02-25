@@ -616,6 +616,14 @@ return Mysql filter
 sub _get_filter {
     my($self, $inp) = @_;
     my $filter = $self->_get_subfilter($inp);
+    
+    open LOGFILE, ">>/tmp/thruk.log";
+    print LOGFILE "--------------------------\n";
+    print LOGFILE Dumper([$filter]);
+    close LOGFILE;
+
+
+
     if($filter and ref $filter) {
         $filter = '('.join(' AND ', @{$filter}).')';
     }

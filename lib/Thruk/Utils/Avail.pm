@@ -569,6 +569,13 @@ sub calculate_availability {
     }
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
+    
+    open LOGFILE, ">>/tmp/thruk.log";
+    print LOGFILE "--------------------------\n";
+    print LOGFILE Dumper([$filter]);
+    close LOGFILE;
+
+
 
     $c->stats->profile(begin => "avail.pm updatecache");
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
@@ -586,6 +593,12 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
     $c->stats->profile(end   => "avail.pm fetchlogs");
+    
+    open LOGFILE, ">>/tmp/thruk.log";
+    print LOGFILE "--------------------------\n";
+    print LOGFILE Dumper([$logs]);
+    close LOGFILE;
+
 
     $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
 
