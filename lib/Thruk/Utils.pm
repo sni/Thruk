@@ -18,11 +18,12 @@ use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use File::Slurp qw/read_file/;
 use Encode qw/encode encode_utf8 decode is_utf8/;
-use File::Copy qw/move/;
+use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Backend::Pool qw//;
 use Thruk::Utils::IO qw//;
+use Digest::MD5 qw(md5_hex);
 
 ##############################################
 =head1 METHODS
@@ -1914,14 +1915,14 @@ sub read_data_file {
 
 =head2 write_data_file
 
-  write_data_file($filename, $data)
+  write_data_file($filename, $data, [$number_of_backups])
 
 write data to datafile
 
 =cut
 
 sub write_data_file {
-    my($filename, $data) = @_;
+    my($filename, $data, $number_of_backups) = @_;
 
     # make data::dumper save utf-8 directly
     local $Data::Dumper::Useqq = 1;
@@ -1940,6 +1941,22 @@ sub write_data_file {
     print $fh $d;
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
+
+    if($number_of_backups && -e $filename) {
+        my $old_md5 = md5_hex(read_file($filename));
+        my $new_md5 = md5_hex($data);
+        if($new_md5 ne $old_md5) {
+            # remove oldest backup
+            unlink($filename.'.'.$number_of_backups);
+            my @backups = sort glob($filename.'.*');
+            while(scalar @backups > $number_of_backups) {
+                unlink(shift(@backups));
+            }
+            my @stat = stat($filename);
+            move($filename, $filename.'.'.$stat[9]);
+        }
+    }
+
     move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
 
     return;

@@ -8,7 +8,7 @@ use JSON::XS;
 use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
-use File::Copy qw/copy/;
+use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
 use Thruk::Utils::PanoramaCpuStats;
 
@@ -115,6 +115,12 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         }
         elsif($task eq 'dashboard_update') {
             return($self->_task_dashboard_update($c));
+        }
+        elsif($task eq 'dashboard_restore_list') {
+            return($self->_task_dashboard_restore_list($c));
+        }
+        elsif($task eq 'dashboard_restore') {
+            return($self->_task_dashboard_restore($c));
         }
         elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
@@ -1958,6 +1964,8 @@ sub _task_dashboard_update {
         $c->stash->{'json'} = { 'status' => 'ok' };
         if($action eq 'remove') {
             unlink($dashboard->{'file'});
+            # and also all backups
+            unlink(glob($dashboard->{'file'}.'.*'));
         }
         if($action eq 'update') {
             my $extra_settings = {};
@@ -1974,6 +1982,46 @@ sub _task_dashboard_update {
             }
             $self->_save_dashboard($c, $dashboard, $extra_settings);
         }
+    }
+    $self->_add_misc_details($c, 1);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore_list {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        my $list = [];
+        $nr       =~ s/^tabpan-tab_//gmx;
+        my @files = reverse sort glob($self->{'var'}.'/'.$nr.'.tab.*');
+        for my $file (@files) {
+            $file =~ m/\.(\d+)$/mx;
+            my $date = $1;
+            push(@{$list}, { num => $date })
+        }
+        $c->stash->{'json'} = { data => $list };
+    }
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+       $nr         =~ s/^tabpan-tab_//gmx;
+    my $timestamp  = $c->request->parameters->{'timestamp'};
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        my @stat = stat($self->{'var'}.'/'.$nr.'.tab');
+        move($self->{'var'}.'/'.$nr.'.tab', $self->{'var'}.'/'.$nr.'.tab.'.$stat[9], );
+        move($self->{'var'}.'/'.$nr.'.tab.'.$timestamp, $self->{'var'}.'/'.$nr.'.tab');
     }
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
@@ -2271,7 +2319,7 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
 
-    Thruk::Utils::write_data_file($file, $dashboard);
+    Thruk::Utils::write_data_file($file, $dashboard, 15);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     return $dashboard;

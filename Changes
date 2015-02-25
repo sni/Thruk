@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add host and service notes url macros (Andrew Widdersheim)
+          - Panorama View:
+            - add undo function
           - Business Process:
             - show draft edits in overview
           - Bug Fixes

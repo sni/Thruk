@@ -14,13 +14,13 @@ debian/thruk.lintian-overrides
 debian/thruk.logrotate
 debian/thruk.manpages
 dist.ini
+docs/documentation/configuration.asciidoc
 docs/manpages/nagexp.3
 docs/manpages/nagimp.3
 docs/manpages/naglint.3
 docs/manpages/thruk.3
 docs/manpages/thruk.8
 docs/manpages/thruk8.txt
-docs/documentation/configuration.asciidoc
 examples/bp_functions.pm
 examples/contacts2csv
 examples/dump_services
@@ -742,6 +742,7 @@ plugins/plugins-available/panorama/root/images/accept.png
 plugins/plugins-available/panorama/root/images/add.png
 plugins/plugins-available/panorama/root/images/application_view_columns.png
 plugins/plugins-available/panorama/root/images/arrow_refresh.png
+plugins/plugins-available/panorama/root/images/book_previous.png
 plugins/plugins-available/panorama/root/images/bricks.png
 plugins/plugins-available/panorama/root/images/btn_ack.png
 plugins/plugins-available/panorama/root/images/btn_ack_remove.png
@@ -755,6 +756,7 @@ plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_organisation.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
+plugins/plugins-available/panorama/root/images/clock_go.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/computer.png
