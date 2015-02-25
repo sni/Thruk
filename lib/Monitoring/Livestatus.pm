@@ -3,14 +3,37 @@ package Monitoring::Livestatus;
 use 5.006;
 use strict;
 use warnings;
-use Data::Dumper;
-use Carp;
+use Data::Dumper qw/Dumper/;
+use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
-use Encode;
-use JSON::XS;
+use Encode qw(encode);
+use JSON::XS qw();
+use Storable qw/dclone/;
+
+use Monitoring::Livestatus::INET qw//;
+use Monitoring::Livestatus::UNIX qw//;
 
 our $VERSION = '0.76';
 
+
+# list of allowed options
+my $allowed_options = {
+        'addpeer'       => 1,
+        'backend'       => 1,
+        'columns'       => 1,
+        'deepcopy'      => 1,
+        'header'        => 1,
+        'limit'         => 1,
+        'limit_start'   => 1,
+        'limit_length'  => 1,
+        'rename'        => 1,
+        'slice'         => 1,
+        'sum'           => 1,
+        'callbacks'     => 1,
+        'wrapped_json'  => 1,
+        'sort'          => 1,
+        'offset'        => 1,
+};
 
 =head1 NAME
 
@@ -27,17 +50,16 @@ data from Nagios and Icinga
 
 =head1 DESCRIPTION
 
-This module connects via socket/tcp to the check_mk livestatus addon for Nagios
-and Icinga. You first have to install and activate the mklivestatus addon in your
-monitoring installation.
+This module connects via socket/tcp to the livestatus addon for Naemon, Nagios,
+Icinga and Shinken. You first have to install and activate the livestatus addon
+in your monitoring installation.
 
 =head1 CONSTRUCTOR
 
 =head2 new ( [ARGS] )
 
 Creates an C<Monitoring::Livestatus> object. C<new> takes at least the
-socketpath.  Arguments are in key-value pairs.
-See L<EXAMPLES> for more complex variants.
+socketpath. Arguments are in key-value pairs.
 
 =over 4
 
@@ -104,14 +126,6 @@ set a query timeout. Used for retrieving querys, Default 60sec
 
 set a connect timeout. Used for initial connections, default 5sec
 
-=item use_threads
-
-only used with multiple backend connections.
-Default is to don't threads where available. As threads in perl
-are causing problems with tied resultset and using more memory.
-Querys are usually faster without threads, except for very slow backends
-connections.
-
 =back
 
 If the constructor is only passed a single argument, it is assumed to
@@ -121,32 +135,31 @@ be a the C<peer> specification. Use either socker OR server.
 
 sub new {
     my $class = shift;
-    unshift(@_, "peer") if scalar @_ == 1;
+    unshift(@_, 'peer') if scalar @_ == 1;
     my(%options) = @_;
 
     my $self = {
-      "verbose"                     => 0,       # enable verbose output
-      "socket"                      => undef,   # use unix sockets
-      "server"                      => undef,   # use tcp connections
-      "peer"                        => undef,   # use for socket / server connections
-      "name"                        => undef,   # human readable name
-      "line_seperator"              => 10,      # defaults to newline
-      "column_seperator"            => 0,       # defaults to null byte
-      "list_seperator"              => 44,      # defaults to comma
-      "host_service_seperator"      => 124,     # defaults to pipe
-      "keepalive"                   => 0,       # enable keepalive?
-      "errors_are_fatal"            => 1,       # die on errors
-      "backend"                     => undef,   # should be keept undef, used internally
-      "timeout"                     => undef,   # timeout for tcp connections
-      "query_timeout"               => 60,      # query timeout for tcp connections
-      "connect_timeout"             => 5,       # connect timeout for tcp connections
-      "timeout"                     => undef,   # timeout for tcp connections
-      "use_threads"                 => undef,   # use threads, default is to use threads where available
-      "warnings"                    => 1,       # show warnings, for example on querys without Column: Header
-      "logger"                      => undef,   # logger object used for statistical informations and errors / warnings
-      "deepcopy"                    => undef,   # copy result set to avoid errors with tied structures
-      "retries_on_connection_error" => 3,       # retry x times to connect
-      "retry_interval"              => 1,       # retry after x seconds
+      'verbose'                     => 0,       # enable verbose output
+      'socket'                      => undef,   # use unix sockets
+      'server'                      => undef,   # use tcp connections
+      'peer'                        => undef,   # use for socket / server connections
+      'name'                        => undef,   # human readable name
+      'line_seperator'              => 10,      # defaults to newline
+      'column_seperator'            => 0,       # defaults to null byte
+      'list_seperator'              => 44,      # defaults to comma
+      'host_service_seperator'      => 124,     # defaults to pipe
+      'keepalive'                   => 0,       # enable keepalive?
+      'errors_are_fatal'            => 1,       # die on errors
+      'backend'                     => undef,   # should be keept undef, used internally
+      'timeout'                     => undef,   # timeout for tcp connections
+      'query_timeout'               => 60,      # query timeout for tcp connections
+      'connect_timeout'             => 5,       # connect timeout for tcp connections
+      'timeout'                     => undef,   # timeout for tcp connections
+      'warnings'                    => 1,       # show warnings, for example on querys without Column: Header
+      'logger'                      => undef,   # logger object used for statistical informations and errors / warnings
+      'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
+      'retries_on_connection_error' => 3,       # retry x times to connect
+      'retry_interval'              => 1,       # retry after x seconds
     };
 
     for my $opt_key (keys %options) {
@@ -178,11 +191,9 @@ sub new {
         $options{'name'} = $peer->{'name'};
         $options{'peer'} = $peer->{'peer'};
         if($peer->{'type'} eq 'UNIX') {
-            require Monitoring::Livestatus::UNIX;
             $self->{'CONNECTOR'} = new Monitoring::Livestatus::UNIX(%options);
         }
         elsif($peer->{'type'} eq 'INET') {
-            require Monitoring::Livestatus::INET;
             $self->{'CONNECTOR'} = new Monitoring::Livestatus::INET(%options);
         }
         $self->{'peer'} = $peer->{'peer'};
@@ -261,53 +272,64 @@ column aliases can be defined with a rename hash
 =cut
 
 sub selectall_arrayref {
-    my($self, $statement, $opt, $limit) = @_;
+    my($self, $statement, $opt, $limit, $result) = @_;
     $limit = 0 unless defined $limit;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt) unless $result;
 
-    $self->_log_statement($statement, $opt, $limit) if $self->{'verbose'};
-
-    my $result = $self->_send($statement, $opt);
+    $self->_log_statement($statement, $opt, $limit) if !$result && $self->{'verbose'};
 
     if(!defined $result) {
-        return unless $self->{'errors_are_fatal'};
-        croak("got undef result for: $statement");
+        $result = &_send($self, $statement, $opt);
+        return $result if $ENV{'THRUK_SELECT'};
+
+        if(!defined $result) {
+            return unless $self->{'errors_are_fatal'};
+            croak("got undef result for: $statement");
+        }
     }
 
     # trim result set down to excepted row count
-    if(defined $limit and $limit >= 1) {
+    if(!$opt->{'offset'} && defined $limit and $limit >= 1) {
         if(scalar @{$result->{'result'}} > $limit) {
             @{$result->{'result'}} = @{$result->{'result'}}[0..$limit-1];
         }
     }
 
     if($opt->{'slice'}) {
+        my $callbacks = $opt->{'callbacks'};
         # make an array of hashes, inplace to safe memory
-        my $rnum = scalar @{$result->{'result'}};
-        my $knum = scalar @{$result->{'keys'}};
-        for(my $x=0;$x<$rnum;$x++) {
-            my $row = $result->{'result'}->[$x];
-            my $hash_ref;
-            for(my $y=0;$y<$knum;$y++) {
-                my $key = $result->{'keys'}->[$y];
-                if(exists $opt->{'rename'} and defined $opt->{'rename'}->{$key}) {
-                    $key = $opt->{'rename'}->{$key};
-                }
-                $hash_ref->{$key} = $row->[$y];
-            }
-            # add callbacks
-            if(exists $opt->{'callbacks'}) {
-                for my $key (keys %{$opt->{'callbacks'}}) {
-                    $hash_ref->{$key} = $opt->{'callbacks'}->{$key}->($hash_ref);
+        my $keys = $result->{'keys'};
+        # renamed columns
+        if($opt->{'rename'}) {
+            $keys = dclone($result->{'keys'});
+            my $keysize = scalar @{$keys};
+            for(my $x=0; $x<$keysize;$x++) {
+                my $old = $keys->[$x];
+                if($opt->{'rename'}->{$old}) {
+                    $keys->[$x] = $opt->{'rename'}->{$old};
                 }
             }
-            $result->{'result'}->[$x] = $hash_ref;
         }
-        return($result->{'result'});
+        $result  = $result->{'result'};
+        my $rnum = scalar @{$result};
+        for(my $x=0;$x<$rnum;$x++) {
+            # sort array into hash slices
+            my %hash;
+            @hash{@{$keys}} = @{$result->[$x]};
+            # add callbacks
+            if($callbacks) {
+                for my $key (keys %{$callbacks}) {
+                    $hash{$key} = $callbacks->{$key}->(\%hash);
+                }
+            }
+            $result->[$x] = \%hash;
+        }
+        return($result);
     }
-    elsif(exists $opt->{'callbacks'}) {
+
+    if(exists $opt->{'callbacks'}) {
         for my $res (@{$result->{'result'}}) {
             # add callbacks
             if(exists $opt->{'callbacks'}) {
@@ -316,9 +338,7 @@ sub selectall_arrayref {
                 }
             }
         }
-    }
 
-    if(exists $opt->{'callbacks'}) {
         for my $key (keys %{$opt->{'callbacks'}}) {
             push @{$result->{'keys'}}, $key;
         }
@@ -343,11 +363,11 @@ Sends a query and returns a hashref with the given key
 sub selectall_hashref {
     my($self, $statement, $key_field, $opt) = @_;
 
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     $opt->{'slice'} = 1;
 
-    croak("key is required for selectall_hashref") if !defined $key_field;
+    croak('key is required for selectall_hashref') if !defined $key_field;
 
     my $result = $self->selectall_arrayref($statement, $opt);
 
@@ -414,7 +434,7 @@ sub selectcol_arrayref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     # if now colums are set, use just the first one
     if(!defined $opt->{'columns'} or ref $opt->{'columns'} ne 'ARRAY') {
@@ -451,7 +471,7 @@ sub selectrow_array {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my @result = @{$self->selectall_arrayref($statement, $opt, 1)};
     return @{$result[0]} if scalar @result > 0;
@@ -477,7 +497,7 @@ sub selectrow_arrayref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my $result = $self->selectall_arrayref($statement, $opt, 1);
     return if !defined $result;
@@ -504,7 +524,7 @@ sub selectrow_hashref {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
     $opt->{slice} = 1;
 
     my $result = $self->selectall_arrayref($statement, $opt, 1);
@@ -532,7 +552,7 @@ sub selectscalar_value {
     my($self, $statement, $opt) = @_;
 
     # make opt hash keys lowercase
-    $opt = $self->_lowercase_and_verify_options($opt);
+    $opt = &_lowercase_and_verify_options($self, $opt);
 
     my $row = $self->selectrow_arrayref($statement);
     return if !defined $row;
@@ -622,7 +642,7 @@ when using multiple backends, a list of all addresses is returned in list contex
 =cut
 sub peer_addr {
     my($self) = @_;
-    return "".$self->{'peer'};
+    return ''.$self->{'peer'};
 }
 
 
@@ -647,7 +667,7 @@ sub peer_name {
         $self->{'name'} = $value;
     }
 
-    return "".$self->{'name'};
+    return ''.$self->{'name'};
 }
 
 
@@ -665,7 +685,7 @@ when using multiple backends, a list of all keys is returned in list context
 sub peer_key {
     my($self) = @_;
 
-    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr." ".$self->peer_name); }
+    if(!defined $self->{'key'}) { $self->{'key'} = md5_hex($self->peer_addr.' '.$self->peer_name); }
 
     return $self->{'key'};
 }
@@ -676,9 +696,11 @@ sub peer_key {
 sub _send {
     my($self, $statement, $opt) = @_;
 
+    confess('duplicate data') if $opt->{'data'};
+
     delete $self->{'meta_data'};
 
-    my $header     = "";
+    my $header = '';
     my $keys;
 
     $Monitoring::Livestatus::ErrorCode = 0;
@@ -743,12 +765,28 @@ sub _send {
         if($statement =~ m/^Columns:\ (.*)$/mx) {
             ($statement,$keys) = $self->_extract_keys_from_columns_header($statement);
         } elsif($statement =~ m/^Stats:\ (.*)$/mx or $statement =~ m/^StatsGroupBy:\ (.*)$/mx) {
-            ($statement,$keys) = $self->_extract_keys_from_stats_statement($statement);
+            ($statement,$keys) = extract_keys_from_stats_statement($statement);
+        }
+
+        # Offset header (currently naemon only)
+        if(defined $opt->{'offset'}) {
+            $statement .= "\nOffset: ".$opt->{'offset'};
+        }
+
+        # Sort header (currently naemon only)
+        if(defined $opt->{'sort'}) {
+            for my $sort (@{$opt->{'sort'}}) {
+                $statement .= "\nSort: ".$sort;
+            }
         }
 
         # Commands need no additional header
         if($statement !~ m/^COMMAND/mx) {
-            $header .= "OutputFormat: json\n";
+            if($opt->{'wrapped_json'}) {
+                $header .= "OutputFormat: wrapped_json\n";
+            } else {
+                $header .= "OutputFormat: json\n";
+            }
             $header .= "ResponseHeader: fixed16\n";
             if($self->{'keepalive'}) {
                 $header .= "KeepAlive: on\n";
@@ -760,20 +798,21 @@ sub _send {
         # add additional headers
         if(defined $opt->{'header'} and ref $opt->{'header'} eq 'HASH') {
             for my $key ( keys %{$opt->{'header'}}) {
-                $header .= $key.": ".$opt->{'header'}->{$key}."\n";
+                $header .= $key.': '.$opt->{'header'}->{$key}."\n";
             }
         }
 
         chomp($statement);
         my $send = "$statement\n$header";
-        $self->{'logger'}->debug("> ".Dumper($send)) if $self->{'verbose'};
-        ($status,$msg,$body) = $self->_send_socket($send);
+        $self->{'logger'}->debug('> '.Dumper($send)) if $self->{'verbose'};
+        ($status,$msg,$body) = &_send_socket($self, $send);
+        return([$status, $opt, $keys]) if $ENV{'THRUK_SELECT'};
         if($self->{'verbose'}) {
             #$self->{'logger'}->debug("got:");
             #$self->{'logger'}->debug(Dumper(\@erg));
-            $self->{'logger'}->debug("status: ".Dumper($status));
-            $self->{'logger'}->debug("msg:    ".Dumper($msg));
-            $self->{'logger'}->debug("< ".Dumper($body));
+            $self->{'logger'}->debug('status: '.Dumper($status));
+            $self->{'logger'}->debug('msg:    '.Dumper($msg));
+            $self->{'logger'}->debug('< '.Dumper($body));
         }
     }
 
@@ -787,18 +826,15 @@ sub _send {
         } else {
             $Monitoring::Livestatus::ErrorMessage = $msg;
         }
-        $self->{'logger'}->error($status." - ".$Monitoring::Livestatus::ErrorMessage." in query:\n'".$statement) if $self->{'verbose'};
+        $self->{'logger'}->error($status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement) if $self->{'verbose'};
         if($self->{'errors_are_fatal'}) {
-            croak("ERROR ".$status." - ".$Monitoring::Livestatus::ErrorMessage." in query:\n'".$statement."'\n");
+            croak('ERROR '.$status.' - '.$Monitoring::Livestatus::ErrorMessage." in query:\n".$statement."\n");
         }
         return;
     }
 
     # return a empty result set if nothing found
     return({ keys => [], result => []}) if !defined $body;
-
-    my $line_seperator = chr($self->{'line_seperator'});
-    my $col_seperator  = chr($self->{'column_seperator'});
 
     my $limit_start = 0;
     if(defined $opt->{'limit_start'}) { $limit_start = $opt->{'limit_start'}; }
@@ -823,7 +859,7 @@ sub _send {
             };
         }
         if($@) {
-            my $message = "ERROR ".$@." in text: '".$body."'\" for statement: '$statement'\n";
+            my $message = 'ERROR '.$@." in text: '".$body."'\" for statement: '$statement'\n";
             $self->{'logger'}->error($message) if $self->{'verbose'};
             if($self->{'errors_are_fatal'}) {
                 croak($message);
@@ -842,19 +878,35 @@ sub _send {
 
     # for querys with column header, no separate columns will be returned
     if(!defined $keys) {
-        $self->{'logger'}->warn("got statement without Columns: header!") if $self->{'verbose'};
+        $self->{'logger'}->warn('got statement without Columns: header!') if $self->{'verbose'};
         if($self->{'warnings'}) {
-            carp("got statement without Columns: header! -> ".$statement);
+            carp('got statement without Columns: header! -> '.$statement);
         }
         $keys = shift @{$result};
     }
 
-    return($self->_post_processing($result, $opt, $keys));
+    return(&post_processing($self, $result, $opt, $keys));
 }
 
 ########################################
-sub _post_processing {
+
+=head2 post_processing
+
+ $ml->post_processing($result, $options, $keys)
+
+returns postprocessed result.
+
+Useful when using select based io.
+
+=cut
+sub post_processing {
     my($self, $result, $opt, $keys) = @_;
+
+    my $total_count;
+    if($opt->{'wrapped_json'}) {
+        $total_count = $result->{'total_count'};
+        $result      = $result->{'data'};
+    }
 
     # add peer information?
     my $with_peers = 0;
@@ -862,11 +914,11 @@ sub _post_processing {
         $with_peers = 1;
     }
 
-    my $peer_name = $self->peer_name;
-    my $peer_addr = $self->peer_addr;
-    my $peer_key  = $self->peer_key;
-
     if(defined $with_peers and $with_peers == 1) {
+        my $peer_name = $self->peer_name;
+        my $peer_addr = $self->peer_addr;
+        my $peer_key  = $self->peer_key;
+
         unshift @{$keys}, 'peer_name';
         unshift @{$keys}, 'peer_addr';
         unshift @{$keys}, 'peer_key';
@@ -880,7 +932,8 @@ sub _post_processing {
 
     # set some metadata
     $self->{'meta_data'} = {
-                    'result_count' => scalar @{$result},
+        'total_count'  => $total_count,
+        'result_count' => scalar @{$result},
     };
 
     return({ keys => $keys, result => $result });
@@ -888,11 +941,11 @@ sub _post_processing {
 
 ########################################
 sub _open {
-    my($self, $statement) = @_;
+    my($self) = @_;
 
     # return the current socket in keep alive mode
     if($self->{'keepalive'} and defined $self->{'sock'} and $self->{'sock'}->connected) {
-        $self->{'logger'}->debug("reusing old connection") if $self->{'verbose'};
+        $self->{'logger'}->debug('reusing old connection') if $self->{'verbose'};
         return($self->{'sock'});
     }
 
@@ -903,7 +956,7 @@ sub _open {
         $self->{'sock'} = $sock;
     }
 
-    $self->{'logger'}->debug("using new connection") if $self->{'verbose'};
+    $self->{'logger'}->debug('using new connection') if $self->{'verbose'};
     return($sock);
 }
 
@@ -1023,21 +1076,23 @@ sub _send_socket {
     # try to avoid connection errors
     eval {
         local $SIG{PIPE} = sub {
-            die("broken pipe");
+            die('broken pipe');
         };
 
         if($self->{'retries_on_connection_error'} <= 0) {
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($sock, $msg, $recv) if $msg;
-            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
+            return $sock if $ENV{'THRUK_SELECT'};
+            ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             return($status, $msg, $recv);
         }
 
         while((!defined $status or ($status == 491 or $status == 497 or $status == 500)) and $retries < $self->{'retries_on_connection_error'}) {
             $retries++;
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            ($status, $msg, $recv) = $self->_read_socket_do($sock, $statement);
+            return $sock if $ENV{'THRUK_SELECT'};
+            ($status, $msg, $recv) = &_read_socket_do($self, $sock, $statement);
             $self->{'logger'}->debug('query status '.$status) if $self->{'verbose'};
             if($status == 491 or $status == 497 or $status == 500) {
                 $self->{'logger'}->debug('got status '.$status.' retrying in '.$self->{'retry_interval'}.' seconds') if $self->{'verbose'};
@@ -1049,14 +1104,16 @@ sub _send_socket {
     if($@) {
         $self->{'logger'}->debug("try 1 failed: $@") if $self->{'verbose'};
         if(defined $@ and $@ =~ /broken\ pipe/mx) {
-            ($sock, $msg, $recv) = $self->_send_socket_do($statement);
+            ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
-            return($self->_read_socket_do($sock, $statement));
+            return $sock if $ENV{'THRUK_SELECT'};
+            return(&_read_socket_do($self, $sock, $statement));
         }
         croak($@) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
+    return $sock if $ENV{'THRUK_SELECT'};
     croak($msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
@@ -1065,7 +1122,7 @@ sub _send_socket {
 ########################################
 sub _send_socket_do {
     my($self, $statement) = @_;
-    my $sock = $self->_open() or return(491, $self->_get_error(491), $!);
+    my $sock = $self->_open() or return(491, $self->_get_error(491, $!), $!);
     utf8::decode($statement);
     print $sock encode('utf-8' => $statement) or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
     print $sock "\n";
@@ -1084,7 +1141,7 @@ sub _read_socket_do {
 
     $sock->read($header, 16) or return($self->_socket_error($statement, $sock, 'reading header from socket failed, check your livestatus logfile: '.$!));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
-    my($status, $msg, $content_length) = $self->_parse_header($header, $sock);
+    my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
     return($status, $msg, undef) if !defined $content_length;
     my $json_decoder = JSON::XS->new->utf8->relaxed;
     if($content_length > 0) {
@@ -1111,7 +1168,8 @@ sub _read_socket_do {
 
 ########################################
 sub _socket_error {
-    my($self, $statement, $sock, $body) = @_;
+    #my($self, $statement, $sock, $body)...
+    my($self, $statement, undef, $body) = @_;
 
     my $message = "\n";
     $message   .= "peer                ".Dumper($self->peer_name);
@@ -1191,28 +1249,40 @@ pairs:
 =cut
 
 ########################################
-sub _extract_keys_from_stats_statement {
-    my($self, $statement) = @_;
+
+=head2 extract_keys_from_stats_statement
+
+ extract_keys_from_stats_statement($statement)
+
+Extract column keys from statement.
+
+=cut
+sub extract_keys_from_stats_statement {
+    my($statement) = @_;
 
     my(@header, $new_statement);
 
     for my $line (split/\n/mx, $statement) {
-        if($line =~ m/^Stats:\ (.*)\s+as\s+(.*)$/mxi) {
+        if($line !~ m/^Stats/mxo) { # faster shortcut for non-stats lines
+            $new_statement .= $line."\n";
+            next;
+        }
+        if($line =~ m/^Stats:\ (.*)\s+as\s+(.*?)$/mxo) {
             push @header, $2;
             $line = 'Stats: '.$1;
         }
-        elsif($line =~ m/^Stats:\ (.*)$/mx) {
+        elsif($line =~ m/^Stats:\ (.*)$/mxo) {
             push @header, $1;
         }
 
-        if($line =~ m/^StatsAnd:\ (\d+)\s+as\s+(.*)$/mx) {
+        elsif($line =~ m/^StatsAnd:\ (\d+)\s+as\s+(.*?)$/mxo) {
             for(my $x = 0; $x < $1; $x++) {
                 pop @header;
             }
             $line = 'StatsAnd: '.$1;
             push @header, $2;
         }
-        elsif($line =~ m/^StatsAnd:\ (\d+)$/mx) {
+        elsif($line =~ m/^StatsAnd:\ (\d+)$/mxo) {
             my @to_join;
             for(my $x = 0; $x < $1; $x++) {
                 unshift @to_join, pop @header;
@@ -1220,14 +1290,14 @@ sub _extract_keys_from_stats_statement {
             push @header, join(' && ', @to_join);
         }
 
-        if($line =~ m/^StatsOr:\ (\d+)\s+as\s+(.*)$/mx) {
+        elsif($line =~ m/^StatsOr:\ (\d+)\s+as\s+(.*?)$/mxo) {
             for(my $x = 0; $x < $1; $x++) {
                 pop @header;
             }
             $line = 'StatsOr: '.$1;
             push @header, $2;
         }
-        elsif($line =~ m/^StatsOr:\ (\d+)$/mx) {
+        elsif($line =~ m/^StatsOr:\ (\d+)$/mxo) {
             my @to_join;
             for(my $x = 0; $x < $1; $x++) {
                 unshift @to_join, pop @header;
@@ -1236,11 +1306,11 @@ sub _extract_keys_from_stats_statement {
         }
 
         # StatsGroupBy header are always sent first
-        if($line =~ m/^StatsGroupBy:\ (.*)\s+as\s+(.*)$/mxi) {
+        elsif($line =~ m/^StatsGroupBy:\ (.*)\s+as\s+(.*?)$/mxo) {
             unshift @header, $2;
             $line = 'StatsGroupBy: '.$1;
         }
-        elsif($line =~ m/^StatsGroupBy:\ (.*)$/mx) {
+        elsif($line =~ m/^StatsGroupBy:\ (.*)$/mxo) {
             unshift @header, $1;
         }
         $new_statement .= $line."\n";
@@ -1289,7 +1359,7 @@ Errorhandling can be done like this:
 
 =cut
 sub _get_error {
-    my($self, $code) = @_;
+    my($self, $code, $append) = @_;
 
     my $codes = {
         '200' => 'OK. Reponse contains the queried data.',
@@ -1315,50 +1385,44 @@ sub _get_error {
     };
 
     confess('non existant error code: '.$code) if !defined $codes->{$code};
+    my $msg = $codes->{$code};
+    $msg .= ' - '.$append if $append;
 
-    return($codes->{$code});
+    return($msg);
 }
 
 ########################################
 sub _get_peer {
     my($self) = @_;
 
-    # set options for our peer(s)
-    my %options;
-    for my $opt_key (keys %{$self}) {
-        $options{$opt_key} = $self->{$opt_key};
-    }
-
-    my $peers = [];
-
     # check if the supplied peer is a socket or a server address
     if(defined $self->{'peer'}) {
         if(ref $self->{'peer'} eq '') {
-            my $name = $self->{'name'} || "".$self->{'peer'};
+            my $name = $self->{'name'} || ''.$self->{'peer'};
             if(index($self->{'peer'}, ':') > 0) {
-                push @{$peers}, { 'peer' => "".$self->{'peer'}, type => 'INET', name => $name };
+                return({ 'peer' => ''.$self->{'peer'}, type => 'INET', name => $name });
             } else {
-                push @{$peers}, { 'peer' => "".$self->{'peer'}, type => 'UNIX', name => $name };
+                return({ 'peer' => ''.$self->{'peer'}, type => 'UNIX', name => $name });
             }
         }
         elsif(ref $self->{'peer'} eq 'ARRAY') {
             for my $peer (@{$self->{'peer'}}) {
                 if(ref $peer eq 'HASH') {
                     next if !defined $peer->{'peer'};
-                    $peer->{'name'} = "".$peer->{'peer'} unless defined $peer->{'name'};
+                    $peer->{'name'} = ''.$peer->{'peer'} unless defined $peer->{'name'};
                     if(!defined $peer->{'type'}) {
                         $peer->{'type'} = 'UNIX';
                         if(index($peer->{'peer'}, ':') >= 0) {
                             $peer->{'type'} = 'INET';
                         }
                     }
-                    push @{$peers}, $peer;
+                    return $peer;
                 } else {
                     my $type = 'UNIX';
                     if(index($peer, ':') >= 0) {
                         $type = 'INET';
                     }
-                    push @{$peers}, { 'peer' => "".$peer, type => $type, name => "".$peer };
+                    return({ 'peer' => ''.$peer, type => $type, name => ''.$peer });
                 }
             }
         }
@@ -1369,32 +1433,24 @@ sub _get_peer {
                 if(index($peer, ':') >= 0) {
                     $type = 'INET';
                 }
-                push @{$peers}, { 'peer' => "".$peer, type => $type, name => "".$name };
+                return({ 'peer' => ''.$peer, type => $type, name => ''.$name });
             }
         } else {
-            confess("type ".(ref $self->{'peer'})." is not supported for peer option");
+            confess('type '.(ref $self->{'peer'}).' is not supported for peer option');
         }
     }
     if(defined $self->{'socket'}) {
-        my $name = $self->{'name'} || "".$self->{'socket'};
-        push @{$peers}, { 'peer' => "".$self->{'socket'}, type => 'UNIX', name => $name };
+        my $name = $self->{'name'} || ''.$self->{'socket'};
+        return({ 'peer' => ''.$self->{'socket'}, type => 'UNIX', name => $name });
     }
     if(defined $self->{'server'}) {
-        my $name = $self->{'name'} || "".$self->{'server'};
-        push @{$peers}, { 'peer' => "".$self->{'server'}, type => 'INET', name => $name };
+        my $name = $self->{'name'} || ''.$self->{'server'};
+        return({ 'peer' => ''.$self->{'server'}, type => 'INET', name => $name });
     }
 
     # check if we got a peer
-    if(scalar @{$peers} == 0) {
-        croak('please specify a peer');
-    }
-
-    # clean up
-    delete $options{'peer'};
-    delete $options{'socket'};
-    delete $options{'server'};
-
-    return $peers->[0];
+    croak('please specify a peer');
+    return;
 }
 
 
@@ -1403,27 +1459,15 @@ sub _lowercase_and_verify_options {
     my($self, $opts) = @_;
     my $return = {};
 
-    # list of allowed options
-    my $allowed_options = {
-        'addpeer'       => 1,
-        'backend'       => 1,
-        'columns'       => 1,
-        'deepcopy'      => 1,
-        'header'        => 1,
-        'limit'         => 1,
-        'limit_start'   => 1,
-        'limit_length'  => 1,
-        'rename'        => 1,
-        'slice'         => 1,
-        'sum'           => 1,
-        'callbacks'     => 1,
-    };
+    # make keys lowercase
+    %{$return} = map { lc($_) => $opts->{$_} } keys %{$opts};
 
-    for my $key (keys %{$opts}) {
-        if($self->{'warnings'} and !defined $allowed_options->{lc $key}) {
-            carp("unknown option used: $key - please use only: ".join(", ", keys %{$allowed_options}));
+    if($self->{'warnings'}) {
+        for my $key (keys %{$return}) {
+            if(!defined $allowed_options->{$key}) {
+                carp("unknown option used: $key - please use only: ".join(', ', keys %{$allowed_options}));
+            }
         }
-        $return->{lc $key} = $opts->{$key};
     }
 
     # set limits
@@ -1465,32 +1509,6 @@ sub _log_statement {
 
 1;
 
-=head1 EXAMPLES
-
-=head2 Multibackend Configuration
-
-    use Monitoring::Livestatus;
-    my $ml = Monitoring::Livestatus->new(
-      name       => 'multiple connector',
-      verbose   => 0,
-      keepalive => 1,
-      peer      => [
-            {
-                name => 'DMZ Monitoring',
-                peer => '50.50.50.50:9999',
-            },
-            {
-                name => 'Local Monitoring',
-                peer => '/tmp/livestatus.socket',
-            },
-            {
-                name => 'Special Monitoring',
-                peer => '100.100.100.100:9999',
-            }
-      ],
-    );
-    my $hosts = $ml->selectall_arrayref("GET hosts");
-
 =head1 SEE ALSO
 
 For more information about the query syntax and the livestatus plugin installation
@@ -1501,8 +1519,6 @@ see the Livestatus page: http://mathias-kettner.de/checkmk_livestatus.html
 Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2009 by Sven Nierlein
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

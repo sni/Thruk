@@ -82,7 +82,7 @@
           </tr>
           [% END %]
           [% IF host.action_url_expanded %]
-          [% action_url = get_action_url(2, 1, host.action_url_expanded, host.name) %]
+          [% action_url = get_action_url(c, 2, 1, host.action_url_expanded, host.name) %]
             <tr>
               <td align='right'>
                 <a href='[% action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(host, host_action_icon) %]' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
@@ -106,6 +106,14 @@
               <td align='right'>
                 <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Business<br>Process</i></font>
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <tr>
+              <td align='left'>
+                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% host.peer_key %]', '[% host.name %]', undefined, 'b-l');</script>[% END %]
                 <br clear="all">
               </td>
             </tr>
@@ -400,7 +408,7 @@
           [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
-        [% END %]
+        [% ELSE %]
         [% graph_url = get_graph_url(c, host, 1)%]
         [% IF graph_url %]
         <tr>
@@ -408,6 +416,7 @@
           [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
+        [% END %]
         [% END %]
 
         <tr>

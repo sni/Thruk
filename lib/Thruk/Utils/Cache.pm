@@ -54,7 +54,8 @@ return cache
 
 =cut
 sub cache {
-    my($class, $file) = @_;
+    #my($class, $file)...
+    my(undef, $file) = @_;
     our $instance;
     if($file) { $instance = __PACKAGE__->new($file); }
     if(!$instance) { confess('uninitialized'); }
@@ -161,7 +162,6 @@ update cache from file
 =cut
 sub _update {
     my($self, %args) = @_;
-    my $update = 0;
     if(-f $self->{'_cachefile'}) {
         my $now = time();
         # only check every x seconds

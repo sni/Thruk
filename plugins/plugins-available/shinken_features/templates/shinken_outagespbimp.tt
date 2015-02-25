@@ -1,5 +1,6 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _blocks.tt %]
 [% has_bp = 0 %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
@@ -65,7 +66,7 @@
           <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
-            [% PROCESS _status_host_attributes.tt hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
+            [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
           <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_hosts %]</a></td>
@@ -117,7 +118,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
           <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
-            [% PROCESS _status_service_attributes.tt service=srv service_comment_count=srv.comment_count %]
+            [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
           <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>

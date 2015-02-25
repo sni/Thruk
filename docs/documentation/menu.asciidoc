@@ -1,0 +1,45 @@
+---
+layout: docs
+title: Menu Customization
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== Menu Configuration
+
+Navigation configuration is split in two files
+
+ * menu.conf
+ * menu_local.conf
+
+The menu.conf contains the default side menu configuration. Do not change
+it as this file will be overwritten with every update. If you want to
+create a complete custom navigation, just copy this file to
+menu_local.conf and adjust it to your needs. See the next chapter on
+how to add just add a few links without having to copy the complete
+file.
+
+The menu_local.conf contains the user configuration for the side menu. See the
+link:faq.html#how-to-change-the-side-menu[FAQ] for
+some examples.
+
+The file itself is perl syntax, so you can do whatever perl can do.
+Make sure you verify the syntax after changing the file. The changes
+will be used immediately. So maybe you want to test your changes
+on a test instance first.
+
+[TIP]
+.syntax check for menu configuration
+=======
+ %>perl -wc menu_local.conf
+ menu_local.conf syntax OK
+=======
+
+
+If you just want to add a few entries, create a empty menu_local.conf
+and put these lines into it:
+
+-------
+do '/usr/share/thruk/menu.conf';
+insert_item('General', { 'href' => 'http://labs.consol.de', 'name' => 'Labs', target => '_blank' });
+-------

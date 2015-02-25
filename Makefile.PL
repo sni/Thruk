@@ -49,10 +49,11 @@ requires 'Catalyst::View::GD'                     => 0;     # required by Thruk
 requires 'Catalyst::View::JSON'                   => 0;     # required by Thruk
 requires 'Catalyst::View::Excel::Template::Plus'  => 0;     # required by Thruk::Utils
 requires 'Catalyst::Plugin::ConfigLoader'         => 0;     # required by Catalyst::Plugin::Thruk::ConfigLoader
-requires 'Catalyst::Plugin::Static::Simple'       => 0.30;  # required by Thruk
 requires 'Catalyst::Plugin::Authorization::Roles' => 0;     # required by Catalyst::Plugin::Authorization::ThrukRoles
 requires 'Catalyst::Plugin::CustomErrorMessage'   => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Redirect'             => 0;     # required by Thruk
+requires 'Catalyst::Plugin::Static::Simple'       => 0.30;  # required for reports
+requires 'Catalyst::Action::RenderView'           => 0;     # required by Thruk
 requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
 requires 'Log::Dispatch::File'                    => 0;     # required by Thruk / Log4perl example config
 requires 'FCGI'                                   => 0;     # required by Thruk
@@ -124,6 +125,7 @@ feature     ('author_test',
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
   'WWW::Mechanize::Firefox'                                                 => 0,
   'Test::JavaScript'                                                        => 0,
+  'Test::Vars'                                                              => 0,
 );
 };
 

@@ -91,18 +91,25 @@ sub _create_backend {
     my $name    = $config->{'name'};
     my $type    = $config->{'type'};
     my $options = $config->{'options'};
+    my $class;
 
-    my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
-    if(scalar @provider == 0) {
-        my $list = join(', ', @{$Thruk::Backend::Manager::Provider});
-        $list =~ s/Thruk::Backend::Provider:://gmx;
-        die('unknown type in peer configuration, choose from: '.$list);
+    if(lc $type eq 'livestatus') {
+        # speed up things here, since this class is 99% of the use cases
+        $class = 'Thruk::Backend::Provider::Livestatus';
+    } else {
+        my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
+        if(scalar @provider == 0) {
+            my $list = join(', ', @{$Thruk::Backend::Manager::Provider});
+            $list =~ s/Thruk::Backend::Provider:://gmx;
+            die('unknown type in peer configuration, choose from: '.$list);
+        }
+        $class   = $provider[0];
+        my $require = $class;
+        $require =~ s/::/\//gmx;
+        require $require . ".pm";
+        $class->import;
     }
-    my $class   = $provider[0];
-    my $require = $class;
-    $require =~ s/::/\//gmx;
-    require $require . ".pm";
-    $class->import;
+
     $options->{'name'} = $name;
 
     # disable keepalive for now, it does not work and causes lots of problems
@@ -212,12 +219,14 @@ sub _initialise_peer {
             undef $use_shadow_naemon;
         }
     }
-    if($use_shadow_naemon) {
+    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
-                                                peer     => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
-                                                peer_key => $self->{'key'},
+                                                peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
+                                                peer_key  => $self->{'key'},
+                                                #keepalive => 1,
                                             });
         $self->{'cacheproxy'}->peer_key($self->{'key'});
+        $self->{'cacheproxy'}->{'naemon_optimizations'} = 1;
     }
 
     return;

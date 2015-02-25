@@ -130,9 +130,33 @@ TP.getExportTab = function(options) {
 
 
 /* show settings window */
-TP.tabSettingsWindow = function() {
+TP.tabSettingsWindow = function(nr, closeAfterEdit) {
+    new Ext.LoadMask(Ext.getBody(), {
+        msg: 'loading settings...',
+        listeners: {
+            show: function(mask, eOpts) {
+                window.setTimeout(function() {
+                    TP.tabSettingsWindowDo(mask, nr, closeAfterEdit);
+                }, 100);
+            }
+        }
+    }).show();
+}
+
+TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
     var tabpan = Ext.getCmp('tabpan');
-    var tab    = tabpan.getActiveTab();
+    var tab;
+    if(nr != undefined) {
+        tab = Ext.getCmp(TP.nr2TabId(nr));
+        if(tab == undefined) {
+            TP.add_pantab(nr, undefined, true, function() {
+                TP.tabSettingsWindow(nr, true);
+            });
+            return(false);
+        }
+    } else {
+        tab = tabpan.getActiveTab();
+    }
 
     /* stop rotation */
     TP.stopRotatingTabs();
@@ -243,6 +267,106 @@ TP.tabSettingsWindow = function() {
             }]
         };
     }
+
+    var access = [];
+    if(tab.xdata.groups == undefined) { tab.xdata.groups = []; }
+    Ext.Array.each(tab.xdata.groups, function(item, idx, len) {
+        var group = Ext.Object.getKeys(item)[0];
+        var perm  = item[group];
+        access.push({ contactgroup: group, permission: perm });
+    });
+    var permissionsStore = Ext.create('Ext.data.Store', {
+        fields: ['contactgroup', 'permission'],
+        data: access
+    });
+    var permissionsItems = [{
+        /* show owner */
+        xtype:      'textfield',
+        fieldLabel: 'Owner',
+        name:       'owner',
+        disabled:    true
+    }, {
+        /* permissions */
+        xtype:      'fieldcontainer',
+        fieldLabel: 'Permissions',
+        layout:     'fit',
+        items: [{
+            xtype:      'gridpanel',
+            name:       'permissions',
+            id:         'permissionsGrid',
+            columns:    [
+                    { header: 'Group', flex: 1, dataIndex: 'contactgroup',  align: 'left', tdCls: 'editable', editor: {
+                            xtype:            'searchCbo',
+                            panel:            {panel_id: tab.id},
+                            store:             searchStore,
+                            storeExtraParams: { wildcards: 1 },
+                            lazyRender:        true,
+                            allowBlank:        false
+                        }
+                    },
+                    { header: 'Permissions', width: 140,  dataIndex: 'permission', align: 'left', tdCls: 'editable', editor: {
+                            xtype:         'combobox',
+                            triggerAction: 'all',
+                            selectOnTab:    true,
+                            lazyRender:     true,
+                            editable:       false,
+                            store:        ['read-only', 'read-write']
+                        }
+                    },
+                    { header: '',  width: 30,
+                      xtype: 'actioncolumn',
+                      items: [{
+                            icon: '../plugins/panorama/images/delete.png',
+                            handler: TP.removeGridRow,
+                            action: 'remove'
+                      }],
+                      tdCls: 'clickable icon_column'
+                    }
+            ],
+            store: permissionsStore,
+            selType:    'rowmodel',
+            plugins:     [Ext.create('Ext.grid.plugin.RowEditing', {
+                clicksToEdit: 1,
+                listeners: {
+                    canceledit: function(grid, eOpts) {
+                        // remove new elements
+                        if(eOpts.record.phantom) { eOpts.store.remove(eOpts.record); }
+                    }
+                }
+            })],
+            height: 200,
+            width:  300,
+            fbar: [{
+                type: 'button',
+                text: 'Add Contactgroup',
+                iconCls: 'user-tab',
+                handler: function(btn, eOpts) {
+                    var store = btn.up('gridpanel').store;
+                    store.add({contactgroup:'*', permission:'read-only'})
+                    btn.up('gridpanel').plugins[0].startEdit(store.last(), 0);
+                }
+            }]
+        }]
+    }];
+    var permissionsTab = {
+        title : 'Permissions',
+        type  : 'panel',
+        items: [{
+            xtype : 'panel',
+            layout: 'fit',
+            border: 0,
+            items: [{
+                    xtype:          'form',
+                    id:             'permissionsForm',
+                    bodyPadding:     2,
+                    border:          0,
+                    bodyStyle:      'overflow-y: auto;',
+                    submitEmptyText: false,
+                    defaults:      { anchor: '-12', labelWidth: 130 },
+                    items:           permissionsItems
+            }]
+        }]
+    };
 
     function applyBackground(field) {
         var d_form  = Ext.getCmp('dashboardForm').getForm();
@@ -478,6 +602,7 @@ TP.tabSettingsWindow = function() {
             dashboardTab,
             backendsTab,
             soundsTab,
+            permissionsTab,
             exportTab,
             usersettingsTab
         ]
@@ -485,9 +610,8 @@ TP.tabSettingsWindow = function() {
 
     /* the actual settings window containing the panel */
     var tab_win_settings = new Ext.window.Window({
-        autoShow:    true,
         modal:       true,
-        width:       500,
+        width:       550,
         height:      320,
         title:       'Settings',
         layout :     'fit',
@@ -500,6 +624,7 @@ TP.tabSettingsWindow = function() {
                         // restore old values
                         tab.applyXdata(undefined, false);
                         tab_win_settings.destroy();
+                        if(closeAfterEdit) { tab.destroy(); }
                     }
                 }, {
                 /* save button */
@@ -528,6 +653,14 @@ TP.tabSettingsWindow = function() {
                             Ext.apply(tab.xdata, values);
                         }
 
+                        /* dashboard permissions */
+                        tab.xdata.groups = [];
+                        permissionsStore.each(function(rec) {
+                            var row = {};
+                            row[rec.data.contactgroup] = rec.data.permission;
+                            tab.xdata.groups.push(row);
+                        });
+
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
                         tab.saveState();
@@ -543,6 +676,7 @@ TP.tabSettingsWindow = function() {
                         delete values['rotate_tabs_txt'];
                         Ext.apply(tabpan.xdata, values);
                         var newstate = Ext.JSON.encode(tabpan.getState());
+                        TP.log('['+tab.id+'] settings changed: '+newstate);
                         /* avoid useless updates */
                         if(oldstate != newstate) {
                             tabpan.saveState();
@@ -565,6 +699,14 @@ TP.tabSettingsWindow = function() {
                         }
 
                         tab_win_settings.destroy();
+                        if(closeAfterEdit) {
+                            tab.destroy();
+                        } else {
+                            /* permissions might have changed */
+                            window.setTimeout(function() {
+                                TP.renewDashboard(tab);
+                            }, 2000);
+                        }
                         return true;
                     }
                }
@@ -574,6 +716,10 @@ TP.tabSettingsWindow = function() {
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);
+    Ext.getCmp('permissionsForm').getForm().setValues(tab.xdata);
+    tab_win_settings.show();
+    mask.destroy();
+    TP.modalWindows.push(tab_win_settings);
 };
 
 TP.tabSettingsWindowLocked = function(tab, val) {
@@ -606,6 +752,18 @@ TP.tabSettingsWindowLocked = function(tab, val) {
             item.setDisabled(val);
             if(item.name == "backends" && !tab.xdata.select_backends) {
                 item.setDisabled(true);
+            }
+        });
+    }
+    /* apply to permissions tab */
+    var permissionsForm = Ext.getCmp('permissionsForm');
+    if(permissionsForm) {
+        permissionsForm.items.each(function(item, idx, len) {
+            item.setDisabled(val);
+            Ext.getCmp('permissionsGrid').setDisabled(val);
+            if(tab.readonly == 1) {
+                item.setDisabled(true);
+                Ext.getCmp('permissionsGrid').setDisabled(true);
             }
         });
     }

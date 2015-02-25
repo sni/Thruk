@@ -74,7 +74,8 @@
       top.location.href = '[% loginurl %]?'+ref;
     } else {
       var ref = clean_ref(window.location.search + window.location.hash);
-      jQuery('#referer').val(ref);
+      var el  = document.getElementById('referer');
+      if(el) { el.value = ref; }
     }
   -->
   </script>

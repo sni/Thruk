@@ -1,0 +1,136 @@
+---
+layout: docs
+title: Running Thruk with nginx on Ubuntu
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+= Installation
+
+This document assumes Naemon and Thruk are installed from official
+.deb packages from thruk.org.
+
+
+== Nginx
+
+Install package 'nginx-full':
+
+------------
+  #> apt-get install nginx-full
+------------
+
+Example configuration:
+
+------------
+server {
+    listen                  80 default_server;
+    server_name             thruk thruk.mydomain.com
+
+    access_log              /var/log/nginx/thruk-access.log;
+    error_log               /var/log/nginx/thruk-error.log;
+
+    root                    /usr/share/naemon/root;
+    index                   index.cgi index.html startup.html;
+
+    auth_basic              "Thruk server authentication"
+    auth_basic_user_file    /etc/naemon/htpasswd;
+
+    location /naemon/documentation.html { alias /usr/share/naemon/root/thruk/documentation.html; }
+    location /naemon/startup.html { alias /usr/share/naemon/root/thruk/startup.html; }
+    location ~ ^/naemon/plugins/(.*?)/(.*)$ { alias /etc/naemon/plugins/plugins-enabled/$1/root/$2; }
+    location /naemon/themes/ { alias /etc/naemon/themes/themes-enabled/; }
+    location /naemon { alias /usr/share/naemon/root/thruk; }
+
+    location ~ ^/naemon/(.*\.cgi|.*\.html) {
+        include             /etc/nginx/fastcgi_params;
+        fastcgi_index       index.cgi;
+        fastcgi_param       REMOTE_USER $remote_user;
+        fastcgi_pass        unix:/var/run/fcgiwrap.socket;
+    }
+
+    rewrite ^/$ /naemon;
+}
+------------
+
+== Thruk
+
+Replace existing Thruk init script with this:
+
+------------
+#!/bin/sh
+
+# chkconfig: 2345 85 15
+# description: Thruk FCGI Daemon
+
+### BEGIN INIT INFO
+# Provides:          thruk
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop the Thruk FCGI Daemon
+### END INIT INFO
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=Thruk
+PIDFILE=/var/cache/naemon/thruk/thruk.pid
+CONFDIR=/etc/naemon
+FCGIWRAP_SOCKET=/var/run/fcgiwrap.socket
+
+case "$1" in
+    start)
+        pid=$(cat $PIDFILE 2>/dev/null)
+        if [ "$pid" = "" ]; then
+            kill -0 $pid 2>/dev/null
+            if [ $? = 0 ]; then
+                echo "$NAME is already running (PID: $pid)"
+                exit 1
+            fi
+        fi
+
+        echo -n "Starting Thruk... "
+        CATALYST_CONFIG=$CONFDIR /usr/share/naemon/script/thruk_fastcgi.pl -l $FCGIWRAP_SOCKET >/dev/null 2>&1 &
+        echo $! > $PIDFILE
+        sleep 2
+        echo "Done!"
+    ;;
+    stop)
+        pid=$(cat $PIDFILE 2>/dev/null)
+        if [ "$pid" = "" ]; then
+            echo "No PID found in $PIDFILE"
+            exit 1
+        fi
+
+        echo -n "Stopping $NAME... "
+        kill -9 $pid
+        echo "" > $PIDFILE
+        echo "Done!"
+    ;;
+    reload|force-reload|restart)
+        $0 stop && $0 start
+        exit $?
+        ;;
+    *)
+        echo "Usage: $0 {start|stop||reload|restart|force-reload}"
+        exit 1
+        ;;
+esac
+
+exit 0
+------------
+
+
+== Startup
+
+------------
+  #> /etc/init.d/nginx start
+  #> /etc/init.d/thruk start
+------------
+
+To make Thruk start by default when OS boots, use update-rc.d(8):
+
+------------
+  #> update-rc.d thruk defaults 99
+------------

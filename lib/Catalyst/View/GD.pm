@@ -44,13 +44,11 @@ sub new {
 }
 
 sub process {
-    my $self = shift;
-    my $c    = shift;
-    my @args = @_;
+    #my($self, $c, @args)...
+    my($self, $c, undef) = @_;
 
     my $gd_image_type         = $c->stash->{gd_image_type}         || $self->gd_image_type;
     my $gd_image_content_type = $c->stash->{gd_image_content_type} || $self->gd_image_content_type;
-    my $gd_image_render_args  = $c->stash->{gd_image_render_args}  || $self->gd_image_render_args;
 
     my $gd_image = $c->stash->{gd_image};
 

@@ -16,6 +16,10 @@ use Carp;
 use Fcntl qw/:mode :flock/;
 use Thruk::Backend::Pool;
 use JSON::XS;
+use Encode qw(decode_utf8 encode_utf8);
+use File::Temp qw/tempfile/;
+use POSIX ":sys_wait_h";
+use IPC::Open3 qw/open3/;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -83,17 +87,18 @@ sub mkdir_r {
 
 =head2 write
 
-  write($path, $content, [ $mtime ])
+  write($path, $content, [ $mtime ], [ $append ])
 
 creates file and ensure permissions
 
 =cut
 
 sub write {
-    my($path,$content,$mtime) = @_;
-    open(my $fh, '>', $path) or die('cannot create file '.$path.': '.$!);
+    my($path,$content,$mtime,$append) = @_;
+    my $mode = $append ? '>>' : '>';
+    open(my $fh, $mode, $path) or die('cannot create file '.$path.': '.$!);
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $path);
+    Thruk::Utils::IO::close($fh, $path) or die("cannot close file ".$path.": ".$!);
     utime($mtime, $mtime, $path) if $mtime;
     return 1;
 }
@@ -170,9 +175,8 @@ sub json_lock_store {
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
     print $fh $json->encode($data);
-    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
+    Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);;
     alarm(0);
-    Thruk::Utils::IO::close($fh, $file);
     return 1;
 }
 
@@ -200,10 +204,75 @@ sub json_lock_retrieve {
         $json->incr_parse($line);
     }
     $data = $json->incr_parse;
-    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
+    CORE::close($fh) or die("cannot close file ".$file.": ".$!);;
     alarm(0);
-    CORE::close($fh);
     return $data;
+}
+
+##############################################
+
+=head2 save_logs_to_tempfile
+
+  save_logs_to_tempfile($logs)
+
+save logfiles to tempfile
+
+=cut
+
+sub save_logs_to_tempfile {
+    my($data) = @_;
+    my($fh, $filename) = tempfile();
+    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
+    for my $r (@{$data}) {
+        print $fh encode_utf8($r->{'message'}),"\n";
+    }
+    &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);;
+    return($filename);
+}
+
+##############################################
+
+=head2 cmd
+
+  cmd($command)
+
+run command and return exit code and output
+
+$command can be either a string like '/bin/prog arg1 arg2' or an
+array like ['/bin/prog', 'arg1', 'arg2']
+
+=cut
+
+sub cmd {
+    my($c, $cmd) = @_;
+
+    local $SIG{CHLD}='';
+    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
+    my($rc, $output);
+    if(ref $cmd eq 'ARRAY') {
+        my $prog = shift @{$cmd};
+        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
+        my($pid, $wtr, $rdr, @lines);
+        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        while(waitpid($pid, WNOHANG) == 0) {
+            push @lines, <$rdr>;
+        }
+        $rc = $?;
+        push @lines, <$rdr>;
+        chomp($output = join('', @lines) || '');
+    } else {
+        $c->log->debug( "running cmd: ". $cmd );
+        $output = `$cmd 2>&1`;
+        $rc = $?;
+    }
+    if($rc == -1) {
+        $output .= "[".$!."]";
+    } else {
+        $rc = $rc>>8;
+    }
+    $c->log->debug( "rc:     ". $rc );
+    $c->log->debug( "output: ". $output );
+    return($rc, $output);
 }
 
 ##############################################

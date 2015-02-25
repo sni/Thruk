@@ -513,7 +513,6 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    my @data;
     my $sorted = 0;
     my $sort = {'time' => 1};
     if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
@@ -1621,7 +1620,6 @@ sub _import_logs {
 
     my $backend_count = 0;
     my $log_count     = 0;
-    my $log_skipped   = 0;
 
     if(!defined $backends) {
         Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
@@ -1629,6 +1627,7 @@ sub _import_logs {
     }
     $backends = Thruk::Utils::list($backends);
 
+    my $errors = [];
     for my $key (@{$backends}) {
         my $table = 'logs_'.$key;
         my $peer = $c->{'db'}->get_peer_by_key($key);
@@ -1651,14 +1650,17 @@ sub _import_logs {
                 print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
         };
-        print "ERROR: ", $@,"\n" if $@ and $verbose;
+        if($@) {
+            print "ERROR: ", $@,"\n" if $verbose;
+            push @{$errors}, $@;
+        }
 
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
     }
 
     $c->stats->profile(end => "Mongodb::_import_logs($mode)");
-    return($backend_count, $log_count);
+    return($backend_count, $log_count, $errors);
 }
 
 ##########################################################
@@ -1762,7 +1764,8 @@ sub _update_logcache {
 
 ##########################################################
 sub _update_logcache_auth {
-    my($self, $c, $peer, $db, $table, $verbose) = @_;
+    #my($self, $c, $peer, $db, $table, $verbose)...
+    my($self, undef, $peer, $db, $table, $verbose) = @_;
 
     my $col       = $db->$table;
     my $log_count = 0;

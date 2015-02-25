@@ -9,8 +9,8 @@
 %endif
 
 Name:          thruk
-Version:       1.84
-Release: 5
+Version:       1.86
+Release: 4
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
@@ -28,17 +28,21 @@ Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd wget
+BuildRequires: perl(ExtUtils::MakeMaker)
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 # sles specific requirements
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
 %else
-# rhel specific requirements
-Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-fonts-common
-# rhel6 specific requirements
-%if 0%{?el6}
-Requires: cronie
+# >rhel6 specific requirements
+%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+BuildRequires: perl(File::Copy::Recursive)
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext cronie dejavu-fonts-common
+%else
+# rhel5 specific requirements (centos support no el5 tag)
+BuildRequires: perl(File::Copy::Recursive)
+Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
 %endif
 %endif
 
@@ -119,8 +123,8 @@ a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-if [ /usr/sbin/systemctl ]; then
-    systemctl restart httpd
+if [ -x /usr/sbin/systemctl ]; then
+    /usr/sbin/systemctl restart httpd
 else
     /etc/init.d/httpd restart || /etc/init.d/httpd start
 fi
@@ -224,7 +228,6 @@ exit 0
 %{_datadir}/thruk/LICENSE
 %{_datadir}/thruk/menu.conf
 %{_datadir}/thruk/dist.ini
-%{_datadir}/thruk/docs
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
 %{_libdir}/thruk/perl5
 %doc %{_mandir}/man3/nagexp.3

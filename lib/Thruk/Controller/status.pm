@@ -50,13 +50,26 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
         }
     }
 
-    my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
     if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
         return $self->_process_bookmarks($c);
     }
 
     if(defined $c->{'request'}->{'parameters'}->{'verify'} and $c->{'request'}->{'parameters'}->{'verify'} eq 'time') {
         return $self->_process_verify_time($c);
+    }
+
+    if($c->{'request'}->{'parameters'}->{'serveraction'}) {
+        my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
+        my $json = { 'rc' => $rc, 'msg' => $msg };
+        $c->stash->{'json'} = $json;
+        return $c->forward('Thruk::View::JSON');
+    }
+
+    if($c->{'request'}->{'parameters'}->{'replacemacros'}) {
+        my($rc, $data) = $self->_replacemacros($c);
+        my $json = { 'rc' => $rc, 'data' => $data };
+        $c->stash->{'json'} = $json;
+        return $c->forward('Thruk::View::JSON');
     }
 
     # set some defaults
@@ -184,6 +197,16 @@ sub _process_raw_request {
             elsif($type eq 'custom variable') {
                 $data = [];
             }
+            elsif($type eq 'contactgroup') {
+                $data = [];
+                if($c->{'request'}->{'parameters'}->{'wildcards'}) {
+                    push @{$data}, '*';
+                }
+                my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'});
+                for my $g (@{$groups}) {
+                    push @{$data}, $g->{'name'};
+                }
+            }
             elsif($type eq 'site') {
                 $data = [];
                 for my $key (@{$c->stash->{'backends'}}) {
@@ -222,7 +245,9 @@ sub _process_raw_request {
             push @json, { 'name' => 'hosts', 'data'=> $hosts };
         }
         if( $c->config->{ajax_search_services} ) {
-            $services = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            my @servicefilter = (Thruk::Utils::Auth::get_auth_filter( $c, 'services' ));
+            Thruk::Utils::Status::set_default_filter($c, \@servicefilter);
+            $services = $c->{'db'}->get_service_names( filter => \@servicefilter );
             push @json, { 'name' => 'services', 'data' => $services };
         }
         if( $c->config->{ajax_search_timeperiods} ) {
@@ -235,7 +260,8 @@ sub _process_raw_request {
     }
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 0;
@@ -314,13 +340,15 @@ sub _process_details_page {
     my( $self, $c ) = @_;
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
@@ -331,9 +359,9 @@ sub _process_details_page {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
         '3' => [ [ 'has_been_checked', 'state_order', 'host_name', 'description' ], 'service status' ],
-        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
-        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_order', 'host_name', 'description' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
@@ -350,7 +378,7 @@ sub _process_details_page {
         $keep_peer_addr   = delete $col_hash->{'peer_addr'};
         $keep_peer_name   = delete $col_hash->{'peer_name'};
         $keep_peer_key    = delete $col_hash->{'peer_key'};
-        $keep_last_state  = delete $col_hash->{'last_state_change_plus'};
+        $keep_last_state  = delete $col_hash->{'last_state_change_order'};
         $keep_state_order = delete $col_hash->{'state_order'};
         @{$columns} = keys %{$col_hash};
     }
@@ -367,6 +395,7 @@ sub _process_details_page {
         if($c->stash->{'num_hosts'} > 0) {
             my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail'});
             $url =~ s/&amp;/&/gmx;
+            Thruk::Utils::set_message( $c, 'info_message', 'No services found for this filter, redirecting to host view.' );
             return $c->response->redirect($url)
         }
     }
@@ -382,15 +411,15 @@ sub _process_details_page {
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
-                delete $s->{'peer_addr'}              unless $keep_peer_addr;
-                delete $s->{'peer_name'}              unless $keep_peer_name;
-                delete $s->{'peer_key'}               unless $keep_peer_key;
-                delete $s->{'last_state_change_plus'} unless $keep_last_state;
-                delete $s->{'state_order'}            unless $keep_state_order;
+                delete $s->{'peer_addr'}               unless $keep_peer_addr;
+                delete $s->{'peer_name'}               unless $keep_peer_name;
+                delete $s->{'peer_key'}                unless $keep_peer_key;
+                delete $s->{'last_state_change_order'} unless $keep_last_state;
+                delete $s->{'state_order'}             unless $keep_state_order;
             }
         }
         $c->stash->{'json'} = $services;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -401,7 +430,7 @@ sub _process_details_page {
        and defined $c->stash->{'host_stats'}->{'up'}
        and $c->stash->{'host_stats'}->{'up'} + $c->stash->{'host_stats'}->{'down'} + $c->stash->{'host_stats'}->{'unreachable'} + $c->stash->{'host_stats'}->{'pending'} == 1) {
         # set allowed custom vars into stash
-        Thruk::Utils::set_custom_vars($c, {'prefix' => 'host_', 'host' => $c->{'stash'}->{'data'}->[0]});
+        Thruk::Utils::set_custom_vars($c, {'prefix' => 'host_', 'host' => $c->stash->{'data'}->[0]});
     }
 
     return 1;
@@ -413,13 +442,15 @@ sub _process_hostdetails_page {
     my( $self, $c ) = @_;
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
@@ -428,8 +459,8 @@ sub _process_hostdetails_page {
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
         '1' => [ 'name', 'host name' ],
-        '4' => [ [ 'last_check',             'name' ], 'last check time' ],
-        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'name' ], 'last check time' ],
+        '6' => [ [ 'last_state_change_order', 'name' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'name' ], 'site' ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
@@ -447,7 +478,7 @@ sub _process_hostdetails_page {
         $keep_peer_addr  = delete $col_hash->{'peer_addr'};
         $keep_peer_name  = delete $col_hash->{'peer_name'};
         $keep_peer_key   = delete $col_hash->{'peer_key'};
-        $keep_last_state = delete $col_hash->{'last_state_change_plus'};
+        $keep_last_state = delete $col_hash->{'last_state_change_order'};
         @{$columns} = keys %{$col_hash};
     }
 
@@ -466,14 +497,14 @@ sub _process_hostdetails_page {
         # remove unwanted colums
         if($columns) {
             for my $h (@{$hosts}) {
-                delete $h->{'peer_addr'}              unless $keep_peer_addr;
-                delete $h->{'peer_name'}              unless $keep_peer_name;
-                delete $h->{'peer_key'}               unless $keep_peer_key;
-                delete $h->{'last_state_change_plus'} unless $keep_last_state;
+                delete $h->{'peer_addr'}               unless $keep_peer_addr;
+                delete $h->{'peer_name'}               unless $keep_peer_name;
+                delete $h->{'peer_key'}                unless $keep_peer_key;
+                delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
         }
         $c->stash->{'json'} = $hosts;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
@@ -539,7 +570,6 @@ sub _process_overview_page {
             $joined_groups{$name}->{'hosts'} = {};
         }
 
-        my( $hostname, $servicename );
         if( $c->stash->{substyle} eq 'host' ) {
             for my $hostname ( @{ $group->{'members'} } ) {
 
@@ -878,8 +908,10 @@ sub _process_combined_page {
     my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
     return if $c->stash->{'has_error'};
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';;
 
     # services
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
@@ -890,9 +922,9 @@ sub _process_combined_page {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
         '3' => [ [ 'has_been_checked', 'state', 'host_name', 'description' ], 'service status' ],
-        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
-        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '4' => [ [ 'last_check',              'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_order', 'host_name', 'description' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
@@ -914,9 +946,9 @@ sub _process_combined_page {
     $order = "DESC" if $sorttype == 2;
     $sortoptions = {
         '1' => [ 'name', 'host name' ],
-        '4' => [ [ 'last_check',             'name' ], 'last check time' ],
-        '5' => [ [ 'current_attempt',        'name' ], 'attempt number'  ],
-        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration'  ],
+        '4' => [ [ 'last_check',              'name' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',         'name' ], 'attempt number'  ],
+        '6' => [ [ 'last_state_change_order', 'name' ], 'state duration'  ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
@@ -931,7 +963,6 @@ sub _process_combined_page {
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
@@ -945,7 +976,7 @@ sub _process_combined_page {
             'hosts'    => $hosts,
             'services' => $services,
         };
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     # set audio file to play
@@ -962,7 +993,8 @@ sub _process_perfmap_page {
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
     # which host to display?
-    my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
+    #my( $hostfilter, $servicefilter, $groupfilter )...
+    my( undef, $servicefilter, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
     # add comments and downtimes
@@ -1024,7 +1056,7 @@ sub _process_perfmap_page {
             }
         }
         $c->stash->{'json'} = $data;
-        return $c->detach('View::JSON');
+        return $c->detach('Thruk::View::JSON');
     }
 
     # sort things?
@@ -1185,10 +1217,36 @@ sub _process_verify_time {
 
     my $json = { 'verified' => $verified, 'error' => $error };
     $c->stash->{'json'} = $json;
-    $c->forward('Thruk::View::JSON');
+    $c->forward('Thruk::Thruk::View::JSON');
     return;
 }
 
+
+##########################################################
+# replace macros in given string for a host/service
+sub _replacemacros {
+    my( $self, $c ) = @_;
+
+    return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
+
+    my $host    = $c->{'request'}->{'parameters'}->{'host'};
+    my $service = $c->{'request'}->{'parameters'}->{'service'};
+    my $data    = $c->{'request'}->{'parameters'}->{'data'};
+
+    # replace macros
+    my $objs;
+    if($service) {
+        $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
+    } else {
+        $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
+    }
+    my $obj = $objs->[0];
+    return(1, 'no such object') unless $obj;
+
+    my($new, $rc) = $c->{'db'}->replace_macros($data, {host => $obj, service => $service ? $obj : undef, skip_user => 1});
+    # replace_macros returns 1 on success, js expects 0 on success, so revert rc here
+    return(!$rc, $new);
+}
 
 ##########################################################
 

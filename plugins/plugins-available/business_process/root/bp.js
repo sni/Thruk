@@ -303,7 +303,7 @@ function bp_fill_select_form(data, form) {
         for(var key in data.radio) {
             var d = data.radio[key];
             jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+']][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').attr("checked","checked");
             jQuery(d[1]).buttonset();
         }
     }

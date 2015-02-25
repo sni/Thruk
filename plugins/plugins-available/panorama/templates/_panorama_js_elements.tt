@@ -1,4 +1,27 @@
-﻿Ext.define('TP.ComboBoxSum', {
+﻿Ext.define('TP.BackendCombo', {
+    extend: 'Ext.form.field.ComboBox',
+
+    alias:  'widget.tp_backendcombo',
+
+    fieldLabel: 'Backends / Sites',
+    emptyText : 'inherited from dashboard',
+    name:       'backends',
+    multiSelect: true,
+    queryMode:  'local',
+    valueField: 'name',
+    displayField: 'value',
+    editable:   false,
+    triggerAction: 'all',
+    store:      { fields: ['name', 'value'], data: [] },
+    listConfig : {
+        getInnerTpl: function(displayField) {
+            return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+        }
+    }
+});
+
+
+Ext.define('TP.ComboBoxSum', {
     extend: 'Ext.form.field.ComboBox',
 
     alias:  'widget.tp_combobox_sum',
@@ -307,6 +330,7 @@ TP.Msg = function() {
             if(p[0] == 'info_message') {
                 title = 'Information';
             }
+            TP.log('msg: '+title+' - '+p[1]);
             var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
             var btn = new Ext.Element(m.dom.firstChild);
             btn.on("click", function() {
@@ -473,6 +497,7 @@ Ext.define('Ext.ux.SearchCombobox', {
     triggerAction:  'all',
     pageSize:       true,
     selectOnFocus:  true,
+    selectOnTab:    true,
     typeAhead:      true,
     minChars:       0,
     initComponent: function() {
@@ -483,10 +508,13 @@ Ext.define('Ext.ux.SearchCombobox', {
             searchStore.panel = me.panel;
             var type          = me.name;
             searchStore.search_type = type;
+            var proxy         = searchStore.getProxy();
+            proxy.addParams   = Ext.Object.merge({}, me.storeExtraParams);
+            if(me.storeExtraParams) {
+                proxy.addParams = Ext.Object.merge({}, me.storeExtraParams);
+            }
             if(type == 'service') {
-                searchStore.getProxy().extraParams.host = this.up('form').getForm().getFieldValues().host;
-            } else {
-                delete searchStore.getProxy().extraParams.host;
+                proxy.addParams.host = this.up('form').getForm().getFieldValues().host;
             }
             searchStore.load();
         };

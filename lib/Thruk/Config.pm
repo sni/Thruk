@@ -21,19 +21,21 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.84';
+our $VERSION = '1.86';
 
 my $project_root = home('Thruk::Config');
-my $branch       = '5';
+my $branch       = '4';
 my $gitbranch    = get_git_name($project_root);
-$branch          = $gitbranch unless $branch ne '';
+my $filebranch   = $branch || 1;
+$branch          = $gitbranch if($gitbranch ne '' and $branch eq '');
+$branch          = $branch.'~'.$gitbranch if($gitbranch ne '' and $branch ne '');
 confess('got no project_root') unless $project_root;
 
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'July 16, 2014',
+              'released'               => 'February 12, 2015',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
@@ -67,6 +69,7 @@ our %config = ('name'                   => 'Thruk',
                                           'escape_quotes'       => \&Thruk::Utils::Filter::escape_quotes,
                                           'escape_ampersand'    => \&Thruk::Utils::Filter::escape_ampersand,
                                           'escape_bslash'       => \&Thruk::Utils::Filter::escape_bslash,
+                                          'escape_regex'        => \&Thruk::Utils::Filter::escape_regex,
                                           'get_message'         => \&Thruk::Utils::Filter::get_message,
                                           'throw'               => \&Thruk::Utils::Filter::throw,
                                           'date_format'         => \&Thruk::Utils::Filter::date_format,
@@ -93,9 +96,13 @@ our %config = ('name'                   => 'Thruk',
                                           'reduce_number'       => \&Thruk::Utils::reduce_number,
                                           'split_perfdata'      => \&Thruk::Utils::Filter::split_perfdata,
                                           'get_cookie_remove_paths' => \&Thruk::Utils::Filter::get_cookie_remove_paths,
+                                          'get_custom_vars'     => \&Thruk::Utils::get_custom_vars,
+                                          'validate_json'       => \&Thruk::Utils::Filter::validate_json,
+                                          'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
+                                          'filebranch'     => $filebranch,
                                           'starttime'      => time(),
                                           'debug_details'  => get_debug_details(),
                                           'stacktrace'     => '',
@@ -149,8 +156,8 @@ our %config = ('name'                   => 'Thruk',
                                                 '_'             => undef,
                                           },
                                           'all_in_one_javascript' => [
-                                              'jquery-1.7.2.min.js',
-                                              'thruk-'.$VERSION.'.js',
+                                              'jquery-1.11.1.min.js',
+                                              'thruk-'.$VERSION.'-'.$filebranch.'.js',
                                               'cal/jscal2.js',
                                               'overlib.js',
                                               'jquery-fieldselection.js',
@@ -166,6 +173,13 @@ our %config = ('name'                   => 'Thruk',
                                               'Thruk.css',
                                           ],
                                           'jquery_ui' => '1.10.3',
+                                          'all_in_one_javascript_panorama' => [
+                                              'javascript/thruk-'.$VERSION.'-'.$filebranch.'.js',
+                                              'plugins/panorama/ux/form/MultiSelect.js',
+                                              'plugins/panorama/ux/form/ItemSelector.js',
+                                              'plugins/panorama/sprintf.js',
+                                              'javascript/strftime-min.js',
+                                          ],
                                       },
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,
@@ -194,7 +208,6 @@ our %config = ('name'                   => 'Thruk',
               },
               'View::JSON'               => {
                   expose_stash       => 'json',
-                  json_driver        => 'XS',
               },
               'Plugin::Thruk::ConfigLoader' => { file => $project_root.'/thruk.conf' },
               'Plugin::Authentication' => {

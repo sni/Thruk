@@ -86,6 +86,16 @@ Ext.onReady(function() {
     icon.parentNode.parentNode.parentNode.style.display = 'none';
     [% END %]
 
-    // make sure initialized is set to true
+    /* make sure initialized is set to true */
     TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);
+
+    /* full reload page interval */
+    [% IF full_reload_interval != 0 %]
+    TP.timeouts['timeout_page_reload'] = window.setInterval("TP.fullReload()", [% full_reload_interval %]*1000);
+    TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
+    [% END %]
+    cleanUnderscoreUrl();
+
+    /* preload images */
+    window.setTimeout(preloader, 3000);
 });

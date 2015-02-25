@@ -9,11 +9,9 @@ our $VERSION = 1.0;
 
 # Note we have to hook here as uploads also add to the request parameters
 sub prepare_uploads {
-    my $c = shift;
+    my($c) = @_;
 
     $c->next::method(@_);
-
-    my $enc = $c->encoding;
 
     for my $key ( keys %{ $c->request->{'parameters'} } ) {
         next if $key eq 'data';

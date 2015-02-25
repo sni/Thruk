@@ -42,7 +42,7 @@ Test::Perl::Critic->import( -profile => $rcfile );
 if(-e $cachefile) {
     eval {
         $cache = thaw(scalar read_file($cachefile));
-        diag("loaded $cachefile");
+        #diag("loaded $cachefile");
     };
     diag($@) if $@;
 }

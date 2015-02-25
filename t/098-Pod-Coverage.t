@@ -30,11 +30,7 @@ for my $module (@modules) {
     $module =~ s/plugins::plugins\-enabled::\w+::lib:://gmx;
 
     # check module and skip UPPERCASE constants which are reported as fail
-    if($module eq 'Thruk::Controller::summary' or $module eq 'Thruk::Controller::trends') {
-        pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
-    } else {
-        pod_coverage_ok( $module );
-    }
+    pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
 }
 
 done_testing;

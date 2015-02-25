@@ -21,9 +21,9 @@
 [% END %]
 [% IF theme == 'Thruk' && !thruk_debug %]
   [% IF use_frames %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one-[% version %].css' />
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one-[% version %]-[% filebranch %].css' />
   [% ELSE %]
-  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %].css' />
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %]-[% filebranch %].css' />
   [% END %]
 [% END %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]javascript/cal/jscal2.css' />

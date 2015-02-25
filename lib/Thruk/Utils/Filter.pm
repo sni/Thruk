@@ -147,17 +147,18 @@ formats a time definition into date format
 sub date_format {
     my($c, $timestamp, $format) = @_;
     return "" unless defined $timestamp;
+    confess("no c") unless defined $c;
 
     # get today
     my @today;
-    if(defined $c->{'stash'}->{'today'}) {
-        @today = @{$c->{'stash'}->{'today'}};
+    if(defined $c->stash->{'today'}) {
+        @today = @{$c->stash->{'today'}};
     }
     else {
         @today = Today();
     }
     my($t_year,$t_month,$t_day) = @today;
-    $c->{'stash'}->{'today'} = \@today;
+    $c->stash->{'today'} = \@today;
 
     my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
@@ -173,10 +174,12 @@ sub date_format {
     }
 
     if($t_year == $year and $t_month == $month and $t_day == $day) {
-        return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format_today'}));
+        confess("no datetime_format_today") unless $c->stash->{'datetime_format_today'};
+        return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format_today'}));
     }
 
-    return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format'}));
+    confess("no datetime_format") unless $c->stash->{'datetime_format'};
+    return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format'}));
 }
 
 
@@ -253,8 +256,9 @@ returns a correct uri but only the url part
 sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    for my $key (keys %uri_filter) {
+        $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
         for my $key (%{$data}) {
@@ -301,8 +305,9 @@ sub uri_with {
     my $data = shift;
 
     my $filter = {};
-    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
-        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
+    for my $key (keys %uri_filter) {
+        $filter->{$key} = $uri_filter{$key};
     }
     for my $key (keys %{$data}) {
         next unless defined $data->{$key};
@@ -403,6 +408,53 @@ sub remove_html_comments {
 
 ########################################
 
+=head2 validate_json
+
+  validate_json(...)
+
+returns error if json is invalid
+
+=cut
+sub validate_json {
+    my($str) = @_;
+    eval {
+        JSON::XS->new->decode($str);
+    };
+    if($@) {
+        my $err = $@;
+        chomp($err);
+        return($err);
+    }
+    return("");
+}
+
+########################################
+
+=head2 get_action_menu
+
+  get_action_menu(c, [name|menu])
+
+returns menu and error
+
+=cut
+sub get_action_menu {
+    my($c, $menu) = @_;
+    our $already_checked_action_menus;
+    $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+    if($menu !~ m/^[\[\{]/mx) {
+        my $new = $c->config->{'action_menu_items'}->{$menu};
+        if(!$new) {
+            return(["no $menu in action_menu_items", "{}"]);
+        }
+        $already_checked_action_menus->{$menu} = validate_json($new) unless exists $already_checked_action_menus->{$menu};
+        return([$already_checked_action_menus->{$menu}, $new]);
+    }
+    my $err = validate_json($menu);
+    return([$err, $menu]);
+}
+
+########################################
+
 =head2 json_encode
 
   json_encode(...)
@@ -484,7 +536,21 @@ sub escape_xml {
     $return =~ s/\\n\Z//mx;
     $return =~ s/\\n/\n/gmx;
     $return =~ tr/\x80-\xFF//d;
+    $return =~ s/\p{Cc}//gmx;
     return $return;
+}
+
+########################################
+
+=head2 escape_regex
+
+  escape_regex($text)
+
+returns an escaped string for regular expression
+
+=cut
+sub escape_regex {
+    return(quotemeta($_[0]));
 }
 
 
@@ -871,9 +937,9 @@ return paths used to remove old/abandoned cookie paths
 =cut
 sub get_cookie_remove_paths {
     my($c) = @_;
-    my $prefix  = $c->{'stash'}->{'url_prefix'};
+    my $prefix  = $c->stash->{'url_prefix'};
     $prefix     =~ s|/$||gmx;
-    my $product = $c->{'stash'}->{'product_prefix'};
+    my $product = $c->stash->{'product_prefix'};
     $product    =~ s|/$||gmx;
     my $paths   = [
         '/',

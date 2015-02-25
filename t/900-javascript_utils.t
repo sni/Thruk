@@ -30,18 +30,14 @@ var window = {
         removeChild:function(){}
     }
   }
-}
+};
+var document = window.document;
 thruk_debug_js = 1;
 ", 'set window object') or BAIL_OUT("$0: failed to create window object");
-my @jsfiles = glob('root/thruk/javascript/jquery-*.js');
-ok($jsfiles[0], $jsfiles[0]);
-js_eval_ok($jsfiles[0]) or BAIL_OUT("$0: failed to load jQuery");
-js_ok("jQuery = window.jQuery", 'set jQuery into global space') or BAIL_OUT("$0: failed to globalize jQuery");
-js_ok("jQuery.noConflict()", 'set jQuery noConflict') or BAIL_OUT("$0: failed to so noConflict");
 
 #################################################
 js_ok("url_prefix='/'", 'set url prefix');
-@jsfiles = glob('root/thruk/javascript/thruk-*.js');
+my @jsfiles = glob('root/thruk/javascript/thruk-*.js');
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]);
 
@@ -74,6 +70,7 @@ done_testing();
 #################################################
 sub _eval_extracted_js {
     my($file) = @_;
+    ok(1, "extracting from ".$file);
     my $cont = read_file($file);
     my @codes = $cont =~ m/<script[^>]*text\/javascript.*?>(.*?)<\/script>/gsmxi;
     my $jscode = join("\n", @codes);

@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 9;
+    plan tests => 17;
 }
 
 BEGIN {
@@ -15,6 +15,7 @@ BEGIN {
 }
 
 use_ok("Thruk::Utils::Reports::Render");
+$Thruk::Utils::Reports::Render::c = TestUtils::get_c();
 
 ###########################################################
 # _replace_link
@@ -41,3 +42,19 @@ $paged = Thruk::Utils::Reports::Render::page_splice($data, 7, 20);
 is(scalar @{$paged}, 5, "page_splice() pages size");
 is(scalar @{$paged->[0]}, 7, "page_splice() slice size");
 is(scalar @{$paged->[4]}, 6, "page_splice() slice size");
+
+###########################################################
+# _absolutize_url
+my $urls = [
+    [ 'http://test.com',                'test.html',            'http://test.com/test.html' ],
+    [ 'http://test.com/',               'test.html',            'http://test.com/test.html' ],
+    [ '',                               '/thruk/test.html',     '/thruk/test.html' ],
+    [ 'http://test.com/blah/',          '../test.html',         'http://test.com/test.html' ],
+    [ 'http://test.com/blah/',          '/test.html',           'http://test.com/test.html' ],
+    [ 'http://test.com/css/style.css',  '../images/test.png',   'http://test.com/images/test.png' ],
+    [ 'http://test.com/css/style.css',  '/test.png',            'http://test.com/test.png' ],
+    [ 'http://test.com',                'http://test2.com/',    'http://test2.com/' ],
+];
+for my $url (@{$urls}) {
+    is(Thruk::Utils::Reports::Render::_absolutize_url($url->[0], $url->[1]), $url->[2], '_absolutize_url('.($url->[0]||'').', '.$url->[1].') -> '.$url->[2]);
+}

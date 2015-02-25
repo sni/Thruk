@@ -136,6 +136,7 @@ sub update_objects {
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     if(defined $current_object or $in_unknown_object) {
         push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
@@ -150,8 +151,6 @@ sub update_objects {
             $self->{'comments'} = $comments;
         }
     }
-
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
 
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 0;
@@ -437,7 +436,7 @@ sub get_meta_data {
     open(my $fh, $self->{'path'});
     $ctx->addfile($fh);
     $meta->{'md5'} = $ctx->hexdigest;
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,

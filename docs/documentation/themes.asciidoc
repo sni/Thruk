@@ -1,0 +1,192 @@
+---
+layout: docs
+title: Themes
+lightbox: true
+---
+
+Themes
+======
+
+Thruks look & feel can be easily changed with themes. There are a few
+themes already included. Themes normally reside in the
+'themes/themes-available' directory. Activate a theme by creating a symlink
+in the 'themes/themes-enabled' directory. If you use the packaged Thruk
+version, the themes folder is directly in your Thruk folder. If you are using
+OMD, the themes folder is in $OMD_ROOT/etc/thruk/themes.
+
+Example of a themes:
+----
+  theme/
+  ├── images
+  │   └── logos -> ../../Classic/images/logos
+  ├── stylesheets
+  └── templates
+----
+
+
+Installation
+------------
+Installation of a theme is easy:
+
+.Installation
+. Unpack the plugin in 'themes-available' directory.
+. Create a symlink in 'themes-enabled' which points to the theme.
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Deactivate
+. Remove the symlink from 'themes-enabled'
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Uninstall
+. Remove themes from 'themes-available'
+
+
+
+
+
+Builtin Themes
+---------------
+
+
+Thruk
+~~~~~
+
+----
+ Author:      Sven Nierlein
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="thruk theme" rel="lightbox[plugins]" href="themes/thruk1.png"><img src="themes/thruk1.png" alt="thruk theme" width="30%" height="30%" /></a>
+<a title="thruk theme" rel="lightbox[plugins]" href="themes/thruk2.png"><img src="themes/thruk2.png" alt="thruk theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Classic
+~~~~~~~
+
+----
+ Author:      Nagios
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="classic theme" rel="lightbox[plugins]" href="themes/classic1.png"><img src="themes/classic1.png" alt="classic theme" width="30%" height="30%" /></a>
+<a title="classic theme" rel="lightbox[plugins]" href="themes/classic2.png"><img src="themes/classic2.png" alt="classic theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Exfoliation
+~~~~~~~~~~~
+
+----
+ Author:      Matt Wall
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="exfoliation theme" rel="lightbox[plugins]" href="themes/exfoliation1.png"><img src="themes/exfoliation1.png" alt="exfoliation theme" width="30%" height="30%" /></a>
+<a title="exfoliation theme" rel="lightbox[plugins]" href="themes/exfoliation2.png"><img src="themes/exfoliation2.png" alt="exfoliation theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Neat
+~~~~
+
+----
+ Author:      Unknown
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="neat theme" rel="lightbox[plugins]" href="themes/neat1.png"><img src="themes/neat1.png" alt="neat theme" width="30%" height="30%" /></a>
+<a title="neat theme" rel="lightbox[plugins]" href="themes/neat2.png"><img src="themes/neat2.png" alt="neat theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Nuvola
+~~~~~~
+
+----
+ Author:      Unknown
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="nuvola theme" rel="lightbox[plugins]" href="themes/nuvola1.png"><img src="themes/nuvola1.png" alt="nuvola theme" width="30%" height="30%" /></a>
+<a title="nuvola theme" rel="lightbox[plugins]" href="themes/nuvola2.png"><img src="themes/nuvola2.png" alt="nuvola theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+Vautour
+~~~~~~~
+
+----
+ Author:      Unknown
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="vautour theme" rel="lightbox[plugins]" href="themes/vautour1.png"><img src="themes/vautour1.png" alt="vautour theme" width="30%" height="30%" /></a>
+<a title="vautour theme" rel="lightbox[plugins]" href="themes/vautour2.png"><img src="themes/vautour2.png" alt="vautour theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+Wakizashi
+~~~~~~~~~
+
+----
+ Author:      Jean Gabes
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+++++
+<a title="wakizashi theme" rel="lightbox[plugins]" href="themes/wakizashi1.png"><img src="themes/wakizashi1.png" alt="wakizashi theme" width="30%" height="30%" /></a>
+<a title="wakizashi theme" rel="lightbox[plugins]" href="themes/wakizashi2.png"><img src="themes/wakizashi2.png" alt="wakizashi theme" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+Write your own themes
+----------------------
+
+The directory structure of a theme contains just a few folders and you
+don't need all of them for every theme.
+
+TIP: Let me know if you want to get your theme listed here.
+
+----
+  theme/
+  ├── images
+  │   └── logos -> ../../Classic/images/logos
+  ├── stylesheets
+  └── templates
+----
+
+.Structure
+* 'images' containts all images needed by this theme. Make sure you
+  have at least the basic images.
+* 'logos' contains all logos, should be a symlink to your logos folder
+  unless you have special logos in this theme.
+* 'stylesheets' contain your css files.
+* 'templates' contains all template files. You can override normal
+  templates in your theme and therefor completly rewrite the html
+  output.
+
+TIP: Easiest way would be to copy an existing theme and change it to your
+needs.
+

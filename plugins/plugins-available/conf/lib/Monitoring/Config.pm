@@ -151,11 +151,11 @@ sub init {
         }
     }
 
+    # read rc file, must be read every time, otherwise key_sort is not defined
+    $self->read_rc_file();
+
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
-
-    # read rc file
-    $self->read_rc_file();
 
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
@@ -1325,7 +1325,7 @@ sub _update_core_conf {
             $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
         }
     }
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     return;
 }
@@ -2139,7 +2139,7 @@ sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 
@@ -2156,7 +2156,7 @@ sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 

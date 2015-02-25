@@ -253,8 +253,8 @@ sub read_downtime {
         my $found = 0;
         $found = 1 if $backends->[0] eq ''; # no backends at all
         for my $b (@{$backends}) {
-            next unless $c->{'stash'}->{'backend_detail'}->{$b};
-            $found = 1 if $c->{'stash'}->{'backend_detail'}->{$b}->{'disabled'} != 2;
+            next unless $c->stash->{'backend_detail'}->{$b};
+            $found = 1 if $c->stash->{'backend_detail'}->{$b}->{'disabled'} != 2;
         }
         return unless $found;
     }

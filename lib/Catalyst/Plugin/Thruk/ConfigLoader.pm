@@ -2,6 +2,7 @@ package Catalyst::Plugin::Thruk::ConfigLoader;
 
 use strict;
 use Thruk::Backend::Pool;
+use Carp qw/confess/;
 
 ########################################
 
@@ -94,8 +95,8 @@ sub _do_finalize_config {
         $addon_name =~ s/\/+$//gmx;
         $addon_name =~ s/^.*\///gmx;
 
-        # does the plugin directory exist?
-        if(! -d $config->{home}.'/root/thruk/plugins/' and -w $config->{home}.'/root/thruk' ) {
+        # does the plugin directory exist? (only when running as normal user)
+        if($> != 0 and ! -d $config->{home}.'/root/thruk/plugins/' and -w $config->{home}.'/root/thruk' ) {
             CORE::mkdir($config->{home}.'/root/thruk/plugins');
         }
 
@@ -160,11 +161,23 @@ sub _do_finalize_config {
     ###################################################
     # when using shadow naemon, some settings don't make sense
     if($config->{'use_shadow_naemon'}) {
+        $config->{'connection_pool_size'} = 1; # no pool required when using caching
         $config->{'check_local_states'}   = 0; # local state checking not required
     }
 
     # make this setting available in env
     $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
+
+    if($config->{'action_menu_apply'}) {
+        for my $menu (keys %{$config->{'action_menu_apply'}}) {
+            for my $pattern (ref $config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$config->{'action_menu_apply'}->{$menu}} : ($config->{'action_menu_apply'}->{$menu})) {
+                if($pattern !~ m/;/mx) {
+                    $pattern .= '.*;$';
+                }
+            }
+        }
+    }
+
 
     # set default config
     Thruk::Backend::Pool::set_default_config($config);
@@ -224,7 +237,8 @@ sub switch_user {
 ## no critic
 ######################################
 
-=head2 setup( )
+=head2 setup()
+
 =cut
 
 sub setup {
@@ -262,6 +276,7 @@ sub setup {
 }
 
 =head2 load_config
+
 =cut
 
 sub load_config {
@@ -278,6 +293,7 @@ sub load_config {
 }
 
 =head2 find_files
+
 =cut
 
 sub find_files {
@@ -300,6 +316,7 @@ sub find_files {
 }
 
 =head2 get_config_path
+
 =cut
 
 sub get_config_path {
@@ -323,6 +340,7 @@ sub get_config_path {
 }
 
 =head2 get_config_local_suffix
+
 =cut
 
 sub get_config_local_suffix {
@@ -356,7 +374,9 @@ sub _fix_syntax {
 }
 
 =head2 config_substitutions( $value )
+
 =cut
+
 sub config_substitutions {
     my $c    = shift;
     my $subs = $c->config->{ 'Plugin::ConfigLoader' }->{ substitutions }
@@ -364,7 +384,8 @@ sub config_substitutions {
     $subs->{ HOME }    ||= sub { shift->path_to( '' ); };
     $subs->{ ENV }    ||=
         sub {
-            my ( $c, $v ) = @_;
+            #my ( $c, $v )...
+            my ( undef, $v ) = @_;
             if (! defined($ENV{$v})) {
                 Catalyst::Exception->throw( message =>
                     "Missing environment variable: $v" );

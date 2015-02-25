@@ -118,13 +118,6 @@ sub add_defaults {
     }
 
     ###############################
-    # no db access before here, so check if all pool worker are up already
-    if($Thruk::Backend::Pool::pool) {
-        my $worker = do { lock ${$Thruk::Backend::Pool::pool->{worker}}; ${$Thruk::Backend::Pool::pool->{worker}} };
-        while($worker < $Thruk::Backend::Pool::pool_size) { sleep(0.1); $worker = do { lock ${$Thruk::Backend::Pool::pool->{worker}}; ${$Thruk::Backend::Pool::pool->{worker}} }; }
-    }
-
-    ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
 
     ###############################
@@ -202,7 +195,6 @@ sub add_defaults {
     # do we have only icinga backends?
     if(!exists $c->config->{'enable_icinga_features'} and defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
-        my $init = $ENV{'OMD_ROOT'}.'/etc/init.d/core';
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
             my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';
@@ -320,6 +312,7 @@ sub after_execute {
     }
 
     $c->stats->profile(end => "AddDefaults::after");
+    $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if defined $c->stash->{'total_backend_waited'};
     return;
 }
 
@@ -338,7 +331,7 @@ sub set_configs_stash {
     for my $key (qw/url_prefix product_prefix title_prefix use_pager start_page documentation_link
                   use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
-                  use_new_search ajax_search show_notification_number strict_passive_mode hide_passive_icon
+                  use_new_search show_notification_number strict_passive_mode hide_passive_icon
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
                   show_backends_in_table host_action_icon service_action_icon cookie_path
@@ -348,6 +341,7 @@ sub set_configs_stash {
                   use_service_description force_sticky_ack force_send_notification force_persistent_ack
                   force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
                 /) {
+        confess("$key not defined in config,\n".Dumper($c->config)) unless defined $c->config->{$key};
         $c->stash->{$key} = $c->config->{$key};
         Thruk::Utils::decode_any($c->stash->{$key}) if ref $c->stash->{$key} eq '';
     }
@@ -468,7 +462,7 @@ set process info into stash
 
 =cut
 sub set_processinfo {
-    my($c, $cached_user_data, $safe, $cached_data) = @_;
+    my($c, $cached_user_data, $safe, $cached_data, $skip_cache_update) = @_;
     my $last_program_restart     = 0;
     $safe = 0 unless defined $safe;
 
@@ -487,10 +481,10 @@ sub set_processinfo {
                 last;
             }
         }
-        $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'};
     } else {
         $fetch = 1;
     }
+    $c->stash->{'processinfo_time'} = $cached_data->{'processinfo_time'} if $cached_data->{'processinfo_time'};
 
     if($fetch) {
         $c->stats->profile(begin => "AddDefaults::set_processinfo fetch");
@@ -558,7 +552,7 @@ sub set_processinfo {
        or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
        or $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
       ) {
-        if(defined $c->stash->{'remote_user'}) {
+        if(defined $c->stash->{'remote_user'} and !$skip_cache_update) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
             $cached_user_data = {
@@ -597,6 +591,9 @@ sub _set_enabled_backends {
         $c->{'db'}->enable_backends();
     }
 
+    if($c->{'request'}->{'parameters'}->{'backend'} && $c->{'request'}->{'parameters'}->{'backends'}) {
+        confess("'backend' and 'backends' parameter set!");
+    }
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || $c->{'request'}->{'parameters'}->{'backends'};
     $c->stash->{'param_backend'} = $backend || '';
     my $disabled_backends = {};
@@ -612,7 +609,8 @@ sub _set_enabled_backends {
             $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
         }
         if(ref $backends eq '') {
-            @{$backends} = split(/\s*,\s*/mx, $backends);
+            my @tmp = split(/\s*,\s*/mx, $backends);
+            $backends = \@tmp;
         }
         for my $b (@{$backends}) {
             # peer key can be name too
@@ -728,7 +726,8 @@ sub delayed_proc_info_update {
     my($c) = @_;
     my $disabled_backends = $c->{'db'}->disable_hidden_backends();
     _set_possible_backends($c, $disabled_backends);
-    set_processinfo($c);
+    my $cached_data = $c->cache->get->{'global'} || {};
+    set_processinfo($c, undef, undef, $cached_data, 1);
     return;
 }
 

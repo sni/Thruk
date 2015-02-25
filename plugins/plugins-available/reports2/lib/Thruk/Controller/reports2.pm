@@ -287,11 +287,7 @@ sub report_update {
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
-        Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
-        my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
-        Thruk::Utils::Reports::clean_report_tmp_files($c, $report_nr);
-        my $job = Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1, 'no_shell' => 1 });
-        Thruk::Utils::Reports::set_running($c, $report_nr, undef, undef, undef, $job);
+        Thruk::Utils::Reports::generate_report_background($c, $report_nr, undef, $report);
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
@@ -327,7 +323,12 @@ sub report_cancel {
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
-        if($report->{'var'}->{'job'}) {
+        if($report->{'var'}->{'is_waiting'}) {
+            Thruk::Utils::Reports::set_running($c, $report_nr, 0);
+            Thruk::Utils::Reports::set_waiting($c, $report_nr, 0, 0);
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report canceled' });
+        }
+        elsif($report->{'var'}->{'job'}) {
             Thruk::Utils::External::cancel($c, $report->{'var'}->{'job'});
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report canceled' });
         } else {
@@ -391,7 +392,11 @@ sub report_email {
     }
 
     $c->stash->{size}    = -s $c->config->{'tmp_path'}.'/reports/'.$r->{'nr'}.'.dat';
-    $c->stash->{attach}  = $r->{'var'}->{'attachment'} || 'report.pdf';
+    if($r->{'var'}->{'attachment'} && (!$r->{'var'}->{'ctype'} || $r->{'var'}->{'ctype'} ne 'html2pdf')) {
+        $c->stash->{attach}  = $r->{'var'}->{'attachment'};
+    } else {
+        $c->stash->{attach}  = 'report.pdf';
+    }
     $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
     $c->stash->{r}       = $r;
 

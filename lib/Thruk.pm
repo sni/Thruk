@@ -25,12 +25,23 @@ BEGIN {
 };
 
 ###################################################
+# load timing class
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('starting thruk');
+};
+
+###################################################
 # clean up env
 use Thruk::Utils::INC;
 BEGIN {
     Thruk::Utils::INC::clean();
+    ## no critic
+    eval "use Time::HiRes qw/gettimeofday tv_interval/;" if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 0);
+    eval "use Thruk::Template::Context;"                 if ($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 3);
+    ## use critic
+    #&timing_breakpoint('cleaned env');
 }
-
 use Carp;
 use Moose;
 use GD;
@@ -57,6 +68,7 @@ use Catalyst::Runtime '5.70';
 #         -Debug: activates the debug mode for very useful log messages
 #         StackTrace
 BEGIN {
+    #&timing_breakpoint('begin thruk');
     # Compress - temporarily disabled till https://rt.cpan.org/Ticket/Display.html?id=87998 gets fixed
     my @catalyst_plugins = qw/
           Thruk::ConfigLoader
@@ -76,18 +88,21 @@ BEGIN {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         @catalyst_plugins = grep(!/^Static::Simple$/mx, @catalyst_plugins);
     }
+    #&timing_breakpoint('loading Catalyst');
     require Catalyst;
     Catalyst->import(@catalyst_plugins);
     __PACKAGE__->config( encoding => 'UTF-8' );
+    #&timing_breakpoint('loading Catalyst done');
 };
 
 ###################################################
-our $VERSION = '1.84';
+our $VERSION = '1.86';
 
 ###################################################
 # load config loader
 __PACKAGE__->config(%Thruk::Config::config);
 __PACKAGE__->config( encoding => 'UTF-8' );
+#&timing_breakpoint('config loaded');
 
 ###################################################
 # install leak checker
@@ -105,6 +120,7 @@ if($ENV{THRUK_LEAK_CHECK}) {
 # override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
 $Thruk::Utils::IO::config = __PACKAGE__->config;
+#&timing_breakpoint('setup done');
 
 ###################################################
 binmode(STDOUT, ":encoding(UTF-8)");
@@ -120,11 +136,13 @@ __PACKAGE__->cache(__PACKAGE__->config->{'tmp_path'}.'/thruk.cache');
 # save pid
 my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
+    $SIG{PIPE} = 'IGNORE';
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
             my $remaining = [];
             for my $pid (@{$pids}) {
+                next unless($pid and $pid =~ m/^\d+$/mx);
                 next if $pid == $$;
                 next if kill(0, $pid) == 0;
                 push @{$remaining}, $pid;
@@ -239,7 +257,7 @@ if($ENV{'SIZEME'}) {
     # add signal handler to print memory information
     # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
     $SIG{'USR1'} = sub {
-        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Utils::get_memory_usage());
+        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
         eval {
             require Devel::SizeMe;
             Devel::SizeMe::perl_size();
@@ -325,7 +343,12 @@ sub prepare_path {
     my($c) = @_;
     $c->maybe::next::method();
 
-    $c->stats->enable(1) if $ENV{'THRUK_JOB_DIR'};
+    #&timing_breakpoint('request '.$c->request->path) if $c->request->path =~ m/cgi\-bin|html/;
+
+    # collect statistics when running external command or if enabled by env variable
+    if($ENV{'THRUK_JOB_DIR'} || ($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2)) {
+        $c->stats->enable(1);
+    }
 
     my $product = $c->config->{'product_prefix'} || 'thruk';
     if($product ne 'thruk') {
@@ -366,21 +389,104 @@ sub run_after_request {
     return;
 }
 
+before finalize => sub {
+    my($c) = @_;
+    $c->stash->{'no_more_profile'} = 1;
+    $c->stats->profile(begin => "finalize");
+    return;
+};
+
 after finalize => sub {
     my($c) = @_;
+    $c->stats->profile(end => "finalize");
+    $c->stats->profile(begin => "after finalize");
 
-    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
-
-    return unless defined $c->stash->{'run_after_request_cb'};
     while(my $sub = shift @{$c->stash->{'run_after_request_cb'}}) {
         ## no critic
         eval($sub);
         ## use critic
         $c->log->info($@) if $@;
     }
+    $c->stats->profile(end => "after finalize");
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
+        my $elapsed = tv_interval($c->stash->{'time_begin'});
+        $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
+        my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
+        $url     = $c->request->uri unless $url;
+        $url     =~ s/^cgi\-bin\///mxo;
+        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
+        $c->log->info(sprintf("Req: %03d, mem:% 7s MB  % 10.2f MB     %.2fs %8s    %s\n",
+                                ($Catalyst::COUNT || 0),
+                                $c->stash->{'memory_end'},
+                                ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
+                                $elapsed,
+                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '',
+                                $url,
+                    ));
+    }
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2) {
+        Thruk::Utils::External::log_profile($c);
+    }
+
+    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
     return;
 };
 
+###################################################
+
+=head2 use_stats
+
+switch for various internal catalyst sub wether to gather statistics or not
+
+=cut
+sub use_stats {
+    my($c) = @_;
+    # save previous error, otherwise we would
+    # overwrite real error which has not yet been thrown
+    my $error = $@;
+    eval { # newer Catalyst::Middleware::Stash versions die if called to early
+        if($c->stash->{'no_more_profile'})  { return; }
+    };
+    # restore original error
+    $@ = $error;
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $ENV{'THRUK_PERFORMANCE_DEBUG'} > 1) { return(1); }
+    return;
+}
+
+###################################################
+# add some more profiles
+before prepare_body     => sub {
+    my($c) = @_;
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
+        $c->stash->{'memory_begin'} = Thruk::Backend::Pool::get_memory_usage();
+        $c->stash->{'time_begin'}   = [gettimeofday()];
+    }
+    $c->stats->profile(begin => "prepare_body");
+    return;
+};
+after prepare_body      => sub { my($c) = @_; $c->stats->profile(end   => "prepare_body");     return; };
+
+before dispatch         => sub { my($c) = @_; $c->stats->profile(begin => "dispatch");         return; };
+after dispatch          => sub { my($c) = @_; $c->stats->profile(end   => "dispatch");         return; };
+
+before finalize_uploads => sub { my($c) = @_; $c->stats->profile(begin => "finalize_uploads"); return; };
+after finalize_uploads  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_uploads"); return; };
+
+before finalize_error   => sub { my($c) = @_; $c->stats->profile(begin => "finalize_error");   return; };
+after finalize_error    => sub { my($c) = @_; $c->stats->profile(end   => "finalize_error");   return; };
+
+before finalize_headers => sub { my($c) = @_; $c->stats->profile(begin => "finalize_headers"); return; };
+after finalize_headers  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_headers"); return; };
+
+before finalize_cookies => sub { my($c) = @_; $c->stats->profile(begin => "finalize_cookies"); return; };
+after finalize_cookies  => sub { my($c) = @_; $c->stats->profile(end   => "finalize_cookies"); return; };
+
+before finalize_body    => sub { my($c) = @_; $c->stats->profile(begin => "finalize_body");    return; };
+after finalize_body     => sub { my($c) = @_; $c->stats->profile(end   => "finalize_body");    return; };
+
+#&timing_breakpoint('start done');
 
 =head1 SEE ALSO
 

@@ -49,9 +49,12 @@
                 TP.Msg.msg("info_message~~cannot close last dashboard.");
                 return false;
             }
+            TP.log('['+This.id+'] closing tab');
             return true;
         },
         destroy: function( This, eOpts ) {
+            TP.log('['+This.id+'] destroy');
+            This.stopTimeouts();
             var tabpan = Ext.getCmp('tabpan');
             var window_ids = TP.clone(This.window_ids);
             for(var nr=0; nr<window_ids.length; nr++) {
@@ -67,6 +70,8 @@
                     }
                 }
             }
+            if(This.bgDragEl) { This.bgDragEl.destroy(); }
+            if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
@@ -120,17 +125,19 @@
             This.hidePanlets();
         },
         afterrender: function(This, eOpts) {
-            if(!this.title) {
-                this.applyXdata();
-            } else {
-                this.setBackground(this.xdata.background, this.xdata.backgroundscale, this.xdata.backgroundoffset_x, this.xdata.backgroundoffset_y);
-            }
-            var header = This.getDockedItems()[0];
-            if(header) { header.hide() }
             var tab = This;
-            this.el.on("contextmenu", function(e) {
+            TP.log('['+tab.id+'] added tab - refresh: '+tab.xdata.refresh);
+            if(!tab.title) {
+                tab.applyXdata();
+            } else {
+                tab.setBackground(tab.xdata.background, tab.xdata.backgroundscale, tab.xdata.backgroundoffset_x, tab.xdata.backgroundoffset_y);
+            }
+            var header = tab.getDockedItems()[0];
+            if(header) { header.hide() }
+            tab.el.on("contextmenu", function(e) {
                 /* right click context menu on tab body */
                 e.preventDefault();
+                TP.resetMoveIcons();
                 var pos = [e.getX(), e.getY()];
                 Ext.create('Ext.menu.Menu', {
                     margin: '0 0 10 0',
@@ -144,7 +151,8 @@
                         text:   'New',
                         icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
                         hideOnClick: false,
-                        menu:    TP.addPanletsMenu({open: 'right'})
+                        menu:    TP.addPanletsMenu({open: 'right'}),
+                        disabled: tab.xdata.locked
                     }, {
                         text:   'Paste',
                         icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
@@ -163,15 +171,73 @@
                             pos[1] = pos[1] - 8;
                             TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
                         },
-                        disabled: (This.locked || TP.clipboard == undefined)
+                        disabled: (tab.xdata.locked || TP.clipboard == undefined)
+                    }, '-', {
+                        text:   'Dashboard Settings',
+                        icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                        handler: function() { TP.tabSettingsWindow() },
+                        hidden:  tab.xdata.locked       // only show when not locked
+                    }, {
+                        text:   'Unlock Dashboard',
+                        icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                        handler: function() { tab.setLock(false); },
+                        hidden:  !tab.xdata.locked      // only show when locked
+                    }, {
+                        text:   'Lock Dashboard',
+                        icon:   '[% url_prefix %]plugins/panorama/images/lock.png',
+                        handler: function() { tab.setLock(true); },
+                        hidden:  tab.xdata.locked       // only show when not locked
                     }
                     [% END %]
                     ],
                     listeners: {
                         beforehide: function(menu, eOpts) { menu.destroy(); }
                     }
-                }).showAt(e.getXY());
+                }).showAt(pos);
             });
+            tab.el.on("click", function(e) {
+                if(!TP.skipResetMoveIcons) {
+                    TP.resetMoveIcons();
+                }
+                TP.skipResetMoveIcons = false;
+            });
+
+[% UNLESS readonly %]
+            /* lasso for element selection */
+            Ext.getBody().on("mouseup", function(e) {
+                if(TP.lassoEl) {
+                    TP.lassoEl.destroy();
+                    TP.lassoEl = undefined;
+                    Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
+                    TP.createIconMoveKeyNav();
+                    TP.skipResetMoveIcons = true;
+                    window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
+                }
+            });
+            Ext.getBody().on("dragstart", function(e) {
+                e.preventDefault();
+                if(tab.xdata.locked) { return(false); };
+                var pos = e.getXY();
+                if(TP.lassoEl) { TP.lassoEl.destroy(); }
+                TP.lassoEl = Ext.create('Ext.Component', {
+                    'html':     ' ',
+                    autoRender: true,
+                    autoShow:   true,
+                    shadow:     false,
+                    style: {
+                        position: 'absolute',
+                        border: '1px black dashed',
+                        top:     pos[1]+'px',
+                        left:    pos[0]+'px',
+                        width:   '1px',
+                        height:  '1px'
+                    }
+                });
+                TP.lassoEl.startPosition = pos;
+                Ext.getBody().on("mousemove", TP.lassoDragHandler);
+                return(false);
+            });
+[% END %]
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -191,6 +257,7 @@
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
+            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             // REMOVE AFTER: 01.01.2016
             // migrate old settings
             if(state.xdata == undefined) { state.xdata = {} }
@@ -256,8 +323,12 @@
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
         this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
-        if(TP.initialized && startTimeouts != false) {
-            this.startTimeouts();
+        if(startTimeouts != false) {
+            if(TP.initialized) {
+                this.startTimeouts();
+            } else {
+                TP.timeouts['timeout_' + this.id + '_starttimeouts'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), 30000);
+            }
         }
     },
 
@@ -304,6 +375,7 @@
     /* start all timed actions for this tab and its panels */
     startTimeouts: function() {
         this.stopTimeouts();
+        TP.log('['+this.id+'] startTimeouts');
 
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
@@ -341,8 +413,8 @@
             }
         }
         var This = this;
-        if(activeTab && activeTab.xdata && activeTab.xdata.refresh > 0) {
-            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, activeTab.xdata.refresh * 1000);
+        if(This.xdata && This.xdata.refresh > 0) {
+            TP.timeouts['interval_global_icons' + This.id + '_refresh'] = window.setInterval(function() { TP.updateAllIcons(This) }, This.xdata.refresh * 1000);
             TP.updateAllIcons(This);
         }
 
@@ -350,12 +422,13 @@
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.unmask();
-            TP.dashboardsSettingWindow.toFront();
         }
+        TP.checkModalWindows();
     },
 
     /* stop all timed actions for this tab and its panels */
     stopTimeouts: function() {
+        TP.log('['+this.id+'] stopTimeouts');
         /* start refresh for all panlets with our refresh rate */
         var panels = TP.getAllPanel(this);
         for(var nr=0; nr<panels.length; nr++) {
@@ -372,6 +445,14 @@
         if(retries >= 5)         { return;      }
         var body = This.body;
         if(body == undefined)    { return; }
+        if(!This.bgDragEl) {
+            This.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
+            This.bgDragEl.dom.src            = background;
+            This.bgDragEl.dom.style.position = "absolute";
+            This.bgDragEl.dom.style.width    = "100%";
+            This.bgDragEl.dom.style.height   = "100%";
+            This.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
+        }
         if(background != undefined && background != 'none') {
             if(!This.bgImgEl) {
                 This.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
@@ -418,3 +499,65 @@
         }
     }
 });
+
+/* handles dragging a lasso around icon elements to move them together */
+TP.lassoDragHandler = function(e) {
+    e.preventDefault();
+    var mouse = e.getXY();
+    TP.reduceDelayEvents(TP.lassoEl, function() {
+        TP.lassoDragHandlerDo(mouse);
+    }, 50, 'timeout_icon_lasso');
+}
+
+TP.lassoDragHandlerDo = function(mouse) {
+    /* set new lasso size */
+    window.clearTimeout(TP.timeouts['timeout_icon_lasso']);
+    if(!TP.lassoEl) { return; }
+    var start = TP.lassoEl.startPosition;
+    var x = mouse[0]-start[0];
+    var y = mouse[1]-start[1];
+    if(x < 0 && y < 0) {
+        TP.lassoEl.setPosition(mouse[0], mouse[1]);
+        x = -x;
+        y = -y;
+    }
+    else if(x < 0) {
+        TP.lassoEl.setPosition(mouse[0], start[1]);
+        x = -x;
+    }
+    else if(y < 0) {
+        TP.lassoEl.setPosition(start[0], mouse[1]);
+        y = -y;
+    }
+    TP.lassoEl.setSize(x, y);
+
+    TP.reduceDelayEvents(TP.lassoEl, function() {
+        TP.lassoMarkIcons(x, y);
+    }, 50, 'timeout_icon_mark_update');
+}
+
+TP.lassoMarkIcons = function(x, y) {
+    /* check marked elements */
+    window.clearTimeout(TP.timeouts['timeout_icon_mark_update']);
+    if(!TP.lassoEl) { return; }
+    var lassoPos = TP.lassoEl.getPosition();
+    var tabpan = Ext.getCmp('tabpan');
+    var tab    = tabpan.getActiveTab();
+    var panels = TP.getAllPanel(tab);
+    TP.moveIcons = [];
+    for(var nr=0; nr<panels.length; nr++) {
+        var panel = panels[nr];
+        if(panel.xdata.layout) {
+            var center = panel.getPosition();
+            var size   = panel.getSize();
+            center[0]  = center[0] + size.width;
+            center[1]  = center[1] + size.height;
+            if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
+                panel.el.dom.style.outline = "2px dotted orange";
+                TP.moveIcons.push(panel);
+            } else {
+                panel.el.dom.style.outline = "";
+            }
+        }
+    }
+}

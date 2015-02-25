@@ -15,7 +15,7 @@
     <style type="text/css">
     <!--
     HTML {
-        overflow: inherit;
+        overflow-x: hidden;
         overflow-y: auto;
     }
     -->
@@ -60,6 +60,7 @@
                 <input type='hidden' name='hidesearch' value='2' />
                 <input type='hidden' name='s0_op' value='~' id="s0_to" />
                 <input type='hidden' name='s0_type' value='search' />
+                <input type='hidden' name='add_default_service_filter' value='1' />
                 <input type='text' name='s0_value' size='15' class="NavBarSearchItem  deletable" id="s0_value" />
                 [% ELSE %]
                 <input type='hidden' name='navbarsearch' value='1' />

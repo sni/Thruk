@@ -38,7 +38,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # lookup parameters
     my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
-    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};
     my $host           = $c->{'request'}->{'parameters'}->{'host'}         || '';
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $service        = $c->{'request'}->{'parameters'}->{'service'}      || '';

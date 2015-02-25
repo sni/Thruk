@@ -14,14 +14,16 @@ Just like Monitoring::Livestatus::Class but without Moose.
 
     use Monitoring::Livestatus::Class::Lite;
 
-    my $class = Monitoring::Livestatus::Class::Lite->new(
+    my $class = Monitoring::Livestatus::Class::Lite->new({
         peer => '/var/lib/nagios3/rw/livestatus.sock'
-    );
+    });
 
     my $hosts = $class->table('hosts');
     my @data = $hosts->columns('display_name')->filter(
         { display_name => { '-or' => [qw/test_host_47 test_router_3/] } }
     )->hashref_array();
+
+    use Data::Dumper;
     print Dumper \@data;
 
 =head1 ATTRIBUTES
@@ -57,16 +59,16 @@ Set peer for live tests.
 
 use warnings;
 use strict;
-use Carp;
-use Scalar::Util qw/blessed/;
+use Carp qw/croak confess/;
 use List::Util qw/first/;
-use Monitoring::Livestatus;
+use Monitoring::Livestatus qw//;
 
 our $VERSION = '0.05';
 our $TRACE   = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;
 
 our $compining_prefix = '';
 our $filter_mode      = '';
+our $filter_cache     = {};
 
 ################################################################################
 
@@ -191,6 +193,8 @@ sub hashref_pk {
 
     confess("no key!") unless $key;
 
+    return([$self->statement(), $self->{_columns}, $self->{_options}]) if $ENV{'THRUK_SELECT'};
+
     my %indexed;
     my @data = $self->hashref_array();
     confess('undefined index: '.$key) if(defined $data[0] and !defined $data[0]->{$key});
@@ -211,21 +215,71 @@ return result as array
 =cut
 sub hashref_array {
     my($self) = @_;
+    return([$self->statement(), $self->{_columns}, $self->{_options}]) if $ENV{'THRUK_SELECT'};
     my @data = $self->_execute();
     return wantarray ? @data : \@data;
 }
 
 ################################################################################
 
+=head2 reset_filter
+
+    reset_filter()
+
+removes all current filter
+
+=cut
+sub reset_filter {
+    my($self) = @_;
+    $self->{'_filter'}      = undef;
+    $self->{'_statsfilter'} = undef;
+    return($self);
+}
+
+################################################################################
+
+=head2 save_filter
+
+    save_filter($name)
+
+save this filter with given name which can be reused later.
+
+=cut
+sub save_filter {
+    my($self, $name) = @_;
+    $filter_cache->{$name} = $self->statement(1);
+    return($self);
+}
+
+################################################################################
+
+=head2 apply_filter
+
+    apply_filter($name)
+
+returns true if a filter with this name has been applied. returns false if filter
+does not exist.
+
+=cut
+sub apply_filter {
+    my($self, $name) = @_;
+    return unless $filter_cache->{$name};
+    $self->{'_extra_stm'} = $filter_cache->{$name};
+    $self->{'_columns'}   = undef;
+    return($self);
+}
+
+################################################################################
+
 =head2 statement
 
-    statement()
+    statement($filter_only)
 
-return query as text
+return query as text.
 
 =cut
 sub statement {
-    my($self) = @_;
+    my($self, $filter_only) = @_;
 
     confess("no table??") unless $self->{'_table'};
 
@@ -241,6 +295,10 @@ sub statement {
     if( $self->{'_statsfilter'} ) {
         push @statements, @{$self->_apply_filter($self->{'_statsfilter'}, 'Stats')};
     }
+    if( $self->{'_extra_stm'} ) {
+        push @statements, @{$self->{'_extra_stm'}};
+    }
+    return(\@statements) if $filter_only;
 
     unshift @statements, sprintf("GET %s", $self->{'_table'});
 
@@ -271,7 +329,8 @@ sub _apply_filter {
 
     $compining_prefix = $mode || '';
     $filter_mode      = $mode || 'Filter';
-    my( $combining_count, @statements) = &_recurse_cond($filter);
+    #my( $combining_count, @statements)...
+    my( undef, @statements) = &_recurse_cond($filter);
     return wantarray ? @statements: \@statements;
 }
 
@@ -280,7 +339,7 @@ sub _recurse_cond {
     my($cond, $combining_count) = @_;
     $combining_count = $combining_count || 0;
     print STDERR "#IN _recurse_cond $cond $combining_count\n" if $TRACE > 9;
-    my $method = &_METHOD_FOR_refkind("_cond", $cond);
+    my $method = &_METHOD_FOR_refkind('_cond', $cond);
     my ( $child_combining_count, @statment ) = &{\&$method}($cond,$combining_count);
     $combining_count = $child_combining_count;
     print STDERR "#OUT _recurse_cond $cond $combining_count ( $method )\n" if $TRACE > 9;
@@ -297,8 +356,6 @@ sub _cond_ARRAYREF {
     print STDERR "#IN _cond_ARRAYREF $conds $combining_count\n" if $TRACE > 9;
     my @statment = ();
 
-    my $child_combining_count = 0;
-    my @child_statment = ();
     my @cp_conds = @{ $conds }; # work with a copy
     while ( my $cond = shift @cp_conds ){
         my ( $child_combining_count, @child_statment ) = &_dispatch_refkind($cond, {
@@ -317,22 +374,20 @@ sub _cond_ARRAYREF {
 ################################################################################
 sub _cond_HASHREF {
     my($cond, $combining_count) = @_;
-    $combining_count = $combining_count || 0;
+    $combining_count          = $combining_count || 0;
     print STDERR "#IN _cond_HASHREF $cond $combining_count\n" if $TRACE > 9 ;
-    my @all_statment = ();
+    my @all_statment          = ();
     my $child_combining_count = 0;
-    my @child_statment = ();
+    my @child_statment        = ();
 
-    foreach my $key ( keys %{ $cond } ){
+    for my $key (keys %{ $cond }){
         my $value = $cond->{$key};
-        my $method ;
-
-        if ( $key =~ /^-/mxo ){
+        if(index($key, '-') == 0){
             # Child key for combining filters ( -and / -or )
             ( $child_combining_count, @child_statment ) = &_cond_op_in_hash($key, $value, $combining_count);
             $combining_count = $child_combining_count;
-        } else{
-            $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
+        } else {
+            my $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
             ( $child_combining_count, @child_statment ) = &{\&$method}($key, $value, undef ,$combining_count);
             $combining_count = $child_combining_count;
         }
@@ -345,12 +400,13 @@ sub _cond_HASHREF {
 
 ################################################################################
 sub _cond_hashpair_UNDEF {
-    my $key = shift || '';
-    my $value = shift;
-    my $operator = shift || '=';
+    #my($key, $value, $operator, $combining_count)...
+    my($key, undef, $operator, $combining_count) = @_;
+    $combining_count = 0 unless $combining_count;
+    $key      = '' unless $key;
+    $operator = '=' unless $operator;
     print STDERR "# _cond_hashpair_UNDEF\n" if $TRACE > 9 ;
 
-    my $combining_count = shift || 0;
     my @statment = (
         sprintf("%s: %s %s",$filter_mode,$key,$operator)
     );
@@ -392,10 +448,11 @@ sub _cond_hashpair_ARRAYREF {
 
 ################################################################################
 sub _cond_hashpair_HASHREF {
-    my $key             = shift || '';
-    my $values          = shift || {};
-    my $combining       = shift || undef;
-    my $combining_count = shift || 0;
+    #my($key, $values, $combining, $combining_count)...
+    my($key, $values, undef, $combining_count) = @_;
+    $key             = '' unless $key;
+    $values          = {} unless $values;
+    $combining_count = 0 unless $combining_count;
 
     print STDERR "#IN Abstract::_cond_hashpair_HASHREF $combining_count\n" if $TRACE > 9;
     my @statment = ();
@@ -499,43 +556,34 @@ sub _cond_compining {
 
 ################################################################################
 sub _refkind {
-  my ($data) = @_;
-  my $suffix = '';
-  my $ref;
-  my $n_steps = 0;
-
-  while (1) {
-    # blessed objects are treated like scalars
-    $ref = (blessed $data) ? '' : ref $data;
-    $n_steps += 1 if $ref;
-    last          if $ref ne 'REF';
-    $data = $$data;
+  my($data) = @_;
+  if(!defined $data) {
+    return('UNDEF');
+  }
+  my $ref = ref $data;
+  if(!$ref) {
+    return('SCALAR');
   }
 
-  my $base = $ref || (defined $data ? 'SCALAR' : 'UNDEF');
-
-  return $base . ('REF' x $n_steps);
+  return(uc($ref).'REF');
 }
 
 ################################################################################
 sub _dispatch_refkind {
-    my $value = shift;
-    my $dispatch_table = shift;
+    my($value, $dispatch_table) = @_;
 
-    my $type = &_refkind($value);
-    my $coderef = $dispatch_table->{$type};
-
-    die sprintf("No coderef for %s ( %s ) found!",$value, $type)
-        unless ( ref $coderef eq 'CODE' );
+    my $type    = &_refkind($value);
+    my $coderef = $dispatch_table->{$type} ||
+        die(sprintf("No coderef for %s ( %s ) found!",$value, $type));
 
     return $coderef->();
 }
 
 ################################################################################
 sub _METHOD_FOR_refkind {
-    my $prefix = shift || '';
-    my $value = shift;
-    my $type = &_refkind($value);
+    my($prefix, $value) = @_;
+    $prefix    = '' unless defined $prefix;
+    my $type   = &_refkind($value);
     my $method = sprintf("%s_%s",$prefix,$type);
     return $method;
 }

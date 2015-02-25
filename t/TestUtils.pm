@@ -11,6 +11,23 @@ BEGIN {
   $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
 }
 
+###################################################
+# create connection pool
+# has to be done really early to save memory
+use lib 'lib';
+use Thruk::Backend::Pool;
+BEGIN {
+    Thruk::Backend::Pool::init_backend_thread_pool();
+}
+
+###################################################
+# clean up env
+use Thruk::Utils::INC;
+BEGIN {
+    Thruk::Utils::INC::clean();
+}
+
+###################################################
 use strict;
 use Data::Dumper;
 use Test::More;
@@ -21,6 +38,7 @@ use HTTP::Request::Common qw(POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/ tempfile /;
+use Carp;
 use Thruk::Utils;
 use Thruk::Utils::External;
 
@@ -172,8 +190,9 @@ sub get_test_hostgroup_cli {
     skip_doctype    => skip doctype check, even if its an html page
     skip_js_check   => skip js comma check
     sleep           => sleep this amount of seconds after the request
-    waitfor         => wait till regex occurs (max 60sec)
+    waitfor         => wait till regex occurs (max 120sec)
     agent           => user agent for requests
+    callback        => content callback
   }
 
 =cut
@@ -224,7 +243,7 @@ sub test_page {
         my $now = time();
         my $waitfor = $opts->{'waitfor'};
         my $found   = 0;
-        while($now < $start + 60) {
+        while($now < $start + 120) {
             # text that shouldn't appear
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
@@ -245,7 +264,7 @@ sub test_page {
             $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, undef, $opts->{'agent'});
             $return->{'content'} = $request->content;
         }
-        fail("content did not occur within 60 seconds") unless $found;
+        fail("content did not occur within 120 seconds") unless $found;
         return $return;
     }
 
@@ -264,7 +283,7 @@ sub test_page {
         ok( $request->is_error, 'Request '.$opts->{'url'}.' should fail' );
     }
     elsif(defined $opts->{'redirect'}) {
-        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($request));
+        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($opts, $request));
         if(defined $opts->{'location'}) {
             if(defined $request->{'_headers'}->{'location'}) {
                 like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
@@ -336,7 +355,7 @@ sub test_page {
             $lint->parse($content);
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
-            is( scalar @errors, 0, "No errors found in HTML" );
+            is( scalar @errors, 0, "No errors found in HTML" ) or diag($content);
             $lint->clear_errors();
         }
     }
@@ -346,7 +365,8 @@ sub test_page {
         my $content = $return->{'content'};
         # check for failed javascript lists
         verify_html_js($content) unless $opts->{'skip_js_check'};
-        $content =~ s/<script[^>]*>.*?<\/script>//gsmxio;
+        # remove script tags without a src
+        $content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
         my @matches1 = $content =~ m/\s+(src|href)='(.+?)'/gio;
         my @matches2 = $content =~ m/\s+(src|href)="(.+?)"/gio;
         my $links_to_check;
@@ -400,6 +420,10 @@ sub test_page {
         ok(sleep($opts->{'sleep'}), "slept $opts->{'sleep'} seconds");
     }
 
+    if($opts->{'callback'}) {
+        $opts->{'callback'}($return->{'content'});
+    }
+
     return $return;
 }
 
@@ -417,7 +441,7 @@ sub set_cookie {
     our($cookie_jar, $cookie_file);
     if(!defined $cookie_jar) {
         my $fh;
-        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
+        ($fh, $cookie_file) = tempfile(TEMPLATE => 'tempXXXXX', UNLINK => 1);
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
@@ -509,7 +533,7 @@ sub wait_for_job {
         return;
     }
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
-    alarm(60);
+    alarm(120);
     eval {
         while(Thruk::Utils::External::_is_running($jobdir)) {
             sleep(1);
@@ -517,7 +541,12 @@ sub wait_for_job {
     };
     alarm(0);
     my $end  = time();
-    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds') or diag(Dumper(`find $jobdir/ -ls -exec cat {} \\;`));
+    is(Thruk::Utils::External::_is_running($jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+        or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
+                            scalar `uptime`,
+                            scalar `ps -efl`,
+                            scalar `find $jobdir/ -ls -exec cat {} \\;`,
+               ));
     return;
 }
 
@@ -644,7 +673,7 @@ sub _request {
     our($cookie_jar, $cookie_file);
     if(!defined $cookie_jar) {
         my $fh;
-        ($fh, $cookie_file) = tempfile(undef, UNLINK => 1);
+        ($fh, $cookie_file) = tempfile(TEMPLATE => 'tempXXXXX', UNLINK => 1);
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
@@ -702,7 +731,7 @@ sub _external_request {
     $ua->agent( $agent ) if $agent;
 
     if($post and ref $post ne 'HASH') {
-        die("unknown post data: ".Dumper($post));
+        confess("unknown post data: ".Dumper($post));
     }
     my $req;
     if($post) {
@@ -735,12 +764,13 @@ sub _check_startup_redirect {
         #diag("starting up... ".$link);
         is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, []);
+        my $r = _request('/'.$product.'/cgi-bin/remote.cgi', undef, {});
         #diag("startup request:");
         #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless(-f '/var/cache/thruk/thruk.pid' || -f '/var/cache/naemon/thruk/thruk.pid');
         sleep(3);
+        if($link !~ m/\?/mx && $link =~ m/\&/mx) { $link =~ s/\&/?/mx; }
         $request = _request($link);
         #diag("original request:");
         #diag(Dumper($request));

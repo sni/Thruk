@@ -5,8 +5,8 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Storable qw/dclone/;
+#use Thruk::Timer qw/timing_breakpoint/;
 use Monitoring::Livestatus::Class::Lite;
-use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -39,8 +39,9 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
-        'live'   => Monitoring::Livestatus::Class::Lite->new($peer_config),
-        'config' => $config,
+        'live'                 => Monitoring::Livestatus::Class::Lite->new($peer_config),
+        'config'               => $config,
+        'naemon_optimizations' => 0,
     };
     bless $self, $class;
 
@@ -126,30 +127,37 @@ return the process info
 sub get_processinfo {
     my($self, %options) = @_;
     my $key = $self->peer_key();
-    unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-                      accept_passive_host_checks accept_passive_service_checks check_external_commands
-                      check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
-                      enable_notifications execute_host_checks execute_service_checks last_command_check
-                      last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
-                      process_performance_data program_start program_version interval_length
-        /];
-        if(defined $options{'extra_columns'}) {
-            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+    my $data;
+    if(defined $options{'data'}) {
+        $data = { $key => $options{'data'}->[0] };
+    } else {
+        unless(defined $options{'columns'}) {
+            $options{'columns'} = [qw/
+                          accept_passive_host_checks accept_passive_service_checks check_external_commands
+                          check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
+                          enable_notifications execute_host_checks execute_service_checks last_command_check
+                          last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
+                          process_performance_data program_start program_version interval_length
+            /];
+            if(defined $options{'extra_columns'}) {
+                push @{$options{'columns'}}, @{$options{'extra_columns'}};
+            }
         }
+
+        $data = $self->{'live'}
+                     ->table('status')
+                     ->columns(@{$options{'columns'}})
+                     ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
+                     ->hashref_pk('peer_key');
+        return $data if $ENV{'THRUK_SELECT'};
     }
 
-    my $data = $self->{'live'}
-                    ->table('status')
-                    ->columns(@{$options{'columns'}})
-                    ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
-                    ->hashref_pk('peer_key');
-
     $data->{$key}->{'data_source_version'} = "Livestatus ".$data->{$key}->{'data_source_version'};
+    $self->{'naemon_optimizations'} = 0;
+    $self->{'naemon_optimizations'} = 1 if $data->{$key}->{'data_source_version'} =~ m/\-naemon$/mx;
 
     # naemon checks external commands on arrival
     $data->{$key}->{'last_command_check'} = time() if $data->{$key}->{'last_command_check'} == $data->{$key}->{'program_start'};
-
     return($data, 'HASH');
 }
 
@@ -161,9 +169,10 @@ returns if this user is allowed to submit commands
 
 =cut
 sub get_can_submit_commands {
-    my($self, $user) = @_;
+    my($self, $user, $data) = @_;
     confess("no user") unless defined $user;
-    my $data = $self->{'live'}
+    return $data if $data;
+    $data = $self->{'live'}
                     ->table('contacts')
                     ->columns(qw/can_submit_commands
                                  alias/)
@@ -193,11 +202,11 @@ $VAR1 = [
 
 =cut
 sub get_contactgroups_by_contact {
-    my($self,$username) = @_;
+    my($self,$username, $data) = @_;
     confess("no user") unless defined $username;
+    return $data if $data;
 
-    my $contactgroups = {};
-    my $data = $self->{'live'}
+    $data = $self->{'live'}
                     ->table('contactgroups')
                     ->columns(qw/name/)
                     ->filter({ members => { '>=' => $username }})
@@ -218,15 +227,22 @@ returns a list of hosts
 =cut
 sub get_hosts {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
 
     if($options{'options'}->{'callbacks'}) {
         %options = %{dclone(\%options)};
         $self->_replace_callbacks($options{'options'}->{'callbacks'});
     }
 
+    # optimized naemon with wrapped_json output
+    if($self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options);
+        #&timing_breakpoint('optimized get_hosts') if $self->{'optimized'};
+    }
+
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
@@ -261,10 +277,17 @@ sub get_hosts {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
         my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-        $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+        $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     }
 
+    # get result
     my $data = $self->_get_table('hosts', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
 
     unless(wantarray) {
         confess("get_hosts() should not be called in scalar context");
@@ -283,6 +306,7 @@ returns a list of host by a services query
 =cut
 sub get_hosts_by_servicequery {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
 
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -295,6 +319,7 @@ sub get_hosts_by_servicequery {
     }
 
     my $data = $self->_get_table('services', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
@@ -312,8 +337,15 @@ returns a list of host names
 =cut
 sub get_host_names{
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hosts', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -334,6 +366,7 @@ returns a list of hostgroups
 =cut
 sub get_hostgroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
@@ -356,8 +389,15 @@ returns a list of hostgroup names
 =cut
 sub get_hostgroup_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -377,10 +417,17 @@ returns a list of services
 =cut
 sub get_services {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
+
+    # optimized naemon with wrapped_json output
+    if($self->{'naemon_optimizations'}) {
+        $self->_optimized_for_wrapped_json(\%options);
+        #&timing_breakpoint('optimized get_services') if $self->{'optimized'};
+    }
 
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'}) {
+    if(!$self->{'optimized'} && defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
@@ -425,16 +472,24 @@ sub get_services {
 
 
     my $last_program_start = $options{'last_program_starts'}->{$self->peer_key()} || 0;
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
+    $options{'options'}->{'callbacks'}->{'last_state_change_order'} = sub { return $_[0]->{'last_state_change'} || $last_program_start; };
     # make it possible to order by state
     if(grep {/^state$/mx} @{$options{'columns'}}) {
         $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
     }
+
+    # get result
     my $data = $self->_get_table('services', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
+
+    # set total size
+    if(!$size && $self->{'optimized'}) {
+        $size = $self->{'live'}->{'backend_obj'}->{'meta_data'}->{'total_count'};
+    }
+
     unless(wantarray) {
         confess("get_services() should not be called in scalar context");
     }
-
     return($data, undef, $size);
 }
 
@@ -449,8 +504,15 @@ returns a list of service names
 =cut
 sub get_service_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'description'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/description/];
     my $data = $self->_get_hash_table('services', 'description', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_service_names() should not be called in scalar context");
@@ -469,6 +531,7 @@ returns a list of servicegroups
 =cut
 sub get_servicegroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members action_url notes notes_url
@@ -491,8 +554,15 @@ returns a list of servicegroup names
 =cut
 sub get_servicegroup_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_servicegroup_names() should not be called in scalar context");
@@ -511,6 +581,7 @@ returns a list of comments
 =cut
 sub get_comments {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment entry_time entry_type expires
@@ -535,6 +606,7 @@ returns a list of downtimes
 =cut
 sub get_downtimes {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             author comment end_time entry_time fixed host_name
@@ -560,6 +632,7 @@ returns a list of contactgroups
 =cut
 sub get_contactgroups {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias members
@@ -596,7 +669,7 @@ sub get_logs {
     }
 
     my @logs = reverse @{$self->_get_table('log', \%options)};
-    return(Thruk::Utils::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
+    return(Thruk::Utils::IO::save_logs_to_tempfile(\@logs), 'file') if $options{'file'};
     return \@logs;
 }
 
@@ -612,6 +685,7 @@ returns a list of timeperiods
 =cut
 sub get_timeperiods {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias
@@ -645,8 +719,15 @@ returns a list of timeperiod names
 =cut
 sub get_timeperiod_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
         confess("get_timeperiods_names() should not be called in scalar context");
@@ -665,6 +746,7 @@ returns a list of commands
 =cut
 sub get_commands {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name line
@@ -687,6 +769,7 @@ returns a list of contacts
 =cut
 sub get_contacts {
     my($self, %options) = @_;
+    return($options{'data'}) if($options{'data'});
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
             name alias email pager service_notification_period host_notification_period
@@ -709,8 +792,15 @@ returns a list of contact names
 =cut
 sub get_contact_names {
     my($self, %options) = @_;
+    if($options{'data'}) {
+        my %indexed;
+        for my $row (@{$options{'data'}}) { $indexed{$row->{'name'}} = 1; }
+        my @keys = keys %indexed;
+        return(\@keys, 'uniq');
+    }
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('contacts', 'name', \%options);
+    return $data if $ENV{'THRUK_SELECT'};
     my $keys = defined $data ? [keys %{$data}] : [];
 
     unless(wantarray) {
@@ -730,6 +820,20 @@ returns the host statistics for the tac page
 =cut
 sub get_host_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('hosts', \%options);
+    if($class->apply_filter('hoststats')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_host_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
 
     my $stats = [
         'total'                             => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
@@ -763,13 +867,8 @@ sub get_host_stats {
         'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
         'outages'                           => { -isa => { -and => [ 'state' => 1, 'childs' => {'!=' => undef } ]}},
     ];
-    my $class = $self->_get_class('hosts', \%options);
-    my $rows  = $class->stats($stats)->hashref_array();
-
-    unless(wantarray) {
-        confess("get_host_stats() should not be called in scalar context");
-    }
-    return(\%{$rows->[0]}, 'SUM');
+    $class->reset_filter()->stats($stats)->save_filter('hoststats');
+    return($self->get_host_stats(%options));
 }
 
 ##########################################################
@@ -783,6 +882,20 @@ returns the services statistics for the tac page
 =cut
 sub get_service_stats {
     my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('services', \%options);
+    if($class->apply_filter('servicestats')) {
+        my $rows = $class->hashref_array();
+        return $rows if $ENV{'THRUK_SELECT'};
+        unless(wantarray) {
+            confess("get_service_stats() should not be called in scalar context");
+        }
+        return(\%{$rows->[0]}, 'SUM');
+    }
 
     my $stats = [
         'total'                             => { -isa => { -and => [ 'description' => { '!=' => '' } ]}},
@@ -824,14 +937,8 @@ sub get_service_stats {
         'active_checks_disabled_passive'    => { -isa => { -and => [ 'check_type' => 1, 'active_checks_enabled' => 0 ]}},
         'passive_checks_disabled'           => { -isa => { -and => [ 'accept_passive_checks' => 0 ]}},
     ];
-
-    my $class = $self->_get_class('services', \%options);
-    my $rows  = $class->stats($stats)->hashref_array();
-
-    unless(wantarray) {
-        confess("get_service_stats() should not be called in scalar context");
-    }
-    return(\%{$rows->[0]}, 'SUM');
+    $class->reset_filter()->stats($stats)->save_filter('servicestats');
+    return($self->get_service_stats(%options));
 }
 
 ##########################################################
@@ -846,6 +953,12 @@ returns the service /host execution statistics
 sub get_performance_stats {
     my($self, %options) = @_;
 
+    if($options{'data'}) {
+        my $d = $options{'data'};
+        my $data = {%{$d->[0]->[0]}, %{$d->[1]->[0]}, %{$d->[2]->[0]}, %{$d->[3]->[0]}, %{$d->[4]->[0]}, %{$d->[5]->[0]}, };
+        return($data, 'STATS');
+    }
+
     my $now    = time();
     my $min1   = $now - 60;
     my $min5   = $now - 300;
@@ -854,6 +967,7 @@ sub get_performance_stats {
     my $minall = $options{'last_program_starts'}->{$self->peer_key()} || 0;
 
     my $data = {};
+    my $selects = [];
     for my $type (qw{hosts services}) {
         my $stats = [
             $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
@@ -873,7 +987,11 @@ sub get_performance_stats {
         $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data = { %{$data}, %{$rows->[0]} }
+        }
 
         # add stats for active checks
         $stats = [
@@ -891,7 +1009,11 @@ sub get_performance_stats {
         $rows = $class
                     ->filter([ has_been_checked => 1, check_type => 0 ])
                     ->stats($stats)->hashref_array();
-        $data = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data = { %{$data}, %{$rows->[0]} };
+        }
 
         # add stats for passive checks
         $stats = [
@@ -902,9 +1024,14 @@ sub get_performance_stats {
         $class = $self->_get_class($type, \%options);
         $rows  = $class->filter([ has_been_checked => 1, check_type => 1 ])
                        ->stats($stats)->hashref_array();
-        $data  = { %{$data}, %{$rows->[0]} };
+        if($ENV{'THRUK_SELECT'}) {
+            push @{$selects}, $rows;
+        } else {
+            $data  = { %{$data}, %{$rows->[0]} };
+        }
     }
 
+    return $selects if $ENV{'THRUK_SELECT'};
     unless(wantarray) {
         confess("get_performance_stats() should not be called in scalar context");
     }
@@ -923,6 +1050,10 @@ returns the service /host execution statistics
 sub get_extra_perf_stats {
     my($self, %options) = @_;
 
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
     my $class = $self->_get_class('status', \%options);
     my $data  =  $class
                   ->columns(qw/
@@ -932,6 +1063,7 @@ sub get_extra_perf_stats {
                         log_messages log_messages_rate forks forks_rate
                   /)
                   ->hashref_array();
+    return $data if $ENV{'THRUK_SELECT'};
 
     if(defined $data) {
         $data = shift @{$data};
@@ -964,7 +1096,7 @@ sub set_verbose {
 
 =head2 _get_class
 
-  _get_class
+  _get_class($tablename, $options)
 
 generic function to return a table class
 
@@ -1132,6 +1264,52 @@ sub _replace_callbacks {
         confess("no callback for ".$key." -> ".$callbacks->{$key}) unless defined $callback;
         $callbacks->{$key} = $callback;
     }
+    return;
+}
+
+##########################################################
+sub _optimized_for_wrapped_json {
+    my($self, $options) = @_;
+    $self->{'optimized'} = 0;
+
+    if($options->{'sort'}) {
+        $options->{'options'}->{'sort'} = [];
+        if(ref $options->{'sort'} eq '') {
+            $options->{'sort'} = { ASC => [ $options->{'sort'} ] };
+        }
+        elsif(ref $options->{'sort'} eq 'ARRAY') {
+            $options->{'sort'} = { ASC => $options->{'sort'} };
+        }
+        for my $order (keys %{$options->{'sort'}}) {
+            if(ref $options->{'sort'}->{$order} ne 'ARRAY') {
+                $options->{'sort'}->{$order} = [$options->{'sort'}->{$order}];
+            }
+            for my $key (@{$options->{'sort'}->{$order}}) {
+                push @{$options->{'options'}->{'sort'}}, $key.' '.(lc $order);
+                if(   $key eq 'last_state_change_order'
+                   || $key eq 'state_order'
+                   || $key eq 'peer_name'
+                ) {
+                    delete $options->{'options'}->{'sort'};
+                    return;
+                }
+            }
+        }
+    }
+
+    $options->{'options'}->{'wrapped_json'} = 1;
+    if($options->{'pager'} && $options->{'pager'}->{'entries'} && $options->{'pager'}->{'entries'} =~ m/^\d+$/mx) {
+        my $page = ($options->{'pager'}->{'page'} || 1);
+        $page++   if $options->{'pager'}->{'next'};
+        $page--   if $options->{'pager'}->{'previous'};
+        $page = 1 if $options->{'pager'}->{'first'};
+        $page = $options->{'pager'}->{'pages'} if $options->{'pager'}->{'last'};
+        # offset can only be used if this is the only backend...
+        # so use the minimal limit for now
+        #$options->{'options'}->{'offset'} = $page * $options->{'pager'}->{'entries'};
+        $options->{'options'}->{'limit'}  = $page * $options->{'pager'}->{'entries'};
+    }
+    $self->{'optimized'} = 1;
     return;
 }
 

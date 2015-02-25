@@ -9,7 +9,6 @@ use URI::Escape qw/uri_escape/;
 use File::Slurp;
 use JSON::XS;
 use POSIX qw/strftime/;
-use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::Filter;
 
 #
@@ -42,11 +41,6 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
     $c->stats->profile(begin => "Root begin");
-
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        $self->{'memory_begin'} = Thruk::Utils::get_memory_usage();
-        $self->{'time_begin'}   = [gettimeofday];
-    }
 
     Thruk::Action::AddDefaults::set_configs_stash($c);
 
@@ -157,23 +151,26 @@ sub begin : Private {
         or ref $c->{'db'}->{'backends'} ne 'ARRAY'
         or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
 
+        my $product_prefix = $c->config->{'product_prefix'};
+
         # return here for static content, no backend needed
-        if(   $c->request->action =~ m|thruk/\w+\.html|mx
-           or $c->request->action =~ m|thruk\/\w+\.html|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/conf\.cgi\?sub=backends|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/remote\.cgi|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/login\.cgi|mx
-           or $c->request->action =~ m|thruk\/cgi\-bin\/restricted\.cgi|mx
-           or $c->request->action =~ m|^/$|mx
-           or $c->request->action eq 'thruk$'
-           or $c->request->action eq 'thruk\\/docs\\/' ) {
+        if(   $c->request->action =~ m|$product_prefix/\w+\.html|mx
+           or $c->request->action =~ m|$product_prefix\/\w+\.html|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/conf\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/remote\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/login\.cgi|mx
+           or $c->request->action =~ m|$product_prefix\/cgi\-bin\/restricted\.cgi|mx
+           or $c->request->action eq '/'
+           or $c->request->action eq $product_prefix
+           or $c->request->action eq $product_prefix.'/docs'
+           or $c->request->action eq $product_prefix.'\\/docs\\/' ) {
             $c->stash->{'no_auto_reload'} = 1;
             return;
         }
         # redirect to backends manager if admin user
         if( $c->config->{'use_feature_configtool'} ) {
             $c->{'request'}->{'parameters'}->{'sub'} = 'backends';
-            return $c->detach('/conf/index');
+            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/conf.cgi?sub=backends");
         } else {
             return $c->detach("/error/index/14");
         }
@@ -267,6 +264,13 @@ sub begin : Private {
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     $c->stash->{'usercontent_folder'} = $ENV{'CATALYST_CONFIG'}.'/usercontent' if $ENV{'CATALYST_CONFIG'};
     $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
+
+
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        if($c->config->{'max_process_memory'} && $Catalyst::COUNT && $Catalyst::COUNT%10 == 0) {
+            $c->run_after_request('Thruk::Utils::check_memory_usage($c);');
+        }
+    }
 
     $c->stats->profile(end => "Root begin");
     return 1;
@@ -761,7 +765,9 @@ sub end : ActionClass('RenderView') {
 
     $c->stats->profile(begin => "Root end");
 
-    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
+    if(!defined $c->stash->{'navigation'} or $c->stash->{'navigation'} eq '') {
+        Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
+    }
 
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {
@@ -871,15 +877,6 @@ sub end : ActionClass('RenderView') {
                $c->stash->{'title'} = $c->stash->{'infoBoxTitle'};
             }
         }
-    }
-
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'}) {
-        my $elapsed = tv_interval($self->{'time_begin'});
-        $self->{'memory_end'} = Thruk::Utils::get_memory_usage();
-        my($url) = ($c->request->uri =~ m#.*?/thruk/(.*)#mxo);
-        $url     = $c->request->uri unless $url;
-        if(length($url) > 50) { $url = substr($url, 0, 50).'...' }
-        $c->log->info(sprintf("mem:% 7s MB  % 10.2f MB     %.2fs    %s\n", $self->{'memory_end'}, ($self->{'memory_end'}-$self->{'memory_begin'}), $elapsed, $url));
     }
 
     $c->stats->profile(end => "Root end");

@@ -27,6 +27,8 @@ var TP = {
     timeouts:     {},
     num_panels:   0,
     cur_panels:   1,
+    logHistory:   [],
+    modalWindows: [],
 
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
@@ -37,18 +39,20 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden) {
+    add_pantab: function(id, replace_id, hidden, callback) {
         var tabpan = Ext.getCmp('tabpan');
 
         if(TP.dashboardsSettingWindow) {
             TP.dashboardsSettingWindow.body.mask('loading...');
-            TP.dashboardsSettingWindow.toFront();
         }
+        TP.checkModalWindows();
 
         if(id == undefined) {
             TP.initialized = true;
             id = 'new_or_empty';
         }
+
+        TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
 
         /* get tab data from server */
         if(id && cp.state[id] == undefined) {
@@ -60,8 +64,7 @@ var TP = {
                 async: false,
                 callback: function(options, success, response) {
                     if(id != 'new') {
-                        id = String(id).replace(/^tabpan-tab_/, '');
-                        id = "tabpan-tab_"+id;
+                        id = TP.nr2TabId(id);
                     }
                     if(!success) {
                         if(response.status == 0) {
@@ -73,6 +76,7 @@ var TP = {
                     } else {
                         var data = TP.getResponse(undefined, response);
                         data = data.data;
+                        TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
                         if(data.newid) { id = data.newid; delete data.newid; }
                         for(var key in data) {
                             cp.set(key, Ext.JSON.decode(data[key]));
@@ -82,15 +86,16 @@ var TP = {
                                 TP.initial_active_tab = id; // set inital tab, so panlets will be shown
                             }
                             TP.add_pantab(id, replace_id, hidden);
-                            if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
+                            if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
                                 TP.dashboardsSettingGrid.getView().refresh();
-                                TP.dashboardsSettingWindow.toFront();
                             }
+                            TP.checkModalWindows();
                         } else {
                             TP.Msg.msg("fail_message~~adding new dashboard failed, no such dashboard");
                             tabpan.saveState();
                         }
                     }
+                    if(callback) { callback(id); }
                 }
             });
             return;
@@ -137,6 +142,9 @@ var TP = {
 
         /* save tabs state */
         Ext.getCmp('tabpan').saveState();
+
+        /* any callbacks? */
+        if(callback) { callback(id); }
 
         /* return false to prevent newtab button being activated */
         return false;
@@ -194,6 +202,7 @@ var TP = {
             cp.set(config.conf.id, config.state);
         }
         config.conf.panel_id = tb.id;
+        TP.log('['+tb.id+'] add_panlet - type: '+config.type+', '+Ext.JSON.encode(config.conf));
         var win = Ext.create(config.type, config.conf);
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
@@ -254,6 +263,15 @@ var TP = {
         tb.getEl().on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY]);
     },
 
+    redraw_panlet: function(panel, tab) {
+        panel.redrawOnly = true;
+        panel.destroy();
+        TP.timeouts['timeout_' + panel.id + '_show_settings'] = window.setTimeout(function() {
+            panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+        }, 50);
+    },
+
     /* return next unused id */
     getNextId: function(prefix, id) {
         if(id != undefined) {
@@ -279,19 +297,23 @@ var TP = {
 
     /* show about window */
     aboutWindow: function() {
-        new Ext.window.Window({
+        var win = new Ext.window.Window({
             autoShow:   true,
             modal:      true,
             title:      'About Thruks Panorama',
             buttonAlign: 'center',
             items: [{
-                html: 'Thruk Panorama<br><br>Copyright 2012 Sven Nierlein, sven@consol.de<br>License: GPL v3<br>Version: [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %] <font size="-3">([% c.config.extra_version %])<\/font>[% END %]'
+                html: 'Thruk Panorama Dashboard<br><br>'
+                     +'Copyright 2009-2014 Sven Nierlein, sven@consol.de<br>'
+                     +'License: GPL v3<br>'
+                     +'Version: [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %] <font size="-3">([% c.config.extra_version %])<\/font>[% END %]'
             }],
             fbar: [{
                 text:'OK',
                 handler: function() { this.up('window').destroy() }
             }]
         });
+        TP.modalWindows.push(win);
     },
 
     /* get box coordinates for given object */
@@ -517,19 +539,49 @@ var TP = {
 
     /* default refresh handler */
     defaultSiteRefreshHandler: function(panel) {
-        if(panel.xdata.url != '' && panel.xdata.refresh != -2) { // -2 means temporarily disabled
-            var url = panel.xdata.url;
+        TP.log('['+panel.id+'] defaultSiteRefreshHandler');
+        if(panel.loader.loading) {
+            TP.log('['+panel.id+'] is already loading, skipped');
+            return;
+        }
+        if(panel.xdata.url == '') {
+            TP.log('['+panel.id+'] no url, skipped');
+            return;
+        }
+        if(panel.xdata.refresh == -2) { // -2 means temporarily disabled
+            TP.log('['+panel.id+'] temporarily disabled, skipped');
+            return;
+        }
+        var url = panel.xdata.url;
+        var baseParams = {};
+        if(panel.noChangeUrlParams == undefined || !panel.noChangeUrlParams) {
             if(panel.loader.baseParams == undefined) {
                 panel.loader.baseParams = {};
             }
-            var baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
+            baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
             delete baseParams['gridstate']; // not needed
             // add backend settings
             var tab = Ext.getCmp(panel.panel_id);
             baseParams['backends'] = TP.getActiveBackendsPanel(tab, panel);
-            panel.loader.load({url:url, baseParams: baseParams});
+
+            // update proc info?
+            baseParams['update_proc'] = TP.setUpdateProcInfo();
         }
+        TP.log('['+panel.id+'] loading '+url);
+        panel.loader.load({url:url, baseParams: baseParams});
     },
+
+    /* only request proc update information every 30 seconds */
+    setUpdateProcInfo: function() {
+        var d   = new Date();
+        var now = Math.floor(d.getTime()/1000);
+        if(TP.last_update_proc == undefined || TP.last_update_proc < now - 30) {
+            TP.last_update_proc = now;
+            return("1");
+        }
+        return("0");
+    },
+
     /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         if(Ext.isNumeric(String(timedef))) { timedef = timedef + 's'; }
@@ -579,7 +631,6 @@ var TP = {
 
         /* stop everything */
         var tabpan = Ext.getCmp('tabpan');
-        tabpan.stopTimeouts();
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
@@ -590,6 +641,7 @@ var TP = {
                 'This is an old import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and be added again.',
                 function(button) {
                     if(button === 'yes') {
+                        tabpan.stopTimeouts();
                         cp.loadData(decoded, false);
                         cp.saveChanges(false, {replace: 1});
                         Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...').toFront();
@@ -662,8 +714,10 @@ var TP = {
             }
             var tab = Ext.getCmp('tabpan').getActiveTab();
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
+                var old = tab.ts ? tab.ts : '';
                 tab.ts = data.dashboard_ts[tab.id];
                 if(no_ts == undefined || no_ts == false) {
+                    TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
                     TP.renewDashboard(tab);
                 }
             }
@@ -864,6 +918,7 @@ var TP = {
     },
     /* called on body unload */
     unload: function() {
+        TP.isUnloading = true;
         try {
             // try saving state
             cp.saveChanges(false);
@@ -926,10 +981,12 @@ var TP = {
         var req = statusReq.req,
             ref = statusReq.ref;
 
+        TP.log('['+tab.id+'] updateAllIconsDo');
         var params = {
-            types:      Ext.JSON.encode(req),
-            backends:   TP.getActiveBackendsPanel(tab),
-            reschedule: reschedule ? 1 : ''
+            types:       Ext.JSON.encode(req),
+            backends:    TP.getActiveBackendsPanel(tab),
+            update_proc: TP.setUpdateProcInfo(),
+            reschedule:  reschedule ? 1 : ''
         };
         TP.iconUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
@@ -947,7 +1004,7 @@ var TP = {
                         if(response.status == 0) {
                             TP.Msg.msg("fail_message~~refreshing status failed");
                         } else {
-                            TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText);
+                            TP.Msg.msg("fail_message~~refreshing status failed: "+response.status+' - '+response.statusText+'<br>please have a look at the server logfile.');
                         }
                     }
                 } else {
@@ -1085,7 +1142,6 @@ var TP = {
 
     /* do the availability update */
     updateAllLabelAvailabilityDo: function(tab, id, xdata) {
-        if(!TP.initialized)               { return; }
         if(!TP.availabilityUpdateRunning) { TP.availabilityUpdateRunning = {}; }
         if(TP.availabilityUpdateRunning[tab.id]) { return; }
         var statusReq = TP.getStatusReq(tab, id, xdata);
@@ -1094,17 +1150,18 @@ var TP = {
             ref = statusReq.ref;
 
         var params = {
-            types:      Ext.JSON.encode(req),
-            backends:   TP.getActiveBackendsPanel(tab),
-            avail:      Ext.JSON.encode(TP.availabilities)
+            types:       Ext.JSON.encode(req),
+            backends:    TP.getActiveBackendsPanel(tab),
+            update_proc: TP.setUpdateProcInfo(),
+            avail:       Ext.JSON.encode(TP.availabilities)
         };
+        TP.log('['+tab.id+'] updateAllLabelAvailability');
         TP.availabilityUpdateRunning[tab.id] = true;
         Ext.Ajax.request({
             url: 'panorama.cgi?task=availability',
             method: 'POST',
             params: params,
             callback: function(options, success, response) {
-                TP.availabilityUpdateRunning[tab.id] = false;
                 if(success) {
                     var data = TP.getResponse(undefined, response);
                     if(!data || !data.data) { return; }
@@ -1119,15 +1176,17 @@ var TP = {
                         panel.setIconLabel();
                     }
                 }
+                TP.availabilityUpdateRunning[tab.id] = false;
+                TP.log('['+tab.id+'] updateAllLabelAvailability done');
             }
         });
     },
 
     /* get request parameters for status requests */
     getStatusReq: function(tab, id, xdata) {
-        var panels = TP.getAllPanel(tab);
-        var req    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
-        var ref    = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
+        var panels   = TP.getAllPanel(tab);
+        var req      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}};
+        var ref      = { filter: {}, hosts: {}, hostgroups: {}, services: {}, servicegroups: {}, sites: {}};
         var count  = 0;
         for(var nr=0; nr<panels.length; nr++) {
             var p = panels[nr];
@@ -1136,7 +1195,7 @@ var TP = {
             if(p.xdata && p.xdata.general) {
                 /* custom filter */
                 if(p.xdata.general.filter) {
-                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter]);
+                    var filter = Ext.JSON.encode([p.xdata.general.incl_hst, p.xdata.general.incl_svc, p.xdata.general.filter, p.xdata.general.backends]);
                     if(ref.filter[filter] == undefined) { ref.filter[filter] = []; }
                     if(req.filter[filter] == undefined) { req.filter[filter] = []; }
                     req.filter[filter].push(p.id);
@@ -1242,10 +1301,10 @@ var TP = {
     /* fetch dashboard data from server and reapply settings */
     reconfigureDashboard: function(nr) {
         /* update dashboard managment view */
-        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid) {
+        if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.getView) {
             TP.dashboardsSettingGrid.getView().refresh();
-            TP.dashboardsSettingWindow.toFront();
         }
+        TP.checkModalWindows();
 
         var tab = Ext.getCmp(nr);
         if(tab == undefined) { return; }
@@ -1282,15 +1341,15 @@ var TP = {
     dashboardActionHandler: function(grid, rowIndex, colIndex, item, e, record, row, confirmed) {
         var action = item.action;
         var nr     = record.data.nr;
-        if(confirmed == undefined || confirmed == 0) {
-            Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
-                if (button === 'yes') {
-                    TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
-                }
-            });
-            return false;
-        }
         if(action == 'remove') {
+            if(confirmed == undefined || confirmed == 0) {
+                Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
+                    if (button === 'yes') {
+                        TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
+                    }
+                });
+                return false;
+            }
             Ext.Ajax.request({
                 url: 'panorama.cgi?task=dashboard_update',
                 method: 'POST',
@@ -1307,13 +1366,14 @@ var TP = {
                         if(TP.dashboardsSettingWindow && TP.dashboardsSettingGrid && TP.dashboardsSettingGrid.loader) {
                             TP.dashboardsSettingGrid.loader.load();
                         }
-                        nr = String(nr).replace(/^tabpan-tab_/, '');
-                        nr = "tabpan-tab_"+nr;
-                        var tab = Ext.getCmp(nr);
+                        var tab = Ext.getCmp(TP.nr2TabId(nr));
                         if(tab) { tab.close(); }
                     }
                 }
             });
+        }
+        if(action == 'edit') {
+            TP.tabSettingsWindow(nr);
         }
         return false;
     },
@@ -1436,11 +1496,12 @@ var TP = {
         window.clearTimeout(TP.timeouts['timeout_global_renewdashboard'+tab.id]);
         TP.timeouts['timeout_global_renewdashboard'+tab.id] = window.setTimeout(function() {
             TP.renewDashboardDo(tab);
-        });
+        }, 200);
     },
 
     /* renew dashboards on the fly */
     renewDashboardDo: function(tab) {
+        TP.log('['+tab.id+'] renewDashboardDo');
         var duration = 1000;
         tab.renewInProgress = true;
         Ext.Ajax.request({
@@ -1454,8 +1515,9 @@ var TP = {
                     var old_window_ids = TP.clone(tab.window_ids);
                     for(var key in data) {
                         var cfg = Ext.JSON.decode(data[key]);
-                        if(key.search(/tabpan-tab_\d+$/) != -1) {
-                            var p = Ext.getCmp(key);
+                        var p   = Ext.getCmp(key);
+                        if(p && key.search(/tabpan-tab_\d+$/) != -1) {
+                            /* changes in our dashboard itself */
                             Ext.apply(p, cfg);
                             delete cfg['readonly'];
                             delete cfg['user'];
@@ -1464,14 +1526,22 @@ var TP = {
                             p.applyXdata();
                             cp.set(key, cfg);
                         }
+
+                        /* panel class changed */
+                        if(p && cfg.xdata.cls != p.xdata.cls) {
+                            cp.set(p.id, cfg);
+                            TP.redraw_panlet(p, tab);
+                            continue;
+                        }
+
+                        /* panel does not yet exist */
                         if(ExtState[key] == undefined) {
                             cp.set(key, cfg);
                             TP.add_panlet({id:key, tb:tab, autoshow:true, conf: { firstRun:false }}, false);
                             tab.saveState();
                         }
-                        else if(data[key] != ExtState[key]) {
-                            // position and size changes can be applied by animation
-                            var p = Ext.getCmp(key);
+                        else if(p && !TP.JSONequals(ExtState[key], data[key])) {
+                            /* position and size changes can be applied by animation */
                             Ext.apply(p, cfg);
                             cp.set(key, cfg);
                             if(p.applyAnimated) {
@@ -1526,8 +1596,83 @@ var TP = {
         tmppanel.setFloatParent(item.el);
         panel.shapeRender(tmppanel.xdata, panel.xdata.appearance.color_ok, tmppanel);
         list.push(tmppanel);
+    },
+    fullReload: function() {
+        TP.log('[global] full reload');
+        reloadPage();
+    },
+    log: function(str) {
+        TP.logHistory.push([new Date(), str]);
+        while(TP.logHistory.length > 50000) {
+            TP.logHistory.shift();
+        }
+    },
+    JSONequals: function(str1, str2) {
+        if(!str1) {
+            return(false);
+        }
+        if(str2 != str1) {
+            if(str1.length != str2.length) {
+                return(false);
+            }
+            var dec1 = Ext.JSON.decode(str1);
+            var dec2 = Ext.JSON.decode(str2);
+            for(var key2 in dec1) {
+                var obj1 = dec1[key2]; if(Ext.isString(dec1[key2]) && dec1[key2].match(/^\{/)) { obj1 = Ext.JSON.decode(dec1[key2]); }
+                var obj2 = dec2[key2]; if(Ext.isString(dec2[key2]) && dec2[key2].match(/^\{/)) { obj2 = Ext.JSON.decode(dec2[key2]); }
+                if(!Object.my_equals(obj1, obj2)) {
+                    return(false);
+                }
+            }
+        }
+        return(true);
+    },
+    /* remove row from gridpanel */
+    removeGridRow: function(grid, rowIndex, colIndex) {
+        grid.getStore().removeAt(rowIndex);
+    },
+    /* convert number to tab id */
+    nr2TabId: function(nr) {
+        nr = String(nr).replace(/^tabpan-tab_/, '');
+        nr = "tabpan-tab_"+nr;
+        return(nr);
+    },
+    /* make sure our modal windows are still in front */
+    checkModalWindows: function() {
+        if(TP.modalWindows.length == 0) { return; }
+        var newModelWindows = [];
+        Ext.Array.each(TP.modalWindows, function(win) {
+            if(win && win.el) {
+                win.toFront();
+                newModelWindows.push(win);
+            }
+        });
+        TP.modalWindows = newModelWindows;
+    },
+    reduceDelayEvents: function(scope, callback, delay, timeoutName) {
+        var now = (new Date()).getTime();
+        if(!scope.lastEventRun)              { scope.lastEventRun = {}; }
+        if(!scope.lastEventRun[timeoutName]) { scope.lastEventRun[timeoutName] = 0; }
+        window.clearTimeout(TP.timeouts[timeoutName]);
+        if(now > scope.lastEventRun[timeoutName] + delay) {
+            scope.lastEventRun[timeoutName] = now;
+            callback();
+        } else {
+            TP.timeouts[timeoutName] = window.setTimeout(function() {
+                if(scope) {
+                    var now = (new Date()).getTime();
+                    scope.lastEventRun[timeoutName] = now;
+                    callback();
+                }
+            }, delay);
+        }
     }
 }
+TP.log('[global] starting');
+TP.log('[global] [% version %][% IF branch %]~[% branch %][% END %]');
+[% IF c.config.extra_version %]TP.log('[global] [% c.config.extra_version %]');[% END %]
+TP.log('[global] '+window.location);
+TP.log('[global] '+navigator.userAgent);
 
 /* returns formated time string */
 function strftime(format, unix_timestamp) {

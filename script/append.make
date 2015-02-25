@@ -95,15 +95,10 @@ local_install: local_patches
 	# man pages
 	mkdir -p ${DESTDIR}${MANDIR}/man3
 	mkdir -p ${DESTDIR}${MANDIR}/man8
-	cp -p docs/thruk.3 ${DESTDIR}${MANDIR}/man3/thruk.3
-	cp -p docs/thruk.8 ${DESTDIR}${MANDIR}/man8/thruk.8
-	cp -p docs/naglint.3 ${DESTDIR}${MANDIR}/man3/naglint.3
-	cp -p docs/nagexp.3 ${DESTDIR}${MANDIR}/man3/nagexp.3
-	############################################################################
-	# docs
-	mkdir -p                     ${DESTDIR}${DATADIR}/docs
-	cp -p docs/FAQ.html          ${DESTDIR}${DATADIR}/docs/FAQ.html
-	cp -p docs/THRUK_MANUAL.html ${DESTDIR}${DATADIR}/docs/THRUK_MANUAL.html
+	cp -p docs/manpages/thruk.3 ${DESTDIR}${MANDIR}/man3/thruk.3
+	cp -p docs/manpages/thruk.8 ${DESTDIR}${MANDIR}/man8/thruk.8
+	cp -p docs/manpages/naglint.3 ${DESTDIR}${MANDIR}/man3/naglint.3
+	cp -p docs/manpages/nagexp.3 ${DESTDIR}${MANDIR}/man3/nagexp.3
 	############################################################################
 	# logfiles
 	mkdir -p ${DESTDIR}${LOGDIR}

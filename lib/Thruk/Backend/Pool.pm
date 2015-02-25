@@ -2,16 +2,20 @@ package Thruk::Backend::Pool;
 
 use strict;
 use warnings;
-use threads;
-use Carp qw/confess/;
 
-use Thruk::Pool::Simple;
-use Thruk::Backend::Peer;
-use Thruk::Utils::IO;
-use Config::General;
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('starting pool');
+};
+
+use Carp qw/confess/;
+use Thruk::Backend::Peer qw//;
+use Thruk::Utils::IO qw//;
+use Config::General qw//;
 use Cwd qw/getcwd/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 NAME
 
@@ -39,6 +43,8 @@ return config with defaults added
 
 sub set_default_config {
     my( $config ) = @_;
+
+    #&timing_breakpoint('set_default_config');
 
     # defaults
     unless($config->{'url_prefix_fixed'}) {
@@ -251,10 +257,11 @@ sub set_default_config {
     }
 
     # ensure csrf hosts is a list
-    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{Thruk::Utils::list($config->{'csrf_allowed_hosts'})}))];
+    $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
 
+    #&timing_breakpoint('set_default_config done');
     return;
 }
 
@@ -269,16 +276,21 @@ init thread connection pool
 =cut
 
 sub init_backend_thread_pool {
-    our($peer_order, $peers, $pool, $pool_size);
+    our($peer_order, $peers, $pool, $pool_size, $xs);
+    return if defined $peers;
+    #&timing_breakpoint('creating pool');
+
+    $xs = 0;
+    eval {
+        require Thruk::Utils::XS;
+        Thruk::Utils::XS->import();
+        $xs = 1;
+    };
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
         chdir($ENV{'HOME'});
-    }
-
-    if(defined $peers) {
-        return;
     }
 
     $peer_order  = [];
@@ -296,8 +308,10 @@ sub init_backend_thread_pool {
     } else {
         $pool_size   = 1;
     }
+    $pool_size       = 1 if $ENV{'THRUK_NO_CONNECTION_POOL'};
     $config->{'deprecations_shown'} = {};
     $pool_size       = $num_peers if $num_peers < $pool_size;
+
 
     # if we have multiple https backends, make sure we use the thread safe IO::Socket::SSL
     my $https_count = 0;
@@ -316,7 +330,15 @@ sub init_backend_thread_pool {
                 Thruk::Utils::IO::mkdir_r($config->{'shadow_naemon_dir'}) ;
             };
             die("could not create shadow_naemon_dir ".$config->{'shadow_naemon_dir'}.': '.$@) if $@;
+            if($xs) {
+                $pool_size = 1; # no pool required when using xs caching
+            }
         }
+    }
+
+    if($pool_size > 1) {
+        require threads;
+        require Thruk::Pool::Simple;
     }
 
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
@@ -336,6 +358,7 @@ sub init_backend_thread_pool {
             }
         }
     }
+    #&timing_breakpoint('configs gathered');
 
     if($num_peers > 0) {
         $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
@@ -351,21 +374,47 @@ sub init_backend_thread_pool {
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
             }
         }
+        #&timing_breakpoint('peers created');
         if($pool_size > 1) {
-            printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
             $pool = Thruk::Pool::Simple->new(
-                min      => $pool_size,
-                max      => $pool_size,
-                do       => [\&Thruk::Backend::Pool::_do_thread ],
+                size    => $pool_size,
+                handler => \&Thruk::Backend::Pool::_do_thread,
             );
-            printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
-            printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         }
     }
 
+    #&timing_breakpoint('creating pool done');
+    return;
+}
+
+########################################
+
+=head2 shutdown_backend_thread_pool
+
+  shutdown_backend_thread_pool()
+
+shutdown thread connection pool
+
+=cut
+
+sub shutdown_backend_thread_pool {
+    our($peer_order, $peers, $pool, $pool_size);
+
+    if($pool) {
+        eval {
+            local $SIG{ALRM} = sub { die "alarm\n" };
+            alarm(3);
+            $pool->shutdown();
+            $pool = undef;
+        };
+        alarm(0);
+    };
     return;
 }
 
@@ -381,7 +430,12 @@ do the work on threads
 
 sub _do_thread {
     my($key, $function, $arg, $use_shadow) = @_;
-    return(do_on_peer($key, $function, $arg, $use_shadow));
+    my $t1 = [gettimeofday];
+    my $res = do_on_peer($key, $function, $arg, $use_shadow);
+    my $elapsed = tv_interval($t1);
+    unshift @{$res}, $elapsed;
+    unshift @{$res}, $key;
+    return($res);
 }
 
 ########################################
@@ -435,6 +489,7 @@ sub do_on_peer {
             if($use_shadow and $peer->{'cacheproxy'} and $function =~ m/^get_/mx and $function ne 'get_logs') {
                 ($data,$type,$size) = $peer->{'cacheproxy'}->$function(@{$arg});
             } else {
+                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
                 if($use_shadow and $peer->{'cacheproxy'} and $function eq 'send_command') {
                     # duplicate command to cache, otherwise we would have to wait
                     # for a full sync of this host/service
@@ -450,7 +505,6 @@ sub do_on_peer {
                     Thruk::Utils::IO::close($fh, $filename);
                     move($tmpfile, $filename);
                 }
-                ($data,$type,$size) = $peer->{'class'}->$function(@{$arg});
             }
             if(defined $data and !defined $size) {
                 if(ref $data eq 'ARRAY') {
@@ -507,10 +561,7 @@ sub get_config {
 
     my %config;
     for my $file (@files) {
-        my %conf = Config::General::ParseConfig(-ConfigFile => $file,
-                                                -UTF8       => 1,
-                                                -CComments  => 0,
-        );
+        my %conf = %{read_config_file($file)};
         for my $key (keys %conf) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 $config{$key} = { %{$config{$key}}, %{$conf{$key}} };
@@ -589,6 +640,69 @@ sub array2hash {
     }
 
     return \%hash;
+}
+
+########################################
+
+=head2 list
+
+  list($ref)
+
+return list of ref unless it is already a list
+
+=cut
+
+sub list {
+    my($d) = @_;
+    return [] unless defined $d;
+    return $d if ref $d eq 'ARRAY';
+    return([$d]);
+}
+
+########################################
+
+=head2 read_config_file
+
+  read_config_file($file)
+
+return parsed config file
+
+=cut
+
+sub read_config_file {
+    my($file) = @_;
+    # this is faster than letting Config::General read the file by itself
+    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file)));
+    my %conf = Config::General::ParseConfig(-String     => \@config_lines,
+                                            -UTF8       => 1,
+                                            -CComments  => 0,
+    );
+    return(\%conf);
+}
+
+########################################
+
+=head2 get_memory_usage
+
+  get_memory_usage([$pid])
+
+return memory usage of pid or own process if no pid specified
+
+=cut
+
+sub get_memory_usage {
+    my($pid) = @_;
+    $pid = $$ unless defined $pid;
+
+    my $rsize;
+    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
+    while(my $line = <$ph>) {
+        if($line =~ m/(\d+)/mx) {
+            $rsize = sprintf("%.2f", $1/1024);
+        }
+    }
+    CORE::close($ph);
+    return($rsize);
 }
 
 ########################################

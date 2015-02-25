@@ -40,9 +40,9 @@
         if(this.xdata.general[this.iconType] == undefined) { this.xdata.general[this.iconType] = '' };
         this.autoEl = {
             tag:     'a',
-            href:    '#',
+            href:    '',
             target:  '',
-            onclick: "return(TP.iconClickHandler('"+this.id+"'));"
+            onclick: "return(false);"
         };
 
         if(!this.locked) {
@@ -59,6 +59,7 @@
         this.origApplyState = this.applyState;
         this.applyState = function(state) {
             Ext.apply(this.xdata, state.xdata);
+            TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             this.origApplyState(state);
             if(state) {
                 this.applyXdata(state.xdata);
@@ -67,6 +68,7 @@
     },
     listeners: {
         afterrender: function(This, eOpts) {
+            TP.log('['+this.id+'] rendered');
             This.addClickEventhandler(This.el);
 
             [% UNLESS readonly %]
@@ -94,28 +96,27 @@
             this.setIconLabel();
             if(this.labelEl) { this.labelEl.show(); }
             /* make sure we don't overlap dashboard settings window */
-            if(TP.dashboardsSettingWindow) {
-                TP.dashboardsSettingWindow.toFront();
-            }
+            TP.checkModalWindows();
         },
         hide: function(This, eOpts) {
             if(this.labelEl) { this.labelEl.hide(); }
         },
         destroy: function( This, eOpts ) {
+            TP.log('['+this.id+'] remove icon');
             if(!this.redrawOnly) {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
                 cp.clear(this.id);
-                if(this.labelEl) { this.labelEl.destroy(); }
             }
+            if(this.labelEl) { this.labelEl.destroy(); }
         },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();
             if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
             if(y != undefined) { y = Math.floor(y); } else { y = pos[1]; }
 
-            // snap to roaster when shift key is hold
+            /* snap to roaster when shift key is hold */
             if(TP.isShift) {
                 var pos = TP.get_snap(x, y);
                 if(This.ddShadow) {
@@ -129,16 +130,9 @@
                 }
             }
 
-            // update settings window
-            if(TP.iconSettingsWindow) {
-                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
-            }
-            /* update label */
-            this.setIconLabel();
-            if(This.stateful) {
-                this.xdata.layout.x = Math.floor(x);
-                this.xdata.layout.y = Math.floor(y);
-            }
+            TP.reduceDelayEvents(This, function() {
+                TP.iconMoveHandler(This, x, y);
+            }, 50, 'timeout_icon_move');
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
@@ -192,10 +186,10 @@
                 this.removeCls('clickable');
                 this.addCls('notclickable');
             }
-            if(this.el) { this.el.dom.href='#'; }
-            this.autoEl.href='#';
+            if(this.el) { this.el.dom.href=''; }
+            this.autoEl.href='';
             if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href='#';
+                this.labelEl.el.dom.href='';
                 this.labelEl.removeCls('clickable');
                 this.labelEl.addCls('notclickable');
             }
@@ -213,6 +207,11 @@
         }, win, []), delay);
 
         layout = this.xdata.layout;
+        if(layout.rotation) {
+            // animations with rotated elements results in wrong position,
+            // ex.: rotated shapes return wrong position on getPosition()
+            return;
+        }
         animated.to = {x:layout.x, y:layout.y};
         this.animate(animated);
     },
@@ -250,9 +249,7 @@
         var tab = Ext.getCmp(this.panel_id);
         if(this.locked != val) {
             this.saveState();
-            this.redrawOnly = true;
-            this.destroy();
-            TP.add_panlet({id:this.id, skip_state:true, tb:tab, autoshow:true}, false);
+            TP.redraw_panlet(this, tab);
         }
     },
 
@@ -345,7 +342,7 @@
                     tag:     'a',
                     href:    panel.xdata.link.link,
                     target:  '',
-                    onclick: "return(TP.iconClickHandler('"+panel.id+"'));"
+                    onclick: "return(false);"
                 },
                 listeners: {
                     /* move parent element according to our drag / drop */
@@ -370,9 +367,7 @@
                     show: function( This, eOpts ) {
                         panel.addDDListener(This);
                         /* make sure we don't overlap dashboard settings window */
-                        if(TP.dashboardsSettingWindow) {
-                            TP.dashboardsSettingWindow.toFront();
-                        }
+                        TP.checkModalWindows();
                     }
                 }
             });
@@ -441,6 +436,10 @@
             }
             top = top - offsety;
         }
+        if(cfg.position == 'center') {
+            top  = top + offsetx + (elHeight/2) - (size.height/2);
+            left = left + (elWidth / 2) - (size.width / 2) - offsety;
+        }
         el.style.left = left+"px";
         el.style.top  = top+"px";
         this.labelEl.oldX = left;
@@ -450,6 +449,33 @@
     /* add dbl click and context menu events */
     addClickEventhandler: function(el) {
         var This = this;
+
+        el.on("click", function(e) {
+            [% UNLESS readonly %]
+            if(e.ctrlKey) {
+                var tab = Ext.getCmp(This.panel_id);
+                if(This.locked) { return; }
+                if(TP.moveIcons == undefined) {
+                    TP.moveIcons = [];
+                }
+                if(This.el.dom.style.outline) {
+                    /* already selected -> unselect */
+                    This.el.dom.style.outline = "";
+                    TP.moveIcons = TP.removeFromList(TP.moveIcons, This);
+                } else {
+                    This.el.dom.style.outline = "2px dotted orange";
+                    TP.moveIcons.push(This);
+                    TP.createIconMoveKeyNav();
+                }
+                if(TP.moveIcons.length == 0) {
+                    TP.resetMoveIcons();
+                }
+                return(false);
+            }
+            [% END %]
+            return(TP.iconClickHandler(This.id));
+        });
+
         /* open edit box on double or right click */
         [% UNLESS readonly %]
         el.on("dblclick", function(e) {
@@ -463,6 +489,7 @@
         /* right click context menu on icon widgets */
         el.on("contextmenu", function(e) {
             e.preventDefault();
+            TP.resetMoveIcons();
             Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -567,7 +594,9 @@
                 /* prevents opening link after draging */
                 if(TP.isShift) {
                     var pos = el.getPosition();
+                    panel.noMoreMoves = true;
                     el.setPosition(TP.get_snap(pos[0], pos[1]));
+                    panel.noMoreMoves = false;
                 }
                 TP.isShift = false;
                 if(el.ddShadow) { el.ddShadow.dom.style.display = 'none'; }
@@ -1399,7 +1428,9 @@ TP.renderTipDetails = function(data) {
         details += '<th>Hosts:<\/th>';
         details += '<\/tr>';
         var skipped = 0;
-        var uniq_hosts = {};
+        var uniq_hosts   = {};
+        var host_details         = [];
+        var host_details_skipped = [];
         for(var x=0; x<data.length;x++) {
             var d = data[x];
             var prefix = '';
@@ -1407,19 +1438,29 @@ TP.renderTipDetails = function(data) {
                 prefix = 'host_';
             }
             if(uniq_hosts[d[prefix+'name']]) { continue; }
+            if(host_details_skipped.length > 5) { skipped++; continue; }
             uniq_hosts[d[prefix+'name']] = true;
-            if(num_shown >= 5) { skipped++; continue; }
-            if(panel.xdata.state != 0 && d[prefix+'state'] == 0) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, d);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:d});
-            details += '<tr>';
-            details += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
-            details += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
-            details += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
-            details += '<\/tr>';
+            detail  = '<tr>';
+            detail += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
+            detail += '<td class="state"><div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div><\/td>';
+            detail += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
+            detail += '<\/tr>';
+            if(data.length > 10 && (num_shown >= 5 || (panel.xdata.state != 0 && d[prefix+'state'] == 0))) {
+                skipped++;
+                host_details_skipped.push(detail);
+                continue;
+            }
+            host_details.push(detail);
             num_shown++;
+        }
+        details += host_details.join("");
+        if(skipped == 1) {
+            details += host_details_skipped.join("");
+            skipped = 0;
         }
         if(skipped > 0) {
             details += '<tr>';
@@ -1437,8 +1478,7 @@ TP.renderTipDetails = function(data) {
         skipped = 0;
         for(var x=0; x<data.length;x++) {
             var d = data[x];
-            if(panel.xdata.state != 0 && d['state'] == 0) { skipped++; continue; }
-            if(num_shown >= 10) { skipped++; continue; }
+            if(data.length > 10 && (num_shown >= 10 || (panel.xdata.state != 0 && d['state'] == 0))) { skipped++; continue; }
             delete d['action_url_expanded'];
             delete d['notes_url_expanded'];
             var icons = TP.render_service_icons({}, {}, {}, {}, {}, {}, {}, d);
@@ -1657,6 +1697,11 @@ Ext.define('TP.HostgroupStatusIcon', {
     refreshHandler: function(newStatus) {
         // calculate summarized status
         if(this.hostgroup) {
+            /* makes no sense if nothing selected but happens after switching classes */
+            if(!this.xdata.general.incl_hst && !this.xdata.general.incl_svc) {
+                this.xdata.general.incl_svc = true;
+                this.xdata.general.incl_hst = true;
+            }
             var res = TP.get_group_status({
                 group:          this.hostgroup,
                 incl_ack:       this.xdata.general.incl_ack,
@@ -1854,6 +1899,9 @@ Ext.define('TP.FilterStatusIcon', {
                 xtype:      'textfield',
                 name:       'name',
                 value:      ''
+            }, {
+                fieldLabel: 'Backends / Sites',
+                xtype:      'tp_backendcombo'
             },
             new TP.formFilter({
                 fieldLabel: 'Filter',
@@ -2069,6 +2117,30 @@ Ext.define('TP.StaticIcon', {
     }
 });
 
+TP.resetMoveIcons = function() {
+    Ext.Array.each(TP.moveIcons, function(item) {
+        item.el.dom.style.outline = "";
+    });
+    TP.moveIcons = undefined;
+    if(TP.keynav) {
+        TP.keynav.destroy();
+        TP.keynav = undefined;
+    }
+}
+
+TP.createIconMoveKeyNav = function() {
+    if(TP.keynav) { return; }
+    TP.keynav = Ext.create('Ext.util.KeyNav', Ext.getBody(), {
+        'left':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]-1, pos[1]); }},
+        'right': function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]+1, pos[1]); }},
+        'up':    function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]-1); }},
+        'down':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]+1); }},
+        'esc':   function(e){ TP.resetMoveIcons(); },
+        ignoreInputFields: true
+    });
+}
+
+
 /* delay link opening to allow double click menu */
 TP.iconClickHandler = function(id) {
     if(Ext.getCmp(id).passClick) { return true; }
@@ -2084,24 +2156,74 @@ TP.iconClickHandlerDo = function(id) {
     if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
         return;
     }
-    var link   = panel.xdata.link.link;
-    var newTab = panel.xdata.link.newtab;
-    var matches = link.match(/dashboard:\/\/(\d+)$/);
-    if(matches && matches[1]) {
-        // is that tab already open?
-        var tabpan = Ext.getCmp('tabpan');
-        var tab_id = "tabpan-tab_"+matches[1];
-        var tab    = Ext.getCmp(tab_id);
-        if(tab) {
-            tabpan.setActiveTab(tab);
-        } else {
-            var replace;
-            if(!newTab) {
-                replace = tabpan.getActiveTab().id;
+    var link    = panel.xdata.link.link;
+    var newTab  = panel.xdata.link.newtab;
+    var special = link.match(/dashboard:\/\/(.+)$/);
+    var action  = link.match(/server:\/\/(.+)$/);
+    if(special && special[1]) {
+        link = undefined;
+        if(special[1].match(/^\d+$/)) {
+            // is that tab already open?
+            var tabpan = Ext.getCmp('tabpan');
+            var tab_id = "tabpan-tab_"+special[1];
+            var tab    = Ext.getCmp(tab_id);
+            if(tab) {
+                tabpan.setActiveTab(tab);
+            } else {
+                var replace;
+                if(!newTab) {
+                    replace = tabpan.getActiveTab().id;
+                }
+                TP.add_pantab(tab_id, replace);
             }
-            TP.add_pantab(tab_id, replace);
         }
-    } else {
+        else if(special[1] == 'show_details') {
+            link = TP.getIconDetailsLink(panel);
+        }
+        else if(special[1] == 'refresh') {
+            var el = panel.getEl();
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id, undefined, el)
+            el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
+        } else {
+            TP.Msg.msg("fail_message~~unrecognized link: "+special[1]);
+        }
+    }
+    if(action && action[1]) {
+        var panel_id = panel.panel_id.replace(/^tabpan\-tab_/, '');
+        var params = {
+            host:      panel.xdata.general.host,
+            service:   panel.xdata.general.service,
+            link:      link,
+            dashboard: panel_id,
+            icon:      id,
+            token:     user_token
+        };
+        Ext.Ajax.request({
+            url:    '[% url_prefix %]cgi-bin/panorama.cgi?task=serveraction',
+            params:  params,
+            method: 'POST',
+            callback: function(options, success, response) {
+                if(!success) {
+                    if(response.status == 0) {
+                        TP.Msg.msg("fail_message~~server action failed");
+                    } else {
+                        TP.Msg.msg("fail_message~~server action failed: "+response.status+' - '+response.statusText);
+                    }
+                } else {
+                    var data = TP.getResponse(undefined, response);
+                    if(data.rc == 0) {
+                        if(data.msg != "") {
+                            TP.Msg.msg("success_message~~"+data.msg);
+                        }
+                    } else {
+                        TP.Msg.msg("fail_message~~"+data.msg);
+                    }
+                }
+            }
+        });
+        return(false);
+    }
+    if(link) {
         panel.el.dom.href=link;
         panel.passClick = true;
         if(newTab) {
@@ -2145,6 +2267,9 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         base           = 'panorama.cgi';
     } else {
         return('#');
+    }
+    if(panel.xdata.general.backends) {
+        options.backends = panel.xdata.general.backends;
     }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));
@@ -2249,4 +2374,38 @@ function availability(panel, opts) {
         TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
     }
     return(TP.availabilities[panel.id][opts_enc]['last']);
+}
+
+
+TP.iconMoveHandler = function(icon, x, y) {
+    window.clearTimeout(TP.timeouts['timeout_icon_move']);
+    /* update settings window */
+    if(TP.iconSettingsWindow) {
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+    }
+    /* update label */
+    icon.setIconLabel();
+
+    var deltaX = x - icon.xdata.layout.x;
+    var deltaY = y - icon.xdata.layout.y;
+
+    if(icon.stateful) {
+        icon.xdata.layout.x = Math.floor(x);
+        icon.xdata.layout.y = Math.floor(y);
+
+        /* move aligned items too */
+        if(TP.moveIcons) {
+            Ext.Array.each(TP.moveIcons, function(item) {
+                if(item.id != icon.id) {
+                    item.suspendEvents();
+                    item.xdata.layout.x += deltaX;
+                    item.xdata.layout.y += deltaY;
+                    item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                    item.setIconLabel();
+                    item.resumeEvents();
+                    item.saveState();
+                }
+            });
+        }
+    }
 }

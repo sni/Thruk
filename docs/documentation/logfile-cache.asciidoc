@@ -1,0 +1,141 @@
+---
+layout: docs
+title: Logfile Cache
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== Logfile Cache
+Accessing logfiles can be time and memory consuming, especially when having
+remote sites connected to Thruk. Livestatus caches logfile data used for
+queries. This increases the size of the naemon process, slows down the
+monitoring and increases the overall load on your monitoring host. Therefor
+Thruk may use a logfile cache to increase performance of logfile access and
+reports.
+
+If unsure whether to use MongoDB or MySQL, use MySQL which is newer and faster.
+The MongoDB logfile cache may be deprecated in the future.
+
+For maximum performance, the Logfile Cache Database should be installed on the
+same server as Thruk itself (or at least in the same network).
+
+.Logfile Cache Architecture
+image:source/livestatus_mongodb.png[Logfile Cache Architecture]
+
+
+=== Configuration
+You will need to specify your mysql connection configuration in your
+thruk_local.conf. Make sure the user and database exists. The tables will then
+be created automatically.
+
+thruk_local.conf:
+-------
+  logcache = mysql://username:password@localhost:3306/thruk_logs
+-------
+
+[TIP]
+.create mysql user and tables
+=======
+ #> mysql -u root -p
+ mysql> CREATE USER 'thruk'@'localhost' IDENTIFIED BY '****';
+ mysql> CREATE DATABASE IF NOT EXISTS `thruk`;
+ mysql> GRANT ALL PRIVILEGES ON `thruk`.* TO 'thruk'@'localhost';
+=======
+
+
+=== Actions
+
+==== Import
+It's a good idea to import the logfiles after enabling the
+logfilecache:
+
+Initial import:
+-------
+    %> thruk -a logcacheimport --local
+    ...
+    OK - imported 20374 log items from 1 site successfully in 4.94s (4122/s)
+-------
+
+Be careful, the 'logcacheimport' deletes all current cached data, so only
+do that once.
+
+Depending on the size, this may take a while.
+
+==== Update
+
+Logfile Cache Update
+-------
+    %> thruk -a logcacheupdate
+    OK - imported 3 log items from 3 sites successfully in 0.13s (23/s)
+-------
+
+The logcacheupdate imports the delta since the last update. That's pretty
+fast and done automatically whenever you access logfiles via Thruk. However,
+if you access the eventlog page only once in a while, it would be a good idea
+to update the logcache periodically by a cronjob.
+
+
+==== Import from Logfile Archive Files
+The MySQL logcache supports import from files too. Duplicates are not imported
+twice, so you can do that safely as often as you like.
+
+-------
+    %> thruk -a logcacheupdate --local /var/log/naemon/archive/naemon-09-07-2012-00.log
+    OK - imported 2 log items from 1 site successfully in 0.01s (247/s)
+-------
+
+
+==== Authentication Update
+
+The cache needs authentication information which has to be updated whenever
+contacts have changed.
+
+Update logfile caches authentication information:
+-------
+    %> thruk -a logcacheauthupdate
+    OK - updated 71 log items from 3 sites successfully in 0.25s (286/s)
+-------
+
+
+==== Cleanup
+You may want to remove old logfile entries from time to time. This is possible
+with the logcacheclean command. Optionally you can define the number of days
+which should be kept in the cache.
+
+-------
+    %> thruk -a logcacheclean=730
+    OK - removed 18046 log items from 1 site successfully in 0.08s (218816/s)
+-------
+
+
+
+==== Statistics
+
+There is also a command to check the current usage statistics of your
+logfile cache:
+
+-------
+    %> thruk -a logcachestats
+    Backend              Index Size      Data Size       Items
+    Devel                 14.4 MB        136.4 MB       238104
+-------
+
+
+==== Maintainance
+Using the logfile cache needs some extra maintainance to work smoothly, the
+following cronjobs should cover that. When not using OMD, you will have to
+adjust the paths.
+
+-------
+  # update logcache data
+  */5 * * * * $OMD_ROOT/bin/thruk -a logcacheupdate     >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # update authentication data in our logcache
+  0   2 * * * $OMD_ROOT/bin/thruk -a logcacheauthupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # optimize and repair tables
+  0  20 * * * $OMD_ROOT/bin/thruk -a logcacheoptimize   >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # clean logfiles from cache after two years
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcacheclean=730  >>$OMD_ROOT/var/log/thruk.log 2>&1
+-------

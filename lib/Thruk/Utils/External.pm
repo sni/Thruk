@@ -63,7 +63,7 @@ sub cmd {
     my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
-    if ($pid) {
+    if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
@@ -126,7 +126,7 @@ sub perl {
     my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
-    if ($pid) {
+    if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         if(defined $conf->{'backends'}) {
@@ -193,11 +193,10 @@ return true if process is still running
 
 =cut
 sub is_running {
-    my $c      = shift;
-    my $id     = shift;
-    my $nouser = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id, $nouser) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
@@ -219,11 +218,10 @@ returns true if successfully canceled
 
 =cut
 sub cancel {
-    my $c      = shift;
-    my $id     = shift;
-    my $nouser = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id, $nouser) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
@@ -231,13 +229,15 @@ sub cancel {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    update_status($dir, 99.9, 'canceled');
-
-    my $pid = read_file($dir."/pid");
-    kill(-15, $pid);
-    sleep(1);
-    kill(-2, $pid);
-    sleep(1);
+    my $pidfile = $dir."/pid";
+    if(-f $pidfile) {
+        my $pid = read_file($pidfile);
+        update_status($dir, 99.9, 'canceled');
+        kill(-15, $pid);
+        sleep(1);
+        kill(-2, $pid);
+        sleep(1);
+    }
     return _is_running($dir);
 }
 
@@ -252,10 +252,10 @@ return status of a job
 
 =cut
 sub get_status {
-    my $c   = shift;
-    my $id  = shift;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    my($c, $id) = @_;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
     # reap pending zombies
@@ -299,6 +299,7 @@ sub get_status {
         $remaining = $2;
         $message   = $3;
     }
+    if($percent eq "") { $percent = 0; }
 
     return($is_running,$time,$percent,$message,$forward,$remaining);
 }
@@ -314,8 +315,8 @@ return json status of a job
 
 =cut
 sub get_json_status {
-    my $c   = shift;
-    my $id  = shift;
+    my($c, $id) = @_;
+    confess("got no id") unless $id;
 
     my($is_running,$time,$percent,$message,$forward,$remaining) = get_status($c, $id);
     return unless defined $time;
@@ -345,13 +346,18 @@ return result of a job
 =cut
 sub get_result {
     my($c, $id, $nouser) = @_;
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    confess("got no id") unless $id;
 
+    my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user") {
         my $user = read_file($dir."/user");
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
+    }
+
+    if(!-d $dir) {
+        return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
     my($out, $err) = ('', '');
@@ -361,14 +367,27 @@ sub get_result {
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir.'/start');
     my @end;
-    if(-f $dir."/stdout") {
-        @end = stat($dir."/stdout")
-    } elsif(-f $dir."/stderr") {
-        @end = stat($dir."/stderr")
+    my $retries = 10;
+    while($retries > 0) {
+        if(-f $dir."/stdout") {
+            @end = stat($dir."/stdout")
+        } elsif(-f $dir."/stderr") {
+            @end = stat($dir."/stderr")
+        } elsif(-f $dir."/rc") {
+            @end = stat($dir."/rc")
+        }
+        if(!defined $end[9]) {
+            sleep(1);
+            $retries--;
+        } else {
+            last;
+        }
     }
-    unless(defined $end[9]) {
+    if(!defined $end[9]) {
         $end[9] = time();
         $err    = 'job was killed';
+        $c->log->error('killed job: '.$dir);
+        $c->log->error(`ls -la $dir`);
     }
 
     my $time = $end[9] - $start[9];
@@ -410,7 +429,7 @@ sub job_page {
     my($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
     return $c->detach('/error/index/22') unless defined $is_running;
 
-    # try to directly server the request if it takes less than 10seconds
+    # try to directly serve the request if it takes less than 10seconds
     while($is_running and $time < 10) {
         sleep(1);
         ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
@@ -429,7 +448,8 @@ sub job_page {
         $c->stash->{template}              = 'waiting_for_job.tt';
     } else {
         # job finished, display result
-        my($out,$err,$time,$dir,$stash) = get_result($c, $job);
+        #my($out,$err,$time,$dir,$stash)...
+        my($out,$err,undef,$dir,$stash) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
         if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
         if(defined $err and $err ne '') {
@@ -478,13 +498,33 @@ sub save_profile {
 
     my $file = $dir.'/profile.log';
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
-    local $ENV{COLUMNS} = 80;
+    local $ENV{COLUMNS} = 140;
     local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
     eval {
         print $fh "".$c->stats->report(),"\n";
     };
     print $fh $@,"\n" if $@;
     CORE::close($fh);
+    return;
+}
+
+##############################################
+
+=head2 log_profile
+
+  log_profile($c)
+
+log profile to info channel
+
+=cut
+sub log_profile {
+    my($c) = @_;
+
+    local $ENV{COLUMNS} = 140;
+    local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
+    eval {
+        $c->log->info(sprintf("Req: %03d, profile:\n%s", $Catalyst::COUNT, scalar $c->stats->report()));
+    };
     return;
 }
 
@@ -500,6 +540,9 @@ sub _do_child_stuff {
     # don't use connection pool after forking
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
 
+    # don't fork twice
+    $ENV{'NO_EXTERNAL_JOBS'}         = 1;
+
     # make remote user available
     confess('no remote_user') unless defined $c->stash->{'remote_user'};
     $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
@@ -509,6 +552,8 @@ sub _do_child_stuff {
     $ENV{'THRUK_JOB_DIR'} = $dir;
 
     $|=1; # autoflush
+
+    Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
     # close open filehandles
     for my $fd (0..1024) {
@@ -524,6 +569,8 @@ sub _do_child_stuff {
 ##############################################
 sub _do_parent_stuff {
     my($c, $dir, $pid, $id, $conf) = @_;
+
+    confess("got no id") unless $id;
 
     # write pid file
     my $pidfile = $dir."/pid";

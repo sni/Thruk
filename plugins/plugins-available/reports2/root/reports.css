@@ -83,4 +83,6 @@ body.status TABLE.weekly_days TD {
 
 .report_progessbar DIV {
   font-size: 11px;
+  white-space: nowrap;
+  overflow-x: hidden;
 }

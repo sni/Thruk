@@ -27,7 +27,7 @@ BEGIN {
     for my $x (0..99) {
         $testport = $start + $x;
         my $socket = IO::Socket::INET->new(Listen    => 5,
-                                           LocalAddr => 'localhost',
+                                           LocalAddr => '127.0.0.1',
                                            LocalPort => $testport,
                                            Proto     => 'tcp');
         last if($socket);
@@ -88,7 +88,7 @@ if(!$httppid) {
 }
 my $now = time();
 for my $x (1..15) {
-    my $socket = IO::Socket::INET->new('localhost:'.$testport);
+    my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
     last if($socket and $socket->connected());
     sleep(1);
 }

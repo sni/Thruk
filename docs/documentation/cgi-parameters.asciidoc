@@ -1,0 +1,93 @@
+---
+layout: docs
+title: CGI Parameters
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+= CGI Parameters
+
+Most of the CGI Parameters can be changed with buttons, but there are
+some which are only accessible by adding them directly to the url.
+
+== List of Parameters
+
+=== columns
+
+Pages: status overview
+
+Description: Sets the number of columns
+
+Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
+
+
+=== debug
+
+Pages: availability reports
+
+Description: Creates a file with debug information regarding this report
+
+Example: /thruk/cgi-bin/avail.cgi?host=HOSTNAME&debug=1
+
+
+=== hidetop
+
+Pages: status pages
+
+Description: Show/Hide the status totals header.
+
+Example: /thruk/cgi-bin/status.cgi?hidetop=1
+
+
+=== hidesearch
+
+Pages: status pages
+
+Description: Show/Hide the status filters
+
+Example: /thruk/cgi-bin/status.cgi?host=localhost&hidesearch=1
+
+
+=== minimal
+
+Pages: status page
+
+Description: Hides almost all user interface buttons. Useful for
+monitor screens where only the current problems should be displayed.
+
+Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
+
+
+=== nav
+
+Pages: all pages
+
+Description: Show/Hide the navigation. Only useful in non-frames mode.
+
+Example: /thruk/cgi-bin/tac.cgi?nav=0
+
+
+=== noexternalforks
+
+Pages: all pages
+
+Description: Skip external page generation. Used primarily in reports.
+
+Example: /thruk/cgi-bin/avail.cgi?noexternalforks
+
+
+=== noheader
+
+Pages: status pages
+
+Description: Show/Hide the status totals header.
+
+Example: /thruk/cgi-bin/status.cgi?noheader
+
+
+=== refresh
+
+Pages: all pages
+
+Description: Sets refresh timer to a custom value.
+
+Example: /thruk/cgi-bin/status.cgi?refresh=30

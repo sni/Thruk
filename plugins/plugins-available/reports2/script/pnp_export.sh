@@ -4,7 +4,7 @@
 #
 # usage:
 #
-# pnp_export.sh <hostname> <servicedescription> <imgwidth> <imgheight> <start> <end> <pnpurl> <tempfile>
+# pnp_export.sh <hostname> <servicedescription> <imgwidth> <imgheight> <start> <end> <pnpurl> <tempfile> [<source>]
 
 
 PNP_WGET="wget -q"

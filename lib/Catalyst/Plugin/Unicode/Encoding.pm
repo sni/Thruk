@@ -188,7 +188,7 @@ Setups C<< $c->encoding >> with encoding specified in C<< $c->config->{encoding}
 
 =head1 SEE ALSO
 
-L<Encode::Encoding>, L<Catalyst::Plugin::Unicode>, L<Catalyst>.
+L<Encode::Encoding>, L<Catalyst>.
 
 =head1 AUTHORS
 

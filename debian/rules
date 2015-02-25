@@ -4,6 +4,7 @@
 export DH_VERBOSE=1
 DESTDIR=$(CURDIR)/debian/tmp/
 PERLARCH=$(shell perl -e 'use Config; print $$Config{archname}')
+PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
 
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
 
@@ -24,8 +25,12 @@ override_dh_auto_configure:
 		--with-thruk-libs="/usr/lib/thruk/perl5" \
 		--with-httpd-conf="$(HTTPDCONF)" \
 		--with-htmlurl="/thruk"
-	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so: zlib" >> debian/thruk.lintian-overrides
-	echo "thruk: embedded-zlib ./usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so"        >> debian/thruk.lintian-overrides
+	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so: zlib"     >> debian/thruk.lintian-overrides
+	echo "thruk: embedded-zlib ./usr/lib/thruk/perl5/$(PERLARCH)/auto/Compress/Raw/Zlib/Zlib.so"            >> debian/thruk.lintian-overrides
+	echo "thruk: embedded-library usr/lib/thruk/perl5/$(PERLARCH)/auto/YAML/XS/LibYAML/LibYAML.so: libyaml" >> debian/thruk.lintian-overrides
+
+override_dh_gencontrol:
+	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
 
 override_dh_strip:
 	dh_strip --exclude=wkhtmltopdf

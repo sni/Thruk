@@ -1,0 +1,124 @@
+---
+layout: docs
+title: Source Installation
+---
+
+
+== Install from Source
+
+After this guide, you will have a thruk user with a Thruk installation in its
+home folder with all required libraries.
+
+[IMPORTANT]
+.Experienced Users Only
+=======
+Source installation is for experienced users only. Using
+packages/repositories should be the preferred solution in almost all
+situations. Especially for production environments.
+=======
+
+
+=== Requirements
+
+In order to install the Thruk Monitoring Webinterface from source you
+will need the following:
+
+- Perl
+- Git Client
+- compiler tools: automake, make, g++, gcc
+- Apache Webserver (optional for fastcgi only)
+
+
+=== Create New User
+refer to your systems manual on how to add new user.
+This guide uses the following:
+
+-------
+  user:  thruk
+  group: thruk
+-------
+
+IMPORTANT: all following steps should be done by the thruk user.
+
+=== Install Thruk Libraries
+
+All required Perl modules are available via the thruk_libs repository:
+
+-------
+  %> su - thruk
+  %> cd /tmp
+  %> git clone git://github.com/sni/thruk_libs.git
+  %> cd /tmp/thruk_libs
+  %> make
+-------
+
+You now have all required modules in `/tmp/thruk_libs/local-lib/dest`.
+
+
+=== Git Clone Thruk
+
+-------
+    %> cd /tmp
+    %> git clone https://github.com/sni/Thruk.git
+    %> cd /tmp/Thruk
+    %> ./configure
+    %> make
+-------
+
+
+=== Move Perl Librarys
+
+We now move the librarys into our thruk folder:
+
+-------
+    %> mv /tmp/thruk_libs/local-lib/dest/lib/perl5 perl5 ~/Thruk/
+-------
+
+Edit your `.profile` and add the following
+
+-------
+    PERL5LIB=lib:~/Thruk/perl5
+-------
+
+Then logout and login again and make sure `$PERL5LIB` contains
+the correct path.
+
+Finally you can test if thruk works by running:
+
+-------
+    %> cd ~/Thruk && ./script/thruk
+-------
+
+Or by running the development server:
+
+-------
+    %> cd ~/Thruk && ./script/thruk_server.pl
+-------
+
+Open your browser and open http://<your_host>:3000
+
+
+=== Configuration
+
+Copy 'thruk.conf' to 'thruk_local.conf' and adjust the livestatus settings to your needs.
+-------
+  %> cp thruk.conf thruk_local.conf
+-------
+The thruk.conf will be overwritten with new defaults on updates. The
+thruk_local.conf contains the local overrides and will never be
+overwritten.
+
+
+Edit 'cgi.conf' and adjust settings to your needs.
+
+See the link:configuration.html[Thruk Configuration] section for detailed explanation of configuration options.
+
+
+=== Webserver Integration
+
+If thats fine, you may contine with link:install.html#apache-configuration[integrating Thruk into your webserver].
+
+
+=== Backend Configuration
+
+The last step is to configure backends, which is covered in the link:install.html#backend-configuration[Backend Configuration] section.

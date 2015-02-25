@@ -48,6 +48,7 @@ var searchStore = Ext.create('Ext.data.Store', {
     listeners: {
         beforeload: function(store, operation, eOpts) {
             var now = new Date();
+            store.proxy.extraParams = Ext.Object.merge({format: 'search', hash: 1}, store.proxy.addParams);
             store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
             if(!searchStore.search_type) { return false; }
             var type = searchStore.search_type.toLowerCase();
@@ -57,7 +58,7 @@ var searchStore = Ext.create('Ext.data.Store', {
             if(type == 'parent') {
                 type = 'host';
             }
-            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod' || type == 'site') {
+            if(type == 'host' || type == 'service' || type == 'hostgroup' || type == 'servicegroup' || type == 'timeperiod' || type == 'site' || type == 'contactgroup') {
                 store.proxy.extraParams['type'] = type;
             } else {
                 store.removeAll();
@@ -84,10 +85,6 @@ var searchStore = Ext.create('Ext.data.Store', {
         type:   'ajax',
         url:    'status.cgi',
         method: 'POST',
-        extraParams: {
-            format: 'search',
-            hash:   1
-        },
         reader: {
             type: 'json',
             root: 'data'
@@ -185,6 +182,16 @@ Ext.define('TP.formFilterSelect', {
                     searchStore.search_type = this.up('panel').items.getAt(0).getValue();
                     searchStore.panel       = this.up().panel;
                     searchStore.load();
+                }
+            },
+            'select': function(combo, records, eOpts) {
+                /* if something has been selected from the dropdown, change operator to =, because its most likly not regexp */
+                var old = this.up('panel').items.getAt(2).getValue();
+                if(old == '~') {
+                    this.up('panel').items.getAt(2).setValue('=');
+                }
+                if(old == '!~') {
+                    this.up('panel').items.getAt(2).setValue('!=');
                 }
             }
         }
@@ -531,4 +538,6 @@ TP.filterWindow = function(ftype, base_el, panel) {
 
     /* show the window */
     win.show();
+    win.toFront();
+    TP.modalWindows.push(win);
 }

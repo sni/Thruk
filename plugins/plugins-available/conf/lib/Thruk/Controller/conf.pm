@@ -18,7 +18,6 @@ use File::Slurp;
 use Encode qw(decode_utf8 encode_utf8);
 use Config::General qw(ParseConfig);
 use Digest::MD5 qw(md5_hex);
-use IPC::Open3;
 
 =head1 NAME
 
@@ -118,7 +117,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{sub}          = $subcat;
     $c->stash->{action}       = $action;
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
-    $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::_get_backends_with_obj_config($c)};
+    $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::get_backends_with_obj_config($c)};
 
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
@@ -626,7 +625,7 @@ sub _process_users_page {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->response->redirect($redirect);
         }
-        my $msg      = $self->_update_password($c);
+        my $msg = $self->_update_password($c);
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
             return $c->response->redirect($redirect);
@@ -1203,7 +1202,7 @@ sub _apply_config_changes {
 
     # make nicer output
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
-        $c->{'stash'}->{'output'} = Thruk::Utils::beautify_diff($c->{'stash'}->{'output'});
+        $c->stash->{'output'} = Thruk::Utils::beautify_diff($c->stash->{'output'});
     }
 
     # discard changes
@@ -1251,8 +1250,10 @@ sub _update_password {
     my $user = $c->{'request'}->{'parameters'}->{'data.username'};
     my $send = $c->{'request'}->{'parameters'}->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+        # htpasswd is usually somewhere in sbin
+        local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
         my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
-        return('could not find htpasswd or htpasswd2 in path, cannot update passwords') unless $htpasswd;
+        return('could not find htpasswd or htpasswd2 in '.$ENV{'PATH'}.', cannot update passwords') unless $htpasswd;
 
         # remove password?
         if($send eq 'remove password') {
@@ -1322,30 +1323,8 @@ sub _store_changes {
 sub _cmd {
     my ( $self, $c, $cmd ) = @_;
 
-    local $SIG{CHLD}='';
-    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-    my($rc, $output);
-    if(ref $cmd eq 'ARRAY') {
-        my $prog = shift @{$cmd};
-        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
-        my($pid, $wtr, $rdr);
-        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-        waitpid( $pid, 0 );
-        $rc = $?;
-        chomp($output = <$rdr> || '');
-    } else {
-        $c->log->debug( "running cmd: ". $cmd );
-        $output = `$cmd 2>&1`;
-        $rc = $?;
-    }
-    if($rc == -1) {
-        $output .= "[".$!."]";
-    } else {
-        $rc = $rc>>8;
-    }
-    $c->{'stash'}->{'output'} = decode_utf8($output);
-    $c->log->debug( "rc:     ". $rc );
-    $c->log->debug( "output: ". $output );
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    $c->stash->{'output'} = $output;
     if($rc != 0) {
         return 0;
     }
@@ -1973,13 +1952,13 @@ sub _file_history_commit {
         return;
     }
 
-    $c->{'stash'}->{'previous'} = '';
-    $c->{'stash'}->{'next'}     = '';
+    $c->stash->{'previous'} = '';
+    $c->stash->{'next'}     = '';
     my $logs = $self->_get_git_logs($c, $dir);
     for my $l (@{$logs}) {
         if($l->{'id'} eq $data->{'id'}) {
-            $c->{'stash'}->{'previous'} = $self->_get_git_commit($c, $dir, $l->{'previous'}) if $l->{'previous'};
-            $c->{'stash'}->{'next'}     = $self->_get_git_commit($c, $dir, $l->{'next'})     if $l->{'next'};
+            $c->stash->{'previous'} = $self->_get_git_commit($c, $dir, $l->{'previous'}) if $l->{'previous'};
+            $c->stash->{'next'}     = $self->_get_git_commit($c, $dir, $l->{'next'})     if $l->{'next'};
             last;
         }
     }
@@ -1995,9 +1974,9 @@ sub _file_history_commit {
     $data->{'diff'} = Thruk::Utils::beautify_diff($data->{'diff'});
     $data->{'diff'} =~ s/^\s+//gmx;
 
-    $c->{'stash'}->{'dir'}    = $dir;
-    $c->{'stash'}->{'data'}   = $data;
-    $c->{'stash'}->{'links'}  = $diff_link_files;
+    $c->stash->{'dir'}    = $dir;
+    $c->stash->{'data'}   = $data;
+    $c->stash->{'links'}  = $diff_link_files;
 
     return 1;
 }
@@ -2210,7 +2189,9 @@ sub _config_reload {
     my($c) = @_;
 
     my $time = time();
-    my $pkey;
+    my $name = $c->stash->{'param_backend'};
+    my $peer = $c->{'db'}->get_peer_by_key($name);
+    my $pkey = $peer->peer_key();
     my $wait = 1;
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
@@ -2230,20 +2211,17 @@ sub _config_reload {
         _nice_check_output($c);
     } else {
         # restart by livestatus
-        my $name = $c->stash->{'param_backend'};
-        my $peer = $c->{'db'}->get_peer_by_key($name);
-        $pkey = $peer->peer_key();
         die("no backend found by name ".$name) unless $peer;
         my $options = {
             'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
             'backend' => [ $pkey ],
         };
         $c->{'db'}->send_command( %{$options} );
-        $c->{'stash'}->{'output'} = 'config reloaded by external command.';
+        $c->stash->{'output'} = 'config reloaded by external command.';
     }
 
     # wait until core responds again
-    Thruk::Utils::wait_after_reload($c, $pkey, $time) if $wait;
+    Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if $wait;
 
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
@@ -2255,16 +2233,16 @@ sub _config_reload {
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
-    $c->{'stash'}->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
-    $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
-    $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
-    $c->{'stash'}->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->{'stash'}->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->{'stash'}->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
-    $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
+    $c->stash->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->stash->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
+    $c->stash->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
+    $c->stash->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->stash->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
+    $c->stash->{'output'} = "<pre>".$c->stash->{'output'}."</pre>";
     return;
 }
 

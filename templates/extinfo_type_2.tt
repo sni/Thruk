@@ -25,7 +25,7 @@
                 [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
                 [% END %]
-                <br><a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&s0_type=service&s0_value=[% service.description | uri %]&style=perfmap'>As Performance Map</a>)
+                <br><a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap'>As Performance Map</a>)
                 <br>
               </td>
             </tr>
@@ -79,7 +79,7 @@
           </tr>
           [% END %]
           [% IF service.action_url_expanded %]
-          [% action_url = get_action_url(2, 1, service.action_url_expanded, service.host_name, service.description) %]
+          [% action_url = get_action_url(c, 2, 1, service.action_url_expanded, service.host_name, service.description) %]
           <tr>
             <td align='right'>
               <a href='[% action_url %]' target='_blank'><img src='[% url_prefix %]themes/[% theme %]/images/[% action_icon(service, service_action_icon) %]' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
@@ -103,6 +103,14 @@
               <td align='right'>
                 <a href="bp.cgi?action=details&bp=[% has_bp %]"><img src='[% url_prefix %]themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show Business Process' title='Show Business Process' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Business<br>Process</i></font>
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
+            <tr>
+              <td align='left'>
+                [% tmp = get_action_menu(c, cust_vars.THRUK_ACTION_MENU); err = tmp.0; action_menu = tmp.1; IF err %]<img src="[% url_prefix %]themes/[% theme %]/images/error.png" title="[% escape_quotes(err) %]" alt="json error" width=16 height=16>[% ELSE %]<script type="text/javascript">print_action_menu([% action_menu %], '[% service.peer_key %]', '[% service.host_name %]', '[% service.description %]', 'b-l');</script>[% END %]
                 <br clear="all">
               </td>
             </tr>
@@ -398,7 +406,7 @@
           [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
           </td>
         </tr>
-        [% END %]
+        [% ELSE %]
         [% graph_url = get_graph_url(c, service, 1)%]
         [% IF graph_url %]
         <tr>
@@ -406,6 +414,7 @@
           [% PROCESS _third_graph.tt hst=service.host_name svc=service.description %]
           </td>
         </tr>
+        [% END %]
         [% END %]
 
         <tr>

@@ -20,6 +20,8 @@
         This.loading = false;
         var data = TP.getResponse(this, response);
         if(data) {
+            TP.log('['+panel.id+'] loaded');
+            if(!this.grid) {this.grid = this.target };
             var b = Ext.get(this.grid.id+"-body");
             var body;
             if(b) { body = b.dom.firstChild }
@@ -36,7 +38,7 @@
                     try {
                         body.style.overflow  = 'inherit';
                         body.style.overflowY = 'hidden';
-                    } catch(e) { debug(e) } // breaks in IE 8 sometimes
+                    } catch(e) { debug("thruk: setting style failed: "+e) } // breaks in IE 8 sometimes
                 }
             } else {
                 if(this.pagingToolbar) {
@@ -46,7 +48,7 @@
                     try {
                         body.style.overflowY = 'inherit';
                         body.style.overflow  = 'auto';
-                    } catch(e) { debug(e) } // breaks in IE 8 sometimes
+                    } catch(e) { debug("thruk: setting style failed: "+e) } // breaks in IE 8 sometimes
                 }
             }
             var fields = [];
@@ -72,6 +74,7 @@
                     }
                 }
             }
+            if(this.xdata == undefined) { this.xdata = { pageSize: 20 }; }
             this.gridStore = Ext.create('Ext.data.Store', {
                 data:  {'items': data.data },
                 fields: fields,
@@ -90,12 +93,18 @@
                 columns = panel.xdata.gridstate.columns;
             }
             var changed = false;
-            if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
-                this.gridcolumns = newcolumns;
-                this.grid.reconfigure(this.gridStore, data.columns);
-                changed = true;
-            } else {
-                this.grid.reconfigure(this.gridStore);
+            /* may fail if grid is already closed */
+            try {
+                if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
+                    this.gridcolumns = newcolumns;
+                    this.grid.reconfigure(this.gridStore, data.columns);
+                    changed = true;
+                } else {
+                    this.grid.reconfigure(this.gridStore);
+                }
+            } catch(e) {
+                debug("thruk: reconfigure failed: "+e);
+                return;
             }
             if(this.initialState != undefined) {
                 /* applyState throws internal error but state gets applied anyway */

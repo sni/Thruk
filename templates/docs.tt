@@ -16,18 +16,18 @@
      <td>
       <h2>Thruk Documentation</h2>
       <br>
-      Thruks documentation itself is located in your project root under the <a href="[% url_prefix %]documentation.html">/docs/</a> folder.<br>
+      Thruks documentation itself is available online at <a href="http://www.thruk.org/documentation/" target="_blank">www.thruk.org/documentation/</a>.<br>
       <br>
       To replace this link with the documentation of your monitoring tool<br>
       add a <i>documentation_link</i> config item to your thruk_local.conf.<br>
       <br>
       If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
       <br>
-      For installation information and general Thruk help look at the <a href="[% url_prefix %]documentation.html">Documentation</a>.
+      For installation information and general Thruk help look at the <a href="http://www.thruk.org/documentation/" target="_blank">online documentation</a>.
       <br>
       <br>
       <br>
-      <font size="+1"><a href="[% url_prefix %]documentation.html">Continue to the Thruk Documentation</a></font>
+      <font size="+1"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></font>
     </td>
   </tr>
 </table>

@@ -33,6 +33,8 @@ sub read_navigation {
 
     $c->stats->profile(begin => "Utils::Menu::read_navigation()");
 
+    $c->{'stash'} = $c->stash; # required for backwards compatibility on old menu_local.confs
+
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
     if(defined $ENV{'CATALYST_CONFIG'}) {
@@ -399,8 +401,8 @@ returns the current prefered target
 sub _get_menu_target {
     my $c = $Thruk::Utils::Menu::c;
 
-    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'} and $c->{'stash'}->{'target'} ne '';
-    if($c->{'stash'}->{'use_frames'}) {
+    return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
+    if($c->stash->{'use_frames'}) {
         return("main");
     }
     return("_self");

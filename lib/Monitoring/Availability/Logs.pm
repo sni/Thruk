@@ -85,6 +85,13 @@ sub new {
     # create an empty log store
     $self->{'logs'} = [];
 
+    $self->{'xs'} = 0;
+    eval {
+        require Thruk::Utils::XS;
+        Thruk::Utils::XS->import();
+        $self->{'xs'} = 1;
+    };
+
     # which source do we use?
     if(defined $self->{'log_string'}) {
         $self->_store_logs_from_string($self->{'log_string'});
@@ -153,11 +160,14 @@ sub parse_line {
 # INTERNAL SUBS
 ########################################
 sub _store_logs_from_string {
-    my $self   = shift;
-    my $string = shift;
+    my($self, $string) = @_;
     return unless defined $string;
+    my $parse_line = \&parse_line;
+    if($self->{xs}) {
+        $parse_line = \&Thruk::Utils::XS::parse_line;
+    }
     for my $line (split/\n/mxo, $string) {
-        my $data = &parse_line($line);
+        my $data = &{$parse_line}($line);
         push @{$self->{'logs'}}, $data if defined $data;
     }
     return 1;
@@ -167,12 +177,16 @@ sub _store_logs_from_string {
 sub _store_logs_from_file {
     my($self, $file) = @_;
     return unless defined $file;
+    my $parse_line = \&parse_line;
+    if($self->{xs}) {
+        $parse_line = \&Thruk::Utils::XS::parse_line;
+    }
     open(my $FH, '<', $file) or croak('cannot read file '.$file.': '.$!);
     binmode($FH);
     while(my $line = <$FH>) {
         &_decode_any($line);
         chomp($line);
-        my $data = &parse_line($line);
+        my $data = &{$parse_line}($line);
         push @{$self->{'logs'}}, $data if defined $data;
     }
     close($FH);
@@ -181,8 +195,7 @@ sub _store_logs_from_file {
 
 ########################################
 sub _store_logs_from_dir {
-    my $self   = shift;
-    my $dir   = shift;
+    my($self, $dir) = @_;
 
     return unless defined $dir;
 
@@ -199,8 +212,7 @@ sub _store_logs_from_dir {
 
 ########################################
 sub _store_logs_from_livestatus {
-    my $self      = shift;
-    my $log_array = shift;
+    my($self, $log_array) = @_;
     return unless defined $log_array;
     for my $entry (@{$log_array}) {
         my $data = $self->_parse_livestatus_entry($entry);
@@ -220,9 +232,14 @@ sub _parse_livestatus_entry {
         return $entry;
     }
 
+    my $parse_line = \&parse_line;
+    if($self->{xs}) {
+        $parse_line = \&Thruk::Utils::XS::parse_line;
+    }
+
     # extract more information from our options
     if($entry->{'message'}) {
-        return &parse_line($string);
+        return &{$parse_line}($string);
     } else {
         &_set_from_options($entry->{'type'}, $entry, $string);
     }
@@ -287,6 +304,7 @@ sub _set_from_options {
         $data->{'timeperiod'} = $tmp[0];
         $data->{'from'}       = $tmp[1];
         $data->{'to'}         = $tmp[2];
+        $data->{'timeperiod'} =~ s/^TIMEPERIOD\ TRANSITION:\ //mxo; # workaround for doubled string in logcache db
     }
 
     # Host States

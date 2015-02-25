@@ -41,22 +41,22 @@ Ext.define('TP.PanletChart', {
     width:  640,
     height: 260,
     initComponent: function() {
-        this.callParent();
-        this.xdata.nr_dots = 60;
+        var panel = this;
+        panel.callParent();
+        panel.xdata.nr_dots = 60;
 
-        this.loader = {
+        panel.loader = {
             autoLoad: false,
-            renderer: 'data',
-            scope:    this,
+            scope:    panel,
             url:      '',
             ajaxOptions: { method: 'POST' },
             loading:  false,
             listeners: {
                 'beforeload': function(This, options, eOpts) {
-                    if(this.loading) {
+                    if(This.loading) {
                         return false;
                     }
-                    this.loading = true;
+                    This.loading = true;
                     return true;
                 }
             },
@@ -66,54 +66,57 @@ Ext.define('TP.PanletChart', {
             },
             callback: function(This, success, response, options) {
                 This.loading = false;
-                var data = TP.getResponse(this, response);
+                var data = TP.getResponse(panel, response);
                 var row;
                 if(data) {
+                    TP.log('['+panel.id+'] loaded');
                     row = data;
-                    if(this.getData) {
-                        row = this.getData(data);
+                    if(panel.getData) {
+                        row = panel.getData(data);
                     }
                 }
                 if(row) {
-                    var last = this.store.data.last();
+                    var last = panel.store.data.last();
                     if(last != undefined) {
                         row.nr = last.get('nr') + 1;
                     } else {
+                        var tmp = {nr: 0, date: new Date(), empty:''};
+                        panel.store.loadRawData(tmp, true);
                         row.nr = 1;
                     }
                     row.date  = new Date();
                     row.empty = '';
-                    this.store.loadRawData(row, true);
-                    if(this.updated_callback) {
-                        this.updated_callback(this);
+                    panel.store.loadRawData(row, true);
+                    if(panel.updated_callback) {
+                        panel.updated_callback(panel);
                     }
                 } else {
                     var row = {date: new Date(), empty:''};
-                    this.store.loadRawData(row, true);
+                    panel.store.loadRawData(row, true);
                 }
             }
         };
 
-        this.addListener('afterrender', function() {
-            this.refreshHandler();
+        panel.addListener('afterrender', function() {
+            panel.refreshHandler();
         });
 
-        this.addListener('hide', function() {
-            this.chart.hide();
+        panel.addListener('hide', function() {
+            panel.chart.hide();
         });
-        this.addListener('show', function() {
-            if(this.updated_callback) {
-                this.updated_callback(this);
+        panel.addListener('show', function() {
+            if(panel.updated_callback) {
+                panel.updated_callback(panel);
             }
-            this.chart.show();
+            panel.chart.show();
             // restoreZoom helps refreshing the chart after hiding
-            this.chart.restoreZoom();
+            panel.chart.restoreZoom();
         });
     },
     setGearItems: function() {
         var panel = this;
-        this.callParent();
-        this.addGearItems({
+        panel.callParent();
+        panel.addGearItems({
             fieldLabel: 'History',
             xtype:      'textfield',
             name:       'nr_dots'

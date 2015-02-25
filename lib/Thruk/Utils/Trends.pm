@@ -122,9 +122,6 @@ sub _do_report {
 
     my $start_time = time();
 
-    my $host    = $c->stash->{host};
-    my $service = $c->stash->{service};
-
     # calculate availability data
     $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
     Thruk::Utils::Avail::calculate_availability($c);
@@ -154,7 +151,7 @@ sub _do_report {
 
     $c->stash->{image_width}  = '900';
     $c->stash->{image_height} = '300';
-    if($service ne '') {
+    if($c->stash->{service} ne '') {
         $c->stash->{image_height} = '320';
     }
 
@@ -198,7 +195,7 @@ sub _create_image {
         Thruk::Utils::Avail::calculate_availability($c);
     }
 
-    my($im, $width, $height, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+    my($im, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
     if($smallimage) {
         unless($mode == IMAGE_MAP_MODE) {
             $im = GD::Image->new(500, 20);
@@ -278,13 +275,13 @@ sub _create_image {
 
         unless($smallimage) {
             # draw horizontal grid lines
-            _draw_horizontal_grid_lines($c, $im, $colors->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_horizontal_grid_lines($im, $colors->{'black'}, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
 
             # draw total times / percentages
-            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
+            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
 
             # draw text
-            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_x_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
         }
 
         # draw a border
@@ -484,7 +481,7 @@ sub _draw_states {
 
 ##########################################################
 sub _draw_text {
-    my ($c, $im, $color, $start, $end, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $color, $start, $end, $drawing_width, $drawing_x_offset, $host, $service ) = @_;
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
@@ -518,7 +515,7 @@ sub _draw_text {
 
 ##########################################################
 sub _draw_horizontal_grid_lines {
-    my ($c, $im, $color, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
+    my ($im, $color, $drawing_width, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
 
     _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+10,$drawing_x_offset+$drawing_width,$drawing_y_offset+10,$color);
     _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+30,$drawing_x_offset+$drawing_width,$drawing_y_offset+30,$color);
@@ -532,9 +529,9 @@ sub _draw_horizontal_grid_lines {
 
 ##########################################################
 sub _draw_time_breakdowns {
-    my ($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
 
-    my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
+    my $font_width = gdSmallFont->width;
 
     my $string;
     if(defined $service){

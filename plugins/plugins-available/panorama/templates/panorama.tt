@@ -7,40 +7,44 @@
     [%+ PROCESS _panorama_js_globals.tt +%]
     -->
     </script>
+    [% PROCESS custom_perf_bar_adjustments.tt %]
     <title>[% title_prefix %]Thruk Panorama</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]plugins/panorama/extjs-4.1.1/resources/css/ext-all-gray.css">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %]-[% filebranch %].css' />
     [% IF thruk_debug %]
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
-    <script type="text/javascript" src="[% url_prefix %]javascript/thruk-[% version %].js"></script>
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
     [% ELSE %]
-    <!--[IF IE]>
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
-    <![ENDIF]-->
-    <!--[IF !IE]> -->
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all.js"></script>
-    <!-- <![ENDIF]-->
-    <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_dc=[% date.now %]"></script>
-    <script type="text/javascript" src="[% url_prefix %]javascript/thruk-[% version %].js"></script>
+      <!--[IF IE]>
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
+      <![ENDIF]-->
+      <!--[IF !IE]> -->
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all.js"></script>
+      <!-- <![ENDIF]-->
     [% END %]
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/ux/form/MultiSelect.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/ux/form/ItemSelector.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/sprintf.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]/javascript/strftime-min.js"></script>
-    [% PROCESS custom_perf_bar_adjustments.tt %]
+    [% IF thruk_debug %]
+      [% FOREACH js = all_in_one_javascript_panorama %]
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
+      [% END %]
+    [% ELSE %]
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
+    [% END %]
 </head>
 <body onunload="TP.unload()">
-[% IF thruk_debug %]
 <script type="text/javascript">
 <!--
 [%+ PROCESS panorama_js.tt +%]
+
+function preloader() {
+    if(document.images) {
+[%+ FOREACH i = preload_img %]
+        img[% loop.index %] = new Image(); /* no var here, otherwise browser would clean the preloaded images from cache */
+        img[% loop.index %].src = "[% url_prefix %]plugins/panorama/images/[% i %]";
+[%+ END %]
+    }
+}
 -->
 </script>
-[% END %]
-[%+ FOREACH i = preload_img %]
-<img src="[% url_prefix %]plugins/panorama/images/[% i %]" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
-[%+ END %]
 </body>
 </html>

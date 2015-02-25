@@ -32,9 +32,16 @@ put objects model into stash
 sub set_object_model {
     my ( $c, $no_recursion ) = @_;
 
-    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2);
+    my $cached_data = $c->cache->get->{'global'} || {};
+    Thruk::Action::AddDefaults::set_processinfo($c, undef, 2, $cached_data, 1);
+    $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
 
-    $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
+    # if this is no obj config yet, try updating process info which updates
+    # configuration information from http backends
+    if(!$c->stash->{has_obj_conf}) {
+        Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, undef, 1);
+        $c->stash->{has_obj_conf} = scalar keys %{get_backends_with_obj_config($c)};
+    }
 
     return unless $c->stash->{has_obj_conf};
 
@@ -783,15 +790,47 @@ sub _link_obj {
 }
 
 ##########################################################
-sub _get_backends_with_obj_config {
-    my $c        = shift;
+
+=head2 get_backends_with_obj_config
+
+    get_backends_with_obj_config($c);
+
+returns all backends which do have a objects configuration
+
+=cut
+sub get_backends_with_obj_config {
+    my($c)       = @_;
     my $backends = {};
     my $firstpeer;
     $c->stash->{'param_backend'} = '';
 
+    my @peers = @{$c->{'db'}->get_peers(1)};
+    my @fetch;
+    for my $peer (@peers) {
+        if($peer->{'addr'} && $peer->{'addr'} =~ /^http/mxi && (!defined $peer->{'configtool'} || scalar keys %{$peer->{'configtool'}} == 0)) {
+            $peer->{'configtool'} = { remote => 1 };
+            push @fetch, $peer->{'key'};
+        }
+    }
+    if(scalar @fetch > 0) {
+        # make sure we have uptodate information about config section of http backends
+        local $ENV{'THRUK_USE_SHADOW'} = 0;
+        eval {
+            $c->{'db'}->get_processinfo(backend => \@fetch);
+        };
+        for my $key (@fetch) {
+            if($c->stash->{'failed_backends'}->{$key}) {
+                my $peer = $c->{'db'}->get_peer_by_key($key);
+                delete $peer->{'configtool'}->{remote};
+            }
+        }
+    }
+
     # first hide all of them
-    for my $peer (@{$c->{'db'}->get_peers(1)}) {
-        if(scalar keys %{$peer->{'configtool'}} > 0) {
+    for my $peer (@peers) {
+        my $min_key_size = 0;
+        if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
+        if(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
         } else {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5
@@ -799,7 +838,7 @@ sub _get_backends_with_obj_config {
     }
 
     # first non hidden peer with object config enabled
-    for my $peer (@{$c->{'db'}->get_peers(1)}) {
+    for my $peer (@peers) {
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
@@ -809,7 +848,7 @@ sub _get_backends_with_obj_config {
 
     # first peer with object config enabled
     if(!defined $firstpeer) {
-        for my $peer (@{$c->{'db'}->get_peers(1)}) {
+        for my $peer (@peers) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
                 $backends->{$peer->{'key'}} = $peer->{'configtool'}

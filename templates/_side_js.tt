@@ -30,9 +30,11 @@
             return false;
         });
 
+        [% IF use_frames %]
         jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
             jQuery(this).prev('input').val('').focus();
         }));
+        [% END %]
     });
 
     function check_frame_loaded() {

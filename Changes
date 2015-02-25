@@ -1,7 +1,78 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-
 next:
+          - add host and service notes url macros (Andrew Widdersheim)
+          - Business Process:
+            - show draft edits in overview
+          - Bug Fixes
+            - fix accessing performance data page in author mode
+            - fix accessing reports page in author mode
+            - fix title offset in trends graph
+
+1.86-4   Thu Feb 12 21:47:53 CET 2015:
+          - add action_menu_apply option to apply action menus on the fly
+          - Panorama View:
+            - add group based permissions for dashboards
+            - move multiple icons by selecting them with ctrl click
+            - also move multiple icons by mouse lasso
+          - Bug Fixes
+            - fix using comma separated backend list in CLI tool
+            - fix undefined key_sort in CLI config parser
+
+1.86-3   Thu Jan 29 19:57:35 CET 2015
+          - add option for default service filter
+          - add host/servce connection macros
+          - Bug Fixes
+            - fix icon logo path in statusmap parent view
+            - fixed links to other dashboards in panorama plugin
+            - fix listing all backends with object config when using http backends
+            - fix product prefix in cli url requests
+
+1.86-2   Sun Jan 18 17:45:37 CET 2015
+          - Reporting:
+            - add option for maximum number of concurrent reports
+            - start reports from cron serial instead of all at once
+          - Panorama View:
+            - add server actions as possible link targets
+            - fixed problem when moving rotated shapes
+          - Bug Fixes
+            - fixed macro replacement in action menu links
+            - fixed error in cluetip library by shiping a new version
+            - fixed problem with shadownaemon in non-xs env
+            - fixed error: Can't use string xxx as an ARRAY
+
+1.86     Thu Jan  8 14:10:41 CET 2015
+          - add custom action menu
+          - livestatus performance improvements
+          - updated jquery to 1.11.1
+          - added new configuration setting: max_process_memory
+          - add excel export permanent link (awiddersheim)
+          - increased logcache int size
+          - use grey performance bars on extinfo page
+          - Business Process:
+            - fix zoom on large business objects
+          - Mobile:
+            - updated jquery mobile
+            - respect escape_html_tags setting from cgi.cfg
+            - old themes have been replaced with 2 new ones
+          - Reporting:
+            - support url reports from external urls
+          - Panorama View:
+            - added show details/refresh links to icons
+            - add 'center' position option for labels
+            - changeable icon filter types
+            - fixed memory leak in generic url panel
+            - fixed problem with stopped timers after import
+            - reload every x hours to prevent noncatchable memory leaks
+            - fixed linking public dashboards
+          - Bug Fixes
+            - fixed problem with timeperiods in logcache database
+            - fixed show_custom_vars with wildcards
+            - fixed adding dummy function in business processes
+            - fixed startup page in safari browser
+            - fixed css problem in mobile client
+
+1.84-6   Wed Aug  6 11:24:12 CEST 2014
           - Panorama View:
             - support availability results in labels and speedometer
 

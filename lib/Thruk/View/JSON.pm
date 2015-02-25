@@ -20,7 +20,8 @@ encodes data into json object
 
 =cut
 sub encode_json {
-    my($self, $c, $data) = @_;
+    #my($self, $c, $data)...
+    my($self, undef, $data) = @_;
     my $encoder = JSON::XS->new
                           ->ascii
                           ->pretty

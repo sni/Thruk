@@ -1,0 +1,94 @@
+---
+layout: docs
+title: Macros
+---
+
+= Macros
+
+Macros are available in a few places, for example the link:action-menu.html[Action Menus]
+or in the action_url, notes_url or icon_url.
+
+== Host Macros
+
+Host related Macros:
+
+[options="header"]
+|===========================================================================================================
+| Macro                 | Example                  | Description
+| $HOSTADDRESS$         | 94.185.90.75             | Adress from the host configuration
+| $HOSTNAME$            | www.thruk.org            | Name from the host configuration
+| $HOSTALIAS$           | thruk.org                | Alias from the host configuration
+| $HOSTSTATEID$         | 0                        | Number of the current state. 0 UP, 1 Down, 2 Unreachable
+| $HOSTLATENCY$         | 0.12                     | Latency of last check in seconds
+| $HOSTOUTPUT$          | HTTP - 200 OK...         | Output of last check
+| $HOSTPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
+| $HOSTATTEMPT$         | 1                        | Number of current check attempt
+| $HOSTCHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
+| $HOSTSTATE$           | UP                       | State of last check in human readable form
+| $HOSTBACKENDID$       | abcd                     | Internal id for the backend of this host
+| $HOSTBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this host
+| $HOSTBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this host
+| $HOSTNOTESURL$        | http://example.org       | Notes URL
+|===========================================================================================================
+
+
+== Service Macros
+
+Service related Macros:
+
+[options="header"]
+|===========================================================================================================
+| Macro                    | Example                  | Description
+| $SERVICEDESC$            | Check Website            | Description from the service configuration
+| $SERVICESTATE$           | 0                        | Number of the current state. 0 OK, 1 WARNING, 2 CRITICAL, 3 UNKNOWN
+| $SERVICELATENCY$         | 0.12                     | Latency of last check in seconds
+| $SERVICEOUTPUT$          | HTTP - 200 OK...         | Output of last check
+| $SERVICEPERFDATA$        | size=100B;200;300;;;     | Performance data from the last check
+| $SERVICEATTEMPT$         | 1                        | Number of current check attempt
+| $SERVICECHECKCOMMAND$    | check_http!www.thruk.org | Checkcommand used for this host
+| $SERVICEBACKENDID$       | abcd                     | Internal id for the backend of this service
+| $SERVICEBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this service
+| $SERVICEBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this service
+| $SERVICENOTESURL$        | http://example.org       | Notes URL
+|===========================================================================================================
+
+
+== Date/Time Macros
+
+Date and time related macros:
+
+[options="header"]
+|===========================================================================================================
+| Macro           | Example                      | Description
+| $SHORTDATETIME$ | 2015-01-14 14:53:35          | Date with format: %Y-%m-%d %H:%M:%S
+| $LONGDATETIME$  | Wed Jan 14 14:53:35 CET 2015 | Date with format: %a %b %e %H:%M:%S %Z %Y
+| $DATE$          | 2015-01-14                   | Date with format: %Y-%m-%d
+| $TIME$          | 14:53:35                     | Date with format: %H:%M:%S
+| $TIMET$         | 1421243760                   | Unix Timestamp
+|===========================================================================================================
+
+
+== User Macros
+
+Macros from the `resource.cfg`:
+
+[options="header"]
+|===========================================================================================================
+| Macro   | Example                 | Description
+| $USER1$ | /usr/lib/nagios/plugins | USER1 variable from the ressource.cfg
+| ...     |                         |
+|===========================================================================================================
+
+
+== Dashboard Macros
+
+These macros are only available in server actions used by
+link:action-menu.html[action items] the link:dashboard.html[panorama dashboard].
+
+[options="header"]
+|===========================================================================================================
+| Macro              | Example                  | Description
+| $REMOTE_USER$      | thrukadmin               | User name of current user which is also available in $REMOTE_USER environment variable
+| $DASHBOARD_ID$     | 10                       | Number of the current dashboard
+| $DASHBOARD_ICON$   | tabpan-tab_1_panlet_2    | Id of the current icon which triggered the server action
+|===========================================================================================================

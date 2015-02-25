@@ -28,8 +28,11 @@ my $skip_compress = defined $ENV{THRUK_SKIP_COMPRESS} ? $ENV{THRUK_SKIP_COMPRESS
 #################################################
 # directly use config, otherwise user would be switched when called as root from the Makefile.PL
 my $config   = \%Thruk::Config::config;
+my $branch   = $config->{'View::TT'}->{'PRE_DEFINE'}->{'filebranch'} ;
 die('no config') unless $config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'};
 die('no config') unless $Thruk::Config::VERSION;
+die('no config') unless $branch;
+my $version = $Thruk::Config::VERSION.'-'.$branch;
 
 #################################################
 # check if update is required
@@ -39,8 +42,8 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}
     $newest = $s[9] if $newest < $s[9];
 }
 my $js_required = 1;
-if(-e 'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js') {
-    my @s = stat('root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js');
+if(-e 'root/thruk/javascript/all_in_one-'.$version.'.js') {
+    my @s = stat('root/thruk/javascript/all_in_one-'.$version.'.js');
     if($s[9] >= $newest) {
         $js_required = 0;
     }
@@ -52,14 +55,37 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}
     $newest = $s[9] if $newest < $s[9];
 }
 my $css_required = 1;
-if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css') {
-    my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css');
+if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css') {
+    my @s = stat('themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css');
     if($s[9] >= $newest) {
         $css_required = 0;
     }
 }
 
-if(!$js_required and !$css_required and !$skip_compress) {
+my @panorama_files;
+$newest = 0;
+for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}) {
+    my @s;
+    if($file =~ m/^plugins\//mx) {
+        my $tmp = $file;
+        $tmp =~ s|plugins/|root/thruk/plugins/|gmx;
+        @s = stat($tmp);
+        push @panorama_files, $tmp;
+    } else {
+        @s = stat('root/thruk/'.$file);
+        push @panorama_files, 'root/thruk/'.$file;
+    }
+    $newest = $s[9] if (@s && $newest < $s[9]);
+}
+my $panorama_required = 1;
+if(-e 'root/thruk/javascript/all_in_one-'.$version.'_panorama.js') {
+    my @s = stat('root/thruk/javascript/all_in_one-'.$version.'_panorama.js');
+    if($s[9] >= $newest) {
+        $panorama_required = 0;
+    }
+}
+
+if(!$js_required and !$css_required and !$skip_compress and !$panorama_required and (!$ARGV[0] or $ARGV[0] ne '-f')) {
     print STDERR "no update necessary\n";
     exit;
 }
@@ -75,11 +101,13 @@ unless($skip_compress) {
 
 #################################################
 my $cmds = [
-    'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.js',
-    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$Thruk::Config::VERSION.'.css',
-    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$Thruk::Config::VERSION.'.css',
+    'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$version.'.js',
+    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$version.'.css',
+    'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$version.'.css',
+    'cat '.join(' ', @panorama_files).' > root/thruk/javascript/all_in_one-'.$version.'_panorama.js',
 ];
-push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$Thruk::Config::VERSION.'.js' if $dos2unix;
+push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'.js'          if $dos2unix;
+push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'_panorama.js' if $dos2unix;
 for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
@@ -93,8 +121,8 @@ if($skip_compress) {
 #################################################
 # try to minify css
 my $files = [
-    'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$Thruk::Config::VERSION.'.css',
-    'themes/themes-available/Thruk/stylesheets/all_in_one-'.$Thruk::Config::VERSION.'.css',
+    'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.'.css',
+    'themes/themes-available/Thruk/stylesheets/all_in_one-'.$version.'.css',
 ];
 for my $file (@{$files}) {
     my $cmd = $yuicompr.' -o compressed.css '.$file.' && mv compressed.css '.$file;
@@ -109,7 +137,8 @@ unlink('tmp.css');
 #################################################
 # try to minify js
 my $jsfiles = [
-    'root/thruk/javascript/all_in_one-'.$Thruk::Config::VERSION.'.js',
+    'root/thruk/javascript/all_in_one-'.$version.'.js',
+    'root/thruk/javascript/all_in_one-'.$version.'_panorama.js',
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;

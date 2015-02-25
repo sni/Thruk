@@ -69,7 +69,7 @@ sub calculate_availability {
             $c->stash->{template}   = 'avail_report_service.tt';
         }
     }
-    elsif(defined $service and $service eq 'all') {
+    elsif((defined $service and $service eq 'all') || $c->{request}->{parameters}->{s_filter}) {
         if($csvoutput) {
             $c->stash->{template} = 'avail_report_services_csv.tt';
         } else {
@@ -90,7 +90,7 @@ sub calculate_availability {
             $c->stash->{template}   = 'avail_report_host.tt';
         }
     }
-    elsif(defined $host and $host eq 'all') {
+    elsif((defined $host and $host eq 'all') || $c->{request}->{parameters}->{h_filter}) {
         if($csvoutput) {
             $c->stash->{template}   = 'avail_report_hosts_csv.tt';
         } else {
@@ -233,6 +233,7 @@ sub calculate_availability {
         my @hostfilter;
         if($c->{request}->{parameters}->{s_filter}) {
             $servicefilter = $c->{request}->{parameters}->{s_filter};
+            $service       = 1;
         }
         elsif($service ne 'all') {
             $host = '*' if $host =~ m/^\s*$/mx;
@@ -835,7 +836,8 @@ sub get_availability_percents {
     for my $name (sort keys %{$avail->{'breakdown'}}) {
         my $t = $avail->{'breakdown'}->{$name};
 
-        my($percent, $time) = _sum_availability($t, $u);
+        #my($percent, $time)
+        my($percent, undef) = _sum_availability($t, $u);
         confess('corrupt breakdowns: '.Dumper($name, $avail->{'breakdown'})) unless defined $t->{'timestamp'};
         $values->{$name} = [
             $t->{'timestamp'}*1000,

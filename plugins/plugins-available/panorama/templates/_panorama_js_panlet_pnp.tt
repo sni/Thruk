@@ -24,9 +24,20 @@ TP.graphStore = Ext.create('Ext.data.Store', {
         type:   'ajax',
         url:    'panorama.cgi?task=pnp_graphs',
         method: 'POST',
+        params: {},
         reader: {
             type: 'json',
             root: 'data'
+        }
+    },
+    listeners: {
+        beforeload: function(store, operation, eOpts) {
+            if(store.panel) {
+                store.proxy.extraParams['backends'] = TP.getActiveBackendsPanel(Ext.getCmp(store.panel.panel_id), store.panel);
+            } else {
+                store.proxy.extraParams = {};
+            }
+            return true;
         }
     }
 });
@@ -56,7 +67,8 @@ Ext.define('TP.PanletPNP', {
         this.updateSource = function(force) {
             var form   = this.down('form').getForm();
             var values = form.getValues();
-            if(force || (values.graph && values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
+            if(!values.graph) { return; }
+            if(force || (values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
@@ -232,6 +244,7 @@ Ext.define('TP.PanletPNP', {
         });
     },
     gearInitCallback: function(panel) {
+        TP.graphStore.panel = panel;
         TP.graphStore.load();
         panel.updateSource(true);
     }
