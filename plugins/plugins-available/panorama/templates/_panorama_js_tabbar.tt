@@ -280,8 +280,6 @@ Ext.define('TP.TabBar', {
             TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
                 // hide mask
                 if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
-                // and scroll to top
-                window.scrollTo(0, 0);
             } ,TP.initial_create_delay_active + 500);
         }
     },

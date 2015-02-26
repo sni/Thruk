@@ -1927,7 +1927,7 @@ sub _get_dashboard_by_name {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
             my $d = $self->_load_dashboard($c, $1);
             if($d) {
-                if($d->{'tab'}->{'xdata'}->{'title'} eq $name) {
+                if($d->{'tab'}->{'xdata'}->{'title'} eq $name || $d->{'nr'} eq $name) {
                     return($d);
                 }
             }

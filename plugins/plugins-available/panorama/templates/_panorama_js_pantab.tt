@@ -195,17 +195,7 @@
             }
         },
         resize: function(This, adjWidth, adjHeight, eOpts) {
-            [% IF one_tab_only %]
-            /* required for showing the background */
-            This.body.dom.style.width  = "100%";
-            This.body.dom.style.height = "100%";
-            This.body.dom.style.top    = "25px";
-            var body = Ext.getBody();
-            /* required due to missing tabbar */
-            body.dom.style.position    = "relative";
-            body.dom.style.top         = "-25px";
-            body.dom.style.left        = "0";
-            [% END %]
+            This.adjustTabHeaderOffset();
         }
     },
     getState: function() {
@@ -592,6 +582,19 @@
                 beforehide: function(menu, eOpts) { menu.destroy(); }
             }
         }).showAt(pos);
+    },
+    adjustTabHeaderOffset: function() {
+        [%+ IF one_tab_only +%]
+        var tab = this;
+        var body = Ext.getBody();
+        /* required for showing the background */
+        tab.setSize(body.getSize());
+        tab.body.dom.style.top    = "25px";
+        /* required due to missing tabbar */
+        body.dom.style.position    = "relative";
+        body.dom.style.top         = "-25px";
+        body.dom.style.left        = "0";
+        [%+ END +%]
     }
 });
 
