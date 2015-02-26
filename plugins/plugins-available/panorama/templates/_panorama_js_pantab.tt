@@ -482,10 +482,13 @@
             }, {
                 text:   'Exit Fullscreen',
                 icon:   '[% url_prefix %]plugins/panorama/images/pictures.png',
-                handler: function() {
-                    BigScreen.exit();
-                },
+                handler: function() { BigScreen.exit(); },
                 hidden:  !BigScreen.element
+            }, {
+                text:   'Debug Information',
+                icon:   '[% url_prefix %]plugins/panorama/images/information.png',
+                handler: thruk_debug_window_handler,
+                hidden:  [% IF !thruk_debug || c.config.demo_mode %]true[% ELSE %]false[% END %]
             }
             [% UNLESS readonly %]
             , {

@@ -82,7 +82,8 @@ Ext.onReady(function() {
                     return(this.items.get(0));
                 }
                 return;
-            }
+            },
+            setActiveTab: function() {}
         });
         TP.add_pantab([% one_tab_only %], undefined, undefined, function(id) {
             TP.initialized = true;
