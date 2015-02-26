@@ -6,6 +6,7 @@ next:
             - add undo function
             - dashboard are now locked by default
             - fix showing -1 objects for new dashboards
+            - fix showing empty totals for custom filter icons
           - Business Process:
             - show draft edits in overview
           - Bug Fixes

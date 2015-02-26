@@ -499,7 +499,7 @@ sub _task_status {
             next if $c->stash->{'has_error'};
             delete $c->request->parameters->{'backend'};
             delete $c->request->parameters->{'backends'};
-            if($backends) {
+            if($backends && scalar @{$backends} > 0) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
