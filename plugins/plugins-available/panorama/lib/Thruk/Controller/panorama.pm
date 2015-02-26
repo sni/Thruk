@@ -222,7 +222,19 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         return $c->response->redirect("panorama.cgi");
     }
 
-    $self->_js($c, 1);
+    $c->stash->{one_tab_only} = '';
+    my $open_tabs;
+    if(defined $c->request->parameters->{'map'}) {
+        my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
+        if(!$dashboard) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
+            return $c->response->redirect($c->stash->{'url_prefix'});
+        }
+        $open_tabs = [$dashboard->{'nr'}];
+        $c->stash->{one_tab_only} = $dashboard->{'nr'};
+    }
+
+    $self->_js($c, 1, $open_tabs);
 
     $c->stash->{template} = 'panorama.tt';
     return 1;
@@ -230,7 +242,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 ##########################################################
 sub _js {
-    my ( $self, $c, $only_data ) = @_;
+    my($self, $c, $only_data, $open_tabs) = @_;
 
     $c->stash->{shapes} = {};
     my $data = Thruk::Utils::get_user_data($c);
@@ -277,10 +289,11 @@ sub _js {
     }
 
     # merge open dashboards into state
-    if($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
-        my $shapes = {};
+    if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
+        my $shapes         = {};
         $c->stash->{state} = '';
-        for my $nr (@{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}}) {
+        $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
+        for my $nr (@{$open_tabs}) {
             my $dashboard = $self->_load_dashboard($c, $nr);
             $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
@@ -1903,6 +1916,24 @@ sub _get_dashboard_list {
 
     $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
     return $dashboards;
+}
+
+##########################################################
+sub _get_dashboard_by_name {
+    my($self, $c, $name) = @_;
+    return unless $name;
+
+    for my $file (glob($self->{'var'}.'/*.tab')) {
+        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
+            my $d = $self->_load_dashboard($c, $1);
+            if($d) {
+                if($d->{'tab'}->{'xdata'}->{'title'} eq $name) {
+                    return($d);
+                }
+            }
+        }
+    }
+    return;
 }
 
 ##########################################################

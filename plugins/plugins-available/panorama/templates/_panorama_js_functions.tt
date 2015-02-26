@@ -122,6 +122,7 @@ var TP = {
         }
 
         /* move new-tab button at the end */
+        [% IF !one_tab_only %]
         tabpan.getTabBar().move(size-1, size);
 
         /* make tab title editable */
@@ -134,6 +135,7 @@ var TP = {
         } else {
             TP.addTabBarMouseEvents(tabhead.getEl(), id);
         }
+        [% END %]
         [% END %]
 
         /* replace existing tab with current one */

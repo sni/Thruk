@@ -69,21 +69,42 @@ Ext.onReady(function() {
     Ext.QuickTips.init();
 
     /* main viewport */
-    TP.viewport = new Ext.Viewport({
-        id:       'viewport',
-        layout:   'border',
-        renderTo: Ext.getBody(),
-        margins:  '0 0 0 0',
-        items:    [ new TP.TabBar() ]
-    });
-    Ext.getCmp('bug_report').hide();
-    [% IF !thruk_debug || c.config.demo_mode %]
-    Ext.getCmp('debug_tab').hide();
-    [% END %]
+    [% IF one_tab_only %]
+        TP.viewport = new Ext.Viewport({
+            id:       'tabpan',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [],
+            xdata:    {},
+            getActiveTab: function() {
+                if(this.items.length > 0) {
+                    return(this.items.get(0));
+                }
+                return;
+            }
+        });
+        TP.add_pantab([% one_tab_only %], undefined, undefined, function(id) {
+            TP.initialized = true;
+            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+        });
+    [% ELSE %]
+        TP.viewport = new Ext.Viewport({
+            id:       'viewport',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [ new TP.TabBar() ]
+        });
+        Ext.getCmp('bug_report').hide();
+        [% IF !thruk_debug || c.config.demo_mode %]
+        Ext.getCmp('debug_tab').hide();
+        [% END %]
 
-    [% IF (readonly || dashboard_ignore_changes) %]
-    var icon = Ext.query('SPAN.new-tab')[0];
-    icon.parentNode.parentNode.parentNode.style.display = 'none';
+        [% IF readonly || dashboard_ignore_changes %]
+        var icon = Ext.query('SPAN.new-tab')[0];
+        icon.parentNode.parentNode.parentNode.style.display = 'none';
+        [% END %]
     [% END %]
 
     /* make sure initialized is set to true */

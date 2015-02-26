@@ -343,6 +343,7 @@ plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
 plugins/plugins-available/panorama/lib/Thruk/Utils/PanoramaCpuStats.pm
 plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
+plugins/plugins-available/panorama/root/bigscreen.js
 plugins/plugins-available/panorama/root/cleanextjs.sh
 plugins/plugins-available/panorama/root/extjs-4.1.1/ext-all-debug.js
 plugins/plugins-available/panorama/root/extjs-4.1.1/ext-all.js
@@ -796,6 +797,8 @@ plugins/plugins-available/panorama/root/images/page_find.png
 plugins/plugins-available/panorama/root/images/page_lightning.png
 plugins/plugins-available/panorama/root/images/page_paste.png
 plugins/plugins-available/panorama/root/images/picture.png
+plugins/plugins-available/panorama/root/images/picture_empty.png
+plugins/plugins-available/panorama/root/images/pictures.png
 plugins/plugins-available/panorama/root/images/remove.png
 plugins/plugins-available/panorama/root/images/right.png
 plugins/plugins-available/panorama/root/images/s.gif

@@ -4,6 +4,7 @@ next:
           - add host and service notes url macros (Andrew Widdersheim)
           - Panorama View:
             - add undo function
+            - add fullscreen mode
             - dashboard are now locked by default
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons

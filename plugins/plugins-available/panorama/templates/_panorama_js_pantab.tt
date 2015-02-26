@@ -193,6 +193,19 @@
                     panlet.hide();
                 }
             }
+        },
+        resize: function(This, adjWidth, adjHeight, eOpts) {
+            [% IF one_tab_only %]
+            /* required for showing the background */
+            This.body.dom.style.width  = "100%";
+            This.body.dom.style.height = "100%";
+            This.body.dom.style.top    = "25px";
+            var body = Ext.getBody();
+            /* required due to missing tabbar */
+            body.dom.style.position    = "relative";
+            body.dom.style.top         = "-25px";
+            body.dom.style.left        = "0";
+            [% END %]
         }
     },
     getState: function() {
@@ -464,6 +477,25 @@
                 text:   'Refresh',
                 icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
+            }, {
+                text:   'Fullscreen',
+                icon:   '[% url_prefix %]plugins/panorama/images/picture_empty.png',
+                handler: function() {
+                    var element = Ext.getBody().dom;
+                    try {
+                        BigScreen.request(element);
+                    } catch(e) {
+                        TP.log('[global] error in BigScreen: '+e);
+                    }
+                },
+                hidden:  !!BigScreen.element
+            }, {
+                text:   'Exit Fullscreen',
+                icon:   '[% url_prefix %]plugins/panorama/images/pictures.png',
+                handler: function() {
+                    BigScreen.exit();
+                },
+                hidden:  !BigScreen.element
             }
             [% UNLESS readonly %]
             , {
