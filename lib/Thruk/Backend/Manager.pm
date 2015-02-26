@@ -1040,6 +1040,8 @@ sub _set_host_macros {
     $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'})    ? $host->{'host_current_attempt'}    : $host->{'current_attempt'};
     $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
     $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
+    $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
+    $macros->{'$HOSTDURATION$'}       = time() - $macros->{'$HOSTDURATION$'};
     $macros->{'$HOSTSTATE$'}          = $c->config->{'nagios'}->{'host_state_by_number'}->{$macros->{'$HOSTSTATEID$'}};
     $macros->{'$HOSTBACKENDID$'}      = $host->{'peer_key'};
     $macros->{'$HOSTBACKENDNAME$'}    = '';
@@ -1087,6 +1089,7 @@ sub _set_service_macros {
     $macros->{'$SERVICECHECKCOMMAND$'}   = $service->{'check_command'};
     $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
     $macros->{'$SERVICENOTESURL$'}       = $service->{'notes_url_expanded'};
+    $macros->{'$SERVICEDURATION$'}       = time() - $service->{'last_state_change'};
     my $peer = defined $service->{'peer_key'} ? $self->get_peer_by_key($service->{'peer_key'}) : undef;
     if($peer) {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';

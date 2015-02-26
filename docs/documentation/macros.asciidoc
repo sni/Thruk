@@ -29,6 +29,7 @@ Host related Macros:
 | $HOSTBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this host
 | $HOSTBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this host
 | $HOSTNOTESURL$        | http://example.org       | Notes URL
+| $HOSTDURATION$        | 1337                     | Time in seconds since last state change
 |===========================================================================================================
 
 
@@ -50,6 +51,7 @@ Service related Macros:
 | $SERVICEBACKENDNAME$     | Cental-Monitor           | Given name for the backend of this service
 | $SERVICEBACKENDADDRESS$  | localhost:6557           | Connection string used by the backend of this service
 | $SERVICENOTESURL$        | http://example.org       | Notes URL
+| $SERVICEDURATION$        | 1337                     | Time in seconds since last state change
 |===========================================================================================================
 
 

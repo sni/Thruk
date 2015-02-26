@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add host and service notes url macros (Andrew Widdersheim)
+          - add host and service duration macro (Andrew Widdersheim)
           - Panorama View:
             - add undo function
             - dashboard are now locked by default
