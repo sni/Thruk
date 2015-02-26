@@ -111,6 +111,9 @@
         var state = this.callParent(arguments);
         state.title = this.title;
         state.xdata = this.xdata;
+        [% IF one_tab_only %]
+        state.pos[1] += 25;
+        [% END %]
         return state;
     },
     applyState: function(state) {
