@@ -143,6 +143,13 @@ var TP = {
             [% IF one_tab_only %]
             if(id != replace_id) {
                 Ext.getCmp(replace_id).destroy();
+                if(history.replaceState) {
+                    var tab    = tabpan.getActiveTab();
+                    var newloc = new String(window.document.location);
+                    newloc     = newloc.replace(/\?map=.*$/g, '');
+                    newloc     = newloc + "?map="+tab.xdata.title;
+                    history.replaceState({}, "", newloc);
+                }
             }
             [% ELSE %]
             var replace_nr;
@@ -739,7 +746,7 @@ var TP = {
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
                 var old = tab.ts ? tab.ts : '';
                 tab.ts = data.dashboard_ts[tab.id];
-                if((no_ts == undefined || no_ts == false) && old != tab.ts) {
+                if((no_ts == undefined || no_ts == false) && old < tab.ts) {
                     TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
                     TP.renewDashboard(tab);
                 }
