@@ -449,6 +449,7 @@ sub get_services {
             host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
             host_is_executing host_is_flapping host_name host_notes_url_expanded
             host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
+            host_last_state_change
             icon_image icon_image_alt icon_image_expanded is_executing is_flapping
             last_check last_notification last_state_change latency long_plugin_output
             low_flap_threshold max_check_attempts next_check notes notes_expanded
