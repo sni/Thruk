@@ -199,7 +199,7 @@ our %config = ('name'                   => 'Thruk',
                                     4 => 'PENDING',
                                 },
                   host_state_by_number => {
-                                    0 => 'OK',
+                                    0 => 'UP',
                                     1 => 'DOWN',
                                     2 => 'UNREACHABLE',
                                 },
