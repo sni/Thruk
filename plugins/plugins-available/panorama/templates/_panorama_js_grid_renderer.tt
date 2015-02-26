@@ -419,6 +419,11 @@ TP.render_long_pluginoutput = function(v, td, item, row, col, store, view) {
     return v;
 }
 
+/* render full screen link */
+TP.render_fullscreenlink = function(v, td, item, row, col, store, view) {
+    return "<a target='_blank' href='panorama.cgi?map="+item.data.name+"'><img src='[% url_prefix %]plugins/panorama/images/picture_empty.png' border='0' width='20' height='20' alt='fullscreen url' title='open dashboard in a new fullscreen window'><\/a>";
+}
+
 /* format timestamp */
 TP.date_format = function(t, f) {
     var d = new Date(t*1000);
