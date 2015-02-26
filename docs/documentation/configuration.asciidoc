@@ -1520,14 +1520,14 @@ of the script and the corresponding command. The command has to be a full path p
 and *not* just a shell command. Therefor you do not have to use quotes because the arguments
 are not interpreted by a shell before execution due to security reasons.
 
-It is possible to use most standard macros and the username is available in the `REMOTE_USER`
+It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
 environment variable.
 
 ex.:
 
   <action_menu_actions>
-      example_action   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$
-      refresh_action   = /usr/local/bin/refresh.sh otherargs
+      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$
+      refresh   = /usr/local/bin/refresh.sh otherargs
   </action_menu_actions>
 
 
