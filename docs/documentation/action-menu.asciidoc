@@ -70,7 +70,7 @@ to give feedback to the user. HTML is allowed and will be used in the output.
 
 === Authorization
 The Script will be run when ever the user has access to the given host and service.
-If your script wants to do some further checking, it can use the `$REMOTE_USER`
+If your script wants to do some further checking, it can use the `$REMOTE_USER$`
 environment variable.
 
 
