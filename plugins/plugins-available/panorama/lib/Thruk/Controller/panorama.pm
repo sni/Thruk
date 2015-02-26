@@ -2335,7 +2335,7 @@ sub _load_dashboard {
     my $file  = $self->{'var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
-    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -3;
+    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
     if($permission == ACCESS_READONLY) {

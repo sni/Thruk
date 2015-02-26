@@ -5,6 +5,7 @@ next:
           - Panorama View:
             - add undo function
             - dashboard are now locked by default
+            - fix showing -1 objects for new dashboards
           - Business Process:
             - show draft edits in overview
           - Bug Fixes
