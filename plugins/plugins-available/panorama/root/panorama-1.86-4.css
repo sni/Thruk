@@ -44,6 +44,10 @@ DIV.x-tab-top button {
     background-image: url("images/cog_add.png") !important;
     left: -4px;
 }
+.lock-tab {
+    background-image: url("images/lock.png") !important;
+    left: -4px;
+}
 .bug-tab {
     background-image: url("images/bug_error.png") !important;
     left: 4px;

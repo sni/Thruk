@@ -2019,8 +2019,10 @@ sub _task_dashboard_restore {
     my $dashboard  = $self->_load_dashboard($c, $nr);
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
+        die("no such dashboard") unless -e $self->{'var'}.'/'.$nr.'.tab';
+        die("no such restore point") unless -e $self->{'var'}.'/'.$nr.'.tab.'.$timestamp;
         my @stat = stat($self->{'var'}.'/'.$nr.'.tab');
-        move($self->{'var'}.'/'.$nr.'.tab', $self->{'var'}.'/'.$nr.'.tab.'.$stat[9], );
+        move($self->{'var'}.'/'.$nr.'.tab', $self->{'var'}.'/'.$nr.'.tab.'.$stat[9]);
         move($self->{'var'}.'/'.$nr.'.tab.'.$timestamp, $self->{'var'}.'/'.$nr.'.tab');
     }
     $self->_add_misc_details($c, 1);
@@ -2316,6 +2318,7 @@ sub _save_dashboard {
     delete $dashboard->{'nr'};
     delete $dashboard->{'id'};
     delete $dashboard->{'file'};
+    delete $dashboard->{'locked'};
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
 

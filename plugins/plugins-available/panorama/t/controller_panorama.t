@@ -3,10 +3,11 @@ use warnings;
 use Test::More;
 use JSON::XS;
 use Encode qw/encode_utf8/;
+use File::Copy qw/copy/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 367;
+    plan tests => 385;
 }
 
 BEGIN {
@@ -96,6 +97,10 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=userdata_shapes',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_sounds',
     { url => '/thruk/cgi-bin/panorama.cgi?task=serveraction', post => { dashboard => '__DASHBOARD__', link => 'server://test' } },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__' } },
+
+    # finally remove our test dashboard
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_update', post => { nr => '__DASHBOARD__', action => 'remove' } },
 ];
 
@@ -158,6 +163,11 @@ sub test_json_page {
 
     if($url->{'post'}->{'nr'} && $url->{'post'}->{'nr'} eq '__DASHBOARD__') {
         $url->{'post'}->{'nr'} = $test_dashboard_nr;
+    }
+    if($url->{'post'}->{'timestamp'} && $url->{'post'}->{'timestamp'} eq '__TIMESTAMP__') {
+        my $test_timestamp = time();
+        copy($var_path.'/panorama/'.$test_dashboard_nr.'.tab', $var_path.'/panorama/'.$test_dashboard_nr.'.tab.'.$test_timestamp);
+        $url->{'post'}->{'timestamp'} = $test_timestamp;
     }
 
     my $page = TestUtils::test_page(%{$url});

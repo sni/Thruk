@@ -55,6 +55,10 @@ var TP = {
         TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
 
         /* get tab data from server */
+        var newDashboard = false;
+        if(id && (id == "new" || id == "new_or_empty")) {
+            newDashboard = true;
+        }
         if(id && cp.state[id] == undefined) {
             /* fetch state info and add new tab as callback */
             Ext.Ajax.request({
@@ -95,6 +99,13 @@ var TP = {
                             tabpan.saveState();
                         }
                     }
+
+                    /* disable lock for new dashboard */
+                    if(newDashboard) {
+                        Ext.getCmp(id).locked = false;
+                        Ext.getCmp(id).setLock(false);
+                    }
+
                     if(callback) { callback(id); }
                 }
             });

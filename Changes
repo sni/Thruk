@@ -4,6 +4,7 @@ next:
           - add host and service notes url macros (Andrew Widdersheim)
           - Panorama View:
             - add undo function
+            - dashboard are now locked by default
           - Business Process:
             - show draft edits in overview
           - Bug Fixes

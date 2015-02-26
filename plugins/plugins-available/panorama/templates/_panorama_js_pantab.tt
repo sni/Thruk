@@ -10,6 +10,7 @@
     [% END %]
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
+    locked:      true, // lock it by default
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -109,7 +110,11 @@
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
-                Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
+                if(This.xdata.locked) {
+                    Ext.getCmp('tabbar_addbtn').setDisabled(true).setIconCls('lock-tab');
+                } else {
+                    Ext.getCmp('tabbar_addbtn').setDisabled(false).setIconCls('gear-tab');
+                }
             }
 
             // refresh icons
@@ -295,8 +300,9 @@
     },
     getState: function() {
         var state = {
-            xdata: this.xdata
+            xdata: TP.clone(this.xdata)
         };
+        delete state.xdata.locked;
         return state;
     },
     applyState: function(state) {
@@ -363,8 +369,9 @@
             xdata = this.xdata;
         }
         if(this.readonly == 1) {
-            xdata.locked = true;
+            this.locked = true;
         }
+        xdata.locked = this.locked;
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
         this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
@@ -531,10 +538,15 @@
     setLock: function(val) {
         var tab = this;
         tab.xdata.locked = val;
+        tab.locked       = val;
 
         /* disable add button */
         if(Ext.getCmp('tabbar_addbtn')) {
-            Ext.getCmp('tabbar_addbtn').setDisabled(val);
+            if(tab.xdata.locked) {
+                Ext.getCmp('tabbar_addbtn').setDisabled(true).setIconCls('lock-tab');
+            } else {
+                Ext.getCmp('tabbar_addbtn').setDisabled(false).setIconCls('gear-tab');
+            }
         }
 
         /* apply to all widgets and panels */
