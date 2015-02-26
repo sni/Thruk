@@ -589,11 +589,11 @@
         var body = Ext.getBody();
         /* required for showing the background */
         tab.setSize(body.getSize());
-        tab.body.dom.style.top    = "25px";
         /* required due to missing tabbar */
-        body.dom.style.position    = "relative";
-        body.dom.style.top         = "-25px";
-        body.dom.style.left        = "0";
+        var bodyview = Ext.get("bodyview");
+        bodyview.dom.style.position    = "relative";
+        bodyview.dom.style.top         = "-25px";
+        bodyview.dom.style.left        = "0";
         [%+ END +%]
     }
 });

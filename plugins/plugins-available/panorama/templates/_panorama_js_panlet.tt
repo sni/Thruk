@@ -10,6 +10,7 @@
     hideMode:  'visibility',
     autoShow:  false,
     stateful:  true,
+    renderTo: "bodyview",
     initComponent: function() {
         var panel = this;
         if(this.xdata == undefined) {

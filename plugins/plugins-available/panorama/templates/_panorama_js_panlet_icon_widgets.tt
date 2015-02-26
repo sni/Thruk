@@ -19,6 +19,7 @@
         [% END %]
         this.redrawOnly = false;
         this.animations = 0;
+        this.renderTo   = "bodyview";
 
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
@@ -337,6 +338,7 @@
                 autoRender: true,
                 autoShow:   true,
                 shadow:     false,
+                renderTo:  "bodyview",
                 cls:        (panel.xdata.link.link ? '' : 'not') +'clickable iconlabel', // defaults to text cursor otherwise
                 autoEl: {
                     tag:     'a',
