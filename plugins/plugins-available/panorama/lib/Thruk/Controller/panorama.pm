@@ -83,6 +83,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
         $c->stash->{'is_admin'} = 1;
     }
+    $c->stash->{one_tab_only} = '';
 
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
 
@@ -222,7 +223,6 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         return $c->response->redirect("panorama.cgi");
     }
 
-    $c->stash->{one_tab_only} = '';
     my $open_tabs;
     if(defined $c->request->parameters->{'map'}) {
         my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
