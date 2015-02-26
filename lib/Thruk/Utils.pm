@@ -1944,7 +1944,7 @@ sub write_data_file {
 
     if($number_of_backups && -e $filename) {
         my $old_md5 = md5_hex(read_file($filename));
-        my $new_md5 = md5_hex($data);
+        my $new_md5 = md5_hex($d);
         if($new_md5 ne $old_md5) {
             # remove oldest backup
             unlink($filename.'.'.$number_of_backups);
