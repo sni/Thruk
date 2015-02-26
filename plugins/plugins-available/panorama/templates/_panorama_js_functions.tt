@@ -129,10 +129,10 @@ var TP = {
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
         if(tabhead.rendered == false) {
             tabhead.addListener('afterrender', function(This, eOpts) {
-                TP.addDblClickRename(This.getEl(), tabhead, id);
+                TP.addTabBarMouseEvents(This.getEl(), id);
             });
         } else {
-            TP.addDblClickRename(tabhead.getEl(), tabhead, id);
+            TP.addTabBarMouseEvents(tabhead.getEl(), id);
         }
         [% END %]
 
@@ -824,9 +824,13 @@ var TP = {
             tabpan.setActiveTab(1);
         }
     },
-    addDblClickRename: function(el, item, id) {
-        el.on("dblclick", function() {
+    addTabBarMouseEvents: function(el, tabId) {
+        el.on("dblclick", function(e, el, o) {
             TP.tabSettingsWindow();
+        });
+        el.on("contextmenu", function(e, el, o) {
+            var tab = Ext.getCmp(tabId);
+            tab.contextmenu(e, true);
         });
     },
     /* sum list elements */
