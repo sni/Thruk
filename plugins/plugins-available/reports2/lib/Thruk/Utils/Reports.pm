@@ -108,7 +108,7 @@ sub report_show {
         } else {
             my $name = $report->{'name'};
             $name    =~ s/\s+/_/gmx;
-            $name    =~ s/[^a-zA-Z0-9-_]+//gmx;
+            $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
             $c->res->content_type('application/pdf');
             $c->res->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
             open(my $fh, '<', $report_file);
