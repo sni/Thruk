@@ -45,6 +45,7 @@ use constant {
     ACCESS_READWRITE => 2,
     ACCESS_OWNER     => 3,
 };
+my @runtime_keys = qw/state/;
 
 ##########################################################
 
@@ -2031,6 +2032,7 @@ sub _task_dashboard_restore_list {
         $nr       =~ s/^tabpan-tab_//gmx;
         my @files = reverse sort glob($self->{'var'}.'/'.$nr.'.tab.*');
         for my $file (@files) {
+            next if $file =~ m/\.runtime$/mx;
             $file =~ m/\.(\d+)$/mx;
             my $date = $1;
             push(@{$list}, { num => $date })
@@ -2354,7 +2356,20 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
 
+    # save runtime data in extra file
+    my $runtime = {};
+    for my $tab (keys %{$dashboard}) {
+        next unless ref $dashboard->{$tab} eq 'HASH';
+        delete $dashboard->{$tab}->{""};
+        for my $key (@runtime_keys) {
+            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
+                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
+            }
+        }
+    }
+
     Thruk::Utils::write_data_file($file, $dashboard, 15);
+    Thruk::Utils::write_data_file($file.'.runtime', $runtime);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     return $dashboard;
@@ -2384,6 +2399,17 @@ sub _load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
     if($public) {
         push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
+    }
+
+    # merge runtime data
+    my $runtime = {};
+    if(-e $file.'.runtime') {
+       $runtime = Thruk::Utils::read_data_file($file.'.runtime');
+    }
+    for my $tab (keys %{$runtime}) {
+        for my $key (keys %{$runtime->{$tab}}) {
+            $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key};
+        }
     }
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
