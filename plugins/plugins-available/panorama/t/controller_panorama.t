@@ -7,7 +7,7 @@ use File::Copy qw/copy/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 385;
+    plan tests => 407;
 }
 
 BEGIN {
@@ -56,14 +56,15 @@ for my $page (@{$pages}) {
 
 #################################################
 # json pages
-my $test_dashboard_nr = 0;
+my $test_dashboard_nr   = 0;
+my $test_dashboard_name = 'Test Dashboard '.time();
 $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=availability', post => {
           'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
           'types' => '{"filter":{},"hosts":{"'.encode_utf8($host).'":["tabpan-tab_4_panlet_1"]},"hostgroups":{},"services":{},"servicegroups":{}}',
           'force' => '1'
     }},
-    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_data', post => { nr => 'new' }, callback => sub {
+    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_data', post => { nr => 'new', title => $test_dashboard_name }, callback => sub {
        if($_[0] =~ m|"newid"\s*:\s*"[^"0-9]*?(\d+)"|) { $test_dashboard_nr = $1; }
        isnt($test_dashboard_nr, 0, 'got a dashboard number: '.$test_dashboard_nr);
        ok(-e $var_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file exists: '.$var_path.'/panorama/'.$test_dashboard_nr.'.tab');
@@ -99,21 +100,35 @@ $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=serveraction', post => { dashboard => '__DASHBOARD__', link => 'server://test' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__' } },
-
-    # finally remove our test dashboard
-    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_update', post => { nr => '__DASHBOARD__', action => 'remove' } },
 ];
 
 for my $url (@{$pages}) {
-    test_json_page($url);
+    _test_json_page($url);
 }
+
+# some more normal pages
+$pages = [
+    '/thruk/cgi-bin/panorama.cgi?map=__DASHBOARD__',
+    '/thruk/cgi-bin/panorama.cgi?map=__DASHBOARDNAME__',
+];
+for my $url (@{$pages}) {
+    if(!ref $url) {
+        $url = { url => $url };
+    }
+    $url = _set_dynamic_url_parts($url);
+    TestUtils::test_page(%{$url});
+}
+
+# finally remove our test dashboard
+_test_json_page({ url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_update', post => { nr => '__DASHBOARD__', action => 'remove' } });
+
 is(scalar keys %{$subs}, 0, 'all tasks tested') or diag("untested tasks:\n".join(",\n", keys %{$subs})."\n");
 ok(!-e $var_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file removed: '.$var_path.'/panorama/'.$test_dashboard_nr.'.tab');
 
 #################################################
 # some more availability
 # single host
-my $res = test_json_page({
+my $res = _test_json_page({
     url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
     post => {
         'avail' => '{"tabpan-tab_4_panlet_1":{"{\\"d\\":\\"60m\\"}":{"opts":{"d":"60m"}}}}',
@@ -124,7 +139,7 @@ my $res = test_json_page({
 isnt($res->{'data'}->{'tabpan-tab_4_panlet_1'}->{'{\\"d\\":\\"60m\\"}'}, -1);
 
 # filter
-$res = test_json_page({
+$res = _test_json_page({
     url  => '/thruk/cgi-bin/panorama.cgi?task=availability',
     post => {
         'avail' => encode_json({
@@ -152,7 +167,7 @@ $res = test_json_page({
 isnt($res->{'data'}->{'tabpan-tab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\":1,\\"incl_svc\\":1}'}, -1);
 
 #################################################
-sub test_json_page {
+sub _test_json_page {
     my($url) = @_;
     if(!ref $url) {
         $url = { url => $url };
@@ -161,14 +176,7 @@ sub test_json_page {
     $url->{'post'}         = {} unless $url->{'post'};
     $url->{'content_type'} = 'application/json; charset=utf-8' unless $url->{'content_type'};
 
-    if($url->{'post'}->{'nr'} && $url->{'post'}->{'nr'} eq '__DASHBOARD__') {
-        $url->{'post'}->{'nr'} = $test_dashboard_nr;
-    }
-    if($url->{'post'}->{'timestamp'} && $url->{'post'}->{'timestamp'} eq '__TIMESTAMP__') {
-        my $test_timestamp = time();
-        copy($var_path.'/panorama/'.$test_dashboard_nr.'.tab', $var_path.'/panorama/'.$test_dashboard_nr.'.tab.'.$test_timestamp);
-        $url->{'post'}->{'timestamp'} = $test_timestamp;
-    }
+    $url = _set_dynamic_url_parts($url);
 
     my $page = TestUtils::test_page(%{$url});
     my $data;
@@ -180,4 +188,22 @@ sub test_json_page {
         ok(scalar keys %{$data} > 0, "json result has content: ".$url->{'url'});
     }
     return($data);
+}
+
+#################################################
+sub _set_dynamic_url_parts {
+    my($test) = @_;
+
+    if($test->{'post'} && $test->{'post'}->{'nr'} && $test->{'post'}->{'nr'} eq '__DASHBOARD__') {
+        $test->{'post'}->{'nr'} = $test_dashboard_nr;
+    }
+    $test->{'url'} =~ s|__DASHBOARD__|$test_dashboard_nr|gmx;
+    $test->{'url'} =~ s|__DASHBOARDNAME__|$test_dashboard_name|gmx;
+    if($test->{'post'} && $test->{'post'}->{'timestamp'} && $test->{'post'}->{'timestamp'} eq '__TIMESTAMP__') {
+        my $test_timestamp = time();
+        copy($var_path.'/panorama/'.$test_dashboard_nr.'.tab', $var_path.'/panorama/'.$test_dashboard_nr.'.tab.'.$test_timestamp);
+        $test->{'post'}->{'timestamp'} = $test_timestamp;
+    }
+
+    return $test;
 }

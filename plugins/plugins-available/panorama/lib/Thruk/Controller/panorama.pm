@@ -2485,7 +2485,7 @@ sub _merge_dashboard_into_hash {
 sub _get_default_tab_xdata {
     my($self, $c) = @_;
     return({
-        title           => 'Dashboard',
+        title           => $c->request->parameters->{'title'} || 'Dashboard',
         refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
         select_backends => 0,
         backends        => [],
