@@ -4,6 +4,7 @@ next:
           - add host and service notes url macros (Andrew Widdersheim)
           - add host and service duration macro (Andrew Widdersheim)
           - disable IE8 compatiblity mode introduced in 56c92b1 (Andrew Widdersheim)
+          - add 'expand_user_macros' option (Andrew Widdersheim)
           - Panorama View:
             - add undo function
               - restore point can be created manually
@@ -13,6 +14,7 @@ next:
             - dashboard are now locked by default
               - popups will only displayed in locked mode for smoother editing
               - links are disabled during editing
+            - dashboards are now locked by default
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons
           - Business Process:
