@@ -213,9 +213,9 @@ sub test_page {
     if($opts->{'post'}) {
         local $Data::Dumper::Indent = 0;
         local $Data::Dumper::Varname = 'POST';
-        ok($opts->{'url'}, $opts->{'url'}.' '.Dumper($opts->{'post'}));
+        ok($opts->{'url'}, 'POST '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
     } else {
-        ok($opts->{'url'}, $opts->{'url'});
+        ok($opts->{'url'}, 'GET '.$opts->{'url'});
     }
 
     my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
