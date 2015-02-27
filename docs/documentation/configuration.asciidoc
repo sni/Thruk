@@ -444,10 +444,10 @@ ex.:
   mode_dir = 0770
 
 === resource_file
-Set a general resource file. Make sure it does not contain any
-passwords or any other data which should not be displayed. Instead of
-using a general 'resource_file' you could define one file per peer in your
-peer config.
+Set a general resource file. If used in combination with 'expand_user_macros'
+be aware that passwords could be exposed if configured to expand the wrong
+macros. Instead of using a general 'resource_file' you could define one file
+per peer in your peer config.
 
 ex.:
 
@@ -762,7 +762,8 @@ ex.:
 Display the full command line for host / service checks .
 Be warned, the command line could contain passwords and other confidential data.
 In order to replace the user macros for commands, you have to set the
-'resource_file' in your peer config or the general 'resource_file' option.
+'resource_file' in your peer config or the general 'resource_file' option and
+set 'expand_user_macros' to a safe set of macros to expand.
 
  * 0 = off, don't show the command line at all
  * 1 = show them for contacts with the role: authorized_for_configuration_information
@@ -920,6 +921,20 @@ variables. Use * as wildcard, ex.: _VAR*
 ex.:
 
   show_custom_vars = _VAR1
+
+
+=== expand_user_macros
+Expand user macros ($USERx$) for host / service commands and custom
+variables. Can be specified more than once to define multiple user
+macros to expand. Specifiying 'ALL' will expand all $USERx$ macros.
+Be warned, some user macros can contain passwords and expanding them
+could expose them to unauthorized users.
+
+ex.:
+
+  expand_user_macros = $USER1$
+  expand_user_macros = $USER20$
+  expand_user_macros = ALL # expands all $USERx$ macros
 
 
 === show_error_reports
@@ -1421,6 +1436,11 @@ Sample menu with two items and a seperator:
         "label":  "refresh",
         "action": "server://refresh/$HOSTNAME$"
       },
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/page_white_key.png",
+        "label":  "example",
+        "action": "server://example/$HOSTNAME$/$SERVICEDESC$"
+      },
       "-",
       {
         "icon":   "/thruk/themes/{{theme}}/images/page_white_text.png",
@@ -1526,7 +1546,7 @@ environment variable.
 ex.:
 
   <action_menu_actions>
-      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$
+      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
       refresh   = /usr/local/bin/refresh.sh otherargs
   </action_menu_actions>
 
