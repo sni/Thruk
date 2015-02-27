@@ -553,6 +553,7 @@
                                             found++;
                                             menu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data[x].num),
                                                       val:     data[x].num,
+                                                      style:  'text-align: right;',
                                                       icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
                                                       handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val); }
                                                     }
