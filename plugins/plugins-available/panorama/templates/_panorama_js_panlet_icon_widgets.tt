@@ -112,6 +112,9 @@
             }
             if(this.labelEl) { this.labelEl.destroy(); }
         },
+        boxready: function( This, width, height, eOpts ) {
+            This.addDDListener(This);
+        },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();
             if(x != undefined) { x = Math.floor(x); } else { x = pos[0]; }
@@ -247,10 +250,11 @@
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
-        var tab = Ext.getCmp(this.panel_id);
-        if(this.locked != val) {
-            this.saveState();
-            TP.redraw_panlet(this, tab);
+        var panel = this;
+        var tab   = Ext.getCmp(panel.panel_id);
+        if(panel.locked != val) {
+            panel.saveState();
+            TP.redraw_panlet(panel, tab);
         }
     },
 
