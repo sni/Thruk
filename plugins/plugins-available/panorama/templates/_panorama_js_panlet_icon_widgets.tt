@@ -25,7 +25,9 @@
         this.xdata.state      = 4;
         this.xdata.general    = {};
         this.xdata.layout     = { rotation:   0 };
-        this.xdata.appearance = { type: 'icon' };
+        if(this.xdata.appearance == undefined) {
+            this.xdata.appearance = { type: 'icon' };
+        }
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -586,6 +588,14 @@
                         });
                         menu.move(menu.items.length, i);
                     }
+                }, {
+                    xtype:  'menuseparator',
+                    hidden: !This.locked      // only show when locked
+                }, {
+                    text:   'Unlock Dashboard',
+                    icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                    handler: function() { Ext.getCmp(This.panel_id).setLock(false); },
+                    hidden: !This.locked      // only show when locked
                 }
                 [% END %]
                 ],
@@ -714,6 +724,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
+        if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
     },
 
     /* rotates this thing */
@@ -784,7 +795,15 @@ Ext.define('TP.IconWidget', {
         var size;
         var scale   = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
         if(scale <= 0) { scale = 1; }
-        if(xdata.nsize && xdata.size) {
+        if(xdata.appearance.type == 'connector') {
+            width  = xdata.appearance.connectorfromx - xdata.appearance.connectortox;
+            height = xdata.appearance.connectorfromy - xdata.appearance.connectortoy;
+            if(width  < 0) { width  = width  * -1; }
+            if(height < 0) { height = height * -1; }
+            width  = width  + 2*(xdata.appearance.connectorarrowlength + xdata.appearance.connectorarrowwidth);
+            height = height + 2*(xdata.appearance.connectorarrowlength + xdata.appearance.connectorarrowwidth);
+        }
+        else if(xdata.nsize && xdata.size) {
             x        = (xdata.size - xdata.nsize[0]) / 2;
             y        = (xdata.size - xdata.nsize[1]) / 2;
             width    = xdata.nsize[0];
@@ -807,7 +826,13 @@ Ext.define('TP.IconWidget', {
         }
         panel.lastScale = scale;
 
-        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
+        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape' || xdata.appearance.type == 'connector') {
+            var drawWidth  = size;
+            var drawHeight = size;
+            if(xdata.appearance.type == 'connector') {
+                drawWidth  = width;
+                drawHeight = height;
+            }
             var items = [];
             if(xdata.appearance.type == 'icon') {
                 if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
@@ -824,8 +849,8 @@ Ext.define('TP.IconWidget', {
             panel.add({
                 viewBox:   false,
                 xtype:    'draw',
-                width:     size,
-                height:    size,
+                width:     drawWidth,
+                height:    drawHeight,
                 items:     items,
                 style:     'vertical-align:inherit;',
                 listeners: {
@@ -1073,6 +1098,7 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+        if(!panel.surface.el) { return };
         var shapeData;
         TP.shapesStore.findBy(function(rec, id) {
             if(rec.data.name == xdata.appearance.shapename) {
@@ -1089,85 +1115,7 @@ Ext.define('TP.IconWidget', {
         }
 
         shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-        var state = xdata.state, fillcolor;
-        if(state == undefined) { state = panel.xdata.state; }
-        if(forceColor != undefined) { fillcolor = forceColor; }
-        else if(state == 0)         { fillcolor = xdata.appearance.shapecolor_ok; }
-        else if(state == 1)         { fillcolor = xdata.appearance.shapecolor_warning; }
-        else if(state == 2)         { fillcolor = xdata.appearance.shapecolor_critical; }
-        else if(state == 3)         { fillcolor = xdata.appearance.shapecolor_unknown; }
-        else if(state == 4)         { fillcolor = "#777777"; }
-        if(!fillcolor) { fillcolor = '#333333'; }
-        if(xdata.appearance.shapegradient != 0) {
-            if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-
-            if(xdata.appearance.shapesource == undefined) { xdata.appearance.shapesource = 'fixed'; }
-            var matches = xdata.appearance.shapesource.match(/^perfdata:(.*)$/);
-            if(xdata.appearance.shapesource != 'fixed' && matches && matches[1]) {
-                /* dynamic gradient */
-                window.perfdata = {};
-                panel.setIconLabel(undefined, true);
-                if(perfdata[matches[1]]) {
-                    var p = perfdata[matches[1]];
-                    var r = TP.getPerfDataMinMax(p, 100);
-                    var color1 = xdata.appearance.shapecolor_ok;
-                    var color2 = xdata.appearance.shapecolor_ok;
-                    var perc  = 100;
-                    /* inside critical range: V c w o w c  */
-                    if(p.crit_min != "" && p.val < p.crit_min) {
-                        color1 = xdata.appearance.shapecolor_critical;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = 100;
-                    }
-                    /* above critical threshold: o w c V */
-                    else if(p.crit_max != "" && p.val > p.crit_max) {
-                        color1 = xdata.appearance.shapecolor_critical;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = 100;
-                    }
-                    /* inside warning range low: c V w o w c */
-                    else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
-                    }
-                    /* inside warning range high: c w o w V c */
-                    else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
-                    }
-                    /* above warning threshold: o w V c */
-                    else if(p.warn_max != "" && p.val > p.warn_max) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
-                    }
-                    /* below warning threshold: o V w c */
-                    else if(p.warn_max != "" && p.val < p.warn_max) {
-                        color1 = xdata.appearance.shapecolor_ok;
-                        color2 = xdata.appearance.shapecolor_warning;
-                        perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
-                    }
-                    var gradient = TP.createGradient(color1, xdata.appearance.shapegradient, color2, perc);
-                    if(panel.surface.existingGradients[gradient.id] == undefined) {
-                        panel.surface.addGradient(gradient);
-                        panel.surface.existingGradients[gradient.id] = true;
-                    }
-                    shapeData += ",fill:'url(#"+gradient.id+")'";
-                }
-            } else {
-                /* fixed gradient */
-                var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
-                if(panel.surface.existingGradients[gradient.id] == undefined) {
-                    panel.surface.addGradient(gradient);
-                    panel.surface.existingGradients[gradient.id] = true;
-                }
-                shapeData += ",fill:'url(#"+gradient.id+")'";
-            }
-        } else {
-            shapeData += ",fill:'"+fillcolor+"'";
-        }
+        shapeData += ",fill:'"+TP.getShapeColor("shape", panel, xdata, forceColor)+"'";
         var spriteData;
         try {
             eval("spriteData = {"+shapeData+"};");
@@ -1191,6 +1139,91 @@ Ext.define('TP.IconWidget', {
             panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
         }
         sprite.show(true);
+    },
+    /* renders connector */
+    connectorRender: function(xdata, forceColor, panel) {
+        if(panel == undefined) { panel = this; }
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type != 'connector') { return }
+
+        if(!panel.surface) {
+            panel.setRenderItem(xdata);
+            return;
+        }
+        if(!panel.surface.el) { return };
+        panel.surface.removeAll();
+
+        /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
+        var distance  = Math.ceil(Math.sqrt(Math.pow(xdata.appearance.connectortox-xdata.appearance.connectorfromx, 2)
+                                          + Math.pow(xdata.appearance.connectortoy - xdata.appearance.connectorfromy, 2)));
+        if(isNaN(distance) || distance == 0) {
+            return;
+        }
+        var start = [ 0, 0 ];
+        var end   = [ distance, 0 ];
+
+        /* get angle between points */
+        var angle = Math.ceil(Math.atan((xdata.appearance.connectortoy-xdata.appearance.connectorfromy)/(xdata.appearance.connectortox-xdata.appearance.connectorfromx))*180/Math.PI);
+
+        var points = [[start[0],start[1]]];
+        /* top half of left arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+            points.push(
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-xdata.appearance.connectorwidth/2-xdata.appearance.connectorarrowwidth)],
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-xdata.appearance.connectorwidth/2)]
+            );
+        } else {
+            points.push(
+                [start[0], (start[1]-xdata.appearance.connectorwidth/2)]
+            );
+        }
+
+        /* right arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "right") {
+            points.push(
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-xdata.appearance.connectorwidth/2)],
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]-xdata.appearance.connectorwidth/2-xdata.appearance.connectorarrowwidth)],
+                [end[0], end[1]],
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]+xdata.appearance.connectorwidth/2+xdata.appearance.connectorarrowwidth)],
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]+xdata.appearance.connectorwidth/2)]
+            );
+        } else {
+            points.push(
+                [end[0], (end[1]-xdata.appearance.connectorwidth/2)],
+                [end[0], (end[1]+xdata.appearance.connectorwidth/2)]
+            );
+        }
+
+        /* bottom half of left arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+            points.push(
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+xdata.appearance.connectorwidth/2)],
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+xdata.appearance.connectorwidth/2+xdata.appearance.connectorarrowwidth)]
+            );
+        } else {
+            points.push(
+                [start[0], (start[1]+xdata.appearance.connectorwidth/2)]
+            );
+        }
+
+        sprite = panel.surface.add({
+            type: "path",
+            path: TP.pointsToPath(points),
+            fill: TP.getShapeColor("connector", panel, xdata, forceColor)
+        });
+        sprite.setAttributes({rotate:{degrees: angle, x:0, y:0}}, true);
+        var box = sprite.getBBox();
+        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(xdata.appearance.connectorarrowtype == "none" ? xdata.appearance.connectorarrowwidth : 0)}}, true);
+        var newHeight = Math.ceil(Ext.Array.max([xdata.appearance.connectorarrowwidth+xdata.appearance.connectorwidth, box.height]));
+        panel.setSize(Math.ceil(box.width), newHeight);
+        panel.surface.setSize(Math.ceil(box.width), newHeight);
+        panel.surface.el.dom.parentNode.style.width  = Math.ceil(box.width)+"px";
+        panel.surface.el.dom.parentNode.style.height = newHeight+"px";
+        sprite.show(true);
+        /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
+        xdata.layout.x = Math.ceil(xdata.appearance.connectorfromx-box.path[0][1]);
+        xdata.layout.y = Math.ceil(xdata.appearance.connectorfromy-box.path[0][2]);
+        panel.setPosition(xdata.layout.x, xdata.layout.y);
     },
     iconSetSourceFromState: function(xdata) {
         var panel = this;
@@ -2416,19 +2449,38 @@ function availability(panel, opts) {
 
 TP.iconMoveHandler = function(icon, x, y) {
     window.clearTimeout(TP.timeouts['timeout_icon_move']);
-    /* update settings window */
-    if(TP.iconSettingsWindow) {
-        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
-    }
-    /* update label */
-    icon.setIconLabel();
 
     var deltaX = x - icon.xdata.layout.x;
     var deltaY = y - icon.xdata.layout.y;
 
+    /* update settings window */
+    if(TP.iconSettingsWindow) {
+        /* layout tab */
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+        /* appearance tab */
+        TP.skipRender = true;
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues({
+            connectorfromx: icon.xdata.appearance.connectorfromx + deltaX,
+            connectorfromy: icon.xdata.appearance.connectorfromy + deltaY,
+            connectortox:   icon.xdata.appearance.connectortox   + deltaX,
+            connectortoy:   icon.xdata.appearance.connectortoy   + deltaY
+        });
+        TP.skipRender = false;
+    }
+    /* update label */
+    icon.setIconLabel();
+
+    /* moving with closed settings window */
     if(icon.stateful) {
         icon.xdata.layout.x = Math.floor(x);
         icon.xdata.layout.y = Math.floor(y);
+
+        if(icon.xdata.appearance.type == "connector") {
+            icon.xdata.appearance.connectorfromx += deltaX;
+            icon.xdata.appearance.connectorfromy += deltaY;
+            icon.xdata.appearance.connectortox   += deltaX;
+            icon.xdata.appearance.connectortoy   += deltaY;
+        }
 
         /* move aligned items too */
         if(TP.moveIcons) {
@@ -2438,6 +2490,12 @@ TP.iconMoveHandler = function(icon, x, y) {
                     item.xdata.layout.x += deltaX;
                     item.xdata.layout.y += deltaY;
                     item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                    if(item.xdata.appearance.type == "connector") {
+                        item.xdata.appearance.connectorfromx += deltaX;
+                        item.xdata.appearance.connectorfromy += deltaY;
+                        item.xdata.appearance.connectortox   += deltaX;
+                        item.xdata.appearance.connectortoy   += deltaY;
+                    }
                     item.setIconLabel();
                     item.resumeEvents();
                     item.saveState();
@@ -2445,4 +2503,99 @@ TP.iconMoveHandler = function(icon, x, y) {
             });
         }
     }
+}
+
+/* convert list of points to svg path */
+TP.pointsToPath = function(points) {
+    var l = points.length;
+    if(l == 0) {return("");}
+    var path = "M";
+    for(var x = 0; x < l; x++) {
+        var p = points[x];
+        path += " "+p[0]+","+p[1];
+    }
+    path += " Z";
+    return(path);
+}
+
+/* create gradient and return color by state */
+TP.getShapeColor = function(type, panel, xdata, forceColor) {
+    var state = xdata.state, fillcolor;
+    if(state == undefined) { state = panel.xdata.state; }
+    if(forceColor != undefined) { fillcolor = forceColor; }
+    else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
+    else if(state == 1)         { fillcolor = xdata.appearance[type+"color_warning"]; }
+    else if(state == 2)         { fillcolor = xdata.appearance[type+"color_critical"]; }
+    else if(state == 3)         { fillcolor = xdata.appearance[type+"color_unknown"]; }
+    else if(state == 4)         { fillcolor = "#777777"; }
+    if(!fillcolor) { fillcolor = '#333333'; }
+    if(xdata.appearance[type+"gradient"] != 0) {
+        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+
+        if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
+        var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
+        if(xdata.appearance[type+"source"] != 'fixed' && matches && matches[1]) {
+            /* dynamic gradient */
+            window.perfdata = {};
+            panel.setIconLabel(undefined, true);
+            if(perfdata[matches[1]]) {
+                var p = perfdata[matches[1]];
+                var r = TP.getPerfDataMinMax(p, 100);
+                var color1 = xdata.appearance[type+"color_ok"];
+                var color2 = xdata.appearance[type+"color_ok"];
+                var perc  = 100;
+                /* inside critical range: V c w o w c  */
+                if(p.crit_min != "" && p.val < p.crit_min) {
+                    color1 = xdata.appearance[type+"color_critical"];
+                    color2 = xdata.appearance[type+"color_critical"];
+                    perc   = 100;
+                }
+                /* above critical threshold: o w c V */
+                else if(p.crit_max != "" && p.val > p.crit_max) {
+                    color1 = xdata.appearance[type+"color_critical"];
+                    color2 = xdata.appearance[type+"color_critical"];
+                    perc   = 100;
+                }
+                /* inside warning range low: c V w o w c */
+                else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
+                    color1 = xdata.appearance[type+"color_warning"];
+                    color2 = xdata.appearance[type+"color_critical"];
+                    perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
+                }
+                /* inside warning range high: c w o w V c */
+                else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
+                    color1 = xdata.appearance[type+"color_warning"];
+                    color2 = xdata.appearance[type+"color_critical"];
+                    perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
+                }
+                /* above warning threshold: o w V c */
+                else if(p.warn_max != "" && p.val > p.warn_max) {
+                    color1 = xdata.appearance[type+"color_warning"];
+                    color2 = xdata.appearance[type+"color_critical"];
+                    perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
+                }
+                /* below warning threshold: o V w c */
+                else if(p.warn_max != "" && p.val < p.warn_max) {
+                    color1 = xdata.appearance[type+"color_ok"];
+                    color2 = xdata.appearance[type+"color_warning"];
+                    perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
+                }
+                var gradient = TP.createGradient(color1, xdata.appearance[type+"gradient"], color2, perc);
+                if(panel.surface.existingGradients[gradient.id] == undefined) {
+                    panel.surface.addGradient(gradient);
+                    panel.surface.existingGradients[gradient.id] = true;
+                }
+                return("url(#"+gradient.id+")");
+            }
+        } else {
+            /* fixed gradient */
+            var gradient = TP.createGradient(fillcolor, xdata.appearance[type+"gradient"]);
+            if(panel.surface.existingGradients[gradient.id] == undefined) {
+                panel.surface.addGradient(gradient);
+                panel.surface.existingGradients[gradient.id] = true;
+            }
+            return("url(#"+gradient.id+")");
+        }
+    }
+    return(fillcolor);
 }

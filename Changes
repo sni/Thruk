@@ -6,6 +6,7 @@ next:
           - Panorama View:
             - add undo function
             - add fullscreen mode
+            - add new connector item
             - dashboard are now locked by default
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons

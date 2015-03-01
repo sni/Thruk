@@ -653,11 +653,11 @@ TP.lassoMarkIcons = function(x, y) {
     TP.moveIcons = [];
     for(var nr=0; nr<panels.length; nr++) {
         var panel = panels[nr];
-        if(panel.xdata.layout) {
+        if(panel.xdata.layout) { // only icons
             var center = panel.getPosition();
             var size   = panel.getSize();
-            center[0]  = center[0] + size.width;
-            center[1]  = center[1] + size.height;
+            center[0]  = center[0] + size.width/2;
+            center[1]  = center[1] + size.height/2;
             if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
                 panel.el.dom.style.outline = "2px dotted orange";
                 TP.moveIcons.push(panel);

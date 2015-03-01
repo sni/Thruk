@@ -762,6 +762,10 @@ plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/computer.png
 plugins/plugins-available/panorama/root/images/computer_link.png
+plugins/plugins-available/panorama/root/images/connector_type_both.png
+plugins/plugins-available/panorama/root/images/connector_type_left.png
+plugins/plugins-available/panorama/root/images/connector_type_none.png
+plugins/plugins-available/panorama/root/images/connector_type_right.png
 plugins/plugins-available/panorama/root/images/cup_key.png
 plugins/plugins-available/panorama/root/images/database_go.png
 plugins/plugins-available/panorama/root/images/delete.png
@@ -779,6 +783,7 @@ plugins/plugins-available/panorama/root/images/image_edit.png
 plugins/plugins-available/panorama/root/images/information.png
 plugins/plugins-available/panorama/root/images/lightning_go.png
 plugins/plugins-available/panorama/root/images/link.png
+plugins/plugins-available/panorama/root/images/link_go.png
 plugins/plugins-available/panorama/root/images/loading-icon.gif
 plugins/plugins-available/panorama/root/images/lock.png
 plugins/plugins-available/panorama/root/images/lock_open.png

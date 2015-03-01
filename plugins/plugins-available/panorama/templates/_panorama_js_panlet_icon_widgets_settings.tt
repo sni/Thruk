@@ -47,6 +47,7 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     TP.resetMoveIcons();
+    TP.skipRender = false;
 
     var defaultSpeedoSource = 'problems';
     var perfDataUpdate = function() {
@@ -89,6 +90,8 @@ TP.iconShowEditDialog = function(panel) {
             data.push(['Perf. Data: '+key+' ('+options+')', 'perfdata:'+key]);
         }
         var cbo = Ext.getCmp('shapesourceStore');
+        TP.updateArrayStoreKV(cbo.store, data);
+        var cbo = Ext.getCmp('connectorsourceStore');
         TP.updateArrayStoreKV(cbo.store, data);
     }
 
@@ -172,6 +175,11 @@ TP.iconShowEditDialog = function(panel) {
         Ext.getCmp('shapetogglelocked').toggle(xdata.appearance.shapelocked);
         Ext.getCmp('pieheightfield').setDisabled(xdata.appearance.pielocked);
         Ext.getCmp('pietogglelocked').toggle(xdata.appearance.pielocked);
+        if(xdata.appearance.type == "connector") {
+            Ext.getCmp('rotationfield').setVisible(false);
+        } else {
+            Ext.getCmp('rotationfield').setVisible(true);
+        }
         renderUpdate = originalRenderUpdate;
     };
 
@@ -224,6 +232,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:        'numberunit',
                     allowDecimals: false,
                     name:         'rotation',
+                    id:           'rotationfield',
                     unit:         '°',
                     minValue:     -360,
                     maxValue:      360,
@@ -262,6 +271,7 @@ TP.iconShowEditDialog = function(panel) {
     TP.shapesStore.load();
     var renderUpdate   = Ext.emptyFn;
     var renderUpdateDo = function(forceColor, forceRenderItem) {
+        if(TP.skipRender) { return; }
         var xdata = TP.get_icon_form_xdata(settingsWindow);
         if(panel.iconType == 'image') { panel.setRenderItem(xdata); }
         if(xdata.appearance      == undefined) { return; }
@@ -279,6 +289,9 @@ TP.iconShowEditDialog = function(panel) {
         }
         if(xdata.appearance.type == 'speedometer') {
             panel.speedoRender(xdata, forceColor);
+        }
+        if(xdata.appearance.type == 'connector') {
+            panel.connectorRender(xdata, forceColor);
         }
         labelUpdate();
         updateDisabledFields(xdata);
@@ -305,7 +318,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'combobox',
                     fieldLabel: 'Type',
                     name:       'type',
-                    store:      [['icon','Icon'], ['shape', 'Shape'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer']],
+                    store:      [['icon','Icon'], ['shape', 'Shape'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['connector', 'Connector']],
                     id:         'appearance_types',
                     editable:    false,
                     listeners: {
@@ -387,6 +400,34 @@ TP.iconShowEditDialog = function(panel) {
                                 }
                                 Ext.getCmp('appearanceForm').getForm().setValues(values);
                             }
+
+                            if(newValue == 'connector') {
+                                // fill in defaults
+                                var values = Ext.getCmp('appearanceForm').getForm().getValues();
+                                if(!values['connectorwidth']) {
+                                    var pos = panel.getPosition();
+                                    values['connectorfromx']             = pos[0]-100;
+                                    values['connectorfromy']             = pos[1];
+                                    values['connectortox']               = pos[0]+100;
+                                    values['connectortoy']               = pos[1];
+                                    values['connectorwidth']             = 3;
+                                    values['connectorarrowtype']         = 'both';
+                                    values['connectorarrowwidth']        = 10;
+                                    values['connectorarrowlength']       = 20;
+                                    values['connectorarrowinset']        = 2;
+                                    values['connectorcolor_ok']          = '#199C0F';
+                                    values['connectorcolor_warning']     = '#CDCD0A';
+                                    values['connectorcolor_critical']    = '#CA1414';
+                                    values['connectorcolor_unknown']     = '#CC740F';
+                                    values['connectorgradient']          =  0;
+                                    values['connectorsource']            = 'fixed';
+                                }
+                                var originalRenderUpdate = renderUpdate;
+                                renderUpdate = Ext.emptyFn;
+                                Ext.getCmp('appearanceForm').getForm().setValues(values);
+                                renderUpdate = originalRenderUpdate;
+                            }
+
                             renderUpdate();
                         }
                     }
@@ -421,6 +462,7 @@ TP.iconShowEditDialog = function(panel) {
                     padding:    '10 0 0 0',
                     border:      0
                 },
+
 
                 /* Shapes */
                 {
@@ -558,6 +600,223 @@ TP.iconShowEditDialog = function(panel) {
                     padding:    '10 0 0 0',
                     border:      0
                 },
+
+
+                /* Connector */
+                {
+                    fieldLabel: 'From',
+                    xtype:      'fieldcontainer',
+                    name:       'connectorfrom',
+                    cls:        'connector',
+                    layout:     { type: 'hbox', align: 'stretch' },
+                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
+                    items:        [{
+                        xtype:        'label',
+                        text:         'x',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorfromx',
+                        width:         70,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorfromx
+                    }, {
+                        xtype:        'label',
+                        text:         'y',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorfromy',
+                        width:         70,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorfromy
+                    }]
+                },
+                {
+                    fieldLabel: 'To',
+                    xtype:      'fieldcontainer',
+                    name:       'connectorto',
+                    cls:        'connector',
+                    layout:     { type: 'hbox', align: 'stretch' },
+                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
+                    items:        [{
+                        xtype:        'label',
+                        text:         'x',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectortox',
+                        width:         70,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectortox
+                    }, {
+                        xtype:        'label',
+                        text:         'y',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectortoy',
+                        width:         70,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectortoy
+                    }]
+                },
+                {
+                    fieldLabel: 'Size',
+                    xtype:      'fieldcontainer',
+                    name:       'connectorsize',
+                    cls:        'connector',
+                    layout:     { type: 'hbox', align: 'stretch' },
+                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
+                    items:        [{
+                        xtype:        'label',
+                        text:         'Width',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorwidth',
+                        width:         60,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorwidth
+                    },{
+                        xtype:        'label',
+                        text:         'Endpoints',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'combobox',
+                        name:         'connectorarrowtype',
+                        value:         panel.xdata.appearance.connectorarrowtype,
+                        store:         ['both', 'left', 'right', 'none'],
+                        listConfig : {
+                            getInnerTpl: function(displayField) {
+                                return '<div class="x-combo-list-item"><img src="[% url_prefix %]plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
+                            }
+                        }
+                    }]
+                },
+                {
+                    fieldLabel: 'Arrowhead',
+                    xtype:      'fieldcontainer',
+                    name:       'connectorarrow',
+                    cls:        'connector',
+                    layout:     { type: 'hbox', align: 'stretch' },
+                    defaults:   { listeners: { change: function() { renderUpdate(); } } },
+                    items:        [{
+                        xtype:        'label',
+                        text:         'Width',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorarrowwidth',
+                        width:         60,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorarrowwidth
+                    }, {
+                        xtype:        'label',
+                        text:         'Length',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorarrowlength',
+                        width:         60,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorarrowlength
+                    }, {
+                        xtype:        'label',
+                        text:         'Inset',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'numberunit',
+                        allowDecimals: false,
+                        name:         'connectorarrowinset',
+                        width:         60,
+                        unit:         'px',
+                        value:         panel.xdata.appearance.connectorarrowinset
+                    }]
+                }, {
+                    fieldLabel: 'Colors',
+                    cls:        'connector',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'table', columns: 4, tableAttrs: { style: { width: '100%' } } },
+                    defaults:    {
+                        listeners: { change:    function()      { renderUpdateDo() }     },
+                                     mouseover: function(color) { renderUpdateDo(color); },
+                                     mouseout:  function(color) { renderUpdateDo();      }
+                    },
+                    items: [
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'connectorcolor_ok',
+                            value:           panel.xdata.appearance.connectorcolor_ok,
+                            width:           80,
+                            tdAttrs:       { style: 'padding-right: 10px;'},
+                            colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
+                        },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'connectorcolor_warning',
+                            value:           panel.xdata.appearance.connectorcolor_warning,
+                            width:           80,
+                            colorGradient: { start: '#E1E174', stop: '#FFFF00' }
+                        },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'connectorcolor_critical',
+                            value:           panel.xdata.appearance.connectorcolor_critical,
+                            width:           80,
+                            colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
+                        },
+                        { xtype: 'label', text: 'Unknown: ', hidden: panel.iconType == 'host' ? true : false },
+                        {
+                            xtype:          'colorcbo',
+                            name:           'connectorcolor_unknown',
+                            value:           panel.xdata.appearance.connectorcolor_unknown,
+                            width:           80,
+                            colorGradient: { start: '#DAB891', stop: '#FF8900' },
+                            hidden:          panel.iconType == 'host' ? true : false
+                    }]
+                }, {
+                    fieldLabel: 'Gradient',
+                    cls:        'connector',
+                    xtype:      'fieldcontainer',
+                    layout:      { type: 'hbox', align: 'stretch' },
+                    items: [{
+                        xtype:        'numberfield',
+                        allowDecimals: true,
+                        name:         'connectorgradient',
+                        maxValue:      1,
+                        minValue:     -1,
+                        step:          0.05,
+                        value:         panel.xdata.appearance.connectorgradient,
+                        width:         55,
+                        listeners:   { change: function() { renderUpdate(); } }
+                    },
+                    { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
+                    {
+                        name:         'connectorsource',
+                        xtype:        'combobox',
+                        id:           'connectorsourceStore',
+                        displayField: 'name',
+                        valueField:   'value',
+                        queryMode:    'local',
+                        store:       { fields: ['name', 'value'], data: [] },
+                        editable:      false,
+                        value:         panel.xdata.appearance.connectorsource,
+                        listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
+                        flex:          1
+                    }]
+                },
+
 
                 /* Pie Chart */
                 {
@@ -1258,6 +1517,7 @@ TP.iconShowEditDialog = function(panel) {
     TP.iconSettingsWindow.panel = panel;
 
     renderUpdate = function(forceColor, forceRenderItem) {
+        if(TP.skipRender) { return; }
         window.clearTimeout(TP.timeouts['settingsRenderUpdate']);
         TP.timeouts['settingsRenderUpdate'] = window.setTimeout(function() {
             renderUpdateDo(forceColor, forceRenderItem);
