@@ -437,6 +437,10 @@
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
         var tab = this;
+        var mask;
+        if(tab.locked != val) {
+            tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
+        }
         tab.xdata.locked = val;
         tab.locked       = val;
 
