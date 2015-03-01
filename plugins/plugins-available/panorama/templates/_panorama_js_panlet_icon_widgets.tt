@@ -338,7 +338,7 @@
             var panel = this;
             this.labelEl = Ext.create('Ext.Component', {
                 'html':     ' ',
-                draggable:  true,
+                draggable:  !panel.locked,
                 autoRender: true,
                 autoShow:   true,
                 shadow:     false,
