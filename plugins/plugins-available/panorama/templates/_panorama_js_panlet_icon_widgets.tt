@@ -602,6 +602,17 @@
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
                 TP.suppressIconTip = true;
                 TP.isShift = is_shift_pressed(e);
+                /* add ourself to movelist */
+                if(TP.moveIcons) {
+                    var found = false;
+                    Ext.Array.each(TP.moveIcons, function(item) {
+                        if(item.id == panel.id) { found = true; return(false); }
+                    });
+                    if(!found) {
+                        panel.el.dom.style.outline = "2px dotted orange";
+                        TP.moveIcons.push(panel);
+                    }
+                }
                 if(!panel.ddShadow) {
                     var size = panel.getSize();
                     panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
