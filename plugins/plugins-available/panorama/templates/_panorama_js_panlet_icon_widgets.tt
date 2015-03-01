@@ -104,13 +104,21 @@
         },
         destroy: function( This, eOpts ) {
             TP.log('['+this.id+'] remove icon');
-            if(!this.redrawOnly) {
+            if(this.redrawOnly) {
+                if(This.labelEl) {
+                    /* remove later to avoid flickering during redraw */
+                    if(TP.removeLabel == undefined) {
+                        TP.removeLabel = {};
+                    }
+                    TP.removeLabel[This.id] = This.labelEl;
+                }
+            } else {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
                 cp.clear(this.id);
+                if(This.labelEl) { This.labelEl.destroy(); }
             }
-            if(this.labelEl) { this.labelEl.destroy(); }
         },
         boxready: function( This, width, height, eOpts ) {
             This.addDDListener(This);
@@ -261,6 +269,14 @@
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
+        if(TP.removeLabel && TP.removeLabel[this.id]) {
+            /* remove later to avoid flickering during redraw */
+            window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
+            TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
+                TP.removeLabel[panel.id].destroy();
+                delete TP.removeLabel[panel.id];
+            }, 1000);
+        }
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
         if(!this.el || !this.el.dom)  { return; }

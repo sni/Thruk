@@ -294,11 +294,12 @@ var TP = {
     },
 
     redraw_panlet: function(panel, tab) {
-        panel.redrawOnly = true;
-        panel.destroy();
-        TP.timeouts['timeout_' + panel.id + '_show_settings'] = window.setTimeout(function() {
+        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_redraw']);
+        TP.timeouts['timeout_' + panel.id + '_redraw'] = window.setTimeout(function() {
+            panel.redrawOnly = true;
+            panel.destroy();
             panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id));
         }, 50);
     },
 
