@@ -9,7 +9,7 @@ $Data::Dumper::Sortkeys = 1;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 30;
+    plan tests => 37;
 }
 
 BEGIN {
