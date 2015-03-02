@@ -600,7 +600,7 @@ sub expand_command {
 
     my $rc;
     eval {
-        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args });
+        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args, filter_user => 1});
     };
 
     # does it still contain macros?
@@ -870,7 +870,7 @@ sub _get_macros {
 
     my $host        = $args->{'host'};
     my $service     = $args->{'service'};
-    my $filter_user = (defined $args->{'filter_user'}) ? $args->{'filter_user'} : 1;
+    my $filter_user = (defined $args->{'filter_user'}) ? $args->{'filter_user'} : 0;
 
     # arguments
     my $x = 1;
@@ -2314,7 +2314,7 @@ sub _set_user_macros {
     my $c      = $Thruk::Backend::Manager::c;
 
     my $search = $args->{'search'} || 'expand_user_macros';
-    my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 1;
+    my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 0;
     my $vars   = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
     my $res;
@@ -2331,22 +2331,24 @@ sub _set_user_macros {
         $res = Thruk::Utils::read_resource_file($c->config->{'resource_file'});
     }
 
-    for my $test (@$vars) {
-        if($test eq 'ALL') {
-            $filter = 0;
-            last;
-        }
-    }
-
-    if(defined $res and (!$filter or ($filter and scalar @$vars))) {
+    if(defined $res) {
         for my $key (keys %{$res}) {
-            if($filter) {
+            if($filter and scalar @{$vars}) {
                 my $found = 0;
+                (my $k = $key) =~ s/\$//gmx;
 
-                for my $test (@$vars) {
-                    if($key eq $test) {
+                for my $test (@{$vars}) {
+                    if($k eq $test) {
                         $found = 1;
                         last;
+                    } else {
+                        my $v = "".$test;
+                        next if CORE::index($v, '*') == -1;
+                        $v =~ s/\*/.*/gmx;
+                        if($k =~ m/^$v$/mx) {
+                            $found = 1;
+                            last;
+                        }
                     }
                 }
 
