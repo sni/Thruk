@@ -1993,7 +1993,7 @@ sub serveraction {
         return(1, 'no such object') unless $obj;
     }
 
-    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0});
+    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef});
     $macros->{'$REMOTE_USER$'}    = $c->stash->{'remote_user'};
     $macros->{'$DASHBOARD_ID$'}   = $c->{'request'}->{'parameters'}->{'dashboard'} if $c->{'request'}->{'parameters'}->{'dashboard'};
     $macros->{'$DASHBOARD_ICON$'} = $c->{'request'}->{'parameters'}->{'icon'}      if $c->{'request'}->{'parameters'}->{'icon'};

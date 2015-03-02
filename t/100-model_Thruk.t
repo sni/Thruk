@@ -136,6 +136,48 @@ is($cmd->{'line_expanded'}, '/tmp/check_test ', 'expanded command: '.$cmd->{'lin
 is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["NONE"]
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '$PLUGINDIR$/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"]
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"]
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p test3', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
+
+################################################################################
 my $res1 = Thruk::Utils::read_resource_file('t/data/resource.cfg');
 my $res2 = Thruk::Utils::read_resource_file('t/data/resource2.cfg');
 is_deeply($res1, $res2, 'parsing resource.cfg');

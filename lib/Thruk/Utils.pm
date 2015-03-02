@@ -1012,15 +1012,17 @@ sub set_custom_vars {
                 if (defined $host and defined $service) {
                         #($cust_value, $rc)...
                         ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host,
-                            service => $service
+                            string      => $cust_value,
+                            host        => $host,
+                            service     => $service,
+                            filter_user => 1
                         });
                 } elsif (defined $host) {
                         #($cust_value, $rc)...
                         ($cust_value, undef) = $c->{'db'}->_replace_macros({
-                            string  => $cust_value,
-                            host    => $host
+                            string      => $cust_value,
+                            host        => $host,
+                            filter_user => 1
                         });
                 }
 
