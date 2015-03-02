@@ -138,7 +138,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["NONE"]
+$b->{'config'}->{'expand_user_macros'} = ["NONE"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -152,7 +152,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"]
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -166,7 +166,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
-$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"]
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"];
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
