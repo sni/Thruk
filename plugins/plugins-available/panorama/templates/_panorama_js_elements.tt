@@ -592,26 +592,23 @@ Ext.define('TP.dragEl', {
     autoShow:   true,
     shadow:     false,
     floating:   true,
-    width:      25,
-    height:     25,
+    width:      24,
+    height:     24,
     renderTo:  "bodyview",
     cls:       "clickable",
-    initComponent: function() {
-        var This = this;
-        This.x   = This.xdata.appearance[This.keyX] -15;
-        This.y   = This.xdata.appearance[This.keyY];
-    },
+    x:          0,
+    y:          0,
     listeners: {
         move: function(This, x, y, eOpts) {
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
-            This.xdata.appearance[This.keyX] = x;
-            This.xdata.appearance[This.keyY] = y;
+            This.xdata.appearance[This.keyX] = x-This.offsetX;
+            This.xdata.appearance[This.keyY] = y-This.offsetY;
             TP.reduceDelayEvents(This, function() {
                 if(TP.iconSettingsWindow) {
                     var values = {};
-                    values[This.keyX] = x;
-                    values[This.keyY] = y;
+                    values[This.keyX] = x-This.offsetX;
+                    values[This.keyY] = y-This.offsetY;
                     Ext.getCmp('appearanceForm').getForm().setValues(values);
                 }
                 This.panel.updateRender(This.xdata);

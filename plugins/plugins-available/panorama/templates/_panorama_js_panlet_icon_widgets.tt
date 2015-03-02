@@ -724,6 +724,13 @@ Ext.define('TP.IconWidget', {
     /* update shapes and stuff */
     updateRender: function(xdata) {
         var panel = this;
+        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_updaterender']);
+        TP.timeouts['timeout_' + panel.id + '_updaterender'] = window.setTimeout(function() {
+            panel.updateRenderDo(xdata);
+        }, 100);
+    },
+    updateRenderDo: function(xdata) {
+        var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
@@ -886,13 +893,17 @@ Ext.define('TP.IconWidget', {
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectorfromx",
-                    keyY:       "connectorfromy"
+                    keyY:       "connectorfromy",
+                    offsetX:    -12,
+                    offsetY:    -12,
                 });
                 panel.dragEl2 = Ext.create('TP.dragEl', {
                     panel:      panel,
                     xdata:      xdata,
                     keyX:       "connectortox",
-                    keyY:       "connectortoy"
+                    keyY:       "connectortoy",
+                    offsetX:    -12,
+                    offsetY:    -12,
                 });
             }
         }
@@ -1244,8 +1255,8 @@ Ext.define('TP.IconWidget', {
         panel.surface.el.dom.parentNode.style.height = newHeight+"px";
         sprite.show(true);
         /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
-        xdata.layout.x = Math.ceil(xdata.appearance.connectorfromx-box.path[0][1]);
-        xdata.layout.y = Math.ceil(xdata.appearance.connectorfromy-box.path[0][2]);
+        xdata.layout.x = Math.ceil(xdata.appearance.connectorfromx-box.path[0][1]+box.x);
+        xdata.layout.y = Math.ceil(xdata.appearance.connectorfromy-box.path[0][2]+box.y);
         panel.suspendEvents();
         panel.setPosition(xdata.layout.x, xdata.layout.y);
         panel.resumeEvents();
@@ -1254,7 +1265,7 @@ Ext.define('TP.IconWidget', {
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
             if(dragEl != undefined) {
                 dragEl.suspendEvents();
-                dragEl.setPosition(xdata.appearance[dragEl.keyX], xdata.appearance[dragEl.keyY]);
+                dragEl.setPosition(xdata.appearance[dragEl.keyX]+dragEl.offsetX, xdata.appearance[dragEl.keyY]+dragEl.offsetY);
                 dragEl.resumeEvents();
                 try {
                     dragEl.toFront();
