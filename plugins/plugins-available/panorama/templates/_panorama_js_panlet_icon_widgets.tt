@@ -337,6 +337,7 @@
                 panel.updateRender(panel.xdata);
             }
         }
+        /* no label at all */
         if(!cfg.labeltext) {
             if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
             return;
@@ -480,6 +481,8 @@
                     This.el.dom.style.outline = "";
                     TP.moveIcons = TP.removeFromList(TP.moveIcons, This);
                 } else {
+                    if(This.dragEl1) { TP.moveIcons = TP.removeFromList(TP.moveIcons, This.dragEl1); This.dragEl1.el.dom.style.outline = ""; }
+                    if(This.dragEl2) { TP.moveIcons = TP.removeFromList(TP.moveIcons, This.dragEl2); This.dragEl2.el.dom.style.outline = ""; }
                     This.el.dom.style.outline = "2px dotted orange";
                     TP.moveIcons.push(This);
                     TP.createIconMoveKeyNav();
