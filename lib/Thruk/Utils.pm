@@ -1947,7 +1947,6 @@ sub write_data_file {
         my $new_md5 = md5_hex($d);
         if($new_md5 ne $old_md5) {
             my $now         = time();
-            my @stat        = stat($filename);
             my @backups     = sort glob($filename.'.*');
             @backups        = grep(!/\.runtime$/mx, @backups);
             my $backups_num = scalar @backups;

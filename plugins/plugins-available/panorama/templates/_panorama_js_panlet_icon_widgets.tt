@@ -895,7 +895,7 @@ Ext.define('TP.IconWidget', {
                     keyX:       "connectorfromx",
                     keyY:       "connectorfromy",
                     offsetX:    -12,
-                    offsetY:    -12,
+                    offsetY:    -12
                 });
                 panel.dragEl2 = Ext.create('TP.dragEl', {
                     panel:      panel,
@@ -903,7 +903,7 @@ Ext.define('TP.IconWidget', {
                     keyX:       "connectortox",
                     keyY:       "connectortoy",
                     offsetX:    -12,
-                    offsetY:    -12,
+                    offsetY:    -12
                 });
             }
         }

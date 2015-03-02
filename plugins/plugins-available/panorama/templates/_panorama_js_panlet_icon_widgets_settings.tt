@@ -1532,10 +1532,8 @@ TP.iconShowEditDialog = function(panel) {
 
     /* highlight current icon */
     if(panel.xdata.appearance.type == "connector") {
-        panel.dragEl1.el.dom.style.border       = "2px dotted orange";
-        panel.dragEl1.el.dom.style.borderRadius = "9px";
-        panel.dragEl2.el.dom.style.border       = "2px dotted orange";
-        panel.dragEl2.el.dom.style.borderRadius = "9px";
+        panel.dragEl1.el.dom.style.border = "2px dotted orange";
+        panel.dragEl2.el.dom.style.border = "2px dotted orange";
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
