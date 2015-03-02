@@ -9,6 +9,7 @@ next:
             - add new connector item
             - dashboard are now locked by default
               - popups will only displayed in locked mode for smoother editing
+              - links are disabled during editing
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons
           - Business Process:

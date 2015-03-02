@@ -2285,7 +2285,7 @@ TP.iconClickHandler = function(id) {
 /* actually open the clicked link */
 TP.iconClickHandlerDo = function(id) {
     var panel = Ext.getCmp(id);
-    if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
+    if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link || !panel.locked) {
         return;
     }
     var link    = panel.xdata.link.link;
