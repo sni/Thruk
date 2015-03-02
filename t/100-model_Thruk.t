@@ -124,8 +124,9 @@ is($cmd->{'note'}, '', 'note should be empty');
 ################################################################################
 $cmd = $b->expand_command(
     'host'    => {
-        'state'         => 0,
-        'check_command' => 'check_test!',
+        'state'             => 0,
+        'last_state_change' => time(),
+        'check_command'     => 'check_test!',
     },
     'command' => {
         'name' => 'check_test',
