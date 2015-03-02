@@ -1942,18 +1942,33 @@ sub write_data_file {
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
 
-    if($number_of_backups && -e $filename) {
+    if($number_of_backups) {
         my $old_md5 = md5_hex(read_file($filename));
         my $new_md5 = md5_hex($d);
         if($new_md5 ne $old_md5) {
-            # remove oldest backup
-            unlink($filename.'.'.$number_of_backups);
-            my @backups = sort glob($filename.'.*');
-            while(scalar @backups > $number_of_backups) {
-                unlink(shift(@backups));
+            my $now         = time();
+            my @stat        = stat($filename);
+            my @backups     = sort glob($filename.'.*');
+            @backups        = grep(!/\.runtime$/mx, @backups);
+            my $backups_num = scalar @backups;
+
+            copy($tmpfile, $filename.'.'.$now);
+
+            # backup only once per minute
+            my $ts;
+            if($backups_num > 1 && $backups[$backups_num-2] =~ m/\.(\d+)$/mx) {
+                $ts = $1;
+                if($ts && $ts > $now-60) {
+                    unlink($backups[$backups_num-1]);
+                    $backups_num--;
+                }
             }
-            my @stat = stat($filename);
-            move($filename, $filename.'.'.$stat[9]);
+
+            # cleanup old backups
+            while($backups_num > $number_of_backups) {
+                unlink(shift(@backups));
+                $backups_num--;
+            }
         }
     }
 
