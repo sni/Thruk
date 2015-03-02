@@ -727,6 +727,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
+        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
     },
 
     /* rotates this thing */
