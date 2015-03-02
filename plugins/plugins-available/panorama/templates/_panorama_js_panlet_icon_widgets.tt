@@ -92,7 +92,7 @@
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
             This.applyScale(This.xdata.layout.scale, This.xdata);
-            if(!This.locked) {
+            if(!This.locked && This.xdata.appearance.type != "connector") {
                 This.el.on('mouseover', function(e,t,a) {
                     if(!This.el.dom.style.outline.match("orange")) {
                         This.el.dom.style.outline = "1px dashed grey";
@@ -196,31 +196,6 @@
         /* recalculate state */
         if(TP.initialized) {
             this.refreshHandler();
-        }
-
-        /* add link */
-        if(xdata.link && xdata.link.link) {
-            this.addCls('clickable');
-            this.removeCls('notclickable');
-            if(this.el) { this.el.dom.href=xdata.link.link; }
-            this.autoEl.href=xdata.link.link;
-            if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href=xdata.link.link;
-                this.labelEl.removeCls('notclickable');
-                this.labelEl.addCls('clickable');
-            }
-        } else {
-            if(this.el) {
-                this.removeCls('clickable');
-                this.addCls('notclickable');
-            }
-            if(this.el) { this.el.dom.href=''; }
-            this.autoEl.href='';
-            if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href='';
-                this.labelEl.removeCls('clickable');
-                this.labelEl.addCls('notclickable');
-            }
         }
     },
     /* change size and position animated */
@@ -814,6 +789,31 @@ Ext.define('TP.IconWidget', {
 
         if(panel.dragEl1) { panel.dragEl1.destroy(); }
         if(panel.dragEl2) { panel.dragEl2.destroy(); }
+
+        /* add link (link will only work on labels for connectors) */
+        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
+            panel.addCls('clickable');
+            panel.removeCls('notclickable');
+            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            panel.autoEl.href=xdata.link.link;
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href=xdata.link.link;
+                panel.labelEl.removeCls('notclickable');
+                panel.labelEl.addCls('clickable');
+            }
+        } else {
+            if(panel.el) {
+                panel.removeCls('clickable');
+                panel.addCls('notclickable');
+            }
+            if(panel.el) { panel.el.dom.href=''; }
+            panel.autoEl.href='';
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href='';
+                panel.labelEl.removeCls('clickable');
+                panel.labelEl.addCls('notclickable');
+            }
+        }
 
         var x       = 0;
         var y       = 0;
