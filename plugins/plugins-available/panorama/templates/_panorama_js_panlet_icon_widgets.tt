@@ -469,13 +469,13 @@
 
         el.on("click", function(e) {
             [% UNLESS readonly %]
-            if(e.ctrlKey) {
+            if(e.ctrlKey || is_shift_pressed(e)) {
                 var tab = Ext.getCmp(This.panel_id);
                 if(This.locked) { return; }
                 if(TP.moveIcons == undefined) {
                     TP.moveIcons = [];
                 }
-                if(This.el.dom.style.outline) {
+                if(This.el.dom.style.outline.match("orange")) {
                     /* already selected -> unselect */
                     This.el.dom.style.outline = "";
                     TP.moveIcons = TP.removeFromList(TP.moveIcons, This);
