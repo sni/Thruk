@@ -10,7 +10,7 @@
     [% END %]
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
-    locked:      true, // lock it by default
+    locked:      [% IF c.request.parameters.exists('unlocked') %]false[% ELSE %]true[% END %], // lock it by default
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
