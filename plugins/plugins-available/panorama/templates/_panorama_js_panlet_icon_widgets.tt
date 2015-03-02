@@ -121,6 +121,8 @@
                 cp.clear(this.id);
                 if(This.labelEl) { This.labelEl.destroy(); }
             }
+            if(This.dragEl1) { This.dragEl1.destroy(); }
+            if(This.dragEl2) { This.dragEl2.destroy(); }
         },
         boxready: function( This, width, height, eOpts ) {
             This.addDDListener(This);
@@ -687,6 +689,9 @@ Ext.define('TP.IconWidget', {
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         this.mixins.smallWidget.applyXdata.call(this, xdata);
+        if(this.xdata.appearance.type == "connector") {
+            this.draggable = false;
+        }
         if(xdata.nsize && xdata.size) {
             var size = Math.ceil(Math.sqrt(Math.pow(xdata.nsize[0], 2) + Math.pow(xdata.nsize[1], 2)));
             this.setSize(size, size);
@@ -788,6 +793,9 @@ Ext.define('TP.IconWidget', {
         panel.icon     = undefined;
         panel.chart    = undefined;
 
+        if(panel.dragEl1) { panel.dragEl1.destroy(); }
+        if(panel.dragEl2) { panel.dragEl2.destroy(); }
+
         var x       = 0;
         var y       = 0;
         var width   = 16;
@@ -872,6 +880,21 @@ Ext.define('TP.IconWidget', {
                     }
                 }
             });
+
+            if(xdata.appearance.type == 'connector' && !panel.locked) {
+                panel.dragEl1 = Ext.create('TP.dragEl', {
+                    panel:      panel,
+                    xdata:      xdata,
+                    keyX:       "connectorfromx",
+                    keyY:       "connectorfromy"
+                });
+                panel.dragEl2 = Ext.create('TP.dragEl', {
+                    panel:      panel,
+                    xdata:      xdata,
+                    keyX:       "connectortox",
+                    keyY:       "connectortoy"
+                });
+            }
         }
         else if(xdata.appearance.type == 'pie') {
             var pieStore = Ext.create('Ext.data.Store', {
@@ -1223,7 +1246,21 @@ Ext.define('TP.IconWidget', {
         /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
         xdata.layout.x = Math.ceil(xdata.appearance.connectorfromx-box.path[0][1]);
         xdata.layout.y = Math.ceil(xdata.appearance.connectorfromy-box.path[0][2]);
+        panel.suspendEvents();
         panel.setPosition(xdata.layout.x, xdata.layout.y);
+        panel.resumeEvents();
+
+        /* adjust drag elements position */
+        Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
+            if(dragEl != undefined) {
+                dragEl.suspendEvents();
+                dragEl.setPosition(xdata.appearance[dragEl.keyX], xdata.appearance[dragEl.keyY]);
+                dragEl.resumeEvents();
+                try {
+                    dragEl.toFront();
+                } catch(e) {}
+            }
+        });
     },
     iconSetSourceFromState: function(xdata) {
         var panel = this;
@@ -2465,6 +2502,8 @@ TP.iconMoveHandler = function(icon, x, y) {
             connectortox:   icon.xdata.appearance.connectortox   + deltaX,
             connectortoy:   icon.xdata.appearance.connectortoy   + deltaY
         });
+        if(icon.dragEl1) { icon.dragEl1.suspendEvents(); icon.dragEl1.setPosition(icon.xdata.appearance.connectorfromx + deltaX, icon.xdata.appearance.connectorfromy + deltaY); icon.dragEl1.resumeEvents(); }
+        if(icon.dragEl2) { icon.dragEl2.suspendEvents(); icon.dragEl2.setPosition(icon.xdata.appearance.connectortox   + deltaX, icon.xdata.appearance.connectortoy   + deltaY); icon.dragEl2.resumeEvents(); }
         TP.skipRender = false;
     }
     /* update label */

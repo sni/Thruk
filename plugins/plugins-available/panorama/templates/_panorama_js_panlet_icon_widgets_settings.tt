@@ -690,6 +690,7 @@ TP.iconShowEditDialog = function(panel) {
                     }, {
                         xtype:        'combobox',
                         name:         'connectorarrowtype',
+                        width:         130,
                         value:         panel.xdata.appearance.connectorarrowtype,
                         store:         ['both', 'left', 'right', 'none'],
                         listConfig : {
@@ -1527,7 +1528,14 @@ TP.iconShowEditDialog = function(panel) {
     settingsWindow.renderUpdate = renderUpdate;
 
     /* highlight current icon */
-    panel.el.dom.style.outline = "2px dotted orange";
+    if(panel.xdata.appearance.type == "connector") {
+        panel.dragEl1.el.dom.style.border       = "2px dotted orange";
+        panel.dragEl1.el.dom.style.borderRadius = "9px";
+        panel.dragEl2.el.dom.style.border       = "2px dotted orange";
+        panel.dragEl2.el.dom.style.borderRadius = "9px";
+    } else {
+        panel.el.dom.style.outline = "2px dotted orange";
+    }
 
     window.setTimeout(function() {
         TP.iconSettingsWindow.toFront();

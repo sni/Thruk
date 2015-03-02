@@ -580,3 +580,42 @@ Ext.define('TP.speedochart', {
         colorSet:  [ '#00FF00' ]
     }]
 });
+
+Ext.define('TP.dragEl', {
+    extend: 'Ext.Component',
+
+    alias:  'widget.tp_drager',
+
+    'html':     ' ',
+    draggable:  true,
+    autoRender: true,
+    autoShow:   true,
+    shadow:     false,
+    floating:   true,
+    width:      25,
+    height:     25,
+    renderTo:  "bodyview",
+    cls:       "clickable",
+    initComponent: function() {
+        var This = this;
+        This.x   = This.xdata.appearance[This.keyX] -15;
+        This.y   = This.xdata.appearance[This.keyY];
+    },
+    listeners: {
+        move: function(This, x, y, eOpts) {
+            if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
+            if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
+            This.xdata.appearance[This.keyX] = x;
+            This.xdata.appearance[This.keyY] = y;
+            TP.reduceDelayEvents(This, function() {
+                if(TP.iconSettingsWindow) {
+                    var values = {};
+                    values[This.keyX] = x;
+                    values[This.keyY] = y;
+                    Ext.getCmp('appearanceForm').getForm().setValues(values);
+                }
+                This.panel.updateRender(This.xdata);
+            }, 200, 'timeout_panel_move_delay');
+        }
+    }
+});

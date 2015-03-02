@@ -303,15 +303,16 @@
                         // may fail when not yet rendered
                         try {
                             panel.toFront();
+                            if(panel.labelEl) { panel.labelEl.toFront(); }
+                            if(panel.dragEl1) { panel.dragEl1.toFront(); }
+                            if(panel.dragEl2) { panel.dragEl2.toFront(); }
                         }
                         catch(e) {}
                     });
                 }
             });
         }
-        if(TP.iconSettingsWindow && TP.iconSettingsWindow.toFront) {
-            TP.iconSettingsWindow.toFront();
-        }
+        TP.checkModalWindows();
     },
 
     hidePanlets: function() {
