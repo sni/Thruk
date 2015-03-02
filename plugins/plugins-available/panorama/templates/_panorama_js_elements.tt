@@ -599,6 +599,20 @@ Ext.define('TP.dragEl', {
     x:          0,
     y:          0,
     listeners: {
+        afterrender: function(This, eOpts) {
+            if(!This.panel.locked) {
+                This.el.on('mouseover', function(e,t,a) {
+                    if(!This.el.dom.style.outline.match("orange")) {
+                        This.el.dom.style.outline = "1px dashed grey";
+                    }
+                });
+                This.el.on('mouseout', function(e,t,a) {
+                    if(This.el.dom.style.outline.match("grey")) {
+                        This.el.dom.style.outline = "";
+                    }
+                });
+            }
+        },
         move: function(This, x, y, eOpts) {
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }

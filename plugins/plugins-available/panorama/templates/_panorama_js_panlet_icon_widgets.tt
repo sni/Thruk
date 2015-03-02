@@ -92,6 +92,18 @@
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
             This.applyScale(This.xdata.layout.scale, This.xdata);
+            if(!This.locked) {
+                This.el.on('mouseover', function(e,t,a) {
+                    if(!This.el.dom.style.outline.match("orange")) {
+                        This.el.dom.style.outline = "1px dashed grey";
+                    }
+                });
+                This.el.on('mouseout', function(e,t,a) {
+                    if(This.el.dom.style.outline.match("grey")) {
+                        This.el.dom.style.outline = "";
+                    }
+                });
+            }
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
@@ -1445,6 +1457,8 @@ Ext.onReady(function() {
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         var img = Ext.getCmp(el.id);
         TP.iconTip.panel   = img;
+        /* hide when in edit mode */
+        if(!img.locked) { TP.suppressIconTip = true; return; }
         TP.iconTip.last_id = el.id;
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());

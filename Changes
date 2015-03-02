@@ -4,10 +4,11 @@ next:
           - add host and service notes url macros (Andrew Widdersheim)
           - add host and service duration macro (Andrew Widdersheim)
           - Panorama View:
-            - add undo function
+            - add undo function, saves dashboard once a minute on changes
             - add fullscreen mode
             - add new connector item
             - dashboard are now locked by default
+              - popups will only displayed in locked mode for smoother editing
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons
           - Business Process:
