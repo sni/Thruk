@@ -649,19 +649,31 @@ TP.lassoMarkIcons = function(x, y) {
     var tab    = tabpan.getActiveTab();
     var panels = TP.getAllPanel(tab);
     TP.moveIcons = [];
+    var elements = [];
     for(var nr=0; nr<panels.length; nr++) {
         var panel = panels[nr];
         if(panel.xdata.layout) { // only icons
-            var center = panel.getPosition();
-            var size   = panel.getSize();
-            center[0]  = center[0] + size.width/2;
-            center[1]  = center[1] + size.height/2;
-            if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
-                panel.el.dom.style.outline = "2px dotted orange";
-                TP.moveIcons.push(panel);
+            if(panel.xdata.appearance.type == "connector") {
+                elements.push(panel.dragEl1);
+                elements.push(panel.dragEl2);
             } else {
-                panel.el.dom.style.outline = "";
+                elements.push(panel);
             }
+        }
+    }
+
+    /* now check those elements */
+    for(var nr=0; nr<elements.length; nr++) {
+        var panel = elements[nr];
+        var center = panel.getPosition();
+        var size   = panel.getSize();
+        center[0]  = center[0] + size.width/2;
+        center[1]  = center[1] + size.height/2;
+        if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
+            panel.el.dom.style.outline = "2px dotted orange";
+            TP.moveIcons.push(panel);
+        } else {
+            panel.el.dom.style.outline = "";
         }
     }
 }

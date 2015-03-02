@@ -602,17 +602,30 @@ Ext.define('TP.dragEl', {
         move: function(This, x, y, eOpts) {
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
-            This.xdata.appearance[This.keyX] = x-This.offsetX;
-            This.xdata.appearance[This.keyY] = y-This.offsetY;
             TP.reduceDelayEvents(This, function() {
+                var origX = This.xdata.appearance[This.keyX];
+                var origY = This.xdata.appearance[This.keyY];
+                This.xdata.appearance[This.keyX] = x-This.offsetX;
+                This.xdata.appearance[This.keyY] = y-This.offsetY;
                 if(TP.iconSettingsWindow) {
                     var values = {};
                     values[This.keyX] = x-This.offsetX;
                     values[This.keyY] = y-This.offsetY;
                     Ext.getCmp('appearanceForm').getForm().setValues(values);
+                } else {
+                    /* move aligned items too */
+                    var deltaX = This.xdata.appearance[This.keyX] - origX;
+                    var deltaY = This.xdata.appearance[This.keyY] - origY;
+                    TP.moveAlignedIcons(deltaX, deltaY, This.id);
                 }
                 This.panel.updateRender(This.xdata);
-            }, 200, 'timeout_panel_move_delay');
+            }, 100, 'timeout_panel_move_delay');
         }
+    },
+    moveDragEl: function(deltaX, deltaY) {
+        var This = this;
+        This.xdata.appearance[This.keyX] += deltaX;
+        This.xdata.appearance[This.keyY] += deltaY;
+        This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
     }
 });

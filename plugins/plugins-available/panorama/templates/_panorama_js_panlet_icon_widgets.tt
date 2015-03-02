@@ -2518,41 +2518,52 @@ TP.iconMoveHandler = function(icon, x, y) {
         TP.skipRender = false;
     }
     /* update label */
-    icon.setIconLabel();
+    if(icon.setIconLabel) {
+        icon.setIconLabel();
+    }
 
     /* moving with closed settings window */
     if(icon.stateful) {
-        icon.xdata.layout.x = Math.floor(x);
-        icon.xdata.layout.y = Math.floor(y);
+        if(icon.setIconLabel) {
+            icon.xdata.layout.x = Math.floor(x);
+            icon.xdata.layout.y = Math.floor(y);
 
-        if(icon.xdata.appearance.type == "connector") {
-            icon.xdata.appearance.connectorfromx += deltaX;
-            icon.xdata.appearance.connectorfromy += deltaY;
-            icon.xdata.appearance.connectortox   += deltaX;
-            icon.xdata.appearance.connectortoy   += deltaY;
+            if(icon.xdata.appearance.type == "connector") {
+                icon.xdata.appearance.connectorfromx += deltaX;
+                icon.xdata.appearance.connectorfromy += deltaY;
+                icon.xdata.appearance.connectortox   += deltaX;
+                icon.xdata.appearance.connectortoy   += deltaY;
+            }
         }
 
         /* move aligned items too */
-        if(TP.moveIcons) {
-            Ext.Array.each(TP.moveIcons, function(item) {
-                if(item.id != icon.id) {
-                    item.suspendEvents();
-                    item.xdata.layout.x += deltaX;
-                    item.xdata.layout.y += deltaY;
-                    item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
-                    if(item.xdata.appearance.type == "connector") {
-                        item.xdata.appearance.connectorfromx += deltaX;
-                        item.xdata.appearance.connectorfromy += deltaY;
-                        item.xdata.appearance.connectortox   += deltaX;
-                        item.xdata.appearance.connectortoy   += deltaY;
-                    }
-                    item.setIconLabel();
-                    item.resumeEvents();
-                    item.saveState();
-                }
-            });
-        }
+        TP.moveAlignedIcons(deltaX, deltaY, icon.id);
     }
+}
+
+TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {
+    if(!TP.moveIcons) { return; }
+    Ext.Array.each(TP.moveIcons, function(item) {
+        if(item.id != skip_id) {
+            if(item.setIconLabel) {
+                item.suspendEvents();
+                item.xdata.layout.x += deltaX;
+                item.xdata.layout.y += deltaY;
+                item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                if(item.xdata.appearance.type == "connector") {
+                    item.xdata.appearance.connectorfromx += deltaX;
+                    item.xdata.appearance.connectorfromy += deltaY;
+                    item.xdata.appearance.connectortox   += deltaX;
+                    item.xdata.appearance.connectortoy   += deltaY;
+                }
+                item.setIconLabel();
+                item.resumeEvents();
+                item.saveState();
+            } else {
+                item.moveDragEl(deltaX, deltaY);
+            }
+        }
+    });
 }
 
 /* convert list of points to svg path */
