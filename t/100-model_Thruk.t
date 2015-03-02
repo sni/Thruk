@@ -148,7 +148,6 @@ $cmd = $b->expand_command(
 );
 is($cmd->{'line_expanded'}, '$PLUGINDIR$/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
-is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
@@ -162,7 +161,6 @@ $cmd = $b->expand_command(
 );
 is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
-is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
 # set expand user macros
