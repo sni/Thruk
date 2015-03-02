@@ -600,7 +600,7 @@ sub expand_command {
 
     my $rc;
     eval {
-        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args });
+        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args, filter_user => 1});
     };
 
     # does it still contain macros?
@@ -868,8 +868,9 @@ sub _get_macros {
     my $args    = shift;
     my $macros  = shift || {};
 
-    my $host    = $args->{'host'};
-    my $service = $args->{'service'};
+    my $host        = $args->{'host'};
+    my $service     = $args->{'service'};
+    my $filter_user = (defined $args->{'filter_user'}) ? $args->{'filter_user'} : 0;
 
     # arguments
     my $x = 1;
@@ -880,7 +881,7 @@ sub _get_macros {
 
     # user macros...
     unless(defined $args->{'skip_user'}) {
-        $self->_set_user_macros($host->{'peer_key'}, $macros);
+        $self->_set_user_macros({peer_key => $host->{'peer_key'}, filter => $filter_user}, $macros);
     }
 
     # host macros
@@ -944,10 +945,11 @@ returns a hash of macros
 
 $args should be:
 {
-    host      => host object (or service object)
-    service   => service object
-    skip_user => 0/1   # skips user macros
-    args      => list of arguments
+    host        => host object (or service object)
+    service     => service object
+    skip_user   => 0/1   # skips user macros
+    filter_user => 0/1   # filters user macros
+    args        => list of arguments
 }
 
 =cut
@@ -1048,8 +1050,8 @@ sub _set_host_macros {
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
     my $peer = defined $host->{'peer_key'} ? $self->get_peer_by_key($host->{'peer_key'}) : undef;
     if($peer) {
-        $macros->{'$HOSTBACKENDNAME$'}    = (defined $peer->{'name'})             ? $peer->{'name'}                 : '';
-        $macros->{'$HOSTBACKENDADDRESS$'} = (defined $peer->{'addr'})             ? $peer->{'addr'}                 : '';
+        $macros->{'$HOSTBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
+        $macros->{'$HOSTBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
     }
 
     my $prefix = (defined $host->{'host_custom_variable_names'}) ? 'host_' : '';
@@ -2290,23 +2292,37 @@ sub _limit {
 
 =head2 _set_user_macros
 
-  _set_user_macros($peer_key)
+  _set_user_macros($args, $macros)
 
-sets the USER1-256 macros from a resource file. Shinken supports all kind of
+Sets the USER1-256 macros from a resource file. Shinken supports all kind of
 macros in resource file, so just replace everything from the resource file.
+
+$args should be:
+{
+    peer_key      => peer key for the host
+    filter        => 0/1   # only add allowed macros
+    file          => location of resource file
+    args          => list of arguments
+}
 
 =cut
 
 sub _set_user_macros {
-    my($self, $peer_key, $macros, $file) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $self   = shift;
+    my $args   = shift;
+    my $macros = shift || {};
+    my $c      = $Thruk::Backend::Manager::c;
+
+    my $search = $args->{'search'} || 'expand_user_macros';
+    my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 0;
+    my $vars   = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
     my $res;
-    if(defined $file) {
-        $res = Thruk::Utils::read_resource_file($file);
+    if(defined $args->{'file'}) {
+        $res = Thruk::Utils::read_resource_file($args->{'file'});
     }
-    if(!defined $res and defined $peer_key) {
-        my $backend = $self->get_peer_by_key($peer_key);
+    if(!defined $res and defined $args->{'peer_key'}) {
+        my $backend = $self->get_peer_by_key($args->{'peer_key'});
         if(defined $backend->{'resource_file'}) {
             $res = Thruk::Utils::read_resource_file($backend->{'resource_file'});
         }
@@ -2317,6 +2333,30 @@ sub _set_user_macros {
 
     if(defined $res) {
         for my $key (keys %{$res}) {
+            if($filter and scalar @{$vars}) {
+                my $found = 0;
+                (my $k = $key) =~ s/\$//gmx;
+
+                for my $test (@{$vars}) {
+                    if($k eq $test) {
+                        $found = 1;
+                        last;
+                    } else {
+                        my $v = "".$test;
+                        next if CORE::index($v, '*') == -1;
+                        $v =~ s/\*/.*/gmx;
+                        if($k =~ m/^$v$/mx) {
+                            $found = 1;
+                            last;
+                        }
+                    }
+                }
+
+                if(!$found) {
+                    next;
+                }
+            }
+
             $macros->{$key} = $res->{$key};
         }
     }
