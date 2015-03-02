@@ -1679,7 +1679,9 @@ var TP = {
         var newModelWindows = [];
         Ext.Array.each(TP.modalWindows, function(win) {
             if(win && win.el) {
-                win.toFront();
+                try {
+                    win.toFront();
+                } catch(e) {}
                 newModelWindows.push(win);
             }
         });

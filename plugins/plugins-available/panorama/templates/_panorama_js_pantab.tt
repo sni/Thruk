@@ -301,13 +301,10 @@
                 if(panels != undefined) {
                     Ext.Array.each(panels, function(panel, id2) {
                         // may fail when not yet rendered
-                        try {
-                            panel.toFront();
-                            if(panel.labelEl) { panel.labelEl.toFront(); }
-                            if(panel.dragEl1) { panel.dragEl1.toFront(); }
-                            if(panel.dragEl2) { panel.dragEl2.toFront(); }
-                        }
-                        catch(e) {}
+                        try { panel.toFront(); } catch(e) {}
+                        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
+                        if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(e) {} }
+                        if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(e) {} }
                     });
                 }
             });
