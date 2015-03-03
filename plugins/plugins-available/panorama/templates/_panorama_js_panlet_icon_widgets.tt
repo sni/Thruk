@@ -614,6 +614,8 @@
                         panel.el.dom.style.outline = "2px dotted orange";
                         TP.moveIcons.push(panel);
                     }
+                    if(panel.dragEl1) { TP.moveIcons = TP.removeFromList(TP.moveIcons, panel.dragEl1); panel.dragEl1.el.dom.style.outline = ""; }
+                    if(panel.dragEl2) { TP.moveIcons = TP.removeFromList(TP.moveIcons, panel.dragEl2); panel.dragEl2.el.dom.style.outline = ""; }
                 }
                 if(!panel.ddShadow) {
                     var size = panel.getSize();
