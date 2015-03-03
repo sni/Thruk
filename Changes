@@ -4,7 +4,9 @@ next:
           - add host and service notes url macros (Andrew Widdersheim)
           - add host and service duration macro (Andrew Widdersheim)
           - Panorama View:
-            - add undo function, saves dashboard once a minute on changes
+            - add undo function
+              - restore point can be created manually
+              - autosave creates restore point every 10minutes and when unlocking a dashboard
             - add fullscreen mode
             - add new connector item
             - dashboard are now locked by default

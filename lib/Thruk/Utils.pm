@@ -1915,14 +1915,14 @@ sub read_data_file {
 
 =head2 write_data_file
 
-  write_data_file($filename, $data, [$number_of_backups])
+  write_data_file($filename, $data)
 
 write data to datafile
 
 =cut
 
 sub write_data_file {
-    my($filename, $data, $number_of_backups) = @_;
+    my($filename, $data) = @_;
 
     # make data::dumper save utf-8 directly
     local $Data::Dumper::Useqq = 1;
@@ -1941,37 +1941,48 @@ sub write_data_file {
     print $fh $d;
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
+    move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
 
-    if($number_of_backups) {
-        my $old_md5 = -e $filename ? md5_hex(read_file($filename)) : '';
-        my $new_md5 = md5_hex($d);
-        if($new_md5 ne $old_md5) {
-            my $now         = time();
-            my @backups     = sort glob($filename.'.*');
-            @backups        = grep(!/\.runtime$/mx, @backups);
-            my $backups_num = scalar @backups;
+    return;
+}
 
-            copy($tmpfile, $filename.'.'.$now);
+##############################################
 
-            # backup only once per minute
-            my $ts;
-            if($backups_num > 1 && $backups[$backups_num-2] =~ m/\.(\d+)$/mx) {
-                $ts = $1;
-                if($ts && $ts > $now-60) {
-                    unlink($backups[$backups_num-1]);
-                    $backups_num--;
-                }
-            }
+=head2 backup_data_file
 
-            # cleanup old backups
-            while($backups_num > $number_of_backups) {
-                unlink(shift(@backups));
-                $backups_num--;
-            }
+  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+
+write data to datafile
+
+=cut
+
+sub backup_data_file {
+    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+
+    my @backups     = sort glob($filename.'.*.'.$mode);
+    @backups        = grep(!/\.runtime$/mx, @backups);
+    my $num         = scalar @backups;
+    my $last_backup = $backups[$num-1];
+    my $now         = time();
+
+    if($save_interval && $last_backup && $last_backup =~ m/\.(\d+)\.\w$/mx) {
+        my $ts = $1;
+        if($save_interval > $now - $ts) {
+            return;
         }
     }
 
-    move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
+    my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
+    my $new_md5 = md5_hex(read_file($filename));
+    if($force || $new_md5 ne $old_md5) {
+        copy($filename, $filename.'.'.$now.'.'.$mode);
+
+        # cleanup old backups
+        while($num > $max_backups) {
+            unlink(shift(@backups));
+            $num--;
+        }
+    }
 
     return;
 }

@@ -532,53 +532,33 @@
             }, {
                 text:   'Restore',
                 icon:   '[% url_prefix %]plugins/panorama/images/book_previous.png',
-                hideOnClick: false,
+                id:     'manualmenu',
                 menu: [{
+                    text:    'Create Restorepoint',
+                    icon:    '[% url_prefix %]plugins/panorama/images/disk.png',
+                    handler: function() { TP.createRestorePoint(tab, "m") }
+                }, '-', {
+                    text:       'Autosave',
+                    hideOnClick: false,
+                    id:         'autosavemenu',
+                    icon:       '[% url_prefix %]plugins/panorama/images/shield.png',
+                    menu:        [],
+                    listeners: {
+                        afterrender: function(item, eOpts) {
+                            TP.setRestorePointsMenuItems(tab);
+                        }
+                    }
+                }, {
                     text:    'Loading...',
                     icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
                     disabled: true,
-                    listeners: {
-                        afterrender: function(item, eOpts) {
-                            Ext.Ajax.request({
-                                url:      'panorama.cgi?task=dashboard_restore_list&nr='+tab.id,
-                                method:  'POST',
-                                callback: function(options, success, response) {
-                                    if(!success) {
-                                        if(response.status == 0) {
-                                            TP.Msg.msg("fail_message~~fetching dashboard restore points failed");
-                                        } else {
-                                            TP.Msg.msg("fail_message~~fetching dashboard restore points failed: "+response.status+' - '+response.statusText);
-                                        }
-                                    } else {
-                                        var data = TP.getResponse(undefined, response);
-                                        data = data.data;
-                                        menu = item.findParentByType('menu');
-                                        menu.removeAll();
-                                        var found = 0;
-                                        for(var x=0; x<data.length; x++) {
-                                            found++;
-                                            menu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data[x].num),
-                                                      val:     data[x].num,
-                                                      style:  'text-align: right;',
-                                                      icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
-                                                      handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val); }
-                                                    }
-                                            );
-                                        }
-                                        if(found == 0) {
-                                            menu.add({text: 'none', disabled: true});
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
+                    id:      'restorepointsloading'
                 }],
                 hidden:  tab.xdata.locked       // only show when not locked
             }, {
                 text:   'Unlock Dashboard',
                 icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
-                handler: function() { tab.setLock(false); },
+                handler: function() { TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                 hidden:  !tab.xdata.locked      // only show when locked
             }, {
                 text:   'Lock Dashboard',
@@ -683,21 +663,93 @@ TP.lassoMarkIcons = function(x, y) {
 }
 
 /* restore dashboard to given timestamp */
-TP.restoreDashboard = function(tab, timestamp) {
+TP.restoreDashboard = function(tab, timestamp, mode) {
+    Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
+        if (button === 'yes') {
+            Ext.Ajax.request({
+                url:      'panorama.cgi?task=dashboard_restore&nr='+tab+'&timestamp='+timestamp+"&mode="+mode,
+                method:  'POST',
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~restoring dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~restoring dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        TP.getResponse(undefined, response);
+                        TP.Msg.msg("success_message~~restoring dashboard successful to "+strftime("%a %b %e %Y, %H:%M:%S", timestamp));
+                    }
+                }
+            });
+        }
+    });
+}
+
+
+/* create restore point for dashboard */
+TP.createRestorePoint = function(tab, mode) {
     Ext.Ajax.request({
-        url:      'panorama.cgi?task=dashboard_restore&nr='+tab+'&timestamp='+timestamp,
+        url:      'panorama.cgi?task=dashboard_restore_point&nr='+tab.id+"&mode="+mode,
         method:  'POST',
         callback: function(options, success, response) {
             if(!success) {
                 if(response.status == 0) {
-                    TP.Msg.msg("fail_message~~restoring dashboard");
+                    TP.Msg.msg("fail_message~~creating restore point failed");
                 } else {
-                    TP.Msg.msg("fail_message~~restoring dashboard failed: "+response.status+' - '+response.statusText);
+                    TP.Msg.msg("fail_message~~creating restore point failed: "+response.status+' - '+response.statusText);
                 }
             } else {
                 TP.getResponse(undefined, response);
-                TP.Msg.msg("success_message~~restoring dashboard successful to "+strftime("%a %b %e %Y, %H:%M:%S", timestamp));
+                if(mode == "m") {
+                    TP.Msg.msg("success_message~~created restore point successfully");
+                }
             }
         }
     });
+}
+
+TP.setRestorePointsMenuItems = function(tab) {
+    Ext.Ajax.request({
+        url:      'panorama.cgi?task=dashboard_restore_list&nr='+tab.id,
+        method:  'POST',
+        callback: function(options, success, response) {
+            if(!success) {
+                if(response.status == 0) {
+                    TP.Msg.msg("fail_message~~fetching dashboard restore points failed");
+                } else {
+                    TP.Msg.msg("fail_message~~fetching dashboard restore points failed: "+response.status+' - '+response.statusText);
+                }
+            } else {
+                var data = TP.getResponse(undefined, response);
+                data = data.data;
+                var autosavemenu  = Ext.getCmp("autosavemenu").menu;
+                var manualmenu    = Ext.getCmp("manualmenu").menu;
+                Ext.getCmp("restorepointsloading").destroy();
+                var found = 0;
+                for(var x=0; x<data.a.length; x++) {
+                    found++;
+                    autosavemenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.a[x].num),
+                              val:     data.a[x].num,
+                              style:  'text-align: right;',
+                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "a"); }
+                            }
+                    );
+                }
+                if(found == 0) {
+                    autosavemenu.add({text: 'none', disabled: true});
+                }
+                for(var x=0; x<data.m.length; x++) {
+                    manualmenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.m[x].num),
+                              val:     data.m[x].num,
+                              style:  'text-align: right;',
+                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "m"); }
+                            }
+                    );
+                }
+            }
+        }
+    })
 }

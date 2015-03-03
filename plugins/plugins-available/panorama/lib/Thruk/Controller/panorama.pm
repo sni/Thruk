@@ -121,6 +121,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'dashboard_restore_list') {
             return($self->_task_dashboard_restore_list($c));
         }
+        elsif($task eq 'dashboard_restore_point') {
+            return($self->_task_dashboard_restore_point($c));
+        }
         elsif($task eq 'dashboard_restore') {
             return($self->_task_dashboard_restore($c));
         }
@@ -2028,17 +2031,44 @@ sub _task_dashboard_restore_list {
     my $dashboard  = $self->_load_dashboard($c, $nr);
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
-        my $list = [];
+        my $list = {
+            a => [],
+            m => [],
+        };
         $nr       =~ s/^tabpan-tab_//gmx;
         my @files = reverse sort glob($self->{'var'}.'/'.$nr.'.tab.*');
         for my $file (@files) {
             next if $file =~ m/\.runtime$/mx;
-            $file =~ m/\.(\d+)$/mx;
+            $file =~ m/\.(\d+)\.(\w)$/mx;
             my $date = $1;
-            push(@{$list}, { num => $date })
+            my $mode = $2;
+            push(@{$list->{$mode}}, { num => $date })
         }
         $c->stash->{'json'} = { data => $list };
     }
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore_point {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+    my $mode       = $c->request->parameters->{'mode'} || 'm';
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        $nr =~ s/^tabpan-tab_//gmx;
+        my $file = $self->{'var'}.'/'.$nr.'.tab';
+        if(!$mode || $mode eq 'm') {
+            Thruk::Utils::backup_data_file($file, 'm', 5, 0, 1);
+        } else {
+            Thruk::Utils::backup_data_file($file, 'a', 5, 600, 1);
+        }
+    }
+
+    $c->stash->{'json'} = { msg => "ok" };
     $self->_add_misc_details($c);
     return $c->forward('Thruk::View::JSON');
 }
@@ -2048,15 +2078,16 @@ sub _task_dashboard_restore {
     my($self, $c) = @_;
 
     my $nr         = $c->request->parameters->{'nr'};
+    my $mode       = $c->request->parameters->{'mode'};
        $nr         =~ s/^tabpan-tab_//gmx;
     my $timestamp  = $c->request->parameters->{'timestamp'};
     my $dashboard  = $self->_load_dashboard($c, $nr);
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
         die("no such dashboard") unless -e $self->{'var'}.'/'.$nr.'.tab';
-        die("no such restore point") unless -e $self->{'var'}.'/'.$nr.'.tab.'.$timestamp;
+        die("no such restore point") unless -e $self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
         unlink($self->{'var'}.'/'.$nr.'.tab');
-        copy($self->{'var'}.'/'.$nr.'.tab.'.$timestamp, $self->{'var'}.'/'.$nr.'.tab');
+        copy($self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $self->{'var'}.'/'.$nr.'.tab');
     }
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
@@ -2367,8 +2398,9 @@ sub _save_dashboard {
         }
     }
 
-    Thruk::Utils::write_data_file($file, $dashboard, 15);
+    Thruk::Utils::write_data_file($file, $dashboard);
     Thruk::Utils::write_data_file($file.'.runtime', $runtime);
+    Thruk::Utils::backup_data_file($file, 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     return $dashboard;
