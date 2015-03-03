@@ -1943,7 +1943,7 @@ sub write_data_file {
     Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
 
     if($number_of_backups) {
-        my $old_md5 = md5_hex(read_file($filename));
+        my $old_md5 = -e $filename ? md5_hex(read_file($filename)) : '';
         my $new_md5 = md5_hex($d);
         if($new_md5 ne $old_md5) {
             my $now         = time();
