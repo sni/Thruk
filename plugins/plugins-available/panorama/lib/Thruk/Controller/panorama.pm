@@ -2406,6 +2406,7 @@ sub _load_dashboard {
        $runtime = Thruk::Utils::read_data_file($file.'.runtime');
     }
     for my $tab (keys %{$runtime}) {
+        next if !defined $dashboard->{$tab};
         for my $key (keys %{$runtime->{$tab}}) {
             $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key};
         }
