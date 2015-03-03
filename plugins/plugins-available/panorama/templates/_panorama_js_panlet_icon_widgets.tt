@@ -92,7 +92,7 @@
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
             This.applyScale(This.xdata.layout.scale, This.xdata);
-            if(!This.locked && This.xdata.appearance.type != "connector") {
+            if(!This.locked) {
                 This.el.on('mouseover', function(e,t,a) {
                     if(!This.el.dom.style.outline.match("orange")) {
                         This.el.dom.style.outline = "1px dashed grey";
