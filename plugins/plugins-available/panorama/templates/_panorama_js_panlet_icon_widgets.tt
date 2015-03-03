@@ -647,6 +647,8 @@
                 }, 100);
                 TP.suppressIconTip = false;
                 panel.setIconLabel();
+                if(panel.dragEl1) { panel.dragEl1.resetDragEl(); }
+                if(panel.dragEl2) { panel.dragEl2.resetDragEl(); }
             });
             el.dd_listener_added = true;
         }

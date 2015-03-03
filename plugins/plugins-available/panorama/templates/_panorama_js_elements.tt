@@ -641,5 +641,11 @@ Ext.define('TP.dragEl', {
         This.xdata.appearance[This.keyX] += deltaX;
         This.xdata.appearance[This.keyY] += deltaY;
         This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
+    },
+    resetDragEl: function() {
+        var This = this;
+        This.suspendEvents();
+        This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
+        This.resumeEvents();
     }
 });
