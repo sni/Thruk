@@ -1404,7 +1404,7 @@ function showBugReport(id, text) {
 }
 
 /* create error text for bug reports */
-function getErrorText(details) {
+function getErrorText(details, error) {
     var text = "";
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
@@ -1418,10 +1418,40 @@ function getErrorText(details) {
         first = 0;
     }
     text = text + details;
-    text = text + "Stacktrace:\n";
+    text = text + "Error List:\n";
     for(var nr=0; nr<thruk_errors.length; nr++) {
         text = text + thruk_errors[nr]+"\n";
     }
+
+    /* try to get a stacktrace */
+    text += "\n";
+    text += "Full Stacktrace:\n";
+    if(error && error.stack) {
+        text = text + error.stack;
+    }
+    try {
+        var stack = [];
+        var f = arguments.callee.caller;
+        while (f) {
+            stack.push(f.name);
+            f = f.caller;
+        }
+        text = text + stack.join("\n");
+    } catch(e) {}
+    /* this only works in panorama view */
+    try {
+        if(TP.logHistory) {
+            text += "\n";
+            text += "Panorama Log:\n";
+            var formatLogEntry = function(entry) {
+                var date = Ext.Date.format(entry[0], "Y-m-d H:i:s.u");
+                return('['+date+'] '+entry[1]+"\n");
+            }
+            for(var i=TP.logHistory.length-1; i > 0; i--) {
+                text += formatLogEntry(TP.logHistory[i]);
+            }
+        }
+    } catch(e) {}
     return(text);
 }
 

@@ -1345,7 +1345,9 @@ TP.iconShowEditDialog = function(panel) {
                 var j     = Ext.JSON.encode(xdata);
                 try {
                     j = JSON.stringify(xdata, null, 2);
-                } catch(e) { debug(e); }
+                } catch(e) {
+                    TP.logError(panel.id, "jsonStringifyException", e);
+                }
                 this.down('form').getForm().setValues({source: j, sourceError: ''});
             }
         },
@@ -1381,7 +1383,7 @@ TP.iconShowEditDialog = function(panel) {
                                 var xdata = Ext.JSON.decode(values.source);
                                 TP.setIconSettingsValues(xdata);
                             } catch(e) {
-                                debug(e);
+                                TP.logError(panel.id, "jsonDecodeException", e);
                                 Ext.getCmp('sourceForm').getForm().setValues({sourceError: e});
                             }
                         }

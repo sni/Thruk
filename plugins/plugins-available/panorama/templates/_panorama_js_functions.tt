@@ -225,7 +225,17 @@ var TP = {
         }
         if(config.type == undefined) {
             debug(config);
-            throw new Error("TP.add_panlet(): no type! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
+            var err  = new Error("no type!");
+            var text = "";
+            try {
+                delete config['tb'];
+                text = Ext.JSON.encode(config);
+            } catch(e) {
+                text = ""+e;
+            }
+            TP.logError("global", "noTypeException", err);
+            TP.log("[global] "+text);
+            throw err;
         }
         // fake state (probably cloned)
         if(config.state) {
@@ -640,7 +650,7 @@ var TP = {
             decoded = cp.decodeValue(decode64(data));
         }
         catch(e) {
-            debug(e);
+            TP.logError("global", "importAllTabsException", e);
             Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
@@ -649,7 +659,7 @@ var TP = {
                 decoded = Ext.JSON.decode(decode64(data));
             }
             catch(e) {
-                debug(e);
+                TP.logError("global", "jsonDecodeException", e);
                 Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                 return(false);
             }
@@ -724,7 +734,7 @@ var TP = {
                 data = eval("("+response.responseText+")");
             } catch(e) {
                 if(refresh.setType) { refresh.setType('broken') }
-                debug(e);
+                TP.logError(panlet.id, "responseEvalException", e);
                 return data;
             }
             if(refresh.setType) { refresh.setType('refresh') }
@@ -738,7 +748,7 @@ var TP = {
                             initial_backends[key].state         = data.pi_detail[key]['state'];
                             initial_backends[key].program_start = data.pi_detail[key]['program_start'];
                         } catch(e) {
-                            debug(e);
+                            TP.logError(panlet.id, "initialBackendsException", e);
                         }
                     }
                 }
@@ -1638,10 +1648,22 @@ var TP = {
         reloadPage();
     },
     log: function(str) {
+        debug(str);
         TP.logHistory.push([new Date(), str]);
+        /* limit history to last 50k entries */
         while(TP.logHistory.length > 50000) {
             TP.logHistory.shift();
         }
+    },
+    logError: function(prefix, name, e) {
+        if(name == "labelEvalException") { return; }
+        try {
+            TP.log('['+prefix+'] '+name+':');
+            var out = e.stack.trim().split("\n");
+            for(var x=0; x<out.length; x++) {
+                TP.log('['+prefix+'] '+out[x]);
+            }
+        } catch(er) {}
     },
     JSONequals: function(str1, str2) {
         if(!str1) {
@@ -1679,9 +1701,7 @@ var TP = {
         var newModelWindows = [];
         Ext.Array.each(TP.modalWindows, function(win) {
             if(win && win.el) {
-                try {
-                    win.toFront();
-                } catch(e) {}
+                try { win.toFront(); } catch(e) {}
                 newModelWindows.push(win);
             }
         });

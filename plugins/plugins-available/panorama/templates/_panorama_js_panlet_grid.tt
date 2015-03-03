@@ -38,7 +38,11 @@
                     try {
                         body.style.overflow  = 'inherit';
                         body.style.overflowY = 'hidden';
-                    } catch(e) { debug("thruk: setting style failed: "+e) } // breaks in IE 8 sometimes
+                    } catch(e) {
+                        /* breaks in IE 8 sometimes */
+                        Thruk.log("thruk: setting style failed")
+                        TP.logError(panel.id, "bodyStyleException", e);
+                    }
                 }
             } else {
                 if(this.pagingToolbar) {
@@ -48,7 +52,11 @@
                     try {
                         body.style.overflowY = 'inherit';
                         body.style.overflow  = 'auto';
-                    } catch(e) { debug("thruk: setting style failed: "+e) } // breaks in IE 8 sometimes
+                    } catch(e) {
+                        /* breaks in IE 8 sometimes */
+                        Thruk.log("thruk: setting style failed")
+                        TP.logError(panel.id, "bodyStyleException", e);
+                    }
                 }
             }
             var fields = [];
@@ -103,14 +111,17 @@
                     this.grid.reconfigure(this.gridStore);
                 }
             } catch(e) {
-                debug("thruk: reconfigure failed: "+e);
+                Thruk.log("reconfigure failed");
+                TP.logError(panel.id, "gridReconfigureException", e);
                 return;
             }
             if(this.initialState != undefined) {
                 /* applyState throws internal error but state gets applied anyway */
                 try {
                     this.grid.applyState(this.initialState);
-                } catch(e) {}
+                } catch(e) {
+                    TP.logError(panel.id, "gridApplyStateException", e);
+                }
             }
             if(this.xdata.gridstate != undefined) {
                 this.grid.applyState(this.xdata.gridstate);

@@ -88,7 +88,9 @@
                         } else {
                             panlet.show(false);
                         }
-                    } catch(e) { debug(e) }
+                    } catch(e) {
+                        TP.logError(panlet.id, "panelActivateException", e);
+                    }
                 }
             }
             var tabpan = Ext.getCmp('tabpan');
@@ -338,7 +340,9 @@
                     if(panlet) { // may not yet exists due to delayed rendering
                         try {    // so allow it to fail
                             panlet.show(false);
-                        } catch(e) { debug(e) }
+                        } catch(e) {
+                            TP.logError(this.id, "panelStarttimeoutException", e);
+                        }
                     }
                 }
             }
@@ -477,7 +481,7 @@
                     try {
                         BigScreen.request(element);
                     } catch(e) {
-                        TP.log('[global] error in BigScreen: '+e);
+                        TP.logError(tab.id, "bigscreenException", e);
                     }
                 },
                 hidden:  !!BigScreen.element

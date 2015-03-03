@@ -271,7 +271,7 @@ Ext.define('TP.TabBar', {
             }
             TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
         } catch(e) {
-            debug(e);
+            TP.logError(this.id, "tabbarApplyStateException", e);
             if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
                 window.location = 'panorama.cgi?clean=1';
             }
@@ -430,13 +430,19 @@ TP.getLogTab = function() {
                         var text = "";
                         var pattern;
                         if(filter) { pattern = new RegExp(filter, 'i') }
-                        for(var i = TP.logHistory.length - 1; i >= 0; i--) {
+                        for(var i = 0; i < TP.logHistory.length; i++) {
                             if(!pattern || TP.logHistory[i][1].match(pattern)) {
                                 text += formatLogEntry(TP.logHistory[i]);
                             }
                         }
                         logtextarea.setValue(text);
                         logtextarea.setDisabled(false);
+                        /* scroll down */
+                        var input = Ext.getCmp('logtextarea-inputEl');
+                        if(input && input.dom) {
+debug(input.dom.scrollTop);
+                            input.dom.scrollTop = 10000000;
+                        }
                     }
                 }
             }, {

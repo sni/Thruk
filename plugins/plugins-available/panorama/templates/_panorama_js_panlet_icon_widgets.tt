@@ -317,7 +317,10 @@
                 calc = calc.replace(/availability\(/g, 'availability(panel, ');
                 try {
                     res = eval(calc);
-                } catch(e) { debug(e); panel.el.dom.title = e; }
+                } catch(e) {
+                    TP.logError(panel.id, "labelEvalException", e);
+                    panel.el.dom.title = e;
+                }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
                 if(calc.match(/availability\(/) && res.match(/\-1/)) {
@@ -732,6 +735,7 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
+        TP.checkModalWindows();
     },
 
     /* rotates this thing */
@@ -1175,8 +1179,8 @@ Ext.define('TP.IconWidget', {
             eval("spriteData = {"+shapeData+"};");
         }
         catch(e) {
+            TP.logError(panel.id, "labelSpriteEvalException", e);
             TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
-            debug(e);
             return;
         }
         panel.surface.removeAll();
@@ -1287,9 +1291,7 @@ Ext.define('TP.IconWidget', {
                 dragEl.suspendEvents();
                 dragEl.setPosition(xdata.appearance[dragEl.keyX]+dragEl.offsetX, xdata.appearance[dragEl.keyY]+dragEl.offsetY);
                 dragEl.resumeEvents();
-                try {
-                    dragEl.toFront();
-                } catch(e) {}
+                try { dragEl.toFront(); } catch(e) {}
             }
         });
     },
