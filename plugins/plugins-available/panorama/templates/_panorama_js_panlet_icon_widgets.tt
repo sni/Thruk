@@ -81,7 +81,6 @@
                 this.xdata.layout.y = pos[1];
                 if(this.iconType != 'text' && this.xdata.general[this.iconType] == '' && this.firstRun != false) {
                     this.firstRun = true;
-                    TP.suppressIconTip = true;
                     TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
                         TP.iconShowEditDialog(This);
@@ -347,11 +346,10 @@
         }
         if(!this.labelEl) {
             var panel = this;
+            if(!this.isThisTheActiveTab()) { return; } /* no need for a label on inactive tab */
             this.labelEl = Ext.create('Ext.Component', {
                 'html':     ' ',
                 draggable:  !panel.locked,
-                autoRender: true,
-                autoShow:   true,
                 shadow:     false,
                 renderTo:  "bodyview",
                 cls:        (panel.xdata.link.link ? '' : 'not') +'clickable iconlabel', // defaults to text cursor otherwise
@@ -589,7 +587,7 @@
                 }, {
                     text:   'Unlock Dashboard',
                     icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
-                    handler: function() { Ext.getCmp(This.panel_id).setLock(false); },
+                    handler: function() { var tab = Ext.getCmp(This.panel_id); TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                     hidden: !This.locked      // only show when locked
                 }
                 [% END %]
@@ -605,7 +603,6 @@
         if(el.dd && !el.dd_listener_added) {
             el.dd.addListener('dragstart', function(This, e) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
-                TP.suppressIconTip = true;
                 TP.isShift = is_shift_pressed(e);
                 /* add ourself to movelist */
                 if(TP.moveIcons) {
@@ -650,13 +647,18 @@
                         panel.ddShadow.dom.style.display = 'none';
                     }
                 }, 100);
-                TP.suppressIconTip = false;
                 panel.setIconLabel();
                 if(panel.dragEl1) { panel.dragEl1.resetDragEl(); }
                 if(panel.dragEl2) { panel.dragEl2.resetDragEl(); }
             });
             el.dd_listener_added = true;
         }
+    },
+    isThisTheActiveTab: function() {
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        if(activeTab && this.panel_id != activeTab.id) { return(false); }
+        return(true);
     }
 });
 
@@ -728,6 +730,7 @@ Ext.define('TP.IconWidget', {
     },
     updateRenderDo: function(xdata) {
         var panel = this;
+        if(!panel.isThisTheActiveTab()) { return; } /* no need for changes if we are not the active tab */
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
@@ -742,6 +745,7 @@ Ext.define('TP.IconWidget', {
     applyRotation: function(value, xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         if(value == undefined) { return; }
+        if(isNaN(value)) { return; }
         if(xdata.appearance && xdata.appearance.type == "icon") {
             if(this.surface == undefined) { return; }
             if(this.surface.items.getAt(0) == undefined) { return; }
@@ -1189,6 +1193,7 @@ Ext.define('TP.IconWidget', {
         var xScale = xdata.appearance.shapewidth/box.width;
         var yScale = xdata.appearance.shapeheight/box.height;
         if(xdata.appearance.shapelocked) { yScale = xScale; }
+        if(isNaN(xScale) || isNaN(yScale) || isNaN(box.x)) { return; }
         sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
         box = sprite.getBBox();
         sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
@@ -1399,6 +1404,7 @@ Ext.define('TP.IconWidget', {
             }
             xdata.size  = size;
             xdata.nsize = [naturalWidth, naturalHeight];
+            if(isNaN(scale)) { return; }
             panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:scale, y:scale}}, true);
             // image size has changed
             if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
@@ -1411,7 +1417,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
-        if(isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/)) {
+        if(this.isThisTheActiveTab() && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;
@@ -1468,7 +1474,7 @@ Ext.onReady(function() {
         var img = Ext.getCmp(el.id);
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
-        if(!img.locked) { TP.suppressIconTip = true; return; }
+        if(!img.locked) { return; }
         TP.iconTip.last_id = el.id;
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());
@@ -2268,6 +2274,10 @@ TP.resetMoveIcons = function() {
         TP.keynav.destroy();
         TP.keynav = undefined;
     }
+    if(TP.lassoEl) {
+        TP.lassoEl.destroy();
+        TP.lassoEl = undefined;
+    }
 }
 
 TP.createIconMoveKeyNav = function() {
@@ -2410,8 +2420,11 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     } else {
         return('#');
     }
-    if(panel.xdata.general.backends) {
+    if(panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
         options.backends = panel.xdata.general.backends;
+    } else {
+        var tab = Ext.getCmp(panel.panel_id);
+        options.backends = tab.xdata.backends;
     }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));

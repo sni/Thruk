@@ -1648,7 +1648,7 @@ var TP = {
         reloadPage();
     },
     log: function(str) {
-        debug(str);
+        //debug(str); /* makes too much noise */
         TP.logHistory.push([new Date(), str]);
         /* limit history to last 50k entries */
         while(TP.logHistory.length > 50000) {

@@ -425,6 +425,12 @@ TP.getLogTab = function() {
                     var logtextarea = Ext.getCmp('logtextarea');
                     var filter      = Ext.getCmp('logfilter').getValue();
                     if(logtextarea.lastLength != TP.logHistory.length || logtextarea.lastFilter != filter) {
+                        var input = Ext.get('logtextarea-inputEl');
+                        var oldScroll = input.dom.scrollTop;
+                        input.dom.scrollTop = 100000000;
+                        var scrollDown = false;
+                        if(oldScroll != 0 && oldScroll == input.dom.scrollTop) { scrollDown = true; } /* scroll down if we were on bottom before */
+                        if(logtextarea.lastLength == undefined) { scrollDown = true; } /* scroll down if this is the first refresh */
                         logtextarea.lastLength = TP.logHistory.length;
                         logtextarea.lastFilter = filter;
                         var text = "";
@@ -437,11 +443,10 @@ TP.getLogTab = function() {
                         }
                         logtextarea.setValue(text);
                         logtextarea.setDisabled(false);
-                        /* scroll down */
-                        var input = Ext.getCmp('logtextarea-inputEl');
-                        if(input && input.dom) {
-debug(input.dom.scrollTop);
-                            input.dom.scrollTop = 10000000;
+                        if(scrollDown) {
+                            input.dom.scrollTop = 100000000;
+                        } else {
+                            input.dom.scrollTop = oldScroll;
                         }
                     }
                 }
