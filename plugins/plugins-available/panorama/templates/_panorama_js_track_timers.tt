@@ -7,12 +7,18 @@ var originalClearInterval = window.clearInterval;
 
 // override setTimeout with a function that keeps track of all timers
 window.setTimeout = function(callback, timeout) {
+    var err = new Error;
     var id = originalSetTimeout(function() {
         delete timers[id];
-        if(Ext.isFunction(callback)) {
-            callback();
-        } else {
-            eval(callback);
+        try {
+            if(Ext.isFunction(callback)) {
+                callback();
+            } else {
+                eval(callback);
+            }
+        } catch(e) {
+            TP.logError("global", "setTimeoutExceptionOrigin", err);
+            TP.logError("global", "setTimeoutException", e);
         }
     }, timeout);
     timers[id] = ({id:id,  setAt: new Date(),  timeout: timeout, callback: callback, caller: window.setTimeout.caller});
@@ -26,12 +32,18 @@ window.clearTimeout = function(id) {
 
 // override setInterval with a function that keeps track of all intervals
 window.setInterval = function(callback, timer) {
+    var err = new Error;
     var id = originalSetInterval(function() {
         intervals[id]['lastRun'] = new Date();
-        if(Ext.isFunction(callback)) {
-            callback();
-        } else {
-            eval(callback);
+        try {
+            if(Ext.isFunction(callback)) {
+                callback();
+            } else {
+                eval(callback);
+            }
+        } catch(e) {
+            TP.logError("global", "setIntervalExceptionOrigin", err);
+            TP.logError("global", "setIntervalException", e);
         }
     }, timer);
     intervals[id] = ({id:id,  setAt: new Date(),  interval: timer, callback: callback, lastRun: undefined, caller: window.setInterval.caller});
