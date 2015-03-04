@@ -322,9 +322,16 @@
                 }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
-                if(calc.match(/availability\(/) && res.match(/\-1/)) {
-                    res = res.replace(/\-1[\.0]*/g, '...');
-                    res = "<span class='avail_result_not_ready'>"+res+"<\/span>";
+                if(calc.match(/availability\(/)) {
+                    if(TP.lastAvailError) {
+                        TP.lastAvailError = TP.lastAvailError.replace(/'/g, '');
+                        TP.lastAvailError = TP.lastAvailError.replace(/ at .*?\/Thruk/g, ' at Thruk');
+                        res = "<span class='avail_result_error' title='"+TP.lastAvailError+"'>error<\/span>";
+                    }
+                    else if(res.match(/\-1/)) {
+                        res = res.replace(/\-1[\.0]*/g, '...');
+                        res = "<span class='avail_result_not_ready'>"+res+"<\/span>";
+                    }
                 }
                 txt = txt.replace(item, res);
             });
@@ -2497,6 +2504,7 @@ TP.getNatural = function(src) {
 
 /* calculates availability used in labels */
 function availability(panel, opts) {
+    TP.lastAvailError = undefined;
     if(panel.iconType == 'hostgroup' || panel.iconType == 'filtered') {
         if(panel.xdata.general.incl_hst) { opts['incl_hst'] = 1; }
         if(panel.xdata.general.incl_svc) { opts['incl_svc'] = 1; }
@@ -2518,9 +2526,17 @@ function availability(panel, opts) {
     }
     TP.availabilities[panel.id][opts_enc]['active'] = true;
     if(refresh) {
-        if(TP.iconSettingsWindow != undefined) { return(TP.availabilities[panel.id][opts_enc]['last']); }
+        if(TP.iconSettingsWindow != undefined) {
+            if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
+                TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];
+            }
+            return(TP.availabilities[panel.id][opts_enc]['last']);
+        }
         TP.availabilities[panel.id][opts_enc]['last_refresh'] = now;
         TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
+    }
+    if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
+        TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];
     }
     return(TP.availabilities[panel.id][opts_enc]['last']);
 }

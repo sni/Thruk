@@ -588,3 +588,8 @@ TABLE.TipDetails TD.more_services {
 SPAN.avail_result_not_ready {
     opacity: 0.2;
 }
+
+SPAN.avail_result_error {
+    opacity: 0.4;
+    color: red;
+}

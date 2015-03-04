@@ -846,6 +846,7 @@ sub _avail_calc {
             $c->log->error("calculating availability failed for filter:");
             $c->log->error(Dumper($c->{request}->{parameters}));
             $c->log->error($@);
+            return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
         }
     }
     if($host) {
@@ -868,6 +869,7 @@ sub _avail_calc {
                     $c->log->error("calculating availability failed for host filter:");
                     $c->log->error(Dumper($c->{request}->{parameters}));
                     $c->log->error($@);
+                    return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
             if($c->stash->{avail_data}->{'hosts'}) {
@@ -895,6 +897,7 @@ sub _avail_calc {
                     $c->log->error("calculating availability failed for service filter:");
                     $c->log->error(Dumper($c->{request}->{parameters}));
                     $c->log->error($@);
+                    return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
             if($c->stash->{avail_data}->{'services'}) {
