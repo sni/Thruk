@@ -1724,6 +1724,12 @@ var TP = {
                 }
             }, delay);
         }
+    },
+    isThisTheActiveTab: function(panel) {
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        if(activeTab && panel.panel_id != activeTab.id) { return(false); }
+        return(true);
     }
 }
 TP.log('[global] starting');

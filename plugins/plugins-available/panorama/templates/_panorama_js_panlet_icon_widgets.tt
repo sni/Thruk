@@ -346,7 +346,7 @@
         }
         if(!this.labelEl) {
             var panel = this;
-            if(!this.isThisTheActiveTab()) { return; } /* no need for a label on inactive tab */
+            if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
             this.labelEl = Ext.create('Ext.Component', {
                 'html':     ' ',
                 draggable:  !panel.locked,
@@ -653,12 +653,6 @@
             });
             el.dd_listener_added = true;
         }
-    },
-    isThisTheActiveTab: function() {
-        var tabpan    = Ext.getCmp('tabpan');
-        var activeTab = tabpan.getActiveTab();
-        if(activeTab && this.panel_id != activeTab.id) { return(false); }
-        return(true);
     }
 });
 
@@ -730,7 +724,7 @@ Ext.define('TP.IconWidget', {
     },
     updateRenderDo: function(xdata) {
         var panel = this;
-        if(!panel.isThisTheActiveTab()) { return; } /* no need for changes if we are not the active tab */
+        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for changes if we are not the active tab */
         if(xdata == undefined) { xdata = panel.xdata; }
         if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
@@ -1417,7 +1411,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
-        if(this.isThisTheActiveTab() && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
+        if(TP.isThisTheActiveTab(panel) && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;
