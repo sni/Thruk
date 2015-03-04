@@ -450,7 +450,7 @@
                 text:   'Refresh',
                 icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
-            }, {
+            }, '-', {
                 text:   'Fullscreen',
                 icon:   '[% url_prefix %]plugins/panorama/images/picture_empty.png',
                 handler: function() {
@@ -468,11 +468,17 @@
                 handler: function() { BigScreen.exit(); },
                 hidden:  !BigScreen.element
             }, {
+                text:       'Direct Link',
+                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                href:       'panorama.cgi?map='+tab.xdata.title,
+                hrefTarget: '_blank',
+                tooltip:    'open this dashboard only (new window)'
+            }, {
                 text:   'Debug Information',
                 icon:   '[% url_prefix %]plugins/panorama/images/information.png',
                 handler: thruk_debug_window_handler,
                 hidden:  [% IF !thruk_debug || c.config.demo_mode %]true[% ELSE %]false[% END %]
-            }
+            }, '-'
             [% UNLESS readonly %]
             , {
                 text:   'New',
