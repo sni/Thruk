@@ -40,7 +40,7 @@
                         body.style.overflowY = 'hidden';
                     } catch(e) {
                         /* breaks in IE 8 sometimes */
-                        Thruk.log("thruk: setting style failed")
+                        TP.log("thruk: setting style failed")
                         TP.logError(panel.id, "bodyStyleException", e);
                     }
                 }
@@ -54,7 +54,7 @@
                         body.style.overflow  = 'auto';
                     } catch(e) {
                         /* breaks in IE 8 sometimes */
-                        Thruk.log("thruk: setting style failed")
+                        TP.log("thruk: setting style failed")
                         TP.logError(panel.id, "bodyStyleException", e);
                     }
                 }
@@ -111,7 +111,7 @@
                     this.grid.reconfigure(this.gridStore);
                 }
             } catch(e) {
-                Thruk.log("reconfigure failed");
+                TP.log("reconfigure failed");
                 TP.logError(panel.id, "gridReconfigureException", e);
                 return;
             }
