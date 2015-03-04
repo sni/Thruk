@@ -50,7 +50,12 @@ Just click on the empty table row when the row is highlighted. This only works
 if you do not click on a link.
 
 
-== Where can I see the full command line for a host or servicecheck?
+=== How can i enable debug logging
+
+Have a look at the link:logfiles.html#enable-debug-logging[logfiles section].
+
+
+=== Where can I see the full command line for a host or servicecheck?
 
 You have to enable the option 'set show_full_commandline'. It's
 disabled for security reasons by default. So be careful to not display

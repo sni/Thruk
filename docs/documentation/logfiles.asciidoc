@@ -53,3 +53,6 @@ to track all requests with their cpu and memory usage:
 in order to trace all livestatus queries:
 
   MONITORING_LIVESTATUS_CLASS_TRACE=999
+
+
+NOTE: You might have to adjust the loglevel threshold (see above). Also some log output will end up in the apache errorlog.
