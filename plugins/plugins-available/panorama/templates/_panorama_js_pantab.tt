@@ -724,6 +724,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                 var data = TP.getResponse(undefined, response);
                 data = data.data;
                 var autosavemenu  = Ext.getCmp("autosavemenu").menu;
+                if(autosavemenu == undefined) { return; } /* menu has been closed already */
                 var manualmenu    = Ext.getCmp("manualmenu").menu;
                 Ext.getCmp("restorepointsloading").destroy();
                 var found = 0;
