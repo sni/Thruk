@@ -68,9 +68,10 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
     my @s;
     if($file =~ m/^plugins\//mx) {
         my $tmp = $file;
-        $tmp =~ s|plugins/|root/thruk/plugins/|gmx;
+        $tmp =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
         @s = stat($tmp);
         push @panorama_files, $tmp;
+        -f $tmp || die($tmp.": ".$!);
     } else {
         @s = stat('root/thruk/'.$file);
         push @panorama_files, 'root/thruk/'.$file;
