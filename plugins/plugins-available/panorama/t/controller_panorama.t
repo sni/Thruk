@@ -3,11 +3,10 @@ use warnings;
 use Test::More;
 use JSON::XS;
 use Encode qw/encode_utf8/;
-use File::Copy qw/copy/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 407;
+    plan tests => 418;
 }
 
 BEGIN {
@@ -98,8 +97,9 @@ $pages = [
     '/thruk/cgi-bin/panorama.cgi?task=userdata_shapes',
     '/thruk/cgi-bin/panorama.cgi?task=userdata_sounds',
     { url => '/thruk/cgi-bin/panorama.cgi?task=serveraction', post => { dashboard => '__DASHBOARD__', link => 'server://test' } },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_point', post => { nr => '__DASHBOARD__', mode => 'a' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
-    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__' } },
+    { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__', mode => 'a' } },
 ];
 
 for my $url (@{$pages}) {
@@ -200,9 +200,11 @@ sub _set_dynamic_url_parts {
     $test->{'url'} =~ s|__DASHBOARD__|$test_dashboard_nr|gmx;
     $test->{'url'} =~ s|__DASHBOARDNAME__|$test_dashboard_name|gmx;
     if($test->{'post'} && $test->{'post'}->{'timestamp'} && $test->{'post'}->{'timestamp'} eq '__TIMESTAMP__') {
-        my $test_timestamp = time();
-        copy($var_path.'/panorama/'.$test_dashboard_nr.'.tab', $var_path.'/panorama/'.$test_dashboard_nr.'.tab.'.$test_timestamp);
-        $test->{'post'}->{'timestamp'} = $test_timestamp;
+        my @files = glob($var_path.'/panorama/'.$test_dashboard_nr.'.tab.*.a');
+        ok(scalar @files > 0, "got backup files");
+        $files[0] =~ m/\.(\d+)\.a$/mx;
+        ok($1, "got backup timestamp");
+        $test->{'post'}->{'timestamp'} = $1;
     }
 
     return $test;
