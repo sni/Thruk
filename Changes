@@ -21,6 +21,7 @@ next:
             - fix accessing performance data page in author mode
             - fix accessing reports page in author mode
             - fix title offset in trends graph
+            - fix highlighting correct backend on multiple backends by url
 
 1.86-4   Thu Feb 12 21:47:53 CET 2015:
           - add action_menu_apply option to apply action menus on the fly
