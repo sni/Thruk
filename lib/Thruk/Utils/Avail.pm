@@ -225,6 +225,13 @@ sub calculate_availability {
             time => { '<=' => $end },
     ]};
 
+
+    open LOGFILE, ">/tmp/thruk.log";
+    print LOGFILE "--------------------------\n";
+    print LOGFILE Dumper(["REQUEST", $c->{'request'}]);
+    close LOGFILE;
+
+
     # services
     $c->stash->{'services'} = {};
     if(defined $service || $c->{request}->{parameters}->{s_filter}) {
@@ -335,9 +342,19 @@ sub calculate_availability {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
             }
         }
+        my @hosts_from_groups = ();
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
+            push @hosts_from_groups, { host_name => $host->{'name'} };
         }
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);        
+
+        open LOGFILE, ">/tmp/thruk.log";
+        print LOGFILE "--------------------------\n";
+        print LOGFILE Dumper(["HOSTS", $hosts]);
+        close LOGFILE;
+
+
     }
 
     # all hosts
@@ -551,7 +568,7 @@ sub calculate_availability {
             push @typefilter, { -or => [ @logservicefilter ] };
         }
     }
-    push @typefilter, { class => 2 }; # programm messages
+    #push @typefilter, { class => 2 }; # programm messages
     if($rpttimeperiod) {
         push @typefilter, { '-or' => [
                                       { message => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }},                               # livestatus
@@ -573,15 +590,17 @@ sub calculate_availability {
     
     open LOGFILE, ">>/tmp/thruk.log";
     print LOGFILE "--------------------------\n";
-    print LOGFILE Dumper([$filter]);
+    print LOGFILE Dumper(["FILTER", $filter]);
     close LOGFILE;
 
 
 
-    $c->stats->profile(begin => "avail.pm updatecache");
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
-    $c->{'db'}->renew_logcache($c, 1);
-    $c->stats->profile(end   => "avail.pm updatecache");
+    if ($c->config->{'logcache_update_on_report'}) {
+        $c->stats->profile(begin => "avail.pm updatecache");
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
+        $c->{'db'}->renew_logcache($c, 1);
+        $c->stats->profile(end   => "avail.pm updatecache");
+    }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 10, 'fetching logs') if $ENV{'THRUK_JOB_DIR'};
 
@@ -597,7 +616,7 @@ sub calculate_availability {
     
     open LOGFILE, ">>/tmp/thruk.log";
     print LOGFILE "--------------------------\n";
-    print LOGFILE Dumper([$logs]);
+    print LOGFILE Dumper(["LOGS", $logs]);
     close LOGFILE;
 
 
