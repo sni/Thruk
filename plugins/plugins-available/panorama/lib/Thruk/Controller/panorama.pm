@@ -89,6 +89,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
 
+    $c->stash->{'extjs_version'} = "4.1.1";
+
     $self->{'var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($self->{'var'});
 
@@ -209,16 +211,13 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'serveraction') {
             return($self->_task_serveraction($c));
         }
+        elsif($task eq 'manifest') {
+            return($self->_task_manifest($c));
+        }
     }
 
     # find images for preloader
-    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
-    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
-    $c->stash->{preload_img} = [];
-    for my $i (@images) {
-        $i =~ s|^.*/||gmx;
-        push @{$c->stash->{preload_img}}, $i;
-    }
+    $self->_set_preload_images($c);
 
     # clean up?
     if($c->request->parameters->{'clean'}) {
@@ -608,6 +607,25 @@ sub _task_serveraction {
     $c->stash->{'json'} = $json;
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_manifest {
+    my($self, $c) = @_;
+    $self->_set_preload_images($c);
+
+    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
+    my $cmd = 'find '.$plugin_dir.'/plugins-enabled/panorama/root/extjs-'.$c->stash->{'extjs_version'}.'/ -type f';
+    $c->stash->{ext_img} = [];
+    for my $i (split/\n/mx, `$cmd`) {
+        $i =~ s|^.*?/extjs\-.*?/|/|gmx;
+        next unless $i =~ m|resources/css/|mx;
+        push @{$c->stash->{ext_img}}, $i;
+    }
+
+    $c->stash->{template} = 'panorama_manifest.tt';
+    $c->res->content_type('text/cache-manifest');
+    return;
 }
 
 ##########################################################
@@ -2580,6 +2598,18 @@ sub _add_misc_details {
         $c->stats->profile(end => "_add_misc_details");
     }
     return;
+}
+
+##########################################################
+sub _set_preload_images {
+    my($self, $c) = @_;
+    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
+    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
+    $c->stash->{preload_img} = [];
+    for my $i (@images) {
+        $i =~ s|^.*/||gmx;
+        push @{$c->stash->{preload_img}}, $i;
+    }
 }
 
 ##########################################################

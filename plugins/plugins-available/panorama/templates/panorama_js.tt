@@ -117,7 +117,4 @@ Ext.onReady(function() {
     TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
     [% END %]
     cleanUnderscoreUrl();
-
-    /* preload images */
-    window.setTimeout(preloader, 3000);
 });
