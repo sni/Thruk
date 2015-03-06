@@ -404,8 +404,8 @@ sub _set_possible_backends {
         }
     }
 
-    $c->stash->{'backends'}           = \@new_possible_backends;
-    $c->stash->{'backend_detail'}     = \%backend_detail;
+    $c->stash->{'backends'}       = \@new_possible_backends;
+    $c->stash->{'backend_detail'} = \%backend_detail;
 
     return;
 }
@@ -616,12 +616,12 @@ sub _set_enabled_backends {
             # peer key can be name too
             if($b eq 'ALL') {
                 for my $peer (@{$c->{'db'}->get_peers()}) {
-                    $disabled_backends->{$peer->peer_key()} = 0;
+                    $disabled_backends->{$peer->{'key'}} = 0;
                 }
             } else {
                 my $peer = $c->{'db'}->get_peer_by_key($b);
                 die("got no peer for: ".$b) unless defined $peer;
-                $disabled_backends->{$peer->peer_key()} = 0;
+                $disabled_backends->{$peer->{'key'}} = 0;
             }
         }
     }
