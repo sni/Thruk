@@ -1,7 +1,12 @@
 ﻿[% USE date %]
 <!DOCTYPE HTML>
-<html[% IF !thruk_debug && use_manifest %] manifest="panorama.cgi?task=manifest"[% END %]>
+<html>
   <head>
+    <script type="text/javascript">
+    <!--
+    [%+ PROCESS _panorama_js_globals.tt +%]
+    -->
+    </script>
     [% PROCESS custom_perf_bar_adjustments.tt %]
     <title>[% title_prefix %]Thruk Panorama</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
@@ -25,29 +30,13 @@
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
     [% END %]
-    <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_=[% date.now %]"></script>
 </head>
 <body onunload="TP.unload()">
 <div id="bodyview"></div>
-[% IF !thruk_debug && use_manifest %]
 <script type="text/javascript">
 <!--
-/* new application cache available? */
-if(window.applicationCache) {
-  window.applicationCache.addEventListener('updateready', function(e) {
-    if(window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-      // Browser downloaded a new app cache.
-      // Swap it in
-      window.applicationCache.swapCache();
-      // and reload the page to get the new hotness.
-      //if(confirm('A new version is available. Reload?')) {
-        window.location.reload(true);
-      //}
-    }
-  }, false);
-}
+[%+ PROCESS panorama_js.tt +%]
 -->
 </script>
-[% END %]
 </body>
 </html>

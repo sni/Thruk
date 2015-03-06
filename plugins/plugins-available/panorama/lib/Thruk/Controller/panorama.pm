@@ -211,9 +211,6 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'serveraction') {
             return($self->_task_serveraction($c));
         }
-        elsif($task eq 'manifest') {
-            return($self->_task_manifest($c));
-        }
     }
 
     # find images for preloader
@@ -229,11 +226,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $self->_js($c, 1);
 
-    $c->stash->{use_manifest} = 0;
-    if(defined $c->{'request'}->{'headers'}->{'user-agent'} && $c->{'request'}->{'headers'}->{'user-agent'} =~ m/Chrome/mx) {
-        $c->stash->{use_manifest} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} : 1;
-    }
-    $c->stash->{template}     = 'panorama.tt';
+    $c->stash->{template} = 'panorama.tt';
     return 1;
 }
 
@@ -611,16 +604,6 @@ sub _task_serveraction {
     $c->stash->{'json'} = $json;
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
-}
-
-##########################################################
-sub _task_manifest {
-    my($self, $c) = @_;
-    _set_preload_images($c);
-    $c->stash->{template} = 'panorama_manifest.tt';
-    $c->res->content_type('text/cache-manifest');
-    $c->res->header('Cache-Control', 'no-cache, private');
-    return;
 }
 
 ##########################################################

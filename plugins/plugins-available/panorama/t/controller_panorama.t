@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 428;
+    plan tests => 418;
 }
 
 BEGIN {
@@ -162,31 +162,6 @@ $res = _test_json_page({
     }
 });
 isnt($res->{'data'}->{'tabpan-tab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\":1,\\"incl_svc\\":1}'}, -1);
-
-#################################################
-# test manifest file
-my $m_url = {
-        url          => '/thruk/cgi-bin/panorama.cgi?task=manifest',
-        like         => ['CACHE MANIFEST', 'NETWORK'],
-        content_type => 'text/cache-manifest; charset=UTF-8',
-};
-my $m_res = TestUtils::test_page(%{$m_url});
-delete $subs->{$m_url->{'url'}};
-my $manifest_errors = 0;
-my $skip_rest       = 0;
-for my $line (split/\n/, $m_res->{'content'}) {
-    next if $line =~ m/^\s*$/mx;
-    next if $line =~ m/^(\#|CACHE)/mx;
-    $skip_rest = 1 if $line =~ '^NETWORK:';
-    next if $skip_rest;
-    my $r = TestUtils::_request($line);
-    if(!$r->is_success) {
-        fail($line.' from manifest file does not exists');
-        TestUtils::bail_out_req('from manifest file does not exists.', $r);
-        $manifest_errors++;
-    }
-}
-is($manifest_errors, 0, "manifest files do exist");
 
 #################################################
 # make sure all tasks are covered with tests
