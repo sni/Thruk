@@ -2303,7 +2303,7 @@ TP.iconClickHandler = function(id) {
     window.clearTimeout(TP.timeouts['click'+id]);
     TP.timeouts['click'+id] = window.setTimeout(function() {
         TP.iconClickHandlerDo(id);
-    }, 500);
+    }, 200);
     return false;
 }
 /* actually open the clicked link */
