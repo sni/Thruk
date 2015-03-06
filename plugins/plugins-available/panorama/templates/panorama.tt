@@ -2,11 +2,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html[% IF !thruk_debug %] manifest="panorama.cgi?task=manifest"[% END %]>
   <head>
-    <script type="text/javascript">
-    <!--
-    [%+ PROCESS _panorama_js_globals.tt +%]
-    -->
-    </script>
     [% PROCESS custom_perf_bar_adjustments.tt %]
     <title>[% title_prefix %]Thruk Panorama</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
@@ -30,26 +25,23 @@
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
     [% END %]
+    <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1"></script>
 </head>
 <body onunload="TP.unload()">
 <div id="bodyview"></div>
 <script type="text/javascript">
 <!--
-[%+ PROCESS panorama_js.tt +%]
-
 /* new application cache available? */
 window.addEventListener('load', function(e) {
     if(window.applicationCache) {
         window.applicationCache.addEventListener('updateready', function(e) {
-            if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+            if(window.applicationCache.status == window.applicationCache.UPDATEREADY) {
                 // Browser downloaded a new app cache.
-                // Swap it in and reload the page to get the new hotness.
+                // Swap it in
                 window.applicationCache.swapCache();
-                if (confirm('A new version of this site is available. Load it?')) {
-                    window.location.reload();
-                }
-            } else {
-                // Manifest didn't changed. Nothing new to server.
+                // and reload the page to get the new hotness.
+                // reload is broken in firefox, it reloads every time
+                //window.location.reload();
             }
         }, false);
     }

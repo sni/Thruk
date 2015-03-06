@@ -217,7 +217,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     }
 
     # find images for preloader
-    $self->_set_preload_images($c);
+    _set_preload_images($c);
 
     # clean up?
     if($c->request->parameters->{'clean'}) {
@@ -612,17 +612,7 @@ sub _task_serveraction {
 ##########################################################
 sub _task_manifest {
     my($self, $c) = @_;
-    $self->_set_preload_images($c);
-
-    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
-    my $cmd = 'find '.$plugin_dir.'/plugins-enabled/panorama/root/extjs-'.$c->stash->{'extjs_version'}.'/ -type f';
-    $c->stash->{ext_img} = [];
-    for my $i (split/\n/mx, `$cmd`) {
-        $i =~ s|^.*?/extjs\-.*?/|/|gmx;
-        next unless $i =~ m|resources/css/|mx;
-        push @{$c->stash->{ext_img}}, $i;
-    }
-
+    _set_preload_images($c);
     $c->stash->{template} = 'panorama_manifest.tt';
     $c->res->content_type('text/cache-manifest');
     return;
@@ -2602,7 +2592,7 @@ sub _add_misc_details {
 
 ##########################################################
 sub _set_preload_images {
-    my($self, $c) = @_;
+    my($c) = @_;
     my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
     my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
     $c->stash->{preload_img} = [];

@@ -43,17 +43,19 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 var debug = function(str) {}
-if(thruk_debug_js != undefined && thruk_debug_js) {
-    if(window.console != undefined) {
-        /* overwrite debug function, so caller information is not replaced */
-        try {
-            debug = console.debug;
-            debug('console debug log enabled');
-        } catch(e) {
-            debug = function(str) {}
+window.addEventListener('load', function(e) {
+    if(thruk_debug_js != undefined && thruk_debug_js) {
+        if(window.console != undefined) {
+            /* overwrite debug function, so caller information is not replaced */
+            try {
+                debug = console.debug;
+                debug('console debug log enabled');
+            } catch(e) {
+                debug = function(str) {}
+            }
         }
     }
-}
+}, false);
 
 /* do initial things */
 function init_page() {
@@ -4028,7 +4030,6 @@ Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
 var ajax_search = {
-    url             : url_prefix + 'cgi-bin/status.cgi?format=search',
     max_results     : 12,
     input_field     : 'NavBarSearchItem',
     result_pan      : 'search-results',
@@ -4101,6 +4102,7 @@ var ajax_search = {
 
         if(options == undefined) { options = {}; };
 
+        ajax_search.url = url_prefix + 'cgi-bin/status.cgi?format=search';
         ajax_search.input_field = elem.id;
 
         if(ajax_search.stop_events == true) {
