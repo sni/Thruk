@@ -54,9 +54,9 @@ sub _open {
     my $self = shift;
     my $sock;
 
+    my $remaining = alarm($self->{'connect_timeout'});
     eval {
         local $SIG{'ALRM'} = sub { die("connection timeout"); };
-        alarm($self->{'connect_timeout'});
         $sock = IO::Socket::INET->new(
                                          PeerAddr => $self->{'peer'},
                                          Type     => SOCK_STREAM,
@@ -73,20 +73,21 @@ sub _open {
             return;
         }
 
-        if(defined $self->{'query_timeout'}) {
-            # set timeout
-            $sock->timeout($self->{'query_timeout'});
-        }
-
         setsockopt($sock, IPPROTO_TCP, TCP_NODELAY, 1);
 
     };
     alarm(0);
+    alarm($remaining) if $remaining;
 
     if($@) {
         $Monitoring::Livestatus::ErrorCode    = 500;
         $Monitoring::Livestatus::ErrorMessage = $@;
         return;
+    }
+
+    if(defined $self->{'query_timeout'}) {
+        # set timeout
+        $sock->timeout($self->{'query_timeout'});
     }
 
     return($sock);

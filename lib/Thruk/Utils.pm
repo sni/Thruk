@@ -1797,11 +1797,12 @@ sub wait_after_reload {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
-            local $SIG{'PIPE'} = 'IGNORE'; # exits sometimes on reload
-            alarm 10;
+            local $SIG{'PIPE'} = sub { die "pipe error\n" };
+            alarm(10);
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
+        alarm(0);
         if($@) {
             $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
         }
