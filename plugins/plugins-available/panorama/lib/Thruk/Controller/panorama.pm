@@ -240,7 +240,10 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $self->_js($c, 1, $open_tabs);
 
-    $c->stash->{use_manifest} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} : 1;
+    $c->stash->{use_manifest} = 0;
+    if(defined $c->{'request'}->{'headers'}->{'user-agent'} && $c->{'request'}->{'headers'}->{'user-agent'} =~ m/Chrome/mx) {
+        $c->stash->{use_manifest} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} : 1;
+    }
     $c->stash->{template}     = 'panorama.tt';
     return 1;
 }
