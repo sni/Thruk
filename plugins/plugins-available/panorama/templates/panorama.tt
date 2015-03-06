@@ -40,9 +40,9 @@ if(window.applicationCache) {
       // Swap it in
       window.applicationCache.swapCache();
       // and reload the page to get the new hotness.
-      if(confirm('A new version is available. Reload?')) {
+      //if(confirm('A new version is available. Reload?')) {
         window.location.reload(true);
-      }
+      //}
     }
   }, false);
 }
