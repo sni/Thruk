@@ -10,6 +10,7 @@ use IO::Socket;
 use File::Slurp;
 use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
+use Scalar::Util qw/looks_like_number/;
 use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
@@ -664,6 +665,7 @@ sub _avail_update {
 
     my $data = {};
     my $now  = time();
+    Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
             # check if this filter is used in availabilities at all
@@ -678,7 +680,7 @@ sub _avail_update {
             my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
             delete $c->request->parameters->{'backend'};
             delete $c->request->parameters->{'backends'};
-            if($backends) {
+            if((ref $backends eq "" and $backends) || (ref $backends eq 'ARRAY' && scalar @{$backends} > 0)) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
@@ -721,7 +723,7 @@ sub _avail_update {
                     my $opts   = $in->{$panel}->{$key}->{opts};
                     my $cached = $cache->get(@cache_prefix, 'hostgroups', $group, $key);
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
-                        $c->{request}->{parameters}->{include_host_services} = 1
+                        $c->{request}->{parameters}->{include_host_services} = 1;
                     }
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
@@ -746,6 +748,7 @@ sub _avail_update {
         for my $host (keys %{$types->{'hosts'}}) {
             Thruk::Utils::Avail::reset_req_parameters($c);
             $c->{request}->{parameters}->{host} = $host;
+            $c->{request}->{parameters}->{include_host_services} = 0;
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
@@ -819,7 +822,7 @@ sub _avail_calc {
             $refresh = 1;
         }
         # retry unknown values every 2 minutes
-        if(!$refresh && $cached->{'val'} == -1) {
+        elsif(!looks_like_number($cached->{'val'}) || $cached->{'val'} == -1) {
             if($now > $cached->{'time'} + 120) {
                 $refresh = 1;
             }
@@ -855,10 +858,17 @@ sub _avail_calc {
                                                                     $host,
                                                                     $service
                                                                    );
-        return $totals->{'total'}->{'percent'};
+        return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
+        return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
+        return($totals->{'total'}->{'percent'});
     } else {
         my($num, $total) = (0,0);
-        if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+        # if nothing is enabled, use all
+        if(!$opts->{'incl_hst'} && !$opts->{'incl_svc'}) {
+            $opts->{'incl_hst'} = 1;
+            $opts->{'incl_svc'} = 1;
+        }
+        if($opts->{'incl_hst'}) {
             my $s_filter = delete $c->{request}->{parameters}->{s_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'hosts'};
@@ -886,7 +896,7 @@ sub _avail_calc {
             }
             $c->{request}->{parameters}->{s_filter} = $s_filter;
         }
-        if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+        if($opts->{'incl_svc'}) {
             delete $c->{request}->{parameters}->{h_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'services'};
@@ -920,7 +930,7 @@ sub _avail_calc {
             return($total/$num);
         }
     }
-    return(-1);
+    return("found no data");
 }
 
 ##########################################################

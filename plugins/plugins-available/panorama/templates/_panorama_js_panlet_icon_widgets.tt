@@ -330,7 +330,7 @@
                     }
                     else if(res.match(/\-1/)) {
                         res = res.replace(/\-1[\.0]*/g, '...');
-                        res = "<span class='avail_result_not_ready'>"+res+"<\/span>";
+                        res = "<span class='avail_result_not_ready' title='not yet ready'>"+res+"<\/span>";
                     }
                 }
                 txt = txt.replace(item, res);
@@ -2521,7 +2521,8 @@ function availability(panel, opts) {
             last:        -1
         };
     }
-    else if(TP.availabilities[panel.id][opts_enc]['last_refresh'] < now - 30) {
+    /* refresh every 30seconds max */
+    else if(TP.availabilities[panel.id][opts_enc]['last_refresh'] < now - [% IF thruk_debug %]5[% ELSE %]30[% END %]) {
         refresh = true;
     }
     TP.availabilities[panel.id][opts_enc]['active'] = true;
