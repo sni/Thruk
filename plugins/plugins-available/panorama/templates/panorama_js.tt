@@ -120,3 +120,34 @@ Ext.onReady(function() {
     [% END %]
     cleanUnderscoreUrl();
 });
+
+[% IF !thruk_debug && use_manifest %]
+/* Log every appcache event to the console */
+var cacheStatusValues = ['uncached', 'idle', 'checking', 'downloading', 'updateready', 'obsolete'];
+var cache = window.applicationCache;
+function logAppCacheEvent(e) {
+     var online, status, type, message;
+     try {
+         online = (navigator.onLine) ? 'yes' : 'no';
+     } catch(e) { online = 'unknown'; }
+     status = cacheStatusValues[cache.status];
+     type = e.type;
+     message = 'online: ' + online;
+     message+= ', event: ' + type;
+     message+= ', status: ' + status;
+     if(type == 'error' && navigator.onLine) {
+         message+= ' There was an unknown error, check your Cache Manifest.';
+     }
+     debug(' '+message);
+     TP.log('[appcache] '+message);
+}
+/* Listeners for all possible events */
+cache.addEventListener('cached', logAppCacheEvent, false);
+cache.addEventListener('checking', logAppCacheEvent, false);
+cache.addEventListener('downloading', logAppCacheEvent, false);
+cache.addEventListener('error', logAppCacheEvent, false);
+cache.addEventListener('noupdate', logAppCacheEvent, false);
+cache.addEventListener('obsolete', logAppCacheEvent, false);
+cache.addEventListener('progress', logAppCacheEvent, false);
+cache.addEventListener('updateready', logAppCacheEvent, false);
+[% END %]

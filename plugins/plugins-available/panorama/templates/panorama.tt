@@ -1,6 +1,6 @@
 ﻿[% USE date %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html[% IF !thruk_debug %] manifest="panorama.cgi?task=manifest"[% END %]>
+<!DOCTYPE HTML>
+<html[% IF !thruk_debug && use_manifest %] manifest="panorama.cgi?task=manifest"[% END %]>
   <head>
     [% PROCESS custom_perf_bar_adjustments.tt %]
     <title>[% title_prefix %]Thruk Panorama</title>
@@ -25,28 +25,29 @@
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
     [% END %]
-    <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1"></script>
+    <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_=[% date.now %]"></script>
 </head>
 <body onunload="TP.unload()">
 <div id="bodyview"></div>
+[% IF !thruk_debug && use_manifest %]
 <script type="text/javascript">
 <!--
 /* new application cache available? */
-window.addEventListener('load', function(e) {
-    if(window.applicationCache) {
-        window.applicationCache.addEventListener('updateready', function(e) {
-            if(window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-                // Browser downloaded a new app cache.
-                // Swap it in
-                window.applicationCache.swapCache();
-                // and reload the page to get the new hotness.
-                // reload is broken in firefox, it reloads every time
-                //window.location.reload();
-            }
-        }, false);
+if(window.applicationCache) {
+  window.applicationCache.addEventListener('updateready', function(e) {
+    if(window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      // Browser downloaded a new app cache.
+      // Swap it in
+      window.applicationCache.swapCache();
+      // and reload the page to get the new hotness.
+      if(confirm('A new version is available. Reload?')) {
+        window.location.reload(true);
+      }
     }
-}, false);
+  }, false);
+}
 -->
 </script>
+[% END %]
 </body>
 </html>

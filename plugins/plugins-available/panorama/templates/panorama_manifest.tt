@@ -12,6 +12,5 @@ CACHE:
 [%+ url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all-debug.js
 [%+ url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all.js
 
-
 NETWORK:
 *

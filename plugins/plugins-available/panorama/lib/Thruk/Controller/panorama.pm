@@ -240,7 +240,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $self->_js($c, 1, $open_tabs);
 
-    $c->stash->{template} = 'panorama.tt';
+    $c->stash->{use_manifest} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'use_manifest'} : 1;
+    $c->stash->{template}     = 'panorama.tt';
     return 1;
 }
 
@@ -615,6 +616,7 @@ sub _task_manifest {
     _set_preload_images($c);
     $c->stash->{template} = 'panorama_manifest.tt';
     $c->res->content_type('text/cache-manifest');
+    $c->res->header('Cache-Control', 'no-cache, private');
     return;
 }
 
