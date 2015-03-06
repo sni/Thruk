@@ -227,18 +227,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         return $c->response->redirect("panorama.cgi");
     }
 
-    my $open_tabs;
-    if(defined $c->request->parameters->{'map'}) {
-        my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
-        if(!$dashboard) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
-            return $c->response->redirect($c->stash->{'url_prefix'});
-        }
-        $open_tabs = [$dashboard->{'nr'}];
-        $c->stash->{one_tab_only} = $dashboard->{'nr'};
-    }
-
-    $self->_js($c, 1, $open_tabs);
+    $self->_js($c, 1);
 
     $c->stash->{use_manifest} = 0;
     if(defined $c->{'request'}->{'headers'}->{'user-agent'} && $c->{'request'}->{'headers'}->{'user-agent'} =~ m/Chrome/mx) {
@@ -250,7 +239,18 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 ##########################################################
 sub _js {
-    my($self, $c, $only_data, $open_tabs) = @_;
+    my($self, $c, $only_data) = @_;
+
+    my $open_tabs;
+    if(defined $c->request->parameters->{'map'}) {
+        my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
+        if(!$dashboard) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
+            return $c->response->redirect($c->stash->{'url_prefix'});
+        }
+        $open_tabs = [$dashboard->{'nr'}];
+        $c->stash->{one_tab_only} = $dashboard->{'nr'};
+    }
 
     $c->stash->{shapes} = {};
     my $data = Thruk::Utils::get_user_data($c);
@@ -846,7 +846,7 @@ sub _avail_calc {
     }
     if($cached_only) {
         if(defined $cached->{'val'}) {
-            if($now > $cached->{'time'} + $duration * $cache_retrieve_factor*5) {
+            if($now > $cached->{'time'} + $duration * $cache_retrieve_factor*5 && $now > $cached->{'time'} + 180) {
                 # better return unknown for really old cached values
                 return(-1);
             }

@@ -731,12 +731,14 @@ Ext.define('TP.IconWidget', {
     },
     updateRenderDo: function(xdata) {
         var panel = this;
-        if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for changes if we are not the active tab */
         if(xdata == undefined) { xdata = panel.xdata; }
+        /* static icons must be refreshed, even when inactive, because they won't be updated later on */
+        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
+        /* no need for changes if we are not the active tab */
+        if(!TP.isThisTheActiveTab(panel)) { return; }
         if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
-        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
         TP.checkModalWindows();
@@ -1377,6 +1379,7 @@ Ext.define('TP.IconWidget', {
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);
+        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
     },
     iconFixSize: function(xdata) {
         var panel = this;
