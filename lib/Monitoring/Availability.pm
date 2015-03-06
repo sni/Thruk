@@ -185,26 +185,15 @@ sub new {
         '3'           => STATE_UNKNOWN,
     };
 
-    # allow setting debug mode from env
-    if(defined $ENV{'MONITORING_AVAILABILITY_DEBUG'}) {
-        $self->{'verbose'} = 1;
-    }
-
-    # init log4perl, may require additional modules
-    if($self->{'verbose'} and !defined $self->{'logger'}) {
-        require Log::Log4perl;
-        Log::Log4perl->import(qw(:easy));
-        Log::Log4perl->easy_init({
-            level   => 'DEBUG',
-            file    => ">/tmp/Monitoring-Availability-Debug.log"
-        });
-        $self->{'logger'} = get_logger();
-    }
-
     $self->_log('initialized '.$class) if $self->{'verbose'};
     $self->_log($self)                 if $self->{'verbose'};
 
-    $verbose = $self->{'verbose'};
+    $self->{'xs'} = 0;
+    eval {
+        require Thruk::Utils::XS;
+        Thruk::Utils::XS->import();
+        $self->{'xs'} = 1;
+    };
 
     return $self;
 }
@@ -296,6 +285,23 @@ sub calculate {
     my $self      = shift;
     my(%opts)     = @_;
 
+    # allow setting debug mode from env
+    if(defined $ENV{'MONITORING_AVAILABILITY_DEBUG'}) {
+        $self->{'verbose'} = 1;
+    }
+
+    # init log4perl, may require additional modules
+    if($self->{'verbose'} and !defined $self->{'logger'}) {
+        require Log::Log4perl;
+        Log::Log4perl->import(qw(:easy));
+        Log::Log4perl->easy_init({
+            level   => 'DEBUG',
+            file    => ">/tmp/Monitoring-Availability-Debug.log"
+        });
+        $self->{'logger'} = get_logger();
+    }
+    $verbose = $self->{'verbose'};
+
     # clean up namespace
     $self->_reset();
 
@@ -322,8 +328,8 @@ sub calculate {
         'timeformat'                     => $self->{'timeformat'},
         'breakdown'                      => $self->{'breakdown'},
     };
-    $self->_log('calculate()')             if $self->{'verbose'};
-    $self->_log($self->{'report_options'}) if $self->{'verbose'};
+    $self->_log('calculate()')             if $verbose;
+    $self->_log($self->{'report_options'}) if $verbose;
     my $result;
 
     for my $opt_key (keys %opts) {
@@ -334,7 +340,6 @@ sub calculate {
             croak("unknown option: $opt_key");
         }
     }
-    $verbose = $self->{'verbose'};
 
     $self->{'report_options'} = $self->_set_default_options($self->{'report_options'});
     $self->{'report_options'} = $self->_verify_options($self->{'report_options'});
@@ -366,7 +371,7 @@ sub calculate {
 
     $self->{'report_options'}->{'calc_all'} = FALSE;
     if(scalar keys %{$result->{'services'}} == 0 and scalar keys %{$result->{'hosts'}} == 0) {
-        $self->_log('will calculate availability for all hosts/services found') if $self->{'verbose'};
+        $self->_log('will calculate availability for all hosts/services found') if $verbose;
         $self->{'report_options'}->{'calc_all'} = TRUE;
     }
 
@@ -454,7 +459,7 @@ sub get_full_logs {
 ########################################
 sub _reset {
     my $self   = shift;
-    $self->_log('_reset()') if $self->{'verbose'};
+    $self->_log('_reset()') if $verbose;
 
     undef $self->{'full_log_store'};
     $self->{'full_log_store'} = [];
@@ -480,7 +485,7 @@ sub _set_empty_hosts {
         $initial_assumend_state = $self->{'report_options'}->{'initialassumedhoststate'};
     }
 
-    $self->_log('_set_empty_hosts()') if $self->{'verbose'};
+    $self->_log('_set_empty_hosts()') if $verbose;
     for my $hostname (keys %{$data->{'hosts'}}) {
         my $first_state = $initial_assumend_state;
         if($initial_assumend_state == STATE_CURRENT) {
@@ -503,7 +508,7 @@ sub _set_empty_hosts {
 sub _set_empty_services {
     my $self    = shift;
     my $data    = shift;
-    $self->_log('_set_empty_services()') if $self->{'verbose'};
+    $self->_log('_set_empty_services()') if $verbose;
 
     my $initial_assumend_state      = STATE_UNSPECIFIED;
     my $initial_assumend_host_state = STATE_UNSPECIFIED;
@@ -577,7 +582,7 @@ sub _compute_for_data {
     if($self->{'report_options'}->{'breakdown'} != BREAK_NONE) {
         my $breakpoint = $self->{'breakpoints'}->[0];
         while(defined $breakpoint and $last_time < $breakpoint and $data->{'time'} >= $breakpoint) {
-            $self->_log('_compute_for_data(): inserted breakpoint: '.$breakpoint." (".scalar localtime($breakpoint).")") if $self->{'verbose'};
+            $self->_log('_compute_for_data(): inserted breakpoint: '.$breakpoint." (".scalar localtime($breakpoint).")") if $verbose;
             $self->_insert_fake_event($result, $breakpoint);
             shift(@{$self->{'breakpoints'}});
             $breakpoint = $self->{'breakpoints'}->[0];
@@ -607,7 +612,7 @@ sub _compute_for_data {
 sub _compute_availability_line_by_line {
     my($self,$result,$file) = @_;
 
-    if($self->{'verbose'}) {
+    if($verbose) {
         $self->_log('_compute_availability_line_by_line()');
         $self->_log('_compute_availability_line_by_line() report start: '.(scalar localtime $self->{'report_options'}->{'start'}));
         $self->_log('_compute_availability_line_by_line() report end:   '.(scalar localtime $self->{'report_options'}->{'end'}));
@@ -621,6 +626,8 @@ sub _compute_availability_line_by_line {
     open(my $fh, '<', $file) or die("cannot read ".$file.": ".$!);
     binmode($fh);
 
+    my $xs = $self->{xs};
+
     # process all log lines we got
     # logs should be sorted already
     my $count     = 0;
@@ -630,7 +637,12 @@ sub _compute_availability_line_by_line {
         $count++;
         &Monitoring::Availability::Logs::_decode_any($line);
         chomp($line);
-        my $data = &Monitoring::Availability::Logs::parse_line($line);
+        my $data;
+        if($xs) {
+            $data = &Thruk::Utils::XS::parse_line($line);
+        } else {
+            $data = &Monitoring::Availability::Logs::parse_line($line);
+        }
         next unless $data;
         &_compute_for_data($self,$last_time, $data, $result);
         # set timestamp of last log line
@@ -660,7 +672,7 @@ sub _compute_availability_from_iterator {
     my $result  = shift;
     my $logs    = shift;
 
-    if($self->{'verbose'}) {
+    if($verbose) {
         $self->_log('_compute_availability_from_iterator()');
         $self->_log('_compute_availability_from_iterator() report start: '.(scalar localtime $self->{'report_options'}->{'start'}));
         $self->_log('_compute_availability_from_iterator() report end:   '.(scalar localtime $self->{'report_options'}->{'end'}));
@@ -669,7 +681,7 @@ sub _compute_availability_from_iterator {
     my $last_time = -1;
     # no logs at all?
     unless($logs->has_next) {
-        $self->_compute_for_data(-1,
+        &_compute_for_data($self, -1,
                                  {time => $self->{'report_options'}->{'end'}, fake => 1},
                                  $result);
         $last_time = $self->{'report_options'}->{'end'};
@@ -678,8 +690,8 @@ sub _compute_availability_from_iterator {
     # process all log lines we got
     # logs should be sorted already
     while(my $data = $logs->next) {
-        $self->_compute_for_data($last_time,
-                                 Monitoring::Availability::Logs->_parse_livestatus_entry($data),
+        &_compute_for_data($self, $last_time,
+                                 &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
                                  $result);
 
         # set timestamp of last log line
@@ -696,34 +708,48 @@ sub _compute_availability_from_iterator {
 
 ########################################
 sub _compute_availability_on_the_fly {
-    my $self    = shift;
-    my $result  = shift;
-    my $logs    = shift;
+    my($self, $result, $logs) = @_;
 
-    if($self->{'verbose'}) {
+    if($verbose) {
         $self->_log('_compute_availability_on_the_fly()');
         $self->_log('_compute_availability_on_the_fly() report start: '.(scalar localtime $self->{'report_options'}->{'start'}));
         $self->_log('_compute_availability_on_the_fly() report end:   '.(scalar localtime $self->{'report_options'}->{'end'}));
+        $self->_log('_compute_availability_on_the_fly() log size:     '.(scalar @{$logs}));
     }
 
     my $last_time = -1;
     if(scalar @{$logs} == 0) {
-        $self->_compute_for_data(-1,
+        &_compute_for_data($self, -1,
                                  {time => $self->{'report_options'}->{'end'}, fake => 1},
                                  $result);
         $last_time = $self->{'report_options'}->{'end'};
     }
 
+    my $xs = $self->{xs};
+
     # process all log lines we got
     # make sure our logs are sorted by time
     for my $data ( sort { $a->{'time'} <=> $b->{'time'} } @{$logs} ) {
-        eval {
-            $self->_compute_for_data($last_time,
-                                     Monitoring::Availability::Logs->_parse_livestatus_entry($data),
-                                     $result);
+        if($xs) {
+            eval {
+                &_compute_for_data($self, $last_time,
+                                         &Thruk::Utils::XS::parse_line($data->{'message'}),
+                                         $result);
 
-            # set timestamp of last log line
-            $last_time = $data->{'time'};
+                # set timestamp of last log line
+                $last_time = $data->{'time'};
+            };
+            $self->_log('_compute_availability_on_the_fly(): '.$@) if $@ and $verbose;
+        } else {
+            eval {
+                &_compute_for_data($self, $last_time,
+                                         &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
+                                         $result);
+
+                # set timestamp of last log line
+                $last_time = $data->{'time'};
+            };
+            $self->_log('_compute_availability_on_the_fly(): '.$@) if $@ and $verbose;
         }
     }
 
@@ -741,7 +767,7 @@ sub _compute_availability_from_log_store {
     my $result  = shift;
     my $logs    = shift;
 
-    if($self->{'verbose'}) {
+    if($verbose) {
         $self->_log('_compute_availability_from_log_store()');
         $self->_log('_compute_availability_from_log_store() report start: '.(scalar localtime $self->{'report_options'}->{'start'}));
         $self->_log('_compute_availability_from_log_store() report end:   '.(scalar localtime $self->{'report_options'}->{'end'}));
@@ -750,13 +776,13 @@ sub _compute_availability_from_log_store {
     # make sure our logs are sorted by time
     @{$logs} = sort { $a->{'time'} <=> $b->{'time'} } @{$logs};
 
-    $self->_log('_compute_availability_from_log_store() sorted logs') if $self->{'verbose'};
+    $self->_log('_compute_availability_from_log_store() sorted logs') if $verbose;
 
     # process all log lines we got
     my $last_time = -1;
     for my $data (@{$logs}) {
 
-        $self->_compute_for_data($last_time, $data, $result);
+        &_compute_for_data($self, $last_time, $data, $result);
 
         # set timestamp of last log line
         $last_time = $data->{'time'};
@@ -782,7 +808,7 @@ sub _add_last_time_event {
     # breakpoints left?
     my $breakpoint = $self->{'breakpoints'}->[0];
     while(defined $breakpoint) {
-        $self->_log('_add_last_time_event(): inserted breakpoint: '.$breakpoint." (".scalar localtime($breakpoint).")") if $self->{'verbose'};
+        $self->_log('_add_last_time_event(): inserted breakpoint: '.$breakpoint." (".scalar localtime($breakpoint).")") if $verbose;
         $self->_insert_fake_event($result, $breakpoint);
         shift(@{$self->{'breakpoints'}});
         $breakpoint = $self->{'breakpoints'}->[0];
