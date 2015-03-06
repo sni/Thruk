@@ -444,6 +444,7 @@
         e.preventDefault();
         TP.resetMoveIcons();
         var pos = [e.getX(), e.getY()];
+        var nr = tab.id.replace(/^tabpan-tab_/, '');
         Ext.create('Ext.menu.Menu', {
             margin: '0 0 10 0',
             items: [{
@@ -468,11 +469,18 @@
                 handler: function() { BigScreen.exit(); },
                 hidden:  !BigScreen.element
             }, {
+[% IF one_tab_only %]
+                text:       'Open Tab Mode',
+                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                href:       'panorama.cgi#'+nr,
+                tooltip:    'open this dashboard in tab mode'
+[% ELSE %]
                 text:       'Direct Link',
                 icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
                 href:       'panorama.cgi?map='+tab.xdata.title,
                 hrefTarget: '_blank',
                 tooltip:    'open this dashboard only (new window)'
+[% END %]
             }, {
                 text:   'Debug Information',
                 icon:   '[% url_prefix %]plugins/panorama/images/information.png',
