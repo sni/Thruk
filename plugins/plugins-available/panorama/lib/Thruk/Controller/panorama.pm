@@ -832,7 +832,13 @@ sub _avail_calc {
         }
     }
     if($cached_only) {
-        return($cached->{'val'}) if defined $cached->{'val'};
+        if(defined $cached->{'val'}) {
+            if($now > $cached->{'time'} + $duration * $cache_retrieve_factor*5) {
+                # better return unknown for really old cached values
+                return(-1);
+            }
+            return($cached->{'val'});
+        }
         return(-1);
     }
 
