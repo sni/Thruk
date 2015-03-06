@@ -2588,6 +2588,7 @@ sub _set_preload_images {
         $i =~ s|^.*/||gmx;
         push @{$c->stash->{preload_img}}, $i;
     }
+    return;
 }
 
 ##########################################################
