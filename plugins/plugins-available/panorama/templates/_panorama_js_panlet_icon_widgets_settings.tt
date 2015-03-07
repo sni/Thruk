@@ -701,7 +701,7 @@ TP.iconShowEditDialog = function(panel) {
                     }]
                 },
                 {
-                    fieldLabel: 'Arrowhead',
+                    fieldLabel: 'Endpoints',
                     xtype:      'fieldcontainer',
                     name:       'connectorarrow',
                     cls:        'connector',

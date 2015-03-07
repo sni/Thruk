@@ -1244,9 +1244,20 @@ Ext.define('TP.IconWidget', {
         if(!panel.surface.el) { return };
         panel.surface.removeAll();
 
+        var fromX = xdata.appearance.connectorfromx;
+        var fromY = xdata.appearance.connectorfromy;
+        var toX   = xdata.appearance.connectortox;
+        var toY   = xdata.appearance.connectortoy;
+        if(fromX > toX) {
+            fromX = xdata.appearance.connectortox;
+            fromY = xdata.appearance.connectortoy;
+            toX   = xdata.appearance.connectorfromx;
+            toY   = xdata.appearance.connectorfromy;
+        }
+
         /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
-        var distance  = Math.ceil(Math.sqrt(Math.pow(xdata.appearance.connectortox-xdata.appearance.connectorfromx, 2)
-                                          + Math.pow(xdata.appearance.connectortoy - xdata.appearance.connectorfromy, 2)));
+        var distance  = Math.ceil(Math.sqrt(Math.pow(toX-fromX, 2)
+                                          + Math.pow(toY-fromY, 2)));
         if(isNaN(distance) || distance == 0) {
             return;
         }
@@ -1254,7 +1265,7 @@ Ext.define('TP.IconWidget', {
         var end   = [ distance, 0 ];
 
         /* get angle between points */
-        var angle = Math.ceil(Math.atan((xdata.appearance.connectortoy-xdata.appearance.connectorfromy)/(xdata.appearance.connectortox-xdata.appearance.connectorfromx))*180/Math.PI);
+        var angle = Math.atan((toY-fromY)/(toX-fromX))*180/Math.PI;
 
         var points = [[start[0],start[1]]];
         /* top half of left arrow */
@@ -1312,8 +1323,8 @@ Ext.define('TP.IconWidget', {
         panel.surface.el.dom.parentNode.style.height = newHeight+"px";
         sprite.show(true);
         /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
-        xdata.layout.x = Math.ceil(xdata.appearance.connectorfromx-box.path[0][1]+box.x);
-        xdata.layout.y = Math.ceil(xdata.appearance.connectorfromy-box.path[0][2]+box.y);
+        xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
+        xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
         panel.suspendEvents();
         panel.setPosition(xdata.layout.x, xdata.layout.y);
         panel.resumeEvents();
