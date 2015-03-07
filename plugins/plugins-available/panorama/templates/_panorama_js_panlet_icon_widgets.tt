@@ -1205,7 +1205,7 @@ Ext.define('TP.IconWidget', {
         }
 
         shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-        shapeData += ",fill:'"+TP.getShapeColor("shape", panel, xdata, forceColor)+"'";
+        shapeData += ",fill:'"+(TP.getShapeColor("shape", panel, xdata, forceColor).color)+"'";
         var spriteData;
         try {
             eval("spriteData = {"+shapeData+"};");
@@ -1254,6 +1254,22 @@ Ext.define('TP.IconWidget', {
             toX   = xdata.appearance.connectorfromx;
             toY   = xdata.appearance.connectorfromy;
         }
+        var connectorarrowwidth = xdata.appearance.connectorarrowwidth;
+
+        /* variable arrow sizes */
+        var shapeColor = TP.getShapeColor("connector", panel, xdata, forceColor);
+        var connectorwidth = xdata.appearance.connectorwidth;
+        if(xdata.appearance.connectorvariable) {
+            var percent = shapeColor.percent;
+            var min     = xdata.appearance.connectormin;
+            if(min == undefined) { min = 0; }
+            if(xdata.appearance.connectormax) {
+                percent = (shapeColor.value-min / xdata.appearance.connectormax-min) * 100;
+            }
+            if(percent > 100) { percent = 100 }
+            connectorwidth = connectorwidth * (percent/100);
+            if(connectorwidth < 1) { connectorwidth = 1; }
+        }
 
         /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
         var distance  = Math.ceil(Math.sqrt(Math.pow(toX-fromX, 2)
@@ -1271,52 +1287,52 @@ Ext.define('TP.IconWidget', {
         /* top half of left arrow */
         if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
             points.push(
-                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-xdata.appearance.connectorwidth/2-xdata.appearance.connectorarrowwidth)],
-                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-xdata.appearance.connectorwidth/2)]
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-connectorwidth/2-connectorarrowwidth)],
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-connectorwidth/2)]
             );
         } else {
             points.push(
-                [start[0], (start[1]-xdata.appearance.connectorwidth/2)]
+                [start[0], (start[1]-connectorwidth/2)]
             );
         }
 
         /* right arrow */
         if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "right") {
             points.push(
-                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-xdata.appearance.connectorwidth/2)],
-                [end[0]-xdata.appearance.connectorarrowlength, (end[1]-xdata.appearance.connectorwidth/2-xdata.appearance.connectorarrowwidth)],
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-connectorwidth/2)],
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]-connectorwidth/2-connectorarrowwidth)],
                 [end[0], end[1]],
-                [end[0]-xdata.appearance.connectorarrowlength, (end[1]+xdata.appearance.connectorwidth/2+xdata.appearance.connectorarrowwidth)],
-                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]+xdata.appearance.connectorwidth/2)]
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]+connectorwidth/2+connectorarrowwidth)],
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]+connectorwidth/2)]
             );
         } else {
             points.push(
-                [end[0], (end[1]-xdata.appearance.connectorwidth/2)],
-                [end[0], (end[1]+xdata.appearance.connectorwidth/2)]
+                [end[0], (end[1]-connectorwidth/2)],
+                [end[0], (end[1]+connectorwidth/2)]
             );
         }
 
         /* bottom half of left arrow */
         if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
             points.push(
-                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+xdata.appearance.connectorwidth/2)],
-                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+xdata.appearance.connectorwidth/2+xdata.appearance.connectorarrowwidth)]
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+connectorwidth/2)],
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+connectorwidth/2+connectorarrowwidth)]
             );
         } else {
             points.push(
-                [start[0], (start[1]+xdata.appearance.connectorwidth/2)]
+                [start[0], (start[1]+connectorwidth/2)]
             );
         }
 
         sprite = panel.surface.add({
             type: "path",
             path: TP.pointsToPath(points),
-            fill: TP.getShapeColor("connector", panel, xdata, forceColor)
+            fill: shapeColor.color
         });
         sprite.setAttributes({rotate:{degrees: angle, x:0, y:0}}, true);
         var box = sprite.getBBox();
-        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(xdata.appearance.connectorarrowtype == "none" ? xdata.appearance.connectorarrowwidth : 0)}}, true);
-        var newHeight = Math.ceil(Ext.Array.max([xdata.appearance.connectorarrowwidth+xdata.appearance.connectorwidth, box.height]));
+        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(xdata.appearance.connectorarrowtype == "none" ? connectorarrowwidth : 0)}}, true);
+        var newHeight = Math.ceil(Ext.Array.max([connectorarrowwidth+connectorwidth, box.height]));
         panel.setSize(Math.ceil(box.width), newHeight);
         panel.surface.setSize(Math.ceil(box.width), newHeight);
         panel.surface.el.dom.parentNode.style.width  = Math.ceil(box.width)+"px";
@@ -1328,6 +1344,7 @@ Ext.define('TP.IconWidget', {
         panel.suspendEvents();
         panel.setPosition(xdata.layout.x, xdata.layout.y);
         panel.resumeEvents();
+        panel.setIconLabel();
 
         /* adjust drag elements position */
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
@@ -2672,6 +2689,7 @@ TP.pointsToPath = function(points) {
 /* create gradient and return color by state */
 TP.getShapeColor = function(type, panel, xdata, forceColor) {
     var state = xdata.state, fillcolor;
+    var perc  = 100;
     if(state == undefined) { state = panel.xdata.state; }
     if(forceColor != undefined) { fillcolor = forceColor; }
     else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
@@ -2694,7 +2712,6 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
                 var r = TP.getPerfDataMinMax(p, 100);
                 var color1 = xdata.appearance[type+"color_ok"];
                 var color2 = xdata.appearance[type+"color_ok"];
-                var perc  = 100;
                 /* inside critical range: V c w o w c  */
                 if(p.crit_min != "" && p.val < p.crit_min) {
                     color1 = xdata.appearance[type+"color_critical"];
@@ -2736,7 +2753,7 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
                     panel.surface.addGradient(gradient);
                     panel.surface.existingGradients[gradient.id] = true;
                 }
-                return("url(#"+gradient.id+")");
+                return({color: "url(#"+gradient.id+")", percent: perc, value: p.val});
             }
         } else {
             /* fixed gradient */
@@ -2748,5 +2765,5 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
             return("url(#"+gradient.id+")");
         }
     }
-    return(fillcolor);
+    return({color: fillcolor, percent: perc});
 }

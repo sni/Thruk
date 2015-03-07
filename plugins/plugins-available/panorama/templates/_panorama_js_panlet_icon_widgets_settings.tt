@@ -816,6 +816,19 @@ TP.iconShowEditDialog = function(panel) {
                         listeners:   { focus: perfDataUpdate, change: function() { renderUpdate(); } },
                         flex:          1
                     }]
+                }, {
+                    fieldLabel: 'Options',
+                    xtype:      'fieldcontainer',
+                    cls:        'connector',
+                    layout:     'table',
+                    defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
+                    items: [{ xtype: 'label', text: 'Variable Size:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'checkbox', name: 'connectorvariable' },
+                            { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormin', step: 100 },
+                            { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormax', step: 100 }
+                        ]
                 },
 
 
@@ -1420,7 +1433,7 @@ TP.iconShowEditDialog = function(panel) {
     }
 
     var settingsWindow = new Ext.Window({
-        height:  330,
+        height:  350,
         width:   400,
         layout: 'fit',
         items:   tabPanel,
