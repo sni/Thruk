@@ -97,9 +97,8 @@ Ext.onReady(function() {
             margins:  '0 0 0 0',
             items:    [ new TP.TabBar() ]
         });
-        Ext.getCmp('bug_report').hide();
-        [% IF !thruk_debug || c.config.demo_mode %]
-        Ext.getCmp('debug_tab').hide();
+        [% IF thruk_debug && !c.config.demo_mode %]
+        Ext.getCmp('debug_tab').show();
         [% END %]
 
         [% IF readonly || dashboard_ignore_changes %]

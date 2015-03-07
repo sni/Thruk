@@ -29,7 +29,8 @@ Ext.define('TP.TabBar', {
             iconCls:  'debug-tab',
             tooltip:  'Debug Information',
             handler:  thruk_debug_window_handler,
-            margin:   '0 15 0 0'
+            margin:   '0 15 0 0',
+            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
             xtype:    'label',
             text:     '[% date_format(c, date.now, "%H:%M") %]',
@@ -52,7 +53,8 @@ Ext.define('TP.TabBar', {
             iconCls:  'bug-tab',
             href:     '#',
             html:     'Report',
-            tooltip:  'Send Bug Report'
+            tooltip:  'Send Bug Report',
+            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
             iconCls:  'user-tab',
             closable:  false,
