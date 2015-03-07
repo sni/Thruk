@@ -95,11 +95,17 @@
                 This.el.on('mouseover', function(e,t,a) {
                     if(!This.el.dom.style.outline.match("orange")) {
                         This.el.dom.style.outline = "1px dashed grey";
+                        if(This.iconType != "text" && This.labelEl && This.labelEl.el) {
+                            This.labelEl.el.dom.style.outline = "1px dashed grey";
+                        }
                     }
                 });
                 This.el.on('mouseout', function(e,t,a) {
                     if(This.el.dom.style.outline.match("grey")) {
                         This.el.dom.style.outline = "";
+                        if(This.labelEl && This.labelEl.el) {
+                            This.labelEl.el.dom.style.outline = "";
+                        }
                     }
                 });
             }
@@ -390,6 +396,24 @@
                     afterrender: function(This, eOpts) {
                         panel.addClickEventhandler(This.el);
                         panel.addDDListener(This);
+                        if(!panel.locked) {
+                            This.el.on('mouseover', function(e,t,a) {
+                                if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
+                                    This.el.dom.style.outline = "1px dashed grey";
+                                    if(panel.iconType != "text") {
+                                        panel.el.dom.style.outline = "1px dashed grey";
+                                    }
+                                }
+                            });
+                            This.el.on('mouseout', function(e,t,a) {
+                                if(This.el.dom.style.outline.match("grey")) {
+                                    This.el.dom.style.outline = "";
+                                }
+                                if(panel.el.dom.style.outline.match("grey")) {
+                                    panel.el.dom.style.outline = "";
+                                }
+                            });
+                        }
                     },
                     show: function( This, eOpts ) {
                         panel.addDDListener(This);
@@ -2273,6 +2297,9 @@ Ext.define('TP.StaticIcon', {
 TP.resetMoveIcons = function() {
     Ext.Array.each(TP.moveIcons, function(item) {
         item.el.dom.style.outline = "";
+        if(item.labelEl) {
+            item.labelEl.el.dom.style.outline = "";
+        }
     });
     TP.moveIcons = undefined;
     if(TP.keynav) {

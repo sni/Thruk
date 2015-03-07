@@ -688,7 +688,11 @@ TP.lassoMarkIcons = function(x, y) {
         center[0]  = center[0] + size.width/2;
         center[1]  = center[1] + size.height/2;
         if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
-            panel.el.dom.style.outline = "2px dotted orange";
+            if(panel.iconType == "text") {
+                panel.labelEl.el.dom.style.outline = "2px dotted orange";
+            } else {
+                panel.el.dom.style.outline = "2px dotted orange";
+            }
             TP.moveIcons.push(panel);
         } else {
             panel.el.dom.style.outline = "";

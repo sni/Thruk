@@ -1504,6 +1504,7 @@ TP.iconShowEditDialog = function(panel) {
                 }
                 if(panel.dragEl1) { panel.dragEl1.el.dom.style.outline = ""; }
                 if(panel.dragEl2) { panel.dragEl2.el.dom.style.outline = ""; }
+                if(panel.labelEl) { panel.labelEl.el.dom.style.outline = ""; }
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
             }
         }
@@ -1536,6 +1537,8 @@ TP.iconShowEditDialog = function(panel) {
     if(panel.xdata.appearance.type == "connector") {
         panel.dragEl1.el.dom.style.outline = "2px dotted orange";
         panel.dragEl2.el.dom.style.outline = "2px dotted orange";
+    } else if (panel.iconType == "text") {
+        panel.labelEl.el.dom.style.outline = "2px dotted orange";
     } else {
         panel.el.dom.style.outline = "2px dotted orange";
     }
