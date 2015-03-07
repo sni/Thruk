@@ -633,6 +633,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     xtype : 'button',
                     text:   'save',
                     handler: function() {
+                        /* unlock form, otherwise values cannot be retrieved */
+                        TP.tabSettingsWindowLocked(tab, false);
+
                         var win     = this.up('window');
                         var oldautohideheader = tab.xdata.autohideheader;
 
