@@ -612,10 +612,35 @@ Ext.define('TP.dragEl', {
                     }
                 });
             }
+            This.addDDListener();
+        },
+        boxready: function(This, width, height, eOpts) {
+            This.addDDListener();
+        },
+        show: function( This, eOpts ) {
+            This.addDDListener();
         },
         move: function(This, x, y, eOpts) {
+            if(This.noMoreMoves) { return; }
             if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
             if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
+
+            /* snap to roaster when shift key is hold */
+            if(TP.isShift) {
+                var pos = TP.get_snap(x, y);
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = '';
+                    This.ddShadow.dom.style.left    = pos[0]+"px";
+                    This.ddShadow.dom.style.top     = pos[1]+"px";
+                }
+                x=pos[0];
+                y=pos[1];
+            } else {
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = 'none';
+                }
+            }
+
             TP.reduceDelayEvents(This, function() {
                 var origX = This.xdata.appearance[This.keyX];
                 var origY = This.xdata.appearance[This.keyY];
@@ -623,8 +648,8 @@ Ext.define('TP.dragEl', {
                 This.xdata.appearance[This.keyY] = y-This.offsetY;
                 if(TP.iconSettingsWindow) {
                     var values = {};
-                    values[This.keyX] = x-This.offsetX;
-                    values[This.keyY] = y-This.offsetY;
+                    values[This.keyX] = This.xdata.appearance[This.keyX];
+                    values[This.keyY] = This.xdata.appearance[This.keyY];
                     Ext.getCmp('appearanceForm').getForm().setValues(values);
                 } else {
                     /* move aligned items too */
@@ -647,5 +672,42 @@ Ext.define('TP.dragEl', {
         This.suspendEvents();
         This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
         This.resumeEvents();
+    },
+    addDDListener: function() {
+        var panel = this;
+        if(!panel.el || !panel.dd) {return;}
+        if(panel.ddAdded) {return;}
+        panel.dd.addListener('dragstart', function(This, e) {
+            TP.isShift = is_shift_pressed(e);
+            if(!panel.ddShadow) {
+                var size = panel.getSize();
+                panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+            }
+            if(!panel.dragHint) {
+                panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+            }
+        });
+        panel.dd.addListener('drag', function(This, e) {
+            TP.isShift = is_shift_pressed(e);
+        });
+        panel.dd.addListener('dragend', function(This, e) {
+            panel.dragHint.destroy();
+            panel.dragHint = undefined;
+            TP.isShift = is_shift_pressed(e);
+            if(TP.isShift) {
+                var pos = panel.getPosition();
+                panel.noMoreMoves = true;
+                panel.setPosition(TP.get_snap(pos[0], pos[1]));
+                panel.noMoreMoves = false;
+            }
+            TP.isShift = false;
+            if(panel.ddShadow) { panel.ddShadow.dom.style.display = 'none'; }
+            window.setTimeout(function() {
+                if(panel.ddShadow) {
+                    panel.ddShadow.dom.style.display = 'none';
+                }
+            }, 100);
+        });
+        panel.ddAdded = true;
     }
 });

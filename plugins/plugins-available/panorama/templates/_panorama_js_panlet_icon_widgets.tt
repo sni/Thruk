@@ -152,7 +152,7 @@
 
             /* snap to roaster when shift key is hold */
             if(TP.isShift) {
-                var pos = TP.get_snap(x, y);
+                pos = TP.get_snap(x, y);
                 if(This.ddShadow) {
                     This.ddShadow.dom.style.display = '';
                     This.ddShadow.dom.style.left    = pos[0]+"px";
