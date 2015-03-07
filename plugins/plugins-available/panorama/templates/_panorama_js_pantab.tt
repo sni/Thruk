@@ -134,6 +134,7 @@
             if(This.locked) {
                 TP.suppressIconTip = false;
             }
+            This.applyZindex();
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -280,6 +281,7 @@
                     Ext.Array.each(panels, function(panel, id2) {
                         // may fail when not yet rendered
                         try { panel.toFront(); } catch(e) {}
+                        panel.setIconLabel();
                         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
                         if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(e) {} }
                         if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(e) {} }

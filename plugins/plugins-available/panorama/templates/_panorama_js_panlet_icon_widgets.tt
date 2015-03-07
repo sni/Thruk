@@ -107,8 +107,8 @@
         show: function( This, eOpts ) {
             This.addDDListener(This);
             /* update label */
-            this.setIconLabel();
-            if(this.labelEl) { this.labelEl.show(); }
+            This.setIconLabel();
+            if(This.labelEl) { This.labelEl.show(); }
             /* make sure we don't overlap dashboard settings window */
             TP.checkModalWindows();
         },
@@ -137,6 +137,7 @@
         },
         boxready: function( This, width, height, eOpts ) {
             This.addDDListener(This);
+            This.setIconLabel();
         },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();

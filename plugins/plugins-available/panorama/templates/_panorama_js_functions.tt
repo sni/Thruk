@@ -1022,8 +1022,6 @@ var TP = {
         }
     },
     updateAllIconsDo: function(tab, id, xdata, reschedule) {
-        var panels = TP.getAllPanel(tab);
-
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
