@@ -933,7 +933,8 @@ macros to expand.
 Be warned, some user macros can contain passwords and expanding them
 could expose them to unauthorized users. Use * as wildcard, ex.: USER*
 
-Defaults to USER1-4.
+Defaults to USER1-255. So by default all user macros are expanded, because
+its limited to admin users anyway.
 
 ex.:
 

@@ -2338,6 +2338,10 @@ sub _set_user_macros {
                 (my $k = $key) =~ s/\$//gmx;
 
                 for my $test (@{$vars}) {
+                    if($test eq 'ALL') {
+                        $found = 1;
+                        last;
+                    }
                     if($k eq $test) {
                         $found = 1;
                         last;
