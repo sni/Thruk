@@ -931,7 +931,7 @@ Expand user macros ($USERx$) for host / service commands and custom
 variables. Can be specified more than once to define multiple user
 macros to expand.
 Be warned, some user macros can contain passwords and expanding them
-could expose them to unauthorized users. Use * as wildcard, ex.: _VAR*
+could expose them to unauthorized users. Use * as wildcard, ex.: USER*
 
 ex.:
 
