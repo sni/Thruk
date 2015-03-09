@@ -933,7 +933,7 @@ macros to expand.
 Be warned, some user macros can contain passwords and expanding them
 could expose them to unauthorized users. Use * as wildcard, ex.: USER*
 
-Defaults to USER1-255. So by default all user macros are expanded, because
+Defaults to 'ALL' which means all user macros are expanded, because
 its limited to admin users anyway.
 
 ex.:
@@ -941,6 +941,8 @@ ex.:
   expand_user_macros = USER1
   expand_user_macros = USER10-20
   expand_user_macros = PLUGIN*
+  expand_user_macros = ALL  # expands all user macros
+  expand_user_macros = NONE # do not expand user macros
 
 
 === show_error_reports
