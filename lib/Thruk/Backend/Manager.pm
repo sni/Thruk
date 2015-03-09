@@ -600,7 +600,7 @@ sub expand_command {
 
     my $rc;
     eval {
-        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args, filter_user => 1});
+        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args});
     };
 
     # does it still contain macros?
@@ -870,7 +870,7 @@ sub _get_macros {
 
     my $host        = $args->{'host'};
     my $service     = $args->{'service'};
-    my $filter_user = (defined $args->{'filter_user'}) ? $args->{'filter_user'} : 0;
+    my $filter_user = (defined $args->{'filter_user'}) ? $args->{'filter_user'} : 1;
 
     # arguments
     my $x = 1;
@@ -2314,7 +2314,7 @@ sub _set_user_macros {
     my $c      = $Thruk::Backend::Manager::c;
 
     my $search = $args->{'search'} || 'expand_user_macros';
-    my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 0;
+    my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 1;
     my $vars   = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
     my $res;
