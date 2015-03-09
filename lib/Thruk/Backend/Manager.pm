@@ -2339,9 +2339,11 @@ sub _set_user_macros {
 
                 for my $test (@{$vars}) {
                     if($test eq 'ALL') {
-                        $found = 1;
+                        $filter = 0;
+                        $found  = 1;
                         last;
                     }
+
                     if($k eq $test) {
                         $found = 1;
                         last;
