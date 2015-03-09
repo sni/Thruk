@@ -47,8 +47,8 @@ Ext.define('TP.PanletClock', {
                 newText = d.strftime(panel.xdata.timeformat);
             } else {
                 /* update offset */
-                // TODO: update every hour, fetch new offsets
-                if(panel.lastTZ != panel.xdata.timezone) {
+                var hour = d.strftime("%H");
+                if(panel.lastHour != hour || panel.lastTZ != panel.xdata.timezone) {
                     if(TP.timezoneStore.loading) {
                         /* try again later */
                         window.setTimeout(function() { panel.refreshHandler(); }, 100 );
@@ -73,7 +73,8 @@ Ext.define('TP.PanletClock', {
                         panel.clockItem.update("ERROR: unknown timezone");
                         return;
                     }
-                    panel.lastTZ = panel.xdata.timezone;
+                    panel.lastHour = hour;
+                    panel.lastTZ   = panel.xdata.timezone;
                 }
                 var localTime   = d.getTime();
                 var localOffset = d.getTimezoneOffset() * 60000;
@@ -81,15 +82,18 @@ Ext.define('TP.PanletClock', {
                 var timestamp   = utc + (1000*panel.tzOffset);
                 newText = strftime(panel.xdata.timeformat, timestamp/1000);
             }
+            var oldSize = el.getSize();
             el.update(newText);
-            /* TODO: only if size of el changes, run adjustBodyStyle() */
-            panel.adjustBodyStyle();
+            var newSize = el.getSize();
+            if(oldSize.width != newSize.width || oldSize.height != newSize.height) {
+                panel.adjustBodyStyle();
+            }
         };
 
         this.clockItem = this.add({
             xtype:     'panel',
             border:     0,
-            html:      '<span id="'+this.id+'-clock" style="text-align: center; white-space: nowrap;"></span>',
+            html:      '<span id="'+this.id+'-clock" style="white-space: nowrap;"></span>',
             listeners: { resize: function(This, adjWidth, adjHeight, eOpts) { panel.adjustBodyStyle(); } }
         });
 
