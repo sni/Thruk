@@ -758,6 +758,7 @@ plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_organisation.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
+plugins/plugins-available/panorama/root/images/clock.png
 plugins/plugins-available/panorama/root/images/clock_go.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
@@ -823,6 +824,7 @@ plugins/plugins-available/panorama/root/images/text_italic.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
+plugins/plugins-available/panorama/root/images/wrench.png
 plugins/plugins-available/panorama/root/panorama-1.86-4.css
 plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
@@ -838,6 +840,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_menu_add.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_clock.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metrics.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_hosts.tt

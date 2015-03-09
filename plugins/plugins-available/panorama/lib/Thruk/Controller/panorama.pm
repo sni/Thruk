@@ -11,6 +11,8 @@ use File::Slurp;
 use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
 use Scalar::Util qw/looks_like_number/;
+use DateTime;
+use DateTime::TimeZone;
 use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
@@ -210,6 +212,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         }
         elsif($task eq 'serveraction') {
             return($self->_task_serveraction($c));
+        }
+        elsif($task eq 'timezones') {
+            return($self->_task_timezones($c));
         }
     }
 
@@ -607,6 +612,45 @@ sub _task_serveraction {
 }
 
 ##########################################################
+sub _task_timezones {
+    my($self, $c) = @_;
+
+    my $query = $c->{'request'}->{'parameters'}->{'query'} || '';
+    my $data = [];
+    my $localname = 'Local Browser';
+    push @{$data}, {
+        text   => $localname,
+        abbr   => '',
+        offset => 0
+    } if $localname =~ m/$query/mxi;
+    my @timezones = DateTime::TimeZone->all_names;
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+    for my $name (@timezones) {
+        next unless $name =~ m/$query/mxi;
+        my $dt = DateTime->new(
+            year      => $year+1900,
+            month     => $mon+1,
+            day       => $mday,
+            hour      => $hour,
+            minute    => $min,
+            second    => $sec,
+            time_zone => $name
+        );
+        push @{$data}, {
+            text   => $name,
+            abbr   => $dt->time_zone()->short_name_for_datetime($dt),
+            offset => $dt->offset(),
+            isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
+        }
+    }
+
+    my $json = { 'rc' => 0, 'data' => $data };
+    $c->stash->{'json'} = $json;
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
 sub _task_availability {
     my($self, $c) = @_;
 
@@ -627,7 +671,6 @@ sub _task_availability {
     $c->stats->profile(end => "_task_avail");
     return($res);
 }
-
 
 ##########################################################
 sub _avail_update {

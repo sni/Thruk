@@ -1,0 +1,124 @@
+﻿Ext.define('Timezones', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'abbr',   type: 'string' },
+        {name: 'offset', type: 'int'    },
+        {name: 'isdst',  type: 'boolean'},
+        {name: 'text',   type: 'string' }
+    ]
+});
+
+TP.timezoneStore = Ext.create('Ext.data.Store', {
+    model: 'Timezones',
+    autoLoad: false,
+    proxy: {
+        type: 'ajax',
+        url : 'panorama.cgi?task=timezones',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    }
+});
+
+Ext.define('TP.PanletClock', {
+    extend: 'TP.Panlet',
+
+    title: 'Clock',
+    height: 120,
+    width:  300,
+    hideSettingsForm: ['backends'],
+    initComponent: function() {
+        this.callParent();
+        var panel             = this;
+        this.xdata.timeformat = '%H:%M';
+        this.xdata.timezone   = 'Local Browser';
+        this.xdata.showborder = true;
+        this.xdata.refresh    = 1;
+        this.loader           = {};
+        this.refreshHandler = function() {
+            var panel = this;
+            var d     = new Date();
+            if(panel.xdata.timezone == "Local Browser") {
+                panel.clockItem.update(d.strftime(panel.xdata.timeformat));
+            } else {
+                /* update offset */
+                // TODO: update every hour, fetch new offsets
+                if(panel.lastTZ != panel.xdata.timezone) {
+                    if(TP.timezoneStore.loading) {
+                        /* try again later */
+                        window.setTimeout(function() { panel.refreshHandler(); }, 100 );
+                        return;
+                    }
+                    var found = false;
+                    TP.timezoneStore.queryBy(function(record, id) {
+                        if(record.data.text == panel.xdata.timezone) {
+                            found = true;
+                            panel.tzOffset = record.data.offset;
+                            return false;
+                        }
+                    });
+                    if(!found) {
+                        if(TP.timezoneStore.data.length == 0 || TP.timezoneStore.isFiltered()) {
+                            TP.timezoneStore.load();
+                            /* try again later */
+                            window.setTimeout(function() { panel.refreshHandler(); }, 500 );
+                            return;
+                        }
+                        /* totally unknown tz selected */
+                        panel.clockItem.update("ERROR: unknown timezone");
+                        return;
+                    }
+                    panel.lastTZ = panel.xdata.timezone;
+                }
+                var localTime   = d.getTime();
+                var localOffset = d.getTimezoneOffset() * 60000;
+                var utc         = localTime + localOffset;
+                var timestamp   = utc + (1000*panel.tzOffset);
+                panel.clockItem.update(strftime(panel.xdata.timeformat, timestamp/1000));
+            }
+        };
+
+        this.clockItem = this.add({
+            xtype:     'panel',
+            bodyStyle: 'text-align: center; white-space: nowrap;',
+            listeners: {
+                resize: function(This, adjWidth, adjHeight, eOpts) {
+                    var size = This.getSize();
+                    This.setBodyStyle("font-size: "+size.height+"px;")
+                    This.setBodyStyle("line-height: "+size.height+"px;")
+                }
+            }
+        });
+
+        /* set inital value */
+        this.addListener('afterrender', function() {
+            this.refreshHandler();
+        });
+    },
+    setGearItems: function() {
+        var panel = this;
+        this.callParent();
+        this.addGearItems({
+            fieldLabel:     'Time Format',
+            xtype:          'textfield',
+            name:           'timeformat'
+        });
+        this.addGearItems({
+            fieldLabel:     'Time Zone',
+            xtype:          'combobox',
+            name:           'timezone',
+            displayField:   'text',
+            valueField:     'text',
+            store:           TP.timezoneStore,
+            typeAhead:       true,
+            minChars:        1
+        });
+        this.addGearItems({
+            fieldLabel:     'Show Border',
+            xtype:          'checkbox',
+            name:           'showborder'
+        });
+        /* TODO: font, color, background */
+    }
+});

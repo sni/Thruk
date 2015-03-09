@@ -1026,7 +1026,10 @@ var TP = {
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
-        if(statusReq == undefined) { return; }
+        if(statusReq == undefined) {
+            if(tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+            return;
+        }
         var req = statusReq.req,
             ref = statusReq.ref;
 

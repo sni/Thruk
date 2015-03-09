@@ -281,7 +281,7 @@
                     Ext.Array.each(panels, function(panel, id2) {
                         // may fail when not yet rendered
                         try { panel.toFront(); } catch(e) {}
-                        panel.setIconLabel();
+                        if(panel.setIconLabel) { panel.setIconLabel(); }
                         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
                         if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(e) {} }
                         if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(e) {} }
@@ -418,7 +418,8 @@
     setLock: function(val) {
         var tab = this;
         var mask;
-        if(tab.locked != val) {
+        var panels = TP.getAllPanel(this);
+        if(tab.locked != val && panels.length > 0) {
             tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
         }
         tab.xdata.locked   = val;
@@ -435,10 +436,11 @@
         }
 
         /* apply to all widgets and panels */
-        var panels = TP.getAllPanel(this);
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].setLock(val);
         }
+        /* schedule update, which also remove the mask from above */
+        TP.updateAllIcons(this);
     },
     contextmenu: function(e, hidePasteAndNew) {
         var tab = this;
