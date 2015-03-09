@@ -6,7 +6,7 @@ use Encode qw/encode_utf8/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 436;
+    plan tests => 428;
 }
 
 BEGIN {
