@@ -157,7 +157,7 @@ Ext.define('TP.PanletClock', {
                 xtype:        'colorcbo',
                 name:         'background',
                 value:        '',
-                flex:          1,
+                flex:          1
             }]
         });
         this.addGearItems({
