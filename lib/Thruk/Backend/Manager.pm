@@ -2344,6 +2344,11 @@ sub _set_user_macros {
                         last;
                     }
 
+                    if($test eq 'NONE') {
+                        # return an empty hash
+                        return {};
+                    }
+
                     if($k eq $test) {
                         $found = 1;
                         last;
