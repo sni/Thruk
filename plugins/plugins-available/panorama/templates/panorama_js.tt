@@ -117,5 +117,14 @@ Ext.onReady(function() {
     TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
     [% END %]
     cleanUnderscoreUrl();
-});
 
+    /* disable backspace on body to prevent accidentally leaving the page */
+    Ext.EventManager.on(document, 'keydown', function(e, t) {
+        if(e.getKey() == e.BACKSPACE && e.target) {
+            if(e.target.tagName.toLowerCase() != "input" && e.target.tagName.toLowerCase() != "textarea") {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+});

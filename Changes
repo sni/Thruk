@@ -16,6 +16,7 @@ next:
               - popups will only displayed in locked mode for smoother editing
               - links are disabled during editing
             - dashboards are now locked by default
+            - prevent accidentally leaving the page by backspace key
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons
           - Business Process:
