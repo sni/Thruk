@@ -60,6 +60,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{'wkhtmltopdf'}         = 1;
+    $c->stash->{'disable_backspace'}   = 1;
 
     $Thruk::Utils::CLI::c              = $c;
 

@@ -60,6 +60,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{subtitle}              = 'Business Process';
     $c->stash->{infoBoxTitle}          = 'Business Process';
     $c->stash->{'has_jquery_ui'}       = 1;
+    $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{editmode}              = 0;
     $c->stash->{testmode}              = $c->{'request'}->{'parameters'}->{'testmode'} || 0;
     $c->stash->{debug}                 = $c->{'request'}->{'parameters'}->{'debug'} || 0;

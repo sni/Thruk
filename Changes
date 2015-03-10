@@ -21,6 +21,11 @@ next:
             - fix showing empty totals for custom filter icons
           - Business Process:
             - show draft edits in overview
+            - prevent accidentally leaving the page by backspace key
+          - Reports:
+            - prevent accidentally leaving the page by backspace key
+          - Config Tool:
+            - prevent accidentally leaving the page by backspace key
           - Bug Fixes
             - fix accessing performance data page in author mode
             - fix accessing reports page in author mode

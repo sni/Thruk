@@ -47,5 +47,13 @@
         set_hash(saved_hash);
         cookieRemove('thruk_preserve_hash');
     }
+
+    [%+ IF disable_backspace +%]
+    jQuery(document).on("keydown", function (e) {
+        if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
+            e.preventDefault();
+        }
+    });
+    [%+ END +%]
 -->
 </script>

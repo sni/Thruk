@@ -93,6 +93,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{'needs_commit'}        = 0;
     $c->stash->{'show_save_reload'}    = 0;
     $c->stash->{'has_jquery_ui'}       = 1;
+    $c->stash->{'disable_backspace'}   = 1;
 
     Thruk::Utils::ssi_include($c);
 
