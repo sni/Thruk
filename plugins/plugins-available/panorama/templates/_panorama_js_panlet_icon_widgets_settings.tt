@@ -717,6 +717,7 @@ TP.iconShowEditDialog = function(panel) {
                         name:         'connectorarrowwidth',
                         width:         60,
                         unit:         'px',
+                        minValue:      0,
                         value:         panel.xdata.appearance.connectorarrowwidth
                     }, {
                         xtype:        'label',
@@ -727,6 +728,7 @@ TP.iconShowEditDialog = function(panel) {
                         allowDecimals: false,
                         name:         'connectorarrowlength',
                         width:         60,
+                        minValue:      0,
                         unit:         'px',
                         value:         panel.xdata.appearance.connectorarrowlength
                     }, {

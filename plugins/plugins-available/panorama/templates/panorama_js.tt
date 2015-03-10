@@ -127,4 +127,7 @@ Ext.onReady(function() {
             }
         }
     });
+
+    /* preload images */
+    window.setTimeout(preloader, 3000);
 });
