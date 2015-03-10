@@ -1734,7 +1734,7 @@ Ext.define('TP.HostStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'host', 'Hostname'),
+            TP.objectSearchItem(panel, 'host', 'Hostname', panel.xdata.general.host),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -1877,7 +1877,7 @@ Ext.define('TP.HostgroupStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'hostgroup', 'Hostgroupname'),
+            TP.objectSearchItem(panel, 'hostgroup', 'Hostgroupname', panel.xdata.general.hostgroup),
             {
                 fieldLabel: 'Include Hosts',
                 xtype:      'checkbox',
@@ -1962,8 +1962,8 @@ Ext.define('TP.ServiceStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'host', 'Hostname'),
-            TP.objectSearchItem(panel, 'service', 'Servicename'),
+            TP.objectSearchItem(panel, 'host', 'Hostname', panel.xdata.general.host),
+            TP.objectSearchItem(panel, 'service', 'Servicename', panel.xdata.general.service),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -2031,7 +2031,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'servicegroup', 'Servicegroupname'),
+            TP.objectSearchItem(panel, 'servicegroup', 'Servicegroupname', panel.xdata.general.servicegroup),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -2195,7 +2195,7 @@ Ext.define('TP.SiteStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'site', 'Sitename')
+            TP.objectSearchItem(panel, 'site', 'Sitename', panel.xdata.general.site)
         ]);
     },
     refreshHandler: function(newStatus) {

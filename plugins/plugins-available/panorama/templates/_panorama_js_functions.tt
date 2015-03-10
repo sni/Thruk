@@ -992,13 +992,14 @@ var TP = {
         panel.add(menu);
         menu.show();
     },
-    objectSearchItem: function(panel, type, name) {
+    objectSearchItem: function(panel, type, name, value) {
         return({
             name:           type,
             fieldLabel:     name,
             panel:          panel,
             xtype:          'searchCbo',
-            store:          searchStore
+            store:          searchStore,
+            value:          value
         });
     },
     removeWindowFromPanels: function(win_id) {
