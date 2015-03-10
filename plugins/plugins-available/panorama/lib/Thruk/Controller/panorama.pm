@@ -616,17 +616,38 @@ sub _task_timezones {
     my($self, $c) = @_;
 
     my $query = $c->{'request'}->{'parameters'}->{'query'} || '';
-    my $data = [];
+    my $data  = [];
+    for my $tz (@{_get_timezone_data($c)}) {
+        next unless $tz->{'text'} =~ m/$query/mxi;
+        push @{$data}, $tz;
+    }
+
+    my $json = { 'rc' => 0, 'data' => $data };
+    $c->stash->{'json'} = $json;
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _get_timezone_data {
+    my($c) = @_;
+
+    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
+    my $data  = $cache->get('timezones');
+    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
+    if(defined $data && $data->{'timestamp'} eq $timestamp) {
+        return($data->{'timezones'});
+    }
+
+    my $timezones = [];
     my $localname = 'Local Browser';
-    push @{$data}, {
+    push @{$timezones}, {
         text   => $localname,
         abbr   => '',
         offset => 0
-    } if $localname =~ m/$query/mxi;
-    my @timezones = DateTime::TimeZone->all_names;
+    };
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-    for my $name (@timezones) {
-        next unless $name =~ m/$query/mxi;
+    for my $name (DateTime::TimeZone->all_names) {
         my $dt = DateTime->new(
             year      => $year+1900,
             month     => $mon+1,
@@ -636,19 +657,20 @@ sub _task_timezones {
             second    => $sec,
             time_zone => $name
         );
-        push @{$data}, {
+        push @{$timezones}, {
             text   => $name,
             abbr   => $dt->time_zone()->short_name_for_datetime($dt),
             offset => $dt->offset(),
             isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
         }
     }
-
-    my $json = { 'rc' => 0, 'data' => $data };
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    $cache->set('timezones', {
+        timestamp => $timestamp,
+        timezones => $timezones,
+    });
+    return($timezones);
 }
+
 
 ##########################################################
 sub _task_availability {
