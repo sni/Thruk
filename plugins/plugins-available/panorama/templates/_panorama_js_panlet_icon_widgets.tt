@@ -1268,7 +1268,8 @@ Ext.define('TP.IconWidget', {
             }
             if(percent > 100) { percent = 100 }
             connectorwidth = connectorwidth * (percent/100);
-            if(connectorwidth < 1) { connectorwidth = 1; }
+            if(connectorwidth < 1)    { connectorwidth = 1; }
+            if(isNaN(connectorwidth)) { connectorwidth = 1; }
         }
 
         /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
