@@ -1762,7 +1762,7 @@ function updateExcelPermanentLink() {
 
 /* print the action menu icons and action icons */
 var menu_nr = 0;
-function print_action_menu(src, backend, host, service, orientation, label) {
+function print_action_menu(src, backend, host, service, orientation, show_title) {
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         src = is_array(src) ? src : [src];
@@ -1771,7 +1771,7 @@ function print_action_menu(src, backend, host, service, orientation, label) {
             icon.src       = replace_macros(e.icon);
             icon.className = 'action_icon '+(e.menu ? 'clickable' : '' );
             icon.title     = e.title ? e.title : '';
-            var text       = document.createTextNode(icon.title);
+            var title      = document.createTextNode(icon.title);
             if(e.menu) {
                 icon.nr = menu_nr;
                 icon.onclick = function() {
@@ -1794,8 +1794,8 @@ function print_action_menu(src, backend, host, service, orientation, label) {
             // obtain reference to current script tag so we could insert the icons here
             var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
-            if(label) {
-                scriptTag.parentNode.appendChild(text);
+            if(show_title) {
+                scriptTag.parentNode.appendChild(title);
             }
         });
     }
