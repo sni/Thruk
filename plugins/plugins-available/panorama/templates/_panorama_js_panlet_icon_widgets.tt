@@ -1260,13 +1260,22 @@ Ext.define('TP.IconWidget', {
         var shapeColor = TP.getShapeColor("connector", panel, xdata, forceColor);
         var connectorwidth = xdata.appearance.connectorwidth;
         if(xdata.appearance.connectorvariable) {
-            var percent = shapeColor.percent;
-            var min     = xdata.appearance.connectormin;
-            if(min == undefined) { min = 0; }
-            if(xdata.appearance.connectormax) {
-                percent = (shapeColor.value-min / xdata.appearance.connectormax-min) * 100;
+            var percent = 100;
+            var state   = xdata.state != undefined ? xdata.state : panel.xdata.state;
+            if(shapeColor.value != undefined) {
+                var min   = shapeColor.range.min;
+                var max   = shapeColor.range.max;
+                if(xdata.appearance.connectormin != undefined) { min = xdata.appearance.connectormin; }
+                if(xdata.appearance.connectormax != undefined) { max = xdata.appearance.connectormax; }
+                if(min == undefined) { min = 0; }
+                percent = ((shapeColor.value-min) / (max-min)) * 100;
+                if(percent > 100) { percent = 100 }
             }
-            if(percent > 100) { percent = 100 }
+            else if(state == 0) { percent =   0; }
+            else if(state == 1) { percent =  50; }
+            else if(state == 2) { percent = 100; }
+            else if(state == 3) { percent =  50; }
+            else if(state == 4) { percent =   0; }
             connectorwidth = connectorwidth * (percent/100);
             if(connectorwidth < 1)    { connectorwidth = 1; }
             if(isNaN(connectorwidth)) { connectorwidth = 1; }
@@ -2689,82 +2698,87 @@ TP.pointsToPath = function(points) {
 
 /* create gradient and return color by state */
 TP.getShapeColor = function(type, panel, xdata, forceColor) {
-    var state = xdata.state, fillcolor;
+    var state = xdata.state, fillcolor, r, color1, color2;
+    var p     = {};
     var perc  = 100;
     if(state == undefined) { state = panel.xdata.state; }
+    if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
     if(forceColor != undefined) { fillcolor = forceColor; }
     else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
     else if(state == 1)         { fillcolor = xdata.appearance[type+"color_warning"]; }
     else if(state == 2)         { fillcolor = xdata.appearance[type+"color_critical"]; }
     else if(state == 3)         { fillcolor = xdata.appearance[type+"color_unknown"]; }
     else if(state == 4)         { fillcolor = "#777777"; }
-    if(!fillcolor) { fillcolor = '#333333'; }
-    if(xdata.appearance[type+"gradient"] != 0) {
-        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+    if(!fillcolor)              { fillcolor = '#333333'; }
 
-        if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
-        var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
-        if(xdata.appearance[type+"source"] != 'fixed' && matches && matches[1]) {
-            /* dynamic gradient */
-            window.perfdata = {};
-            panel.setIconLabel(undefined, true);
-            if(perfdata[matches[1]]) {
-                var p = perfdata[matches[1]];
-                var r = TP.getPerfDataMinMax(p, 100);
-                var color1 = xdata.appearance[type+"color_ok"];
-                var color2 = xdata.appearance[type+"color_ok"];
-                /* inside critical range: V c w o w c  */
-                if(p.crit_min != "" && p.val < p.crit_min) {
-                    color1 = xdata.appearance[type+"color_critical"];
-                    color2 = xdata.appearance[type+"color_critical"];
-                    perc   = 100;
-                }
-                /* above critical threshold: o w c V */
-                else if(p.crit_max != "" && p.val > p.crit_max) {
-                    color1 = xdata.appearance[type+"color_critical"];
-                    color2 = xdata.appearance[type+"color_critical"];
-                    perc   = 100;
-                }
-                /* inside warning range low: c V w o w c */
-                else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
-                    color1 = xdata.appearance[type+"color_warning"];
-                    color2 = xdata.appearance[type+"color_critical"];
-                    perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
-                }
-                /* inside warning range high: c w o w V c */
-                else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
-                    color1 = xdata.appearance[type+"color_warning"];
-                    color2 = xdata.appearance[type+"color_critical"];
-                    perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
-                }
-                /* above warning threshold: o w V c */
-                else if(p.warn_max != "" && p.val > p.warn_max) {
-                    color1 = xdata.appearance[type+"color_warning"];
-                    color2 = xdata.appearance[type+"color_critical"];
-                    perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
-                }
-                /* below warning threshold: o V w c */
-                else if(p.warn_max != "" && p.val < p.warn_max) {
-                    color1 = xdata.appearance[type+"color_ok"];
-                    color2 = xdata.appearance[type+"color_warning"];
-                    perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
-                }
-                var gradient = TP.createGradient(color1, xdata.appearance[type+"gradient"], color2, perc);
-                if(panel.surface.existingGradients[gradient.id] == undefined) {
-                    panel.surface.addGradient(gradient);
-                    panel.surface.existingGradients[gradient.id] = true;
-                }
-                return({color: "url(#"+gradient.id+")", percent: perc, value: p.val});
+    var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
+    if(matches && matches[1]) {
+        window.perfdata = {};
+        panel.setIconLabel(undefined, true);
+        if(perfdata[matches[1]]) {
+            p      = perfdata[matches[1]];
+            r      = TP.getPerfDataMinMax(p, 100);
+            color1 = xdata.appearance[type+"color_ok"];
+            color2 = xdata.appearance[type+"color_ok"];
+            /* inside critical range: V c w o w c  */
+            if(p.crit_min != "" && p.val < p.crit_min) {
+                color1 = xdata.appearance[type+"color_critical"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = 100;
             }
+            /* above critical threshold: o w c V */
+            else if(p.crit_max != "" && p.val > p.crit_max) {
+                color1 = xdata.appearance[type+"color_critical"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = 100;
+            }
+            /* inside warning range low: c V w o w c */
+            else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
+            }
+            /* inside warning range high: c w o w V c */
+            else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
+            }
+            /* above warning threshold: o w V c */
+            else if(p.warn_max != "" && p.val > p.warn_max) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
+            }
+            /* below warning threshold: o V w c */
+            else if(p.warn_max != "" && p.val < p.warn_max) {
+                color1 = xdata.appearance[type+"color_ok"];
+                color2 = xdata.appearance[type+"color_warning"];
+                perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
+            }
+        }
+    }
+
+    if(xdata.appearance[type+"gradient"] != 0) {
+        /* dynamic gradient */
+        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+        if(xdata.appearance[type+"source"] != 'fixed' &&  color1 != undefined && color2 != undefined) {
+            var gradient = TP.createGradient(color1, xdata.appearance[type+"gradient"], color2, perc);
+            if(panel.surface.existingGradients[gradient.id] == undefined) {
+                panel.surface.addGradient(gradient);
+                panel.surface.existingGradients[gradient.id] = true;
+            }
+            return({color: "url(#"+gradient.id+")", value: p.val, perfdata: p, range: r});
         } else {
-            /* fixed gradient */
+            /* fixed gradient from state color */
             var gradient = TP.createGradient(fillcolor, xdata.appearance[type+"gradient"]);
             if(panel.surface.existingGradients[gradient.id] == undefined) {
                 panel.surface.addGradient(gradient);
                 panel.surface.existingGradients[gradient.id] = true;
             }
-            return("url(#"+gradient.id+")");
+            return({color: "url(#"+gradient.id+")", value: p.val, perfdata: p, range: r});
         }
     }
-    return({color: fillcolor, percent: perc});
+    /* fixed state color */
+    return({color: fillcolor, value: p.val, perfdata: p, range: r});
 }
