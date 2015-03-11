@@ -3993,22 +3993,14 @@ function show_cal(id) {
       weekNumbers: true,
       onSelect: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-        if(Calendar.printDate(newDateObj, '%S') == 0) {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
-        } else {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        }
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         var now = new Date; last_cal_hidden = now.getTime();
         jQuery('.DynarchCalendar-topCont').remove();
       },
       onBlur: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
         document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        if(Calendar.printDate(newDateObj, '%S') == 0) {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
-        } else {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        }
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         var now = new Date; last_cal_hidden = now.getTime();
         jQuery('.DynarchCalendar-topCont').remove();
       },
