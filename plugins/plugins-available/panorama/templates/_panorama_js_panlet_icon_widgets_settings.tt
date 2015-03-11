@@ -630,6 +630,22 @@ TP.iconShowEditDialog = function(panel) {
                         width:         70,
                         unit:         'px',
                         value:         panel.xdata.appearance.connectorfromy
+                    },{
+                        xtype:        'label',
+                        text:         'Endpoints',
+                        margins:      {top: 3, right: 2, bottom: 0, left: 7}
+                    }, {
+                        xtype:        'combobox',
+                        name:         'connectorarrowtype',
+                        width:         70,
+                        matchFieldWidth: false,
+                        value:         panel.xdata.appearance.connectorarrowtype,
+                        store:         ['both', 'left', 'right', 'none'],
+                        listConfig : {
+                            getInnerTpl: function(displayField) {
+                                return '<div class="x-combo-list-item"><img src="[% url_prefix %]plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
+                            }
+                        }
                     }]
                 },
                 {
@@ -681,21 +697,13 @@ TP.iconShowEditDialog = function(panel) {
                         width:         60,
                         unit:         'px',
                         value:         panel.xdata.appearance.connectorwidth
-                    },{
+                    }, {
                         xtype:        'label',
-                        text:         'Endpoints',
+                        text:         'Variable Width',
                         margins:      {top: 3, right: 2, bottom: 0, left: 7}
                     }, {
-                        xtype:        'combobox',
-                        name:         'connectorarrowtype',
-                        width:         130,
-                        value:         panel.xdata.appearance.connectorarrowtype,
-                        store:         ['both', 'left', 'right', 'none'],
-                        listConfig : {
-                            getInnerTpl: function(displayField) {
-                                return '<div class="x-combo-list-item"><img src="[% url_prefix %]plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
-                            }
-                        }
+                        xtype:        'checkbox',
+                        name:         'connectorvariable'
                     }]
                 },
                 {
@@ -752,7 +760,7 @@ TP.iconShowEditDialog = function(panel) {
                                      mouseout:  function(color) { renderUpdateDo();      }
                     },
                     items: [
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up: ' : 'Ok: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Up ' : 'Ok ' },
                         {
                             xtype:          'colorcbo',
                             name:           'connectorcolor_ok',
@@ -761,7 +769,7 @@ TP.iconShowEditDialog = function(panel) {
                             tdAttrs:       { style: 'padding-right: 10px;'},
                             colorGradient: { start: '#D3D3AE', stop: '#00FF00' }
                         },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable: ' : 'Warning: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Unreachable ' : 'Warning ' },
                         {
                             xtype:          'colorcbo',
                             name:           'connectorcolor_warning',
@@ -769,7 +777,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#E1E174', stop: '#FFFF00' }
                         },
-                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down: ' : 'Critical: ' },
+                        { xtype: 'label', text: panel.iconType == 'host' ? 'Down ' : 'Critical ' },
                         {
                             xtype:          'colorcbo',
                             name:           'connectorcolor_critical',
@@ -777,7 +785,7 @@ TP.iconShowEditDialog = function(panel) {
                             width:           80,
                             colorGradient: { start: '#D3AEAE', stop: '#FF0000' }
                         },
-                        { xtype: 'label', text: 'Unknown: ', hidden: panel.iconType == 'host' ? true : false },
+                        { xtype: 'label', text: 'Unknown ', hidden: panel.iconType == 'host' ? true : false },
                         {
                             xtype:          'colorcbo',
                             name:           'connectorcolor_unknown',
@@ -802,7 +810,7 @@ TP.iconShowEditDialog = function(panel) {
                         width:         55,
                         listeners:   { change: function() { renderUpdate(); } }
                     },
-                    { xtype: 'label', text: 'Source:', margins: {top: 2, right: 2, bottom: 0, left: 10} },
+                    { xtype: 'label', text: 'Source', margins: {top: 2, right: 2, bottom: 0, left: 10} },
                     {
                         name:         'connectorsource',
                         xtype:        'combobox',
@@ -822,11 +830,10 @@ TP.iconShowEditDialog = function(panel) {
                     cls:        'connector',
                     layout:     'table',
                     defaults: { listeners: { change: function() { renderUpdate(undefined, true) } } },
-                    items: [{ xtype: 'label', text: 'Variable Size:', style: 'margin-left: 0; margin-right: 2px;' },
-                            { xtype: 'checkbox', name: 'connectorvariable' },
-                            { xtype: 'label', text: 'Min:', style: 'margin-left: 8px; margin-right: 2px;' },
+                    items: [
+                            { xtype: 'label', text: 'Cust. Perf. Data Min', style: 'margin-left: 0px; margin-right: 2px;' },
                             { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormin', step: 100 },
-                            { xtype: 'label', text: 'Max:', style: 'margin-left: 8px; margin-right: 2px;' },
+                            { xtype: 'label', text: 'Max', style: 'margin-left: 8px; margin-right: 2px;' },
                             { xtype: 'numberfield', allowDecimals: true, width: 70, name: 'connectormax', step: 100 }
                         ]
                 },
