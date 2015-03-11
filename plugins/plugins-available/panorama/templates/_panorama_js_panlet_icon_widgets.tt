@@ -500,6 +500,7 @@
     /* add dbl click and context menu events */
     addClickEventhandler: function(el) {
         var This = this;
+        var tab  = Ext.getCmp(This.panel_id);
 
         el.on("click", function(e) {
             [% UNLESS readonly %]
@@ -534,7 +535,10 @@
         el.on("dblclick", function(e) {
             window.clearTimeout(TP.timeouts['click'+This.id]);
             if(!This.locked) {
-                TP.iconShowEditDialog(This);
+                tab.body.mask("loading settings");
+                window.setTimeout(function() {
+                    TP.iconShowEditDialog(This);
+                }, 50);
             }
         });
         [% END %]
