@@ -316,7 +316,7 @@ TP.iconShowEditDialog = function(panel) {
                     xtype:      'combobox',
                     fieldLabel: 'Type',
                     name:       'type',
-                    store:      [['icon','Icon'], ['shape', 'Shape'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['connector', 'Connector']],
+                    store:      [['icon','Icon'], ['connector', 'Line / Arrow / Watermark'], ['pie', 'Pie Chart'], ['speedometer', 'Speedometer'], ['shape', 'Shape']],
                     id:         'appearance_types',
                     editable:    false,
                     listeners: {

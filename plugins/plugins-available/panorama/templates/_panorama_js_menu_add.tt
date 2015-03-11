@@ -6,6 +6,10 @@
                 cls:    options.open == 'left' ? 'hideRightArrow' : '',
                 hideOnClick: false,
                 menu:    [{
+                        text:   'Line / Arrow / Watermark',
+                        icon:   '[% url_prefix %]plugins/panorama/images/link_go.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon', conf: { xdata: { appearance: { type: 'connector' }}}}, -8, -8) }
+                    }, '-', {
                         text:   'Host Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.HostStatusIcon'}, -8, -8) }
@@ -26,10 +30,6 @@
                         icon:   '[% url_prefix %]plugins/panorama/images/page_find.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.FilterStatusIcon'}, -8, -8) }
                     }, '-', {
-                        text:   'Connector',
-                        icon:   '[% url_prefix %]plugins/panorama/images/link_go.png',
-                        handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon', conf: { xdata: { appearance: { type: 'connector' }}}}, -8, -8) }
-                    }, '-', {
                         text:   'Site Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/accept.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.SiteStatusIcon'}, -8, -8) }
@@ -38,7 +38,7 @@
                         icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.TextLabelWidget'}, -8, -8) }
                     }, {
-                        text:   'Image',
+                        text:   'Static Image',
                         icon:   '[% url_prefix %]plugins/panorama/images/picture.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.StaticIcon'}, -8, -8) }
                     }
