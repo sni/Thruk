@@ -2379,11 +2379,15 @@ TP.iconClickHandler = function(id) {
 /* actually open the clicked link */
 TP.iconClickHandlerDo = function(id) {
     var panel = Ext.getCmp(id);
-    if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link || !panel.locked) {
+    if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
         return;
     }
     var link    = panel.xdata.link.link;
     var newTab  = panel.xdata.link.newtab;
+    if(!panel.locked) {
+        TP.Msg.msg("info_message~~icon links are disabled in edit mode, would have openend:<br><b>"+link+"</b>"+(newTab?'<br>(in a new tab)':''));
+        return;
+    }
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
     if(special && special[1]) {
