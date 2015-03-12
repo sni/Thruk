@@ -163,7 +163,7 @@ Ext.define('TP.PanletGrid', {
         var groupingFeature = Ext.create('Ext.grid.feature.Grouping',{
             groupHeaderTpl: '{name}'
         });
-        this.pagingToolbar  = new TP.PagingToolbar();
+        this.pagingToolbar  = new TP.PagingToolbar({panel: this});
 
         if(this.grid_sort == undefined) {
             this.grid_sort = true;

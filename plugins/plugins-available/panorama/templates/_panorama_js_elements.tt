@@ -221,13 +221,12 @@ Ext.define('TP.PagingToolbar', {
     dock:       'bottom',
     displayInfo: true,
     getPageData: function() {
-        var panel  = this.up('panel').up('panel');
         var data   = {
-            total:          parseInt(panel.xdata.totalCount),
-            currentPage:    parseInt(panel.xdata.currentPage),
-            pageCount:      Math.ceil(panel.xdata.totalCount / panel.xdata.pageSize),
-            fromRecord:     ((panel.xdata.currentPage - 1) * panel.xdata.pageSize),
-            toRecord:       Math.min(panel.xdata.currentPage * panel.xdata.pageSize, panel.xdata.totalCount)
+            total:          parseInt(this.panel.xdata.totalCount),
+            currentPage:    parseInt(this.panel.xdata.currentPage),
+            pageCount:      Math.ceil(this.panel.xdata.totalCount / this.panel.xdata.pageSize),
+            fromRecord:     ((this.panel.xdata.currentPage - 1) * this.panel.xdata.pageSize),
+            toRecord:       Math.min(this.panel.xdata.currentPage * this.panel.xdata.pageSize, this.panel.xdata.totalCount)
         };
         return(data);
     },
@@ -273,30 +272,25 @@ Ext.define('TP.PagingToolbar', {
         me.fireEvent('change', me, pageData);
     },
     updateData: function(data) {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.totalCount  = data.totalCount;
-        panel.xdata.currentPage = data.currentPage;
+        this.panel.xdata.totalCount  = data.totalCount;
+        this.panel.xdata.currentPage = data.currentPage;
     },
     moveNext: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage++;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage++;
+        this.panel.refreshHandler();
     },
     moveLast: function() {
-        var panel = this.up('panel').up('panel');
         var pageData = this.getPageData();
-        panel.xdata.currentPage = pageData.pageCount;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage = pageData.pageCount;
+        this.panel.refreshHandler();
     },
     moveFirst: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage = 1;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage = 1;
+        this.panel.refreshHandler();
     },
     movePrevious: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage--;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage--;
+        this.panel.refreshHandler();
     }
 });
 
