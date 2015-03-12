@@ -1462,8 +1462,7 @@ Sample menu with two items and a seperator:
 
 A menu has the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
-                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
 
@@ -1472,12 +1471,20 @@ A single `"-"` item can be used as a menu item seperator.
 
 The menu item can have the following attributes:
 
-     ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url.
-     ** `label`         label name of the menu item.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
+                        You may use `{% raw %}{{macros}}{% endraw %}` here too.
      ** `target`        Use '_blank' here to open link in a new window.
+
+The following macros can be used in the icon url and the link url:
+
+     ** `{% raw %}{{theme}}{% endraw %}`        contains the current selected user theme
+     ** `{% raw %}{{remote_user}}{% endraw %}`  contains the user name itself. (Do not rely on this value, a user can change the url by himself)
+     ** `{% raw %}{{prefix}}{% endraw %}`       the url path prefix, ex.: /thruk
+     ** `{% raw %}{{site}}{% endraw %}`         the OMD site name.
+
 
 Sample icons with two action icons:
 

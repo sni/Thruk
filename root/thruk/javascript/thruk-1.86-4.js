@@ -1976,8 +1976,10 @@ function check_server_action(id, link, backend, host, service) {
 /* replace common macros */
 function replace_macros(input) {
     var out = input;
-    out = out.replace(/\{\{\s*theme\s*\}\}/g, theme)
-    out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user)
+    out = out.replace(/\{\{\s*theme\s*\}\}/g, theme);
+    out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user);
+    out = out.replace(/\{\{\s*site\s*\}\}/g, omd_site);
+    out = out.replace(/\{\{\s*prefix\s*\}\}/g, url_prefix);
     return(out);
 }
 
