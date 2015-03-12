@@ -20,6 +20,7 @@ next:
             - prevent accidentally leaving the page by backspace key
             - fix showing -1 objects for new dashboards
             - fix showing empty totals for custom filter icons
+            - fix unclosable host/service popups (#401)
           - Business Process:
             - show draft edits in overview
             - prevent accidentally leaving the page by backspace key

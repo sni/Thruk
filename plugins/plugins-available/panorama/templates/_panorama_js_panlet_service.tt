@@ -31,6 +31,9 @@
         this.formUpdatedCallback = function() {
             this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
         }
+
+        /* should be closeable all the time because they can be openend even on readonly dashboards */
+        this.closable  = true;
     },
     setGearItems: function() {
         var panel = this;
