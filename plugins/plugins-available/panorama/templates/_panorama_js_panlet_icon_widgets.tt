@@ -2450,6 +2450,8 @@ TP.iconClickHandlerDo = function(id) {
         return(false);
     }
     if(link) {
+        var oldOnClick=panel.el.dom.onclick;
+        panel.el.dom.onclick="";
         panel.el.dom.href=link;
         panel.passClick = true;
         if(newTab) {
@@ -2457,6 +2459,8 @@ TP.iconClickHandlerDo = function(id) {
         }
         panel.el.dom.click();
         window.setTimeout(function() {
+            panel.el.dom.href=panel.xdata.link.link;
+            panel.el.dom.onclick=oldOnClick;
             panel.passClick = false;
         }, 300);
     }
