@@ -1478,6 +1478,9 @@ The menu item can have the following attributes:
                         You may use `{% raw %}{{macros}}{% endraw %}` here too.
      ** `target`        Use '_blank' here to open link in a new window.
 
+
+==== action menu macros
+
 The following macros can be used in the icon url and the link url:
 
      ** `{% raw %}{{theme}}{% endraw %}`        contains the current selected user theme
