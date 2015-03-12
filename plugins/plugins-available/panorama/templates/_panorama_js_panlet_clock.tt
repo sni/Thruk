@@ -35,7 +35,7 @@ Ext.define('TP.PanletClock', {
         var panel             = this;
         this.xdata.timeformat = '%H:%M';
         this.xdata.timezone   = 'Local Browser';
-        this.xdata.showborder = true;
+        this.xdata.showborder = false;
         this.xdata.refresh    = 1;
         this.loader           = {};
         this.refreshHandler = function() {
@@ -167,7 +167,7 @@ Ext.define('TP.PanletClock', {
             items:        [{
                 name:         'fontfamily',
                 xtype:        'fontcbo',
-                value:        '',
+                value:        'inherit',
                 flex:          1,
                 editable:      false,
                 allowEmpty:    true
