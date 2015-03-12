@@ -6,6 +6,7 @@ next:
           - disable IE8 compatiblity mode introduced in 56c92b1 (Andrew Widdersheim)
           - add 'expand_user_macros' option (Andrew Widdersheim)
           - command start/end times round to full minute
+          - search now suggests custom variable names too (#450)
           - Panorama View:
             - add undo function
               - restore point can be created manually

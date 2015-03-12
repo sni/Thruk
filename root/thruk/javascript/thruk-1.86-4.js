@@ -3572,12 +3572,9 @@ function add_new_filter(search_prefix, table) {
   newInputPre.setAttribute('id',   pane_prefix + search_prefix + nr + '_val_pre');
   newInputPre.style.display    = "none";
   newInputPre.style.visibility = "hidden";
-  /*
-   * not possible right now
   if(ajax_search_enabled) {
     newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
   }
-  */
   newCell0.appendChild(newInputPre);
 
   newCell0.appendChild(opselect);
@@ -4263,6 +4260,7 @@ var ajax_search = {
                || search_type == 'servicegroup'
                || search_type == 'timeperiod'
                || search_type == 'priority'
+               || search_type == 'custom variable'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -4289,7 +4287,6 @@ var ajax_search = {
                || search_type == '% state change'
                || search_type == 'duration'
                || search_type == 'downtime duration'
-               || search_type == 'custom variable'
             ) {
                 ajax_search.search_type = 'none';
             }

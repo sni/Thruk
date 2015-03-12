@@ -140,7 +140,37 @@ Ext.define('TP.formFilterSelect', {
         width:          100,
         value:          [],
         tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)',
-        emptyText:      'variable name'
+        emptyText:      'variable name',
+        queryMode:      'remote',
+        store:          searchStore,
+        triggerAction:  'all',
+        pageSize:       true,
+        selectOnFocus:  true,
+        typeAhead:      true,
+        minChars:       0,
+        listeners: {
+            'expand': function(field, eOpts) {
+                if(searchStore.search_type != 'custom variable') {
+                    searchStore.search_type = 'custom variable';
+                    searchStore.panel       = this.up().panel;
+                    searchStore.load();
+                }
+            },
+            'change': function(This, newValue, oldValue, eOpts) {
+                if(searchStore.search_type != 'custom variable') {
+                    searchStore.search_type = 'custom variable';
+                    searchStore.panel       = this.up().panel;
+                    searchStore.load();
+                }
+            },
+            'keyup': function() {
+                if(searchStore.search_type != 'custom variable') {
+                    searchStore.search_type = 'custom variable';
+                    searchStore.panel       = this.up().panel;
+                    searchStore.load();
+                }
+            }
+        }
     }, {
         name:           'op',
         xtype:          'combobox',
