@@ -63,6 +63,14 @@
                 });
             }
         }
+        if(!this.locked) {
+            this.tools.push({
+                type: 'restore',
+                scope: this,
+                tooltip: 'clone this panel',
+                handler: function() { var This = this; TP.add_panlet_delayed(TP.clone({type:This.xdata.cls, state:TP.clone_panel_config(This)}), -8, -8) }
+            });
+        }
         this.tools.push(new Ext.panel.Tool({
             type:    'refresh',
             scope:    this,
