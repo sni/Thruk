@@ -20,6 +20,7 @@ my @jsfiles = glob('root/thruk/javascript/thruk-*.js
 for my $file (@jsfiles) {
     ok(1, "checking ".$file);
     next if $file =~ m/bigscreen/mxi;
+    next if $file =~ m/OpenLayers/mxi;
     TestUtils::verify_js($file);
 }
 

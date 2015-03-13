@@ -29,6 +29,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|/conf/root/jstree/|mx
        or $line =~ m|jquery\.flot\.|mx
        or $line =~ m|root/./tests/|mx
+       or $line =~ m|/geoext2|mx
     ) {
       next;
     }
