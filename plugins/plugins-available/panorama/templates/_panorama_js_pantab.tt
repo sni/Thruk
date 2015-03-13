@@ -193,7 +193,6 @@
                 zoom: this.map.map.getZoom()
             };
             this.fixMapIcons();
-debug("getState", state.xdata.map);
         }
         return state;
     },
@@ -210,7 +209,6 @@ debug("getState", state.xdata.map);
     },
     moveMapIcons: function() {
         if(!this.map) { return; }
-debug("moveMapIcons");
         var This = this;
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
@@ -423,6 +421,11 @@ debug("moveMapIcons");
 
         if(background != undefined && background.match('/plugins/panorama/images/map.png')) {
             if(This.bgImgEl) { This.bgImgEl.destroy(); This.bgImgEl = undefined; }
+            var size = This.getSize();
+            if(size.width < 5 || size.height < 5) {
+                window.setTimeout(Ext.bind(This.setBackground, This, [background, scale, offset_x, offset_y, retries+1]), 500);
+                return;
+            }
             if(!This.mapEl) {
                 This.mapEl = body.createChild('<div id="'+This.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
@@ -447,8 +450,8 @@ b=This;
             var mapData = {
                 renderTo: This.id+'-osmmap',
                 map:      map,
-                height:   100,
-                width:    100,
+                width:    size.width,
+                height:   size.height,
                 center:  '12.31,51.48',
                 zoom:     6,
                 stateful: true,
@@ -464,7 +467,9 @@ b=This;
                 mapData.center = [Number(This.xdata.map.lon), Number(This.xdata.map.lat)];
             }
             This.map = Ext.create('GeoExt.panel.Map', mapData);
-a=This.map;
+            map.events.register("movestart", map, function() {
+                This.fixMapIcons();
+            });
             map.events.register("move", map, function() {
                 This.moveMapIcons();
             });
@@ -480,7 +485,6 @@ a=This.map;
         if(This.locked) {
             This.disableMapControls();
         }
-b=This.bgDragEl;
 
         if(background != undefined && background != 'none' && !background.match('/plugins/panorama/images/map.png')) {
             if(!This.bgImgEl) {
@@ -514,7 +518,7 @@ b=This.bgDragEl;
     disableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
-        tab.bgDragEl.dom.style.zIndex=1;
+        tab.bgDragEl.dom.style.zIndex=10;
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div) {
                 tab.map.map.controls[x].div.style.display="none";

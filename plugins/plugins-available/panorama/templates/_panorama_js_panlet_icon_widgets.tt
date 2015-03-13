@@ -164,8 +164,9 @@
                 }
             }
 
+            var noUpdateLonLat = This.noUpdateLonLat;
             TP.reduceDelayEvents(This, function() {
-                TP.iconMoveHandler(This, x, y);
+                TP.iconMoveHandler(This, x, y, noUpdateLonLat);
             }, 50, 'timeout_icon_move');
         },
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
@@ -704,7 +705,6 @@
             lon: lonLat.lon,
             lat: lonLat.lat
         };
-//debug("updateMapLonLat", panel.xdata.map);
         panel.saveState();
     },
     moveToMapLonLat: function() {
@@ -712,7 +712,6 @@
         var tab   = Ext.getCmp(panel.panel_id);
         var pixel = tab.map.map.getPixelFromLonLat({lon: panel.xdata.map.lon, lat: panel.xdata.map.lat});
         var s     = panel.getSize();
-//debug("moveToMapLonLat");
         panel.noUpdateLonLat = true;
         panel.setPosition((pixel.x-s.width/2), (pixel.y-s.height/2)+TP.offset_y);
         delete panel.noUpdateLonLat;
@@ -2659,7 +2658,7 @@ function availability(panel, opts) {
 }
 
 
-TP.iconMoveHandler = function(icon, x, y) {
+TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
     window.clearTimeout(TP.timeouts['timeout_icon_move']);
 
     var deltaX = x - icon.xdata.layout.x;
@@ -2704,7 +2703,9 @@ TP.iconMoveHandler = function(icon, x, y) {
         TP.moveAlignedIcons(deltaX, deltaY, icon.id);
     }
 
-    icon.updateMapLonLat();
+    if(!noUpdateLonLat) {
+        icon.updateMapLonLat();
+    }
 }
 
 TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {
