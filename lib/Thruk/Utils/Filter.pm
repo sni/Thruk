@@ -39,6 +39,27 @@ sub throw {
 
 ##############################################
 
+=head2 contains
+
+  contains($haystack, $needle)
+
+returns true if needle is found in haystack or needle equals haystack
+
+=cut
+sub contains {
+    my($haystack, $needle) = @_;
+    if(ref $haystack eq 'ARRAY') {
+        for my $test (@{$haystack}) {
+            return 1 if $test eq $needle;
+        }
+    }
+    return 1 if $haystack eq $needle;
+    return 0;
+}
+
+
+##############################################
+
 =head2 duration
 
   my $string = duration($seconds, [$options]);

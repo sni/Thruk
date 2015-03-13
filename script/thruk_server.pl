@@ -14,6 +14,9 @@ BEGIN {
         require Thruk::Backend::Pool;
         Thruk::Backend::Pool::init_backend_thread_pool()
     }
+    push @ARGV, '--follow_symlinks';
+    push @ARGV, '--restart_directory=./lib';
+    push @ARGV, '--restart_directory=./plugins/plugins-enabled';
 }
 
 ###################################################

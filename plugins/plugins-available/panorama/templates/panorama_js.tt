@@ -49,6 +49,7 @@ var initial_shapes = [% json_encode(shapes) %];
 [%+ PROCESS _panorama_js_panlet_url_nagvis.tt +%]
 [%+ PROCESS _panorama_js_panlet_icon_widgets_settings.tt +%]
 [%+ PROCESS _panorama_js_panlet_icon_widgets.tt +%]
+[%+ PROCESS _panorama_js_panlet_clock.tt +%]
 
 Ext.onReady(function() {
     TP.unloading = false;
@@ -69,21 +70,42 @@ Ext.onReady(function() {
     Ext.QuickTips.init();
 
     /* main viewport */
-    TP.viewport = new Ext.Viewport({
-        id:       'viewport',
-        layout:   'border',
-        renderTo: Ext.getBody(),
-        margins:  '0 0 0 0',
-        items:    [ new TP.TabBar() ]
-    });
-    Ext.getCmp('bug_report').hide();
-    [% IF !thruk_debug || c.config.demo_mode %]
-    Ext.getCmp('debug_tab').hide();
-    [% END %]
+    [% IF one_tab_only %]
+        TP.viewport = new Ext.Viewport({
+            id:       'tabpan',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [],
+            xdata:    {},
+            getActiveTab: function() {
+                if(this.items.length > 0) {
+                    return(this.items.get(0));
+                }
+                return;
+            },
+            setActiveTab: function() {}
+        });
+        TP.add_pantab([% one_tab_only %], undefined, undefined, function(id) {
+            TP.initialized = true;
+            if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
+        });
+    [% ELSE %]
+        TP.viewport = new Ext.Viewport({
+            id:       'viewport',
+            layout:   'border',
+            renderTo: Ext.getBody(),
+            margins:  '0 0 0 0',
+            items:    [ new TP.TabBar() ]
+        });
+        [% IF thruk_debug && !c.config.demo_mode %]
+        Ext.getCmp('debug_tab').show();
+        [% END %]
 
-    [% IF (readonly || dashboard_ignore_changes) %]
-    var icon = Ext.query('SPAN.new-tab')[0];
-    icon.parentNode.parentNode.parentNode.style.display = 'none';
+        [% IF readonly || dashboard_ignore_changes %]
+        var icon = Ext.query('SPAN.new-tab')[0];
+        icon.parentNode.parentNode.parentNode.style.display = 'none';
+        [% END %]
     [% END %]
 
     /* make sure initialized is set to true */
@@ -95,6 +117,16 @@ Ext.onReady(function() {
     TP.log('[global] full_reload_interval set to: [% full_reload_interval %]');
     [% END %]
     cleanUnderscoreUrl();
+
+    /* disable backspace on body to prevent accidentally leaving the page */
+    Ext.EventManager.on(document, 'keydown', function(e, t) {
+        if(e.getKey() == e.BACKSPACE && e.target) {
+            if(e.target.tagName.toLowerCase() != "input" && e.target.tagName.toLowerCase() != "textarea") {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
 
     /* preload images */
     window.setTimeout(preloader, 3000);

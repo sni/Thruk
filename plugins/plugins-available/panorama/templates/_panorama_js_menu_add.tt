@@ -6,6 +6,10 @@
                 cls:    options.open == 'left' ? 'hideRightArrow' : '',
                 hideOnClick: false,
                 menu:    [{
+                        text:   'Line / Arrow / Watermark',
+                        icon:   '[% url_prefix %]plugins/panorama/images/link_go.png',
+                        handler: function() { TP.add_panlet_delayed({type:'TP.ServiceStatusIcon', conf: { xdata: { appearance: { type: 'connector' }}}}, -8, -8) }
+                    }, '-', {
                         text:   'Host Status',
                         icon:   '[% url_prefix %]plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.HostStatusIcon'}, -8, -8) }
@@ -34,7 +38,7 @@
                         icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.TextLabelWidget'}, -8, -8) }
                     }, {
-                        text:   'Image',
+                        text:   'Static Image',
                         icon:   '[% url_prefix %]plugins/panorama/images/picture.png',
                         handler: function() { TP.add_panlet_delayed({type:'TP.StaticIcon'}, -8, -8) }
                     }
@@ -92,40 +96,54 @@
             },
             /* Misc */
             '-', {
-                text:   'Logfile',
-                icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
-            }, {
-                text:   'PNP Graph',
-                icon:   '[% url_prefix %]plugins/panorama/images/chart_curve.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
-            }, {
-                text:   'Nagvis Map',
-                icon:   '[% url_prefix %]plugins/panorama/images/world.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
-            }
+                text:   'Miscellaneous',
+                icon:   options.open == 'left' ? '[% url_prefix %]plugins/panorama/images/menu-parent.gif' : '[% url_prefix %]plugins/panorama/images/wrench.png',
+                cls:    options.open == 'left' ? 'hideRightArrow' : '',
+                hideOnClick: false,
+                menu:   [{
+                    text:   'Logfile',
+                    icon:   '[% url_prefix %]plugins/panorama/images/text_align_left.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
+                }, {
+                    text:   'PNP Graph',
+                    icon:   '[% url_prefix %]plugins/panorama/images/chart_curve.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
+                }, {
+                    text:   'Nagvis Map',
+                    icon:   '[% url_prefix %]plugins/panorama/images/world.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletNagvis'}) }
+                }, {
+                    text:   'World Clock',
+                    icon:   '[% url_prefix %]plugins/panorama/images/clock.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletClock'}) }
+                }, {
+                    text:    'Generic Url Panlet',
+                    icon:    '[% url_prefix %]plugins/panorama/images/html_add.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
+                }]
+            },
             [% IF use_feature_bp %]
-            , {
+            {
                 text:   'Business Process Map',
                 icon:   '[% url_prefix %]plugins/panorama/images/chart_organisation.png',
                 handler: function() { TP.add_panlet({type:'TP.PanletBP'}) }
-            }
+            },
             [% END %]
             /* Mod-Gearman */
-            ,'-', {
-                text:   'Mod-Gearman Metrics',
-                icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
-            }, {
-                text:   'Mod-Gearman Charts',
-                icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
-            },
-            /* Generics */
-            '-', {
-                text:    'Generic Url Panlet',
-                icon:    '[% url_prefix %]plugins/panorama/images/html_add.png',
-                handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
+            {
+                text:   'Mod-Gearman',
+                icon:   options.open == 'left' ? '[% url_prefix %]plugins/panorama/images/menu-parent.gif' : '[% url_prefix %]plugins/panorama/images/modgearman.png',
+                cls:    options.open == 'left' ? 'hideRightArrow' : '',
+                hideOnClick: false,
+                menu:   [{
+                    text:   'Mod-Gearman Metrics',
+                    icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
+                }, {
+                    text:   'Mod-Gearman Charts',
+                    icon:   '[% url_prefix %]plugins/panorama/images/modgearman.png',
+                    handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
+                }]
             }
         ]
     }

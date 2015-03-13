@@ -262,7 +262,7 @@ sub calculate_availability {
             ]);
         }
         $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-        die('no such service') unless scalar @{$all_services} > 0;
+        die('no such service: '.($service||'').' '.Dumper($servicefilter)) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
@@ -293,7 +293,6 @@ sub calculate_availability {
     elsif((defined $host and $host ne 'all') || $c->{request}->{parameters}->{h_filter}) {
         my @servicefilter;
         my @hostfilter;
-        my $hostfilter;
         if($c->{request}->{parameters}->{h_filter}) {
             $hostfilter = $c->{request}->{parameters}->{h_filter};
         }
@@ -317,7 +316,6 @@ sub calculate_availability {
                     $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
                     push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
                 }
-                $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
                 if($initialassumedservicestate == -1) {
                     for my $service (@{$service_data}) {
@@ -325,11 +323,12 @@ sub calculate_availability {
                     }
                 }
             }
-            $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
+            $hostfilter        = Thruk::Utils::combine_filter('-or', \@hostfilter);
+            $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter); # use service filter here, because log table needs the host_name => ... filter
         }
 
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host: '.$host) unless scalar @{$host_data} > 0;
+        die('no such host: '.($host||'').' '.Dumper($hostfilter)) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
@@ -528,7 +527,7 @@ sub calculate_availability {
         push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
     }
     push @loghostfilter, { type => 'HOST DOWNTIME ALERT' };
-    if($service or $host or $servicegroup or $c->{'request'}->{'parameters'}->{'include_host_services'}) {
+    if($service or $servicegroup or $c->{'request'}->{'parameters'}->{'include_host_services'}) {
         push @logservicefilter, [ { type => 'SERVICE ALERT' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'INITIAL SERVICE STATE' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'CURRENT SERVICE STATE' }, $softlogfilter ];

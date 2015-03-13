@@ -195,7 +195,18 @@ sub _process_raw_request {
                 $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ] );
             }
             elsif($type eq 'custom variable') {
-                $data = [];
+                # get available custom variables
+                $data        = [];
+                my $vars     = {};
+                my $hosts    = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    custom_variable_names => { '!=' => '' } ] );
+                my $services = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), custom_variable_names => { '!=' => '' } ] );
+                for my $obj (@{$hosts}, @{$services}) {
+                    for my $key (@{$obj->{custom_variable_names}}) {
+                        $vars->{$key} = 1;
+                    }
+                }
+                @{$data} = sort keys %{$vars};
+                @{$data} = grep(/$filter/mx, @{$data}) if $filter;
             }
             elsif($type eq 'contactgroup') {
                 $data = [];

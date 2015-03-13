@@ -213,9 +213,9 @@ sub test_page {
     if($opts->{'post'}) {
         local $Data::Dumper::Indent = 0;
         local $Data::Dumper::Varname = 'POST';
-        ok($opts->{'url'}, $opts->{'url'}.' '.Dumper($opts->{'post'}));
+        ok($opts->{'url'}, 'POST '.$opts->{'url'}.' '.Dumper($opts->{'post'}));
     } else {
-        ok($opts->{'url'}, $opts->{'url'});
+        ok($opts->{'url'}, 'GET '.$opts->{'url'});
     }
 
     my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'});
@@ -493,6 +493,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <form>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
         diag($error->as_string."\n");
         push @return, $error;
     }

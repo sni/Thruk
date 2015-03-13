@@ -1,5 +1,5 @@
 ﻿[% USE date %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE HTML>
 <html>
   <head>
     <script type="text/javascript">
@@ -11,16 +11,16 @@
     <title>[% title_prefix %]Thruk Panorama</title>
     <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" type="text/css" href="[% url_prefix %]plugins/panorama/extjs-4.1.1/resources/css/ext-all-gray.css">
+    <link rel="stylesheet" type="text/css" href="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/resources/css/ext-all-gray.css">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/panorama/panorama-[% version %]-[% filebranch %].css' />
     [% IF thruk_debug %]
-      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
+      <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all-debug.js"></script>
     [% ELSE %]
       <!--[IF IE]>
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all-debug.js"></script>
       <![ENDIF]-->
       <!--[IF !IE]> -->
-        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-4.1.1/ext-all.js"></script>
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/extjs-[% extjs_version %]/ext-all.js"></script>
       <!-- <![ENDIF]-->
     [% END %]
     [% IF thruk_debug %]
@@ -32,14 +32,16 @@
     [% END %]
 </head>
 <body onunload="TP.unload()">
+<div id="bodyview"></div>
 <script type="text/javascript">
 <!--
 [%+ PROCESS panorama_js.tt +%]
 
 function preloader() {
     if(document.images) {
+        /* no var here, otherwise browser would clean the preloaded images from cache */
 [%+ FOREACH i = preload_img %]
-        img[% loop.index %] = new Image(); /* no var here, otherwise browser would clean the preloaded images from cache */
+        img[% loop.index %] = new Image();
         img[% loop.index %].src = "[% url_prefix %]plugins/panorama/images/[% i %]";
 [%+ END %]
     }

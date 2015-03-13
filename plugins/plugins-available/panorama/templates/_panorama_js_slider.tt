@@ -40,7 +40,11 @@
             afterrender: function(s) {
                 var f      = s.up('form').getForm();
                 var values = f.getValues();
-                values[s.up().formConf.nameL] = TP.sliderValue2Txt(values[s.up().formConf.nameS]);
+                if(values[s.up().formConf.nameS] != undefined) {
+                    values[s.up().formConf.nameL] = TP.sliderValue2Txt(values[s.up().formConf.nameS]);
+                } else {
+                    values[s.up().formConf.nameL] = TP.sliderValue2Txt(s.up().formConf.value);
+                }
                 f.setValues(values);
             }
         }

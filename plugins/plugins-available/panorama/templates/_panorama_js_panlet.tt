@@ -10,6 +10,7 @@
     hideMode:  'visibility',
     autoShow:  false,
     stateful:  true,
+    renderTo: "bodyview",
     initComponent: function() {
         var panel = this;
         if(this.xdata == undefined) {
@@ -62,6 +63,14 @@
                 });
             }
         }
+        if(!this.locked) {
+            this.tools.push({
+                type: 'restore',
+                scope: this,
+                tooltip: 'clone this panel',
+                handler: function() { var This = this; TP.add_panlet_delayed(TP.clone({type:This.xdata.cls, state:TP.clone_panel_config(This)}), -8, -8) }
+            });
+        }
         this.tools.push(new Ext.panel.Tool({
             type:    'refresh',
             scope:    this,
@@ -110,6 +119,9 @@
         var state = this.callParent(arguments);
         state.title = this.title;
         state.xdata = this.xdata;
+        [% IF one_tab_only %]
+        state.pos[1] += 25;
+        [% END %]
         return state;
     },
     applyState: function(state) {

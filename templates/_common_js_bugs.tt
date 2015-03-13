@@ -4,9 +4,9 @@ var released       = '[% c.config.released %]';
 var thruk_errors   = [];
 var bug_email_rcpt = "[% bug_email_rcpt %]";
 var error_count    = 0;
-window.onerror = function(msg, url, line) {
+window.onerror = function(msg, url, line, col, error) {
   error_count++;
-  if(error_count > 30) {
+  if(error_count > 5) {
     debug("too many errors, not logging any more...");
     window.onerror = undefined;
   }
@@ -22,7 +22,7 @@ window.onerror = function(msg, url, line) {
     [%+ FOREACH skip = skip_js_errors.list %]
     if(msg.match(/[% skip %]/)) { return false; }
     [% END +%]
-    var text = getErrorText("[% debug_details.replace('\n', '\\n') %]\n");
+    var text = getErrorText("[% debug_details.replace('\n', '\\n') %]\n", error);
     [%+ IF show_error_reports == "server" || show_error_reports == "both" %]
     sendJSError("[% url_prefix %]cgi-bin/remote.cgi?log", text);
     [% END +%]

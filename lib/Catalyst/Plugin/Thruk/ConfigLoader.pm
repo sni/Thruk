@@ -178,6 +178,24 @@ sub _do_finalize_config {
         }
     }
 
+    ###################################################
+    # expand expand_user_macros
+    my $new_expand_user_macros = [];
+    if(defined $config->{'expand_user_macros'}) {
+        for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
+            next unless $item;
+            if($item =~ m/^USER([\d\-]+$)/mx) {
+                my $list = Thruk::Backend::Pool::expand_numeric_list($1);
+                for my $nr (@{$list}) {
+                    push @{$new_expand_user_macros}, 'USER'.$nr;
+                }
+            } else {
+                push @{$new_expand_user_macros}, $item;
+            }
+        }
+        $config->{'expand_user_macros'} = $new_expand_user_macros;
+    }
+
 
     # set default config
     Thruk::Backend::Pool::set_default_config($config);

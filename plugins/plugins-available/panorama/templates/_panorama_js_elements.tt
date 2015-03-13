@@ -221,13 +221,12 @@ Ext.define('TP.PagingToolbar', {
     dock:       'bottom',
     displayInfo: true,
     getPageData: function() {
-        var panel  = this.up('panel').up('panel');
         var data   = {
-            total:          parseInt(panel.xdata.totalCount),
-            currentPage:    parseInt(panel.xdata.currentPage),
-            pageCount:      Math.ceil(panel.xdata.totalCount / panel.xdata.pageSize),
-            fromRecord:     ((panel.xdata.currentPage - 1) * panel.xdata.pageSize),
-            toRecord:       Math.min(panel.xdata.currentPage * panel.xdata.pageSize, panel.xdata.totalCount)
+            total:          parseInt(this.panel.xdata.totalCount),
+            currentPage:    parseInt(this.panel.xdata.currentPage),
+            pageCount:      Math.ceil(this.panel.xdata.totalCount / this.panel.xdata.pageSize),
+            fromRecord:     ((this.panel.xdata.currentPage - 1) * this.panel.xdata.pageSize),
+            toRecord:       Math.min(this.panel.xdata.currentPage * this.panel.xdata.pageSize, this.panel.xdata.totalCount)
         };
         return(data);
     },
@@ -273,30 +272,25 @@ Ext.define('TP.PagingToolbar', {
         me.fireEvent('change', me, pageData);
     },
     updateData: function(data) {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.totalCount  = data.totalCount;
-        panel.xdata.currentPage = data.currentPage;
+        this.panel.xdata.totalCount  = data.totalCount;
+        this.panel.xdata.currentPage = data.currentPage;
     },
     moveNext: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage++;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage++;
+        this.panel.refreshHandler();
     },
     moveLast: function() {
-        var panel = this.up('panel').up('panel');
         var pageData = this.getPageData();
-        panel.xdata.currentPage = pageData.pageCount;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage = pageData.pageCount;
+        this.panel.refreshHandler();
     },
     moveFirst: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage = 1;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage = 1;
+        this.panel.refreshHandler();
     },
     movePrevious: function() {
-        var panel = this.up('panel').up('panel');
-        panel.xdata.currentPage--;
-        panel.refreshHandler();
+        this.panel.xdata.currentPage--;
+        this.panel.refreshHandler();
     }
 });
 
@@ -471,7 +465,7 @@ Ext.define('Ext.ux.FontPickerCombo', {
     alias:      'widget.fontcbo',
     triggerTip: 'Please select a font.',
     queryMode:  'local',
-    store:    [ 'Arial', 'Comic Sans MS', 'Georgia', 'Helvetica', 'Lucida Console', 'Lucida Grande', 'Tahoma', 'Times', 'Times New Roman', 'Trebuchet MS', 'Verdana', 'caption', 'cursive', 'fantasy', 'icon', 'menu', 'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption'],
+    store:    [ 'inherit', 'Arial', 'Comic Sans MS', 'Georgia', 'Helvetica', 'Lucida Console', 'Lucida Grande', 'Tahoma', 'Times', 'Times New Roman', 'Trebuchet MS', 'Verdana', 'caption', 'cursive', 'fantasy', 'icon', 'menu', 'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption'],
     listConfig : {
         getInnerTpl: function(displayField) {
             return '<div class="x-combo-list-item" style="font-family:{'+displayField+'}">{'+displayField+'}<\/div>';
@@ -579,4 +573,135 @@ Ext.define('TP.speedochart', {
         showInLegend: true,
         colorSet:  [ '#00FF00' ]
     }]
+});
+
+Ext.define('TP.dragEl', {
+    extend: 'Ext.Component',
+
+    alias:  'widget.tp_drager',
+
+    'html':     ' ',
+    draggable:  true,
+    autoRender: true,
+    autoShow:   true,
+    shadow:     false,
+    floating:   true,
+    width:      24,
+    height:     24,
+    renderTo:  "bodyview",
+    cls:       "clickable",
+    x:          0,
+    y:          0,
+    listeners: {
+        afterrender: function(This, eOpts) {
+            if(!This.panel.locked) {
+                This.el.on('mouseover', function(e,t,a) {
+                    if(!This.el.dom.style.outline.match("orange")) {
+                        This.el.dom.style.outline = "1px dashed grey";
+                    }
+                });
+                This.el.on('mouseout', function(e,t,a) {
+                    if(This.el.dom.style.outline.match("grey")) {
+                        This.el.dom.style.outline = "";
+                    }
+                });
+            }
+            This.addDDListener();
+        },
+        boxready: function(This, width, height, eOpts) {
+            This.addDDListener();
+        },
+        show: function( This, eOpts ) {
+            This.addDDListener();
+        },
+        move: function(This, x, y, eOpts) {
+            if(This.noMoreMoves) { return; }
+            if(x == undefined) { x = This.xdata.appearance[This.keyX]; }
+            if(y == undefined) { y = This.xdata.appearance[This.keyY]; }
+
+            /* snap to roaster when shift key is hold */
+            if(TP.isShift) {
+                var pos = TP.get_snap(x, y);
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = '';
+                    This.ddShadow.dom.style.left    = pos[0]+"px";
+                    This.ddShadow.dom.style.top     = pos[1]+"px";
+                }
+                x=pos[0];
+                y=pos[1];
+            } else {
+                if(This.ddShadow) {
+                    This.ddShadow.dom.style.display = 'none';
+                }
+            }
+
+            TP.reduceDelayEvents(This, function() {
+                var origX = This.xdata.appearance[This.keyX];
+                var origY = This.xdata.appearance[This.keyY];
+                This.xdata.appearance[This.keyX] = x-This.offsetX;
+                This.xdata.appearance[This.keyY] = y-This.offsetY;
+                if(TP.iconSettingsWindow) {
+                    var values = {};
+                    values[This.keyX] = This.xdata.appearance[This.keyX];
+                    values[This.keyY] = This.xdata.appearance[This.keyY];
+                    Ext.getCmp('appearanceForm').getForm().setValues(values);
+                } else {
+                    /* move aligned items too */
+                    var deltaX = This.xdata.appearance[This.keyX] - origX;
+                    var deltaY = This.xdata.appearance[This.keyY] - origY;
+                    TP.moveAlignedIcons(deltaX, deltaY, This.id);
+                }
+                This.panel.updateRender(This.xdata);
+            }, 100, 'timeout_panel_move_delay');
+        }
+    },
+    moveDragEl: function(deltaX, deltaY) {
+        var This = this;
+        This.xdata.appearance[This.keyX] += deltaX;
+        This.xdata.appearance[This.keyY] += deltaY;
+        This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
+    },
+    resetDragEl: function() {
+        var This = this;
+        This.suspendEvents();
+        This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
+        This.resumeEvents();
+    },
+    addDDListener: function() {
+        var panel = this;
+        if(!panel.el || !panel.dd) {return;}
+        if(panel.ddAdded) {return;}
+        panel.dd.addListener('dragstart', function(This, e) {
+            TP.isShift = is_shift_pressed(e);
+            if(!panel.ddShadow) {
+                var size = panel.getSize();
+                panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+            }
+            if(!panel.dragHint) {
+                panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+            }
+        });
+        panel.dd.addListener('drag', function(This, e) {
+            TP.isShift = is_shift_pressed(e);
+        });
+        panel.dd.addListener('dragend', function(This, e) {
+            panel.dragHint.destroy();
+            panel.dragHint = undefined;
+            TP.isShift = is_shift_pressed(e);
+            if(TP.isShift) {
+                var pos = panel.getPosition();
+                panel.noMoreMoves = true;
+                panel.setPosition(TP.get_snap(pos[0], pos[1]));
+                panel.noMoreMoves = false;
+            }
+            TP.isShift = false;
+            if(panel.ddShadow) { panel.ddShadow.dom.style.display = 'none'; }
+            window.setTimeout(function() {
+                if(panel.ddShadow) {
+                    panel.ddShadow.dom.style.display = 'none';
+                }
+            }, 100);
+        });
+        panel.ddAdded = true;
+    }
 });

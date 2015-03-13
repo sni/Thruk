@@ -464,10 +464,14 @@ ex.:
   mode_dir = 0770
 
 === resource_file
-Set a general resource file. Make sure it does not contain any
-passwords or any other data which should not be displayed. Instead of
-using a general 'resource_file' you could define one file per peer in your
-peer config.
+Set a general resource file.
+Be warned, if any macros contain sensitive data like passwords, setting
+this option could expose that data to unauthorized user. It is strongly
+recommended that this option is only used if no passwords are used in
+this file or in combination with the 'expand_user_macros' option which
+will limit which macros are exposed to the user.
+Instead of using a general 'resource_file' you could define one file
+per peer in your peer config.
 
 ex.:
 
@@ -782,7 +786,7 @@ ex.:
 Display the full command line for host / service checks .
 Be warned, the command line could contain passwords and other confidential data.
 In order to replace the user macros for commands, you have to set the
-'resource_file' in your peer config or the general 'resource_file' option.
+'resource_file' in your peer config or a general resource_file option.
 
  * 0 = off, don't show the command line at all
  * 1 = show them for contacts with the role: authorized_for_configuration_information
@@ -940,6 +944,25 @@ variables. Use * as wildcard, ex.: _VAR*
 ex.:
 
   show_custom_vars = _VAR1
+
+
+=== expand_user_macros
+Expand user macros ($USERx$) for host / service commands and custom
+variables. Can be specified more than once to define multiple user
+macros to expand.
+Be warned, some user macros can contain passwords and expanding them
+could expose them to unauthorized users. Use * as wildcard, ex.: USER*
+
+Defaults to 'ALL' which means all user macros are expanded, because
+its limited to admin users anyway.
+
+ex.:
+
+  expand_user_macros = USER1
+  expand_user_macros = USER10-20
+  expand_user_macros = PLUGIN*
+  expand_user_macros = ALL  # expands all user macros
+  expand_user_macros = NONE # do not expand user macros
 
 
 === show_error_reports
@@ -1441,6 +1464,11 @@ Sample menu with two items and a seperator:
         "label":  "refresh",
         "action": "server://refresh/$HOSTNAME$"
       },
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/page_white_key.png",
+        "label":  "example",
+        "action": "server://example/$HOSTNAME$/$SERVICEDESC$"
+      },
       "-",
       {
         "icon":   "/thruk/themes/{{theme}}/images/page_white_text.png",
@@ -1454,8 +1482,7 @@ Sample menu with two items and a seperator:
 
 A menu has the following attributes:
 
-     ** `icon`          icon for the menu itself. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url
-                        and `{% raw %}{{remote_user}}{% endraw %}` for the user name.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
      ** `title`         title of the menu, will be display on mouse over.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
 
@@ -1464,12 +1491,23 @@ A single `"-"` item can be used as a menu item seperator.
 
 The menu item can have the following attributes:
 
-     ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url.
-     ** `label`         label name of the menu item.
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
      ** `action`        url or action which will be run or openend. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
+                        You may use `{% raw %}{{macros}}{% endraw %}` here too.
      ** `target`        Use '_blank' here to open link in a new window.
+
+
+==== action menu macros
+
+The following macros can be used in the icon url and the link url:
+
+     ** `{% raw %}{{theme}}{% endraw %}`        contains the current selected user theme
+     ** `{% raw %}{{remote_user}}{% endraw %}`  contains the user name itself. (Do not rely on this value, a user can change the url by himself)
+     ** `{% raw %}{{prefix}}{% endraw %}`       the url path prefix, ex.: /thruk
+     ** `{% raw %}{{site}}{% endraw %}`         the OMD site name.
+
 
 Sample icons with two action icons:
 
@@ -1540,14 +1578,14 @@ of the script and the corresponding command. The command has to be a full path p
 and *not* just a shell command. Therefor you do not have to use quotes because the arguments
 are not interpreted by a shell before execution due to security reasons.
 
-It is possible to use most standard macros and the username is available in the `REMOTE_USER`
+It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
 environment variable.
 
 ex.:
 
   <action_menu_actions>
-      example_action   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$
-      refresh_action   = /usr/local/bin/refresh.sh otherargs
+      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
+      refresh   = /usr/local/bin/refresh.sh otherargs
   </action_menu_actions>
 
 

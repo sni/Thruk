@@ -43,17 +43,19 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 var debug = function(str) {}
-if(thruk_debug_js != undefined && thruk_debug_js) {
-    if(window.console != undefined) {
-        /* overwrite debug function, so caller information is not replaced */
-        try {
-            debug = console.debug;
-            debug('console debug log enabled');
-        } catch(e) {
-            debug = function(str) {}
+window.addEventListener('load', function(e) {
+    if(thruk_debug_js != undefined && thruk_debug_js) {
+        if(window.console != undefined) {
+            /* overwrite debug function, so caller information is not replaced */
+            try {
+                debug = console.debug;
+                debug('console debug log enabled');
+            } catch(e) {
+                debug = function(str) {}
+            }
         }
     }
-}
+}, false);
 
 /* do initial things */
 function init_page() {
@@ -1404,7 +1406,7 @@ function showBugReport(id, text) {
 }
 
 /* create error text for bug reports */
-function getErrorText(details) {
+function getErrorText(details, error) {
     var text = "";
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
@@ -1418,10 +1420,40 @@ function getErrorText(details) {
         first = 0;
     }
     text = text + details;
-    text = text + "Stacktrace:\n";
+    text = text + "Error List:\n";
     for(var nr=0; nr<thruk_errors.length; nr++) {
         text = text + thruk_errors[nr]+"\n";
     }
+
+    /* try to get a stacktrace */
+    text += "\n";
+    text += "Full Stacktrace:\n";
+    if(error && error.stack) {
+        text = text + error.stack;
+    }
+    try {
+        var stack = [];
+        var f = arguments.callee.caller;
+        while (f) {
+            stack.push(f.name);
+            f = f.caller;
+        }
+        text = text + stack.join("\n");
+    } catch(e) {}
+    /* this only works in panorama view */
+    try {
+        if(TP.logHistory) {
+            text += "\n";
+            text += "Panorama Log:\n";
+            var formatLogEntry = function(entry) {
+                var date = Ext.Date.format(entry[0], "Y-m-d H:i:s.u");
+                return('['+date+'] '+entry[1]+"\n");
+            }
+            for(var i=TP.logHistory.length-1; i > 0; i--) {
+                text += formatLogEntry(TP.logHistory[i]);
+            }
+        }
+    } catch(e) {}
     return(text);
 }
 
@@ -1730,7 +1762,7 @@ function updateExcelPermanentLink() {
 
 /* print the action menu icons and action icons */
 var menu_nr = 0;
-function print_action_menu(src, backend, host, service, orientation) {
+function print_action_menu(src, backend, host, service, orientation, show_title) {
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         src = is_array(src) ? src : [src];
@@ -1739,6 +1771,7 @@ function print_action_menu(src, backend, host, service, orientation) {
             icon.src       = replace_macros(e.icon);
             icon.className = 'action_icon '+(e.menu ? 'clickable' : '' );
             icon.title     = e.title ? e.title : '';
+            var title      = document.createTextNode(icon.title);
             if(e.menu) {
                 icon.nr = menu_nr;
                 icon.onclick = function() {
@@ -1761,6 +1794,9 @@ function print_action_menu(src, backend, host, service, orientation) {
             // obtain reference to current script tag so we could insert the icons here
             var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
+            if(show_title) {
+                scriptTag.parentNode.appendChild(title);
+            }
         });
     }
     catch(e) {
@@ -1940,8 +1976,10 @@ function check_server_action(id, link, backend, host, service) {
 /* replace common macros */
 function replace_macros(input) {
     var out = input;
-    out = out.replace(/\{\{\s*theme\s*\}\}/g, theme)
-    out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user)
+    out = out.replace(/\{\{\s*theme\s*\}\}/g, theme);
+    out = out.replace(/\{\{\s*remote_user\s*\}\}/g, remote_user);
+    out = out.replace(/\{\{\s*site\s*\}\}/g, omd_site);
+    out = out.replace(/\{\{\s*prefix\s*\}\}/g, url_prefix);
     return(out);
 }
 
@@ -3536,12 +3574,9 @@ function add_new_filter(search_prefix, table) {
   newInputPre.setAttribute('id',   pane_prefix + search_prefix + nr + '_val_pre');
   newInputPre.style.display    = "none";
   newInputPre.style.visibility = "hidden";
-  /*
-   * not possible right now
   if(ajax_search_enabled) {
     newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
   }
-  */
   newCell0.appendChild(newInputPre);
 
   newCell0.appendChild(opselect);
@@ -3957,22 +3992,14 @@ function show_cal(id) {
       weekNumbers: true,
       onSelect: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-        if(Calendar.printDate(newDateObj, '%S') == 0) {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
-        } else {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        }
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         var now = new Date; last_cal_hidden = now.getTime();
         jQuery('.DynarchCalendar-topCont').remove();
       },
       onBlur: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
         document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        if(Calendar.printDate(newDateObj, '%S') == 0) {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
-        } else {
-            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
-        }
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         var now = new Date; last_cal_hidden = now.getTime();
         jQuery('.DynarchCalendar-topCont').remove();
       },
@@ -3998,7 +4025,6 @@ Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
 var ajax_search = {
-    url             : url_prefix + 'cgi-bin/status.cgi?format=search',
     max_results     : 12,
     input_field     : 'NavBarSearchItem',
     result_pan      : 'search-results',
@@ -4071,6 +4097,7 @@ var ajax_search = {
 
         if(options == undefined) { options = {}; };
 
+        ajax_search.url = url_prefix + 'cgi-bin/status.cgi?format=search';
         ajax_search.input_field = elem.id;
 
         if(ajax_search.stop_events == true) {
@@ -4235,6 +4262,7 @@ var ajax_search = {
                || search_type == 'servicegroup'
                || search_type == 'timeperiod'
                || search_type == 'priority'
+               || search_type == 'custom variable'
             ) {
                 ajax_search.search_type = search_type;
             }
@@ -4261,7 +4289,6 @@ var ajax_search = {
                || search_type == '% state change'
                || search_type == 'duration'
                || search_type == 'downtime duration'
-               || search_type == 'custom variable'
             ) {
                 ajax_search.search_type = 'none';
             }

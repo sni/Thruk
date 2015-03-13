@@ -29,7 +29,8 @@ Ext.define('TP.TabBar', {
             iconCls:  'debug-tab',
             tooltip:  'Debug Information',
             handler:  thruk_debug_window_handler,
-            margin:   '0 15 0 0'
+            margin:   '0 15 0 0',
+            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
             xtype:    'label',
             text:     '[% date_format(c, date.now, "%H:%M") %]',
@@ -52,7 +53,8 @@ Ext.define('TP.TabBar', {
             iconCls:  'bug-tab',
             href:     '#',
             html:     'Report',
-            tooltip:  'Send Bug Report'
+            tooltip:  'Send Bug Report',
+            listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
             iconCls:  'user-tab',
             closable:  false,
@@ -271,7 +273,7 @@ Ext.define('TP.TabBar', {
             }
             TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
         } catch(e) {
-            debug(e);
+            TP.logError(this.id, "tabbarApplyStateException", e);
             if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
                 window.location = 'panorama.cgi?clean=1';
             }
@@ -280,8 +282,6 @@ Ext.define('TP.TabBar', {
             TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
                 // hide mask
                 if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
-                // and scroll to top
-                window.scrollTo(0, 0);
             } ,TP.initial_create_delay_active + 500);
         }
     },
@@ -427,18 +427,29 @@ TP.getLogTab = function() {
                     var logtextarea = Ext.getCmp('logtextarea');
                     var filter      = Ext.getCmp('logfilter').getValue();
                     if(logtextarea.lastLength != TP.logHistory.length || logtextarea.lastFilter != filter) {
+                        var input = Ext.get('logtextarea-inputEl');
+                        var oldScroll = input.dom.scrollTop;
+                        input.dom.scrollTop = 100000000;
+                        var scrollDown = false;
+                        if(oldScroll != 0 && oldScroll == input.dom.scrollTop) { scrollDown = true; } /* scroll down if we were on bottom before */
+                        if(logtextarea.lastLength == undefined) { scrollDown = true; } /* scroll down if this is the first refresh */
                         logtextarea.lastLength = TP.logHistory.length;
                         logtextarea.lastFilter = filter;
                         var text = "";
                         var pattern;
                         if(filter) { pattern = new RegExp(filter, 'i') }
-                        for(var i = TP.logHistory.length - 1; i >= 0; i--) {
+                        for(var i = 0; i < TP.logHistory.length; i++) {
                             if(!pattern || TP.logHistory[i][1].match(pattern)) {
                                 text += formatLogEntry(TP.logHistory[i]);
                             }
                         }
                         logtextarea.setValue(text);
                         logtextarea.setDisabled(false);
+                        if(scrollDown) {
+                            input.dom.scrollTop = 100000000;
+                        } else {
+                            input.dom.scrollTop = oldScroll;
+                        }
                     }
                 }
             }, {

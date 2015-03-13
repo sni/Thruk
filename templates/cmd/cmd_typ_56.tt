@@ -25,8 +25,8 @@
     SCHEDULE_SVC_DOWNTIME;[% sprintf("%s;%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,service_desc,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,                   '%Y-%m-%d %H:%M:%S'); END %]
-[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,                   '%Y-%m-%d %H:%M:00'); END %]
+[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:00'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
@@ -34,7 +34,7 @@
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
-<tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option>[% FOREACH d = hostdowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %][% FOREACH d = servicedowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %]</select></td></tr>
+<tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option>[% FOREACH d = hostdowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:00') %] </option>[% END %][% FOREACH d = servicedowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:00') %] </option>[% END %]</select></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
 <tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% start_time %]'> <a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 <tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>

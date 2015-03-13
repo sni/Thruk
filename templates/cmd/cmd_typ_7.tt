@@ -20,7 +20,7 @@
     [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_SVC_CHECK[% ELSE %]SCHEDULE_SVC_CHECK[% END %];[% sprintf("%s;%s;%lu",host_name,service_desc,start_time_unix) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>

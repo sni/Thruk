@@ -2,12 +2,39 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add host and service notes url macros (Andrew Widdersheim)
+          - add host and service duration macro (Andrew Widdersheim)
+          - disable IE8 compatiblity mode introduced in 56c92b1 (Andrew Widdersheim)
+          - add 'expand_user_macros' option (Andrew Widdersheim)
+          - command start/end times round to full minute
+          - search now suggests custom variable names too (#450)
+          - Panorama View:
+            - add undo function
+              - restore point can be created manually
+              - autosave creates restore point every 10minutes and when unlocking a dashboard
+            - add fullscreen mode
+            - add new connector item
+            - add new worldclock widget
+            - make widgets clonable
+            - dashboard are now locked by default
+              - popups will only displayed in locked mode for smoother editing
+              - links are disabled during editing
+            - dashboards are now locked by default
+            - prevent accidentally leaving the page by backspace key
+            - fix showing -1 objects for new dashboards
+            - fix showing empty totals for custom filter icons
+            - fix unclosable host/service popups (#401)
           - Business Process:
             - show draft edits in overview
+            - prevent accidentally leaving the page by backspace key
+          - Reports:
+            - prevent accidentally leaving the page by backspace key
+          - Config Tool:
+            - prevent accidentally leaving the page by backspace key
           - Bug Fixes
             - fix accessing performance data page in author mode
             - fix accessing reports page in author mode
             - fix title offset in trends graph
+            - fix highlighting correct backend on multiple backends by url
 
 1.86-4   Thu Feb 12 21:47:53 CET 2015:
           - add action_menu_apply option to apply action menus on the fly

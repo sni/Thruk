@@ -8,8 +8,11 @@ use JSON::XS;
 use URI::Escape qw/uri_unescape/;
 use IO::Socket;
 use File::Slurp;
-use File::Copy qw/copy/;
+use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
+use Scalar::Util qw/looks_like_number/;
+use DateTime;
+use DateTime::TimeZone;
 use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
@@ -45,6 +48,7 @@ use constant {
     ACCESS_READWRITE => 2,
     ACCESS_OWNER     => 3,
 };
+my @runtime_keys = qw/state/;
 
 ##########################################################
 
@@ -83,8 +87,11 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
         $c->stash->{'is_admin'} = 1;
     }
+    $c->stash->{one_tab_only} = '';
 
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
+
+    $c->stash->{'extjs_version'} = "4.1.1";
 
     $self->{'var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($self->{'var'});
@@ -115,6 +122,15 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         }
         elsif($task eq 'dashboard_update') {
             return($self->_task_dashboard_update($c));
+        }
+        elsif($task eq 'dashboard_restore_list') {
+            return($self->_task_dashboard_restore_list($c));
+        }
+        elsif($task eq 'dashboard_restore_point') {
+            return($self->_task_dashboard_restore_point($c));
+        }
+        elsif($task eq 'dashboard_restore') {
+            return($self->_task_dashboard_restore($c));
         }
         elsif($task eq 'stats_core_metrics') {
             return($self->_task_stats_core_metrics($c));
@@ -197,16 +213,13 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'serveraction') {
             return($self->_task_serveraction($c));
         }
+        elsif($task eq 'timezones') {
+            return($self->_task_timezones($c));
+        }
     }
 
     # find images for preloader
-    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
-    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
-    $c->stash->{preload_img} = [];
-    for my $i (@images) {
-        $i =~ s|^.*/||gmx;
-        push @{$c->stash->{preload_img}}, $i;
-    }
+    _set_preload_images($c);
 
     # clean up?
     if($c->request->parameters->{'clean'}) {
@@ -224,7 +237,18 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 ##########################################################
 sub _js {
-    my ( $self, $c, $only_data ) = @_;
+    my($self, $c, $only_data) = @_;
+
+    my $open_tabs;
+    if(defined $c->request->parameters->{'map'}) {
+        my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
+        if(!$dashboard) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
+            return $c->response->redirect($c->stash->{'url_prefix'});
+        }
+        $open_tabs = [$dashboard->{'nr'}];
+        $c->stash->{one_tab_only} = $dashboard->{'nr'};
+    }
 
     $c->stash->{shapes} = {};
     my $data = Thruk::Utils::get_user_data($c);
@@ -271,10 +295,11 @@ sub _js {
     }
 
     # merge open dashboards into state
-    if($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}) {
-        my $shapes = {};
+    if($open_tabs || ($data->{'panorama'}->{dashboards} and $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'})) {
+        my $shapes         = {};
         $c->stash->{state} = '';
-        for my $nr (@{$data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'}}) {
+        $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
+        for my $nr (@{$open_tabs}) {
             my $dashboard = $self->_load_dashboard($c, $nr);
             $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
@@ -292,7 +317,7 @@ sub _js {
             }
         }
         $c->stash->{shapes} = $shapes;
-        $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'});
+        $data->{'panorama'}->{dashboards}->{'tabpan'} = encode_json($data->{'panorama'}->{dashboards}->{'tabpan'}) if $data->{'panorama'}->{dashboards}->{'tabpan'};
     }
 
     $c->stash->{dashboards}        = decode_utf8(encode_json($data->{'panorama'}->{'dashboards'} || {}));
@@ -493,7 +518,7 @@ sub _task_status {
             next if $c->stash->{'has_error'};
             delete $c->request->parameters->{'backend'};
             delete $c->request->parameters->{'backends'};
-            if($backends) {
+            if($backends && scalar @{$backends} > 0) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
@@ -587,6 +612,67 @@ sub _task_serveraction {
 }
 
 ##########################################################
+sub _task_timezones {
+    my($self, $c) = @_;
+
+    my $query = $c->{'request'}->{'parameters'}->{'query'} || '';
+    my $data  = [];
+    for my $tz (@{_get_timezone_data($c)}) {
+        next unless $tz->{'text'} =~ m/$query/mxi;
+        push @{$data}, $tz;
+    }
+
+    my $json = { 'rc' => 0, 'data' => $data };
+    $c->stash->{'json'} = $json;
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _get_timezone_data {
+    my($c) = @_;
+
+    my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
+    my $data  = $cache->get('timezones');
+    my $timestamp = Thruk::Utils::format_date(time(), "%Y-%m-%d %H");
+    if(defined $data && $data->{'timestamp'} eq $timestamp) {
+        return($data->{'timezones'});
+    }
+
+    my $timezones = [];
+    my $localname = 'Local Browser';
+    push @{$timezones}, {
+        text   => $localname,
+        abbr   => '',
+        offset => 0
+    };
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+    for my $name (DateTime::TimeZone->all_names) {
+        my $dt = DateTime->new(
+            year      => $year+1900,
+            month     => $mon+1,
+            day       => $mday,
+            hour      => $hour,
+            minute    => $min,
+            second    => $sec,
+            time_zone => $name
+        );
+        push @{$timezones}, {
+            text   => $name,
+            abbr   => $dt->time_zone()->short_name_for_datetime($dt),
+            offset => $dt->offset(),
+            isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
+        }
+    }
+    $cache->set('timezones', {
+        timestamp => $timestamp,
+        timezones => $timezones,
+    });
+    return($timezones);
+}
+
+
+##########################################################
 sub _task_availability {
     my($self, $c) = @_;
 
@@ -607,7 +693,6 @@ sub _task_availability {
     $c->stats->profile(end => "_task_avail");
     return($res);
 }
-
 
 ##########################################################
 sub _avail_update {
@@ -641,6 +726,7 @@ sub _avail_update {
 
     my $data = {};
     my $now  = time();
+    Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     if(scalar keys %{$types->{'filter'}} > 0) {
         for my $f (keys %{$types->{'filter'}}) {
             # check if this filter is used in availabilities at all
@@ -655,7 +741,7 @@ sub _avail_update {
             my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
             delete $c->request->parameters->{'backend'};
             delete $c->request->parameters->{'backends'};
-            if($backends) {
+            if((ref $backends eq "" and $backends) || (ref $backends eq 'ARRAY' && scalar @{$backends} > 0)) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
@@ -698,7 +784,7 @@ sub _avail_update {
                     my $opts   = $in->{$panel}->{$key}->{opts};
                     my $cached = $cache->get(@cache_prefix, 'hostgroups', $group, $key);
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
-                        $c->{request}->{parameters}->{include_host_services} = 1
+                        $c->{request}->{parameters}->{include_host_services} = 1;
                     }
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
@@ -723,6 +809,7 @@ sub _avail_update {
         for my $host (keys %{$types->{'hosts'}}) {
             Thruk::Utils::Avail::reset_req_parameters($c);
             $c->{request}->{parameters}->{host} = $host;
+            $c->{request}->{parameters}->{include_host_services} = 0;
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
@@ -796,7 +883,7 @@ sub _avail_calc {
             $refresh = 1;
         }
         # retry unknown values every 2 minutes
-        if(!$refresh && $cached->{'val'} == -1) {
+        elsif(!looks_like_number($cached->{'val'}) || $cached->{'val'} == -1) {
             if($now > $cached->{'time'} + 120) {
                 $refresh = 1;
             }
@@ -806,7 +893,13 @@ sub _avail_calc {
         }
     }
     if($cached_only) {
-        return($cached->{'val'}) if defined $cached->{'val'};
+        if(defined $cached->{'val'}) {
+            if($now > $cached->{'time'} + $duration * $cache_retrieve_factor*5 && $now > $cached->{'time'} + 180) {
+                # better return unknown for really old cached values
+                return(-1);
+            }
+            return($cached->{'val'});
+        }
         return(-1);
     }
 
@@ -823,6 +916,7 @@ sub _avail_calc {
             $c->log->error("calculating availability failed for filter:");
             $c->log->error(Dumper($c->{request}->{parameters}));
             $c->log->error($@);
+            return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
         }
     }
     if($host) {
@@ -831,10 +925,17 @@ sub _avail_calc {
                                                                     $host,
                                                                     $service
                                                                    );
-        return $totals->{'total'}->{'percent'};
+        return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
+        return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
+        return($totals->{'total'}->{'percent'});
     } else {
         my($num, $total) = (0,0);
-        if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+        # if nothing is enabled, use all
+        if(!$opts->{'incl_hst'} && !$opts->{'incl_svc'}) {
+            $opts->{'incl_hst'} = 1;
+            $opts->{'incl_svc'} = 1;
+        }
+        if($opts->{'incl_hst'}) {
             my $s_filter = delete $c->{request}->{parameters}->{s_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'hosts'};
@@ -845,6 +946,7 @@ sub _avail_calc {
                     $c->log->error("calculating availability failed for host filter:");
                     $c->log->error(Dumper($c->{request}->{parameters}));
                     $c->log->error($@);
+                    return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
             if($c->stash->{avail_data}->{'hosts'}) {
@@ -861,7 +963,7 @@ sub _avail_calc {
             }
             $c->{request}->{parameters}->{s_filter} = $s_filter;
         }
-        if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
+        if($opts->{'incl_svc'}) {
             delete $c->{request}->{parameters}->{h_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'services'};
@@ -872,6 +974,7 @@ sub _avail_calc {
                     $c->log->error("calculating availability failed for service filter:");
                     $c->log->error(Dumper($c->{request}->{parameters}));
                     $c->log->error($@);
+                    return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
             }
             if($c->stash->{avail_data}->{'services'}) {
@@ -894,7 +997,7 @@ sub _avail_calc {
             return($total/$num);
         }
     }
-    return(-1);
+    return("found no data");
 }
 
 ##########################################################
@@ -1900,6 +2003,24 @@ sub _get_dashboard_list {
 }
 
 ##########################################################
+sub _get_dashboard_by_name {
+    my($self, $c, $name) = @_;
+    return unless $name;
+
+    for my $file (glob($self->{'var'}.'/*.tab')) {
+        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
+            my $d = $self->_load_dashboard($c, $1);
+            if($d) {
+                if($d->{'tab'}->{'xdata'}->{'title'} eq $name || $d->{'nr'} eq $name) {
+                    return($d);
+                }
+            }
+        }
+    }
+    return;
+}
+
+##########################################################
 sub _task_dashboard_list {
     my($self, $c) = @_;
 
@@ -1922,7 +2043,8 @@ sub _task_dashboard_list {
             },
             { 'header' => 'Read-Write Groups',  width => 120, dataIndex => 'groups_rw',    align => 'left' },
             { 'header' => 'Read-Only Groups',   width => 120, dataIndex => 'groups_ro',    align => 'left' },
-            { 'header' => 'Objects',     width => 45,  dataIndex => 'objects',      align => 'center' },
+            { 'header' => 'Direct Link',        width =>  65, dataIndex => 'link',         align => 'center', renderer => 'TP.render_directlink' },
+            { 'header' => 'Objects',     width => 50,  dataIndex => 'objects',      align => 'center' },
             { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
             { 'header' => 'Actions',     width => 50,
                       xtype => 'actioncolumn',
@@ -1958,6 +2080,8 @@ sub _task_dashboard_update {
         $c->stash->{'json'} = { 'status' => 'ok' };
         if($action eq 'remove') {
             unlink($dashboard->{'file'});
+            # and also all backups
+            unlink(glob($dashboard->{'file'}.'.*'));
         }
         if($action eq 'update') {
             my $extra_settings = {};
@@ -1974,6 +2098,76 @@ sub _task_dashboard_update {
             }
             $self->_save_dashboard($c, $dashboard, $extra_settings);
         }
+    }
+    $self->_add_misc_details($c, 1);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore_list {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        my $list = {
+            a => [],
+            m => [],
+        };
+        $nr       =~ s/^tabpan-tab_//gmx;
+        my @files = reverse sort glob($self->{'var'}.'/'.$nr.'.tab.*');
+        for my $file (@files) {
+            next if $file =~ m/\.runtime$/mx;
+            $file =~ m/\.(\d+)\.(\w)$/mx;
+            my $date = $1;
+            my $mode = $2;
+            push(@{$list->{$mode}}, { num => $date })
+        }
+        $c->stash->{'json'} = { data => $list };
+    }
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore_point {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+    my $mode       = $c->request->parameters->{'mode'} || 'm';
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        $nr =~ s/^tabpan-tab_//gmx;
+        my $file = $self->{'var'}.'/'.$nr.'.tab';
+        if(!$mode || $mode eq 'm') {
+            Thruk::Utils::backup_data_file($file, 'm', 5, 0, 1);
+        } else {
+            Thruk::Utils::backup_data_file($file, 'a', 5, 600, 1);
+        }
+    }
+
+    $c->stash->{'json'} = { msg => "ok" };
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_dashboard_restore {
+    my($self, $c) = @_;
+
+    my $nr         = $c->request->parameters->{'nr'};
+    my $mode       = $c->request->parameters->{'mode'};
+       $nr         =~ s/^tabpan-tab_//gmx;
+    my $timestamp  = $c->request->parameters->{'timestamp'};
+    my $dashboard  = $self->_load_dashboard($c, $nr);
+    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    if($permission >= ACCESS_READWRITE) {
+        die("no such dashboard") unless -e $self->{'var'}.'/'.$nr.'.tab';
+        die("no such restore point") unless -e $self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
+        unlink($self->{'var'}.'/'.$nr.'.tab');
+        copy($self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $self->{'var'}.'/'.$nr.'.tab');
     }
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
@@ -2268,10 +2462,25 @@ sub _save_dashboard {
     delete $dashboard->{'nr'};
     delete $dashboard->{'id'};
     delete $dashboard->{'file'};
+    delete $dashboard->{'locked'};
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
 
+    # save runtime data in extra file
+    my $runtime = {};
+    for my $tab (keys %{$dashboard}) {
+        next unless ref $dashboard->{$tab} eq 'HASH';
+        delete $dashboard->{$tab}->{""};
+        for my $key (@runtime_keys) {
+            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
+                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
+            }
+        }
+    }
+
     Thruk::Utils::write_data_file($file, $dashboard);
+    Thruk::Utils::write_data_file($file.'.runtime', $runtime);
+    Thruk::Utils::backup_data_file($file, 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     return $dashboard;
@@ -2284,7 +2493,7 @@ sub _load_dashboard {
     my $file  = $self->{'var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
-    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -3;
+    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
     my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
     if($permission == ACCESS_READONLY) {
@@ -2301,6 +2510,18 @@ sub _load_dashboard {
     $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
     if($public) {
         push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
+    }
+
+    # merge runtime data
+    my $runtime = {};
+    if(-e $file.'.runtime') {
+       $runtime = Thruk::Utils::read_data_file($file.'.runtime');
+    }
+    for my $tab (keys %{$runtime}) {
+        next if !defined $dashboard->{$tab};
+        for my $key (keys %{$runtime->{$tab}}) {
+            $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key};
+        }
     }
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
@@ -2376,7 +2597,7 @@ sub _merge_dashboard_into_hash {
 sub _get_default_tab_xdata {
     my($self, $c) = @_;
     return({
-        title           => 'Dashboard',
+        title           => $c->request->parameters->{'title'} || 'Dashboard',
         refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
         select_backends => 0,
         backends        => [],
@@ -2418,6 +2639,19 @@ sub _add_misc_details {
         $self->_add_json_dashboard_timestamps($c);
         $self->_add_json_pi_detail($c);
         $c->stats->profile(end => "_add_misc_details");
+    }
+    return;
+}
+
+##########################################################
+sub _set_preload_images {
+    my($c) = @_;
+    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
+    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
+    $c->stash->{preload_img} = [];
+    for my $i (@images) {
+        $i =~ s|^.*/||gmx;
+        push @{$c->stash->{preload_img}}, $i;
     }
     return;
 }

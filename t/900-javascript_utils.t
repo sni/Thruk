@@ -29,7 +29,8 @@ var window = {
         insertBefore:function(){},
         removeChild:function(){}
     }
-  }
+  },
+  addEventListener: function() {}
 };
 var document = window.document;
 thruk_debug_js = 1;

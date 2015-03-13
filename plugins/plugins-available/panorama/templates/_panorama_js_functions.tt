@@ -47,6 +47,12 @@ var TP = {
         }
         TP.checkModalWindows();
 
+        [% IF one_tab_only %]
+        if(replace_id && id != replace_id) {
+            tabpan.getActiveTab().body.mask("loading");
+        }
+        [% END %]
+
         if(id == undefined) {
             TP.initialized = true;
             id = 'new_or_empty';
@@ -55,6 +61,10 @@ var TP = {
         TP.log('[global] add_pantab: id:'+id+(replace_id ? ', replace_id: '+replace_id : ''));
 
         /* get tab data from server */
+        var newDashboard = false;
+        if(id && (id == "new" || id == "new_or_empty")) {
+            newDashboard = true;
+        }
         if(id && cp.state[id] == undefined) {
             /* fetch state info and add new tab as callback */
             Ext.Ajax.request({
@@ -95,6 +105,13 @@ var TP = {
                             tabpan.saveState();
                         }
                     }
+
+                    /* disable lock for new dashboard */
+                    if(newDashboard) {
+                        Ext.getCmp(id).locked = false;
+                        Ext.getCmp(id).setLock(false);
+                    }
+
                     if(callback) { callback(id); }
                 }
             });
@@ -111,6 +128,7 @@ var TP = {
         }
 
         /* move new-tab button at the end */
+        [% IF !one_tab_only %]
         tabpan.getTabBar().move(size-1, size);
 
         /* make tab title editable */
@@ -118,15 +136,28 @@ var TP = {
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
         if(tabhead.rendered == false) {
             tabhead.addListener('afterrender', function(This, eOpts) {
-                TP.addDblClickRename(This.getEl(), tabhead, id);
+                TP.addTabBarMouseEvents(This.getEl(), id);
             });
         } else {
-            TP.addDblClickRename(tabhead.getEl(), tabhead, id);
+            TP.addTabBarMouseEvents(tabhead.getEl(), id);
         }
+        [% END %]
         [% END %]
 
         /* replace existing tab with current one */
         if(replace_id) {
+            [% IF one_tab_only %]
+            if(id != replace_id) {
+                Ext.getCmp(replace_id).destroy();
+                if(history.replaceState) {
+                    var tab    = tabpan.getActiveTab();
+                    var newloc = new String(window.document.location);
+                    newloc     = newloc.replace(/\?map=.*$/g, '');
+                    newloc     = newloc + "?map="+tab.xdata.title;
+                    history.replaceState({}, "", newloc);
+                }
+            }
+            [% ELSE %]
             var replace_nr;
             var tabState = tabpan.getState();
             for(var x=0; x<tabState.open_tabs.length; x++) {
@@ -136,8 +167,13 @@ var TP = {
             }
             if(replace_nr != undefined) {
                 tabpan.getTabBar().move(size-1, replace_nr);
-                Ext.getCmp(replace_id).destroy();
+                if(id != replace_id) {
+                    Ext.getCmp(replace_id).destroy();
+                }
             }
+            [% END %]
+            var tab = tabpan.getActiveTab();
+            tab.adjustTabHeaderOffset();
         }
 
         /* save tabs state */
@@ -195,7 +231,17 @@ var TP = {
         }
         if(config.type == undefined) {
             debug(config);
-            throw new Error("TP.add_panlet(): no type! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
+            var err  = new Error("no type!");
+            var text = "";
+            try {
+                delete config['tb'];
+                text = Ext.JSON.encode(config);
+            } catch(e) {
+                text = ""+e;
+            }
+            TP.logError("global", "noTypeException", err);
+            TP.log("[global] "+text);
+            throw err;
         }
         // fake state (probably cloned)
         if(config.state) {
@@ -264,11 +310,12 @@ var TP = {
     },
 
     redraw_panlet: function(panel, tab) {
-        panel.redrawOnly = true;
-        panel.destroy();
-        TP.timeouts['timeout_' + panel.id + '_show_settings'] = window.setTimeout(function() {
+        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_redraw']);
+        TP.timeouts['timeout_' + panel.id + '_redraw'] = window.setTimeout(function() {
+            panel.redrawOnly = true;
+            panel.destroy();
             panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
-            TP.updateAllIcons(Ext.getCmp(panel.panel_id), panel.id);
+            TP.updateAllIcons(Ext.getCmp(panel.panel_id));
         }, 50);
     },
 
@@ -609,7 +656,7 @@ var TP = {
             decoded = cp.decodeValue(decode64(data));
         }
         catch(e) {
-            debug(e);
+            TP.logError("global", "importAllTabsException", e);
             Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
             return(false);
         }
@@ -618,7 +665,7 @@ var TP = {
                 decoded = Ext.JSON.decode(decode64(data));
             }
             catch(e) {
-                debug(e);
+                TP.logError("global", "jsonDecodeException", e);
                 Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
                 return(false);
             }
@@ -693,7 +740,7 @@ var TP = {
                 data = eval("("+response.responseText+")");
             } catch(e) {
                 if(refresh.setType) { refresh.setType('broken') }
-                debug(e);
+                TP.logError(panlet.id, "responseEvalException", e);
                 return data;
             }
             if(refresh.setType) { refresh.setType('refresh') }
@@ -707,7 +754,7 @@ var TP = {
                             initial_backends[key].state         = data.pi_detail[key]['state'];
                             initial_backends[key].program_start = data.pi_detail[key]['program_start'];
                         } catch(e) {
-                            debug(e);
+                            TP.logError(panlet.id, "initialBackendsException", e);
                         }
                     }
                 }
@@ -716,7 +763,7 @@ var TP = {
             if(data && data.dashboard_ts != undefined && data.dashboard_ts[tab.id] != undefined && data.dashboard_ts[tab.id] != tab.ts) {
                 var old = tab.ts ? tab.ts : '';
                 tab.ts = data.dashboard_ts[tab.id];
-                if(no_ts == undefined || no_ts == false) {
+                if((no_ts == undefined || no_ts == false) && old < tab.ts) {
                     TP.log('['+tab.id+'] tab timestamp has changed - old: '+old+', new: '+data.dashboard_ts[tab.id]);
                     TP.renewDashboard(tab);
                 }
@@ -813,9 +860,13 @@ var TP = {
             tabpan.setActiveTab(1);
         }
     },
-    addDblClickRename: function(el, item, id) {
-        el.on("dblclick", function() {
+    addTabBarMouseEvents: function(el, tabId) {
+        el.on("dblclick", function(e, el, o) {
             TP.tabSettingsWindow();
+        });
+        el.on("contextmenu", function(e, el, o) {
+            var tab = Ext.getCmp(tabId);
+            tab.contextmenu(e, true);
         });
     },
     /* sum list elements */
@@ -941,13 +992,14 @@ var TP = {
         panel.add(menu);
         menu.show();
     },
-    objectSearchItem: function(panel, type, name) {
+    objectSearchItem: function(panel, type, name, value) {
         return({
             name:           type,
             fieldLabel:     name,
             panel:          panel,
             xtype:          'searchCbo',
-            store:          searchStore
+            store:          searchStore,
+            value:          value
         });
     },
     removeWindowFromPanels: function(win_id) {
@@ -971,13 +1023,14 @@ var TP = {
         }
     },
     updateAllIconsDo: function(tab, id, xdata, reschedule) {
-        var panels = TP.getAllPanel(tab);
-
         if(!TP.iconUpdateRunning) { TP.iconUpdateRunning = {}; }
         if(TP.iconUpdateRunning[tab.id]) { return; }
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
-        if(statusReq == undefined) { return; }
+        if(statusReq == undefined) {
+            if(tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+            return;
+        }
         var req = statusReq.req,
             ref = statusReq.ref;
 
@@ -996,6 +1049,7 @@ var TP = {
             callback: function(options, success, response) {
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
+                if(tab && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;
@@ -1602,10 +1656,22 @@ var TP = {
         reloadPage();
     },
     log: function(str) {
+        //debug(str); /* makes too much noise */
         TP.logHistory.push([new Date(), str]);
+        /* limit history to last 50k entries */
         while(TP.logHistory.length > 50000) {
             TP.logHistory.shift();
         }
+    },
+    logError: function(prefix, name, e) {
+        if(name == "labelEvalException") { return; }
+        try {
+            TP.log('['+prefix+'] '+name+':');
+            var out = e.stack.trim().split("\n");
+            for(var x=0; x<out.length; x++) {
+                TP.log('['+prefix+'] '+out[x]);
+            }
+        } catch(er) {}
     },
     JSONequals: function(str1, str2) {
         if(!str1) {
@@ -1643,7 +1709,7 @@ var TP = {
         var newModelWindows = [];
         Ext.Array.each(TP.modalWindows, function(win) {
             if(win && win.el) {
-                win.toFront();
+                try { win.toFront(); } catch(e) {}
                 newModelWindows.push(win);
             }
         });
@@ -1666,6 +1732,12 @@ var TP = {
                 }
             }, delay);
         }
+    },
+    isThisTheActiveTab: function(panel) {
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        if(activeTab && panel.panel_id != activeTab.id) { return(false); }
+        return(true);
     }
 }
 TP.log('[global] starting');

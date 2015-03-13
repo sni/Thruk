@@ -18,11 +18,12 @@ use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use File::Slurp qw/read_file/;
 use Encode qw/encode encode_utf8 decode is_utf8/;
-use File::Copy qw/move/;
+use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Backend::Pool qw//;
 use Thruk::Utils::IO qw//;
+use Digest::MD5 qw(md5_hex);
 
 ##############################################
 =head1 METHODS
@@ -1019,7 +1020,7 @@ sub set_custom_vars {
                         #($cust_value, $rc)...
                         ($cust_value, undef) = $c->{'db'}->_replace_macros({
                             string  => $cust_value,
-                            host    => $host
+                            host    => $host,
                         });
                 }
 
@@ -1796,11 +1797,12 @@ sub wait_after_reload {
         $procinfo = {};
         eval {
             local $SIG{ALRM}   = sub { die "alarm\n" };
-            local $SIG{'PIPE'} = 'IGNORE'; # exits sometimes on reload
-            alarm 10;
+            local $SIG{'PIPE'} = sub { die "pipe error\n" };
+            alarm(10);
             $c->{'db'}->reset_failed_backends();
             $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
+        alarm(0);
         if($@) {
             $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
         }
@@ -1941,6 +1943,47 @@ sub write_data_file {
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
     move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
+
+    return;
+}
+
+##############################################
+
+=head2 backup_data_file
+
+  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+
+write data to datafile
+
+=cut
+
+sub backup_data_file {
+    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+
+    my @backups     = sort glob($filename.'.*.'.$mode);
+    @backups        = grep(!/\.runtime$/mx, @backups);
+    my $num         = scalar @backups;
+    my $last_backup = $backups[$num-1];
+    my $now         = time();
+
+    if($save_interval && $last_backup && $last_backup =~ m/\.(\d+)\.\w$/mx) {
+        my $ts = $1;
+        if($save_interval > $now - $ts) {
+            return;
+        }
+    }
+
+    my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
+    my $new_md5 = md5_hex(read_file($filename));
+    if($force || $new_md5 ne $old_md5) {
+        copy($filename, $filename.'.'.$now.'.'.$mode);
+
+        # cleanup old backups
+        while($num > $max_backups) {
+            unlink(shift(@backups));
+            $num--;
+        }
+    }
 
     return;
 }

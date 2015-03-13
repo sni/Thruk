@@ -179,7 +179,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         formConf: {
             minValue:   0,
             nameS:      'rotate_tabs',
-            nameL:      'rotate_tabs_txt'
+            nameL:      'rotate_tabs_txt',
+            value:      tabpan.xdata['rotate_tabs']
         }
     }, {
         /* show server time */
@@ -394,7 +395,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             formConf: {
                 minValue:   0,
                 nameS:      'refresh',
-                nameL:      'refresh_txt'
+                nameL:      'refresh_txt',
+                value:      tab.xdata['refresh']
             }
         }, {
             fieldLabel: 'Background',
@@ -631,6 +633,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     xtype : 'button',
                     text:   'save',
                     handler: function() {
+                        /* unlock form, otherwise values cannot be retrieved */
+                        TP.tabSettingsWindowLocked(tab, false);
+
                         var win     = this.up('window');
                         var oldautohideheader = tab.xdata.autohideheader;
 

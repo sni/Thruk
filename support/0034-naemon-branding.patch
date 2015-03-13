@@ -1,13 +1,14 @@
-From 476ba1f8cf287ab7c5acac261e1c86f4df08d9ed Mon Sep 17 00:00:00 2001
+From 2f16b308d4ee18fa1e1aa979505edbefac16c394 Mon Sep 17 00:00:00 2001
 From: Sven Nierlein <sven@nierlein.de>
-Date: Fri, 11 Jul 2014 11:42:47 +0200
+Date: Thu, 26 Feb 2015 17:58:04 +0100
 Subject: [PATCH] naemon branding
 
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
 ---
- templates/_infobox.tt |    7 ++++++-
- templates/login.tt    |    8 +++++---
- templates/main.tt     |    8 +++++---
- templates/side.tt     |    2 +-
+ templates/_infobox.tt | 7 ++++++-
+ templates/login.tt    | 8 +++++---
+ templates/main.tt     | 8 +++++---
+ templates/side.tt     | 2 +-
  4 files changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/templates/_infobox.tt b/templates/_infobox.tt
@@ -29,7 +30,7 @@ index ab70bb9..fd01626 100644
        [% IF has_proc_info %]
        [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
 diff --git a/templates/login.tt b/templates/login.tt
-index 52cf467..0025846 100644
+index d726b1a..b85d28a 100644
 --- a/templates/login.tt
 +++ b/templates/login.tt
 @@ -18,13 +18,13 @@
@@ -60,11 +61,12 @@ index 52cf467..0025846 100644
      </div>
      [% PROCESS _disclaimer.tt %]
 diff --git a/templates/main.tt b/templates/main.tt
-index 03288b4..c39cfbb 100644
+index 0810b28..821f8f2 100644
 --- a/templates/main.tt
 +++ b/templates/main.tt
-@@ -1,10 +1,12 @@
+@@ -1,11 +1,13 @@
  ﻿[% PROCESS _header.tt %]
+ [% PROCESS _message.tt %]
      <div id="mainbrandsplash">
 -      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
 +      <div id="mainlogo"><a href="http://www.naemon.org" target="_blank"><img class="mainlogo" src="[% url_prefix %]images/naemon_logo.png" border="0" alt="Naemon" title="Naemon" width="352" height="89"></a></div>
@@ -80,7 +82,7 @@ index 03288b4..c39cfbb 100644
        <div class="checkforupdates">
          <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
 diff --git a/templates/side.tt b/templates/side.tt
-index e1f1cdf..1b8e01a 100644
+index d3f6543..5f0c6ab 100644
 --- a/templates/side.tt
 +++ b/templates/side.tt
 @@ -27,7 +27,7 @@
@@ -93,5 +95,5 @@ index e1f1cdf..1b8e01a 100644
      [% FOREACH section = navigation %]
      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
 -- 
-1.7.9.5
+1.9.1
 

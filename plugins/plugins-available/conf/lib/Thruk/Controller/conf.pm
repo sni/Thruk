@@ -93,6 +93,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     $c->stash->{'needs_commit'}        = 0;
     $c->stash->{'show_save_reload'}    = 0;
     $c->stash->{'has_jquery_ui'}       = 1;
+    $c->stash->{'disable_backspace'}   = 1;
 
     Thruk::Utils::ssi_include($c);
 
@@ -2193,6 +2194,7 @@ sub _config_reload {
     my $peer = $c->{'db'}->get_peer_by_key($name);
     my $pkey = $peer->peer_key();
     my $wait = 1;
+
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
         if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );

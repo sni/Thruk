@@ -152,6 +152,7 @@ sub set_default_config {
         downtime_duration                   => 7200,
         expire_ack_duration                 => 86400,
         show_custom_vars                    => [],
+        expand_user_macros                  => ['ALL'],
         themes_path                         => './themes',
         priorities                      => {
                     5                       => 'Business Critical',

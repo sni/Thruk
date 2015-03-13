@@ -17,6 +17,7 @@
   var minimal                = [% IF minimal %]true[% ELSE %]false[% END %];
   var user_token             = '[% get_user_token(c) %]';
   var remote_user            = '[% remote_user %]';
+  var omd_site               = '[% omd_site %]';
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
@@ -47,5 +48,13 @@
         set_hash(saved_hash);
         cookieRemove('thruk_preserve_hash');
     }
+
+    [%+ IF disable_backspace +%]
+    jQuery(document).on("keydown", function (e) {
+        if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
+            e.preventDefault();
+        }
+    });
+    [%+ END +%]
 -->
 </script>

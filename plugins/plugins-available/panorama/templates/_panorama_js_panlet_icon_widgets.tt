@@ -19,12 +19,15 @@
         [% END %]
         this.redrawOnly = false;
         this.animations = 0;
+        this.renderTo   = "bodyview";
 
         this.xdata.cls        = this.$className;
         this.xdata.state      = 4;
         this.xdata.general    = {};
         this.xdata.layout     = { rotation:   0 };
-        this.xdata.appearance = { type: 'icon' };
+        if(this.xdata.appearance == undefined) {
+            this.xdata.appearance = { type: 'icon' };
+        }
         this.xdata.link     = {};
         this.xdata.label    = { fontfamily:  '',
                                 fontsize:     14,
@@ -78,7 +81,6 @@
                 this.xdata.layout.y = pos[1];
                 if(this.iconType != 'text' && this.xdata.general[this.iconType] == '' && this.firstRun != false) {
                     this.firstRun = true;
-                    TP.suppressIconTip = true;
                     TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
                         TP.iconShowEditDialog(This);
@@ -89,12 +91,30 @@
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
             This.applyScale(This.xdata.layout.scale, This.xdata);
+            if(!This.locked) {
+                This.el.on('mouseover', function(e,t,a) {
+                    if(!This.el.dom.style.outline.match("orange")) {
+                        This.el.dom.style.outline = "1px dashed grey";
+                        if(This.iconType != "text" && This.labelEl && This.labelEl.el) {
+                            This.labelEl.el.dom.style.outline = "1px dashed grey";
+                        }
+                    }
+                });
+                This.el.on('mouseout', function(e,t,a) {
+                    if(This.el.dom.style.outline.match("grey")) {
+                        This.el.dom.style.outline = "";
+                        if(This.labelEl && This.labelEl.el) {
+                            This.labelEl.el.dom.style.outline = "";
+                        }
+                    }
+                });
+            }
         },
         show: function( This, eOpts ) {
             This.addDDListener(This);
             /* update label */
-            this.setIconLabel();
-            if(this.labelEl) { this.labelEl.show(); }
+            This.setIconLabel();
+            if(This.labelEl) { This.labelEl.show(); }
             /* make sure we don't overlap dashboard settings window */
             TP.checkModalWindows();
         },
@@ -103,13 +123,27 @@
         },
         destroy: function( This, eOpts ) {
             TP.log('['+this.id+'] remove icon');
-            if(!this.redrawOnly) {
+            if(this.redrawOnly) {
+                if(This.labelEl) {
+                    /* remove later to avoid flickering during redraw */
+                    if(TP.removeLabel == undefined) {
+                        TP.removeLabel = {};
+                    }
+                    TP.removeLabel[This.id] = This.labelEl;
+                }
+            } else {
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
                 cp.clear(this.id);
+                if(This.labelEl) { This.labelEl.destroy(); }
             }
-            if(this.labelEl) { this.labelEl.destroy(); }
+            if(This.dragEl1) { This.dragEl1.destroy(); }
+            if(This.dragEl2) { This.dragEl2.destroy(); }
+        },
+        boxready: function( This, width, height, eOpts ) {
+            This.addDDListener(This);
+            This.setIconLabel();
         },
         move: function(This, x, y, eOpts) {
             var pos = This.getPosition();
@@ -118,7 +152,7 @@
 
             /* snap to roaster when shift key is hold */
             if(TP.isShift) {
-                var pos = TP.get_snap(x, y);
+                pos = TP.get_snap(x, y);
                 if(This.ddShadow) {
                     This.ddShadow.dom.style.display = '';
                     This.ddShadow.dom.style.left    = pos[0]+"px";
@@ -168,31 +202,6 @@
         /* recalculate state */
         if(TP.initialized) {
             this.refreshHandler();
-        }
-
-        /* add link */
-        if(xdata.link && xdata.link.link) {
-            this.addCls('clickable');
-            this.removeCls('notclickable');
-            if(this.el) { this.el.dom.href=xdata.link.link; }
-            this.autoEl.href=xdata.link.link;
-            if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href=xdata.link.link;
-                this.labelEl.removeCls('notclickable');
-                this.labelEl.addCls('clickable');
-            }
-        } else {
-            if(this.el) {
-                this.removeCls('clickable');
-                this.addCls('notclickable');
-            }
-            if(this.el) { this.el.dom.href=''; }
-            this.autoEl.href='';
-            if(this.labelEl && this.labelEl.el) {
-                this.labelEl.el.dom.href='';
-                this.labelEl.removeCls('clickable');
-                this.labelEl.addCls('notclickable');
-            }
         }
     },
     /* change size and position animated */
@@ -246,16 +255,25 @@
     },
     /* enable / disable editing of this panlet */
     setLock: function(val) {
-        var tab = Ext.getCmp(this.panel_id);
-        if(this.locked != val) {
-            this.saveState();
-            TP.redraw_panlet(this, tab);
+        var panel = this;
+        var tab   = Ext.getCmp(panel.panel_id);
+        if(panel.locked != val) {
+            panel.saveState();
+            TP.redraw_panlet(panel, tab);
         }
     },
 
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
+        if(TP.removeLabel && TP.removeLabel[this.id]) {
+            /* remove later to avoid flickering during redraw */
+            window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
+            TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
+                TP.removeLabel[panel.id].destroy();
+                delete TP.removeLabel[panel.id];
+            }, 1000);
+        }
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
         if(!this.el || !this.el.dom)  { return; }
@@ -305,12 +323,22 @@
                 calc = calc.replace(/availability\(/g, 'availability(panel, ');
                 try {
                     res = eval(calc);
-                } catch(e) { debug(e); panel.el.dom.title = e; }
+                } catch(e) {
+                    TP.logError(panel.id, "labelEvalException", e);
+                    panel.el.dom.title = e;
+                }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
-                if(calc.match(/availability\(/) && res.match(/\-1/)) {
-                    res = res.replace(/\-1[\.0]*/g, '...');
-                    res = "<span class='avail_result_not_ready'>"+res+"<\/span>";
+                if(calc.match(/availability\(/)) {
+                    if(TP.lastAvailError) {
+                        TP.lastAvailError = TP.lastAvailError.replace(/'/g, '');
+                        TP.lastAvailError = TP.lastAvailError.replace(/ at .*?\/Thruk/g, ' at Thruk');
+                        res = "<span class='avail_result_error' title='"+TP.lastAvailError+"'>error<\/span>";
+                    }
+                    else if(res.match(/\-1/)) {
+                        res = res.replace(/\-1[\.0]*/g, '...');
+                        res = "<span class='avail_result_not_ready' title='not yet ready'>"+res+"<\/span>";
+                    }
                 }
                 txt = txt.replace(item, res);
             });
@@ -325,18 +353,19 @@
                 panel.updateRender(panel.xdata);
             }
         }
+        /* no label at all */
         if(!cfg.labeltext) {
             if(this.labelEl) { this.labelEl.destroy(); this.labelEl = undefined; }
             return;
         }
         if(!this.labelEl) {
             var panel = this;
+            if(!TP.isThisTheActiveTab(panel)) { return; } /* no need for a label on inactive tab */
             this.labelEl = Ext.create('Ext.Component', {
                 'html':     ' ',
-                draggable:  true,
-                autoRender: true,
-                autoShow:   true,
+                draggable:  !panel.locked,
                 shadow:     false,
+                renderTo:  "bodyview",
                 cls:        (panel.xdata.link.link ? '' : 'not') +'clickable iconlabel', // defaults to text cursor otherwise
                 autoEl: {
                     tag:     'a',
@@ -361,8 +390,30 @@
                             }
                         }
                     },
+                    boxready: function( This, width, height, eOpts ) {
+                        panel.addDDListener(This);
+                    },
                     afterrender: function(This, eOpts) {
                         panel.addClickEventhandler(This.el);
+                        panel.addDDListener(This);
+                        if(!panel.locked) {
+                            This.el.on('mouseover', function(e,t,a) {
+                                if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
+                                    This.el.dom.style.outline = "1px dashed grey";
+                                    if(panel.iconType != "text") {
+                                        panel.el.dom.style.outline = "1px dashed grey";
+                                    }
+                                }
+                            });
+                            This.el.on('mouseout', function(e,t,a) {
+                                if(This.el.dom.style.outline.match("grey")) {
+                                    This.el.dom.style.outline = "";
+                                }
+                                if(panel.el.dom.style.outline.match("grey")) {
+                                    panel.el.dom.style.outline = "";
+                                }
+                            });
+                        }
                     },
                     show: function( This, eOpts ) {
                         panel.addDDListener(This);
@@ -449,20 +500,23 @@
     /* add dbl click and context menu events */
     addClickEventhandler: function(el) {
         var This = this;
+        var tab  = Ext.getCmp(This.panel_id);
 
         el.on("click", function(e) {
             [% UNLESS readonly %]
-            if(e.ctrlKey) {
+            if(e.ctrlKey || is_shift_pressed(e)) {
                 var tab = Ext.getCmp(This.panel_id);
                 if(This.locked) { return; }
                 if(TP.moveIcons == undefined) {
                     TP.moveIcons = [];
                 }
-                if(This.el.dom.style.outline) {
+                if(This.el.dom.style.outline.match("orange")) {
                     /* already selected -> unselect */
                     This.el.dom.style.outline = "";
                     TP.moveIcons = TP.removeFromList(TP.moveIcons, This);
                 } else {
+                    if(This.dragEl1) { TP.moveIcons = TP.removeFromList(TP.moveIcons, This.dragEl1); This.dragEl1.el.dom.style.outline = ""; }
+                    if(This.dragEl2) { TP.moveIcons = TP.removeFromList(TP.moveIcons, This.dragEl2); This.dragEl2.el.dom.style.outline = ""; }
                     This.el.dom.style.outline = "2px dotted orange";
                     TP.moveIcons.push(This);
                     TP.createIconMoveKeyNav();
@@ -481,7 +535,10 @@
         el.on("dblclick", function(e) {
             window.clearTimeout(TP.timeouts['click'+This.id]);
             if(!This.locked) {
-                TP.iconShowEditDialog(This);
+                tab.body.mask("loading settings");
+                window.setTimeout(function() {
+                    TP.iconShowEditDialog(This);
+                }, 50);
             }
         });
         [% END %]
@@ -560,6 +617,14 @@
                         });
                         menu.move(menu.items.length, i);
                     }
+                }, {
+                    xtype:  'menuseparator',
+                    hidden: !This.locked      // only show when locked
+                }, {
+                    text:   'Unlock Dashboard',
+                    icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                    handler: function() { var tab = Ext.getCmp(This.panel_id); TP.createRestorePoint(tab, "a"); tab.setLock(false); },
+                    hidden: !This.locked      // only show when locked
                 }
                 [% END %]
                 ],
@@ -574,40 +639,53 @@
         if(el.dd && !el.dd_listener_added) {
             el.dd.addListener('dragstart', function(This, e) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
-                TP.suppressIconTip = true;
                 TP.isShift = is_shift_pressed(e);
-                if(!el.ddShadow) {
-                    var size = el.getSize();
-                    el.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+                /* add ourself to movelist */
+                if(TP.moveIcons) {
+                    var found = false;
+                    Ext.Array.each(TP.moveIcons, function(item) {
+                        if(item.id == panel.id) { found = true; return(false); }
+                    });
+                    if(!found) {
+                        panel.el.dom.style.outline = "2px dotted orange";
+                        TP.moveIcons.push(panel);
+                    }
+                    if(panel.dragEl1) { TP.moveIcons = TP.removeFromList(TP.moveIcons, panel.dragEl1); panel.dragEl1.el.dom.style.outline = ""; }
+                    if(panel.dragEl2) { TP.moveIcons = TP.removeFromList(TP.moveIcons, panel.dragEl2); panel.dragEl2.el.dom.style.outline = ""; }
                 }
-                if(!el.dragHint) {
-                    el.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
+                if(!panel.ddShadow) {
+                    var size = panel.getSize();
+                    panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
+                }
+                if(!panel.dragHint) {
+                    panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
                 }
             });
             el.dd.addListener('drag', function(This, e) {
                 TP.isShift = is_shift_pressed(e);
             });
             el.dd.addListener('dragend', function(This, e) {
-                el.dragHint.destroy();
-                el.dragHint = undefined;
+                panel.dragHint.destroy();
+                panel.dragHint = undefined;
                 TP.isShift = is_shift_pressed(e);
                 /* prevents opening link after draging */
                 if(TP.isShift) {
-                    var pos = el.getPosition();
+                    var pos = panel.getPosition();
                     panel.noMoreMoves = true;
-                    el.setPosition(TP.get_snap(pos[0], pos[1]));
+                    panel.setPosition(TP.get_snap(pos[0], pos[1]));
                     panel.noMoreMoves = false;
                 }
                 TP.isShift = false;
-                if(el.ddShadow) { el.ddShadow.dom.style.display = 'none'; }
+                if(panel.ddShadow) { panel.ddShadow.dom.style.display = 'none'; }
                 window.setTimeout(function() {
                     window.clearTimeout(TP.timeouts['click'+panel.id]);
-                    if(el.ddShadow) {
-                        el.ddShadow.dom.style.display = 'none';
+                    if(panel.ddShadow) {
+                        panel.ddShadow.dom.style.display = 'none';
                     }
                 }, 100);
-                TP.suppressIconTip = false;
                 panel.setIconLabel();
+                if(panel.dragEl1) { panel.dragEl1.resetDragEl(); }
+                if(panel.dragEl2) { panel.dragEl2.resetDragEl(); }
             });
             el.dd_listener_added = true;
         }
@@ -640,6 +718,9 @@ Ext.define('TP.IconWidget', {
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         this.mixins.smallWidget.applyXdata.call(this, xdata);
+        if(this.xdata.appearance.type == "connector") {
+            this.draggable = false;
+        }
         if(xdata.nsize && xdata.size) {
             var size = Math.ceil(Math.sqrt(Math.pow(xdata.nsize[0], 2) + Math.pow(xdata.nsize[1], 2)));
             this.setSize(size, size);
@@ -672,17 +753,31 @@ Ext.define('TP.IconWidget', {
     /* update shapes and stuff */
     updateRender: function(xdata) {
         var panel = this;
+        window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_updaterender']);
+        TP.timeouts['timeout_' + panel.id + '_updaterender'] = window.setTimeout(function() {
+            panel.updateRenderDo(xdata);
+        }, 100);
+    },
+    updateRenderDo: function(xdata) {
+        var panel = this;
         if(xdata == undefined) { xdata = panel.xdata; }
+        /* static icons must be refreshed, even when inactive, because they won't be updated later on */
+        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
+        /* no need for changes if we are not the active tab */
+        if(!TP.isThisTheActiveTab(panel)) { return; }
         if(xdata.appearance.type == 'shape')       { panel.shapeRender(xdata);            }
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
-        if(xdata.appearance.type == 'icon')        { panel.iconSetSourceFromState(xdata); }
+        if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
+        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
+        TP.checkModalWindows();
     },
 
     /* rotates this thing */
     applyRotation: function(value, xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
         if(value == undefined) { return; }
+        if(isNaN(value)) { return; }
         if(xdata.appearance && xdata.appearance.type == "icon") {
             if(this.surface == undefined) { return; }
             if(this.surface.items.getAt(0) == undefined) { return; }
@@ -740,6 +835,34 @@ Ext.define('TP.IconWidget', {
         panel.icon     = undefined;
         panel.chart    = undefined;
 
+        if(panel.dragEl1) { panel.dragEl1.destroy(); }
+        if(panel.dragEl2) { panel.dragEl2.destroy(); }
+
+        /* add link (link will only work on labels for connectors) */
+        if(xdata.link && xdata.link.link && xdata.appearance.type != "connector") {
+            panel.addCls('clickable');
+            panel.removeCls('notclickable');
+            if(panel.el) { panel.el.dom.href=xdata.link.link; }
+            panel.autoEl.href=xdata.link.link;
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href=xdata.link.link;
+                panel.labelEl.removeCls('notclickable');
+                panel.labelEl.addCls('clickable');
+            }
+        } else {
+            if(panel.el) {
+                panel.removeCls('clickable');
+                panel.addCls('notclickable');
+            }
+            if(panel.el) { panel.el.dom.href=''; }
+            panel.autoEl.href='';
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.dom.href='';
+                panel.labelEl.removeCls('clickable');
+                panel.labelEl.addCls('notclickable');
+            }
+        }
+
         var x       = 0;
         var y       = 0;
         var width   = 16;
@@ -747,7 +870,15 @@ Ext.define('TP.IconWidget', {
         var size;
         var scale   = xdata.layout.scale != undefined ? xdata.layout.scale / 100 : 1;
         if(scale <= 0) { scale = 1; }
-        if(xdata.nsize && xdata.size) {
+        if(xdata.appearance.type == 'connector') {
+            width  = xdata.appearance.connectorfromx - xdata.appearance.connectortox;
+            height = xdata.appearance.connectorfromy - xdata.appearance.connectortoy;
+            if(width  < 0) { width  = width  * -1; }
+            if(height < 0) { height = height * -1; }
+            width  = width  + 2*(xdata.appearance.connectorarrowlength + xdata.appearance.connectorarrowwidth);
+            height = height + 2*(xdata.appearance.connectorarrowlength + xdata.appearance.connectorarrowwidth);
+        }
+        else if(xdata.nsize && xdata.size) {
             x        = (xdata.size - xdata.nsize[0]) / 2;
             y        = (xdata.size - xdata.nsize[1]) / 2;
             width    = xdata.nsize[0];
@@ -770,7 +901,13 @@ Ext.define('TP.IconWidget', {
         }
         panel.lastScale = scale;
 
-        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape') {
+        if(xdata.appearance.type == 'icon' || xdata.appearance.type == 'shape' || xdata.appearance.type == 'connector') {
+            var drawWidth  = size;
+            var drawHeight = size;
+            if(xdata.appearance.type == 'connector') {
+                drawWidth  = width;
+                drawHeight = height;
+            }
             var items = [];
             if(xdata.appearance.type == 'icon') {
                 if(xdata.layout.rotation == undefined) { xdata.layout.rotation = 0; }
@@ -787,8 +924,8 @@ Ext.define('TP.IconWidget', {
             panel.add({
                 viewBox:   false,
                 xtype:    'draw',
-                width:     size,
-                height:    size,
+                width:     drawWidth,
+                height:    drawHeight,
                 items:     items,
                 style:     'vertical-align:inherit;',
                 listeners: {
@@ -810,6 +947,25 @@ Ext.define('TP.IconWidget', {
                     }
                 }
             });
+
+            if(xdata.appearance.type == 'connector' && !panel.locked) {
+                panel.dragEl1 = Ext.create('TP.dragEl', {
+                    panel:      panel,
+                    xdata:      xdata,
+                    keyX:       "connectorfromx",
+                    keyY:       "connectorfromy",
+                    offsetX:    -12,
+                    offsetY:    -12
+                });
+                panel.dragEl2 = Ext.create('TP.dragEl', {
+                    panel:      panel,
+                    xdata:      xdata,
+                    keyX:       "connectortox",
+                    keyY:       "connectortoy",
+                    offsetX:    -12,
+                    offsetY:    -12
+                });
+            }
         }
         else if(xdata.appearance.type == 'pie') {
             var pieStore = Ext.create('Ext.data.Store', {
@@ -1036,6 +1192,7 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
+        if(!panel.surface.el) { return };
         var shapeData;
         TP.shapesStore.findBy(function(rec, id) {
             if(rec.data.name == xdata.appearance.shapename) {
@@ -1052,92 +1209,14 @@ Ext.define('TP.IconWidget', {
         }
 
         shapeData = shapeData.replace(/,\s*$/, ''); // remove trailing commas
-        var state = xdata.state, fillcolor;
-        if(state == undefined) { state = panel.xdata.state; }
-        if(forceColor != undefined) { fillcolor = forceColor; }
-        else if(state == 0)         { fillcolor = xdata.appearance.shapecolor_ok; }
-        else if(state == 1)         { fillcolor = xdata.appearance.shapecolor_warning; }
-        else if(state == 2)         { fillcolor = xdata.appearance.shapecolor_critical; }
-        else if(state == 3)         { fillcolor = xdata.appearance.shapecolor_unknown; }
-        else if(state == 4)         { fillcolor = "#777777"; }
-        if(!fillcolor) { fillcolor = '#333333'; }
-        if(xdata.appearance.shapegradient != 0) {
-            if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
-
-            if(xdata.appearance.shapesource == undefined) { xdata.appearance.shapesource = 'fixed'; }
-            var matches = xdata.appearance.shapesource.match(/^perfdata:(.*)$/);
-            if(xdata.appearance.shapesource != 'fixed' && matches && matches[1]) {
-                /* dynamic gradient */
-                window.perfdata = {};
-                panel.setIconLabel(undefined, true);
-                if(perfdata[matches[1]]) {
-                    var p = perfdata[matches[1]];
-                    var r = TP.getPerfDataMinMax(p, 100);
-                    var color1 = xdata.appearance.shapecolor_ok;
-                    var color2 = xdata.appearance.shapecolor_ok;
-                    var perc  = 100;
-                    /* inside critical range: V c w o w c  */
-                    if(p.crit_min != "" && p.val < p.crit_min) {
-                        color1 = xdata.appearance.shapecolor_critical;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = 100;
-                    }
-                    /* above critical threshold: o w c V */
-                    else if(p.crit_max != "" && p.val > p.crit_max) {
-                        color1 = xdata.appearance.shapecolor_critical;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = 100;
-                    }
-                    /* inside warning range low: c V w o w c */
-                    else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
-                    }
-                    /* inside warning range high: c w o w V c */
-                    else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
-                    }
-                    /* above warning threshold: o w V c */
-                    else if(p.warn_max != "" && p.val > p.warn_max) {
-                        color1 = xdata.appearance.shapecolor_warning;
-                        color2 = xdata.appearance.shapecolor_critical;
-                        perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
-                    }
-                    /* below warning threshold: o V w c */
-                    else if(p.warn_max != "" && p.val < p.warn_max) {
-                        color1 = xdata.appearance.shapecolor_ok;
-                        color2 = xdata.appearance.shapecolor_warning;
-                        perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
-                    }
-                    var gradient = TP.createGradient(color1, xdata.appearance.shapegradient, color2, perc);
-                    if(panel.surface.existingGradients[gradient.id] == undefined) {
-                        panel.surface.addGradient(gradient);
-                        panel.surface.existingGradients[gradient.id] = true;
-                    }
-                    shapeData += ",fill:'url(#"+gradient.id+")'";
-                }
-            } else {
-                /* fixed gradient */
-                var gradient = TP.createGradient(fillcolor, xdata.appearance.shapegradient);
-                if(panel.surface.existingGradients[gradient.id] == undefined) {
-                    panel.surface.addGradient(gradient);
-                    panel.surface.existingGradients[gradient.id] = true;
-                }
-                shapeData += ",fill:'url(#"+gradient.id+")'";
-            }
-        } else {
-            shapeData += ",fill:'"+fillcolor+"'";
-        }
+        shapeData += ",fill:'"+(TP.getShapeColor("shape", panel, xdata, forceColor).color)+"'";
         var spriteData;
         try {
             eval("spriteData = {"+shapeData+"};");
         }
         catch(e) {
+            TP.logError(panel.id, "labelSpriteEvalException", e);
             TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
-            debug(e);
             return;
         }
         panel.surface.removeAll();
@@ -1146,6 +1225,7 @@ Ext.define('TP.IconWidget', {
         var xScale = xdata.appearance.shapewidth/box.width;
         var yScale = xdata.appearance.shapeheight/box.height;
         if(xdata.appearance.shapelocked) { yScale = xScale; }
+        if(isNaN(xScale) || isNaN(yScale) || isNaN(box.x)) { return; }
         sprite.setAttributes({scale:{x:xScale,y:yScale}}, true);
         box = sprite.getBBox();
         sprite.setAttributes({translate:{x:-box.x,y:-box.y}}, true);
@@ -1154,6 +1234,141 @@ Ext.define('TP.IconWidget', {
             panel.items.getAt(0).setSize(Math.ceil(box.width), Math.ceil(box.height));
         }
         sprite.show(true);
+    },
+    /* renders connector */
+    connectorRender: function(xdata, forceColor, panel) {
+        if(panel == undefined) { panel = this; }
+        if(xdata == undefined) { xdata = panel.xdata; }
+        if(xdata.appearance.type != 'connector') { return }
+
+        if(!panel.surface) {
+            panel.setRenderItem(xdata);
+            return;
+        }
+        if(!panel.surface.el) { return };
+        panel.surface.removeAll();
+
+        var fromX = xdata.appearance.connectorfromx;
+        var fromY = xdata.appearance.connectorfromy;
+        var toX   = xdata.appearance.connectortox;
+        var toY   = xdata.appearance.connectortoy;
+        if(fromX > toX) {
+            fromX = xdata.appearance.connectortox;
+            fromY = xdata.appearance.connectortoy;
+            toX   = xdata.appearance.connectorfromx;
+            toY   = xdata.appearance.connectorfromy;
+        }
+        var connectorarrowwidth = xdata.appearance.connectorarrowwidth;
+
+        /* variable arrow sizes */
+        var shapeColor = TP.getShapeColor("connector", panel, xdata, forceColor);
+        var connectorwidth = xdata.appearance.connectorwidth;
+        if(xdata.appearance.connectorvariable) {
+            var percent = 100;
+            var state   = xdata.state != undefined ? xdata.state : panel.xdata.state;
+            if(shapeColor.value != undefined) {
+                var min   = shapeColor.range.min;
+                var max   = shapeColor.range.max;
+                if(xdata.appearance.connectormin != undefined) { min = xdata.appearance.connectormin; }
+                if(xdata.appearance.connectormax != undefined) { max = xdata.appearance.connectormax; }
+                if(min == undefined) { min = 0; }
+                percent = ((shapeColor.value-min) / (max-min)) * 100;
+                if(percent > 100) { percent = 100 }
+            }
+            else if(state == 0) { percent =   0; }
+            else if(state == 1) { percent =  50; }
+            else if(state == 2) { percent = 100; }
+            else if(state == 3) { percent =  50; }
+            else if(state == 4) { percent =   0; }
+            connectorwidth = connectorwidth * (percent/100);
+            if(connectorwidth < 1)    { connectorwidth = 1; }
+            if(isNaN(connectorwidth)) { connectorwidth = 1; }
+        }
+
+        /* calculate distance, draw horizontal arrow with that length and rotate it later. save a lot of work to rotate by ourselves */
+        var distance  = Math.ceil(Math.sqrt(Math.pow(toX-fromX, 2)
+                                          + Math.pow(toY-fromY, 2)));
+        if(isNaN(distance) || distance == 0) {
+            return;
+        }
+        var start = [ 0, 0 ];
+        var end   = [ distance, 0 ];
+
+        /* get angle between points */
+        var angle = Math.atan((toY-fromY)/(toX-fromX))*180/Math.PI;
+
+        var points = [[start[0],start[1]]];
+        /* top half of left arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+            points.push(
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-connectorwidth/2-connectorarrowwidth)],
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-connectorwidth/2)]
+            );
+        } else {
+            points.push(
+                [start[0], (start[1]-connectorwidth/2)]
+            );
+        }
+
+        /* right arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "right") {
+            points.push(
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-connectorwidth/2)],
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]-connectorwidth/2-connectorarrowwidth)],
+                [end[0], end[1]],
+                [end[0]-xdata.appearance.connectorarrowlength, (end[1]+connectorwidth/2+connectorarrowwidth)],
+                [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]+connectorwidth/2)]
+            );
+        } else {
+            points.push(
+                [end[0], (end[1]-connectorwidth/2)],
+                [end[0], (end[1]+connectorwidth/2)]
+            );
+        }
+
+        /* bottom half of left arrow */
+        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+            points.push(
+                [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+connectorwidth/2)],
+                [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+connectorwidth/2+connectorarrowwidth)]
+            );
+        } else {
+            points.push(
+                [start[0], (start[1]+connectorwidth/2)]
+            );
+        }
+
+        sprite = panel.surface.add({
+            type: "path",
+            path: TP.pointsToPath(points),
+            fill: shapeColor.color
+        });
+        sprite.setAttributes({rotate:{degrees: angle, x:0, y:0}}, true);
+        var box = sprite.getBBox();
+        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(xdata.appearance.connectorarrowtype == "none" ? connectorarrowwidth : 0)}}, true);
+        var newHeight = Math.ceil(Ext.Array.max([connectorarrowwidth+connectorwidth, box.height]));
+        panel.setSize(Math.ceil(box.width), newHeight);
+        panel.surface.setSize(Math.ceil(box.width), newHeight);
+        panel.surface.el.dom.parentNode.style.width  = Math.ceil(box.width)+"px";
+        panel.surface.el.dom.parentNode.style.height = newHeight+"px";
+        sprite.show(true);
+        /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
+        xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
+        xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
+        panel.suspendEvents();
+        panel.setPosition(xdata.layout.x, xdata.layout.y);
+        panel.resumeEvents();
+        panel.setIconLabel();
+
+        /* adjust drag elements position */
+        Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
+            if(dragEl != undefined) {
+                dragEl.suspendEvents();
+                dragEl.setPosition(xdata.appearance[dragEl.keyX]+dragEl.offsetX, xdata.appearance[dragEl.keyY]+dragEl.offsetY);
+                dragEl.resumeEvents();
+                try { dragEl.toFront(); } catch(e) {}
+            }
+        });
     },
     iconSetSourceFromState: function(xdata) {
         var panel = this;
@@ -1231,6 +1446,7 @@ Ext.define('TP.IconWidget', {
         panel.src = newSrc;
         panel.icon.setAttributes({src: newSrc}).redraw();
         panel.iconFixSize(xdata);
+        if(!TP.isThisTheActiveTab(panel)) { panel.hide(); }
     },
     iconFixSize: function(xdata) {
         var panel = this;
@@ -1259,6 +1475,7 @@ Ext.define('TP.IconWidget', {
             }
             xdata.size  = size;
             xdata.nsize = [naturalWidth, naturalHeight];
+            if(isNaN(scale)) { return; }
             panel.icon.setAttributes({translation:{x:0, y:0}, scale: {x:scale, y:scale}}, true);
             // image size has changed
             if(panel.icon.width != naturalWidth || panel.icon.height != naturalHeight || panel.lastScale != scale) {
@@ -1271,7 +1488,7 @@ Ext.define('TP.IconWidget', {
         var panel = this;
         var src = panel.src || xdata.general.src;
         if(!panel.el) { return; }
-        if(isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/)) {
+        if(TP.isThisTheActiveTab(panel) && (isError || src == undefined || src == "" || src.match(/\/panorama\/images\/s\.gif$/))) {
             panel.el.dom.style.border    = "1px dashed black";
             panel.el.dom.style.minWidth  = 20;
             panel.el.dom.style.minHeight = 20;
@@ -1327,6 +1544,8 @@ Ext.onReady(function() {
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         var img = Ext.getCmp(el.id);
         TP.iconTip.panel   = img;
+        /* hide when in edit mode */
+        if(!img.locked) { return; }
         TP.iconTip.last_id = el.id;
         if(img.iconType == 'filtered') {
             TP.iconTip.setTitle(img.getName());
@@ -1529,7 +1748,7 @@ Ext.define('TP.HostStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'host', 'Hostname'),
+            TP.objectSearchItem(panel, 'host', 'Hostname', panel.xdata.general.host),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -1672,7 +1891,7 @@ Ext.define('TP.HostgroupStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'hostgroup', 'Hostgroupname'),
+            TP.objectSearchItem(panel, 'hostgroup', 'Hostgroupname', panel.xdata.general.hostgroup),
             {
                 fieldLabel: 'Include Hosts',
                 xtype:      'checkbox',
@@ -1757,8 +1976,8 @@ Ext.define('TP.ServiceStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'host', 'Hostname'),
-            TP.objectSearchItem(panel, 'service', 'Servicename'),
+            TP.objectSearchItem(panel, 'host', 'Hostname', panel.xdata.general.host),
+            TP.objectSearchItem(panel, 'service', 'Servicename', panel.xdata.general.service),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -1826,7 +2045,7 @@ Ext.define('TP.ServicegroupStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'servicegroup', 'Servicegroupname'),
+            TP.objectSearchItem(panel, 'servicegroup', 'Servicegroupname', panel.xdata.general.servicegroup),
             {
                 fieldLabel: 'Include Downtimes',
                 xtype:      'checkbox',
@@ -1990,7 +2209,7 @@ Ext.define('TP.SiteStatusIcon', {
     getGeneralItems: function() {
         var panel = this;
         return([
-            TP.objectSearchItem(panel, 'site', 'Sitename')
+            TP.objectSearchItem(panel, 'site', 'Sitename', panel.xdata.general.site)
         ]);
     },
     refreshHandler: function(newStatus) {
@@ -2120,11 +2339,18 @@ Ext.define('TP.StaticIcon', {
 TP.resetMoveIcons = function() {
     Ext.Array.each(TP.moveIcons, function(item) {
         item.el.dom.style.outline = "";
+        if(item.labelEl) {
+            item.labelEl.el.dom.style.outline = "";
+        }
     });
     TP.moveIcons = undefined;
     if(TP.keynav) {
         TP.keynav.destroy();
         TP.keynav = undefined;
+    }
+    if(TP.lassoEl) {
+        TP.lassoEl.destroy();
+        TP.lassoEl = undefined;
     }
 }
 
@@ -2147,7 +2373,7 @@ TP.iconClickHandler = function(id) {
     window.clearTimeout(TP.timeouts['click'+id]);
     TP.timeouts['click'+id] = window.setTimeout(function() {
         TP.iconClickHandlerDo(id);
-    }, 500);
+    }, 200);
     return false;
 }
 /* actually open the clicked link */
@@ -2158,6 +2384,10 @@ TP.iconClickHandlerDo = function(id) {
     }
     var link    = panel.xdata.link.link;
     var newTab  = panel.xdata.link.newtab;
+    if(!panel.locked) {
+        TP.Msg.msg("info_message~~icon links are disabled in edit mode, would have openend:<br><b>"+link+"</b>"+(newTab?'<br>(in a new tab)':''));
+        return;
+    }
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
     if(special && special[1]) {
@@ -2224,6 +2454,8 @@ TP.iconClickHandlerDo = function(id) {
         return(false);
     }
     if(link) {
+        var oldOnClick=panel.el.dom.onclick;
+        panel.el.dom.onclick="";
         panel.el.dom.href=link;
         panel.passClick = true;
         if(newTab) {
@@ -2231,6 +2463,8 @@ TP.iconClickHandlerDo = function(id) {
         }
         panel.el.dom.click();
         window.setTimeout(function() {
+            panel.el.dom.href=panel.xdata.link.link;
+            panel.el.dom.onclick=oldOnClick;
             panel.passClick = false;
         }, 300);
     }
@@ -2268,8 +2502,11 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
     } else {
         return('#');
     }
-    if(panel.xdata.general.backends) {
+    if(panel.xdata.general.backends && panel.xdata.general.backends.length > 0) {
         options.backends = panel.xdata.general.backends;
+    } else {
+        var tab = Ext.getCmp(panel.panel_id);
+        options.backends = tab.xdata.backends;
     }
     if(relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));
@@ -2348,6 +2585,7 @@ TP.getNatural = function(src) {
 
 /* calculates availability used in labels */
 function availability(panel, opts) {
+    TP.lastAvailError = undefined;
     if(panel.iconType == 'hostgroup' || panel.iconType == 'filtered') {
         if(panel.xdata.general.incl_hst) { opts['incl_hst'] = 1; }
         if(panel.xdata.general.incl_svc) { opts['incl_svc'] = 1; }
@@ -2364,14 +2602,23 @@ function availability(panel, opts) {
             last:        -1
         };
     }
-    else if(TP.availabilities[panel.id][opts_enc]['last_refresh'] < now - 30) {
+    /* refresh every 30seconds max */
+    else if(TP.availabilities[panel.id][opts_enc]['last_refresh'] < now - [% IF thruk_debug %]5[% ELSE %]30[% END %]) {
         refresh = true;
     }
     TP.availabilities[panel.id][opts_enc]['active'] = true;
     if(refresh) {
-        if(TP.iconSettingsWindow != undefined) { return(TP.availabilities[panel.id][opts_enc]['last']); }
+        if(TP.iconSettingsWindow != undefined) {
+            if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
+                TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];
+            }
+            return(TP.availabilities[panel.id][opts_enc]['last']);
+        }
         TP.availabilities[panel.id][opts_enc]['last_refresh'] = now;
         TP.updateAllLabelAvailability(Ext.getCmp(panel.panel_id));
+    }
+    if(!Ext.isNumeric(TP.availabilities[panel.id][opts_enc]['last'])) {
+        TP.lastAvailError = TP.availabilities[panel.id][opts_enc]['last'];
     }
     return(TP.availabilities[panel.id][opts_enc]['last']);
 }
@@ -2379,33 +2626,171 @@ function availability(panel, opts) {
 
 TP.iconMoveHandler = function(icon, x, y) {
     window.clearTimeout(TP.timeouts['timeout_icon_move']);
-    /* update settings window */
-    if(TP.iconSettingsWindow) {
-        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
-    }
-    /* update label */
-    icon.setIconLabel();
 
     var deltaX = x - icon.xdata.layout.x;
     var deltaY = y - icon.xdata.layout.y;
 
+    /* update settings window */
+    if(TP.iconSettingsWindow) {
+        /* layout tab */
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:x, y:y});
+        /* appearance tab */
+        TP.skipRender = true;
+        TP.iconSettingsWindow.items.getAt(0).items.getAt(2).down('form').getForm().setValues({
+            connectorfromx: icon.xdata.appearance.connectorfromx + deltaX,
+            connectorfromy: icon.xdata.appearance.connectorfromy + deltaY,
+            connectortox:   icon.xdata.appearance.connectortox   + deltaX,
+            connectortoy:   icon.xdata.appearance.connectortoy   + deltaY
+        });
+        if(icon.dragEl1) { icon.dragEl1.suspendEvents(); icon.dragEl1.setPosition(icon.xdata.appearance.connectorfromx + deltaX, icon.xdata.appearance.connectorfromy + deltaY); icon.dragEl1.resumeEvents(); }
+        if(icon.dragEl2) { icon.dragEl2.suspendEvents(); icon.dragEl2.setPosition(icon.xdata.appearance.connectortox   + deltaX, icon.xdata.appearance.connectortoy   + deltaY); icon.dragEl2.resumeEvents(); }
+        TP.skipRender = false;
+    }
+    /* update label */
+    if(icon.setIconLabel) {
+        icon.setIconLabel();
+    }
+
+    /* moving with closed settings window */
     if(icon.stateful) {
-        icon.xdata.layout.x = Math.floor(x);
-        icon.xdata.layout.y = Math.floor(y);
+        if(icon.setIconLabel) {
+            icon.xdata.layout.x = Math.floor(x);
+            icon.xdata.layout.y = Math.floor(y);
+
+            if(icon.xdata.appearance.type == "connector") {
+                icon.xdata.appearance.connectorfromx += deltaX;
+                icon.xdata.appearance.connectorfromy += deltaY;
+                icon.xdata.appearance.connectortox   += deltaX;
+                icon.xdata.appearance.connectortoy   += deltaY;
+            }
+        }
 
         /* move aligned items too */
-        if(TP.moveIcons) {
-            Ext.Array.each(TP.moveIcons, function(item) {
-                if(item.id != icon.id) {
-                    item.suspendEvents();
-                    item.xdata.layout.x += deltaX;
-                    item.xdata.layout.y += deltaY;
-                    item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
-                    item.setIconLabel();
-                    item.resumeEvents();
-                    item.saveState();
+        TP.moveAlignedIcons(deltaX, deltaY, icon.id);
+    }
+}
+
+TP.moveAlignedIcons = function(deltaX, deltaY, skip_id) {
+    if(!TP.moveIcons) { return; }
+    Ext.Array.each(TP.moveIcons, function(item) {
+        if(item.id != skip_id) {
+            if(item.setIconLabel) {
+                item.suspendEvents();
+                item.xdata.layout.x += deltaX;
+                item.xdata.layout.y += deltaY;
+                item.setPosition(item.xdata.layout.x, item.xdata.layout.y);
+                if(item.xdata.appearance.type == "connector") {
+                    item.xdata.appearance.connectorfromx += deltaX;
+                    item.xdata.appearance.connectorfromy += deltaY;
+                    item.xdata.appearance.connectortox   += deltaX;
+                    item.xdata.appearance.connectortoy   += deltaY;
                 }
-            });
+                item.setIconLabel();
+                item.resumeEvents();
+                item.saveState();
+            } else {
+                item.moveDragEl(deltaX, deltaY);
+            }
+        }
+    });
+}
+
+/* convert list of points to svg path */
+TP.pointsToPath = function(points) {
+    var l = points.length;
+    if(l == 0) {return("");}
+    var path = "M";
+    for(var x = 0; x < l; x++) {
+        var p = points[x];
+        path += " "+p[0]+","+p[1];
+    }
+    path += " Z";
+    return(path);
+}
+
+/* create gradient and return color by state */
+TP.getShapeColor = function(type, panel, xdata, forceColor) {
+    var state = xdata.state, fillcolor, r, color1, color2;
+    var p     = {};
+    var perc  = 100;
+    if(state == undefined) { state = panel.xdata.state; }
+    if(xdata.appearance[type+"source"] == undefined) { xdata.appearance[type+"source"] = 'fixed'; }
+    if(forceColor != undefined) { fillcolor = forceColor; }
+    else if(state == 0)         { fillcolor = xdata.appearance[type+"color_ok"]; }
+    else if(state == 1)         { fillcolor = xdata.appearance[type+"color_warning"]; }
+    else if(state == 2)         { fillcolor = xdata.appearance[type+"color_critical"]; }
+    else if(state == 3)         { fillcolor = xdata.appearance[type+"color_unknown"]; }
+    else if(state == 4)         { fillcolor = "#777777"; }
+    if(!fillcolor)              { fillcolor = '#333333'; }
+
+    var matches = xdata.appearance[type+"source"].match(/^perfdata:(.*)$/);
+    if(matches && matches[1]) {
+        window.perfdata = {};
+        panel.setIconLabel(undefined, true);
+        if(perfdata[matches[1]]) {
+            p      = perfdata[matches[1]];
+            r      = TP.getPerfDataMinMax(p, 100);
+            color1 = xdata.appearance[type+"color_ok"];
+            color2 = xdata.appearance[type+"color_ok"];
+            /* inside critical range: V c w o w c  */
+            if(p.crit_min != "" && p.val < p.crit_min) {
+                color1 = xdata.appearance[type+"color_critical"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = 100;
+            }
+            /* above critical threshold: o w c V */
+            else if(p.crit_max != "" && p.val > p.crit_max) {
+                color1 = xdata.appearance[type+"color_critical"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = 100;
+            }
+            /* inside warning range low: c V w o w c */
+            else if(p.warn_min != "" && p.val < p.warn_min && p.val > p.crit_min) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc = Math.floor(((p.warn_min - p.val) / (p.warn_min - p.crit_min))*100);
+            }
+            /* inside warning range high: c w o w V c */
+            else if(p.warn_min != "" && p.val > p.warn_max && p.val < p.crit_max) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc = Math.floor(((p.val - p.warn_max) / (p.crit_max - p.warn_max))*100);
+            }
+            /* above warning threshold: o w V c */
+            else if(p.warn_max != "" && p.val > p.warn_max) {
+                color1 = xdata.appearance[type+"color_warning"];
+                color2 = xdata.appearance[type+"color_critical"];
+                perc   = Math.floor(((p.val - p.warn_max) / (r.max - p.warn_max))*100);
+            }
+            /* below warning threshold: o V w c */
+            else if(p.warn_max != "" && p.val < p.warn_max) {
+                color1 = xdata.appearance[type+"color_ok"];
+                color2 = xdata.appearance[type+"color_warning"];
+                perc   = Math.floor(((p.val - r.min) / (p.warn_max - r.min))*100);
+            }
         }
     }
+
+    if(xdata.appearance[type+"gradient"] != 0) {
+        /* dynamic gradient */
+        if(panel.surface.existingGradients == undefined) { panel.surface.existingGradients = {}; }
+        if(xdata.appearance[type+"source"] != 'fixed' &&  color1 != undefined && color2 != undefined) {
+            var gradient = TP.createGradient(color1, xdata.appearance[type+"gradient"], color2, perc);
+            if(panel.surface.existingGradients[gradient.id] == undefined) {
+                panel.surface.addGradient(gradient);
+                panel.surface.existingGradients[gradient.id] = true;
+            }
+            return({color: "url(#"+gradient.id+")", value: p.val, perfdata: p, range: r});
+        } else {
+            /* fixed gradient from state color */
+            var gradient = TP.createGradient(fillcolor, xdata.appearance[type+"gradient"]);
+            if(panel.surface.existingGradients[gradient.id] == undefined) {
+                panel.surface.addGradient(gradient);
+                panel.surface.existingGradients[gradient.id] = true;
+            }
+            return({color: "url(#"+gradient.id+")", value: p.val, perfdata: p, range: r});
+        }
+    }
+    /* fixed state color */
+    return({color: fillcolor, value: p.val, perfdata: p, range: r});
 }

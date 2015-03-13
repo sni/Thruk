@@ -9,7 +9,7 @@ $Data::Dumper::Sortkeys = 1;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 30;
+    plan tests => 39;
 }
 
 BEGIN {
@@ -92,6 +92,7 @@ is_deeply($res, $expected_resource, 'reading resource file');
 
 ################################################################################
 # set resource file
+$b->{'config'}->{'expand_user_macros'} = [];
 $b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
 for my $backend ( @{$b->{'backends'}} ) {
     if(defined $backend->{'resource_file'}) {
@@ -124,8 +125,9 @@ is($cmd->{'note'}, '', 'note should be empty');
 ################################################################################
 $cmd = $b->expand_command(
     'host'    => {
-        'state'         => 0,
-        'check_command' => 'check_test!',
+        'state'             => 0,
+        'last_state_change' => time(),
+        'check_command'     => 'check_test!',
     },
     'command' => {
         'name' => 'check_test',
@@ -134,6 +136,72 @@ $cmd = $b->expand_command(
 );
 is($cmd->{'line_expanded'}, '/tmp/check_test ', 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'note'}, '', 'note should be empty');
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["NONE"];
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '$PLUGINDIR$/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR"];
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p $USER2$', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["PLUGINDIR", "USER*"];
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$PLUGINDIR$/check_test -H $HOSTNAME$ -p $USER2$'
+    },
+);
+is($cmd->{'line_expanded'}, '/usr/local/plugins/check_test -H '.$hosts->[0]->{'name'}.' -p test3', 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["USER1-2"];
+Catalyst::Plugin::Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p $USER2$ $USER3$',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p test3 $USER3$', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# set expand user macros
+$b->{'config'}->{'expand_user_macros'} = ["ALL"];
+Catalyst::Plugin::Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p $USER2$',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p test3', 'expanded command: '.$cmd->{'line_expanded'});
 
 ################################################################################
 my $res1 = Thruk::Utils::read_resource_file('t/data/resource.cfg');

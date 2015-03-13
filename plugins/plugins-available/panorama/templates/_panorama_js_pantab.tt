@@ -2,7 +2,7 @@
     extend: 'Ext.panel.Panel',
 
     [% UNLESS (readonly || dashboard_ignore_changes) %]
-    tooltip:     'double click to rename',
+    tooltip:     'double click to open settings',
     closable:    true,
     bodyCls:     'pantabbody',
     [% ELSE %]
@@ -10,6 +10,7 @@
     [% END %]
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
+    locked:      [% IF c.request.parameters.exists('unlocked') %]false[% ELSE %]true[% END %], // lock it by default
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -75,6 +76,7 @@
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
+            TP.resetMoveIcons();
             var delay = 0;
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
@@ -87,7 +89,9 @@
                         } else {
                             panlet.show(false);
                         }
-                    } catch(e) { debug(e) }
+                    } catch(e) {
+                        TP.logError(panlet.id, "panelActivateException", e);
+                    }
                 }
             }
             var tabpan = Ext.getCmp('tabpan');
@@ -109,7 +113,11 @@
 
             /* disable add button */
             if(Ext.getCmp('tabbar_addbtn')) {
-                Ext.getCmp('tabbar_addbtn').setDisabled(This.xdata.locked);
+                if(This.xdata.locked) {
+                    Ext.getCmp('tabbar_addbtn').setDisabled(true).setIconCls('lock-tab');
+                } else {
+                    Ext.getCmp('tabbar_addbtn').setDisabled(false).setIconCls('gear-tab');
+                }
             }
 
             // refresh icons
@@ -120,9 +128,18 @@
                     TP.updateAllIcons(This);
                 }
             }
+            if(This.bgDragEl) { This.bgDragEl.show(); }
+            if(This.bgImgEl)  { This.bgImgEl.show();  }
+            TP.suppressIconTip = true;
+            if(This.locked) {
+                TP.suppressIconTip = false;
+            }
+            This.applyZindex();
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
+            if(This.bgDragEl) { This.bgDragEl.hide(); }
+            if(This.bgImgEl)  { This.bgImgEl.hide();  }
         },
         afterrender: function(This, eOpts) {
             var tab = This;
@@ -135,65 +152,7 @@
             var header = tab.getDockedItems()[0];
             if(header) { header.hide() }
             tab.el.on("contextmenu", function(e) {
-                /* right click context menu on tab body */
-                e.preventDefault();
-                TP.resetMoveIcons();
-                var pos = [e.getX(), e.getY()];
-                Ext.create('Ext.menu.Menu', {
-                    margin: '0 0 10 0',
-                    items: [{
-                        text:   'Refresh',
-                        icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
-                        handler: function() { TP.refreshAllSitePanel(tab) }
-                    }
-                    [% UNLESS readonly %]
-                    , {
-                        text:   'New',
-                        icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
-                        hideOnClick: false,
-                        menu:    TP.addPanletsMenu({open: 'right'}),
-                        disabled: tab.xdata.locked
-                    }, {
-                        text:   'Paste',
-                        icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
-                        handler: function() {
-                            var tb = Ext.getCmp('tabpan').getActiveTab();
-                            if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
-                                // workaround for not existing gradient after copy&paste
-                                if(TP.clipboard.state.xdata.appearance.piegradient) {
-                                    TP.clipboard.state.xdata.appearance.piegradient = Number(TP.clipboard.state.xdata.appearance.piegradient) + 0.001;
-                                }
-                                if(TP.clipboard.state.xdata.appearance.shapegradient) {
-                                    TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
-                                }
-                            }
-                            pos[0] = pos[0] - 8;
-                            pos[1] = pos[1] - 8;
-                            TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
-                        },
-                        disabled: (tab.xdata.locked || TP.clipboard == undefined)
-                    }, '-', {
-                        text:   'Dashboard Settings',
-                        icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
-                        handler: function() { TP.tabSettingsWindow() },
-                        hidden:  tab.xdata.locked       // only show when not locked
-                    }, {
-                        text:   'Unlock Dashboard',
-                        icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
-                        handler: function() { tab.setLock(false); },
-                        hidden:  !tab.xdata.locked      // only show when locked
-                    }, {
-                        text:   'Lock Dashboard',
-                        icon:   '[% url_prefix %]plugins/panorama/images/lock.png',
-                        handler: function() { tab.setLock(true); },
-                        hidden:  tab.xdata.locked       // only show when not locked
-                    }
-                    [% END %]
-                    ],
-                    listeners: {
-                        beforehide: function(menu, eOpts) { menu.destroy(); }
-                    }
-                }).showAt(pos);
+                tab.contextmenu(e);
             });
             tab.el.on("click", function(e) {
                 if(!TP.skipResetMoveIcons) {
@@ -201,43 +160,6 @@
                 }
                 TP.skipResetMoveIcons = false;
             });
-
-[% UNLESS readonly %]
-            /* lasso for element selection */
-            Ext.getBody().on("mouseup", function(e) {
-                if(TP.lassoEl) {
-                    TP.lassoEl.destroy();
-                    TP.lassoEl = undefined;
-                    Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
-                    TP.createIconMoveKeyNav();
-                    TP.skipResetMoveIcons = true;
-                    window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
-                }
-            });
-            Ext.getBody().on("dragstart", function(e) {
-                e.preventDefault();
-                if(tab.xdata.locked) { return(false); };
-                var pos = e.getXY();
-                if(TP.lassoEl) { TP.lassoEl.destroy(); }
-                TP.lassoEl = Ext.create('Ext.Component', {
-                    'html':     ' ',
-                    autoRender: true,
-                    autoShow:   true,
-                    shadow:     false,
-                    style: {
-                        position: 'absolute',
-                        border: '1px black dashed',
-                        top:     pos[1]+'px',
-                        left:    pos[0]+'px',
-                        width:   '1px',
-                        height:  '1px'
-                    }
-                });
-                TP.lassoEl.startPosition = pos;
-                Ext.getBody().on("mousemove", TP.lassoDragHandler);
-                return(false);
-            });
-[% END %]
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -246,12 +168,16 @@
                     panlet.hide();
                 }
             }
+        },
+        resize: function(This, adjWidth, adjHeight, eOpts) {
+            This.adjustTabHeaderOffset();
         }
     },
     getState: function() {
         var state = {
-            xdata: this.xdata
+            xdata: TP.clone(this.xdata)
         };
+        delete state.xdata.locked;
         return state;
     },
     applyState: function(state) {
@@ -318,8 +244,9 @@
             xdata = this.xdata;
         }
         if(this.readonly == 1) {
-            xdata.locked = true;
+            this.locked = true;
         }
+        xdata.locked = this.locked;
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
         this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
@@ -334,6 +261,10 @@
 
     /* order icons by z-index */
     applyZindex: function() {
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        if(activeTab && this.id != activeTab.id) { return; } /* no need for zindex changes if we are not the active tab */
+
         if(this.window_ids) {
             var zIndexList = [];
             for(var nr=0; nr<this.window_ids.length; nr++) {
@@ -349,17 +280,16 @@
                 if(panels != undefined) {
                     Ext.Array.each(panels, function(panel, id2) {
                         // may fail when not yet rendered
-                        try {
-                            panel.toFront();
-                        }
-                        catch(e) {}
+                        try { panel.toFront(); } catch(e) {}
+                        if(panel.setIconLabel) { panel.setIconLabel(); }
+                        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
+                        if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(e) {} }
+                        if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(e) {} }
                     });
                 }
             });
         }
-        if(TP.iconSettingsWindow && TP.iconSettingsWindow.toFront) {
-            TP.iconSettingsWindow.toFront();
-        }
+        TP.checkModalWindows();
     },
 
     hidePanlets: function() {
@@ -388,7 +318,9 @@
                     if(panlet) { // may not yet exists due to delayed rendering
                         try {    // so allow it to fail
                             panlet.show(false);
-                        } catch(e) { debug(e) }
+                        } catch(e) {
+                            TP.logError(this.id, "panelStarttimeoutException", e);
+                        }
                     }
                 }
             }
@@ -485,21 +417,213 @@
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
         var tab = this;
-        tab.xdata.locked = val;
+        var mask;
+        var panels = TP.getAllPanel(this);
+        if(tab.locked != val && panels.length > 0) {
+            tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
+        }
+        tab.xdata.locked   = val;
+        tab.locked         = val;
+        TP.suppressIconTip = !val;
 
         /* disable add button */
         if(Ext.getCmp('tabbar_addbtn')) {
-            Ext.getCmp('tabbar_addbtn').setDisabled(val);
+            if(tab.xdata.locked) {
+                Ext.getCmp('tabbar_addbtn').setDisabled(true).setIconCls('lock-tab');
+            } else {
+                Ext.getCmp('tabbar_addbtn').setDisabled(false).setIconCls('gear-tab');
+            }
         }
 
         /* apply to all widgets and panels */
-        var panels = TP.getAllPanel(this);
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].setLock(val);
         }
+        /* schedule update, which also remove the mask from above */
+        TP.updateAllIcons(this);
+    },
+    contextmenu: function(e, hidePasteAndNew) {
+        var tab = this;
+        /* right click context menu on tab body */
+        e.preventDefault();
+        TP.resetMoveIcons();
+        var pos = [e.getX(), e.getY()];
+        var nr = tab.id.replace(/^tabpan-tab_/, '');
+        Ext.create('Ext.menu.Menu', {
+            margin: '0 0 10 0',
+            items: [{
+                text:   'Refresh',
+                icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                handler: function() { TP.refreshAllSitePanel(tab) }
+            }, '-', {
+                text:   'Fullscreen',
+                icon:   '[% url_prefix %]plugins/panorama/images/picture_empty.png',
+                handler: function() {
+                    var element = Ext.getBody().dom;
+                    try {
+                        BigScreen.request(element);
+                    } catch(e) {
+                        TP.logError(tab.id, "bigscreenException", e);
+                    }
+                },
+                hidden:  !!BigScreen.element
+            }, {
+                text:   'Exit Fullscreen',
+                icon:   '[% url_prefix %]plugins/panorama/images/pictures.png',
+                handler: function() { BigScreen.exit(); },
+                hidden:  !BigScreen.element
+            }, {
+[% IF one_tab_only %]
+                text:       'Open Tab Mode',
+                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                href:       'panorama.cgi#'+nr,
+                tooltip:    'open this dashboard in tab mode'
+[% ELSE %]
+                text:       'Direct Link',
+                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                href:       'panorama.cgi?map='+tab.xdata.title,
+                hrefTarget: '_blank',
+                tooltip:    'open this dashboard only (new window)'
+[% END %]
+            }, {
+                text:   'Debug Information',
+                icon:   '[% url_prefix %]plugins/panorama/images/information.png',
+                handler: thruk_debug_window_handler,
+                hidden:  [% IF !thruk_debug || c.config.demo_mode %]true[% ELSE %]false[% END %]
+            }, '-'
+            [% UNLESS readonly %]
+            , {
+                text:   'New',
+                icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
+                hideOnClick: false,
+                menu:    TP.addPanletsMenu({open: 'right'}),
+                disabled: tab.xdata.locked,
+                hidden:  hidePasteAndNew
+            }, {
+                text:   'Paste',
+                icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
+                handler: function() {
+                    var tb = Ext.getCmp('tabpan').getActiveTab();
+                    if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
+                        // workaround for not existing gradient after copy&paste
+                        if(TP.clipboard.state.xdata.appearance.piegradient) {
+                            TP.clipboard.state.xdata.appearance.piegradient = Number(TP.clipboard.state.xdata.appearance.piegradient) + 0.001;
+                        }
+                        if(TP.clipboard.state.xdata.appearance.shapegradient) {
+                            TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
+                        }
+                    }
+                    pos[0] = pos[0] - 8;
+                    pos[1] = pos[1] - 8;
+                    TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
+                },
+                disabled: (tab.xdata.locked || TP.clipboard == undefined),
+                hidden:  hidePasteAndNew
+            }, '-', {
+                text:   'Dashboard Settings',
+                icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                handler: function() { TP.tabSettingsWindow() },
+                hidden:  tab.xdata.locked       // only show when not locked
+            }, {
+                text:   'Restore',
+                icon:   '[% url_prefix %]plugins/panorama/images/book_previous.png',
+                id:     'manualmenu',
+                menu: [{
+                    text:    'Create Restorepoint',
+                    icon:    '[% url_prefix %]plugins/panorama/images/disk.png',
+                    handler: function() { TP.createRestorePoint(tab, "m") }
+                }, '-', {
+                    text:       'Autosave',
+                    hideOnClick: false,
+                    id:         'autosavemenu',
+                    icon:       '[% url_prefix %]plugins/panorama/images/shield.png',
+                    menu:        [],
+                    listeners: {
+                        afterrender: function(item, eOpts) {
+                            TP.setRestorePointsMenuItems(tab);
+                        }
+                    }
+                }, {
+                    text:    'Loading...',
+                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                    disabled: true,
+                    id:      'restorepointsloading'
+                }],
+                hidden:  tab.xdata.locked       // only show when not locked
+            }, {
+                text:   'Unlock Dashboard',
+                icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                handler: function() { TP.createRestorePoint(tab, "a"); tab.setLock(false); },
+                hidden:  !tab.xdata.locked      // only show when locked
+            }, {
+                text:   'Lock Dashboard',
+                icon:   '[% url_prefix %]plugins/panorama/images/lock.png',
+                handler: function() { tab.setLock(true); },
+                hidden:  tab.xdata.locked       // only show when not locked
+            }
+            [% END %]
+            ],
+            listeners: {
+                beforehide: function(menu, eOpts) { menu.destroy(); }
+            }
+        }).showAt(pos);
+    },
+    adjustTabHeaderOffset: function() {
+        [%+ IF one_tab_only +%]
+        var tab = this;
+        var body = Ext.getBody();
+        /* required for showing the background */
+        tab.setSize(body.getSize());
+        /* required due to missing tabbar */
+        var bodyview = Ext.get("bodyview");
+        bodyview.dom.style.position    = "relative";
+        bodyview.dom.style.top         = "-25px";
+        bodyview.dom.style.left        = "0";
+        [%+ END +%]
     }
 });
 
+[% UNLESS readonly %]
+Ext.onReady(function() {
+    /* lasso for element selection */
+    Ext.getBody().on("mouseup", function(e) {
+        if(TP.lassoEl) {
+            TP.lassoEl.destroy();
+            TP.lassoEl = undefined;
+            Ext.getBody().removeListener("mousemove", TP.lassoDragHandler);
+            TP.createIconMoveKeyNav();
+            TP.skipResetMoveIcons = true;
+            window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
+        }
+    });
+    Ext.getBody().on("dragstart", function(e) {
+        e.preventDefault();
+        var tabpan = Ext.getCmp('tabpan');
+        var tab    = tabpan.getActiveTab();
+        if(tab.locked) { return(false); };
+        var pos = e.getXY();
+        if(TP.lassoEl) { TP.lassoEl.destroy(); }
+        TP.lassoEl = Ext.create('Ext.Component', {
+            'html':     ' ',
+            autoRender: true,
+            autoShow:   true,
+            shadow:     false,
+            style: {
+                position: 'absolute',
+                border: '1px black dashed',
+                top:     pos[1]+'px',
+                left:    pos[0]+'px',
+                width:   '1px',
+                height:  '1px'
+            }
+        });
+        TP.lassoEl.startPosition = pos;
+        Ext.getBody().on("mousemove", TP.lassoDragHandler);
+        return(false);
+    });
+});
+
+[% END %]
 /* handles dragging a lasso around icon elements to move them together */
 TP.lassoDragHandler = function(e) {
     e.preventDefault();
@@ -545,19 +669,131 @@ TP.lassoMarkIcons = function(x, y) {
     var tab    = tabpan.getActiveTab();
     var panels = TP.getAllPanel(tab);
     TP.moveIcons = [];
+    var elements = [];
     for(var nr=0; nr<panels.length; nr++) {
         var panel = panels[nr];
-        if(panel.xdata.layout) {
-            var center = panel.getPosition();
-            var size   = panel.getSize();
-            center[0]  = center[0] + size.width;
-            center[1]  = center[1] + size.height;
-            if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
-                panel.el.dom.style.outline = "2px dotted orange";
-                TP.moveIcons.push(panel);
+        if(panel.xdata.layout) { // only icons
+            if(panel.xdata.appearance.type == "connector") {
+                if(panel.dragEl1) { elements.push(panel.dragEl1); }
+                if(panel.dragEl2) { elements.push(panel.dragEl2); }
             } else {
-                panel.el.dom.style.outline = "";
+                elements.push(panel);
             }
         }
     }
+
+    /* now check those elements */
+    for(var nr=0; nr<elements.length; nr++) {
+        var panel = elements[nr];
+        var center = panel.getPosition();
+        var size   = panel.getSize();
+        center[0]  = center[0] + size.width/2;
+        center[1]  = center[1] + size.height/2;
+        if(center[0] > lassoPos[0] && center[1] > lassoPos[1] && center[0] < lassoPos[0] + x && center[1] < lassoPos[1] + y) {
+            if(panel.iconType == "text") {
+                panel.labelEl.el.dom.style.outline = "2px dotted orange";
+            } else {
+                panel.el.dom.style.outline = "2px dotted orange";
+            }
+            TP.moveIcons.push(panel);
+        } else {
+            panel.el.dom.style.outline = "";
+        }
+    }
+}
+
+/* restore dashboard to given timestamp */
+TP.restoreDashboard = function(tab, timestamp, mode) {
+    Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
+        if (button === 'yes') {
+            Ext.Ajax.request({
+                url:      'panorama.cgi?task=dashboard_restore&nr='+tab+'&timestamp='+timestamp+"&mode="+mode,
+                method:  'POST',
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~restoring dashboard failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~restoring dashboard failed: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        TP.getResponse(undefined, response);
+                        TP.Msg.msg("success_message~~restoring dashboard successful to "+strftime("%a %b %e %Y, %H:%M:%S", timestamp));
+                    }
+                }
+            });
+        }
+    });
+}
+
+
+/* create restore point for dashboard */
+TP.createRestorePoint = function(tab, mode) {
+    Ext.Ajax.request({
+        url:      'panorama.cgi?task=dashboard_restore_point&nr='+tab.id+"&mode="+mode,
+        method:  'POST',
+        callback: function(options, success, response) {
+            if(!success) {
+                if(response.status == 0) {
+                    TP.Msg.msg("fail_message~~creating restore point failed");
+                } else {
+                    TP.Msg.msg("fail_message~~creating restore point failed: "+response.status+' - '+response.statusText);
+                }
+            } else {
+                TP.getResponse(undefined, response);
+                if(mode == "m") {
+                    TP.Msg.msg("success_message~~created restore point successfully");
+                }
+            }
+        }
+    });
+}
+
+TP.setRestorePointsMenuItems = function(tab) {
+    Ext.Ajax.request({
+        url:      'panorama.cgi?task=dashboard_restore_list&nr='+tab.id,
+        method:  'POST',
+        callback: function(options, success, response) {
+            if(!success) {
+                if(response.status == 0) {
+                    TP.Msg.msg("fail_message~~fetching dashboard restore points failed");
+                } else {
+                    TP.Msg.msg("fail_message~~fetching dashboard restore points failed: "+response.status+' - '+response.statusText);
+                }
+            } else {
+                var data = TP.getResponse(undefined, response);
+                data = data.data;
+                var autosavemenu  = Ext.getCmp("autosavemenu").menu;
+                if(autosavemenu == undefined) { return; } /* menu has been closed already */
+                var manualmenu    = Ext.getCmp("manualmenu").menu;
+                var restorepointsloading = Ext.getCmp("restorepointsloading");
+                if(restorepointsloading) {
+                    restorepointsloading.destroy();
+                }
+                var found = 0;
+                for(var x=0; x<data.a.length; x++) {
+                    found++;
+                    autosavemenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.a[x].num),
+                              val:     data.a[x].num,
+                              style:  'text-align: right;',
+                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "a"); }
+                            }
+                    );
+                }
+                if(found == 0) {
+                    autosavemenu.add({text: 'none', disabled: true});
+                }
+                for(var x=0; x<data.m.length; x++) {
+                    manualmenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.m[x].num),
+                              val:     data.m[x].num,
+                              style:  'text-align: right;',
+                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "m"); }
+                            }
+                    );
+                }
+            }
+        }
+    })
 }
