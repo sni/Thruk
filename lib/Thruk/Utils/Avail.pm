@@ -334,12 +334,9 @@ sub calculate_availability {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
             }
         }
-        my @hosts_from_groups = ();
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
-            push @hosts_from_groups, { host_name => $host->{'name'} };
         }
-        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);
     }
 
     # all hosts
