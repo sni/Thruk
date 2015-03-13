@@ -358,6 +358,9 @@ sub _bp_start_page {
 
     # load business processes
     my $drafts_too = $c->stash->{allowed_for_edit} ? 1 : 0;
+    if($c->{'request'}->{'parameters'}->{'no_drafts'}) {
+        $drafts_too = 0;
+    }
     my $bps = Thruk::BP::Utils::load_bp_data($c, undef, undef, $drafts_too);
     $c->stash->{'bps'} = $bps;
 

@@ -21,7 +21,7 @@
 
         /* available graphs loader */
         panel.updateGraphs = function() {
-            var url    = 'bp.cgi?view_mode=json';
+            var url    = 'bp.cgi?view_mode=json&no_drafts=1';
             Ext.Ajax.request({
                 url: url,
                 method: 'POST',
@@ -58,7 +58,7 @@
         panel.refreshHandler = function() {
             if(panel.xdata.graph) {
                 var refresh = panel.xdata.refresh;
-                if(refresh == -1) {
+                if(refresh == -1 || refresh == undefined) {
                     var tab = Ext.getCmp('tabpan');
                     refresh = tab.xdata.refresh;
                 }
@@ -88,7 +88,9 @@
             }
             var iframeObj = panel.items.getAt(0).getEl();
             if(iframeObj && iframeObj.dom) {
-                panel.body.mask('Loading...');
+                if(newUrl != "about:blank") {
+                    panel.body.mask('Loading...');
+                }
                 iframeObj.dom.src = newUrl;
             }
             panel.xdata.url = newUrl;

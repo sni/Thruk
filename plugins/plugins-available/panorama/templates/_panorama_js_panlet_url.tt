@@ -151,6 +151,14 @@
                             TP.log('['+panel.id+'] loaded');
                             window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
                             panel.unmask();
+                            panel.body.unmask();
+                        }
+                    },
+                    exception: {
+                        element: 'el',
+                        fn: function () {
+                            panel.unmask();
+                            panel.body.unmask();
                         }
                     }
                 }
