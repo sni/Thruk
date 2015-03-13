@@ -739,6 +739,10 @@ plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray
 plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray/window/icon-warning.gif
 plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray/window/window-default-corners.gif
 plugins/plugins-available/panorama/root/extjs-4.1.1/resources/themes/images/gray/window/window-default-sides.gif
+plugins/plugins-available/panorama/root/geoext2-2.0.2/src/GeoExt/data/LayerModel.js
+plugins/plugins-available/panorama/root/geoext2-2.0.2/src/GeoExt/data/LayerStore.js
+plugins/plugins-available/panorama/root/geoext2-2.0.2/src/GeoExt/panel/Map.js
+plugins/plugins-available/panorama/root/geoext2-2.0.2/src/GeoExt/Version.js
 plugins/plugins-available/panorama/root/images/accept.png
 plugins/plugins-available/panorama/root/images/add.png
 plugins/plugins-available/panorama/root/images/application_put.png
@@ -789,6 +793,7 @@ plugins/plugins-available/panorama/root/images/link_go.png
 plugins/plugins-available/panorama/root/images/loading-icon.gif
 plugins/plugins-available/panorama/root/images/lock.png
 plugins/plugins-available/panorama/root/images/lock_open.png
+plugins/plugins-available/panorama/root/images/map.png
 plugins/plugins-available/panorama/root/images/menu-parent.gif
 plugins/plugins-available/panorama/root/images/minemap.png
 plugins/plugins-available/panorama/root/images/minemap0.png
@@ -825,6 +830,7 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/images/wrench.png
+plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
 plugins/plugins-available/panorama/root/panorama-1.86-4.css
 plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js

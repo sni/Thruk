@@ -305,8 +305,10 @@ var TP = {
         if(!tb) {
             throw new Error("TP.add_panlet(): no active tab! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
+        tb.disableMapControls();
         tb.getEl().dom.style.cursor = 'crosshair';
         tb.getEl().on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY]);
+        tb.disableMapControls();
     },
 
     redraw_panlet: function(panel, tab) {

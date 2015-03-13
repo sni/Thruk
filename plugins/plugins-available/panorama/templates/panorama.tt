@@ -48,5 +48,6 @@ function preloader() {
 }
 -->
 </script>
+<div id="mappanel"></div>
 </body>
 </html>

@@ -73,6 +73,7 @@
             }
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
+            if(This.mapEl)    { This.mapEl.destroy();    }
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
@@ -130,6 +131,7 @@
             }
             if(This.bgDragEl) { This.bgDragEl.show(); }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
+            if(This.mapEl)    { This.mapEl.show();    }
             TP.suppressIconTip = true;
             if(This.locked) {
                 TP.suppressIconTip = false;
@@ -140,6 +142,7 @@
             This.hidePanlets();
             if(This.bgDragEl) { This.bgDragEl.hide(); }
             if(This.bgImgEl)  { This.bgImgEl.hide();  }
+            if(This.mapEl)    { This.mapEl.hide();    }
         },
         afterrender: function(This, eOpts) {
             var tab = This;
@@ -171,6 +174,10 @@
         },
         resize: function(This, adjWidth, adjHeight, eOpts) {
             This.adjustTabHeaderOffset();
+            if(This.map) {
+                This.map.setSize(This.getSize());
+                This.saveState();
+            }
         }
     },
     getState: function() {
@@ -178,7 +185,40 @@
             xdata: TP.clone(this.xdata)
         };
         delete state.xdata.locked;
+        if(this.map) {
+            var data = this.map.map.getCenter();
+            state.xdata.map = {
+                lon:    data.lon,
+                lat:    data.lat,
+                zoom: this.map.map.getZoom()
+            };
+            this.fixMapIcons();
+debug("getState", state.xdata.map);
+        }
         return state;
+    },
+    fixMapIcons: function() {
+        if(!this.map) { return; }
+        var This = this;
+        var panels = TP.getAllPanel(This);
+        for(var nr=0; nr<panels.length; nr++) {
+            var panel = panels[nr];
+            if(panel.el && panel.xdata.map == undefined && panel.xdata.layout != undefined) {
+                panel.updateMapLonLat();
+            }
+        }
+    },
+    moveMapIcons: function() {
+        if(!this.map) { return; }
+debug("moveMapIcons");
+        var This = this;
+        var panels = TP.getAllPanel(This);
+        for(var nr=0; nr<panels.length; nr++) {
+            var panel = panels[nr];
+            if(panel.el && panel.xdata.map != undefined && panel.xdata.layout != undefined) {
+                panel.moveToMapLonLat();
+            }
+        }
     },
     applyState: function(state) {
         this.callParent(arguments);
@@ -380,6 +420,55 @@
         if(retries >= 5)         { return;      }
         var body = This.body;
         if(body == undefined)    { return; }
+
+        if(background != undefined && background.match('/plugins/panorama/images/map.png')) {
+            if(This.bgImgEl) { This.bgImgEl.destroy(); This.bgImgEl = undefined; }
+            if(!This.mapEl) {
+                This.mapEl = body.createChild('<div id="'+This.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
+            }
+            Ext.Loader.setConfig({
+                enabled: true,
+                disableCaching: false,
+                paths: {
+                    GeoExt: "[% url_prefix %]plugins/panorama/geoext2-2.0.2/src/GeoExt"
+                }
+            });
+            var map   = new OpenLayers.Map();
+            //var zoomslider = new OpenLayers.control.ZoomSlider();
+            //map.addControl(zoomslider);
+            var layer = new OpenLayers.Layer.WMS("ows.terrestris.de", "http://ows.terrestris.de/osm/service?", {layers: 'OSM-WMS'}, { attribution: '&copy; terrestris GmbH & Co. KG <br>' + 'Data &copy; OpenStreetMap ' + '<a href="http://www.openstreetmap.org/copyright/en"' + 'target="_blank">contributors<a>' } );
+            //var layer = new OpenLayers.Layer.WMS("maps.opengeo.org", "http://maps.opengeo.org/geowebcache/service/wms", {layers: "bluemarble"} );
+            //var layer = new OpenLayers.Layer.WMS("maps.opengeo.org", "http://maps.opengeo.org/geowebcache/service/wms", {layers: "openstreetmap", format: "image/png"});
+            //var layer = new OpenLayers.Layer.WMS("www.osm-wms.de", "http://129.206.228.72/cached/osm?", {layers: 'osm_auto:all'});
+            //var layer = new OpenLayers.Layer.WMS("irs.gis-lab.info", "http://irs.gis-lab.info/?layers=osm&", {});
+            //var layer = new OpenLayers.Layer.WMS("www.osm-wms.de", "http://129.206.228.72/cached/hillshade?", {layers: 'osm_auto:all'});
+b=This;
+            map.addLayer(layer);
+            var mapData = {
+                renderTo: This.id+'-osmmap',
+                map:      map,
+                height:   100,
+                width:    100,
+                center:  '12.31,51.48',
+                zoom:     6,
+                stateful: true,
+                listeners: {
+                    aftermapmove: function(eOpts) {
+                        This.moveMapIcons();
+                        This.saveState();
+                    }
+                }
+            };
+            if(This.xdata && This.xdata.map) {
+                mapData.zoom   = Number(This.xdata.map.zoom);
+                mapData.center = [Number(This.xdata.map.lon), Number(This.xdata.map.lat)];
+            }
+            This.map = Ext.create('GeoExt.panel.Map', mapData);
+a=This.map;
+            map.events.register("move", map, function() {
+                This.moveMapIcons();
+            });
+        }
         if(!This.bgDragEl) {
             This.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
             This.bgDragEl.dom.src            = background;
@@ -388,7 +477,12 @@
             This.bgDragEl.dom.style.height   = "100%";
             This.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
         }
-        if(background != undefined && background != 'none') {
+        if(This.locked) {
+            This.disableMapControls();
+        }
+b=This.bgDragEl;
+
+        if(background != undefined && background != 'none' && !background.match('/plugins/panorama/images/map.png')) {
             if(!This.bgImgEl) {
                 This.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
             }
@@ -417,6 +511,26 @@
             }
         }
     },
+    disableMapControls: function() {
+        if(!this.mapEl) { return; }
+        var tab = this;
+        tab.bgDragEl.dom.style.zIndex=1;
+        for(var x=0; x<tab.map.map.controls.length; x++) {
+            if(tab.map.map.controls[x].div) {
+                tab.map.map.controls[x].div.style.display="none";
+            }
+        }
+    },
+    enableMapControls: function() {
+        if(!this.mapEl) { return; }
+        var tab = this;
+        tab.bgDragEl.dom.style.zIndex="";
+        for(var x=0; x<tab.map.map.controls.length; x++) {
+            if(tab.map.map.controls[x].div) {
+                tab.map.map.controls[x].div.style.display="";
+            }
+        }
+    },
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
         var tab = this;
@@ -442,6 +556,11 @@
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].setLock(val);
         }
+        if(val) {
+            tab.disableMapControls();
+        } else {
+            tab.enableMapControls();
+        }
         /* schedule update, which also remove the mask from above */
         TP.updateAllIcons(this);
     },
@@ -450,6 +569,7 @@
         /* right click context menu on tab body */
         e.preventDefault();
         TP.resetMoveIcons();
+        tab.disableMapControls();
         var pos = [e.getX(), e.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
         Ext.create('Ext.menu.Menu', {
@@ -567,7 +687,10 @@
             [% END %]
             ],
             listeners: {
-                beforehide: function(menu, eOpts) { menu.destroy(); }
+                beforehide: function(menu, eOpts) {
+                    menu.destroy();
+                    tab.enableMapControls();
+                }
             }
         }).showAt(pos);
     },
