@@ -216,6 +216,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         elsif($task eq 'timezones') {
             return($self->_task_timezones($c));
         }
+        elsif($task eq 'wms_provider') {
+            return($self->_task_wms_provider($c));
+        }
     }
 
     # find images for preloader
@@ -334,6 +337,7 @@ sub _js {
 
     $c->stash->{shape_data}   = $self->_task_userdata_shapes($c, 1);
     $c->stash->{iconset_data} = $self->_task_userdata_iconsets($c, 1);
+    $c->stash->{wms_provider} = _get_wms_provider($c);
 
     unless($only_data) {
         $c->res->content_type('text/javascript; charset=UTF-8');
@@ -610,6 +614,43 @@ sub _task_serveraction {
     $self->_add_misc_details($c, 1);
     return $c->forward('Thruk::View::JSON');
 }
+
+##########################################################
+sub _task_wms_provider {
+    my($self, $c) = @_;
+
+    my $provider = _get_wms_provider($c);
+    my $json = { 'rc' => 0, 'data' => $provider };
+    $c->stash->{'json'} = $json;
+    $self->_add_misc_details($c);
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _get_wms_provider {
+    my($c) = @_;
+    my $provider = [];
+    my $list     = $c->config->{'Thruk::Plugin::Panorama'}->{'wms_provider'};
+    if(ref $list eq "") { $list = [$list] };
+    for my $entry (@{$list}) {
+        my($name, $data) = split(/\s*=\s*/mx, $entry, 2);
+        $name =~ s/^\s*//gmx;
+        $name =~ s/\s*$//gmx;
+        $data =~ s/^\s*//gmx;
+        $data =~ s/\s*$//gmx;
+        eval {
+            my $test = JSON::XS::decode_json($data);
+        };
+        if($@) {
+            print STDERR "error in wms provider: ".$@;
+            print STDERR $entry,"\n";
+            die("error in wms provider: ".$@);
+        }
+        push @{$provider}, { name => $name, provider => $data };
+    }
+    return($provider);
+}
+
 
 ##########################################################
 sub _task_timezones {
@@ -1722,10 +1763,7 @@ sub _task_userdata_backgroundimages {
     $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
     $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
-    unless($query) {
-        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/map.png', image => 'Open Street Map'};
-        unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'};
-    }
+    unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'} unless($query);
     $c->{'db'}->_page_data($c, $images);
     $c->stash->{'json'} = {
         data        => $c->stash->{'data'},

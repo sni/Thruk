@@ -1861,6 +1861,18 @@ Full page reload every 3 hours to prevent memory
 leaks. Disabled when set to 0.
 
 
+=== wms_provider
+WMS provider serve map tile data for geo maps according to
+http://dev.openlayers.org/docs/files/OpenLayers/Layer/WMS-js.html#OpenLayers.Layer.WMS.OpenLayers.Layer.WMS
+Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Servers
+
+ ex.:
+
+  <Component Thruk::Plugin::Panorama>
+    ...
+    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}"]
+  </Component>
+
 
 == Component Thruk::Plugin::Reports2
 

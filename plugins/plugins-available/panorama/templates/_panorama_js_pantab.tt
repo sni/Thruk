@@ -74,6 +74,7 @@
             if(This.bgDragEl) { This.bgDragEl.destroy(); }
             if(This.bgImgEl)  { This.bgImgEl.destroy();  }
             if(This.mapEl)    { This.mapEl.destroy();    }
+            if(This.map)      { This.map.destroy();      }
             tabpan.saveState();
         },
         activate: function(This, eOpts) {
@@ -150,7 +151,7 @@
             if(!tab.title) {
                 tab.applyXdata();
             } else {
-                tab.setBackground(tab.xdata.background, tab.xdata.backgroundscale, tab.xdata.backgroundoffset_x, tab.xdata.backgroundoffset_y);
+                tab.setBackground(tab.xdata);
             }
             var header = tab.getDockedItems()[0];
             if(header) { header.hide() }
@@ -176,6 +177,7 @@
             This.adjustTabHeaderOffset();
             if(This.map) {
                 This.map.setSize(This.getSize());
+                This.moveMapIcons();
                 This.saveState();
             }
         }
@@ -287,7 +289,7 @@
         xdata.locked = this.locked;
         this.setLock(xdata.locked);
         this.setTitle(xdata.title);
-        this.setBackground(xdata.background, xdata.backgroundscale, xdata.backgroundoffset_x, xdata.backgroundoffset_y);
+        this.setBackground(xdata);
         if(startTimeouts != false) {
             if(TP.initialized) {
                 this.startTimeouts();
@@ -412,23 +414,46 @@
 
         window.clearInterval(TP.timeouts['interval_global_icons' + this.id + '_refresh']);
     },
-    setBackground: function(background, scale, offset_x, offset_y, retries) {
+    setBackground: function(xdata, retries) {
         var This = this;
+        var background = xdata.background,
+            scale      = xdata.scale,
+            offset_x   = xdata.offset_x,
+            offset_y   = xdata.offset_y;
         if(retries == undefined) { retries = 0; }
         if(retries >= 5)         { return;      }
         var body = This.body;
         if(body == undefined)    { return; }
 
-        if(background != undefined && background.match('/plugins/panorama/images/map.png')) {
+        if(xdata.map) {
             if(This.bgImgEl) { This.bgImgEl.destroy(); This.bgImgEl = undefined; }
             var size = This.getSize();
             if(size.width < 5 || size.height < 5) {
-                window.setTimeout(Ext.bind(This.setBackground, This, [background, scale, offset_x, offset_y, retries+1]), 500);
+                window.setTimeout(Ext.bind(This.setBackground, This, [xdata, retries+1]), 500);
                 return;
+            }
+            /* get wms provider */
+            var wmsData;
+            wmsProvider.findBy(function(rec, id) {
+                if(rec.data.name == xdata.wms_provider) {
+                    wmsData = rec.data.provider;
+                }
+            });
+            if(wmsData == undefined) {
+                wmsData = wmsProvider.getAt(0).data.provider;
+                TP.log('['+This.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
+            }
+            wmsData = Ext.JSON.decode(wmsData);
+            if(This.mapEl && This.mapEl.lastWMSProvider != xdata.wms_provider) {
+                This.mapEl.destroy();
+                This.mapEl = undefined;
+                This.map.destroy();
+                This.map   = undefined;
             }
             if(!This.mapEl) {
                 This.mapEl = body.createChild('<div id="'+This.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
+            if(This.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
             Ext.Loader.setConfig({
                 enabled: true,
                 disableCaching: false,
@@ -436,16 +461,9 @@
                     GeoExt: "[% url_prefix %]plugins/panorama/geoext2-2.0.2/src/GeoExt"
                 }
             });
+            This.mapEl.lastWMSProvider = xdata.wms_provider;
             var map   = new OpenLayers.Map();
-            //var zoomslider = new OpenLayers.control.ZoomSlider();
-            //map.addControl(zoomslider);
-            var layer = new OpenLayers.Layer.WMS("ows.terrestris.de", "http://ows.terrestris.de/osm/service?", {layers: 'OSM-WMS'}, { attribution: '&copy; terrestris GmbH & Co. KG <br>' + 'Data &copy; OpenStreetMap ' + '<a href="http://www.openstreetmap.org/copyright/en"' + 'target="_blank">contributors<a>' } );
-            //var layer = new OpenLayers.Layer.WMS("maps.opengeo.org", "http://maps.opengeo.org/geowebcache/service/wms", {layers: "bluemarble"} );
-            //var layer = new OpenLayers.Layer.WMS("maps.opengeo.org", "http://maps.opengeo.org/geowebcache/service/wms", {layers: "openstreetmap", format: "image/png"});
-            //var layer = new OpenLayers.Layer.WMS("www.osm-wms.de", "http://129.206.228.72/cached/osm?", {layers: 'osm_auto:all'});
-            //var layer = new OpenLayers.Layer.WMS("irs.gis-lab.info", "http://irs.gis-lab.info/?layers=osm&", {});
-            //var layer = new OpenLayers.Layer.WMS("www.osm-wms.de", "http://129.206.228.72/cached/hillshade?", {layers: 'osm_auto:all'});
-b=This;
+            var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], wmsData[2]);
             map.addLayer(layer);
             var mapData = {
                 renderTo: This.id+'-osmmap',
@@ -473,7 +491,16 @@ b=This;
             map.events.register("move", map, function() {
                 This.moveMapIcons();
             });
+            This.fixMapIcons();
+        } else {
+            if(This.mapEl) {
+                This.mapEl.destroy();
+                This.mapEl = undefined;
+                This.map.destroy();
+                This.map   = undefined;
+            }
         }
+
         if(!This.bgDragEl) {
             This.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
             This.bgDragEl.dom.src            = background;
@@ -486,7 +513,7 @@ b=This;
             This.disableMapControls();
         }
 
-        if(background != undefined && background != 'none' && !background.match('/plugins/panorama/images/map.png')) {
+        if(background != undefined && background != 'none' && !xdata.map) {
             if(!This.bgImgEl) {
                 This.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
             }
@@ -498,7 +525,7 @@ b=This;
             } else {
                 var naturalSize = TP.getNatural(background);
                 if(naturalSize.width < 2 || naturalSize.height < 2) {
-                    window.setTimeout(Ext.bind(This.setBackground, This, [background, scale, offset_x, offset_y, retries+1]), 500);
+                    window.setTimeout(Ext.bind(This.setBackground, This, [xdata, retries+1]), 500);
                     return;
                 }
                 var width  = Number(scale * naturalSize.width  / 100);

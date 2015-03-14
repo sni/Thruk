@@ -24,6 +24,19 @@ var sounds = Ext.create('Ext.data.Store', {
     autoLoad: false,
     data : []
 });
+var wmsProvider = Ext.create('Ext.data.Store', {
+    fields: ['name', 'provider'],
+    proxy: {
+        type: 'ajax',
+        url:  'panorama.cgi?task=wms_provider',
+        reader: {
+            type: 'json',
+            root: 'data'
+        }
+    },
+    autoLoad: false,
+    data : [% json_encode(wms_provider) %]
+});
 
 TP.getExportTab = function(options) {
     var exportItems = [{
@@ -163,6 +176,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
     backgrounds.load();
     sounds.load();
+    wmsProvider.load();
 
     var exportTab = TP.getExportTab({tab: tab, close_handler: function() { tab_win_settings.close() }});
 
@@ -373,7 +387,24 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         var d_form  = Ext.getCmp('dashboardForm').getForm();
         if(!d_form.isValid()) { return false; }
         var values = d_form.getFieldValues();
-        tab.setBackground(values.background, values.backgroundscale, values.backgroundoffset_x, values.backgroundoffset_y);
+        if(values.map_choose == 'geomap') {
+            Ext.getCmp('background_choose').hide();
+            Ext.getCmp('background_offset_choose').hide();
+            Ext.getCmp('wms_choose').show();
+            values.map = {};
+            if(values.wms_provider == undefined || values.wms_provider == "") {
+                if(wmsProvider.data.length > 0) {
+                    values.wms_provider = wmsProvider.getAt(0).data.name;
+                    Ext.getCmp('wms_choose').setRawValue(values.wms_provider);
+                }
+            }
+        } else {
+            Ext.getCmp('background_choose').show();
+            Ext.getCmp('background_offset_choose').show();
+            Ext.getCmp('wms_choose').hide();
+            delete values['map'];
+        }
+        tab.setBackground(values);
     }
 
     /* Dashboard Settings Tab */
@@ -399,7 +430,44 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 value:      tab.xdata['refresh']
             }
         }, {
-            fieldLabel: 'Background',
+            fieldLabel:  'Background',
+            xtype:       'fieldcontainer',
+            defaultType: 'radiofield',
+            defaults:   {
+                flex: 1,
+                listeners: { change: function(This) { applyBackground(This) } }
+            },
+            layout:      'hbox',
+            items: [{
+                    boxLabel:   'Static Image',
+                    name:       'map_choose',
+                    inputValue: 'static',
+                    checked:     tab.xdata.map == undefined ? true : false
+                }, {
+                    boxLabel:   'Geo Map',
+                    name:       'map_choose',
+                    inputValue: 'geomap',
+                    checked:     tab.xdata.map != undefined ? true : false
+            }]
+        }, {
+            fieldLabel:     'WMS Provider',
+            xtype:          'combobox',
+            name:           'wms_provider',
+            id:             'wms_choose',
+            store:           wmsProvider,
+            queryMode:      'local',
+            triggerAction:  'all',
+            displayField:   'name',
+            valueField:     'name',
+            editable:        false,
+            forceSelection:  true,
+            hidden:          tab.xdata.map == undefined ? true : false,
+            listeners:     { change: function(This) { applyBackground(This) } }
+        }, {
+            fieldLabel: ' ',
+            labelSeparator: '',
+            id:         'background_choose',
+            hidden:      tab.xdata.map != undefined ? true : false,
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
@@ -416,7 +484,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 typeAhead:       true,
                 displayField:   'image',
                 flex:            1,
-                valueField: 'path',
+                valueField:     'path',
                 listConfig : {
                     getInnerTpl: function(displayField) {
                         return '<div class="x-combo-list-item" style="overflow: hidden; white-space: nowrap;"><img src="{path}" height=16 width=16> {image}<\/div>';
@@ -439,6 +507,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         }, {
             fieldLabel:     ' ',
             labelSeparator: '',
+            id:             'background_offset_choose',
+            hidden:          tab.xdata.map != undefined ? true : false,
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
@@ -643,7 +713,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
                         if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
+                        if(values['map_choose'] != 'geomap') {
+                            delete tab.xdata['map'];
+                            delete tab.xdata['wms_provider'];
+                            delete values['wms_provider'];
+                        }
                         delete values['refresh_txt'];
+                        delete values['map_choose'];
                         Ext.apply(tab.xdata, values);
 
                         var s_form  = Ext.getCmp('soundForm').getForm();
