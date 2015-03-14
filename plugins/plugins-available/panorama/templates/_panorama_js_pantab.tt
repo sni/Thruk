@@ -763,8 +763,8 @@ TP.setRestorePointsMenuItems = function(tab) {
             } else {
                 var data = TP.getResponse(undefined, response);
                 data = data.data;
-                var autosavemenu  = Ext.getCmp("autosavemenu").menu;
-                if(autosavemenu == undefined) { return; } /* menu has been closed already */
+                var autosavemenu  = Ext.getCmp("autosavemenu");
+                if(autosavemenu == undefined || autosavemenu.menu == undefined) { return; } /* menu has been closed already */
                 var manualmenu    = Ext.getCmp("manualmenu").menu;
                 var restorepointsloading = Ext.getCmp("restorepointsloading");
                 if(restorepointsloading) {
@@ -773,7 +773,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                 var found = 0;
                 for(var x=0; x<data.a.length; x++) {
                     found++;
-                    autosavemenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.a[x].num),
+                    autosavemenu.menu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.a[x].num),
                               val:     data.a[x].num,
                               style:  'text-align: right;',
                               icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
@@ -782,7 +782,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                     );
                 }
                 if(found == 0) {
-                    autosavemenu.add({text: 'none', disabled: true});
+                    autosavemenu.menu.add({text: 'none', disabled: true});
                 }
                 for(var x=0; x<data.m.length; x++) {
                     manualmenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.m[x].num),
