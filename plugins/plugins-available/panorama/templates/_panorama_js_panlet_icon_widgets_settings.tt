@@ -45,6 +45,7 @@ TP.iconShowEditDialog = function(panel) {
     if(TP.iconSettingsWindow != undefined) {
         TP.iconSettingsWindow.destroy();
     }
+    tab.disableMapControls();
 
     TP.resetMoveIcons();
     TP.skipRender = false;
@@ -1498,6 +1499,7 @@ TP.iconShowEditDialog = function(panel) {
 
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
+                    tab.enableMapControls();
                     if(panel.firstRun) {
                         panel.destroy();
                     } else {
@@ -1521,9 +1523,9 @@ TP.iconShowEditDialog = function(panel) {
                     panel.el.dom.style.outline = "";
                     panel.setIconLabel();
                 }
-                if(panel.dragEl1) { panel.dragEl1.el.dom.style.outline = ""; }
-                if(panel.dragEl2) { panel.dragEl2.el.dom.style.outline = ""; }
-                if(panel.labelEl) { panel.labelEl.el.dom.style.outline = ""; }
+                if(panel.dragEl1 && panel.dragEl1.el) { panel.dragEl1.el.dom.style.outline = ""; }
+                if(panel.dragEl2 && panel.dragEl2.el) { panel.dragEl2.el.dom.style.outline = ""; }
+                if(panel.labelEl && panel.labelEl.el) { panel.labelEl.el.dom.style.outline = ""; }
                 TP.updateAllIcons(Ext.getCmp(panel.panel_id)); // workaround to put labels in front
             }
         }

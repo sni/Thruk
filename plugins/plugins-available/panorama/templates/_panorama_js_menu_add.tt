@@ -1,5 +1,18 @@
 ﻿TP.addPanletsMenu = function(options) {
     var menu = {
+        listeners: {
+            afterrender: function(menu, eOpts) {
+                var tabpan = Ext.getCmp('tabpan');
+                var tab    = tabpan.getActiveTab();
+                tab.disableMapControls();
+            },
+            beforehide: function(menu, eOpts) {
+                var tabpan = Ext.getCmp('tabpan');
+                var tab    = tabpan.getActiveTab();
+                tab.enableMapControls();
+                menu.destroy();
+            }
+        },
         items: [{
                 text:    'Icons & Widgets',
                 icon:   options.open == 'left' ? '[% url_prefix %]plugins/panorama/images/menu-parent.gif' : '[% url_prefix %]plugins/panorama/images/chart_pie.png',

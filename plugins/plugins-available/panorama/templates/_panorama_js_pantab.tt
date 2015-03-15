@@ -136,9 +136,11 @@
             TP.suppressIconTip = true;
             if(This.locked) {
                 TP.suppressIconTip = false;
+                This.disableMapControls();
             }
             This.applyZindex();
             This.setBackground(This.xdata);
+            This.moveMapIcons();
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -281,23 +283,28 @@
         this.applyXdata();
     },
     applyXdata: function(xdata, startTimeouts) {
+        var This = this;
         if(xdata == undefined) {
-            xdata = this.xdata;
+            xdata = This.xdata;
         }
-        if(this.readonly == 1) {
-            this.locked = true;
+        if(This.readonly == 1) {
+            This.locked = true;
         }
-        xdata.locked = this.locked;
-        this.setLock(xdata.locked);
-        this.setTitle(xdata.title);
-        this.setBackground(xdata);
+        xdata.locked = This.locked;
+        This.setLock(xdata.locked);
+        This.setTitle(xdata.title);
+        This.setBackground(xdata);
         if(startTimeouts != false) {
             if(TP.initialized) {
-                this.startTimeouts();
+                This.startTimeouts();
             } else {
-                TP.timeouts['timeout_' + this.id + '_starttimeouts'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), 30000);
+                TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }
+        if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+        if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        This.setBackground(xdata);
+        This.moveMapIcons();
     },
 
     /* order icons by z-index */
@@ -541,6 +548,7 @@
     disableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
+        if(tab.map == undefined || tab.map.map == undefined) { return; }
         tab.bgDragEl.dom.style.zIndex=10;
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div) {
@@ -551,6 +559,7 @@
     enableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
+        if(tab.map == undefined || tab.map.map == undefined) { return; }
         tab.bgDragEl.dom.style.zIndex="";
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div) {
@@ -753,7 +762,8 @@ Ext.onReady(function() {
         e.preventDefault();
         var tabpan = Ext.getCmp('tabpan');
         var tab    = tabpan.getActiveTab();
-        if(tab.locked) { return(false); };
+        if(tab.locked)            { return(false); };
+        if(TP.iconSettingsWindow) { return(false); };
         var pos = e.getXY();
         if(TP.lassoEl) { TP.lassoEl.destroy(); }
         TP.lassoEl = Ext.create('Ext.Component', {

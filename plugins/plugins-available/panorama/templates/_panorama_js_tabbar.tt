@@ -62,6 +62,19 @@ Ext.define('TP.TabBar', {
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
             html:     '[% remote_user %]&nbsp;&nbsp;&nbsp;',
             menu: {
+                listeners: {
+                    afterrender: function(menu, eOpts) {
+                        var tabpan = Ext.getCmp('tabpan');
+                        var tab    = tabpan.getActiveTab();
+                        tab.disableMapControls();
+                    },
+                    beforehide: function(menu, eOpts) {
+                        var tabpan = Ext.getCmp('tabpan');
+                        var tab    = tabpan.getActiveTab();
+                        tab.enableMapControls();
+                        menu.destroy();
+                    }
+                },
                 items: [{
                         text: 'About',
                         icon: '[% url_prefix %]plugins/panorama/images/information.png',
@@ -127,6 +140,9 @@ Ext.define('TP.TabBar', {
         /* create new tab */
         var tabhead = this.getTabBar().items.getAt(0);
         tabhead.addListener('click', function(This, eOpts) {
+            var tabpan = Ext.getCmp('tabpan');
+            var tab    = tabpan.getActiveTab();
+            tab.disableMapControls();
             var menu = Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -161,7 +177,10 @@ Ext.define('TP.TabBar', {
                     }]
                 }],
                 listeners: {
-                    beforehide: function(menu, eOpts) { menu.destroy(); }
+                    beforehide: function(menu, eOpts) {
+                        tab.enableMapControls();
+                        menu.destroy();
+                    }
                 }
             }).showBy(This);
             TP.load_dashboard_menu_items(menu.items.get(5).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
