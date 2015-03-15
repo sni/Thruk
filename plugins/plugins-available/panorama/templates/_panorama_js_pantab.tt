@@ -293,7 +293,6 @@
         xdata.locked = This.locked;
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
-        This.setBackground(xdata);
         if(startTimeouts != false) {
             if(TP.initialized) {
                 This.startTimeouts();
@@ -468,9 +467,14 @@
                     GeoExt: "[% url_prefix %]plugins/panorama/geoext2-2.0.2/src/GeoExt"
                 }
             });
+            var attribution = wmsData[2];
+            if(attribution == undefined) {
+                var url = xdata.wms_provider.replace(/\ .*$/, '');
+                attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
+            }
             This.mapEl.lastWMSProvider = xdata.wms_provider;
             var map   = new OpenLayers.Map();
-            var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], wmsData[2]);
+            var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             var mapData = {
                 renderTo: This.id+'-osmmap',
@@ -551,7 +555,7 @@
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         tab.bgDragEl.dom.style.zIndex=10;
         for(var x=0; x<tab.map.map.controls.length; x++) {
-            if(tab.map.map.controls[x].div) {
+            if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
                 tab.map.map.controls[x].div.style.display="none";
             }
         }

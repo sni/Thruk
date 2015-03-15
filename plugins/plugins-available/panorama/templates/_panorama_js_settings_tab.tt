@@ -383,10 +383,18 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         }]
     };
 
-    function applyBackground(field) {
-        var d_form  = Ext.getCmp('dashboardForm').getForm();
-        if(!d_form.isValid()) { return false; }
-        var values = d_form.getFieldValues();
+    function applyBackground(values) {
+        if(values == undefined) {
+            var d_form  = Ext.getCmp('dashboardForm').getForm();
+            if(!d_form.isValid()) { return false; }
+            values = d_form.getFieldValues();
+            if(values.locked) { return; }
+        }
+        if(values.map_choose == undefined) {
+            if(values.map) {
+                values.map_choose = 'geomap';
+            }
+        }
         if(values.map_choose == 'geomap') {
             Ext.getCmp('background_choose').hide();
             Ext.getCmp('background_offset_choose').hide();
@@ -435,7 +443,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             defaultType: 'radiofield',
             defaults:   {
                 flex: 1,
-                listeners: { change: function(This) { applyBackground(This) } }
+                listeners: { change: function(This) { applyBackground() } }
             },
             layout:      'hbox',
             items: [{
@@ -462,7 +470,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             editable:        false,
             forceSelection:  true,
             hidden:          tab.xdata.map == undefined ? true : false,
-            listeners:     { change: function(This) { applyBackground(This) } }
+            listeners:     { change: function(This) { applyBackground() } }
         }, {
             fieldLabel: ' ',
             labelSeparator: '',
@@ -471,7 +479,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:      'fieldcontainer',
             layout:     'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground(This) } }
+                listeners: { change: function(This) { applyBackground() } }
             },
             items: [{
                 xtype:          'combobox',
@@ -512,7 +520,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             xtype:          'fieldcontainer',
             layout:         'hbox',
             defaults: {
-                listeners: { change: function(This) { applyBackground(This) } }
+                listeners: { change: function(This) { applyBackground() } }
             },
             items: [
             { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px; margin-top: 5px;' },
@@ -586,7 +594,12 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     defaults:      { anchor: '-12', labelWidth: 130 },
                     items:           dashboardItems
             }]
-        }]
+        }],
+        listeners: {
+            afterrender: function() {
+                applyBackground(tab.xdata);
+            }
+        }
     };
 
 
