@@ -39,7 +39,7 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function(id, replace_id, hidden, callback) {
+    add_pantab: function(id, replace_id, hidden, callback, extraConf) {
         var tabpan = Ext.getCmp('tabpan');
 
         if(TP.dashboardsSettingWindow) {
@@ -88,6 +88,11 @@ var TP = {
                         data = data.data;
                         TP.log('['+id+'] dashboard_data: '+Ext.JSON.encode(data));
                         if(data.newid) { id = data.newid; delete data.newid; }
+                        if(extraConf) {
+                            var tmp = Ext.JSON.decode(data[id]);
+                            Ext.apply(tmp.xdata, extraConf);
+                            data[id] = Ext.JSON.encode(tmp);
+                        }
                         for(var key in data) {
                             cp.set(key, Ext.JSON.decode(data[key]));
                         }

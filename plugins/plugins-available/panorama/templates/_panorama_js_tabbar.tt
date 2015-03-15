@@ -134,6 +134,10 @@ Ext.define('TP.TabBar', {
                     icon:   '[% url_prefix %]plugins/panorama/images/add.png',
                     handler: function() { TP.log('[global] adding new dashboard from menu'); TP.add_pantab('new') }
                 }, {
+                    text:   'New Geo Map',
+                    icon:   '[% url_prefix %]plugins/panorama/images/map.png',
+                    handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new', undefined, undefined, undefined, {map: {}}) }
+                }, '-', {
                     text:   'Dashboard Managment',
                     icon:   '[% url_prefix %]plugins/panorama/images/new_tab.gif',
                     handler: function() { TP.dashboardsWindow() }
@@ -160,8 +164,8 @@ Ext.define('TP.TabBar', {
                     beforehide: function(menu, eOpts) { menu.destroy(); }
                 }
             }).showBy(This);
-            TP.load_dashboard_menu_items(menu.items.get(3).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
-            TP.load_dashboard_menu_items(menu.items.get(4).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(5).menu, 'panorama.cgi?task=dashboard_list&list=my', TP.add_pantab, false);
+            TP.load_dashboard_menu_items(menu.items.get(6).menu, 'panorama.cgi?task=dashboard_list&list=public', TP.add_pantab, false);
         });
 
         this.addListener('afterrender', function(This, eOpts) {

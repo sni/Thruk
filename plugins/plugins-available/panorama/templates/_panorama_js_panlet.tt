@@ -23,6 +23,11 @@
         this.xdata.backends = [];
 
         var tab     = Ext.getCmp(this.panel_id);
+        if(tab == undefined) {
+            var err = new Error;
+            TP.logError(this.id, "noTabException", err);
+            return;
+        }
         this.locked = tab.xdata.locked;
         [% IF readonly %]
         this.locked = true;

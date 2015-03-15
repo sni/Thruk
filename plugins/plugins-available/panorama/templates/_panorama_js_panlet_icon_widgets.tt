@@ -14,9 +14,9 @@
         }
         var tab     = Ext.getCmp(this.panel_id);
         this.locked = tab.xdata.locked;
-        [% IF readonly %]
+        [%+ IF readonly +%]
         this.locked = true;
-        [% END %]
+        [%+ END +%]
         this.redrawOnly = false;
         this.animations = 0;
         this.renderTo   = "bodyview";

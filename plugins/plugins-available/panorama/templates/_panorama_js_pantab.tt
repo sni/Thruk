@@ -138,6 +138,7 @@
                 TP.suppressIconTip = false;
             }
             This.applyZindex();
+            This.setBackground(This.xdata);
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -442,18 +443,17 @@
             if(wmsData == undefined) {
                 wmsData = wmsProvider.getAt(0).data.provider;
                 TP.log('['+This.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
+                xdata.wms_provider = wmsProvider.getAt(0).data.name;
             }
             wmsData = Ext.JSON.decode(wmsData);
             if(This.mapEl && This.mapEl.lastWMSProvider != xdata.wms_provider) {
-                This.mapEl.destroy();
-                This.mapEl = undefined;
-                This.map.destroy();
-                This.map   = undefined;
+                if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+                if(This.map)   { This.map.destroy();   This.map   = undefined; }
             }
             if(!This.mapEl) {
                 This.mapEl = body.createChild('<div id="'+This.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
-            if(This.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
+            if(This.mapEl.lastWMSProvider != undefined && This.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
             Ext.Loader.setConfig({
                 enabled: true,
                 disableCaching: false,
@@ -480,7 +480,7 @@
                     }
                 }
             };
-            if(This.xdata && This.xdata.map) {
+            if(This.xdata && This.xdata.map && This.xdata.map.lon != undefined) {
                 mapData.zoom   = Number(This.xdata.map.zoom);
                 mapData.center = [Number(This.xdata.map.lon), Number(This.xdata.map.lat)];
             }
@@ -493,12 +493,8 @@
             });
             This.fixMapIcons();
         } else {
-            if(This.mapEl) {
-                This.mapEl.destroy();
-                This.mapEl = undefined;
-                This.map.destroy();
-                This.map   = undefined;
-            }
+            if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+            if(This.map)   { This.map.destroy();   This.map   = undefined; }
         }
 
         if(!This.bgDragEl) {
