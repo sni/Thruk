@@ -723,7 +723,7 @@
         }
         panel.saveState();
     },
-    moveToMapLonLat: function() {
+    moveToMapLonLat: function(maxSize) {
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(tab.map == undefined || tab.map.map == undefined) { return; }
@@ -739,7 +739,14 @@
         } else {
             var pixel = tab.map.map.getPixelFromLonLat({lon: panel.xdata.map.lon, lat: panel.xdata.map.lat});
             var s     = panel.getSize();
-            panel.setPosition((pixel.x-s.width/2), (pixel.y-s.height/2)+TP.offset_y);
+            var x     = (pixel.x-s.width/2);
+            var y     = (pixel.y-s.height/2)+TP.offset_y;
+            panel.setPosition(x, y);
+            if(x < 0 || y < 0 || x > maxSize.width || y > maxSize.height) {
+                panel.hide();
+            } else {
+                panel.show();
+            }
         }
         delete panel.noUpdateLonLat;
     }

@@ -215,13 +215,21 @@
     moveMapIcons: function() {
         if(!this.map) { return; }
         var This = this;
+        if(!This.isActiveTab()) { return; }
+        var size = This.getSize();
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
             if(panel.el && panel.xdata.map != undefined && panel.xdata.layout != undefined) {
-                panel.moveToMapLonLat();
+                panel.moveToMapLonLat(size);
             }
         }
+    },
+    isActiveTab: function() {
+        var tabpan    = Ext.getCmp('tabpan');
+        var activeTab = tabpan.getActiveTab();
+        if(activeTab && this.id == activeTab.id) { return(true); }
+        return(false);
     },
     applyState: function(state) {
         this.callParent(arguments);
