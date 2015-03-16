@@ -212,7 +212,7 @@
             }
         }
     },
-    moveMapIcons: function() {
+    moveMapIcons: function(movedOnly) {
         if(!this.map) { return; }
         var This = this;
         if(!This.isActiveTab()) { return; }
@@ -221,7 +221,7 @@
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
             if(panel.el && panel.xdata.map != undefined && panel.xdata.layout != undefined) {
-                panel.moveToMapLonLat(size);
+                panel.moveToMapLonLat(size, movedOnly);
             }
         }
     },
@@ -508,7 +508,7 @@
                 This.fixMapIcons();
             });
             map.events.register("move", map, function() {
-                This.moveMapIcons();
+                This.moveMapIcons(true);
             });
             This.fixMapIcons();
         } else {
