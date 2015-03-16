@@ -1495,7 +1495,6 @@ TP.iconShowEditDialog = function(panel) {
             destroy: function() {
                 delete TP.iconSettingsWindow;
                 panel.stateful = true;
-                TP.suppressIconTip = false;
 
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
@@ -1536,7 +1535,6 @@ TP.iconShowEditDialog = function(panel) {
 
     // new mouseover tips while settings are open
     TP.iconTip.hide();
-    TP.suppressIconTip = true;
 
     // move settings window next to panel itself
     var showAtPos = TP.getNextToPanelPos(panel, settingsWindow.width, settingsWindow.height);
