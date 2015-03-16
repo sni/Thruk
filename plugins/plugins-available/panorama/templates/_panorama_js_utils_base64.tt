@@ -39,7 +39,7 @@ var decode64 = function(input) {
 
     var base64test = /[^A-Za-z0-9\+\/\=]/g;
     if (base64test.exec(input)) {
-        Ext.Msg.alert("Warning", "The document contains invalid characters. Errors can occur when decoding it.");
+        TP.modalWindows.push(Ext.Msg.alert("Warning", "The document contains invalid characters. Errors can occur when decoding it."));
     }
     input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 

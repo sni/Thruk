@@ -2046,7 +2046,7 @@ sub _task_dashboard_list {
             { 'header' => 'Direct Link',        width =>  65, dataIndex => 'link',         align => 'center', renderer => 'TP.render_directlink' },
             { 'header' => 'Objects',     width => 50,  dataIndex => 'objects',      align => 'center' },
             { 'header' => 'Readonly',    width => 60,  dataIndex => 'readonly',     align => 'center', renderer => 'TP.render_yes_no' },
-            { 'header' => 'Actions',     width => 50,
+            { 'header' => 'Actions',     width => 60,
                       xtype => 'actioncolumn',
                       items => [{
                             icon => '../plugins/panorama/images/edit.png',

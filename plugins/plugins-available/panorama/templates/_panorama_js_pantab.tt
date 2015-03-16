@@ -704,7 +704,7 @@ TP.lassoMarkIcons = function(x, y) {
 
 /* restore dashboard to given timestamp */
 TP.restoreDashboard = function(tab, timestamp, mode) {
-    Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
+    TP.modalWindows.push(Ext.Msg.confirm('Reset to previous save point?', 'Do you really want to replace the current dashboard with the previous save version?', function(button) {
         if (button === 'yes') {
             Ext.Ajax.request({
                 url:      'panorama.cgi?task=dashboard_restore&nr='+tab+'&timestamp='+timestamp+"&mode="+mode,
@@ -723,7 +723,7 @@ TP.restoreDashboard = function(tab, timestamp, mode) {
                 }
             });
         }
-    });
+    }));
 }
 
 

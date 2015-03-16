@@ -310,7 +310,7 @@ Ext.define('TP.TabBar', {
         delete this.xdata['autohideheader'];
         delete this.xdata['backends'];
         if(TP.reload_required) {
-            Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format...").toFront();
+            TP.modalWindows.push(Ext.Msg.alert("Reload Required", "Internal storage format has changed. Page will reload automatically with the new format..."));
             TP.timeouts['timeout_'+this.id+'_window_reload'] = window.setTimeout(function() { cp.saveChanges(false); window.location = 'panorama.cgi'; }, 3000);
             return;
         }

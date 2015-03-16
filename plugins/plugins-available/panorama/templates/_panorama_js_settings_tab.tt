@@ -96,13 +96,13 @@ TP.getExportTab = function(options) {
             xtype: 'button',
             text: 'Reset to Default View',
             handler: function() {
-                Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
+                TP.modalWindows.push(Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
                         if(options.close_handler) { options.close_handler(); }
                         Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
                         window.location = 'panorama.cgi?clean=1';
                     }
-                });
+                }));
             }
         }]
     }];

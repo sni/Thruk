@@ -683,7 +683,7 @@ var TP = {
             /* old export with all tabs*/
             // REMOVE AFTER: 01.01.2016
             cp.saveChanges(false);
-            var confirm = Ext.Msg.confirm(
+            TP.modalWindows.push(Ext.Msg.confirm(
                 'Confirm Import',
                 'This is an old import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and be added again.',
                 function(button) {
@@ -696,8 +696,7 @@ var TP = {
                         TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
                     }
                 }
-            );
-            window.setTimeout(function() { confirm.toFront() }, 50);
+            ));
         } else {
             /* new single tab export */
             var param = {
@@ -1397,11 +1396,11 @@ var TP = {
         var nr     = record.data.nr;
         if(action == 'remove') {
             if(confirmed == undefined || confirmed == 0) {
-                Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
-                    if (button === 'yes') {
+                TP.modalWindows.push(Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
+                    if(button === 'yes') {
                         TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
                     }
-                });
+                }));
                 return false;
             }
             Ext.Ajax.request({
@@ -1707,12 +1706,27 @@ var TP = {
     checkModalWindows: function() {
         if(TP.modalWindows.length == 0) { return; }
         var newModelWindows = [];
-        Ext.Array.each(TP.modalWindows, function(win) {
-            if(win && win.el) {
-                try { win.toFront(); } catch(e) {}
-                newModelWindows.push(win);
+        var zIndex;
+        var length = TP.modalWindows.length;
+        var first  = true;
+        for(var x=length-1; x>=0; x--) {
+            var win = TP.modalWindows[x];
+            if(win && win.el && !win.isHidden()) {
+                if(first) {
+                    try { win.toFront(); } catch(e) {}
+                    var masks = Ext.Element.select('.x-mask');
+                    if(masks.elements.length > 0) {
+                        zIndex = Number(masks.elements[0].style.zIndex);
+                    } else {
+                        zIndex = Number(win.el.dom.style.zIndex);
+                    }
+                    first  = false;
+                } else {
+                    win.el.dom.style.zIndex = zIndex - length + x;
+                }
+                newModelWindows.unshift(win);
             }
-        });
+        }
         TP.modalWindows = newModelWindows;
     },
     reduceDelayEvents: function(scope, callback, delay, timeoutName) {
