@@ -22,7 +22,11 @@ function ucfirst(str) {
 var TP = {
     snap_x:       20,
     snap_y:       20,
+    [%+ IF one_tab_only +%]
+    offset_y:     0,
+    [% ELSE %]
     offset_y:     25,
+    [%+ END +%]
     initialized:  false,
     timeouts:     {},
     num_panels:   0,
