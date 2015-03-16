@@ -122,6 +122,18 @@ do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
 remove_item('Reports', 'Availability');
 -----
 
+To remove a sub menuitem, use the 3 arguments variant of `remove_item`:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Current Status', 'Problems', 'Network Outages');
+-----
+
+To remove a sub menuitem hint, use the 4 arguments variant of `remove_item`:
+-----
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+remove_item('Current Status', 'Problems', 'Services', 'Unhandled');
+-----
+
 
 === Make item available for some groups only
 

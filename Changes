@@ -7,6 +7,7 @@ next:
           - add 'expand_user_macros' option (Andrew Widdersheim)
           - command start/end times round to full minute
           - search now suggests custom variable names too (#450)
+          - menu: remove_item can now remove sub links too
           - Panorama View:
             - add undo function
               - restore point can be created manually
