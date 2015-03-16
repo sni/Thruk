@@ -769,6 +769,10 @@ Ext.define('TP.IconWidget', {
         if(xdata.appearance.type == 'pie')         { panel.pieRender(xdata);              }
         if(xdata.appearance.type == 'speedometer') { panel.speedoRender(xdata);           }
         if(xdata.appearance.type == 'connector')   { panel.connectorRender(xdata);        }
+
+        /* update zIndex order if no mask is present only */
+        var masks = Ext.Element.select('.x-mask');
+        if(masks.elements.length > 0) { return }
         if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
         TP.checkModalWindows();
     },
