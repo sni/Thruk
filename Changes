@@ -12,6 +12,7 @@ next:
             - add is_user function to test for specific users
             - fix problem with removing items for specific users only
           - Panorama View:
+            - add geo map
             - add undo function
               - restore point can be created manually
               - autosave creates restore point every 10minutes and when unlocking a dashboard
