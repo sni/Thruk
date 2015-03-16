@@ -6,6 +6,7 @@ use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 use lib('t');
 
+my $log4perl_created;
 BEGIN {
     unless($ENV{TEST_AUTHOR}) {
         plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
@@ -27,6 +28,7 @@ unlink('/tmp/thruk_test_debug.log');
 
 # copy our test log4perl config
 ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("$0: copy failed: $!");
+$log4perl_created = 1;
 
 move('/etc/thruk/log4perl.conf', '/etc/thruk/log4perl.conf.orig');
 move('log4perl.conf', '/etc/thruk/log4perl.conf');
@@ -57,3 +59,11 @@ ok(unlink('/tmp/thruk_test_error.log'), 'unlink test logfile');
 ok(unlink('/tmp/thruk_test_debug.log'), 'unlink test debug file');
 
 done_testing();
+
+END {
+    if($log4perl_created) {
+        unlink("log4perl.conf");
+        unlink('/tmp/thruk_test_error.log');
+        unlink('/tmp/thruk_test_debug.log');
+    }
+}
