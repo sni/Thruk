@@ -377,7 +377,8 @@ TD.less_padding DIV.x-grid-cell-inner {
 }
 
 .x-viewport, .x-viewport body {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 DIV.x-window-default.gearopen {
