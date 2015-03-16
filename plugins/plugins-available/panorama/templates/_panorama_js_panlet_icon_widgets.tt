@@ -704,8 +704,8 @@
         var tab   = Ext.getCmp(panel.panel_id);
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         if(panel.xdata.appearance.type == "connector") {
-            var lonLat1 = tab.map.map.getLonLatFromPixel({x: panel.xdata.layout.connectorfromx, y: panel.xdata.layout.connectorfromy-TP.offset_y});
-            var lonLat2 = tab.map.map.getLonLatFromPixel({x: panel.xdata.layout.connectortox,   y: panel.xdata.layout.connectortoy-TP.offset_y});
+            var lonLat1 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectorfromx, y: panel.xdata.appearance.connectorfromy-TP.offset_y});
+            var lonLat2 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectortox,   y: panel.xdata.appearance.connectortoy-TP.offset_y});
             panel.xdata.map = {
                 lon1: lonLat1.lon,
                 lat1: lonLat1.lat,
@@ -731,10 +731,10 @@
         if(panel.xdata.appearance.type == "connector") {
             var pixel1 = tab.map.map.getPixelFromLonLat({lon: panel.xdata.map.lon1, lat: panel.xdata.map.lat1});
             var pixel2 = tab.map.map.getPixelFromLonLat({lon: panel.xdata.map.lon2, lat: panel.xdata.map.lat2});
-            panel.xdata.layout.connectorfromx = pixel1.x;
-            panel.xdata.layout.connectorfromy = pixel1.y;
-            panel.xdata.layout.connectortox   = pixel2.x;
-            panel.xdata.layout.connectortoy   = pixel2.y;
+            panel.xdata.appearance.connectorfromx = pixel1.x;
+            panel.xdata.appearance.connectorfromy = pixel1.y+TP.offset_y;
+            panel.xdata.appearance.connectortox   = pixel2.x;
+            panel.xdata.appearance.connectortoy   = pixel2.y+TP.offset_y;
             panel.updateRender();
         } else {
             var pixel = tab.map.map.getPixelFromLonLat({lon: panel.xdata.map.lon, lat: panel.xdata.map.lat});

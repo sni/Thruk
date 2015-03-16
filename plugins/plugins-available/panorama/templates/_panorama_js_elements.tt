@@ -640,6 +640,7 @@ Ext.define('TP.dragEl', {
                 var origY = This.xdata.appearance[This.keyY];
                 This.xdata.appearance[This.keyX] = x-This.offsetX;
                 This.xdata.appearance[This.keyY] = y-This.offsetY;
+                This.panel.updateMapLonLat();
                 if(TP.iconSettingsWindow) {
                     var values = {};
                     values[This.keyX] = This.xdata.appearance[This.keyX];
@@ -671,6 +672,7 @@ Ext.define('TP.dragEl', {
         var panel = this;
         if(!panel.el || !panel.dd) {return;}
         if(panel.ddAdded) {return;}
+        var tab   = Ext.getCmp(panel.panel.panel_id);
         panel.dd.addListener('dragstart', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
             if(!panel.ddShadow) {
@@ -680,16 +682,17 @@ Ext.define('TP.dragEl', {
             if(!panel.dragHint) {
                 panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
             }
+            tab.disableMapControls();
         });
         panel.dd.addListener('drag', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
         });
         panel.dd.addListener('dragend', function(This, evt) {
+            tab.enableMapControls();
             panel.dragHint.destroy();
             panel.dragHint = undefined;
             TP.isShift = is_shift_pressed(evt);
             if(TP.isShift) {
-// TODO: check if suspendevents help here when moving multiple elements with shift
                 var pos = panel.getPosition();
                 panel.noMoreMoves = true;
                 panel.setPosition(TP.get_snap(pos[0], pos[1]));
