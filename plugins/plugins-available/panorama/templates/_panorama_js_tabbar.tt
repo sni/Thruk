@@ -295,9 +295,9 @@ Ext.define('TP.TabBar', {
                 Ext.apply(this, state);
             }
             TP.timeouts['timeout_'+this.id+'_delayed_start'] = window.setTimeout(Ext.bind(this.startTimeouts, this, []), TP.initial_create_delay_active);
-        } catch(e) {
-            TP.logError(this.id, "tabbarApplyStateException", e);
-            if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
+        } catch(err) {
+            TP.logError(this.id, "tabbarApplyStateException", err);
+            if(confirm("Errors while loading your saved settings:\n\n"+err+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
                 window.location = 'panorama.cgi?clean=1';
             }
         }
@@ -512,8 +512,8 @@ TP.getLogTab = function() {
                     emptyText: 'enter search term',
                     id:        'logfilter',
                     listeners: {
-                        keyup:  function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); },
-                        change: function(This, e, eOpts) { Ext.getCmp('logrefresh').handler(); }
+                        keyup:  function(This, evt, eOpts) { Ext.getCmp('logrefresh').handler(); },
+                        change: function(This, evt, eOpts) { Ext.getCmp('logrefresh').handler(); }
                     },
                     fieldBodyCls: 'x-form-clear-trigger'
             }, {

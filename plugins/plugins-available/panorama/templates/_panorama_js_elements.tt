@@ -144,22 +144,22 @@ Ext.define('Ext.ux.form.field.DateTime', {
     },
 
     // Handle tab events
-    onSpecialKey:function(cmp, e) {
-        var key = e.getKey();
-        if (key === e.TAB) {
+    onSpecialKey:function(cmp, evt) {
+        var key = evt.getKey();
+        if (key === evt.TAB) {
             if (cmp == this.dateField) {
                 // fire event in container if we are getting out of focus from datefield
-                if (e.shiftKey) {
-                    this.fireEvent('specialkey', this, e);
+                if (evt.shiftKey) {
+                    this.fireEvent('specialkey', this, evt);
                 }
             }
             if (cmp == this.timeField) {
-                if (!e.shiftKey) {
-                    this.fireEvent('specialkey', this, e);
+                if (!evt.shiftKey) {
+                    this.fireEvent('specialkey', this, evt);
                 }
             }
         } else if (this.inEditor) {
-            this.fireEvent('specialkey', this, e);
+            this.fireEvent('specialkey', this, evt);
         }
     },
 
@@ -377,7 +377,7 @@ Ext.define('TP.SoundField', {
         xtype:       'button',
         text:        'Test',
         icon:        '[% url_prefix %]plugins/panorama/images/sound.png',
-        handler:      function(btn, e) { var wav = btn.up().items.getAt(0).getValue(); if(wav != "") { btn.disable(); TP.playWave(wav, function() { btn.enable() }); } }
+        handler:      function(btn, evt) { var wav = btn.up().items.getAt(0).getValue(); if(wav != "") { btn.disable(); TP.playWave(wav, function() { btn.enable() }); } }
     }],
     initComponent: function() {
         this.callParent();
@@ -595,12 +595,12 @@ Ext.define('TP.dragEl', {
     listeners: {
         afterrender: function(This, eOpts) {
             if(!This.panel.locked) {
-                This.el.on('mouseover', function(e,t,a) {
+                This.el.on('mouseover', function(evt,t,a) {
                     if(!This.el.dom.style.outline.match("orange")) {
                         This.el.dom.style.outline = "1px dashed grey";
                     }
                 });
-                This.el.on('mouseout', function(e,t,a) {
+                This.el.on('mouseout', function(evt,t,a) {
                     if(This.el.dom.style.outline.match("grey")) {
                         This.el.dom.style.outline = "";
                     }
@@ -671,8 +671,8 @@ Ext.define('TP.dragEl', {
         var panel = this;
         if(!panel.el || !panel.dd) {return;}
         if(panel.ddAdded) {return;}
-        panel.dd.addListener('dragstart', function(This, e) {
-            TP.isShift = is_shift_pressed(e);
+        panel.dd.addListener('dragstart', function(This, evt) {
+            TP.isShift = is_shift_pressed(evt);
             if(!panel.ddShadow) {
                 var size = panel.getSize();
                 panel.ddShadow = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px dashed black; width: '+size.width+'px; height: '+size.height+'px; position: relative; z-index: 99999; top: 0px; ; left: 0px; display: hidden;"><div style="border: 1px dashed white; width:'+(size.width-2)+'px; height:'+(size.height-2)+'px; position: relative; top: 0px; ; left: 0px;" ><\/div><\/div>' , true);
@@ -681,14 +681,15 @@ Ext.define('TP.dragEl', {
                 panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
             }
         });
-        panel.dd.addListener('drag', function(This, e) {
-            TP.isShift = is_shift_pressed(e);
+        panel.dd.addListener('drag', function(This, evt) {
+            TP.isShift = is_shift_pressed(evt);
         });
-        panel.dd.addListener('dragend', function(This, e) {
+        panel.dd.addListener('dragend', function(This, evt) {
             panel.dragHint.destroy();
             panel.dragHint = undefined;
-            TP.isShift = is_shift_pressed(e);
+            TP.isShift = is_shift_pressed(evt);
             if(TP.isShift) {
+// TODO: check if suspendevents help here when moving multiple elements with shift
                 var pos = panel.getPosition();
                 panel.noMoreMoves = true;
                 panel.setPosition(TP.get_snap(pos[0], pos[1]));

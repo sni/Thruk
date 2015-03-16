@@ -43,14 +43,14 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 var debug = function(str) {}
-window.addEventListener('load', function(e) {
+window.addEventListener('load', function(evt) {
     if(thruk_debug_js != undefined && thruk_debug_js) {
         if(window.console != undefined) {
             /* overwrite debug function, so caller information is not replaced */
             try {
                 debug = console.debug;
                 debug('console debug log enabled');
-            } catch(e) {
+            } catch(err) {
                 debug = function(str) {}
             }
         }
@@ -99,7 +99,7 @@ function cleanUnderscoreUrl() {
         newUrl = newUrl.replace(/\?&/g, '?');
         try {
             history.replaceState({}, "", newUrl);
-        } catch(e) { debug(e) }
+        } catch(err) { debug(err) }
     }
 }
 
@@ -292,7 +292,7 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
     if(!inside) {
         try {
           close_and_remove_event();
-        } catch(e) { debug(e) }
+        } catch(err) { debug(err) }
     }
     return false;
   }
@@ -384,7 +384,7 @@ function setRefreshRate(rate) {
         if(auto_reload_fn && typeof(auto_reload_fn) == 'function') {
             has_auto_reload_fn = true;
         }
-      } catch(e) {}
+      } catch(err) {}
       if(has_auto_reload_fn) {
         auto_reload_fn(function(state) {
             if(state) {
@@ -534,8 +534,8 @@ function reloadPage() {
         try {
             top.frames['side'].is_reloading = newUrl;
         }
-        catch(e) {
-            debug(e);
+        catch(err) {
+            debug(err);
         }
     }
 
@@ -882,13 +882,13 @@ function getTextSelection() {
 
 /* returns true if the shift key is pressed for that event */
 var no_more_events = 0;
-function is_shift_pressed(e) {
+function is_shift_pressed(evt) {
 
   if(no_more_events) {
     return false;
   }
 
-  if(e && e.shiftKey) {
+  if(evt && evt.shiftKey) {
     return true;
   }
 
@@ -1107,9 +1107,9 @@ function checknonempty(id, name) {
 /* hide all waiting icons */
 var hide_activity_icons_timer;
 function hide_activity_icons() {
-    jQuery('img').each(function(i, e) {
-        if(e.src.indexOf("/images/waiting.gif") > 0) {
-            e.style.visibility = "hidden";
+    jQuery('img').each(function(i, el) {
+        if(el.src.indexOf("/images/waiting.gif") > 0) {
+            el.style.visibility = "hidden";
         }
     });
 }
@@ -1276,8 +1276,8 @@ function cron_change_date(id) {
 }
 
 /* remove a row */
-function delete_cron_row(e) {
-    var row = e;
+function delete_cron_row(el) {
+    var row = el;
     /* find first table row */
     while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
     row.parentNode.deleteRow(row.rowIndex);
@@ -1358,7 +1358,7 @@ function do_table_search() {
                         if(cell.innerHTML.toLowerCase().match(value)) {
                             found = 1;
                         }
-                    } catch(e) {
+                    } catch(err) {
                         if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
                             found = 1;
                         }
@@ -1378,8 +1378,8 @@ function do_table_search() {
         if(table_search_cb[id] != undefined) {
             try {
                 table_search_cb[id]();
-            } catch(e) {
-                debug(e);
+            } catch(err) {
+                debug(err);
             }
         }
     });
@@ -1397,7 +1397,7 @@ function showBugReport(id, text) {
     try {
         Ext.getCmp(id).show();
     }
-    catch(e) {
+    catch(err) {
         if(obj) {
             obj.style.display    = '';
             obj.style.visibility = 'visible';
@@ -1439,7 +1439,7 @@ function getErrorText(details, error) {
             f = f.caller;
         }
         text = text + stack.join("\n");
-    } catch(e) {}
+    } catch(err) {}
     /* this only works in panorama view */
     try {
         if(TP.logHistory) {
@@ -1453,7 +1453,7 @@ function getErrorText(details, error) {
                 text += formatLogEntry(TP.logHistory[i]);
             }
         }
-    } catch(e) {}
+    } catch(err) {}
     return(text);
 }
 
@@ -1694,7 +1694,7 @@ function set_hash(value, nr) {
     if(window.parent) {
         try {
             save_url_in_parents_hash();
-        } catch(e) { debug(e); }
+        } catch(err) { debug(err); }
     }
 }
 
@@ -1766,26 +1766,26 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
     try {
         if(orientation == undefined) { orientation = 'b-r'; }
         src = is_array(src) ? src : [src];
-        jQuery(src).each(function(i, e) {
+        jQuery(src).each(function(i, el) {
             var icon       = document.createElement('img');
-            icon.src       = replace_macros(e.icon);
-            icon.className = 'action_icon '+(e.menu ? 'clickable' : '' );
-            icon.title     = e.title ? e.title : '';
+            icon.src       = replace_macros(el.icon);
+            icon.className = 'action_icon '+(el.menu ? 'clickable' : '' );
+            icon.title     = el.title ? el.title : '';
             var title      = document.createTextNode(icon.title);
-            if(e.menu) {
+            if(el.menu) {
                 icon.nr = menu_nr;
                 icon.onclick = function() {
                     // open and show menu
-                    show_action_menu(icon, e.menu, icon.nr, backend, host, service, orientation);
+                    show_action_menu(icon, el.menu, icon.nr, backend, host, service, orientation);
                 }
                 menu_nr++;
             }
             var item = icon;
 
-            if(e.action) {
+            if(el.action) {
                 var link = document.createElement('a');
-                link.href = replace_macros(e.action);
-                if(e.target) { link.target = e.target; }
+                link.href = replace_macros(el.action);
+                if(el.target) { link.target = el.target; }
                 link.appendChild(icon);
                 item = link;
                 check_server_action(undefined, link, backend, host, service);
@@ -1799,8 +1799,8 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
             }
         });
     }
-    catch(e) {
-        document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+e+'">');
+    catch(err) {
+        document.write('<img src="'+ url_prefix +'themes/'+ theme +'/images/error.png" title="'+err+'">');
     }
 }
 
@@ -1846,10 +1846,10 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
     s2.appendChild(menu);
     menu.className = 'action_menu';
 
-    jQuery(items).each(function(i, e) {
+    jQuery(items).each(function(i, el) {
         var item = document.createElement('li');
         menu.appendChild(item);
-        if(e == "-") {
+        if(el == "-") {
             var hr = document.createElement('hr');
             item.appendChild(hr);
             item.className = 'nohover';
@@ -1858,20 +1858,20 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
 
         item.className = 'clickable';
         var link = document.createElement('a');
-        if(e.icon) {
+        if(el.icon) {
             var span = document.createElement('span');
             span.className = 'icon';
             var img  = document.createElement('img');
-            img.src       = replace_macros(e.icon);
-            img.title     = e.title ? e.title : '';
+            img.src       = replace_macros(el.icon);
+            img.title     = el.title ? el.title : '';
             span.appendChild(img);
             link.appendChild(span);
         }
         var label = document.createElement('span');
-        label.innerHTML = e.label;
+        label.innerHTML = el.label;
         link.appendChild(label);
-        link.href      = replace_macros(e.action);
-        link.target    = e.target ? e.target : '';
+        link.href      = replace_macros(el.action);
+        link.target    = el.target ? el.target : '';
         item.appendChild(link);
         check_server_action(id, link, backend, host, service);
         return(true);
@@ -2031,7 +2031,7 @@ function parse_perf_data(perfdata) {
                 max:      (data[21] != null && data[21] != '') ? parseFloat(data[21]) : ''
             };
             perf_data.push(d);
-        } catch(e) {}
+        } catch(el) {}
     }
     return(perf_data);
 }
@@ -2314,14 +2314,14 @@ function addRowSelector(id, type) {
 /* reset all current hosts and service rows */
 function reset_all_hosts_and_services(hosts, services) {
     var rows = Array();
-    jQuery('td.tableRowHover').each(function(i, e) {
-        rows.push(e.parentNode);
+    jQuery('td.tableRowHover').each(function(i, el) {
+        rows.push(el.parentNode);
     });
 
     jQuery.unique(rows);
-    jQuery(rows).each(function(i, e) {
-        resetHostRow(e);
-        resetServiceRow(e);
+    jQuery(rows).each(function(i, el) {
+        resetHostRow(el);
+        resetServiceRow(el);
     });
 }
 
@@ -2493,8 +2493,8 @@ function addStyle(elems, style) {
     if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
-    jQuery.each(elems, function(nr, e) {
-        jQuery(e).addClass(style);
+    jQuery.each(elems, function(nr, el) {
+        jQuery(el).addClass(style);
     });
     return;
 }
@@ -2504,9 +2504,9 @@ function removeStyle(elems, styles) {
     if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
-    jQuery.each(elems, function(nr, e) {
+    jQuery.each(elems, function(nr, el) {
         jQuery.each(styles, function(nr, s) {
-            jQuery(e).removeClass(s);
+            jQuery(el).removeClass(s);
         });
     });
     return;
@@ -4382,7 +4382,7 @@ var ajax_search = {
             // dont hide search result if clicked on the input field
             if(event.type != "blur" && event.target.tagName == 'INPUT') { return; }
         }
-        catch(e) {
+        catch(err) {
             // doesnt matter
         }
         var panel = document.getElementById(ajax_search.result_pan);
@@ -4505,9 +4505,9 @@ var ajax_search = {
                           var re;
                           try {
                             re = new RegExp(sub_pattern, "gi");
-                          } catch(e) {
+                          } catch(err) {
                             debug('regex failed: ' + sub_pattern);
-                            debug(e);
+                            debug(err);
                           }
                           if(index != -1) {
                               found++;
@@ -4680,7 +4680,7 @@ var ajax_search = {
         window.setTimeout("ajax_search.dont_hide=false", 500);
         try { // Error: Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus.
             input.focus();
-        } catch(e) {}
+        } catch(err) {}
     },
 
     onempty: function() {
@@ -4928,7 +4928,7 @@ function set_graphite_img(start, end, id) {
       jQuery('#graphiteerr').css('display' , 'none');
       jQuery('#graphitewaitimg').css({'display': 'none', 'position': 'absolute'});
     })
-    .error(function(e) {
+    .error(function(err) {
       jQuery('#graphitewaitimg').css({'display': 'none', 'position': 'inherit'});
       jQuery('#graphiteimg').css('display' , 'none');
       jQuery('#graphiteerr').css('display' , 'block');
@@ -5008,7 +5008,7 @@ function set_png_img(start, end, id) {
       jQuery('#pnperr').css('display' , 'none');
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
     })
-    .error(function(e) {
+    .error(function(err) {
       jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
       jQuery('#pnpimg').css('display' , 'none');
       jQuery('#pnperr').css('display' , 'block');
@@ -5153,7 +5153,7 @@ function updateFaviconCounter(value, color, fill, font, fontColor) {
             jQuery('link[rel$=icon]', context).remove();
             jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
         }
-    } catch(e) { debug(e) }
+    } catch(err) { debug(err) }
 }
 
 /* save settings in a cookie */

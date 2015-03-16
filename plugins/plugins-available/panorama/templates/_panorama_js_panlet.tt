@@ -187,7 +187,7 @@
         show: function(This, eOpts) {
             // make move show snap shadow
             if(This.dd_overriden == false && This.dd != undefined) {
-                This.dd.onDrag = function(e){
+                This.dd.onDrag = function(evt){
                     // original onDrag function
                     var me = this,
                     comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,

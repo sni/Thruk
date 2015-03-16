@@ -92,7 +92,7 @@
             This.applyZindex(This.xdata.layout.zindex, This.xdata);
             This.applyScale(This.xdata.layout.scale, This.xdata);
             if(!This.locked) {
-                This.el.on('mouseover', function(e,t,a) {
+                This.el.on('mouseover', function(evt,t,a) {
                     if(!This.el.dom.style.outline.match("orange")) {
                         This.el.dom.style.outline = "1px dashed grey";
                         if(This.iconType != "text" && This.labelEl && This.labelEl.el) {
@@ -100,7 +100,7 @@
                         }
                     }
                 });
-                This.el.on('mouseout', function(e,t,a) {
+                This.el.on('mouseout', function(evt,t,a) {
                     if(This.el.dom.style.outline.match("grey")) {
                         This.el.dom.style.outline = "";
                         if(This.labelEl && This.labelEl.el) {
@@ -324,9 +324,9 @@
                 calc = calc.replace(/availability\(/g, 'availability(panel, ');
                 try {
                     res = eval(calc);
-                } catch(e) {
-                    TP.logError(panel.id, "labelEvalException", e);
-                    panel.el.dom.title = e;
+                } catch(err) {
+                    TP.logError(panel.id, "labelEvalException", err);
+                    panel.el.dom.title = err;
                 }
                 if(res == undefined) { res = ''; }
                 // replace not yet resolved availabilities
@@ -398,7 +398,7 @@
                         panel.addClickEventhandler(This.el);
                         panel.addDDListener(This);
                         if(!panel.locked) {
-                            This.el.on('mouseover', function(e,t,a) {
+                            This.el.on('mouseover', function(evt,t,a) {
                                 if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
                                     This.el.dom.style.outline = "1px dashed grey";
                                     if(panel.iconType != "text") {
@@ -406,7 +406,7 @@
                                     }
                                 }
                             });
-                            This.el.on('mouseout', function(e,t,a) {
+                            This.el.on('mouseout', function(evt,t,a) {
                                 if(This.el.dom.style.outline.match("grey")) {
                                     This.el.dom.style.outline = "";
                                 }
@@ -503,9 +503,9 @@
         var This = this;
         var tab  = Ext.getCmp(This.panel_id);
 
-        el.on("click", function(e) {
+        el.on("click", function(evt) {
             [% UNLESS readonly %]
-            if(e.ctrlKey || is_shift_pressed(e)) {
+            if(evt.ctrlKey || is_shift_pressed(evt)) {
                 var tab = Ext.getCmp(This.panel_id);
                 if(This.locked) { return; }
                 if(TP.moveIcons == undefined) {
@@ -533,7 +533,7 @@
 
         /* open edit box on double or right click */
         [% UNLESS readonly %]
-        el.on("dblclick", function(e) {
+        el.on("dblclick", function(evt) {
             window.clearTimeout(TP.timeouts['click'+This.id]);
             if(!This.locked) {
                 tab.body.mask("loading settings");
@@ -545,8 +545,8 @@
         [% END %]
 
         /* right click context menu on icon widgets */
-        el.on("contextmenu", function(e) {
-            e.preventDefault();
+        el.on("contextmenu", function(evt) {
+            evt.preventDefault();
             TP.resetMoveIcons();
             tab.disableMapControls();
             Ext.create('Ext.menu.Menu', {
@@ -595,7 +595,7 @@
                     disabled: This.locked,
                     handler: function(me, eOpts) {
                         var menu = me.parentMenu;
-                        var i = menu.items.findIndexBy(function(e) { if(e.text == 'Remove') {return true;} });
+                        var i = menu.items.findIndexBy(function(el) { if(el.text == 'Remove') {return true;} });
                         menu.remove(i);
                         menu.add({
                             xtype: 'panel',
@@ -643,9 +643,9 @@
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(el.dd && !el.dd_listener_added) {
-            el.dd.addListener('dragstart', function(This, e) {
+            el.dd.addListener('dragstart', function(This, evt) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
-                TP.isShift = is_shift_pressed(e);
+                TP.isShift = is_shift_pressed(evt);
                 tab.disableMapControls();
                 /* add ourself to movelist */
                 if(TP.moveIcons) {
@@ -668,14 +668,14 @@
                     panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
                 }
             });
-            el.dd.addListener('drag', function(This, e) {
-                TP.isShift = is_shift_pressed(e);
+            el.dd.addListener('drag', function(This, evt) {
+                TP.isShift = is_shift_pressed(evt);
             });
-            el.dd.addListener('dragend', function(This, e) {
+            el.dd.addListener('dragend', function(This, evt) {
                 panel.dragHint.destroy();
                 panel.dragHint = undefined;
                 tab.enableMapControls();
-                TP.isShift = is_shift_pressed(e);
+                TP.isShift = is_shift_pressed(evt);
                 /* prevents opening link after draging */
                 if(TP.isShift) {
                     var pos = panel.getPosition();
@@ -833,7 +833,7 @@ Ext.define('TP.IconWidget', {
         /* update zIndex order if no mask is present only */
         var masks = Ext.Element.select('.x-mask');
         if(masks.elements.length > 0) { return }
-        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
+        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
         TP.checkModalWindows();
     },
 
@@ -1278,9 +1278,9 @@ Ext.define('TP.IconWidget', {
         try {
             eval("spriteData = {"+shapeData+"};");
         }
-        catch(e) {
-            TP.logError(panel.id, "labelSpriteEvalException", e);
-            TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+e);
+        catch(err) {
+            TP.logError(panel.id, "labelSpriteEvalException", err);
+            TP.Msg.msg("fail_message~~loading shape '"+xdata.appearance.shapename+"' failed: "+err);
             return;
         }
         panel.surface.removeAll();
@@ -1431,7 +1431,7 @@ Ext.define('TP.IconWidget', {
                 dragEl.suspendEvents();
                 dragEl.setPosition(xdata.appearance[dragEl.keyX]+dragEl.offsetX, xdata.appearance[dragEl.keyY]+dragEl.offsetY);
                 dragEl.resumeEvents();
-                try { dragEl.toFront(); } catch(e) {}
+                try { dragEl.toFront(); } catch(err) {}
             }
         });
     },
@@ -1608,8 +1608,8 @@ Ext.onReady(function() {
         }
     });
 
-    var tipRenderer = function (e, el, eOpts) {
-        e.stopEvent();
+    var tipRenderer = function (evt, el, eOpts) {
+        evt.stopEvent();
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         var img = Ext.getCmp(el.id);
         TP.iconTip.panel   = img;
@@ -1697,8 +1697,8 @@ Ext.onReady(function() {
         }
     };
 
-    Ext.getBody().on('mouseover', function(e,t,a) {
-        tipRenderer(e,t,a);
+    Ext.getBody().on('mouseover', function(evt,t,a) {
+        tipRenderer(evt,t,a);
     }, null, {delegate:'A.iconWidget'});
 });
 
@@ -2426,11 +2426,11 @@ TP.resetMoveIcons = function() {
 TP.createIconMoveKeyNav = function() {
     if(TP.keynav) { return; }
     TP.keynav = Ext.create('Ext.util.KeyNav', Ext.getBody(), {
-        'left':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]-1, pos[1]); }},
-        'right': function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]+1, pos[1]); }},
-        'up':    function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]-1); }},
-        'down':  function(e){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]+1); }},
-        'esc':   function(e){ TP.resetMoveIcons(); },
+        'left':  function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]-1, pos[1]); }},
+        'right': function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0]+1, pos[1]); }},
+        'up':    function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]-1); }},
+        'down':  function(evt){ if(TP.moveIcons && TP.moveIcons[0]) { var pos = TP.moveIcons[0].getPosition(); TP.moveIcons[0].setPosition(pos[0], pos[1]+1); }},
+        'esc':   function(evt){ TP.resetMoveIcons(); },
         ignoreInputFields: true
     });
 }

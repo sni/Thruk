@@ -127,19 +127,19 @@ Ext.define('Ext.ux.BoxReorderer', {
         dd.endAttr = names.right;
     },
 
-    getDragCmp: function(e) {
-        return this.container.getChildByElement(e.getTarget(this.itemSelector, 10));
+    getDragCmp: function(evt) {
+        return this.container.getChildByElement(evt.getTarget(this.itemSelector, 10));
     },
 
     // check if the clicked component is reorderable
-    clickValidator: function(e) {
-        var cmp = this.getDragCmp(e);
+    clickValidator: function(evt) {
+        var cmp = this.getDragCmp(evt);
 
         // If cmp is null, this expression MUST be coerced to boolean so that createInterceptor is able to test it against false
         return !!(cmp && cmp.reorderable !== false);
     },
 
-    onMouseDown: function(e) {
+    onMouseDown: function(evt) {
         var me = this,
             container = me.container,
             containerBox,
@@ -147,7 +147,7 @@ Ext.define('Ext.ux.BoxReorderer', {
             cmpBox;
 
         // Ascertain which child Component is being mousedowned
-        me.dragCmp = me.getDragCmp(e);
+        me.dragCmp = me.getDragCmp(evt);
         if (me.dragCmp) {
             cmpEl = me.dragCmp.getEl();
             me.startIndex = me.curIndex = container.items.indexOf(me.dragCmp);
@@ -165,12 +165,12 @@ Ext.define('Ext.ux.BoxReorderer', {
                 me.minX = containerBox.left;
                 me.maxX = containerBox.right - cmpBox.width;
                 me.minY = me.maxY = cmpBox.top;
-                me.deltaX = e.getPageX() - cmpBox.left;
+                me.deltaX = evt.getPageX() - cmpBox.left;
             } else {
                 me.minY = containerBox.top;
                 me.maxY = containerBox.bottom - cmpBox.height;
                 me.minX = me.maxX = cmpBox.left;
-                me.deltaY = e.getPageY() - cmpBox.top;
+                me.deltaY = evt.getPageY() - cmpBox.top;
             }
             me.constrainY = me.constrainX = true;
         }
@@ -270,11 +270,11 @@ Ext.define('Ext.ux.BoxReorderer', {
         me.curIndex = newIndex;
     },
 
-    onDrag: function(e) {
+    onDrag: function(evt) {
         var me = this,
             newIndex;
 
-        newIndex = me.getNewIndex(e.getPoint());
+        newIndex = me.getNewIndex(evt.getPoint());
         if ((newIndex !== undefined)) {
             me.reorderer.fireEvent('Drag', me, me.container, me.dragCmp, me.startIndex, me.curIndex);
             me.doSwap(newIndex);
@@ -282,9 +282,9 @@ Ext.define('Ext.ux.BoxReorderer', {
 
     },
 
-    endDrag: function(e) {
-        if (e) {
-            e.stopEvent();
+    endDrag: function(evt) {
+        if (evt) {
+            evt.stopEvent();
         }
         var me = this,
             layout = me.container.getLayout(),

@@ -38,10 +38,10 @@
                     try {
                         body.style.overflow  = 'inherit';
                         body.style.overflowY = 'hidden';
-                    } catch(e) {
+                    } catch(err) {
                         /* breaks in IE 8 sometimes */
                         TP.log("thruk: setting style failed")
-                        TP.logError(panel.id, "bodyStyleException", e);
+                        TP.logError(panel.id, "bodyStyleException", err);
                     }
                 }
             } else {
@@ -52,10 +52,10 @@
                     try {
                         body.style.overflowY = 'inherit';
                         body.style.overflow  = 'auto';
-                    } catch(e) {
+                    } catch(err) {
                         /* breaks in IE 8 sometimes */
                         TP.log("thruk: setting style failed")
-                        TP.logError(panel.id, "bodyStyleException", e);
+                        TP.logError(panel.id, "bodyStyleException", err);
                     }
                 }
             }
@@ -110,17 +110,17 @@
                 } else {
                     this.grid.reconfigure(this.gridStore);
                 }
-            } catch(e) {
+            } catch(err) {
                 TP.log("reconfigure failed");
-                TP.logError(panel.id, "gridReconfigureException", e);
+                TP.logError(panel.id, "gridReconfigureException", err);
                 return;
             }
             if(this.initialState != undefined) {
                 /* applyState throws internal error but state gets applied anyway */
                 try {
                     this.grid.applyState(this.initialState);
-                } catch(e) {
-                    TP.logError(panel.id, "gridApplyStateException", e);
+                } catch(err) {
+                    TP.logError(panel.id, "gridApplyStateException", err);
                 }
             }
             if(this.xdata.gridstate != undefined) {

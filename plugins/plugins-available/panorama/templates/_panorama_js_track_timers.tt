@@ -16,9 +16,9 @@ window.setTimeout = function(callback, timeout) {
             } else {
                 eval(callback);
             }
-        } catch(e) {
+        } catch(err2) {
             TP.logError("global", "setTimeoutExceptionOrigin", err);
-            TP.logError("global", "setTimeoutException", e);
+            TP.logError("global", "setTimeoutException", err2);
         }
     }, timeout);
     timers[id] = ({id:id,  setAt: new Date(),  timeout: timeout, callback: callback, caller: window.setTimeout.caller});
@@ -41,9 +41,9 @@ window.setInterval = function(callback, timer) {
             } else {
                 eval(callback);
             }
-        } catch(e) {
+        } catch(err2) {
             TP.logError("global", "setIntervalExceptionOrigin", err);
-            TP.logError("global", "setIntervalException", e);
+            TP.logError("global", "setIntervalException", err2);
         }
     }, timer);
     intervals[id] = ({id:id,  setAt: new Date(),  interval: timer, callback: callback, lastRun: undefined, caller: window.setInterval.caller});

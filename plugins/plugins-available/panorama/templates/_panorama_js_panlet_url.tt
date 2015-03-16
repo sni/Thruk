@@ -41,9 +41,9 @@
                     var head = '';
                     /* keep css links */
                     if(panel.xdata.keepcss && panel.xdata.selector != '') {
-                        el.body.select('LINK').each(function(e) {
-                            if(!e.dom.outerHTML.match(/thruk_noframes\.css/)) {
-                                head = head + e.dom.outerHTML;
+                        el.body.select('LINK').each(function(el) {
+                            if(!el.dom.outerHTML.match(/thruk_noframes\.css/)) {
+                                head = head + el.dom.outerHTML;
                             }
                         });
                         head = '<head>' + head + '<\/head>';
@@ -62,8 +62,8 @@
                 var iframe;
                 try {
                     iframe = panel.items.getAt(0).getEl().dom;
-                } catch(e) {
-                    TP.logError(This.id, "iframeNotFoundException", e);
+                } catch(err) {
+                    TP.logError(This.id, "iframeNotFoundException", err);
                 }
 
                 if(iframe && (iframe.contentWindow || iframe.contentDocument)) {
@@ -76,8 +76,8 @@
                         } else {
                             panel.setBlankAndRefreshLater(iframe);
                         }
-                    } catch(e) {
-                        TP.logError(This.id, "iframeOpenException", e);
+                    } catch(err) {
+                        TP.logError(This.id, "iframeOpenException", err);
                         /* first reload after changing from external to internal url does not work*/
                         panel.setBlankAndRefreshLater(iframe);
                     }

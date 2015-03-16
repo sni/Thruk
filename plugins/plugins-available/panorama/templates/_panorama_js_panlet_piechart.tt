@@ -59,8 +59,8 @@
                     if(this.chart.isVisible()) {
                         try { // this may fail when redrawing for the first time
                             this.chart.redraw();
-                        } catch(e) {
-                            TP.logError(this.id, "chartRedrawException", e);
+                        } catch(err) {
+                            TP.logError(this.id, "chartRedrawException", err);
                         }
                     }
                     this.chart.setShowLabel();

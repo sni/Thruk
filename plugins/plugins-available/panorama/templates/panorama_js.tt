@@ -119,10 +119,10 @@ Ext.onReady(function() {
     cleanUnderscoreUrl();
 
     /* disable backspace on body to prevent accidentally leaving the page */
-    Ext.EventManager.on(document, 'keydown', function(e, t) {
-        if(e.getKey() == e.BACKSPACE && e.target) {
-            if(e.target.tagName.toLowerCase() != "input" && e.target.tagName.toLowerCase() != "textarea") {
-                e.preventDefault();
+    Ext.EventManager.on(document, 'keydown', function(evt, t) {
+        if(evt.getKey() == evt.BACKSPACE && evt.target) {
+            if(evt.target.tagName.toLowerCase() != "input" && evt.target.tagName.toLowerCase() != "textarea") {
+                evt.preventDefault();
                 return false;
             }
         }

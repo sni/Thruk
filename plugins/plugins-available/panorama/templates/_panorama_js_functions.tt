@@ -6,7 +6,7 @@ if(thruk_debug_js != undefined && thruk_debug_js) {
         try {
             debug = console.debug;
             debug('console debug log enabled');
-        } catch(e) {
+        } catch(err) {
             debug = function(str) {}
         }
     }
@@ -241,8 +241,8 @@ var TP = {
             try {
                 delete config['tb'];
                 text = Ext.JSON.encode(config);
-            } catch(e) {
-                text = ""+e;
+            } catch(err) {
+                text = ""+err;
             }
             TP.logError("global", "noTypeException", err);
             TP.log("[global] "+text);
@@ -664,8 +664,8 @@ var TP = {
         try {
             decoded = cp.decodeValue(decode64(data));
         }
-        catch(e) {
-            TP.logError("global", "importAllTabsException", e);
+        catch(err) {
+            TP.logError("global", "importAllTabsException", err);
             TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
             return(false);
         }
@@ -673,8 +673,8 @@ var TP = {
             try {
                 decoded = Ext.JSON.decode(decode64(data));
             }
-            catch(e) {
-                TP.logError("global", "jsonDecodeException", e);
+            catch(err) {
+                TP.logError("global", "jsonDecodeException", err);
                 TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
                 return(false);
             }
@@ -746,9 +746,9 @@ var TP = {
             }
             try {
                 data = eval("("+response.responseText+")");
-            } catch(e) {
+            } catch(err) {
                 if(refresh.setType) { refresh.setType('broken') }
-                TP.logError(panlet.id, "responseEvalException", e);
+                TP.logError(panlet.id, "responseEvalException", err);
                 return data;
             }
             if(refresh.setType) { refresh.setType('refresh') }
@@ -761,8 +761,8 @@ var TP = {
                         try {
                             initial_backends[key].state         = data.pi_detail[key]['state'];
                             initial_backends[key].program_start = data.pi_detail[key]['program_start'];
-                        } catch(e) {
-                            TP.logError(panlet.id, "initialBackendsException", e);
+                        } catch(err) {
+                            TP.logError(panlet.id, "initialBackendsException", err);
                         }
                     }
                 }
@@ -869,12 +869,12 @@ var TP = {
         }
     },
     addTabBarMouseEvents: function(el, tabId) {
-        el.on("dblclick", function(e, el, o) {
+        el.on("dblclick", function(evt, el, o) {
             TP.tabSettingsWindow();
         });
-        el.on("contextmenu", function(e, el, o) {
+        el.on("contextmenu", function(evt, el, o) {
             var tab = Ext.getCmp(tabId);
-            tab.contextmenu(e, true);
+            tab.contextmenu(evt, true);
         });
     },
     /* sum list elements */
@@ -982,7 +982,7 @@ var TP = {
             // try saving state
             cp.saveChanges(false);
         }
-        catch(e) {}
+        catch(evt) {}
     },
     deleteDowntime: function(id, panelId, type) {
         var panel = Ext.getCmp(panelId);
@@ -1400,14 +1400,14 @@ var TP = {
     },
 
     /* run action for dashboards */
-    dashboardActionHandler: function(grid, rowIndex, colIndex, item, e, record, row, confirmed) {
+    dashboardActionHandler: function(grid, rowIndex, colIndex, item, evt, record, row, confirmed) {
         var action = item.action;
         var nr     = record.data.nr;
         if(action == 'remove') {
             if(confirmed == undefined || confirmed == 0) {
                 TP.modalWindows.push(Ext.Msg.confirm('Really Remove?', 'Do you really want to remove this dashboard with all its windows?', function(button) {
                     if(button === 'yes') {
-                        TP.dashboardActionHandler(grid, rowIndex, colIndex, item, e, record, row, 1);
+                        TP.dashboardActionHandler(grid, rowIndex, colIndex, item, evt, record, row, 1);
                     }
                 }));
                 return false;
@@ -1671,11 +1671,11 @@ var TP = {
             TP.logHistory.shift();
         }
     },
-    logError: function(prefix, name, e) {
+    logError: function(prefix, name, err) {
         if(name == "labelEvalException") { return; }
         try {
             TP.log('['+prefix+'] '+name+':');
-            var out = e.stack.trim().split("\n");
+            var out = err.stack.trim().split("\n");
             for(var x=0; x<out.length; x++) {
                 TP.log('['+prefix+'] '+out[x]);
             }
@@ -1722,7 +1722,7 @@ var TP = {
             var win = TP.modalWindows[x];
             if(win && win.el && !win.isHidden()) {
                 if(first) {
-                    try { win.toFront(); } catch(e) {}
+                    try { win.toFront(); } catch(err) {}
                     var masks = Ext.Element.select('.x-mask');
                     if(masks.elements.length > 0) {
                         zIndex = Number(masks.elements[0].style.zIndex);

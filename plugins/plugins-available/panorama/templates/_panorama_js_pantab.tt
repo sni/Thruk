@@ -91,8 +91,8 @@
                         } else {
                             panlet.show(false);
                         }
-                    } catch(e) {
-                        TP.logError(panlet.id, "panelActivateException", e);
+                    } catch(err) {
+                        TP.logError(panlet.id, "panelActivateException", err);
                     }
                 }
             }
@@ -158,10 +158,10 @@
             }
             var header = tab.getDockedItems()[0];
             if(header) { header.hide() }
-            tab.el.on("contextmenu", function(e) {
-                tab.contextmenu(e);
+            tab.el.on("contextmenu", function(evt) {
+                tab.contextmenu(evt);
             });
-            tab.el.on("click", function(e) {
+            tab.el.on("click", function(evt) {
                 if(!TP.skipResetMoveIcons) {
                     TP.resetMoveIcons();
                 }
@@ -338,11 +338,11 @@
                 if(panels != undefined) {
                     Ext.Array.each(panels, function(panel, id2) {
                         // may fail when not yet rendered
-                        try { panel.toFront(); } catch(e) {}
+                        try { panel.toFront(); } catch(err) {}
                         if(panel.setIconLabel) { panel.setIconLabel(); }
-                        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(e) {} }
-                        if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(e) {} }
-                        if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(e) {} }
+                        if(panel.labelEl) { try { panel.labelEl.toFront(); } catch(err) {} }
+                        if(panel.dragEl1) { try { panel.dragEl1.toFront(); } catch(err) {} }
+                        if(panel.dragEl2) { try { panel.dragEl2.toFront(); } catch(err) {} }
                     });
                 }
             });
@@ -376,8 +376,8 @@
                     if(panlet) { // may not yet exists due to delayed rendering
                         try {    // so allow it to fail
                             panlet.show(false);
-                        } catch(e) {
-                            TP.logError(this.id, "panelStarttimeoutException", e);
+                        } catch(err) {
+                            TP.logError(this.id, "panelStarttimeoutException", err);
                         }
                     }
                 }
@@ -612,13 +612,13 @@
         /* schedule update, which also remove the mask from above */
         TP.updateAllIcons(this);
     },
-    contextmenu: function(e, hidePasteAndNew) {
+    contextmenu: function(evt, hidePasteAndNew) {
         var tab = this;
         /* right click context menu on tab body */
-        e.preventDefault();
+        evt.preventDefault();
         TP.resetMoveIcons();
         tab.disableMapControls();
-        var pos = [e.getX(), e.getY()];
+        var pos = [evt.getX(), evt.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
         Ext.create('Ext.menu.Menu', {
             margin: '0 0 10 0',
@@ -633,8 +633,8 @@
                     var element = Ext.getBody().dom;
                     try {
                         BigScreen.request(element);
-                    } catch(e) {
-                        TP.logError(tab.id, "bigscreenException", e);
+                    } catch(err) {
+                        TP.logError(tab.id, "bigscreenException", err);
                     }
                 },
                 hidden:  !!BigScreen.element
@@ -686,7 +686,7 @@
                     }
                     pos[0] = pos[0] - 8;
                     pos[1] = pos[1] - 8;
-                    TP.add_panlet_handler(e, e.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
+                    TP.add_panlet_handler(evt, evt.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
                 },
                 disabled: (tab.xdata.locked || TP.clipboard == undefined),
                 hidden:  hidePasteAndNew
@@ -760,7 +760,7 @@
 [% UNLESS readonly %]
 Ext.onReady(function() {
     /* lasso for element selection */
-    Ext.getBody().on("mouseup", function(e) {
+    Ext.getBody().on("mouseup", function(evt) {
         if(TP.lassoEl) {
             TP.lassoEl.destroy();
             TP.lassoEl = undefined;
@@ -770,13 +770,13 @@ Ext.onReady(function() {
             window.setTimeout(function() { TP.skipResetMoveIcons = false; }, 50);
         }
     });
-    Ext.getBody().on("dragstart", function(e) {
-        e.preventDefault();
+    Ext.getBody().on("dragstart", function(evt) {
+        evt.preventDefault();
         var tabpan = Ext.getCmp('tabpan');
         var tab    = tabpan.getActiveTab();
         if(tab.locked)            { return(false); };
         if(TP.iconSettingsWindow) { return(false); };
-        var pos = e.getXY();
+        var pos = evt.getXY();
         if(TP.lassoEl) { TP.lassoEl.destroy(); }
         TP.lassoEl = Ext.create('Ext.Component', {
             'html':     ' ',
@@ -800,9 +800,9 @@ Ext.onReady(function() {
 
 [% END %]
 /* handles dragging a lasso around icon elements to move them together */
-TP.lassoDragHandler = function(e) {
-    e.preventDefault();
-    var mouse = e.getXY();
+TP.lassoDragHandler = function(evt) {
+    evt.preventDefault();
+    var mouse = evt.getXY();
     TP.reduceDelayEvents(TP.lassoEl, function() {
         TP.lassoDragHandlerDo(mouse);
     }, 50, 'timeout_icon_lasso');

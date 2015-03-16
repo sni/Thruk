@@ -41,10 +41,10 @@ Ext.define('TP.DashboardManagementWindow', {
                 /* prevent selections */
                 return false;
             },
-            edit: function(editor, e) {
-                if(e.value != e.originalValue) {
-                    TP.toggleDashboardOption(e.record.data.id, e.field, e.value);
-                    e.record.commit();
+            edit: function(editor, el) {
+                if(el.value != el.originalValue) {
+                    TP.toggleDashboardOption(el.record.data.id, el.field, el.value);
+                    el.record.commit();
                 }
             },
             destroy: function(This, eOpts) {

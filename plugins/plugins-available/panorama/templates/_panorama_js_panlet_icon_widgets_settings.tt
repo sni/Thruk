@@ -1366,8 +1366,8 @@ TP.iconShowEditDialog = function(panel) {
                 var j     = Ext.JSON.encode(xdata);
                 try {
                     j = JSON.stringify(xdata, null, 2);
-                } catch(e) {
-                    TP.logError(panel.id, "jsonStringifyException", e);
+                } catch(err) {
+                    TP.logError(panel.id, "jsonStringifyException", err);
                 }
                 this.down('form').getForm().setValues({source: j, sourceError: ''});
             }
@@ -1403,9 +1403,9 @@ TP.iconShowEditDialog = function(panel) {
                             try {
                                 var xdata = Ext.JSON.decode(values.source);
                                 TP.setIconSettingsValues(xdata);
-                            } catch(e) {
-                                TP.logError(panel.id, "jsonDecodeException", e);
-                                Ext.getCmp('sourceForm').getForm().setValues({sourceError: e});
+                            } catch(err) {
+                                TP.logError(panel.id, "jsonDecodeException", err);
+                                Ext.getCmp('sourceForm').getForm().setValues({sourceError: err});
                             }
                         }
                     }]
@@ -1485,10 +1485,10 @@ TP.iconShowEditDialog = function(panel) {
             afterRender: function (This) {
                 var form = This.items.getAt(0).items.getAt(1).down('form').getForm();
                 this.nav = Ext.create('Ext.util.KeyNav', this.el, {
-                    'left':  function(e){ form.setValues({x: Number(form.getValues().x)-1}); },
-                    'right': function(e){ form.setValues({x: Number(form.getValues().x)+1}); },
-                    'up':    function(e){ form.setValues({y: Number(form.getValues().y)-1}); },
-                    'down':  function(e){ form.setValues({y: Number(form.getValues().y)+1}); },
+                    'left':  function(evt){ form.setValues({x: Number(form.getValues().x)-1}); },
+                    'right': function(evt){ form.setValues({x: Number(form.getValues().x)+1}); },
+                    'up':    function(evt){ form.setValues({y: Number(form.getValues().y)-1}); },
+                    'down':  function(evt){ form.setValues({y: Number(form.getValues().y)+1}); },
                     ignoreInputFields: true,
                     scope: panel
                 });
@@ -1725,11 +1725,11 @@ TP.openLabelEditorWindow = function(panel) {
                         listeners: {
                             afterrender: function(This) {
                                 var examples = This.el.dom.getElementsByTagName('i');
-                                Ext.Array.each(examples, function(e, i) {
-                                    e.className = "clickable";
-                                    e.onclick   = function(i) {
+                                Ext.Array.each(examples, function(el, i) {
+                                    el.className = "clickable";
+                                    el.onclick   = function(i) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
-                                        var val = Ext.htmlDecode(e.innerHTML);
+                                        var val = Ext.htmlDecode(el.innerHTML);
                                         if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                         if(val.match(/<br>/)) { val += "\n"; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);

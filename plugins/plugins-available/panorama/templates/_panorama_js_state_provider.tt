@@ -104,7 +104,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
                 // new is json already
                 try {
                     state[key] = Ext.JSON.decode(ExtState[key]);
-                } catch(e) {
+                } catch(err) {
                     // REMOVE AFTER: 01.01.2016
                     // old style is just decoded
                     if(state[key] == undefined) {
