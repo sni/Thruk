@@ -10,7 +10,6 @@
                 var tabpan = Ext.getCmp('tabpan');
                 var tab    = tabpan.getActiveTab();
                 tab.enableMapControls();
-                menu.destroy();
             }
         },
         items: [{
