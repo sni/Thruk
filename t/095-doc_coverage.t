@@ -31,7 +31,7 @@ sub get_thruk_conf {
     my $amend = 0;
     while(<$ph>) {
         my $line = $_;
-        next if !$amend && $line !~ m/(=\s+|<)/mx;
+        next if !$amend && $line !~ m/^\#?\s*([\w_\-]+\s*=\s+|<)/mx;
         $amend = $line =~ m/\\$/mx ? 1 : 0;
         $line =~ s/^\s*#//g;
         $conf_string .= $line;
