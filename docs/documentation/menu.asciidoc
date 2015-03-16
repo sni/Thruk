@@ -38,9 +38,9 @@ on a test instance first.
 =======
 
 [TIP]
-.Restart Thruk
+.No Restart Required
 =======
-Thruk has to be restarted to load the new menu_local.conf
+Thruk does not need to be restarted and immediately displays changes in the menu_local.conf.
 =======
 
 If you just want to add a few entries, create a empty menu_local.conf
