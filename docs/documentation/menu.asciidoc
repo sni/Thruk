@@ -137,24 +137,33 @@ remove_item('Current Status', 'Problems', 'Services', 'Unhandled');
 
 === Make item available for some groups only
 
-Just wrap your changes in a 'has_group'.
+Just wrap your changes in a 'has_group' condition.
 
 -----
-if(has_group($c, 'Admins')) {
-  add_section('name' => 'Admins Only');
-  add_link('name' => 'Admin Link', 'href' => '.../only_for_admins.html');
+if(has_group('Admins')) {
+  insert_item('Admins Only', { 'href' => '.../only_for_admins.html', 'name' => 'Admin Link' });
 }
 -----
 
 
 === Make item available for some roles only
 
-Just wrap your changes in a 'has_role'.
+Just wrap your changes in a 'has_role' condition.
 
 -----
-if(has_role($c, 'authorized_for_configuration_information')) {
-  add_section('name' => 'Some Roles Only');
-  add_link('name' => 'Admin Link', 'href' => '.../only_for_some_roles.html');
+if(has_role('authorized_for_configuration_information')) {
+  insert_item('System', { 'href' => '.../only_for_some_roles.html', 'name' => 'Admin Link' });
+}
+-----
+
+
+=== Make item available for some specific user only
+
+Just wrap your changes in a 'is_user' condition.
+
+-----
+if(is_user('thrukadmin')) {
+  insert_item('Admins Only', { 'href' => '.../only_for_some_user.html', 'name' => 'Admin Link' });
 }
 -----
 
@@ -165,7 +174,7 @@ if(has_role($c, 'authorized_for_configuration_information')) {
 Create a `/etc/thruk/menu_local.conf` like this:
 -----
 do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
-if(!has_group($c, 'Admins')) {
+if(!has_group('Admins')) {
   remove_item('Reports', 'Reporting');
 }
 -----

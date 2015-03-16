@@ -221,20 +221,22 @@ sub remove_item {
 
 =head2 has_group
 
-  has_group($c, $group)
+  has_group($group)
 
 returns 1 if the current user has this group
 
 =cut
 sub has_group {
-    my($c, $group) = @_;
+    my($group, $tmp) = @_;
+    my $c = $Thruk::Utils::Menu::c;
+    if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
     my $user  = $c->stash->{'remote_user'};
     if($user) {
         my $contactgroups = $c->cache->get->{'users'}->{$user};
         if($contactgroups and $contactgroups->{'contactgroups'}->{$group}) {
             return 1;
-       }
+        }
     }
     return 0;
 }
@@ -243,15 +245,37 @@ sub has_group {
 
 =head2 has_role
 
-  has_role($c, $role)
+  has_role($role)
 
 returns 1 if the current user has this role
 
 =cut
 sub has_role {
-    my($c, $role) = @_;
+    my($role, $tmp) = @_;
+    my $c = $Thruk::Utils::Menu::c;
+    if(defined $tmp) { $role = $tmp; } # keep backwards compatible with the old call has_role($c, $role)
 
     return 1 if $c->check_user_roles($role);
+    return 0;
+}
+
+##############################################
+
+=head2 is_user
+
+  is_user($username)
+
+returns 1 if the current user has the given name
+
+=cut
+sub is_user {
+    my($name) = @_;
+    my $c = $Thruk::Utils::Menu::c;
+
+    my $user  = $c->stash->{'remote_user'} || '';
+    if($user eq $name) {
+        return 1;
+    }
     return 0;
 }
 
