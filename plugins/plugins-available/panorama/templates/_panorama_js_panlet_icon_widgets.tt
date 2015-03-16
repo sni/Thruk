@@ -1533,8 +1533,12 @@ Ext.onReady(function() {
                 if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
                     This.showAt(showAtPos);
                 }
+                TP.modalWindows.push(TP.iconTip);
             },
-            hide:    function(This) { delete TP.iconTip.last_id; },
+            hide:    function(This) {
+                delete TP.iconTip.last_id;
+                TP.modalWindows = TP.removeFromList(TP.modalWindows, TP.iconTip);
+            },
             destroy: function(This) { delete TP.iconTip; }
         }
     });
