@@ -831,6 +831,7 @@ plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
+plugins/plugins-available/panorama/t/javascript_pattern.t
 plugins/plugins-available/panorama/templates/_panorama_js_elements.tt
 plugins/plugins-available/panorama/templates/_panorama_js_form_filter.tt
 plugins/plugins-available/panorama/templates/_panorama_js_functions.tt
