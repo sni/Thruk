@@ -205,7 +205,6 @@ sub remove_item {
     my($category, $subcategory, $item_name, $hintname) = @_;
     if(!defined $item_name) { $item_name = $subcategory; $subcategory = undef; }
 
-    $Thruk::Utils::Menu::removed_items = {} unless defined $Thruk::Utils::Menu::removed_items;
     if($hintname) {
         $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{$hintname} = 1;
     } elsif($subcategory) {
@@ -299,6 +298,7 @@ sub _renew_navigation {
     # per loading a page
     my $additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
     my $additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    $Thruk::Utils::Menu::removed_items = {};
 
     ## no critic
     eval("#line 1 $file\n".read_file($file));
@@ -392,29 +392,27 @@ sub _renew_navigation {
     }
 
     # remove unwanted items
-    if(defined $Thruk::Utils::Menu::removed_items) {
-        for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
-            my $section = _get_section_by_name($section_name) || next;
-            for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
-                for my $sub_item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}}) {
-                    if($sub_item_name eq '_ALL_') {
-                        $section->{'links'} = _remove_item_from_links($section->{'links'}, $item_name);
-                    } else {
-                        for my $hintname (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}->{$sub_item_name}}) {
-                            for my $link (@{$section->{'links'}}) {
-                                if($link->{'name'} eq $item_name) {
-                                    if($hintname eq '_ALL_') {
-                                        $link->{'links'} = _remove_item_from_links($link->{'links'}, $sub_item_name);
-                                    } else {
-                                        for my $sublink (@{$link->{'links'}}) {
-                                            if($sublink->{'name'} eq $sub_item_name) {
-                                                $sublink->{'links'} = _remove_item_from_links($sublink->{'links'}, $hintname);
-                                                last;
-                                            }
+    for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
+        my $section = _get_section_by_name($section_name) || next;
+        for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
+            for my $sub_item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}}) {
+                if($sub_item_name eq '_ALL_') {
+                    $section->{'links'} = _remove_item_from_links($section->{'links'}, $item_name);
+                } else {
+                    for my $hintname (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}->{$sub_item_name}}) {
+                        for my $link (@{$section->{'links'}}) {
+                            if($link->{'name'} eq $item_name) {
+                                if($hintname eq '_ALL_') {
+                                    $link->{'links'} = _remove_item_from_links($link->{'links'}, $sub_item_name);
+                                } else {
+                                    for my $sublink (@{$link->{'links'}}) {
+                                        if($sublink->{'name'} eq $sub_item_name) {
+                                            $sublink->{'links'} = _remove_item_from_links($sublink->{'links'}, $hintname);
+                                            last;
                                         }
                                     }
-                                    last;
                                 }
+                                last;
                             }
                         }
                     }

@@ -10,6 +10,7 @@ next:
           - menu:
             - remove_item can now remove sub links too
             - add is_user function to test for specific users
+            - fix problem with removing items for specific users only
           - Panorama View:
             - add undo function
               - restore point can be created manually
