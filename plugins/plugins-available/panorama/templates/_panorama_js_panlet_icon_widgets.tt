@@ -1316,6 +1316,7 @@ Ext.define('TP.IconWidget', {
         var fromY = xdata.appearance.connectorfromy;
         var toX   = xdata.appearance.connectortox;
         var toY   = xdata.appearance.connectortoy;
+        if(isNaN(fromX)) { return; }
         if(fromX > toX) {
             fromX = xdata.appearance.connectortox;
             fromY = xdata.appearance.connectortoy;
@@ -2697,6 +2698,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
 
     var deltaX = x - icon.xdata.layout.x;
     var deltaY = y - icon.xdata.layout.y;
+    if(isNaN(deltaX) || isNaN(deltaY)) { return; }
 
     /* update settings window */
     if(TP.iconSettingsWindow) {
@@ -2725,7 +2727,7 @@ TP.iconMoveHandler = function(icon, x, y, noUpdateLonLat) {
             icon.xdata.layout.x = Math.floor(x);
             icon.xdata.layout.y = Math.floor(y);
 
-            if(icon.xdata.appearance.type == "connector") {
+            if(icon.xdata.appearance.type == "connector" && icon.xdata.appearance.connectorfromx != undefined) {
                 icon.xdata.appearance.connectorfromx += deltaX;
                 icon.xdata.appearance.connectorfromy += deltaY;
                 icon.xdata.appearance.connectortox   += deltaX;
