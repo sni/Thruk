@@ -33,7 +33,7 @@ TP.getExportTab = function(options) {
             xtype: 'button',
             text:  'Export Active Tab',
             handler: function() {
-                Ext.MessageBox.show({
+                TP.modalWindows.push(Ext.MessageBox.show({
                     title:      'Current Tab Export',
                     multiline:  true,
                     width:      600,
@@ -41,7 +41,7 @@ TP.getExportTab = function(options) {
                     value:      '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(cp.lastdata[options.tab.id]).match(/.{1,65}/g).join("\n")+"\n# End Export",
                     buttons:    Ext.MessageBox.OK,
                     icon:       Ext.MessageBox.INFO
-                });
+                }));
             }
         }]
     }, {
@@ -52,7 +52,7 @@ TP.getExportTab = function(options) {
             xtype: 'button',
             text: 'Export All Open Tabs',
             handler: function() {
-                Ext.MessageBox.show({
+                TP.modalWindows.push(Ext.MessageBox.show({
                     title:      'All Tabs Export',
                     multiline:  true,
                     width:      600,
@@ -60,7 +60,7 @@ TP.getExportTab = function(options) {
                     value:      '# Thruk Panorama Dashboard Export\n'+encode64(cp.encodeValue(cp.readValues())).match(/.{1,65}/g).join("\n")+"\n# End Export",
                     buttons:    Ext.MessageBox.OK,
                     icon:       Ext.MessageBox.INFO
-                });
+                }));
             }
         }]
     }, {
@@ -70,7 +70,7 @@ TP.getExportTab = function(options) {
             xtype: 'button',
             text: 'Import Tab(s)',
             handler: function() {
-                Ext.MessageBox.prompt({
+                TP.modalWindows.push(Ext.MessageBox.prompt({
                     title:      'Import Tab(s)',
                     id:         'importdialog',
                     multiline:  true,
@@ -86,7 +86,7 @@ TP.getExportTab = function(options) {
                             }
                         }
                     }
-                });
+                }));
             }
         }]
     }, {
@@ -99,7 +99,7 @@ TP.getExportTab = function(options) {
                 TP.modalWindows.push(Ext.Msg.confirm('Reset to default view?', 'Do you really want to reset all tabs and windows?', function(button) {
                     if (button === 'yes') {
                         if(options.close_handler) { options.close_handler(); }
-                        Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...');
+                        TP.modalWindows.push(Ext.MessageBox.alert('Success', 'Reset Successful!<br>Please wait while page reloads...'));
                         window.location = 'panorama.cgi?clean=1';
                     }
                 }));

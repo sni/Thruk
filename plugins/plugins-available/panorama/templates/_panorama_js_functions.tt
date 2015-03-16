@@ -657,7 +657,7 @@ var TP = {
         }
         catch(e) {
             TP.logError("global", "importAllTabsException", e);
-            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+            TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
             return(false);
         }
         if(decoded == null) {
@@ -666,12 +666,12 @@ var TP = {
             }
             catch(e) {
                 TP.logError("global", "jsonDecodeException", e);
-                Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+                TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
                 return(false);
             }
         }
         if(decoded == undefined || decoded == '') {
-            Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.');
+            TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
             return(false);
         }
         if(decoded == '') { decoded = {}; }
@@ -691,7 +691,7 @@ var TP = {
                         tabpan.stopTimeouts();
                         cp.loadData(decoded, false);
                         cp.saveChanges(false, {replace: 1});
-                        Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...').toFront();
+                        TP.modalWindows.push(Ext.MessageBox.alert('Success', 'Import Successful!<br>Please wait while page reloads...'));
                         TP.initialized = false; // prevents onUnload saving over our imported tabs
                         TP.timeouts['timeout_window_reload'] = window.setTimeout("window.location.reload()", 1000);
                     }
@@ -716,7 +716,7 @@ var TP = {
                         TP.initial_active_tab = resp.newid;
                         TP.add_pantab(resp.newid);
                     } else {
-                        Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.').toFront();
+                        TP.modalWindows.push(Ext.MessageBox.alert('Failed', 'Import Failed!\nThis seems to be an invalid dashboard export.'));
                         return(false);
                     }
                 }
