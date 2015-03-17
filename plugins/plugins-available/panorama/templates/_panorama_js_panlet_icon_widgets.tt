@@ -744,10 +744,14 @@
             var x     = (pixel.x-s.width/2);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
             panel.setPosition(x, y);
-            if(x < 0 || y < 0 || x > maxSize.width || y > maxSize.height) {
-                panel.hide();
-            } else {
+            if(panel.xdata.appearance.type == "connector") {
                 panel.show();
+            } else {
+                if(x < 0 || y < 0 || x > maxSize.width || y > maxSize.height) {
+                    panel.hide();
+                } else {
+                    panel.show();
+                }
             }
         }
         delete panel.noUpdateLonLat;
