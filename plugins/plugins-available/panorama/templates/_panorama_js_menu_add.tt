@@ -4,12 +4,12 @@
             afterrender: function(menu, eOpts) {
                 var tabpan = Ext.getCmp('tabpan');
                 var tab    = tabpan.getActiveTab();
-                tab.disableMapControls();
+                tab.disableMapControlsTemp();
             },
             beforehide: function(menu, eOpts) {
                 var tabpan = Ext.getCmp('tabpan');
                 var tab    = tabpan.getActiveTab();
-                tab.enableMapControls();
+                tab.enableMapControlsTemp();
             }
         },
         items: [{

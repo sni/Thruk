@@ -548,7 +548,7 @@
         el.on("contextmenu", function(evt) {
             evt.preventDefault();
             TP.resetMoveIcons();
-            tab.disableMapControls();
+            tab.disableMapControlsTemp();
             Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -633,7 +633,7 @@
                 listeners: {
                     beforehide: function(menu, eOpts) {
                         menu.destroy();
-                        tab.enableMapControls();
+                        tab.enableMapControlsTemp();
                     }
                 }
             }).showBy(This);
@@ -646,7 +646,7 @@
             el.dd.addListener('dragstart', function(This, evt) {
                 window.clearTimeout(TP.timeouts['click'+panel.id]);
                 TP.isShift = is_shift_pressed(evt);
-                tab.disableMapControls();
+                tab.disableMapControlsTemp();
                 /* add ourself to movelist */
                 if(TP.moveIcons) {
                     var found = false;
@@ -674,7 +674,7 @@
             el.dd.addListener('dragend', function(This, evt) {
                 panel.dragHint.destroy();
                 panel.dragHint = undefined;
-                tab.enableMapControls();
+                tab.enableMapControlsTemp();
                 TP.isShift = is_shift_pressed(evt);
                 /* prevents opening link after draging */
                 if(TP.isShift) {

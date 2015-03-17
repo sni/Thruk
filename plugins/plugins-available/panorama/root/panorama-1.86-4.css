@@ -594,3 +594,20 @@ SPAN.avail_result_error {
     opacity: 0.4;
     color: red;
 }
+
+.lockButton {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-repeat: no-repeat;
+    z-index: 2001;
+}
+.lockButton.unlocked {
+    background-image: url(images/lock_open.png);
+}
+.lockButton.locked {
+    background-image: url(images/lock.png);
+}

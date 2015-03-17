@@ -284,7 +284,7 @@ var TP = {
     add_panlet_handler: function(evt, element, args) {
         var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3], pos = args[4];
         tb.getEl().un('click', TP.add_panlet_handler, this, args); // remove event handler again
-        tb.enableMapControls();
+        tb.enableMapControlsTemp();
         if(config.conf == undefined) { config.conf = {}; }
         if(pos != undefined) {
             config.conf.pos = pos;
@@ -318,7 +318,7 @@ var TP = {
         tb.getEl().dom.style.cursor = 'crosshair';
         tb.getEl().on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY]);
         window.setTimeout(function() {
-            tb.disableMapControls();
+            tb.disableMapControlsTemp();
         }, 100);
     },
 
@@ -1627,6 +1627,8 @@ var TP = {
                     }
                     /* update stateproviders last data to prevent useless updates */
                     cp.lastdata = setStateByTab(ExtState);
+                    if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+                    if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
                     tab.renewInProgress = false;
                 } else {
                     tab.renewInProgress = false;

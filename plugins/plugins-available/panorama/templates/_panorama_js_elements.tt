@@ -682,13 +682,13 @@ Ext.define('TP.dragEl', {
             if(!panel.dragHint) {
                 panel.dragHint = Ext.DomHelper.insertFirst(document.body, '<div style="border: 1px solid grey; border-radius: 2px; background: #CCCCCC; position: absolute; z-index: 99999; top: -1px; left: 35%; padding: 3px;">Tip: hold shift key to enable grid snap.<\/div>' , true);
             }
-            tab.disableMapControls();
+            tab.disableMapControlsTemp();
         });
         panel.dd.addListener('drag', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
         });
         panel.dd.addListener('dragend', function(This, evt) {
-            tab.enableMapControls();
+            tab.enableMapControlsTemp();
             panel.dragHint.destroy();
             panel.dragHint = undefined;
             TP.isShift = is_shift_pressed(evt);

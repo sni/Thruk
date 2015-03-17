@@ -45,7 +45,7 @@ TP.iconShowEditDialog = function(panel) {
     if(TP.iconSettingsWindow != undefined) {
         TP.iconSettingsWindow.destroy();
     }
-    tab.disableMapControls();
+    tab.disableMapControlsTemp();
 
     TP.resetMoveIcons();
     TP.skipRender = false;
@@ -1499,7 +1499,7 @@ TP.iconShowEditDialog = function(panel) {
 
                 if(!settingsWindow.skipRestore) {
                     // if we cancel directly after adding a new icon, destroy it
-                    tab.enableMapControls();
+                    tab.enableMapControlsTemp();
                     if(panel.firstRun) {
                         panel.destroy();
                     } else {

@@ -481,9 +481,12 @@
                 attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
             }
             This.mapEl.lastWMSProvider = xdata.wms_provider;
-            var map   = new OpenLayers.Map();
+            var map   = new OpenLayers.Map('map', { controls: [] });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
+            map.addControl(new OpenLayers.Control.Navigation());
+            map.addControl(new OpenLayers.Control.PanZoomBar({panIcons: false}));
+            map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
                 renderTo: This.id+'-osmmap',
                 map:      map,
@@ -511,6 +514,17 @@
                 This.moveMapIcons(true);
             });
             This.fixMapIcons();
+            map.controls[1].moveTo({x:4,y:25});
+            map.controls[1].position.x = 4; /* looses position on next resize otherwise */
+            map.controls[1].position.y = 15;
+            This.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
+            This.lockButton.on("click", function(evt) {
+                if(This.lockButton.hasCls('unlocked')) {
+                    This.disableMapControls();
+                } else {
+                    This.enableMapControls();
+                }
+            });
         } else {
             if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
             if(This.map)   { This.map.destroy();   This.map   = undefined; }
@@ -557,16 +571,33 @@
             }
         }
     },
+    disableMapControlsTemp: function() {
+        if(!this.mapEl) { return; }
+        var tab = this;
+        if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(tab.map.locked) { return; }
+        tab.bgDragEl.dom.style.zIndex=2000;
+    },
+    enableMapControlsTemp: function() {
+        if(!this.mapEl) { return; }
+        var tab = this;
+        if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(tab.map.locked) { return; }
+        tab.bgDragEl.dom.style.zIndex="";
+    },
     disableMapControls: function() {
         if(!this.mapEl) { return; }
         var tab = this;
         if(tab.map == undefined || tab.map.map == undefined) { return; }
-        tab.bgDragEl.dom.style.zIndex=10;
+        tab.bgDragEl.dom.style.zIndex=2000;
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
                 tab.map.map.controls[x].div.style.display="none";
             }
         }
+        tab.map.locked = true;
+        tab.lockButton.removeCls('unlocked');
+        tab.lockButton.addCls('locked');
     },
     enableMapControls: function() {
         if(!this.mapEl) { return; }
@@ -578,6 +609,9 @@
                 tab.map.map.controls[x].div.style.display="";
             }
         }
+        tab.map.locked = false;
+        tab.lockButton.removeCls('locked');
+        tab.lockButton.addCls('unlocked');
     },
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
@@ -617,7 +651,7 @@
         /* right click context menu on tab body */
         evt.preventDefault();
         TP.resetMoveIcons();
-        tab.disableMapControls();
+        tab.disableMapControlsTemp();
         var pos = [evt.getX(), evt.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
         Ext.create('Ext.menu.Menu', {
@@ -737,7 +771,7 @@
             listeners: {
                 beforehide: function(menu, eOpts) {
                     menu.destroy();
-                    tab.enableMapControls();
+                    tab.enableMapControlsTemp();
                 }
             }
         }).showAt(pos);

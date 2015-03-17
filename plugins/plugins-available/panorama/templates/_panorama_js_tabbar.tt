@@ -66,12 +66,12 @@ Ext.define('TP.TabBar', {
                     afterrender: function(menu, eOpts) {
                         var tabpan = Ext.getCmp('tabpan');
                         var tab    = tabpan.getActiveTab();
-                        tab.disableMapControls();
+                        tab.disableMapControlsTemp();
                     },
                     beforehide: function(menu, eOpts) {
                         var tabpan = Ext.getCmp('tabpan');
                         var tab    = tabpan.getActiveTab();
-                        tab.enableMapControls();
+                        tab.enableMapControlsTemp();
                     }
                 },
                 items: [{
@@ -141,7 +141,7 @@ Ext.define('TP.TabBar', {
         tabhead.addListener('click', function(This, eOpts) {
             var tabpan = Ext.getCmp('tabpan');
             var tab    = tabpan.getActiveTab();
-            tab.disableMapControls();
+            tab.disableMapControlsTemp();
             var menu = Ext.create('Ext.menu.Menu', {
                 margin: '0 0 10 0',
                 items: [{
@@ -177,7 +177,7 @@ Ext.define('TP.TabBar', {
                 }],
                 listeners: {
                     beforehide: function(menu, eOpts) {
-                        tab.enableMapControls();
+                        tab.enableMapControlsTemp();
                         menu.destroy();
                     }
                 }

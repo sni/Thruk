@@ -830,6 +830,10 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/images/world.png
 plugins/plugins-available/panorama/root/images/wrench.png
+plugins/plugins-available/panorama/root/img/slider.png
+plugins/plugins-available/panorama/root/img/zoom-minus-mini.png
+plugins/plugins-available/panorama/root/img/zoom-plus-mini.png
+plugins/plugins-available/panorama/root/img/zoombar.png
 plugins/plugins-available/panorama/root/OpenLayers-2.13.1.js
 plugins/plugins-available/panorama/root/panorama-1.86-4.css
 plugins/plugins-available/panorama/root/sprintf.js
