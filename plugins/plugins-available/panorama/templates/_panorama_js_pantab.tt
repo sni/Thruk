@@ -183,6 +183,12 @@
                 This.moveMapIcons();
                 This.saveState();
             }
+        },
+        beforestatesave: function( This, state, eOpts ) {
+            if(This.locked) {
+                return(false);
+            }
+            return(true);
         }
     },
     getState: function() {
