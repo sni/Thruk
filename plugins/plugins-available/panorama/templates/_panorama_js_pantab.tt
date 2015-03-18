@@ -140,7 +140,7 @@
             }
             This.applyZindex();
             This.setBackground(This.xdata);
-            This.moveMapIcons();
+            This.moveMapIcons(true);
         },
         hide: function(This, eOpts) {
             This.hidePanlets();
@@ -196,6 +196,7 @@
             xdata: TP.clone(this.xdata)
         };
         delete state.xdata.locked;
+        delete state.xdata.refresh_txt;
         if(this.map) {
             var data = this.map.map.getCenter();
             state.xdata.map = {
@@ -219,14 +220,15 @@
         }
     },
     moveMapIcons: function(movedOnly) {
-        if(!this.map) { return; }
+        if(!this.map) { debug("no map yet!", new Error); return; }
         var This = this;
-        if(!This.isActiveTab()) { return; }
+        if(!This.isActiveTab()) { debug("not active"); return; }
+debug("moveMapIcons", movedOnly);
         var size = This.getSize();
         var panels = TP.getAllPanel(This);
         for(var nr=0; nr<panels.length; nr++) {
             var panel = panels[nr];
-            if(panel.el && panel.xdata.map != undefined && panel.xdata.layout != undefined) {
+            if(panel.xdata.map != undefined) {
                 panel.moveToMapLonLat(size, movedOnly);
             }
         }
@@ -239,6 +241,7 @@
     },
     applyState: function(state) {
         this.callParent(arguments);
+        this.applyXdata();
         if(state) {
             TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             // REMOVE AFTER: 01.01.2016
@@ -268,33 +271,48 @@
                 this.window_ids = state.xdata.window_ids;
             }
 
-            // create panlets
-            for(var nr=0; nr<this.window_ids.length; nr++) {
-                // delayed panlet creation
-                var autoshow = false;
-                var delay    = TP.initial_create_delay_inactive;
-                if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
-                    autoshow = true;
-                    delay    = TP.initial_create_delay_active;
-                }
-                var tabpan    = Ext.getCmp('tabpan');
-                var activeTab = tabpan.getActiveTab();
-                TP.timeouts['timeout_' + this.window_ids[nr] + '_render'] = window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
-
-                if(autoshow) {
-                   TP.initial_create_delay_active   = TP.initial_create_delay_active   + 50;
-                } else {
-                   TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 30;
-                }
-            };
+            /* create panlets */
             Ext.apply(this.xdata, state.xdata);
-            if(TP.initMask && this.keepMask) {
-                TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
-                    if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete this.keepMask; }
-                }, TP.initial_create_delay_active);
-            }
+            this.createInitialPanlets();
         }
-        this.applyXdata();
+    },
+    createInitialPanlets: function(retries) {
+        if(retries == undefined) { retries=0; }
+        if(retries > 1000) {
+            var err = new Error;
+            TP.logError(this.id, "tooManyRetriesException", err);
+            return;
+        }
+        if(this.xdata.map && (!this.mapEl || !this.map)) {
+debug("no map yet, waiting with panlets...");
+            window.setTimeout(Ext.bind(this.createInitialPanlets, this, [retries+1]), 50);
+            return;
+        }
+debug("got the map, rendering panlets...");
+        for(var nr=0; nr<this.window_ids.length; nr++) {
+            // delayed panlet creation
+            var autoshow = false;
+            var delay    = TP.initial_create_delay_inactive;
+            if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
+                autoshow = true;
+                delay    = TP.initial_create_delay_active;
+            }
+            var tabpan    = Ext.getCmp('tabpan');
+            var activeTab = tabpan.getActiveTab();
+            TP.timeouts['timeout_' + this.window_ids[nr] + '_render'] = window.setTimeout(Ext.bind(TP.add_panlet, this, [{id:this.window_ids[nr], skip_state:true, tb:this, autoshow:autoshow}, false]), delay);
+
+            if(autoshow) {
+               TP.initial_create_delay_active   = TP.initial_create_delay_active   + 50;
+            } else {
+               TP.initial_create_delay_inactive = TP.initial_create_delay_inactive + 30;
+            }
+        };
+        if(TP.initMask && this.keepMask) {
+            TP.timeouts['timeout_'+this.id+'_remove_mask'] = window.setTimeout(function() {
+                if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; delete this.keepMask; }
+            }, TP.initial_create_delay_active);
+        }
+debug("initMask: ", TP.initial_create_delay_active);
     },
     applyXdata: function(xdata, startTimeouts) {
         var This = this;
@@ -307,6 +325,9 @@
         xdata.locked = This.locked;
         This.setLock(xdata.locked);
         This.setTitle(xdata.title);
+        if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
+        if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        This.setBackground(xdata);
         if(startTimeouts != false) {
             if(TP.initialized) {
                 This.startTimeouts();
@@ -314,10 +335,6 @@
                 TP.timeouts['timeout_' + This.id + '_starttimeouts'] = window.setTimeout(Ext.bind(This.startTimeouts, This, []), 30000);
             }
         }
-        if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
-        if(This.map)   { This.map.destroy();   This.map   = undefined; }
-        This.setBackground(xdata);
-        This.moveMapIcons();
     },
 
     /* order icons by z-index */
@@ -436,21 +453,21 @@
         window.clearInterval(TP.timeouts['interval_global_icons' + this.id + '_refresh']);
     },
     setBackground: function(xdata, retries) {
-        var This = this;
+        var tab = this;
         var background = xdata.background,
             scale      = xdata.scale,
             offset_x   = xdata.offset_x,
             offset_y   = xdata.offset_y;
         if(retries == undefined) { retries = 0; }
         if(retries >= 5)         { return;      }
-        var body = This.body;
+        var body = tab.body;
         if(body == undefined)    { return; }
 
         if(xdata.map) {
-            if(This.bgImgEl) { This.bgImgEl.destroy(); This.bgImgEl = undefined; }
-            var size = This.getSize();
+            if(tab.bgImgEl) { tab.bgImgEl.destroy(); tab.bgImgEl = undefined; }
+            var size = tab.getSize();
             if(size.width < 5 || size.height < 5) {
-                window.setTimeout(Ext.bind(This.setBackground, This, [xdata, retries+1]), 500);
+                window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
                 return;
             }
             /* get wms provider */
@@ -462,18 +479,18 @@
             });
             if(wmsData == undefined) {
                 wmsData = wmsProvider.getAt(0).data.provider;
-                TP.log('['+This.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
+                TP.log('['+tab.id+'] fallback to default wms provider, "'+xdata.wms_provider+'" does not exist.');
                 xdata.wms_provider = wmsProvider.getAt(0).data.name;
             }
             wmsData = Ext.JSON.decode(wmsData);
-            if(This.mapEl && This.mapEl.lastWMSProvider != xdata.wms_provider) {
-                if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
-                if(This.map)   { This.map.destroy();   This.map   = undefined; }
+            if(tab.mapEl && tab.mapEl.lastWMSProvider != xdata.wms_provider) {
+                if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+                if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
             }
-            if(!This.mapEl) {
-                This.mapEl = body.createChild('<div id="'+This.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
+            if(!tab.mapEl) {
+                tab.mapEl = body.createChild('<div id="'+tab.id+'-osmmap" style="width: 100%; height: 100%;">', body.dom.childNodes[0]);
             }
-            if(This.mapEl.lastWMSProvider != undefined && This.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
+            if(tab.mapEl.lastWMSProvider != undefined && tab.mapEl.lastWMSProvider == xdata.wms_provider) { return; }
             Ext.Loader.setConfig({
                 enabled: true,
                 disableCaching: false,
@@ -486,7 +503,7 @@
                 var url = xdata.wms_provider.replace(/\ .*$/, '');
                 attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
             }
-            This.mapEl.lastWMSProvider = xdata.wms_provider;
+            tab.mapEl.lastWMSProvider = xdata.wms_provider;
             var map   = new OpenLayers.Map('map', { controls: [] });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
@@ -494,7 +511,7 @@
             map.addControl(new OpenLayers.Control.PanZoomBar({panIcons: false}));
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
-                renderTo: This.id+'-osmmap',
+                renderTo: tab.id+'-osmmap',
                 map:      map,
                 width:    size.width,
                 height:   size.height,
@@ -502,78 +519,80 @@
                 zoom:     6,
                 stateful: true,
                 listeners: {
-                    aftermapmove: function(eOpts) {
-                        This.moveMapIcons();
-                        This.saveState();
+                    aftermapmove: function(This, map, eOpts) {
+debug("aftermapmove");
+                        tab.map = This; /* otherwise not yet set when event fires first time */
+                        tab.moveMapIcons(true);
+                        tab.saveState();
                     }
                 }
             };
-            if(This.xdata && This.xdata.map && This.xdata.map.lon != undefined) {
-                mapData.zoom   = Number(This.xdata.map.zoom);
-                mapData.center = [Number(This.xdata.map.lon), Number(This.xdata.map.lat)];
+            if(tab.xdata && tab.xdata.map && tab.xdata.map.lon != undefined) {
+                mapData.zoom   = Number(tab.xdata.map.zoom);
+                mapData.center = [Number(tab.xdata.map.lon), Number(tab.xdata.map.lat)];
             }
-            This.map = Ext.create('GeoExt.panel.Map', mapData);
+            tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("movestart", map, function() {
-                This.fixMapIcons();
+                tab.fixMapIcons();
             });
             map.events.register("move", map, function() {
-                This.moveMapIcons(true);
+                tab.moveMapIcons(true);
             });
-            This.fixMapIcons();
+            tab.fixMapIcons();
             map.controls[1].moveTo({x:4,y:25});
             map.controls[1].position.x = 4; /* looses position on next resize otherwise */
             map.controls[1].position.y = 15;
-            This.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
-            This.lockButton.on("click", function(evt) {
-                if(This.lockButton.hasCls('unlocked')) {
-                    This.disableMapControls();
+            tab.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
+            tab.lockButton.on("click", function(evt) {
+                if(tab.lockButton.hasCls('unlocked')) {
+                    tab.disableMapControls();
                 } else {
-                    This.enableMapControls();
+                    tab.enableMapControls();
                 }
             });
         } else {
-            if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
-            if(This.map)   { This.map.destroy();   This.map   = undefined; }
+            if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+            if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
         }
 
-        if(!This.bgDragEl) {
-            This.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
-            This.bgDragEl.dom.src            = background;
-            This.bgDragEl.dom.style.position = "absolute";
-            This.bgDragEl.dom.style.width    = "100%";
-            This.bgDragEl.dom.style.height   = "100%";
-            This.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
+        if(!tab.bgDragEl) {
+            tab.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
+            tab.bgDragEl.dom.src            = background;
+            tab.bgDragEl.dom.style.position = "absolute";
+            tab.bgDragEl.dom.style.width    = "100%";
+            tab.bgDragEl.dom.style.height   = "100%";
+            tab.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
         }
-        if(This.locked) {
-            This.disableMapControls();
+        if(tab.locked) {
+            tab.disableMapControls();
         }
 
         if(background != undefined && background != 'none' && !xdata.map) {
-            if(!This.bgImgEl) {
-                This.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
+            if(!tab.bgImgEl) {
+                tab.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
             }
-            This.bgImgEl.dom.src            = background;
-            This.bgImgEl.dom.style.position = "absolute";
+            tab.bgImgEl.dom.src            = background;
+            tab.bgImgEl.dom.style.position = "absolute";
             if(scale == 100) {
-                This.bgImgEl.dom.style.width  = "";
-                This.bgImgEl.dom.style.height = "";
+                tab.bgImgEl.dom.style.width  = "";
+                tab.bgImgEl.dom.style.height = "";
             } else {
                 var naturalSize = TP.getNatural(background);
                 if(naturalSize.width < 2 || naturalSize.height < 2) {
-                    window.setTimeout(Ext.bind(This.setBackground, This, [xdata, retries+1]), 500);
+                    window.setTimeout(Ext.bind(tab.setBackground, tab, [xdata, retries+1]), 50);
                     return;
                 }
                 var width  = Number(scale * naturalSize.width  / 100);
                 var height = Number(scale * naturalSize.height / 100);
-                This.bgImgEl.dom.style.width  = width+"px";
-                This.bgImgEl.dom.style.height = height+"px";
+                tab.bgImgEl.dom.style.width  = width+"px";
+                tab.bgImgEl.dom.style.height = height+"px";
             }
-            This.bgImgEl.dom.style.top  = offset_y+"px";
-            This.bgImgEl.dom.style.left = offset_x+"px";
+            tab.bgImgEl.dom.style.top  = offset_y+"px";
+            tab.bgImgEl.dom.style.left = offset_x+"px";
         } else {
-            if(This.bgImgEl) {
-                This.bgImgEl.destroy();
-                This.bgImgEl = undefined;
+            if(tab.bgImgEl) {
+                tab.bgImgEl.destroy();
+                tab.bgImgEl = undefined;
             }
         }
     },
