@@ -76,7 +76,6 @@
             if(state) {
                 this.applyXdata(state.xdata);
             }
-debug(this.id, "applyState", this.xdata.layout);
         };
     },
     listeners: {
@@ -182,6 +181,12 @@ debug(this.id, "applyState", this.xdata.layout);
         resize: function(This, width, height, oldWidth, oldHeight, eOpts) {
             /* update label */
             this.setIconLabel();
+        },
+        beforestatesave: function( This, state, eOpts ) {
+            if(This.locked) {
+                return(false);
+            }
+            return(true);
         }
     },
     applyXdata: function(xdata) {
@@ -194,8 +199,7 @@ debug(this.id, "applyState", this.xdata.layout);
         if(xdata.appearance['type'] == undefined || xdata.appearance['type'] == '') { xdata.appearance['type'] = 'icon' };
 
         /* restore position */
-debug(this.id, "applyXdata: ", xdata.layout);
-        this.setPosition(Number(xdata.layout.x), Number(xdata.layout.y));
+        this.setRawPosition(Number(xdata.layout.x), Number(xdata.layout.y));
         if(xdata.layout.rotation) {
             this.applyRotation(Number(xdata.layout.rotation), xdata);
         } else {
@@ -395,7 +399,7 @@ debug(this.id, "applyXdata: ", xdata.layout);
                         if(y != undefined) { This.oldY = y; }
                         if(diffX != 0 || diffY != 0) {
                             var pos = panel.getPosition();
-                            panel.setPosition(pos[0]+diffX, pos[1]+diffY);
+                            panel.setRawPosition(pos[0]+diffX, pos[1]+diffY);
                             // update settings window
                             if(TP.iconSettingsWindow) {
                                 TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:pos[0]+diffX, y:pos[1]+diffY});
@@ -691,7 +695,7 @@ debug(this.id, "applyXdata: ", xdata.layout);
                 if(TP.isShift) {
                     var pos = panel.getPosition();
                     panel.noMoreMoves = true;
-                    panel.setPosition(TP.get_snap(pos[0], pos[1]));
+                    panel.setRawPosition(TP.get_snap(pos[0], pos[1]));
                     panel.noMoreMoves = false;
                 }
                 TP.isShift = false;
@@ -717,7 +721,6 @@ debug(this.id, "applyXdata: ", xdata.layout);
         var s = panel.getSize();
         var p = panel.getPosition();
         var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
-debug(this.id, "updateMapLonLat", panel.id, new Error);
         if(panel.xdata.appearance.type == "connector") {
             var lonLat1 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectorfromx, y: panel.xdata.appearance.connectorfromy-TP.offset_y});
             var lonLat2 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectortox,   y: panel.xdata.appearance.connectortoy-TP.offset_y});
@@ -743,7 +746,6 @@ debug(this.id, "updateMapLonLat", panel.id, new Error);
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         panel.noUpdateLonLat++;
         if(panel.xdata.appearance.type == "connector" && !movedOnly) {
-debug(this.id, "moveToMapLonLat", panel.id, movedOnly);
             var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon),  lat: Number(panel.xdata.map.lat)});
             var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon1), lat: Number(panel.xdata.map.lat1)});
             var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon2), lat: Number(panel.xdata.map.lat2)});
@@ -761,7 +763,6 @@ debug(this.id, "moveToMapLonLat", panel.id, movedOnly);
             var s;
             if(!panel.el) {
                 s     = {width: panel.xdata.size, height: panel.xdata.size};
-debug(this.id, "fakesize", s);
             } else {
                 s     = panel.getSize();
             }
@@ -769,15 +770,15 @@ debug(this.id, "fakesize", s);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
             panel.xdata.layout.x = pixel.x;
             panel.xdata.layout.y = pixel.y;
-            panel.setPosition(x, y);
+            panel.setRawPosition(x, y);
             if(panel.el) {
                 if(panel.xdata.appearance.type == "connector") {
-                    panel.show();
+                    if(panel.isHidden()) { panel.show(); }
                 } else {
                     if(maxSize != undefined && (x < 0 || y < 0 || x > maxSize.width || y > maxSize.height)) {
-                        panel.hide();
+                        if(!panel.isHidden()) { panel.hide(); }
                     } else {
-                        panel.show();
+                        if(panel.isHidden()) { panel.show(); }
                     }
                 }
             }
@@ -786,6 +787,18 @@ debug(this.id, "fakesize", s);
             panel.setIconLabel();
         }
         panel.noUpdateLonLat--;
+    },
+    setRawPosition: function(x, y) {
+        var panel = this;
+        panel.noUpdateLonLat++
+        panel.suspendEvents();
+        panel.setPosition(x, y);
+        if(panel.el && panel.el.dom) {
+            panel.setPagePosition(x, y);
+        }
+        panel.resumeEvents();
+        panel.noUpdateLonLat--;
+        panel.setIconLabel();
     }
 });
 
@@ -1463,11 +1476,7 @@ Ext.define('TP.IconWidget', {
         /* adjust position: first point in path is the rotated start point, so we can get our current offset from there */
         xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
         xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
-        panel.suspendEvents();
-debug(panel.id, "connectorRender: ", xdata.layout);
-        panel.setPosition(xdata.layout.x, xdata.layout.y);
-        panel.resumeEvents();
-        panel.setIconLabel();
+        panel.setRawPosition(xdata.layout.x, xdata.layout.y);
 
         /* adjust drag elements position */
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {
