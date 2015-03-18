@@ -624,6 +624,9 @@
                 tab.map.map.controls[x].div.style.display="none";
             }
         }
+        if(tab.locked) {
+            TP.suppressIconTip = false;
+        }
         tab.map.locked = true;
         tab.lockButton.removeCls('unlocked');
         tab.lockButton.addCls('locked');
@@ -636,11 +639,13 @@
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div) {
                 tab.map.map.controls[x].div.style.display="";
+                tab.map.map.controls[x].div.style.zIndex=100000;
             }
         }
         tab.map.locked = false;
         tab.lockButton.removeCls('locked');
         tab.lockButton.addCls('unlocked');
+        TP.suppressIconTip = true;
     },
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {

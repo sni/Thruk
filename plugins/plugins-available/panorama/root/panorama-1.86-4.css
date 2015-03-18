@@ -603,7 +603,7 @@ SPAN.avail_result_error {
     top: 10px;
     left: 10px;
     background-repeat: no-repeat;
-    z-index: 2001;
+    z-index: 100001;
 }
 .lockButton.unlocked {
     background-image: url(images/lock_open.png);
