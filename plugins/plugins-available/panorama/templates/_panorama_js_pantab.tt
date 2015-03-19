@@ -641,6 +641,10 @@
         tab.map.locked = true;
         tab.lockButton.removeCls('unlocked');
         tab.lockButton.addCls('locked');
+        var panels = TP.getAllPanel(this);
+        for(var nr=0; nr<panels.length; nr++) {
+            panels[nr].el.dom.style.pointerEvents = "";
+        }
     },
     enableMapControls: function() {
         if(!this.mapEl) { return; }
@@ -657,6 +661,10 @@
         tab.lockButton.removeCls('locked');
         tab.lockButton.addCls('unlocked');
         TP.suppressIconTip = true;
+        var panels = TP.getAllPanel(this);
+        for(var nr=0; nr<panels.length; nr++) {
+            panels[nr].el.dom.style.pointerEvents = "none";
+        }
     },
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
