@@ -898,6 +898,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_services.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_host.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_icon_tooltip.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_icon_widgets.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_icon_widgets_settings.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart.tt
