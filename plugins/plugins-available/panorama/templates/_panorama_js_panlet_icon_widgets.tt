@@ -714,15 +714,15 @@
             el.dd_listener_added = true;
         }
     },
-    updateMapLonLat: function() {
+    updateMapLonLat: function(forceCenter) {
         var panel = this;
-        if(panel.noUpdateLonLat > 0) { return; }
+        if(forceCenter && panel.noUpdateLonLat > 0) { return; }
         var tab   = Ext.getCmp(panel.panel_id);
         if(tab.map == undefined || tab.map.map == undefined) { return; }
         var s = panel.getSize();
         var p = panel.getPosition();
         var lonLat = tab.map.map.getLonLatFromPixel({x: (p[0]+s.width/2), y: (p[1]+s.height/2)-TP.offset_y});
-        if(panel.xdata.appearance.type == "connector") {
+        if(!forceCenter && panel.xdata.appearance.type == "connector") {
             var lonLat1 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectorfromx, y: panel.xdata.appearance.connectorfromy-TP.offset_y});
             var lonLat2 = tab.map.map.getLonLatFromPixel({x: panel.xdata.appearance.connectortox,   y: panel.xdata.appearance.connectortoy-TP.offset_y});
             panel.xdata.map = {
@@ -734,10 +734,12 @@
                 lat2: lonLat2.lat
             }
         } else {
-            panel.xdata.map = {
-                lon: lonLat.lon,
-                lat: lonLat.lat
-            };
+            /* do not completly overwrite map{}, it might be a connector which looses its endpoints then */
+            if(panel.xdata.appearance.type != "connector" || panel.xdata.map == undefined) {
+                panel.xdata.map = {};
+            }
+            panel.xdata.map.lon = lonLat.lon;
+            panel.xdata.map.lat = lonLat.lat;
         }
         panel.saveState();
     },
@@ -751,7 +753,7 @@
             var pixel1 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon1), lat: Number(panel.xdata.map.lat1)});
             var pixel2 = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon2), lat: Number(panel.xdata.map.lat2)});
             panel.xdata.layout.x                  = pixel.x;
-            panel.xdata.layout.y                  = pixel.y;
+            panel.xdata.layout.y                  = pixel.y+TP.offset_y;
             panel.xdata.appearance.connectorfromx = pixel1.x;
             panel.xdata.appearance.connectorfromy = pixel1.y+TP.offset_y;
             panel.xdata.appearance.connectortox   = pixel2.x;
@@ -769,8 +771,8 @@
             }
             var x     = (pixel.x-s.width/2);
             var y     = (pixel.y-s.height/2)+TP.offset_y;
-            panel.xdata.layout.x = pixel.x;
-            panel.xdata.layout.y = pixel.y;
+            panel.xdata.layout.x = x;
+            panel.xdata.layout.y = y;
             panel.setRawPosition(x, y);
             if(panel.el) {
                 if(panel.xdata.appearance.type == "connector") {
@@ -1478,6 +1480,7 @@ Ext.define('TP.IconWidget', {
         xdata.layout.x = Math.ceil(fromX-box.path[0][1]+box.x);
         xdata.layout.y = Math.ceil(fromY-box.path[0][2]+box.y);
         panel.setRawPosition(xdata.layout.x, xdata.layout.y);
+        panel.updateMapLonLat(true);
 
         /* adjust drag elements position */
         Ext.Array.each([panel.dragEl1, panel.dragEl2], function(dragEl) {

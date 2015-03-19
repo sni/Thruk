@@ -534,6 +534,9 @@
                         This.map.lastZoomLevel = zoom;
                         tab.moveMapIcons(movedOnly);
                         tab.saveState();
+                    },
+                    destroy: function(This){
+                        zoomControl.destroy();
                     }
                 }
             };
