@@ -549,9 +549,9 @@
                 tab.moveMapIcons(true);
             });
             tab.fixMapIcons();
-            map.controls[1].moveTo({x:4,y:25});
+            map.controls[1].moveTo({x:4,y:30});
             map.controls[1].position.x = 4; /* looses position on next resize otherwise */
-            map.controls[1].position.y = 15;
+            map.controls[1].position.y = 20;
             tab.lockButton = body.createChild('<div class="lockButton unlocked">', body.dom.childNodes[0]);
             tab.lockButton.on("click", function(evt) {
                 if(tab.lockButton.hasCls('unlocked')) {

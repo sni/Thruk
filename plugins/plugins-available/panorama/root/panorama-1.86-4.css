@@ -601,7 +601,7 @@ SPAN.avail_result_error {
     cursor: pointer;
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 9px;
     background-repeat: no-repeat;
     z-index: 100001;
 }
