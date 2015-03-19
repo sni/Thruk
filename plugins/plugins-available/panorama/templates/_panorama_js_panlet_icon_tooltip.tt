@@ -1,4 +1,5 @@
-﻿TP.suppressIconTip = false;
+﻿TP.suppressIconTipForce = true;
+TP.suppressIconTip      = false;
 Ext.onReady(function() {
     TP.iconTip = Ext.create('Ext.tip.ToolTip', {
         title:    'Details:',
@@ -15,11 +16,16 @@ Ext.onReady(function() {
         shadow:   'drop',
         html:      '',
         listeners: {
-            beforeshow: function(This) {
+            beforeshow: function(This, eOpts) {
+                if(TP.suppressIconTipForce) {
+                    return false;
+                }
+                TP.suppressIconTipForce = true;
                 if(TP.suppressIconTip) {
                     This.hide();
                     return false;
                 }
+                return true;
             },
             show: function(This) {
                 if(TP.iconTip.detailsTarget) { TP.iconTip.detailsTarget.doLayout(); }
@@ -28,6 +34,7 @@ Ext.onReady(function() {
                 var showAtPos = TP.getNextToPanelPos(TP.iconTip.panel, size.width, size.height);
                 var pos = This.getPosition();
                 if(pos[0] != showAtPos[0] || pos[1] != showAtPos[1]) {
+                    TP.suppressIconTipForce = false;
                     This.showAt(showAtPos);
                 }
                 TP.modalWindows.push(TP.iconTip);
@@ -41,7 +48,9 @@ Ext.onReady(function() {
     });
 
     var tipRenderer = function (evt, el, eOpts) {
+        if(TP.suppressIconTip) { return; }
         evt.stopEvent();
+        if(evt.target.tagName == "rect") { return; } /* skip canvas elements and only popup on actual paths */
         var img = Ext.getCmp(el.id);
         if(img.panel) { img = img.panel; el = img.el.dom }
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
@@ -83,6 +92,7 @@ Ext.onReady(function() {
         if(TP.iconTip.el) { size = TP.iconTip.getSize(); }
         if(size == undefined || size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
         var showAtPos = TP.getNextToPanelPos(img, size.width, size.height);
+        TP.suppressIconTipForce = false;
         TP.iconTip.showAt(showAtPos);
         if(link && TP.iconTip.panel) {
             var style = 'detail';
@@ -230,6 +240,7 @@ TP.renderTipDetails = function(data) {
     var size      = TP.iconTip.getSize();
     if(size.width <= 1 || size.height <= 1) { size = {width: 400, height: 150} }
     var showAtPos = TP.getNextToPanelPos(panel, size.width, size.height);
+    TP.suppressIconTipForce = false;
     TP.iconTip.showAt(showAtPos);
     TP.iconTip.syncShadow();
     return;

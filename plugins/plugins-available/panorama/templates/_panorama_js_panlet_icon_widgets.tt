@@ -1488,6 +1488,32 @@ Ext.define('TP.IconWidget', {
                 try { dragEl.toFront(); } catch(err) {}
             }
         });
+
+        /* enable popups only over the actual arrow */
+        if(!TP.suppressIconTip) {
+            sprite.on('mouseover', function(el, evt, eOpts) {
+                TP.suppressIconTip = false;
+            });
+            sprite.on('mouseout', function(el, evt, eOpts) {
+                TP.suppressIconTip = true;
+            });
+            panel.el.on('mouseover', function(evt, el, eOpts) {
+                if(evt.target.tagName != "rect") { return; }
+                TP.suppressIconTip = true;
+            });
+            panel.el.on('mouseout', function(evt, el, eOpts) {
+                if(evt.target.tagName != "rect") { return; }
+                TP.suppressIconTip = false;
+            });
+            if(panel.labelEl && panel.labelEl.el) {
+                panel.labelEl.el.on('mouseover', function(evt, el, eOpts) {
+                    TP.suppressIconTip = false;
+                });
+                panel.labelEl.el.on('mouseout', function(evt, el, eOpts) {
+                    TP.suppressIconTip = true;
+                });
+            }
+        }
     },
     iconSetSourceFromState: function(xdata) {
         var panel = this;
