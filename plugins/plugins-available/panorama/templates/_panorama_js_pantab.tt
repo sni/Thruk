@@ -77,6 +77,15 @@
             if(This.map)      { This.map.destroy();      }
             tabpan.saveState();
         },
+        beforeactivate: function( This, eOpts ) {
+            /* must be done before active, otherwise map zoom control flicker */
+            TP.suppressIconTip = true;
+            if(This.locked) {
+                TP.suppressIconTip = false;
+                This.disableMapControls();
+            }
+            return(true);
+        },
         activate: function(This, eOpts) {
             TP.resetMoveIcons();
             var delay = 0;
@@ -133,11 +142,6 @@
             if(This.bgDragEl) { This.bgDragEl.show(); }
             if(This.bgImgEl)  { This.bgImgEl.show();  }
             if(This.mapEl)    { This.mapEl.show();    }
-            TP.suppressIconTip = true;
-            if(This.locked) {
-                TP.suppressIconTip = false;
-                This.disableMapControls();
-            }
             This.applyZindex();
             This.setBackground(This.xdata);
             This.moveMapIcons(true);
@@ -504,7 +508,9 @@
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
-            map.addControl(new OpenLayers.Control.PanZoomBar({panIcons: false}));
+            var zoomControlDiv = body.createChild('<div style="position: absolute; z-index: 100000; display: none;">', body.dom.childNodes[0]);
+            var zoomControl    = new OpenLayers.Control.PanZoomBar({panIcons: false, zoomWorldIcon: true, div: zoomControlDiv.dom});
+            map.addControl(zoomControl);
             map.addControl(new OpenLayers.Control.Attribution());
             var mapData = {
                 renderTo: tab.id+'-osmmap',
@@ -554,6 +560,10 @@
                     tab.enableMapControls();
                 }
             });
+            /* create our own zoom controls, because they do not work when not using default div from map */
+            zoomControl.buttons[0].onclick = function() { map.zoomIn() }
+            zoomControl.buttons[1].onclick = function() { map.zoomOut() }
+            zoomControl.buttons[2].onclick = function() { map.zoomToMaxExtent() }
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
@@ -621,7 +631,8 @@
         tab.bgDragEl.dom.style.zIndex=2000;
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div && !tab.map.map.controls[x].div.id.match('Attribution')) {
-                tab.map.map.controls[x].div.style.display="none";
+                var ctrl = tab.map.map.controls[x];
+                ctrl.div.style.display="none";
             }
         }
         if(tab.locked) {
@@ -638,8 +649,8 @@
         tab.bgDragEl.dom.style.zIndex="";
         for(var x=0; x<tab.map.map.controls.length; x++) {
             if(tab.map.map.controls[x].div) {
-                tab.map.map.controls[x].div.style.display="";
-                tab.map.map.controls[x].div.style.zIndex=100000;
+                var ctrl = tab.map.map.controls[x];
+                ctrl.div.style.display="";
             }
         }
         tab.map.locked = false;
