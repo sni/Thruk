@@ -21,6 +21,7 @@ for my $file (@jsfiles) {
     ok(1, "checking ".$file);
     next if $file =~ m/bigscreen/mxi;
     next if $file =~ m/OpenLayers/mxi;
+    next if $file =~ m/all_in_one/mxi;
     TestUtils::verify_js($file);
 }
 
