@@ -1377,16 +1377,19 @@ Ext.define('TP.IconWidget', {
         if(!panel.surface.el) { return };
         panel.surface.removeAll();
 
-        var fromX = xdata.appearance.connectorfromx;
-        var fromY = xdata.appearance.connectorfromy;
-        var toX   = xdata.appearance.connectortox;
-        var toY   = xdata.appearance.connectortoy;
+        var fromX     = xdata.appearance.connectorfromx;
+        var fromY     = xdata.appearance.connectorfromy;
+        var toX       = xdata.appearance.connectortox;
+        var toY       = xdata.appearance.connectortoy;
+        var arrowtype = xdata.appearance.connectorarrowtype;
         if(isNaN(fromX)) { return; }
         if(fromX > toX) {
             fromX = xdata.appearance.connectortox;
             fromY = xdata.appearance.connectortoy;
             toX   = xdata.appearance.connectorfromx;
             toY   = xdata.appearance.connectorfromy;
+            if(     arrowtype == "right") { arrowtype = "left"; }
+            else if(arrowtype == "left")  { arrowtype = "right"; }
         }
         var connectorarrowwidth = xdata.appearance.connectorarrowwidth;
 
@@ -1429,7 +1432,7 @@ Ext.define('TP.IconWidget', {
 
         var points = [[start[0],start[1]]];
         /* top half of left arrow */
-        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+        if(arrowtype == "both" || arrowtype == "left") {
             points.push(
                 [(start[0]+xdata.appearance.connectorarrowlength), (start[1]-connectorwidth/2-connectorarrowwidth)],
                 [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]-connectorwidth/2)]
@@ -1441,7 +1444,7 @@ Ext.define('TP.IconWidget', {
         }
 
         /* right arrow */
-        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "right") {
+        if(arrowtype == "both" || arrowtype == "right") {
             points.push(
                 [end[0]-xdata.appearance.connectorarrowlength+xdata.appearance.connectorarrowinset, (end[1]-connectorwidth/2)],
                 [end[0]-xdata.appearance.connectorarrowlength, (end[1]-connectorwidth/2-connectorarrowwidth)],
@@ -1457,7 +1460,7 @@ Ext.define('TP.IconWidget', {
         }
 
         /* bottom half of left arrow */
-        if(xdata.appearance.connectorarrowtype == "both" || xdata.appearance.connectorarrowtype == "left") {
+        if(arrowtype == "both" || arrowtype == "left") {
             points.push(
                 [(start[0]+xdata.appearance.connectorarrowlength-xdata.appearance.connectorarrowinset), (start[1]+connectorwidth/2)],
                 [(start[0]+xdata.appearance.connectorarrowlength), (start[1]+connectorwidth/2+connectorarrowwidth)]
@@ -1475,7 +1478,7 @@ Ext.define('TP.IconWidget', {
         });
         sprite.setAttributes({rotate:{degrees: angle, x:0, y:0}}, true);
         var box = sprite.getBBox();
-        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(xdata.appearance.connectorarrowtype == "none" ? connectorarrowwidth : 0)}}, true);
+        sprite.setAttributes({translate:{x:-box.x,y:-box.y+(arrowtype == "none" ? connectorarrowwidth : 0)}}, true);
         var newHeight = Math.ceil(Ext.Array.max([connectorarrowwidth+connectorwidth, box.height]));
         panel.setSize(Math.ceil(box.width), newHeight);
         panel.surface.setSize(Math.ceil(box.width), newHeight);
