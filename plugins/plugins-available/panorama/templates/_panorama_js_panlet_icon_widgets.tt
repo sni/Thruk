@@ -752,6 +752,7 @@
         var panel = this;
         var tab   = Ext.getCmp(panel.panel_id);
         if(tab.map == undefined || tab.map.map == undefined) { return; }
+        if(panel.xdata.map == undefined)                     { return; }
         panel.noUpdateLonLat++;
         if(panel.xdata.appearance.type == "connector" && !movedOnly) {
             var pixel  = tab.map.map.getPixelFromLonLat({lon: Number(panel.xdata.map.lon),  lat: Number(panel.xdata.map.lat)});
