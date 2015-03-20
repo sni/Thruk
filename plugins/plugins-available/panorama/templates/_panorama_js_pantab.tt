@@ -699,8 +699,6 @@
         }
         if(val) {
             tab.disableMapControls();
-        } else {
-            tab.enableMapControls();
         }
         /* schedule update, which also remove the mask from above */
         TP.updateAllIcons(this);
