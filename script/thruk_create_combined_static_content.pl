@@ -78,9 +78,10 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
     }
     $newest = $s[9] if (@s && $newest < $s[9]);
 }
-my $panorama_required = 1;
-if(-e 'root/thruk/javascript/all_in_one-'.$version.'_panorama.js') {
-    my @s = stat('root/thruk/javascript/all_in_one-'.$version.'_panorama.js');
+my $panorama_required   = 1;
+my $all_in_one_panorama = 'plugins/plugins-available/panorama/root/all_in_one-'.$version.'_panorama.js';
+if(-e $all_in_one_panorama) {
+    my @s = stat($all_in_one_panorama);
     if($s[9] >= $newest) {
         $panorama_required = 0;
     }
@@ -105,7 +106,7 @@ my $cmds = [
     'cd root/thruk/javascript && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$version.'.js',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$version.'.css',
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$version.'.css',
-    'cat '.join(' ', @panorama_files).' > root/thruk/javascript/all_in_one-'.$version.'_panorama.js',
+    'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
 push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'.js'          if $dos2unix;
 push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'_panorama.js' if $dos2unix;
