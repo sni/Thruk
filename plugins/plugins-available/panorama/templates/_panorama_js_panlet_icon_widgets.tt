@@ -686,6 +686,10 @@
             });
             el.dd.addListener('drag', function(This, evt) {
                 TP.isShift = is_shift_pressed(evt);
+                if(panel.xdata.appearance.type == "connector") {
+                    /* dragging by label does not fire the move event, so fire move manually */
+                    panel.fireEvent("move", panel, undefined, undefined);
+                }
             });
             el.dd.addListener('dragend', function(This, evt) {
                 panel.dragHint.destroy();
