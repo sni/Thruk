@@ -201,6 +201,7 @@
         };
         delete state.xdata.locked;
         delete state.xdata.refresh_txt;
+        delete state.xdata.map_choose;
         if(this.map) {
             var data = this.map.map.getCenter();
             state.xdata.map = {
@@ -537,6 +538,8 @@
                     },
                     destroy: function(This){
                         zoomControl.destroy();
+                        tab.lockButton.destroy();
+                        tab.lockButton = undefined;
                     }
                 }
             };

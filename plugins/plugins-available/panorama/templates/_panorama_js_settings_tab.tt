@@ -730,6 +730,8 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             delete tab.xdata['map'];
                             delete tab.xdata['wms_provider'];
                             delete values['wms_provider'];
+                            if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
+                            if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
@@ -757,7 +759,10 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
+                        var oldLocked = tab.locked;
+                        tab.locked = false;
                         tab.saveState();
+                        tab.locked = oldLocked;
                         if(oldstate != newstate) {
                             tabpan.startTimeouts();
                         }
