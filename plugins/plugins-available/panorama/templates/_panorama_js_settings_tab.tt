@@ -732,6 +732,16 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             delete values['wms_provider'];
                             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
                             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
+                            /* remove map coordinates */
+                            var panels = TP.getAllPanel(tab);
+                            for(var nr=0; nr<panels.length; nr++) {
+                                var p = panels[nr];
+                                delete p.xdata.map;
+                                var oldLocked = p.locked;
+                                p.locked = false;
+                                p.saveState();
+                                p.locked = oldLocked;
+                            }
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
