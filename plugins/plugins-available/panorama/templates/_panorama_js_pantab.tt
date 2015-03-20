@@ -505,7 +505,8 @@
                 attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
             }
             tab.mapEl.lastWMSProvider = xdata.wms_provider;
-            var map   = new OpenLayers.Map('map', { controls: [] });
+            OpenLayers.ImgPath = '[% url_prefix %]plugins/panorama/openlayer/images/';
+            var map   = new OpenLayers.Map('map', { controls: [], theme: '[% url_prefix %]plugins/panorama/openlayer/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
