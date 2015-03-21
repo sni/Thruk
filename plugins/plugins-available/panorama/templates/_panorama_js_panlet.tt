@@ -243,7 +243,18 @@
                 // results in endless loop otherwise
                 this.applyBorderAndBackground();
             }
+        },
+        beforestatesave: function( This, state, eOpts ) {
+            if(This.locked) {
+                return(false);
+            }
+            return(true);
         }
+    },
+    forceSaveState: function() {
+        var oldLocked = this.locked;
+        this.saveState();
+        this.locked = oldLocked;
     },
     setFormDefaults: function() {
         /* set initial form values */

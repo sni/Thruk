@@ -189,6 +189,11 @@
             return(true);
         }
     },
+    forceSaveState: function() {
+        var oldLocked = this.locked;
+        this.saveState();
+        this.locked = oldLocked;
+    },
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
 

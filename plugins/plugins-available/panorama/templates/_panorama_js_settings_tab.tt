@@ -737,10 +737,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             for(var nr=0; nr<panels.length; nr++) {
                                 var p = panels[nr];
                                 delete p.xdata.map;
-                                var oldLocked = p.locked;
-                                p.locked = false;
-                                p.saveState();
-                                p.locked = oldLocked;
+                                p.forceSaveState();
                             }
                         }
                         delete values['refresh_txt'];
@@ -769,10 +766,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
 
                         tab.applyXdata(undefined, false);
                         var newstate = Ext.JSON.encode(tab.getState());
-                        var oldLocked = tab.locked;
-                        tab.locked = false;
-                        tab.saveState();
-                        tab.locked = oldLocked;
+                        tab.forceSaveState();
                         if(oldstate != newstate) {
                             tabpan.startTimeouts();
                         }

@@ -195,6 +195,11 @@
             return(true);
         }
     },
+    forceSaveState: function() {
+        var oldLocked = this.locked;
+        this.saveState();
+        this.locked = oldLocked;
+    },
     getState: function() {
         var state = {
             xdata: TP.clone(this.xdata)
