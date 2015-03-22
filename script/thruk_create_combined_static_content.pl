@@ -108,8 +108,10 @@ my $cmds = [
     'cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$version.'.css',
     'cat '.join(' ', @panorama_files).' > '.$all_in_one_panorama,
 ];
-push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'.js'          if $dos2unix;
-push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'_panorama.js' if $dos2unix;
+if($dos2unix) {
+    push @{$cmds}, 'cd root/thruk/javascript && '.$dos2unix.' all_in_one-'.$version.'.js';
+    push @{$cmds}, $dos2unix.' '.$all_in_one_panorama;
+}
 for my $cmd (@{$cmds}) {
     print `$cmd`;
     exit 1 if $? != 0;
@@ -140,7 +142,7 @@ unlink('tmp.css');
 # try to minify js
 my $jsfiles = [
     'root/thruk/javascript/all_in_one-'.$version.'.js',
-    'root/thruk/javascript/all_in_one-'.$version.'_panorama.js',
+    $all_in_one_panorama,
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
