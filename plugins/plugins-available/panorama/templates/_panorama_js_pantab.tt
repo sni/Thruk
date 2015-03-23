@@ -208,12 +208,6 @@
         delete state.xdata.refresh_txt;
         delete state.xdata.map_choose;
         if(this.map) {
-            var data = this.map.map.getCenter();
-            state.xdata.map = {
-                lon:    data.lon,
-                lat:    data.lat,
-                zoom: this.map.map.getZoom()
-            };
             this.fixMapIcons();
         }
         return state;
@@ -552,6 +546,14 @@
             if(tab.xdata && tab.xdata.map && tab.xdata.map.lon != undefined) {
                 mapData.zoom   = Number(tab.xdata.map.zoom);
                 mapData.center = [Number(tab.xdata.map.lon), Number(tab.xdata.map.lat)];
+            } else {
+                var data = tab.map.map.getCenter();
+                tab.xdata.map = {
+                    lon:    data.lon,
+                    lat:    data.lat,
+                    zoom:   tab.map.map.getZoom()
+                };
+                tab.saveState();
             }
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("movestart", map, function() {
@@ -788,6 +790,21 @@
                 disabled: (tab.xdata.locked || TP.clipboard == undefined),
                 hidden:  hidePasteAndNew
             }, '-', {
+                text:    'Set Map Center',
+                icon:    '[% url_prefix %]plugins/panorama/images/flag_blue.png',
+                handler:  function() {
+                    var data = tab.map.map.getCenter();
+                    tab.xdata.map = {
+                        lon:    data.lon,
+                        lat:    data.lat,
+                        zoom:   tab.map.map.getZoom()
+                    };
+                    tab.saveState();
+                    TP.Msg.msg("success_message~~new map center set successfully.");
+                },
+                disabled: tab.xdata.locked,     // disable if locked
+                hidden:   tab.map == undefined  // only show on maps
+            }, {
                 text:   'Dashboard Settings',
                 icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
                 handler: function() { TP.tabSettingsWindow() },
