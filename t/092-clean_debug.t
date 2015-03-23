@@ -19,6 +19,7 @@ for my $cmd (keys %{$cmds}) {
   while(<$ph>) {
     my $line = $_;
     chomp($line);
+    $line =~ s|//|/|gmx;
 
     if(   $line =~ m|/dojo/dojo\.js|mx
        or $line =~ m|readme\.txt|mx
