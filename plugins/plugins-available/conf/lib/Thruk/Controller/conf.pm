@@ -64,7 +64,7 @@ sub conf_cgi : Path('/thruk/cgi-bin/conf.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
+sub index :Path :Args(0) :MyAction('AddSafeDefaults') { # Safe Defaults required for changing backends
     my ( $self, $c ) = @_;
 
     # check permissions
