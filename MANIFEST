@@ -15,7 +15,6 @@ debian/thruk.logrotate
 debian/thruk.manpages
 dist.ini
 docs/documentation/configuration.asciidoc
-docs/images
 docs/manpages/nagexp.3
 docs/manpages/nagimp.3
 docs/manpages/naglint.3
