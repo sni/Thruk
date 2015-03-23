@@ -1938,7 +1938,7 @@ sub write_data_file {
 
     my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
-    $d    =~ s/JSON::PP::Boolean/JSON::XS::Boolean/mx;
+    $d    =~ s/JSON::PP::Boolean/JSON::XS::Boolean/gmx;
     open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
     print $fh $d;
     Thruk::Utils::IO::close($fh, $tmpfile);

@@ -283,6 +283,7 @@ sub _js {
                     my $window_ids = $tabdata->{'window_ids'} || $tabdata->{'xdata'}->{'window_ids'};
                     for my $id (@{$window_ids}) {
                         my $win = $state->{$id};
+                        next if !defined $win;
                         next if $win eq 'null';
                         $dashboard->{$id} = decode_json($win);
                     }
