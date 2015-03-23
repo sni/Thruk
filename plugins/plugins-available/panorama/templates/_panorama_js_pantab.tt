@@ -575,7 +575,7 @@
             /* create our own zoom controls, because they do not work when not using default div from map */
             zoomControl.buttons[0].onclick = function() { map.zoomIn() }
             zoomControl.buttons[1].onclick = function() { map.zoomOut() }
-            zoomControl.buttons[2].onclick = function() { map.zoomToMaxExtent() }
+            zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
