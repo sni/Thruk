@@ -491,19 +491,19 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 xtype:      'textfield',
                 name:       'maplon',
                 width:       120,
-                value:       tab.xdata.map != undefined ? tab.xdata.map.lon : '',
+                value:       tab.xdata.map != undefined ? tab.xdata.map.lon : ''
             }, {
                 xtype:      'textfield',
                 name:       'maplat',
                 width:       120,
-                value:       tab.xdata.map != undefined ? tab.xdata.map.lat : '',
+                value:       tab.xdata.map != undefined ? tab.xdata.map.lat : ''
             },
             { xtype: 'label', text:  'Zoom:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px; text-align: right;', flex: 1 },
             {
                 xtype:      'textfield',
                 name:       'mapzoom',
                 width:       40,
-                value:       tab.xdata.map != undefined ? tab.xdata.map.zoom : '',
+                value:       tab.xdata.map != undefined ? tab.xdata.map.zoom : ''
             }]
         }, {
             fieldLabel: ' ',
