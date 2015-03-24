@@ -462,11 +462,14 @@ sub get_action_menu {
     my($c, $menu) = @_;
     our $already_checked_action_menus;
     $already_checked_action_menus = {} unless defined $already_checked_action_menus;
+
     if($menu !~ m/^[\[\{]/mx) {
         my $new = $c->config->{'action_menu_items'}->{$menu};
         if(!$new) {
             return(["no $menu in action_menu_items", "{}"]);
         }
+        # fix trailing commas in menu
+        $new =~ s/\,\s*([\}\]\)]+)/$1/gmx;
         unless(exists $already_checked_action_menus->{$menu}) {
             $already_checked_action_menus->{$menu} = validate_json($new);
             if($already_checked_action_menus->{$menu}) {
@@ -475,6 +478,10 @@ sub get_action_menu {
         }
         return([$already_checked_action_menus->{$menu}, $new]);
     }
+
+    # fix trailing commas in menu
+    $menu =~ s/\,\s*([\}\]\)]+)/$1/gmx;
+
     my $err = validate_json($menu);
     if($err) {
         $c->log->error("error in action menu: ".$err."\nsource:\n".$menu);
