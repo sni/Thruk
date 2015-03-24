@@ -1770,14 +1770,12 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
             var icon       = document.createElement('img');
             icon.src       = replace_macros(el.icon);
             icon.className = 'action_icon '+(el.menu ? 'clickable' : '' );
-            icon.title     = el.title ? el.title : '';
-            var title      = document.createTextNode(icon.title);
             if(el.menu) {
                 icon.nr = menu_nr;
-                icon.onclick = function() {
-                    // open and show menu
+                jQuery(icon).bind("click", function() {
+                    /* open and show menu */
                     show_action_menu(icon, el.menu, icon.nr, backend, host, service, orientation);
-                }
+                });
                 menu_nr++;
             }
             var item = icon;
@@ -1791,10 +1789,18 @@ function print_action_menu(src, backend, host, service, orientation, show_title)
                 check_server_action(undefined, link, backend, host, service);
             }
 
-            // obtain reference to current script tag so we could insert the icons here
+            /* apply other attributes */
+            for(var key in el) {
+                if(key != "icon" && key != "action") {
+                    icon[key] = el[key];
+                }
+            }
+
+            /* obtain reference to current script tag so we could insert the icons here */
             var scriptTag = document.scripts[document.scripts.length - 1];
             scriptTag.parentNode.appendChild(item);
-            if(show_title) {
+            if(show_title && el.title) {
+                var title = document.createTextNode(icon.title);
                 scriptTag.parentNode.appendChild(title);
             }
         });
@@ -1859,19 +1865,26 @@ function show_action_menu(icon, items, nr, backend, host, service, orientation) 
         item.className = 'clickable';
         var link = document.createElement('a');
         if(el.icon) {
-            var span = document.createElement('span');
+            var span       = document.createElement('span');
             span.className = 'icon';
-            var img  = document.createElement('img');
-            img.src       = replace_macros(el.icon);
-            img.title     = el.title ? el.title : '';
+            var img        = document.createElement('img');
+            img.src        = replace_macros(el.icon);
+            img.title      = el.title ? el.title : '';
             span.appendChild(img);
             link.appendChild(span);
         }
         var label = document.createElement('span');
         label.innerHTML = el.label;
         link.appendChild(label);
-        link.href      = replace_macros(el.action);
-        link.target    = el.target ? el.target : '';
+        link.href       = replace_macros(el.action);
+
+        /* apply other attributes */
+        for(var key in el) {
+            if(key != "icon" && key != "action" && key != "label") {
+                link[key] = el[key];
+            }
+        }
+
         item.appendChild(link);
         check_server_action(id, link, backend, host, service);
         return(true);
