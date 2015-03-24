@@ -518,8 +518,8 @@
                 map:      map,
                 width:    size.width,
                 height:   size.height,
-                center:  '12.31,51.48',
-                zoom:     6,
+                center:  '13.74,47.77',
+                zoom:     5,
                 stateful: true,
                 listeners: {
                     aftermapmove: function(This, map, eOpts) {
