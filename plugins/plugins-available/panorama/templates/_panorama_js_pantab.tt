@@ -522,6 +522,7 @@
                 center:  '13.74,47.77',
                 zoom:     5,
                 stateful: true,
+                style:    "position: absolute; top: 0px; left: 0px;",
                 listeners: {
                     aftermapmove: function(This, map, eOpts) {
                         if(tab.map == undefined) {
@@ -663,6 +664,7 @@
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].el.dom.style.pointerEvents = "";
         }
+        tab.map.el.dom.style.zIndex = "";
     },
     enableMapControls: function() {
         if(!this.mapEl) { return; }
@@ -683,6 +685,8 @@
         for(var nr=0; nr<panels.length; nr++) {
             panels[nr].el.dom.style.pointerEvents = "none";
         }
+        tab.map.el.setStyle("position: absolute; top: 0px; left: 0px;");
+        tab.map.el.dom.style.zIndex = 1;
     },
     /* enable or disable locking for this tab and all panlet below */
     setLock: function(val) {
