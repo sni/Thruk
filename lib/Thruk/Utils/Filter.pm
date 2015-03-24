@@ -467,10 +467,18 @@ sub get_action_menu {
         if(!$new) {
             return(["no $menu in action_menu_items", "{}"]);
         }
-        $already_checked_action_menus->{$menu} = validate_json($new) unless exists $already_checked_action_menus->{$menu};
+        unless(exists $already_checked_action_menus->{$menu}) {
+            $already_checked_action_menus->{$menu} = validate_json($new);
+            if($already_checked_action_menus->{$menu}) {
+                $c->log->error("error in action menu: ".$already_checked_action_menus->{$menu}."\nsource:\n".$new);
+            }
+        }
         return([$already_checked_action_menus->{$menu}, $new]);
     }
     my $err = validate_json($menu);
+    if($err) {
+        $c->log->error("error in action menu: ".$err."\nsource:\n".$menu);
+    }
     return([$err, $menu]);
 }
 
