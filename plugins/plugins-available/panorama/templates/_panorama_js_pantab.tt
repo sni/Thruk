@@ -590,6 +590,8 @@
             tab.bgDragEl.dom.style.position = "absolute";
             tab.bgDragEl.dom.style.width    = "100%";
             tab.bgDragEl.dom.style.height   = "100%";
+            tab.bgDragEl.dom.style.top      = "0px";
+            tab.bgDragEl.dom.style.left     = "0px";
             tab.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
         }
         if(tab.locked) {
