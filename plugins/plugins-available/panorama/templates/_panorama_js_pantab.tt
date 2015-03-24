@@ -546,14 +546,6 @@
             if(tab.xdata && tab.xdata.map && tab.xdata.map.lon != undefined) {
                 mapData.zoom   = Number(tab.xdata.map.zoom);
                 mapData.center = [Number(tab.xdata.map.lon), Number(tab.xdata.map.lat)];
-            } else {
-                var data = tab.map.map.getCenter();
-                tab.xdata.map = {
-                    lon:    data.lon,
-                    lat:    data.lat,
-                    zoom:   tab.map.map.getZoom()
-                };
-                tab.saveState();
             }
             tab.map = Ext.create('GeoExt.panel.Map', mapData);
             map.events.register("movestart", map, function() {
@@ -578,6 +570,15 @@
             zoomControl.buttons[0].onclick = function() { map.zoomIn() }
             zoomControl.buttons[1].onclick = function() { map.zoomOut() }
             zoomControl.buttons[2].onclick = function() { map.setCenter([tab.xdata.map.lon, tab.xdata.map.lat], tab.xdata.map.zoom) }
+            if(tab.xdata.map == undefined) {
+                var data = map.getCenter();
+                tab.xdata.map = {
+                    lon:    data.lon,
+                    lat:    data.lat,
+                    zoom:   tab.map.map.getZoom()
+                };
+                tab.saveState();
+            }
         } else {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }

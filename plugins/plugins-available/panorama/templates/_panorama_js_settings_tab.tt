@@ -396,10 +396,15 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             }
         }
         if(values.map_choose == 'geomap') {
+            if(tab.xdata.map) {
+                values.map = tab.xdata.map;
+            } else {
+                values.map = {};
+            }
             Ext.getCmp('background_choose').hide();
             Ext.getCmp('background_offset_choose').hide();
             Ext.getCmp('wms_choose').show();
-            values.map = {};
+            Ext.getCmp('mapcenter').show();
             if(values.wms_provider == undefined || values.wms_provider == "") {
                 if(wmsProvider.data.length > 0) {
                     values.wms_provider = wmsProvider.getAt(0).data.name;
@@ -410,6 +415,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             Ext.getCmp('background_choose').show();
             Ext.getCmp('background_offset_choose').show();
             Ext.getCmp('wms_choose').hide();
+            Ext.getCmp('mapcenter').hide();
             delete values['map'];
         }
         tab.setBackground(values);
@@ -471,6 +477,34 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             forceSelection:  true,
             hidden:          tab.xdata.map == undefined ? true : false,
             listeners:     { change: function(This) { applyBackground() } }
+        }, {
+            fieldLabel:  'Map Center',
+            xtype:       'fieldcontainer',
+            id:          'mapcenter',
+            layout:      'hbox',
+            defaults:   {
+                listeners: { change: function(This) { applyBackground() } }
+            },
+            items: [
+            { xtype: 'label', text:  'Lon/Lat:', style: 'margin-left: 0px; margin-right: 2px; margin-top: 5px;' },
+            {
+                xtype:      'textfield',
+                name:       'maplon',
+                width:       120,
+                value:       tab.xdata.map != undefined ? tab.xdata.map.lon : '',
+            }, {
+                xtype:      'textfield',
+                name:       'maplat',
+                width:       120,
+                value:       tab.xdata.map != undefined ? tab.xdata.map.lat : '',
+            },
+            { xtype: 'label', text:  'Zoom:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px; text-align: right;', flex: 1 },
+            {
+                xtype:      'textfield',
+                name:       'mapzoom',
+                width:       40,
+                value:       tab.xdata.map != undefined ? tab.xdata.map.zoom : '',
+            }]
         }, {
             fieldLabel: ' ',
             labelSeparator: '',
@@ -726,7 +760,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
                         if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
-                        if(values['map_choose'] != 'geomap') {
+                        if(values['map_choose'] == 'geomap') {
+                            tab.xdata.map = {
+                                lon:  values.lon,
+                                lat:  values.lat,
+                                zoom: values.zoom
+                            };
+                        } else {
                             delete tab.xdata['map'];
                             delete tab.xdata['wms_provider'];
                             delete values['wms_provider'];
