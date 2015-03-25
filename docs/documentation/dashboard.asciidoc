@@ -193,7 +193,7 @@ every 10 minutes.
 
 == Icon Widget Appereance Types
 
-=== Icons
+=== Icon
 
 Icons are the basic appearance type and are useful for host/service
 status as well as hostgroups and servicegroups. In case of hosts and
@@ -215,7 +215,7 @@ icon individually.
 
 
 
-=== Shapes
+=== Shape
 
 Shapes are kind of svg image. They usually contain one closed path
 which is filled with the color of its state. Again either host/service
@@ -273,7 +273,7 @@ Source:
 
 
 
-=== Pie Charts
+=== Pie Chart
 
 Pie Charts are perfect for visualizing group and filtered states.
 
@@ -358,7 +358,7 @@ Source:
 
 
 
-=== Text Labels
+=== Text Label
 
 Text Labels are static text items which can be placed everywhere where
 you need additional text.
@@ -397,7 +397,7 @@ Source:
 
 
 
-=== Static Images
+=== Static Image
 
 Static images are a good way to add images to your map without having
 to change the background image itself.
