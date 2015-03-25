@@ -42,6 +42,10 @@ you can navigate the map with dragging and zooming. The `world` button brings yo
 back to the default view which can be changed by `Set Map Center` from the context
 menu.
 
+Geo Maps do not store x / y point coordinates for your icons, instead when placing
+an icon, the position is converted to latitude and longitude coordinates. So when
+navigating on the map, all icons will stay at their geo coordinates.
+
 
 === Dashboard Permissions
 
