@@ -8,12 +8,8 @@ lightbox: true
 = Thruk Dashboard
 
 Thruks next generation Dashboard (also known as the panorama plugin)
-has been rewritten in large parts. The main changes are:
-
- * Dashboards are no longer stored in the users profile
- * Dashboards can be shared between users by making them public
- * Dashboards are no longer removed when closed, instead they can be added again later
- * Map components have been added, like state icons, backgrounds and sounds
+is a super flexible dashboard framework which allows you to place icons and widgets
+on a canvas to design all types of dashboards.
 
 ++++
 A demo is available at <a href="http://demo.thruk.org/thruk/cgi-bin/panorama.cgi" target="_blank">demo.thruk.org</a>.
@@ -29,7 +25,83 @@ free iconsets.
 ++++
 
 
-== Labels
+
+== Creating New dashboards
+
+Dashboards can be created by the `new tab` button next to the open dashboards.
+
+=== Dashboards and GeoMaps
+
+A normal Dashboard is just a plain empty canvas where elements can be placed. Dashboards
+can have a background image which can be scaled and moved.
+
+GeoMaps do have a openstreetmap background layer where icons and widgets can be
+placed on. While the map is locked with the `map lock button` in the top left corner
+you can work with the dashboard just like a normal one. When the map is unlocked, then
+you can navigate the map with dragging and zooming. The `world` button brings you
+back to the default view which can be changed by `Set Map Center` from the context
+menu.
+
+
+=== Dashboard Permissions
+
+Dashboards are stored as single maps, but they belong to a specific user. This means
+if you create a dashboard, only you are allowed to see it. Administrators (contacts with
+the configuration information and system commands role) can see and edit all dashboards.
+
+Till release v1.86 you could set a dashboard public, so everyone got read-only permissions
+to that dashboard. Starting with v1.88 a fine granular permission system has been introduced
+which allows you to assign read-only and read-write permissions to specific contactgroups.
+
+Changing permissions is possible in the permissions tab of a dashboard. Double click the
+dashboard title to open the settings or choose settings from the context menu.
+
+++++
+<a title="dashboard" rel="lightbox[dashboard]" href="dashboard/permissions.png"><img src="dashboard/permissions.png" alt="context menu" width="35%" height="35%" /></a>
+<br style="clear: both;">
+++++
+
+
+=== Export / Import
+
+Dashboards can be exported from the dashboard settings window. The import is
+available on the same settings window.
+
+
+== Icons, Widgets and Labels
+
+In general you can place icons and widgets on the canvas.
+
+=== Widgets
+
+Widgets are framed window like panels which contain grids, graphs and all kind of data.
+
+Some widget examples are:
+
+  * Servicetotals Pie Chart
+  * Mine Map
+  * PNP Graphs
+  * Logfiles
+  * Business Process Graphs
+  * Embedd content from other sites with the generic url panlet
+
+
+=== Icons
+
+Icons represent the state of a single host, service or filtered query and are
+usually placed on a map or background image.
+
+The state can be represented in various types:
+
+  * image icon
+  * speedometer
+  * pie chart
+  * traffic lights
+  * arrows and shapes
+  * watermarks and lines
+
+
+=== Labels
 
 Every icon and widget can have a label. Labels can either be static
 text or dynamic. Icon settings can either be changed by double
@@ -90,7 +162,36 @@ helps you creating labels in no time. The examples can be put into the
 textarea by clicking on them.
 
 
-== Examples
+== Editing Dashboards
+
+Editing Dashboards has been made as easy as possible. However there are a few
+hints and tricks which make things even easier.
+
+=== Cloning Widgets and Icons
+
+==== Icons
+Once you have configured an icon the way you want, you can clone it from the
+context menu. Just right click on the icon and select `Clone` from the menu.
+Then click where you want to place the clone. With the `Copy` and `Paste` from
+context menu, it is even possible to copy icons from one dashboard to another.
+
+==== Widgets
+Beginning with the release v1.88 it is possible to clone widgets too. In the
+panel window header, there is a clone button on the top right. After clicking
+that button, you have to choose the location of the cloned widget.
+
+
+=== Restore Points
+Since the release v1.88 it is possible to set up to 5 manual restore points. Whenever
+you made a mistake and want to revert the changes made, just select that restore point
+from the context menu.
+
+Besides the manual restore points, up to 5 automatic restore points will be created
+every 10 minutes.
+
+
+
+== Icon Widget Appereance Types
 
 === Icons
 
