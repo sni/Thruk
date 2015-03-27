@@ -237,8 +237,12 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             $node->resolve_depends($bp, $depends);
 
             # save object creating attributes
-            for my $key (qw/host service template/) {
+            for my $key (qw/host service template notification_period/) {
                 $node->{$key} = $c->{'request'}->{'parameters'}->{'bp_'.$key} || '';
+            }
+            # node array options
+            for my $key (qw/contactgroups contacts/) {
+                $node->{$key} = [split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'bp_'.$key} || '')];
             }
             $node->{'create_obj'} = $c->{'request'}->{'parameters'}->{'bp_create_link'} || 0;
 

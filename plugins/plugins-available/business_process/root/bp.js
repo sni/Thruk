@@ -155,11 +155,7 @@ function bp_context_menu_open(evt, node) {
         if(h < evt.pageY) {
             jQuery("#bp_menu").css('top', h+'px');
         }
-        if(node.id == 'node1') {
-            jQuery('.firstnode').css('display', '');
-        } else {
-            jQuery('.firstnode').css('display', 'none');
-        }
+        bp_update_firstnode_css();
         // first node cannot be removed
         if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
@@ -303,7 +299,7 @@ function bp_fill_select_form(data, form) {
         for(var key in data.radio) {
             var d = data.radio[key];
             jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked","checked");
             jQuery(d[1]).buttonset();
         }
     }
@@ -342,8 +338,8 @@ function bp_input_keys(evt, input) {
 /* generic node type selection */
 function bp_select_type(type) {
     bp_show_edit_node(undefined, false);
-    jQuery('.bp_type_box').attr('checked', false).button("refresh");
-    jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
+    jQuery('.bp_type_box').prop('checked', false).button("refresh");
+    jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
     jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
@@ -369,6 +365,7 @@ function bp_select_type(type) {
     else if(type == 'equals')      { bp_select_equals(node)      }
     else if(type == 'custom')      { bp_select_custom(node)      }
     jQuery('#bp_function').val(type);
+    bp_update_status_function();
 }
 
 /* show node type select: status */
@@ -648,10 +645,16 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_host]").val(node.host);
         jQuery("INPUT[name=bp_service]").val(node.service);
         jQuery("INPUT[name=bp_template]").val(node.template);
+        jQuery("INPUT[name=bp_contactgroups]").val(node.contactgroups.join(", "));
+        jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
+        jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
         jQuery("INPUT[name=bp_template]").val('');
+        jQuery("INPUT[name=bp_contactgroups]").val('');
+        jQuery("INPUT[name=bp_contacts]").val('');
+        jQuery("INPUT[name=bp_notification_period]").val('');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
@@ -860,7 +863,29 @@ function bp_update_status(evt, node) {
 function bp_update_obj_create() {
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
-        jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+        jQuery("INPUT.bp_create").prop('disabled', !checkbox.checked);
+    }
+}
+
+/* toggle status function disabled fields */
+function bp_update_status_function() {
+    var type = jQuery('#bp_function').val();
+    if(type == "status" || type == "groupstatus") {
+        jQuery(".no_supports_link").show();
+        jQuery(".supports_link").hide();
+    } else {
+        jQuery(".no_supports_link").hide();
+        jQuery(".supports_link").show();
+    }
+    bp_update_firstnode_css();
+}
+
+/* toggle firstnode class */
+function bp_update_firstnode_css() {
+    if(bp_active_node == 'node1') {
+        jQuery('.firstnode').css('display', '');
+    } else {
+        jQuery('.firstnode').css('display', 'none');
     }
 }
 

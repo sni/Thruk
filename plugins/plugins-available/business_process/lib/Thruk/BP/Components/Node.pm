@@ -33,29 +33,32 @@ return new node
 sub new {
     my ( $class, $data ) = @_;
     my $self = {
-        'id'                => $data->{'id'},
-        'label'             => $data->{'label'},
-        'function'          => '',
-        'function_ref'      => undef,
-        'function_args'     => [],
-        'depends'           => Thruk::Utils::list($data->{'depends'} || []),
-        'parents'           => $data->{'parents'}       || [],
-        'host'              => $data->{'host'}          || '',
-        'service'           => $data->{'service'}       || '',
-        'hostgroup'         => $data->{'hostgroup'}     || '',
-        'servicegroup'      => $data->{'servicegroup'}  || '',
-        'template'          => $data->{'template'}      || '',
-        'create_obj'        => $data->{'create_obj'}    || 0,
-        'create_obj_ok'     => 1,
-        'scheduled_downtime_depth' => 0,
-        'acknowledged'      => 0,
-        'testmode'          => 0,
+        'id'                        => $data->{'id'},
+        'label'                     => $data->{'label'},
+        'function'                  => '',
+        'function_ref'              => undef,
+        'function_args'             => [],
+        'depends'                   => Thruk::Utils::list($data->{'depends'} || []),
+        'parents'                   => $data->{'parents'}       || [],
+        'host'                      => $data->{'host'}          || '',
+        'service'                   => $data->{'service'}       || '',
+        'hostgroup'                 => $data->{'hostgroup'}     || '',
+        'servicegroup'              => $data->{'servicegroup'}  || '',
+        'template'                  => $data->{'template'}      || '',
+        'contacts'                  => $data->{'contacts'}      || [],
+        'contactgroups'             => $data->{'contactgroups'} || [],
+        'notification_period'       => $data->{'notification_period'} || '',
+        'create_obj'                => $data->{'create_obj'}    || 0,
+        'create_obj_ok'             => 1,
+        'scheduled_downtime_depth'  => 0,
+        'acknowledged'              => 0,
+        'testmode'                  => 0,
 
-        'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
-        'status_text'       => $data->{'status_text'} || '',
-        'short_desc'        => $data->{'short_desc'}  || '',
-        'last_check'        => 0,
-        'last_state_change' => 0,
+        'status'                    => defined $data->{'status'} ? $data->{'status'} : 4,
+        'status_text'               => $data->{'status_text'} || '',
+        'short_desc'                => $data->{'short_desc'}  || '',
+        'last_check'                => 0,
+        'last_state_change'         => 0,
     };
     bless $self, $class;
 
@@ -203,7 +206,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj/) {
+    for my $key (qw/template create_obj notification_period contactgroups contacts/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -242,6 +245,14 @@ sub get_objects_conf {
             '_THRUK_BP_ID'   => $bp->{'id'},
             '_THRUK_NODE_ID' => $self->{'id'},
         };
+        for my $key (qw/notification_period/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $bp->{$key};
+        }
+        for my $key (qw/contacts contactgroups/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = join(',', @{$bp->{$key}});
+        }
     }
 
     $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
@@ -252,6 +263,14 @@ sub get_objects_conf {
         '_THRUK_BP_ID'        => $bp->{'id'},
         '_THRUK_NODE_ID'      => $self->{'id'},
     };
+    for my $key (qw/notification_period/) {
+        next unless $self->{$key};
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = $self->{$key};
+    }
+    for my $key (qw/contacts contactgroups/) {
+        next unless $self->{$key};
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = join(',', @{$self->{$key}});
+    }
 
     return($obj);
 }
@@ -376,9 +395,12 @@ sub _set_function {
         }
     }
     if($self->{'function'} eq 'status') {
-        $self->{'host'}       = $self->{'function_args'}->[0] || '';
-        $self->{'service'}    = $self->{'function_args'}->[1] || '';
-        $self->{'template'}   = '';
+        $self->{'host'}                 = $self->{'function_args'}->[0] || '';
+        $self->{'service'}              = $self->{'function_args'}->[1] || '';
+        $self->{'template'}             = '';
+        $self->{'contacts'}             = [];
+        $self->{'contactgroups'}        = [];
+        $self->{'notification_period'}  = '';
         $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
     }
     if($self->{'function'} eq 'groupstatus') {

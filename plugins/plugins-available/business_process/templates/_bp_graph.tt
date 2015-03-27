@@ -73,6 +73,9 @@
           depends:      [[% FOREACH d IN n.depends %]['[% d.id %]', '[% d.label %]'][% UNLESS loop.last %],[% END %][% END %]],
           func:         '[% n.function %]',
           func_args:    [% json_encode(n.function_args) %],
+          contacts:     [% json_encode(n.contacts) %],
+          contactgroups: [% json_encode(n.contactgroups) %],
+          notification_period: '[% n.notification_period %]',
           width:        120,
           height:        40
         }[% UNLESS loop.last %],[% END +%]

@@ -31,6 +31,7 @@ next:
           - Business Process:
             - show draft edits in overview
             - prevent accidentally leaving the page by backspace key
+            - add basic notification options to link tab
           - Reports:
             - prevent accidentally leaving the page by backspace key
           - Config Tool:
