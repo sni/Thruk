@@ -879,6 +879,10 @@ sub _replace_with_marker {
     @matches = grep {!/var\s+key/} @matches;
     $errors    += scalar @matches;
 
+    # jQuery().attr('checked', true) must be .prop now
+    my @matches = $_[0]  =~ s/(\.attr\s*\(.*checked)/JS_ERROR_MARKER3:$1/gmxi;
+    $errors    += scalar @matches;
+
     return $errors;
 }
 
@@ -899,6 +903,13 @@ sub _check_marker {
             my $orig = $line;
             $orig =~ s/JS_ERROR_MARKER2://gmx;
             fail('found insecure for loop in '.($file || 'content').' line: '.$x);
+            diag($orig);
+        }
+        if($line =~ m/JS_ERROR_MARKER3:/mx) {
+            my $orig = $line;
+            $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
+            $orig =~ s/JS_ERROR_MARKER3://gmx;
+            fail('found jQuery.attr(checked) instead of .prop() in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
         $x++;

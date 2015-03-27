@@ -47,7 +47,7 @@ jQuery(document).ready(function(e){
         var serialized = "";
         for(var key in current_backend_states){
             state = 2;
-            if(jQuery("#backend_"+key).attr("checked")) {
+            if(jQuery("#backend_"+key).prop("checked")) {
                 state = 0;
             }
             serialized += '&'+key+'='+state;
@@ -297,7 +297,7 @@ function refresh_backends() {
         for(var key in current_backend_states) {
             number++;
             if(current_backend_states[key].state == 0 || current_backend_states[key].state == 1) {
-                jQuery("#backend_"+key).attr("checked",true).checkboxradio("refresh");
+                jQuery("#backend_"+key).prop("checked",true).checkboxradio("refresh");
             }
             if(current_backend_states[key].state == 1) {
                 jQuery("#b_lab_"+key).addClass('hostDOWN');
