@@ -275,6 +275,3 @@ BODY.iframed DIV.bp_zoom_container {
     margin: 0;
 }
 
-#bp_select_custom TR:first-child {
-    display: none;
-}

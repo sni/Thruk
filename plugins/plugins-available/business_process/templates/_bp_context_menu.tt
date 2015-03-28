@@ -259,7 +259,7 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_custom'
     function='custom'
-    div_help='custom aggregation functions.'
+    div_help='Custom Aggregation Functions. <a href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details.</a>'
 %]
 <tr>
   <th align="right">Custom Function</th>
