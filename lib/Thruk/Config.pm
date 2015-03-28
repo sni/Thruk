@@ -21,10 +21,10 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.86';
+our $VERSION = '1.88';
 
 my $project_root = home('Thruk::Config');
-my $branch       = '4';
+my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
 $branch          = $gitbranch if($gitbranch ne '' and $branch eq '');
@@ -35,7 +35,7 @@ $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'February 12, 2015',
+              'released'               => 'March 28, 2015',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
