@@ -63,6 +63,10 @@ DIV.ui-dialog INPUT[type=text] {
     font-size: smaller;
 }
 
+.bp_type_desc A {
+    border-bottom: 1px dotted grey;
+}
+
 .bp_info TH {
     vertical-align: top;
     text-align: left;
