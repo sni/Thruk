@@ -89,8 +89,8 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     if [ -e themes/themes-available/Thruk/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css ]; then
         mv themes/themes-available/Thruk/stylesheets/all_in_one_noframes-${VERSION}-${BRANCH}.css themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$fileversion.css
     fi
-    if [ -e root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
-        mv root/thruk/javascript/all_in_one-${VERSION}-${BRANCH}_panorama.js root/thruk/javascript/all_in_one-${fileversion}_panorama.js
+    if [ -e plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
+        mv plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js plugins/plugins-available/panorama/root/all_in_one-${fileversion}_panorama.js
     fi
     git add docs/manpages/nagexp.3 docs/manpages/nagimp.3 docs/manpages/naglint.3
 fi
