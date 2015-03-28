@@ -488,6 +488,8 @@ function bp_update_cust_attributes(select, node) {
         }
     });
 
+    if(func == undefined) { return; }
+
     // add new attributes
     jQuery(func['args']).each(function(x, arg) {
         var nr = x + 2;

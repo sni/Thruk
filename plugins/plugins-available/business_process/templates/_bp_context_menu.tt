@@ -145,7 +145,7 @@
 </tr>
 <tr>
   <th align="right">Group</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp', autosubmit:false })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"[% END %]></td>
 </tr>
 <tr>
   <th align="right" nowrap>Hosts Warning</th>
@@ -332,7 +332,6 @@
           When using the status function, you already have a host or service object.<br>
           It does not makes sense to create another one.<br>
         </p>
-        </p>
       </td>
     </tr>
     <tr class="supports_link">
@@ -419,7 +418,6 @@
           <b>Note:</b> Hostgroup and Servicegroup aggregations will always use Hard and Soft states.<br>
           This is a limitation of the livestatus broker.
       </td>
-    </tr>
     </tr>
     <tr>
       <td colspan=2><hr></td>
