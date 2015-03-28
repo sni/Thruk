@@ -413,6 +413,7 @@
           <option value="hard"[% IF bp.state_type == 'hard' %] selected[% END %]>Use Hard States Only</option>
         </select>
       </td>
+    </tr>
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">
           <b>Note:</b> Hostgroup and Servicegroup aggregations will always use Hard and Soft states.<br>
