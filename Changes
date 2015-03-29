@@ -32,6 +32,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - show draft edits in overview
             - prevent accidentally leaving the page by backspace key
             - add basic notification options to link tab
+            - bp services do no longer use the generic-service template
           - Reports:
             - prevent accidentally leaving the page by backspace key
           - Config Tool:
