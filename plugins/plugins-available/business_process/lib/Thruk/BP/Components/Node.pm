@@ -269,6 +269,7 @@ sub get_objects_conf {
     }
     for my $key (qw/contacts contactgroups/) {
         next unless $self->{$key};
+        next unless scalar @{$self->{$key}} > 0;
         $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = join(',', @{$self->{$key}});
     }
 
