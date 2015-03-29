@@ -880,7 +880,7 @@ sub _replace_with_marker {
     $errors    += scalar @matches;
 
     # jQuery().attr('checked', true) must be .prop now
-    my @matches = $_[0]  =~ s/(\.attr\s*\(.*checked)/JS_ERROR_MARKER3:$1/gmxi;
+    @matches = $_[0]  =~ s/(\.attr\s*\(.*checked)/JS_ERROR_MARKER3:$1/gmxi;
     $errors    += scalar @matches;
 
     return $errors;
