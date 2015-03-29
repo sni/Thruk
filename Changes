@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.88-2   Sun Mar 29 19:30:58 CEST 2015
+          - fix problem with busines process objects
+
 1.88     Sat Mar 28 17:57:53 CET 2015:
           - add host and service notes url macros (Andrew Widdersheim)
           - add host and service duration macro (Andrew Widdersheim)

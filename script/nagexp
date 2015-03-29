@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 our $VERSION = '1.88';
-my $branch       = '';
+my $branch       = '2';
 
 my $nagexp = Thruk::nagexp->new();
 exit $nagexp->run();
