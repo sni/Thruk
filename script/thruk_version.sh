@@ -59,11 +59,10 @@ sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
     -i script/nagimp
 dch --newversion "$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"
 if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
-    sed -r "s/Version:\s*${VERSION}/Version:       $newversion/" -i support/thruk.spec
+    sed -r "s/^Version:\s*.*/Version:       $newversion/" -i support/thruk.spec
     sed -r "s/'${VERSION}'/'$newversion'/" \
                 -i lib/Thruk.pm          \
                 -i lib/Thruk/Config.pm   \
-                -i support/thruk.spec    \
                 -i script/thruk          \
                 -i script/naglint        \
                 -i script/nagexp         \
