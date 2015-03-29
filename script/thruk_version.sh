@@ -4,6 +4,10 @@ set -x
 VERSION=`grep ^VERSION Makefile | head -n 1 | awk '{ print $3 }'`;
 BRANCH=`grep branch script/thruk | grep ^my | awk -F"'" '{ print $2 }'`
 
+if [ "x${BRANCH}" = "x" ]; then
+  BRANCH=1
+fi
+
 test -e .git         || { echo "not in a git directory"; exit 1; }
 which dch >/dev/null || { echo "dch not found"; exit 1; }
 if [ ! -e "root/thruk/javascript/thruk-${VERSION}-${BRANCH}.js" ]; then
