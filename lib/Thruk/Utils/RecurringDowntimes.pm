@@ -85,12 +85,14 @@ sub get_downtimes_list {
     push @hostfilter, { name => $host }                                                     if $host;
 
     my($hosts, $services, $hostgroups, $servicegroups) = ({},{},{},{});
-    my $host_data    = $c->{'db'}->get_hosts(filter => \@hostfilter,    columns => [qw/name groups/]);
-    $hosts    = Thruk::Utils::array2hash($host_data, 'name');
-    undef $host_data;
-    my $service_data = $c->{'db'}->get_services(filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
-    $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
-    undef $service_data;
+    if($host || $service) {
+        my $host_data    = $c->{'db'}->get_hosts(filter => \@hostfilter,    columns => [qw/name groups/]);
+        $hosts    = Thruk::Utils::array2hash($host_data, 'name');
+        undef $host_data;
+        my $service_data = $c->{'db'}->get_services(filter => \@servicefilter, columns => [qw/host_name description host_groups groups/] );
+        $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
+        undef $service_data;
+    }
 
     if($service) {
         $hostgroups    = Thruk::Utils::array2hash($services->{$host}->{$service}->{'host_groups'});

@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix error on omd updates with recurring downtimes
+
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects
 
