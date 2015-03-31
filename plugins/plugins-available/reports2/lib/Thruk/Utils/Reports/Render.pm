@@ -642,6 +642,38 @@ sub page_splice {
 }
 
 ##########################################################
+
+=head2 round_decimals
+
+  round_decimals($float, $decimals, [$round_method])
+
+Round number to given decimals. method can be 'floor' or 'round'.
+
+  - round will do a standard mathematical round
+
+=cut
+sub round_decimals {
+    my($float, $decimals, $round_method) = @_;
+    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    $round_method = ($c->config->{'round_method'} || 'round') unless defined $round_method;
+    if($round_method eq 'round') {
+        my $format  = '%0.'.$decimals.'f';
+        my $rounded = sprintf($format, $float);
+        return($rounded);
+    }
+    elsif($round_method eq 'floor') {
+        # not a float anyway
+        if($float !~ m/^\d+\.\d+$/mx) {
+            return(round_decimals($float, $decimals, 'round'));
+        }
+        my($int, $dec) = split(/\./mx, $float);
+        $dec = substr($dec, 0, $decimals);
+        return(0+($int.'.'.$dec));
+    }
+    die("unknown round_method: ".$round_method);
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _replace_css_and_images {
