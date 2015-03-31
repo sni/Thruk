@@ -71,7 +71,7 @@ You now have all required modules in `/tmp/thruk_libs/local-lib/dest`.
 We now move the librarys into our thruk folder:
 
 -------
-    %> mv /tmp/thruk_libs/local-lib/dest/lib/perl5 perl5 ~/Thruk/
+    %> mv /tmp/thruk_libs/local-lib/dest/lib/perl5 ~/Thruk/
 -------
 
 Edit your `.profile` and add the following
@@ -95,14 +95,15 @@ Or by running the development server:
     %> cd ~/Thruk && ./script/thruk_server.pl
 -------
 
-Open your browser and open http://<your_host>:3000
+Open your browser enter the url http://<your_host>:3000
 
 
 === Configuration
 
-Copy 'thruk.conf' to 'thruk_local.conf' and adjust the livestatus settings to your needs.
+Edit your 'thruk_local.conf' and copy the sections you need to change from the 'thruk.conf'.
+You probably need to adjust the livestatus settings to your needs.
 -------
-  %> cp thruk.conf thruk_local.conf
+  %> vim thruk_local.conf
 -------
 The thruk.conf will be overwritten with new defaults on updates. The
 thruk_local.conf contains the local overrides and will never be
