@@ -294,3 +294,14 @@ changes active).
   SELINUX=disabled
 +
 Read more about SELinux on http://wiki.centos.org/HowTos/SELinux
+
+
+
+=== possible csrf, no or invalid token
+
+This happens if you directly send commands to Thruk without a valid
+csrf protection token. This will happen in combination with nagstamon.
+You have to put those clients in the exception list:
+link:configuration.html#csrf_allowed_hosts[csrf_allowed_hosts].
+
+More information about link:http://en.wikipedia.org/wiki/Cross-site_request_forgery[csrf].
