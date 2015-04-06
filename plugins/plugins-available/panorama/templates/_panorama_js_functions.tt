@@ -1680,10 +1680,14 @@ var TP = {
     logError: function(prefix, name, err) {
         if(name == "labelEvalException") { return; }
         try {
-            TP.log('['+prefix+'] '+name+':');
+            var str = '['+prefix+'] '+name+':';
+            debug(str);
+            TP.log(str);
             var out = err.stack.trim().split("\n");
             for(var x=0; x<out.length; x++) {
-                TP.log('['+prefix+'] '+out[x]);
+                str = '['+prefix+'] '+out[x];
+                debug(str);
+                TP.log(str);
             }
         } catch(er) {}
     },
