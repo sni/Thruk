@@ -1426,10 +1426,12 @@ function getErrorText(details, error) {
     }
 
     /* try to get a stacktrace */
+    var stacktrace = "";
     text += "\n";
     text += "Full Stacktrace:\n";
     if(error && error.stack) {
         text = text + error.stack;
+        stacktrace = stacktrace + error.stack;
     }
     try {
         var stack = [];
@@ -1439,7 +1441,39 @@ function getErrorText(details, error) {
             f = f.caller;
         }
         text = text + stack.join("\n");
+        stacktrace = stacktrace + stack.join("\n");
     } catch(err) {}
+
+    /* try to get source mapping */
+    try {
+        var file = error.fileName;
+        var line = error.lineNumber;
+        /* get filename / line from stack if possible */
+        var stackExplode = stacktrace.split(/\n/);
+        for(var nr=0; nr<stackExplode.length; nr++) {
+            if(!stackExplode[nr].match(/eval/)) {
+                var matches = stackExplode[nr].match(/(https?:.*?):(\d+):(\d+)/i);
+                if(matches && matches[2]) {
+                    file = matches[1];
+                    line = Number(matches[2]);
+                    nr = stackExplode.length + 1;
+                }
+            }
+        }
+        if(window.XMLHttpRequest && file && !file.match("eval")) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", file, false);
+            xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+            xhr.send(null);
+            var source = xhr.responseText.split(/\n/);
+            text += "\n";
+            text += "Source:\n";
+            if(line > 2) { text += shortenSource(source[line-2]); }
+            if(line > 1) { text += shortenSource(source[line-1]); }
+            text += shortenSource(source[line]);
+        }
+    } catch(err) {}
+
     /* this only works in panorama view */
     try {
         if(TP.logHistory) {
@@ -1468,6 +1502,14 @@ function sendJSError(scripturl, text) {
         thruk_errors = [];
     }
     return;
+}
+
+/* return shortened string */
+function shortenSource(text) {
+    if(text.length > 100) {
+        return(text.substr(0, 97)+"...\n");
+    }
+    return(text+"\n");
 }
 
 /* update recurring downtime type select */
