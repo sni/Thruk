@@ -1750,6 +1750,11 @@ var TP = {
     },
     reduceDelayEvents: function(scope, callback, delay, timeoutName) {
         var now = (new Date()).getTime();
+        if(!scope) {
+            /* probably out of scope already, run it a last time */
+            callback();
+            return;
+        }
         if(!scope.lastEventRun)              { scope.lastEventRun = {}; }
         if(!scope.lastEventRun[timeoutName]) { scope.lastEventRun[timeoutName] = 0; }
         window.clearTimeout(TP.timeouts[timeoutName]);
