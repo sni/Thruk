@@ -305,3 +305,12 @@ You have to put those clients in the exception list:
 link:configuration.html#csrf_allowed_hosts[csrf_allowed_hosts].
 
 More information about link:http://en.wikipedia.org/wiki/Cross-site_request_forgery[csrf].
+
+
+=== Error: TypeError: $.browser is undefined
+
+Assuming you are using the ssi file to display PNP4Nagios popups, you have to update
+the ssi files to the latest from link:https://github.com/sni/Thruk/tree/master/ssi[Thruks examples].
+
+The cluetip jquery plugin used in this popups does not work with the latest jQuery release
+from Thruk, so Thruk now ships a own updated copy for this javascript library.
