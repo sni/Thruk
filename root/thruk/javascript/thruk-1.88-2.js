@@ -5052,8 +5052,11 @@ function move_graphite_img(factor) {
 88          88      `888 88
 *******************************************************************************/
 
-function set_png_img(start, end, id) {
-    var newUrl = pnp_url + "&start=" + start + "&end=" + end;
+function set_png_img(start, end, id, source) {
+    if(start  == undefined) { start  = pnp_start; }
+    if(end    == undefined) { end    = pnp_end; }
+    if(source == undefined) { source = pnp_source; }
+    var newUrl = pnp_url + "&start=" + start + "&end=" + end+"&source="+source;
     //debug(newUrl);
 
     jQuery('#pnpwaitimg').css('display', 'block');
@@ -5088,7 +5091,7 @@ function set_png_img(start, end, id) {
 
     if(id) {
         // replace history otherwise we have to press back twice
-        set_hash(id + "/" + start + "/" + end);
+        set_hash(id + "/" + start + "/" + end + "/" + source);
     }
 
     // reset reload timer for page
