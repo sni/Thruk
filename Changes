@@ -4,6 +4,7 @@ next:
           - add pnp graph select option on extinfo pages
           - fix error on omd updates with recurring downtimes
           - fix permission problem with service recurring downtimes
+          - fix escaping html tags in command definitions (#444)
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects
