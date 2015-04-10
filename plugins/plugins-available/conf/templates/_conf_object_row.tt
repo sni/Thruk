@@ -93,7 +93,11 @@
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         [% FOREACH o = value %]
-        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+          [% IF o != "null" %]
+            <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+          [% ELSE %]
+            [% o %]
+          [% END %]
         [% UNLESS loop.last %], [% END %]
         [% END %]
     [% ELSE %]

@@ -1820,6 +1820,9 @@ sub _check_references {
             }
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
+            # 'null' is a special value used to cancel inheritance
+            return if $val eq 'null';
+
             # hostgroups are allowed to have a register 0
             return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
 
