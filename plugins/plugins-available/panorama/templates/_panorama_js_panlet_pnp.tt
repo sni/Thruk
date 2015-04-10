@@ -71,8 +71,11 @@ Ext.define('TP.PanletPNP', {
             if(force || (values.graph != this.lastGraph && values.graph.indexOf('host=') != -1)) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
+                Ext.Ajax.cors                = true;
+                Ext.Ajax.withCredentials     = true;
+                Ext.Ajax.useDefaultXhrHeader = false;
                 Ext.Ajax.request({
-                    url: url,
+                    url:     url,
                     method: 'POST',
                     callback: function(options, success, response) {
                         var data = [];
