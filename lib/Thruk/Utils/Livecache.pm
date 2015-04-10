@@ -155,7 +155,7 @@ sub _start_shadownaemon_for_peer {
                       $config->{'shadow_naemon_ls'} ? " -l ".$config->{'shadow_naemon_ls'} : '',
                       $config->{'shadow_naemon_dir'}.'/'.$key,
                     );
-    $c->log->debug($cmd) if $log_missing;
+    $c->log->error($cmd) if $log_missing;
     # starting in background is not faster here since the daemon immediatly backgrounds
     system($cmd);
     return;
