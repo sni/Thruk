@@ -12,10 +12,11 @@
       withCredentials: true
     },
     success: function(data) {
+      if(!data.match(/^\[/)) { return; }
       var sources = eval(data);
       jQuery('#pnp_source_select').find('option').remove();
       jQuery(sources).each(function(x, s) {
-          jQuery('#pnp_source_select').append('<option value="'+x+'"'+(x==pnp_source ? ' selected' : '')+'>'+s.ds_name+'</option>');
+          jQuery('#pnp_source_select').append('<option value="'+x+'"'+(x==pnp_source ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
       });
       /* only useful for multiple sources */
       if(x > 0) {
@@ -28,15 +29,12 @@
   <tr>
     <td style="position: relative;">
         <div class='commentTitle'>Performance Graph</div>
-        <span style="position: absolute; right: 2px; top: 22px;">
-          <form>
+        <div style="display: inline; position: absolute; right: 2px; top: 22px;">
+          <form action="#">
             <select onchange="pnp_source=this.value; set_png_img();" id="pnp_source_select" style="display: none;">
-                <option value="0">Source 0</option>
-                <option value="1">Source 1</option>
-                <option value="2">Source 2</option>
             </select>
           </form>
-        </span>
+        </div>
     </td>
   </tr>
   <tr>
@@ -58,10 +56,10 @@
   <tr>
     <td colspan=7 align="center">
       <div id="pnp_graph_pane" style="position: relative;">
-        <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&theme=smoothness">
+        <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness">
           <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
           <img id="pnpimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
-          <div id="pnperr" style="display:none">Could not retrieve graph data</div>
+          <span id="pnperr" style="display:none">Could not retrieve graph data</span>
         </a>
       </div>
     </td>
@@ -70,7 +68,6 @@
     </td>
   </tr>
 </table>
-</div>
 <script type="text/javascript">
   var pnp_id     = 'pnp_th2';
   var pnp_start  = [% date.now - 90000 %];
