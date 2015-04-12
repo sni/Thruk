@@ -596,9 +596,7 @@
             tab.bgDragEl.dom.style.left     = "0px";
             tab.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
         }
-        if(tab.locked) {
-            tab.disableMapControls();
-        }
+        tab.disableMapControls();
 
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
