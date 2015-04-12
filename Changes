@@ -6,6 +6,8 @@ next:
           - fix permission problem with service recurring downtimes
           - fix escaping html tags in command definitions (#444)
           - fix complaining about 'null' groups in config tool (#442)
+          - Panorama View:
+            - fix adding new connector items
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects

@@ -1544,15 +1544,17 @@ TP.iconShowEditDialog = function(panel) {
     settingsWindow.showAt(showAtPos);
     TP.iconSettingsWindow.panel = panel;
 
+    settingsWindow.renderUpdateDo = renderUpdateDo;
     renderUpdate = function(forceColor, forceRenderItem) {
         if(TP.skipRender) { return; }
-        window.clearTimeout(TP.timeouts['settingsRenderUpdate']);
-        TP.timeouts['settingsRenderUpdate'] = window.setTimeout(function() {
-            renderUpdateDo(forceColor, forceRenderItem);
-        }, 100);
+        TP.reduceDelayEvents(TP.iconSettingsWindow, function() {
+            if(TP.skipRender)          { return; }
+            if(!TP.iconSettingsWindow) { return; }
+            TP.iconSettingsWindow.renderUpdateDo(forceColor, forceRenderItem);
+        }, 100, 'timeout_settings_render_update');
     };
-    renderUpdate();
     settingsWindow.renderUpdate = renderUpdate;
+    renderUpdate();
 
     /* highlight current icon */
     if(panel.xdata.appearance.type == "connector") {

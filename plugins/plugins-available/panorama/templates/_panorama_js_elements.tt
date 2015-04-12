@@ -668,10 +668,17 @@ Ext.define('TP.dragEl', {
         This.setPosition(This.xdata.appearance[This.keyX]+This.offsetX, This.xdata.appearance[This.keyY]+This.offsetY);
         This.resumeEvents();
     },
-    addDDListener: function() {
+    addDDListener: function(retries) {
         var panel = this;
-        if(!panel.el || !panel.dd) {return;}
+        if(retries == undefined) { retries = 0; }
         if(panel.ddAdded) {return;}
+        if(!panel.el || !panel.dd) {
+            if(retries == 1) { panel.initDraggable(); }
+            if(retries > 10) { return; }
+            /* add dd listener later */
+            window.setTimeout(Ext.bind(panel.addDDListener, panel, [retries+1]), 1000);
+            return;
+        }
         var tab   = Ext.getCmp(panel.panel.panel_id);
         panel.dd.addListener('dragstart', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
@@ -686,8 +693,10 @@ Ext.define('TP.dragEl', {
         });
         panel.dd.addListener('drag', function(This, evt) {
             TP.isShift = is_shift_pressed(evt);
+            if(TP.iconSettingsWindow) { TP.iconSettingsWindow.renderUpdate(); }
         });
         panel.dd.addListener('dragend', function(This, evt) {
+            if(TP.iconSettingsWindow) { TP.iconSettingsWindow.renderUpdate(); }
             tab.enableMapControlsTemp();
             panel.dragHint.destroy();
             panel.dragHint = undefined;

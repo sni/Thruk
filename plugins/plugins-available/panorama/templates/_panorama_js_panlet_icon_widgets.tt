@@ -1383,8 +1383,6 @@ Ext.define('TP.IconWidget', {
             panel.setRenderItem(xdata);
             return;
         }
-        if(!panel.surface.el) { return };
-        panel.surface.removeAll();
 
         var fromX     = xdata.appearance.connectorfromx;
         var fromY     = xdata.appearance.connectorfromy;
@@ -1392,6 +1390,9 @@ Ext.define('TP.IconWidget', {
         var toY       = xdata.appearance.connectortoy;
         var arrowtype = xdata.appearance.connectorarrowtype;
         if(isNaN(fromX)) { return; }
+
+        if(!panel.surface.el) { return };
+
         if(fromX > toX) {
             fromX = xdata.appearance.connectortox;
             fromY = xdata.appearance.connectortoy;
@@ -1480,6 +1481,7 @@ Ext.define('TP.IconWidget', {
             );
         }
 
+        panel.surface.removeAll();
         sprite = panel.surface.add({
             type: "path",
             path: TP.pointsToPath(points),
