@@ -8,6 +8,7 @@ next:
           - fix complaining about 'null' groups in config tool (#442)
           - Panorama View:
             - fix adding new connector items
+            - fix text labels disappearing on unlock
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects

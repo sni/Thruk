@@ -293,6 +293,7 @@
             TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
                 TP.removeLabel[panel.id].destroy();
                 delete TP.removeLabel[panel.id];
+                if(panel.iconType == "text") { panel.setIconLabel(cfg, force_perfdata); }
             }, 1000);
         }
         if(cfg == undefined)          { cfg = this.xdata.label; }

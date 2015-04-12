@@ -690,7 +690,7 @@
     setLock: function(val) {
         var tab = this;
         var mask;
-        var panels = TP.getAllPanel(this);
+        var panels = TP.getAllPanel(tab);
         if(tab.locked != val && panels.length > 0) {
             tab.mask = tab.body.mask((val ? "" : "un")+"locking dashboard...");
         }
@@ -715,7 +715,7 @@
             tab.disableMapControls();
         }
         /* schedule update, which also remove the mask from above */
-        TP.updateAllIcons(this);
+        TP.updateAllIcons(tab);
     },
     contextmenu: function(evt, hidePasteAndNew) {
         var tab = this;
