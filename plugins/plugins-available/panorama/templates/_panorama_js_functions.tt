@@ -1682,6 +1682,7 @@ var TP = {
         try {
             var str = '['+prefix+'] '+name+':';
             debug(str);
+            debug(err);
             TP.log(str);
             var out = err.stack.trim().split("\n");
             for(var x=0; x<out.length; x++) {
