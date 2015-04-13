@@ -790,7 +790,7 @@
             panel.xdata.layout.x = x;
             panel.xdata.layout.y = y;
             panel.setRawPosition(x, y);
-            if(panel.el) {
+            if(panel.el && TP.isThisTheActiveTab(panel)) {
                 if(panel.xdata.appearance.type == "connector") {
                     if(panel.isHidden()) { panel.show(); }
                 } else {
