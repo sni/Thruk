@@ -231,6 +231,15 @@ var TP = {
             throw new Error("TP.add_panlet(): no active tab! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
 
+        /* do not add panlets twice */
+        var testPanlet = Ext.getCmp(config.id);
+        if(testPanlet) {
+            if(config.conf.autoShow) {
+                testPanlet.show();
+            }
+            return;
+        }
+
         config.conf.id = TP.getNextId(tb.id+"_panlet", config.id);
         var state = cp.state;
         if(state[config.conf.id] != undefined
@@ -1040,7 +1049,7 @@ var TP = {
 
         var statusReq = TP.getStatusReq(tab, id, xdata);
         if(statusReq == undefined) {
-            if(tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+            if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
             return;
         }
         var req = statusReq.req,
@@ -1061,7 +1070,7 @@ var TP = {
             callback: function(options, success, response) {
                 TP.iconUpdateRunning[tab.id] = false;
                 if(reschedule) { reschedule.unmask(); }
-                if(tab && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
+                if(tab && tab.body && tab.mask) { tab.body.unmask(); tab.mask = undefined; }
                 if(!success) {
                     if(TP.refresh_errors == undefined) { TP.refresh_errors = 0; }
                     TP.refresh_errors++;

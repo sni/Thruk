@@ -89,6 +89,7 @@
         activate: function(This, eOpts) {
             TP.resetMoveIcons();
             var delay = 0;
+            var missingPanlets = 0;
             for(var nr=0; nr<This.window_ids.length; nr++) {
                 var panlet = Ext.getCmp(This.window_ids[nr]);
                 if(panlet) { // may not yet exists due to delayed rendering
@@ -104,6 +105,7 @@
                         TP.logError(panlet.id, "panelActivateException", err);
                     }
                 }
+                else { missingPanlets++ }
             }
             var tabpan = Ext.getCmp('tabpan');
             if(delay > 0) {
@@ -144,6 +146,10 @@
             if(This.mapEl)    { This.mapEl.show();    }
             This.applyZindex();
             This.setBackground(This.xdata);
+            if(TP.initialized && missingPanlets > 0) {
+                TP.initial_create_delay_active = 0;
+                This.createInitialPanlets(0, true);
+            }
             This.moveMapIcons(true);
         },
         hide: function(This, eOpts) {
@@ -279,7 +285,7 @@
             this.createInitialPanlets();
         }
     },
-    createInitialPanlets: function(retries) {
+    createInitialPanlets: function(retries, autoshow) {
         if(retries == undefined) { retries=0; }
         if(retries > 1000) {
             var err = new Error;
@@ -287,14 +293,16 @@
             return;
         }
         if(this.xdata.map && (!this.mapEl || !this.map)) {
-            window.setTimeout(Ext.bind(this.createInitialPanlets, this, [retries+1]), 50);
+            if(this.isActiveTab()) {
+                window.setTimeout(Ext.bind(this.createInitialPanlets, this, [retries+1, autoshow]), 50);
+            }
             return;
         }
         for(var nr=0; nr<this.window_ids.length; nr++) {
             // delayed panlet creation
-            var autoshow = false;
+            if(autoshow == undefined) { autoshow = false; }
             var delay    = TP.initial_create_delay_inactive;
-            if(TP.initial_active_tab != undefined && this.id == TP.initial_active_tab) {
+            if(autoshow || (TP.initial_active_tab != undefined && this.id == TP.initial_active_tab)) {
                 autoshow = true;
                 delay    = TP.initial_create_delay_active;
             }
