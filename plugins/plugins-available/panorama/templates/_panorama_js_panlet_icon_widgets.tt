@@ -800,6 +800,8 @@
                         if(panel.isHidden()) { panel.show(); }
                     }
                 }
+            } else if(panel.el) {
+                panel.hide();
             }
         }
         if(!panel.isHidden() && panel.el) {
