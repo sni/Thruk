@@ -10,6 +10,8 @@ next:
             - fix adding new connector items
             - fix text labels disappearing on unlock
             - fix ghost items from other dashboards when using geomap
+          - Config Tool:
+            - fix object browser links
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects

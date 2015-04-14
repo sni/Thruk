@@ -105,7 +105,14 @@ jQuery(function($) {
         return;
     });
 
-  jQuery('#container').jstree({
+  jQuery('#container')
+  .on('changed.jstree', function (e, data) {
+    var node=data.instance.get_node(data.selected[0]);
+    if(node && node.a_attr && node.a_attr.href) {
+      jQuery('#content_frame').attr('src', node.a_attr.href);
+    }
+  })
+  .jstree({
     plugins: [ "themes", "dnd"/*, "contextmenu"*/ ],
     core:    {
       animation: 0
