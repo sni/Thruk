@@ -56,10 +56,10 @@ fileversion="$newversion-$rpmrelease"
 sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$date',/" -i lib/Thruk/Config.pm
 sed -i support/thruk.spec -e 's/^Release:.*$/Release: '$rpmrelease'/'
 sed -r "s/branch\s*= '.*';/branch       = '$branch';/" \
-    -i lib/Thruk/Config.pm \
-    -i script/thruk        \
-    -i script/naglint      \
-    -i script/nagexp       \
+    -i lib/Thruk/Config.pm   \
+    -i script/thruk          \
+    -i script/naglint        \
+    -i script/nagexp         \
     -i script/nagimp
 dch --newversion "$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"
 if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
@@ -95,7 +95,10 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
     if [ -e plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js ]; then
         mv plugins/plugins-available/panorama/root/all_in_one-${VERSION}-${BRANCH}_panorama.js plugins/plugins-available/panorama/root/all_in_one-${fileversion}_panorama.js
     fi
-    git add docs/manpages/nagexp.3 docs/manpages/nagimp.3 docs/manpages/naglint.3
+    git add \
+        docs/manpages/nagexp.3 \
+        docs/manpages/nagimp.3 \
+        docs/manpages/naglint.3
 fi
 ./script/thruk_update_docs.sh > /dev/null
 yes n | perl Makefile.PL > /dev/null

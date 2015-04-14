@@ -102,7 +102,7 @@ export everything except logfile archive
 
 =head1 AUTHOR
 
-2012, Sven Nierlein, <sven@nierlein.de>
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
 
 =cut
 
@@ -157,7 +157,7 @@ sub run {
     if($self->{'opt'}->{'version'}) { print $vers,"\n"; exit 0; }
     pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
     pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: missing input file\n" } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
-    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many input files\”" } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many input files" } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
 
     my $maincfg = $self->{'opt'}->{'files'}->[0];
 
