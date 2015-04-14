@@ -253,7 +253,9 @@ sub _out {
 sub _cmd {
     my($self, $cmd) = @_;
     _info('running cmd: '.$cmd) if $self->{'opt'}->{'verbose'};
-    return `$cmd`;
+    my $out = `$cmd`;
+    print STDERR 'cmd failed: ',$cmd,"\n" if $? != 0;
+    return $out;
 }
 
 ##############################################
@@ -328,7 +330,7 @@ sub _tar_append {
             push @relativefiles, $f;
         }
     }
-    $self->_cmd('tar uf '.$tarball.' -C / '.join(' ', @relativefiles));
+    $self->_cmd('tar uf '.$tarball." -C / '".join("' '", @relativefiles)."'");
     return;
 }
 
