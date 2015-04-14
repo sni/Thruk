@@ -7,8 +7,14 @@
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'>
     [% PROCESS _conf_objects_menu.tt type="apply" %]
-    <tr><td colspan=10 align="center">
+  </table>
 
+<br><br>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
+<tr>
+<td align="left" valign="top" width="100%" style="padding-left: 20px" class="confPanel">
+
+  <div class="dataTitle">Apply Configuration Changes</div>
     <table>
 
     [% IF parse_errors.size > 0 %]
@@ -124,8 +130,17 @@
     [% END %]
 
     </table>
-    </td></tr>
-  </table>
+
+
+
+</td>
+<td align="left" valign="top" width="100%" style="padding-left: 20px">
+</td>
+<td align="center" valign="top" class="action_menu">
+[% PROCESS _conf_action_menu.tt show_object="" %]
+</td>
+</tr>
+</table>
 </form>
 </div>
 

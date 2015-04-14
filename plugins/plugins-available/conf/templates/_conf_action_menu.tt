@@ -7,7 +7,7 @@
         <tr>
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
-              [% IF type %]
+              [% IF type != "apply" %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]themes/[% theme %]/images/page_add.png' border="0" alt='Create a new [% type %]' title='Create a new [% type %]' width="16" height="16"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;action=new&amp;type=[% type %]'>Create a new [% type %]</a></td>
@@ -104,7 +104,7 @@
               </tr>
               [% END %]
             [% END %]
-              [% IF type || show_object %]
+              [% IF type != "apply"|| show_object %]
               <tr class='data'>
                 <td colspan=2><hr></td>
               </tr>
