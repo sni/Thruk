@@ -1,7 +1,7 @@
 ﻿[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="GET">
 <input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="change">
 [% IF readonly %]
@@ -47,7 +47,7 @@
         [% IF has_contact %]Yes[% ELSE %]No[% END %]
         [% IF backends_with_obj_config.keys.size > 0 %]
           [% IF has_contact %]
-            - <a href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name %]">edit</a>
+            - <input type="button" name="edit" value="edit in config tool" onclick="window.location='conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name %]'">
           [% ELSE %]
             - <a href="conf.cgi?sub=objects&amp;action=new&amp;type=contact&amp;obj.contact_name=[% user_name %]">create</a>
           [% END %]
@@ -96,7 +96,19 @@
       </tr>
       <tr>
         <td class='dataVar' align="left">Groups</td>
-        <td class='dataVal'>[% contact_groups.keys.sort.join(', ') %][% IF contact_groups.keys.size == 0 %]this contact has no groups.[% END %]</td>
+        <td class='dataVal'>
+          [% IF contact_groups.keys.size == 0 %]
+            this contact has no groups.
+          [% ELSE %]
+            [% IF backends_with_obj_config.keys.size > 0 %]
+              [% FOREACH group = contact_groups.keys.sort %]
+                <a href="conf.cgi?sub=objects&amp;type=contactgroup&amp;data.name=[% group %]">[% group %]</a>[% UNLESS loop.last %], [% END %]
+              [% END %]
+            [% ELSE %]
+              [% contact_groups.keys.sort.join(', ') %]
+            [% END %]
+          [% END %]
+        </td>
       </tr>
       [% IF has_contact %]
       <tr>
