@@ -12,6 +12,7 @@ next:
             - fix ghost items from other dashboards when using geomap
           - Config Tool:
             - fix object browser links
+            - use maximum size in command line wizard
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects

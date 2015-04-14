@@ -34,8 +34,29 @@ INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT
 INPUT.obj_servicegroup_servicegroup_members {
   width: 400px !important;
 }
-INPUT.cmd_line_inp_wzd.single_arg {
-  width: 350px;
+
+TABLE.command_line_wzd {
+  width: 100%;
+  border-collapse: collapse;
+}
+TABLE.command_line_wzd INPUT {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+TABLE.command_line_wzd TD, TABLE.command_line_wzd TR {
+  height: 10px;
+  line-height: 10px;
+  padding: 1px 0;
+  margin: 0;
+  border-right: 10px solid transparent;
+}
+TABLE.command_line_wzd > tbody > TR > TD:first-child {
+  padding-left: 10px;
+  width: 10px;
+}
+TABLE.command_line_wzd.first > tbody > TR > TD:first-child {
+  padding-left: 0;
 }
 
 .conf_attr_used {

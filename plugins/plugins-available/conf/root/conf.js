@@ -209,8 +209,7 @@ function init_conf_tool_command_wizard(id) {
       .dialog({
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
-        width:       'auto',
-        maxWidth:    1024,
+        width:       642,
         position:   'top',
         close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
     });
@@ -289,20 +288,14 @@ function update_command_line(id) {
         success: function(data) {
             hideElement(id + 'wait');
             var cmd_line = data[0].cmd_line;
-            var extra_class = "";
-            // if there is only one arg, we can make the input field larger
-            var regex = new RegExp('\\$ARG[0-9]+\\$', 'g');
-            var matches = cmd_line.match(regex);
-            if(matches && matches.length == 1) {
-                extra_class = "single_arg";
-            }
-
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+extra_class+" cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'>");
+                cmd_line = cmd_line.replace(regex, "<\/td><td><input type='text' id='"+id+"arg"+nr+"' class='cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'><\/td><td>");
             }
 
-            cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");
+            cmd_line = cmd_line.replace(/\ \-/g, "<\/td><\/tr><\/table><table class='command_line_wzd'><tr><td>-");
+            cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>"
+            cmd_line = cmd_line.replace(/<td>\s*<\/td>/g, "");
             document.getElementById(id + 'command_line').innerHTML = cmd_line;
 
             // now set the values to avoid escaping
