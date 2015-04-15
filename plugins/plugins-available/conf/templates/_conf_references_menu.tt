@@ -4,17 +4,18 @@
     <td align="center" valign="top" class='confPanel'>
       <div class='dataTitle'>References</div>
       <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        [% IF incoming.keys.size > 0 %]
         <tr>
           <td>
-            <table border="0" cellspacing="0" cellpadding="0">
+            <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
               <tr class='data'>
-                  <td style="text-align: left; padding-left: 5px;">
+                  <td class="obj_ref">
                     Incoming:<br>
-                    <ul style="padding-left: 10px; margin: 3px;">
+                    <ul class="obj_ref">
                     [% FOREACH t = incoming.keys.sort %]
                       [% FOREACH name = incoming.$t.keys.sort %]
                         [% oid = incoming.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
+                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a><span class="obj_ref">([% t %])</span></li>
                       [% END %]
                     [% END %]
                     </ul>
@@ -23,18 +24,20 @@
             </table>
           </td>
         </tr>
+        [% END %]
+        [% IF outgoing.keys.size > 0 %]
         <tr>
           <td>
             [% IF incoming.keys.size > 0 %]<hr>[% END %]
-            <table border="0" cellspacing="0" cellpadding="0">
+            <table border="0" cellspacing="0" cellpadding="0" style="width: 100%;">
               <tr class='data'>
-                  <td style="text-align: left; padding-left: 5px;">
+                  <td class="obj_ref">
                     Outgoing:<br>
-                    <ul style="padding-left: 10px; margin: 3px;">
+                    <ul class="obj_ref">
                     [% FOREACH t = outgoing.keys.sort %]
                       [% FOREACH name = outgoing.$t.keys.sort %]
                         [% oid = outgoing.$t.$name %]
-                        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
+                        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a><span class="obj_ref">([% t %])</span></li>
                       [% END %]
                     [% END %]
                     </ul>
@@ -43,6 +46,7 @@
             </table>
           </td>
         </tr>
+        [% END %]
       </table>
     </td>
   </tr>
