@@ -18,6 +18,7 @@ use File::Slurp;
 use Encode qw(decode_utf8 encode_utf8);
 use Config::General qw(ParseConfig);
 use Digest::MD5 qw(md5_hex);
+#use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
@@ -2244,6 +2245,8 @@ sub _nice_addon_name {
 sub _gather_references {
     my($self, $c, $obj) = @_;
 
+    #&timing_breakpoint('_gather_references');
+
     # references from other objects
     my $refs = $c->{'obj_db'}->get_references($obj);
     my $incoming = {};
@@ -2282,6 +2285,9 @@ sub _gather_references {
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;
     $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing});
+
+    #&timing_breakpoint('_gather_references done');
+
     return;
 }
 
