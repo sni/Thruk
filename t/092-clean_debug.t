@@ -30,7 +30,7 @@ for my $cmd (keys %{$cmds}) {
       next;
     }
     if($opt->{'skip_comments'}) {
-        if($line =~ m|^[a-zA-Z\./]+:\d+:\s*\#|mx) { next; }
+        if($line =~ m|^[a-zA-Z\./\-]+:\d+:\s*\#|mx) { next; }
     }
     if($opt->{'exclude'}) {
         my $matched = 0;
