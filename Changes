@@ -13,6 +13,7 @@ next:
           - Config Tool:
             - fix object browser links
             - use maximum size in command line wizard
+            - list references directly on the object page
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects

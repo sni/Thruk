@@ -1,0 +1,50 @@
+﻿[% IF has_refs && action != "editor" %]
+<table border='0' cellpadding="0" cellspacing="0" style="padding-top: 10px;">
+  <tr>
+    <td align="center" valign="top" class='confPanel'>
+      <div class='dataTitle'>References</div>
+      <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel confPanel">
+        <tr>
+          <td>
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr class='data'>
+                  <td style="text-align: left; padding-left: 5px;">
+                    Incoming:<br>
+                    <ul style="padding-left: 10px; margin: 3px;">
+                    [% FOREACH t = incoming.keys.sort %]
+                      [% FOREACH name = incoming.$t.keys.sort %]
+                        [% oid = incoming.$t.$name %]
+                        <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
+                      [% END %]
+                    [% END %]
+                    </ul>
+                  </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            [% IF incoming.keys.size > 0 %]<hr>[% END %]
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr class='data'>
+                  <td style="text-align: left; padding-left: 5px;">
+                    Outgoing:<br>
+                    <ul style="padding-left: 10px; margin: 3px;">
+                    [% FOREACH t = outgoing.keys.sort %]
+                      [% FOREACH name = outgoing.$t.keys.sort %]
+                        [% oid = outgoing.$t.$name %]
+                        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
+                      [% END %]
+                    [% END %]
+                    </ul>
+                  </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+[% END %]

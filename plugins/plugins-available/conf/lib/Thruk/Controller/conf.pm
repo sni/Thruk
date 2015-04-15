@@ -94,6 +94,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') { # Safe Defaults required
     $c->stash->{'show_save_reload'}    = 0;
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{'disable_backspace'}   = 1;
+    $c->stash->{'has_refs'}            = 0;
 
     Thruk::Utils::ssi_include($c);
 
@@ -1094,6 +1095,7 @@ sub _process_objects_page {
             delete $obj->{'file'};
         }
         $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
+        $self->_gather_references($c, $obj);
     }
 
     # set default type for start page
@@ -2123,44 +2125,7 @@ sub _host_list_services {
 ##########################################################
 sub _list_references {
     my($self, $c, $obj) = @_;
-
-    # references from other objects
-    my $refs = $c->{'obj_db'}->get_references($obj);
-    my $incoming = {};
-    for my $type (keys %{$refs}) {
-        $incoming->{$type} = {};
-        for my $id (keys %{$refs->{$type}}) {
-            my $obj = $c->{'obj_db'}->get_object_by_id($id);
-            $incoming->{$type}->{$obj->get_name()} = $id;
-        }
-    }
-
-    # references from this to other objects
-    my $outgoing = {};
-    my $resolved = $obj->get_resolved_config($c->{'obj_db'});
-    for my $attr (keys %{$resolved}) {
-        my $refs = $resolved->{$attr};
-        if(ref $refs eq '') { $refs = [$refs]; }
-        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
-            my $type = $obj->{'default'}->{$attr}->{'link'};
-            for my $r (@{$refs}) {
-                if($type eq 'command') { $r =~ s/\!.*$//mx; }
-                $outgoing->{$type}->{$r} = '';
-            }
-        }
-    }
-    # add used templates
-    if(defined $obj->{'conf'}->{'use'}) {
-        for my $t (@{$obj->{'conf'}->{'use'}}) {
-            $outgoing->{$obj->get_type()}->{$t} = '';
-        }
-    }
-
-    # linked from delete object page?
-    $c->stash->{'force_delete'} = $c->{'request'}->{'parameters'}->{'show_force'} ? 1 : 0;
-
-    $c->stash->{'incoming'} = $incoming;
-    $c->stash->{'outgoing'} = $outgoing;
+    $self->_gather_references($c, $obj);
     $c->stash->{'template'} = 'conf_objects_listref.tt';
     return;
 }
@@ -2273,6 +2238,51 @@ sub _nice_addon_name {
     $dir =~ s/^.*\///gmx;
     my $nicename = join(' ', map(ucfirst, split(/_/mx, $dir)));
     return($nicename, $dir);
+}
+
+##########################################################
+sub _gather_references {
+    my($self, $c, $obj) = @_;
+
+    # references from other objects
+    my $refs = $c->{'obj_db'}->get_references($obj);
+    my $incoming = {};
+    for my $type (keys %{$refs}) {
+        $incoming->{$type} = {};
+        for my $id (keys %{$refs->{$type}}) {
+            my $obj = $c->{'obj_db'}->get_object_by_id($id);
+            $incoming->{$type}->{$obj->get_name()} = $id;
+        }
+    }
+
+    # references from this to other objects
+    my $outgoing = {};
+    my $resolved = $obj->get_resolved_config($c->{'obj_db'});
+    for my $attr (keys %{$resolved}) {
+        my $refs = $resolved->{$attr};
+        if(ref $refs eq '') { $refs = [$refs]; }
+        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
+            my $type = $obj->{'default'}->{$attr}->{'link'};
+            for my $r (@{$refs}) {
+                if($type eq 'command') { $r =~ s/\!.*$//mx; }
+                $outgoing->{$type}->{$r} = '';
+            }
+        }
+    }
+    # add used templates
+    if(defined $obj->{'conf'}->{'use'}) {
+        for my $t (@{$obj->{'conf'}->{'use'}}) {
+            $outgoing->{$obj->get_type()}->{$t} = '';
+        }
+    }
+
+    # linked from delete object page?
+    $c->stash->{'force_delete'} = $c->{'request'}->{'parameters'}->{'show_force'} ? 1 : 0;
+
+    $c->stash->{'incoming'} = $incoming;
+    $c->stash->{'outgoing'} = $outgoing;
+    $c->stash->{'has_refs'} = 1 if(scalar keys %{$incoming} || scalar keys %{$outgoing});
+    return;
 }
 
 ##########################################################

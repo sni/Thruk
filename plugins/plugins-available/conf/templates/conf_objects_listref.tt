@@ -49,7 +49,7 @@
     <td class='dataVar'>
       <ul>
       [% FOREACH name = outgoing.$t.keys.sort %]
-        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name %]">[% name %]</a></li>
+        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name | uri %]">[% name %]</a></li>
       [% END %]
       </ul>
     </td>
