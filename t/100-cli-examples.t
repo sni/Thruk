@@ -31,7 +31,8 @@ my $args = {
 
 ###########################################################
 for my $file (@files) {
-    next if $file eq 'examples/remove_duplicates'; # there is an extra test for this
+    next if $file eq 'examples/remove_duplicates';       # there is an extra test for this
+    next if $file eq 'examples/config_tool_git_checkin'; # cannot be tested easily
     next unless -x $file;
     check_example($file);
 }
