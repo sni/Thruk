@@ -8,6 +8,7 @@ next:
           - fix complaining about 'null' groups in config tool (#442)
           - fix business process cron entry being remove when updating reports
           - fix problem for reports using contacts with authorized by groups
+          - display error message if report cannot be created due to missing hosts/services
           - Panorama View:
             - fix adding new connector items
             - fix text labels disappearing on unlock

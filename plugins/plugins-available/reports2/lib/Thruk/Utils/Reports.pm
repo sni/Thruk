@@ -403,10 +403,7 @@ sub generate_report {
         if($options->{'failed_backends'} eq 'cancel') {
             if(scalar @failed > 0) {
                 my $error = "Some backends are not connected, cannot create report!\n".join("\n", @failed)."\n";
-                Thruk::Utils::CLI::_error($error);
-                $Thruk::Utils::Reports::error = $error;
-                _check_for_waiting_reports($c);
-                return $c->detach('/error/index/13');
+                return(_report_die($c, $error, $logfile));
             }
         }
     }
@@ -445,10 +442,7 @@ sub generate_report {
         $c->view("TT")->render($c, 'reports/'.$options->{'template'});
     };
     if($@) {
-        Thruk::Utils::CLI::_error($@);
-        $Thruk::Utils::Reports::error = $@;
-        _check_for_waiting_reports($c);
-        return $c->detach('/error/index/13');
+        return(_report_die($c, $@, $logfile));
     }
 
     # render report
@@ -459,10 +453,7 @@ sub generate_report {
         $reportdata = $c->view("TT")->render($c, 'reports/'.$options->{'template'});
     };
     if($@) {
-        Thruk::Utils::CLI::_error($@);
-        $Thruk::Utils::Reports::error = $@;
-        _check_for_waiting_reports($c);
-        return $c->detach('/error/index/13');
+        return(_report_die($c, $@, $logfile));
     }
 
     # convert to pdf
@@ -498,10 +489,7 @@ sub generate_report {
         if($options->{'failed_backends'} eq 'cancel' and scalar @failed > 0) {
             unlink($attachment);
             my $error = "Some backends threw errors, cannot create report!\n".join("\n", @failed)."\n";
-            Thruk::Utils::CLI::_error($error);
-            $Thruk::Utils::Reports::error = $error;
-            _check_for_waiting_reports($c);
-            return $c->detach('/error/index/13');
+            return(_report_die($c, $error, $logfile));
         }
     }
 
@@ -978,6 +966,7 @@ sub _report_save {
     delete $report->{'readonly'};
     delete $report->{'nr'};
     delete $report->{'error'};
+    delete $report->{'long_error'};
     delete $report->{'failed'};
 
     Thruk::Utils::write_data_file($file, $report);
@@ -1092,6 +1081,10 @@ sub _read_report_file {
         elsif($report->{'error'} =~ m/\[ERROR\]\s+(internal\s+server\s+error)/gmx) {
             $report->{'long_error'} = $report->{'error'};
             $report->{'error'} = $1;
+        }
+        $report->{'error'} =~ s/^\Qundef error - \E//mx;
+        if(!$report->{'long_error'} && $report->{'error'} =~ m/\n/mx) {
+            ($report->{'error'}, $report->{'long_error'}) = split(/\n/mx, $report->{'error'}, 2);
         }
         $needs_save = 1;
     }
@@ -1317,6 +1310,16 @@ sub _check_for_waiting_reports {
         }
     }
     return;
+}
+
+##########################################################
+sub _report_die {
+    my($c, $err, $logfile) = @_;
+    Thruk::Utils::CLI::_error($@);
+    Thruk::Utils::IO::write($logfile, $@, undef, 1);
+    $Thruk::Utils::Reports::error = $@;
+    _check_for_waiting_reports($c);
+    return $c->detach('/error/index/13');
 }
 
 ##########################################################
