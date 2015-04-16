@@ -551,6 +551,7 @@ sub set_processinfo {
        or !defined $cached_user_data->{'prev_last_program_restart'}
        or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
        or $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
+       or ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
       ) {
         if(defined $c->stash->{'remote_user'} and !$skip_cache_update) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
