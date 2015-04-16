@@ -486,7 +486,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 listeners: { change: function(This) { applyBackground() } }
             },
             items: [
-            { xtype: 'label', text:  'Lon/Lat:', style: 'margin-left: 0px; margin-right: 2px; margin-top: 5px;' },
+            { xtype: 'label', text:  'Lon/Lat:', style: 'margin-left: 0px; margin-right: 2px;', cls: 'x-form-item-label' },
             {
                 xtype:      'textfield',
                 name:       'maplon',
@@ -498,7 +498,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 width:       120,
                 value:       tab.xdata.map != undefined ? tab.xdata.map.lat : ''
             },
-            { xtype: 'label', text:  'Zoom:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px; text-align: right;', flex: 1 },
+            { xtype: 'label', text:  'Zoom:', style: 'margin-left: 10px; margin-right: 2px; text-align: right;', flex: 1, cls: 'x-form-item-label' },
             {
                 xtype:      'textfield',
                 name:       'mapzoom',
@@ -533,7 +533,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     }
                 }
             },
-            { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px;' },
+            { xtype: 'label', text:  'Scale:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
             {
                 xtype:          'numberunit',
                 unit:           '%',
@@ -557,7 +557,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 listeners: { change: function(This) { applyBackground() } }
             },
             items: [
-            { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px; margin-top: 5px;' },
+            { xtype: 'label', text: 'Offset X:', style: 'margin-right: 2px;', cls: 'x-form-item-label' },
             {
                 xtype:          'numberunit',
                 unit:           'px',
@@ -570,7 +570,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                 value:           0,
                 fieldStyle:     'text-align: right;'
             },
-            { xtype: 'label', text: 'Y:', style: 'margin-left: 10px; margin-right: 2px; margin-top: 5px;' },
+            { xtype: 'label', text: 'Y:', style: 'margin-left: 10px; margin-right: 2px;', cls: 'x-form-item-label' },
             {
                 xtype:          'numberunit',
                 unit:           'px',
@@ -856,6 +856,11 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
         ]
     });
     tab.xdata['refresh_txt'] = TP.sliderValue2Txt(tab.xdata['refresh']); // refresh text is wrong otherwise on initial settings window
+    if(tab.xdata.map) {
+        tab.xdata['maplon']  = tab.xdata.map.lon;
+        tab.xdata['maplat']  = tab.xdata.map.lat;
+        tab.xdata['mapzoom'] = tab.xdata.map.zoom;
+    }
     Ext.getCmp('dashboardForm').getForm().setValues(tab.xdata);
     Ext.getCmp('soundForm').getForm().setValues(tab.xdata);
     Ext.getCmp('usersettingsForm').getForm().setValues(tabpan.xdata);

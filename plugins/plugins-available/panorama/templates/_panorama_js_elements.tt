@@ -361,7 +361,8 @@ Ext.define('TP.SoundField', {
         name:         'sound'
     }, {
         xtype:        'label',
-        text:         'repeat:'
+        text:         'repeat:',
+        cls:          'x-form-item-label'
     }, {
         xtype:        'numberfield',
         value:        0,
