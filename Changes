@@ -4,19 +4,21 @@ next:
           - add pnp graph select option on extinfo pages
           - fix error on omd updates with recurring downtimes
           - fix permission problem with service recurring downtimes
-          - fix escaping html tags in command definitions (#444)
-          - fix complaining about 'null' groups in config tool (#442)
-          - fix business process cron entry being remove when updating reports
-          - fix problem for reports using contacts with authorized by groups
-          - display error message if report cannot be created due to missing hosts/services
+          - Business Process:
+            - fix business process cron entry being remove when updating reports
+          - Reports:
+            - display error message if report cannot be created due to missing hosts/services
+            - fix problem for reports using contacts with authorized by groups
           - Panorama View:
             - fix adding new connector items
             - fix text labels disappearing on unlock
             - fix ghost items from other dashboards when using geomap
           - Config Tool:
-            - fix object browser links
             - use maximum size in command line wizard
             - list references directly on the object page
+            - fix object browser links
+            - fix complaining about 'null' groups in config tool (#442)
+            - fix escaping html tags in command definitions (#444)
 
 1.88-2   Sun Mar 29 19:30:58 CEST 2015
           - fix problem with busines process objects
