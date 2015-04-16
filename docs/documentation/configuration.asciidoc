@@ -1061,6 +1061,9 @@ type is Mysql. Format is a Mysql/MongoDB connection string like
 memory usage of Thruk and Naemon when accessing logfiles, for example when
 creating reports.
 
+[WARNING]
+The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
+
 ex.:
 
   logcache = mysql://user:password@localhost:3306/thruk_log_cache
@@ -1686,7 +1689,7 @@ for details.
 === peer
 
      ** `name`          name for this connection
-     ** `type`          type of this connection. Can be 'livestatus', 'http' or 'mongodb'
+     ** `type`          type of this connection. Can be 'livestatus' or 'http'.
      ** `hidden`        should this peer be hidden initially ( can be reenabled
                         via gui switch ) Only useful with more than one
                         backend. Setting this option removes this

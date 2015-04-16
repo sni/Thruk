@@ -192,6 +192,9 @@ The MongoDB is not a real backend for status data, but it can be used as a
 logfile cache. If unsure whether to use MongoDB or MySQL, use MySQL which is
 newer and faster. The MongoDB logfile cache may be deprecated in the future.
 
+[WARNING]
+The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
+
 ex.:
 
   logcache = mongodb://localhost:27017/thruk_logs

@@ -13,8 +13,8 @@ monitoring and increases the overall load on your monitoring host. Therefor
 Thruk may use a logfile cache to increase performance of logfile access and
 reports.
 
-If unsure whether to use MongoDB or MySQL, use MySQL which is newer and faster.
-The MongoDB logfile cache may be deprecated in the future.
+[WARNING]
+The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
 
 For maximum performance, the Logfile Cache Database should be installed on the
 same server as Thruk itself (or at least in the same network).

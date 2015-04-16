@@ -12,6 +12,8 @@ use Encode qw/encode_utf8/;
 use File::Temp qw/tempfile/;
 use parent 'Thruk::Backend::Provider::Base';
 
+# REMOVE AFTER: 01.01.2016
+
 =head1 NAME
 
 Thruk::Backend::Provider::Mongodb - connection provider for mongodb connections

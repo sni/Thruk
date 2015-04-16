@@ -195,6 +195,11 @@ sub _initialise_peer {
                                                 });
         } else {
             require Thruk::Backend::Provider::Mongodb;
+            if(!$config->{'deprecations_shown'}->{'mongodb_logcache'}) {
+                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
+                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using mongodb logcache is deprecated and will be removed in future releases.";
+                $config->{'deprecations_shown'}->{'mongodb_logcache'} = 1;
+            }
             Thruk::Backend::Provider::Mongodb->import;
             $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
                                                     peer     => $logcache,

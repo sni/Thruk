@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - mongodb logcache is now deprecated and will be removed 2016
           - add pnp graph select option on extinfo pages
           - fix error on omd updates with recurring downtimes
           - fix permission problem with service recurring downtimes
