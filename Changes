@@ -6,6 +6,7 @@ next:
           - fix permission problem with service recurring downtimes
           - fix escaping html tags in command definitions (#444)
           - fix complaining about 'null' groups in config tool (#442)
+          - fix business process cron entry being remove when updating reports
           - Panorama View:
             - fix adding new connector items
             - fix text labels disappearing on unlock

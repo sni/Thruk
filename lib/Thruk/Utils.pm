@@ -1562,7 +1562,7 @@ sub update_cron_file {
             }
             $thruk_started = 0 if $line =~ m/^\#\ END\ OF\ THRUK/mx;
 
-            if($line =~ m/^\#\ (\w+)$/mx) {
+            if($line =~ m/^\#\ ([\w\s]+)$/mx) {
                 $lastsection = $1;
                 next;
             }
