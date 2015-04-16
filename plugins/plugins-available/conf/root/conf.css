@@ -321,3 +321,7 @@ TD.obj_ref {
   text-align: left;
   padding-left: 5px;
 }
+
+LI.file_node I.jstree-icon {
+  background-position: -100px -69px;
+}

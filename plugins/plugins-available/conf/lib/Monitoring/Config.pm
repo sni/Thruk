@@ -549,6 +549,29 @@ sub get_objects_by_name {
 
 ##########################################################
 
+=head2 get_objects_by_path
+
+    get_objects_by_path($path)
+
+Get all objects by path. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
+
+=cut
+sub get_objects_by_path {
+    my($self, $path) = @_;
+
+    my $objects = [];
+    for my $file (@{$self->{'files'}}) {
+        next unless($file->{'path'} =~ m/^\Q$path\E/mx or $file->{'display'} =~ m/^\Q$path\E/mx);
+        for my $obj (@{$file->{'objects'}}) {
+            push @{$objects}, $obj;
+        }
+    }
+    return $objects;
+}
+
+
+##########################################################
+
 =head2 get_templates_by_type
 
     get_templates_by_type($type)
@@ -598,7 +621,7 @@ sub get_template_by_name {
 
     get_object_by_location($path, $linenr)
 
-Get object by location. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
+Get single object by path and line number. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
 
 =cut
 sub get_object_by_location {
