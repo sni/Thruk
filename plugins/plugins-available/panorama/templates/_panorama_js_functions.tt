@@ -271,7 +271,7 @@ var TP = {
         if(smartPlacement == undefined || smartPlacement == true) {
             pan.setActiveTab(tb); /* otherwise panel won't be rendered and panel size is 0 */
             if(config.conf.pos) {
-                win.setPosition(config.conf.pos[0], config.conf.pos[1]);
+                win.setRawPosition(config.conf.pos[0], config.conf.pos[1]);
             } else {
                 TP.fitWindowPlacement(tb, win);
             }
@@ -431,7 +431,7 @@ var TP = {
                 break;
             }
         }
-        win.setPosition(x, y);
+        win.setRawPosition(x, y);
     },
     /* returns true if any box ovelap */
     boxesOverlap: function(x, y, box, boxes) {

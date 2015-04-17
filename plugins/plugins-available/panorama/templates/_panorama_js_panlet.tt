@@ -11,6 +11,8 @@
     autoShow:  false,
     stateful:  true,
     renderTo: "bodyview",
+    focusOnToFront: false,
+    toFrontOnShow: false,
     initComponent: function() {
         var panel = this;
         if(this.xdata == undefined) {
@@ -134,6 +136,7 @@
         if(state) {
             TP.log('['+this.id+'] applyState: '+Ext.JSON.encode(state));
             Ext.apply(this, state);
+            this.setRawPosition(state.pos[0], state.pos[1]);
             this.setTitle(state.title);
             this.applyBorderAndBackground();
         }
@@ -151,13 +154,23 @@
         animated.to = {x:win.pos[0], y:win.pos[1], width: win.width, height: win.height};
         win.animate(animated);
     },
+    setRawPosition: function(x, y) {
+        var panel = this;
+        panel.suspendEvents();
+        panel.setPosition(x, y);
+        if(panel.el && panel.el.dom) {
+            panel.setPagePosition(x, y);
+        }
+        panel.resumeEvents();
+        return(panel);
+    },
     listeners:  {
         /* make shadow snap to grid */
         move: function( This, x, y, eOpts ) {
             if(This.snap != false && This.animations == 0) {
                 var newpos = TP.get_snap(x, y);
                 if(newpos[0] != x || newpos[1] != y) {
-                    This.setPosition( newpos[0], newpos[1], false );
+                    This.setRawPosition( newpos[0], newpos[1] );
                 }
             }
             /* hide drop shadow */

@@ -376,11 +376,6 @@ TD.less_padding DIV.x-grid-cell-inner {
   padding: 3px;
 }
 
-.x-viewport, .x-viewport body {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
 DIV.x-window-default.gearopen {
   background-color: #E8E8E8;
 }

@@ -821,6 +821,7 @@
         panel.resumeEvents();
         panel.noUpdateLonLat--;
         panel.setIconLabel();
+        return(panel);
     }
 });
 
@@ -832,6 +833,8 @@ Ext.define('TP.IconWidget', {
 
     cls:      'iconWidget tooltipTarget',
     floating:  true,
+    focusOnToFront: false,
+    toFrontOnShow: false,
     width:     22,
     height:    22,
 

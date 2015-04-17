@@ -32,9 +32,7 @@
     [% END %]
 </head>
 <body onunload="TP.unload()">
-<div style="position: relative; overflow: hidden; width: 100%; height: 100%; visibility: hidden;">
-<div id="bodyview" style="visibility: visible;"></div>
-</div>
+<div id="bodyview"></div>
 <script type="text/javascript">
 <!--
 [%+ PROCESS panorama_js.tt +%]
