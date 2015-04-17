@@ -760,6 +760,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var d_form  = Ext.getCmp('dashboardForm').getForm();
                         if(!d_form.isValid()) { return false; }
                         var values = d_form.getFieldValues();
+                        var locked = values.locked;
                         if(values['map_choose'] == 'geomap') {
                             tab.xdata.map = {
                                 lon:  values.maplon,
@@ -846,6 +847,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                             tab.destroy();
                         } else {
                             /* permissions might have changed */
+                            tab.setLock(locked);
                             window.setTimeout(function() {
                                 TP.renewDashboard(tab);
                             }, 2000);
