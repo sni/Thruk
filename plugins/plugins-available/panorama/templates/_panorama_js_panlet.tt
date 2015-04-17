@@ -253,8 +253,9 @@
     },
     forceSaveState: function() {
         var oldLocked = this.locked;
+        this.locked   = false;
         this.saveState();
-        this.locked = oldLocked;
+        this.locked   = oldLocked;
     },
     setFormDefaults: function() {
         /* set initial form values */

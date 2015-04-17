@@ -762,9 +762,9 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         var values = d_form.getFieldValues();
                         if(values['map_choose'] == 'geomap') {
                             tab.xdata.map = {
-                                lon:  values.lon,
-                                lat:  values.lat,
-                                zoom: values.zoom
+                                lon:  values.maplon,
+                                lat:  values.maplat,
+                                zoom: values.mapzoom
                             };
                         } else {
                             delete tab.xdata['map'];

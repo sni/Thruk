@@ -191,8 +191,9 @@
     },
     forceSaveState: function() {
         var oldLocked = this.locked;
+        this.locked   = false;
         this.saveState();
-        this.locked = oldLocked;
+        this.locked   = oldLocked;
     },
     applyXdata: function(xdata) {
         if(xdata == undefined) { xdata = this.xdata; }
