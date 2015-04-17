@@ -703,11 +703,12 @@ var TP = {
 
         if(decoded.tabpan) {
             /* old export with all tabs*/
+            // verify complete import of all tabs export still works
             // REMOVE AFTER: 01.01.2016
             cp.saveChanges(false);
             TP.modalWindows.push(Ext.Msg.confirm(
                 'Confirm Import',
-                'This is an old import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and be added again.',
+                'This is a complete import which will replace your current view with the exported one.<br>Your current open dashboards will be closed and can be added again afterwards.',
                 function(button) {
                     if(button === 'yes') {
                         tabpan.stopTimeouts();
