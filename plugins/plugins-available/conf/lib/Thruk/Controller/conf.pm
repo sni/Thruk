@@ -976,6 +976,7 @@ sub _process_objects_page {
     }
 
     # get object from params
+    $c->stash->{cloned} = 0;
     my $obj = $self->_get_context_object($c);
     if(defined $obj) {
 
@@ -989,10 +990,16 @@ sub _process_objects_page {
         elsif($c->stash->{action} eq 'store') {
             return unless Thruk::Utils::check_csrf($c);
             my $rc = $self->_object_save($c, $obj);
+            if($rc && defined $c->{'request'}->{'parameters'}->{'cloned'}) {
+                if(!$obj->is_template()) {
+                    $self->_clone_refs($c, $obj, $c->{'request'}->{'parameters'}->{'cloned'});
+                }
+            }
             if(defined $c->{'request'}->{'parameters'}->{'save_and_reload'}) {
                 return if $self->_apply_config_changes($c);
             }
             return if $rc;
+            $c->stash->{cloned} = $c->{'request'}->{'parameters'}->{'cloned'} || 0;
         }
 
         # disable this object temporarily
@@ -1022,6 +1029,7 @@ sub _process_objects_page {
         # clone this object
         elsif($c->stash->{action} eq 'clone') {
             return unless Thruk::Utils::check_csrf($c);
+            $c->stash->{cloned} = $obj->get_id() || 0;
             $obj = $self->_object_clone($c, $obj);
         }
 
@@ -1777,10 +1785,52 @@ sub _object_clone {
     $c->stash->{'new_file'} =~ s/^$files_root/\//gmx;
     # if cloned from a readonly file, keep new_file empty
     if($obj->{'file'}->{'readonly'}) { $c->stash->{'new_file'} = ''; }
-    $obj = Monitoring::Config::Object->new(type     => $obj->get_type(),
-                                           conf     => $obj->{'conf'},
-                                           coretype => $c->{'obj_db'}->{'coretype'});
-    return $obj;
+    my $newobj = Monitoring::Config::Object->new(
+        type     => $obj->get_type(),
+        conf     => $obj->{'conf'},
+        coretype => $c->{'obj_db'}->{'coretype'},
+    );
+    return $newobj;
+}
+
+
+##########################################################
+sub _clone_refs {
+    my($self, $c, $obj, $cloned_id) = @_;
+    my $clonedtype  = $obj->get_type();
+    my $new_name    = $obj->get_name();
+    my $orig        = $c->{'obj_db'}->get_object_by_id($cloned_id);
+    if(!$orig) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Could not find object to clone from.' );
+        return;
+    }
+    my $cloned_name = $orig->get_name();
+    my $refs        = $self->_gather_references($c, $orig);
+
+    if($new_name eq $cloned_name) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'New name must be different' );
+        return;
+    }
+
+    # clone incoming references
+    if($refs->{'incoming'}) {
+        for my $type (keys %{$refs->{'incoming'}}) {
+            for my $name (keys %{$refs->{'incoming'}->{$type}}) {
+                my $ref_id = $refs->{'incoming'}->{$type}->{$name};
+                my $ref    = $c->{'obj_db'}->get_object_by_id($ref_id);
+                next if $ref->{'file'}->{'readonly'};
+                for my $attr (keys %{$ref->{'conf'}}) {
+                    if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
+                        if(grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
+                            push @{$ref->{'conf'}->{$attr}}, $new_name;
+                            $c->{'obj_db'}->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return;
 }
 
 
@@ -2295,7 +2345,7 @@ sub _gather_references {
 
     #&timing_breakpoint('_gather_references done');
 
-    return;
+    return({incoming => $incoming, outgoing => $outgoing});
 }
 
 ##########################################################

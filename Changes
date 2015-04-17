@@ -18,6 +18,7 @@ next:
             - use maximum size in command line wizard
             - list references directly on the object page
             - display files/folders in Objects Browser
+            - objects will be cloned including references now
             - fix object browser links
             - fix complaining about 'null' groups in config tool (#442)
             - fix escaping html tags in command definitions (#444)

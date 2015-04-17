@@ -18,6 +18,7 @@
 <input type="hidden" name="type" value="[% type %]">
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="store">
+<input type="hidden" name="cloned" value="[% cloned %]">
 <input type="hidden" name="referer" value="[% referer %]">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'[% IF bare %] width="100%"[% END %]>
