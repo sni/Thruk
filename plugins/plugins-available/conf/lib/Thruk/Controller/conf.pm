@@ -1271,6 +1271,14 @@ sub _process_tools_page {
         }
     }
 
+    # sort tools into categories
+    my $tools_by_category = {};
+    for my $name (keys %{$tools}) {
+        my $t = $tools->{$name};
+        $tools_by_category->{$t->{category}}->{$name} = $t;
+    }
+    $c->stash->{'tools_by_category'} = $tools_by_category;
+
     return;
 }
 

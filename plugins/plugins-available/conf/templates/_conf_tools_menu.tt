@@ -6,7 +6,12 @@
         <tr>
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel">
-              [% FOREACH name = tools.keys.sort %]
+              [% FOREACH category = tools_by_category.keys.sort %]
+              <tr class='data[% IF !loop.first %] tools_category[% END %]'>
+                <td width=23></td>
+                <td class='command'><b>[% category %]</b></td>
+              </tr>
+              [% FOREACH name = tools_by_category.$category.keys.sort %]
               [% t = tools.$name %]
               <tr class='data'>
                 <td width=23><img src='[% url_prefix %]themes/[% theme %]/images/package_go.png' border="0" alt='[% t.link %]' title='[% t.link %]' width="16" height="16"></td>
@@ -16,6 +21,7 @@
                     [% IF name == tool %]</b>[% END %]
                 </td>
               </tr>
+              [% END %]
               [% END %]
             </table>
           </td>

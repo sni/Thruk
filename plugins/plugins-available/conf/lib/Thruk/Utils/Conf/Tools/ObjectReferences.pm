@@ -26,9 +26,11 @@ returns new instance of this tool
 sub new {
     my($class) = @_;
     my $self = {
-        link    => 'Check Object References',
-        title   => 'Cross Reference Check',
-        fixlink => 'remove',
+        category    => 'References',
+        link        => 'Check Object References',
+        title       => 'Cross Reference Check',
+        description => 'Find all objects with broken cross references',
+        fixlink     => 'remove',
     };
     bless($self, $class);
     return($self);

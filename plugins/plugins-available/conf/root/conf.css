@@ -359,3 +359,7 @@ LI.file_node I.jstree-icon {
 .left_pad_5 {
   padding-left: 5px;
 }
+
+TR.tools_category TD {
+    border-top: 1px solid #444444;
+}

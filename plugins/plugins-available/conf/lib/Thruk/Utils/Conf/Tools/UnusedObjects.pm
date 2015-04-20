@@ -26,9 +26,11 @@ returns new instance of this tool
 sub new {
     my($class) = @_;
     my $self = {
-        link    => 'Find Unused Objects',
-        title   => 'Unused Objects',
-        fixlink => 'remove',
+        category    => 'Cleanup',
+        link        => 'Find Unused Objects',
+        title       => 'Unused Objects',
+        description => 'Find all objects not used anywhere',
+        fixlink     => 'remove',
     };
     bless($self, $class);
     return($self);

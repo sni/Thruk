@@ -1,4 +1,4 @@
-package Thruk::Utils::Conf::Tools::DuplicateTemplateAttributes;
+package Thruk::Utils::Conf::Tools::SuggestPossibleTemplates;
 
 use strict;
 use warnings;
@@ -7,11 +7,11 @@ use Thruk::Utils::Conf;
 
 =head1 NAME
 
-Thruk::Utils::Conf::Tools::DuplicateTemplateAttributes.pm - Tool to cleanup duplicate template attributes
+Thruk::Utils::Conf::Tools::SuggestPossibleTemplates.pm - Tool to cleanup duplicate template attributes
 
 =head1 DESCRIPTION
 
-Tool to cleanup duplicate template attributes
+Tool to suggest possible useful templates
 
 =head1 METHODS
 
@@ -28,9 +28,9 @@ sub new {
     my($class) = @_;
     my $self = {
         category    => 'Templates',
-        link        => 'Check Templates Usage',
-        title       => 'Templates Usage',
-        description => 'List attributes which can be safely removed, because they are part of the templates already',
+        link        => 'Suggest Useful Templates',
+        title       => 'Suggest Useful Templates',
+        description => 'Suggest useful templates which could be used',
         fixlink     => 'fix',
     };
     bless($self, $class);
@@ -60,8 +60,8 @@ sub get_list {
             };
         }
         for my $obj (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
-            next unless $obj->{'conf'}->{'use'};
-            for my $tmp (@{$obj->{'conf'}->{'use'}}) {
+            for my $tmp (keys %{$templates}) {
+                next if($obj->{'conf'}->{'use'} && grep(/^\Q$tmp\E$/mx, @{$obj->{'conf'}->{'use'}}));
                 my $resolved = $templates->{$tmp}->{'resolved'};
                 my $template = $templates->{$tmp}->{'obj'};
                 my($total, $identical, $ok, $removeable) = (0, 0, 1, []);
@@ -85,7 +85,7 @@ sub get_list {
                     name       => $obj->get_name(),
                     type       => $obj->get_type(),
                     obj        => $obj,
-                    message    => 'could remove '.$identical.' attributes which are already defined in the <a href="conf.cgi?sub=objects&amp;data.id='.$template->get_id().'">'.$tmp.'</a> template',
+                    message    => 'could save '.$identical.' attributes by using <a href="conf.cgi?sub=objects&amp;data.id='.$template->get_id().'">'.$tmp.'</a> template',
                     cleanable  => 1,
                     removeable => $removeable,
                     template   => $tmp,
