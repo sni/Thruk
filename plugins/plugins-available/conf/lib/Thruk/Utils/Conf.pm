@@ -899,13 +899,16 @@ returns list with all ignores removed
 sub clean_from_tool_ignores {
     my($list, $ignores) = @_;
     return $list unless $ignores;
+    my $hidden  = 0;
     my $cleaned = [];
     for my $r (@{$list}) {
         if(!defined $ignores->{$r->{'ident'}}) {
             push @{$cleaned}, $r;
+        } else {
+            $hidden++;
         }
     }
-    return($cleaned);
+    return($hidden, $cleaned);
 }
 
 ##########################################################

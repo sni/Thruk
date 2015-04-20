@@ -1832,7 +1832,7 @@ sub _check_references {
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
                 if($options{'hash'}) {
-                    push @parse_errors, { ident     => $obj->get_id().';'.$attr.';'.$val,
+                    push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
                                           id        => $obj->get_id(),
                                           type      => $obj->get_type(),
                                           name      => $obj->get_name(),
@@ -1857,7 +1857,7 @@ sub _check_references {
             return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
 
             if($options{'hash'}) {
-                push @parse_errors, { ident     => $obj->get_id().';'.$attr.';'.$val,
+                push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
                                       id        => $obj->get_id(),
                                       type      => $obj->get_type(),
                                       name      => $obj->get_name(),

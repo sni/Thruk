@@ -699,8 +699,21 @@ function conf_tool_cleanup(btn, link, hide) {
         disabled: true
     })
     if(hide) {
+        /* ensure table width is fixed */
+        var table       = jQuery(btn).parents('table')[0];
+        var table_width = table.offsetWidth;
+        if(!table.style.width) {
+            jQuery(table).find('TH').each(function(_, header) {
+                header.style.width = jQuery(header).width()+'px';
+            });
+            table.style.width = jQuery(table).outerWidth()+"px";
+            table.style.tableLayout = "fixed";
+        }
         /* fade away the table row */
         jQuery(btn).parentsUntil('TABLE', 'TR').fadeOut(100);
+        var oldText = jQuery('#hiding_entries').html();
+        var hiding  = Number(oldText.match(/\ (\d+)\ /)[1]) + 1;
+        jQuery('#hiding_entries').html("hiding "+hiding+" entries.").show();
     }
     jQuery.ajax({
         url:   link,

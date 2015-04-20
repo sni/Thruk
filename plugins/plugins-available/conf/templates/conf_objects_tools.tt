@@ -51,6 +51,7 @@
       </tr>
     [% END %]
     </table>
+    <div style="text-align: center;[% IF hidden == 0 %] display: none;[% END %]" id="hiding_entries">hiding [% hidden %] entries.</div>
     [% END %]
 </td>
 [% ELSE %]

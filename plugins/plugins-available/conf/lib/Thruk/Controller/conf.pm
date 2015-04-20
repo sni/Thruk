@@ -1252,14 +1252,20 @@ sub _process_tools_page {
     if($tool eq 'start') {
     }
     elsif($tool eq 'reset_ignores') {
-        unlink($ignore_file);
-        Thruk::Utils::set_message( $c, 'success_message', "successfully reset ignores" );
-        return $c->response->redirect('conf.cgi?sub=objects&tools='.$c->{'request'}->{'parameters'}->{'oldtool'});
+        $tool = $c->{'request'}->{'parameters'}->{'oldtool'};
+        if(defined $tools->{$tool}) {
+            $ignores->{$tool} = {};
+            Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
+            Thruk::Utils::set_message( $c, 'success_message', "successfully reset ignores" );
+        }
+        return $c->response->redirect('conf.cgi?sub=objects&tools='.$tool);
     }
     elsif(defined $tools->{$tool}) {
         if($c->{'request'}->{'parameters'}->{'ignore'}) {
             $ignores->{$tool}->{$c->{'request'}->{'parameters'}->{'ident'}} = 1;
             Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
+            $c->stash->{'json'} = {'ok' => 1};
+            return $c->forward('Thruk::View::JSON');
         }
         $c->stash->{'toolobj'} = $tools->{$tool};
         if($c->{'request'}->{'parameters'}->{'cleanup'} && $c->{'request'}->{'parameters'}->{'ident'}) {
@@ -1267,10 +1273,13 @@ sub _process_tools_page {
             if($c->{'request'}->{'parameters'}->{'ident'} eq 'all') {
                 return $c->response->redirect('conf.cgi?sub=objects&tools='.$tool);
             }
+            $c->stash->{'json'} = {'ok' => 1};
+            return $c->forward('Thruk::View::JSON');
         } else {
-            my $results = $tools->{$tool}->get_list($c, $ignores->{$tool});
+            my($hidden, $results) = $tools->{$tool}->get_list($c, $ignores->{$tool});
             @{$results} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$results};
             $c->stash->{'results'} = $results;
+            $c->stash->{'hidden'}  = $hidden;
         }
     }
 

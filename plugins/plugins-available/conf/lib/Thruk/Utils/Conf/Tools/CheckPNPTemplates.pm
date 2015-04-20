@@ -151,7 +151,7 @@ sub get_list {
                 if(!$obj->{'conf'}->{'use'} || !grep(/^\Q$pnp_template_name\E$/mx)) {
                     # TODO: check parent templates too, might be inherited
                     push $result, {
-                        ident      => $obj->get_id().';use_pnp_template',
+                        ident      => $obj->get_id().'/use_pnp_template',
                         id         => $obj->get_id(),
                         name       => $obj->get_name(),
                         type       => $obj->get_type(),
@@ -166,7 +166,7 @@ sub get_list {
                 # this object should not use the pnp template and have no process_perf_data defined by itself
                 if($obj->{'conf'}->{'use'} && grep(/^\Q$pnp_template_name\E$/mx)) {
                     push $result, {
-                        ident      => $obj->get_id().';del_pnp_template',
+                        ident      => $obj->get_id().'/del_pnp_template',
                         id         => $obj->get_id(),
                         name       => $obj->get_name(),
                         type       => $obj->get_type(),
@@ -181,7 +181,7 @@ sub get_list {
             for my $attr (@skip_attributes) {
                 if(defined $obj->{'conf'}->{$attr}) {
                     push $result, {
-                        ident      => $obj->get_id().';del_'.$attr,
+                        ident      => $obj->get_id().'/del_'.$attr,
                         id         => $obj->get_id(),
                         name       => $obj->get_name(),
                         type       => $obj->get_type(),
