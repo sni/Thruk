@@ -102,6 +102,12 @@ function init_conf_tool_buttons() {
     jQuery('.conf_delete_button').button({
         icons: {primary: 'ui-delete-button'}
     });
+    jQuery('.conf_cleanup_button').button({
+        icons: {primary: 'ui-wrench-button'}
+    })
+    jQuery('.conf_cut_button').button({
+        icons: {primary: 'ui-cut-button'}
+    })
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
@@ -682,4 +688,47 @@ function save_reload_apply(formid) {
         jQuery('button.conf_apply_button')[0].click();
     }
     return false;
+}
+
+function conf_tool_cleanup(btn, link, hide) {
+    if(jQuery(btn).hasClass('done')) {
+        return(false);
+    }
+    jQuery(btn).button({
+        icons: {primary: 'ui-waiting-button'},
+        disabled: true
+    })
+    if(hide) {
+        /* fade away the table row */
+        jQuery(btn).parentsUntil('TABLE', 'TR').fadeOut(100);
+    }
+    jQuery.ajax({
+        url:   link,
+        data:  {},
+        type: 'POST',
+        success: function(data) {
+            jQuery(btn).button({
+                icons:   {primary: 'ui-ok-button'},
+                label:   'done',
+                disabled: false
+            }).addClass('done');
+            if(!hide) {
+                /* hide ignore button */
+                var buttons = jQuery(btn).parentsUntil('TABLE', 'TR').find('BUTTON');
+                if(buttons[0]) {
+                    jQuery(buttons[0]).button('disable');
+                }
+                jQuery('#apply_config_changes_icon').show();
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            jQuery(btn).button({
+                icons:   {primary: 'ui-error-button'},
+                label:   'failed',
+                disabled: false
+            })
+        }
+    });
+
+    return(false);
 }

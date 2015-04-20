@@ -196,9 +196,13 @@ plugins/plugins-available/conf/lib/Thruk/Controller/conf.pm
 plugins/plugins-available/conf/lib/Thruk/Model/Objects.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
+plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/DuplicateTemplateAttributes.pm
+plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/ObjectReferences.pm
+plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/UnusedObjects.pm
 plugins/plugins-available/conf/preview.png
 plugins/plugins-available/conf/root/conf.css
 plugins/plugins-available/conf/root/conf.js
+plugins/plugins-available/conf/root/images/cut.png
 plugins/plugins-available/conf/root/images/file.xcf
 plugins/plugins-available/conf/root/images/file_cfg.png
 plugins/plugins-available/conf/root/images/file_empty.xcf
@@ -225,6 +229,7 @@ plugins/plugins-available/conf/root/images/obj_serviceextinfo.png
 plugins/plugins-available/conf/root/images/obj_servicegroup.png
 plugins/plugins-available/conf/root/images/obj_template.xcf
 plugins/plugins-available/conf/root/images/obj_timeperiod.png
+plugins/plugins-available/conf/root/images/wrench.png
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.txt
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js

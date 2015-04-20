@@ -892,6 +892,12 @@ SPAN.deleteicon INPUT {
 .ui-email-button {
   background-image: url(../images/email_attach.png) !important;
 }
+.ui-waiting-button {
+  background-image: url(../images/loading-icon.gif) !important;
+}
+.ui-error-button {
+  background-image: url(../images/error.png) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }

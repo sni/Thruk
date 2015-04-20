@@ -1832,10 +1832,13 @@ sub _check_references {
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
                 if($options{'hash'}) {
-                    push @parse_errors, { type  => $link.' template',
-                                          state => 'nonexistant',
-                                          name  => $val,
-                                          src   => Thruk::Utils::Conf::_link_obj($obj),
+                    push @parse_errors, { ident     => $obj->get_id().';'.$attr.';'.$val,
+                                          id        => $obj->get_id(),
+                                          type      => $obj->get_type(),
+                                          name      => $obj->get_name(),
+                                          obj       => $obj,
+                                          message   => "referenced template '$val' does not exist",
+                                          cleanable => 0,
                                         };
                 } else {
                     push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
@@ -1854,10 +1857,13 @@ sub _check_references {
             return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
 
             if($options{'hash'}) {
-                push @parse_errors, { type  => $link,
-                                      state => 'nonexistant',
-                                      name  => $val,
-                                      src   => Thruk::Utils::Conf::_link_obj($obj),
+                push @parse_errors, { ident     => $obj->get_id().';'.$attr.';'.$val,
+                                      id        => $obj->get_id(),
+                                      type      => $obj->get_type(),
+                                      name      => $obj->get_name(),
+                                      obj       => $obj,
+                                      message   => 'referenced '.$link." '".$val."' does not exist",
+                                      cleanable => 0,
                                     };
             } else {
                 push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
@@ -1901,10 +1907,14 @@ sub _check_orphaned_objects {
     });
     for my $type (keys %{$all_templates}) {
         for my $name (keys %{$all_templates->{$type}}) {
-            push @errors, { type  => $type." template",
-                            name  => $name,
-                            state => 'unused',
-                            src   => Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}))
+            my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name});
+            push @errors, { ident     => $obj->get_id(),
+                            id        => $obj->get_id(),
+                            type      => $type,
+                            name      => $obj->get_name(),
+                            obj       => $obj,
+                            message   => "this ".$type." template is not used anywhere",
+                            cleanable => 1,
                         };
         }
     }
@@ -1915,10 +1925,13 @@ sub _check_orphaned_objects {
             my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
             next if defined $obj->{'conf'}->{'members'};
             next if $type eq 'host';
-            push @errors, { type  => $type,
-                            name  => $name,
-                            state => 'unused',
-                            src   => Thruk::Utils::Conf::_link_obj($obj),
+            push @errors, { ident     => $obj->get_id(),
+                            id        => $obj->get_id(),
+                            type      => $obj->get_type(),
+                            name      => $obj->get_name(),
+                            obj       => $obj,
+                            message   => "this ".$type." is not used anywhere",
+                            cleanable => 1,
                         };
         }
     }

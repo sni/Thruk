@@ -889,6 +889,27 @@ sub get_backends_with_obj_config {
 
 ##########################################################
 
+=head2 clean_from_tool_ignores
+
+    clean_from_tool_ignores($list, $ignores);
+
+returns list with all ignores removed
+
+=cut
+sub clean_from_tool_ignores {
+    my($list, $ignores) = @_;
+    return $list unless $ignores;
+    my $cleaned = [];
+    for my $r (@{$list}) {
+        if(!defined $ignores->{$r->{'ident'}}) {
+            push @{$cleaned}, $r;
+        }
+    }
+    return($cleaned);
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-2014, <sven@nierlein.org>

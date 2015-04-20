@@ -96,6 +96,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') { # Safe Defaults required
     $c->stash->{'has_jquery_ui'}       = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'has_refs'}            = 0;
+    $c->stash->{'link_obj'}            = \&Thruk::Utils::Conf::_link_obj;
 
     Thruk::Utils::ssi_include($c);
 
@@ -1235,22 +1236,72 @@ sub _apply_config_changes {
 sub _process_tools_page {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'subtitle'}      = 'Config Tools';
-    $c->stash->{'template'}      = 'conf_objects_tools.tt';
-    $c->stash->{'output'}        = '';
-    $c->stash->{'action'}        = 'tools';
-    $c->stash->{'warnings'}      = [];
+    $c->stash->{'subtitle'} = 'Config Tools';
+    $c->stash->{'template'} = 'conf_objects_tools.tt';
+    $c->stash->{'output'}   = '';
+    $c->stash->{'action'}   = 'tools';
+    $c->stash->{'results'}  = [];
+    my $tool                = $c->{'request'}->{'parameters'}->{'tools'} || '';
+    $tool                   =~ s/[^a-zA-Z_]//gmx;
+    my $tools               = _get_tools($c);
+    $c->stash->{'tools'}    = $tools;
+    my $ignore_file         = $c->config->{'var_path'}.'/conf_tools_ignore';
+    my $ignores             = -s $ignore_file ? Thruk::Utils::IO::json_lock_retrieve($ignore_file) : {};
+    $c->stash->{'tool'}     = $tool;
 
-    my $tool   = $c->{'request'}->{'parameters'}->{'tools'} || 'start';
-
-    if($tool eq 'check_object_references') {
-        my $warnings = [ @{$c->{'obj_db'}->_check_references(hash => 1)}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
-        @{$warnings} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$warnings};
-        $c->stash->{'warnings'} = $warnings;
+    if($tool eq 'start') {
+    }
+    elsif($tool eq 'reset_ignores') {
+        unlink($ignore_file);
+        Thruk::Utils::set_message( $c, 'success_message', "successfully reset ignores" );
+        return $c->response->redirect('conf.cgi?sub=objects&tools='.$c->{'request'}->{'parameters'}->{'oldtool'});
+    }
+    elsif(defined $tools->{$tool}) {
+        if($c->{'request'}->{'parameters'}->{'ignore'}) {
+            $ignores->{$tool}->{$c->{'request'}->{'parameters'}->{'ident'}} = 1;
+            Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
+        }
+        $c->stash->{'toolobj'} = $tools->{$tool};
+        if($c->{'request'}->{'parameters'}->{'cleanup'}) {
+            $tools->{$tool}->cleanup($c, $c->{'request'}->{'parameters'}->{'ident'});
+        } else {
+            my $results = $tools->{$tool}->get_list($c, $ignores->{$tool});
+            @{$results} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$results};
+            $c->stash->{'results'} = $results;
+        }
     }
 
-    $c->stash->{'tool'} = $tool;
     return;
+}
+
+##########################################################
+# get list of all tools
+sub _get_tools {
+    my ($c) = @_;
+
+    my $modules = {};
+    for my $folder (@INC) {
+        next unless -d $folder;
+        for my $file (glob($folder.'/Thruk/Utils/Conf/Tools/*.pm')) {
+            $file =~ s|^\Q$folder/\E||gmx;
+            $modules->{$file} = 1;
+        }
+    }
+
+    my $tools = {};
+    for my $file (keys %{$modules}) {
+        require $file;
+        my $class = $file;
+        $class    =~ s|/|::|gmx;
+        $class    =~ s|\.pm$||gmx;
+        $class->import;
+        my $tool = $class->new();
+        my $name = $class;
+        $name =~ s|Thruk::Utils::Conf::Tools::||gmx;
+        $tools->{$name} = $tool;
+    }
+
+    return($tools);
 }
 
 ##########################################################

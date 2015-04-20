@@ -302,9 +302,27 @@ LI#o_objects > UL {
   margin-left: -17px;
 }
 
-TABLE.conf_references TH, TABLE.conf_references TD {
+TABLE.conf_tool_results {
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+TABLE.conf_tool_results TH, TABLE.conf_tool_results TD {
   text-align: left;
+  padding-left: 3px;
   padding-right: 15px;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+}
+TABLE.conf_tool_results TD:first-child, TABLE.conf_tool_results TH:first-child {
+  border-left: 0;
+}
+TABLE.conf_tool_results TR:last-child TD {
+  border-bottom: 0;
+}
+
+TABLE.conf_tool_results FORM {
+  display: inline;
 }
 
 SPAN.obj_ref {
@@ -324,4 +342,20 @@ TD.obj_ref {
 
 LI.file_node I.jstree-icon {
   background-position: -100px -69px;
+}
+
+.ui-wrench-button {
+  background-image: url(images/wrench.png) !important;
+  margin-top: -7px !important;
+}
+.ui-cut-button {
+  background-image: url(images/cut.png) !important;
+  margin-top: -7px !important;
+}
+.width_80 {
+  width: 80px;
+}
+
+.left_pad_5 {
+  padding-left: 5px;
 }

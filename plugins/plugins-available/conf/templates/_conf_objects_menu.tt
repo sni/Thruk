@@ -18,13 +18,11 @@
   [% END %]
   <th class='data'>&nbsp;</th>
   <th class='data[% IF type == 'tools'        %] confSelected[% END %]'><a href="conf.cgi?sub=objects&amp;tools=start">Tools</a></th>
-  <th class='data[% IF type == 'apply'        %] confSelected[% END %]' style="width:60px;">
+  <th class='data[% IF type == 'apply'        %] confSelected[% END %]' style="width:60px;" nowrap>
     <a href="conf.cgi?sub=objects&amp;apply=yes">Apply</a>
     [% IF parse_errors.size > 0 %]
     <a href="conf.cgi?sub=objects&amp;apply=yes"><img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config Errors Detected' title='Config Errors Detected' width="16" height="16" style="vertical-align: text-bottom"></a>
     [% END %]
-    [% IF last_changed || needs_commit %]
-    <a href="conf.cgi?sub=objects&amp;apply=yes"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' alt='Config has changed and needs to be applied' title='Config has changed and needs to be applied' width="16" height="16" style="vertical-align: text-bottom"></a>
-    [% END %]
+    <a href="conf.cgi?sub=objects&amp;apply=yes" id="apply_config_changes_icon" style="display: [% IF last_changed || needs_commit %][% ELSE %]none[% END %];"><img src='[% url_prefix %]themes/[% theme %]/images/disk.png' alt='Config has changed and needs to be applied' title='Config has changed and needs to be applied' width="16" height="16" style="vertical-align: text-bottom"></a>
   </th>
 </tr>
