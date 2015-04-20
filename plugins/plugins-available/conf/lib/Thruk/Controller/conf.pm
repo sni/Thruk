@@ -1797,6 +1797,7 @@ sub _object_clone {
 ##########################################################
 sub _clone_refs {
     my($self, $c, $obj, $cloned_id) = @_;
+    return unless $cloned_id;
     my $clonedtype  = $obj->get_type();
     my $new_name    = $obj->get_name();
     my $orig        = $c->{'obj_db'}->get_object_by_id($cloned_id);
