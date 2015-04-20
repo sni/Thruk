@@ -418,6 +418,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             Ext.getCmp('mapcenter').hide();
             delete values['map'];
         }
+debug("applyBackground", values);
         tab.setBackground(values);
     }
 
@@ -783,6 +784,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
+debug(values);
                         Ext.apply(tab.xdata, values);
 
                         var s_form  = Ext.getCmp('soundForm').getForm();

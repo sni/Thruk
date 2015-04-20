@@ -4,6 +4,8 @@ next:
           - Config Tool:
             - fix editing objects
             - add tools to semi-automatically clean configs from common flaws
+          - Panorama View:
+            - fix scaling and setting offsets for background
 
 1.88-3   Sat Apr 18 11:44:40 CEST 2015:
           - mongodb logcache is now deprecated and will be removed 2016

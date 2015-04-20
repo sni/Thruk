@@ -467,9 +467,9 @@
     setBackground: function(xdata, retries) {
         var tab = this;
         var background = xdata.background,
-            scale      = xdata.scale,
-            offset_x   = xdata.offset_x,
-            offset_y   = xdata.offset_y;
+            scale      = xdata.backgroundscale,
+            offset_x   = xdata.backgroundoffset_x,
+            offset_y   = xdata.backgroundoffset_y;
         if(retries == undefined) { retries = 0; }
         if(retries >= 5)         { return;      }
         var body = tab.body;
