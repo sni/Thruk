@@ -2,6 +2,7 @@ package Thruk::Utils::Conf::Tools::CheckPNPTemplates;
 
 use strict;
 use warnings;
+use Storable qw/dclone/;
 use Thruk::Utils::Conf;
 
 =head1 NAME
@@ -158,6 +159,8 @@ sub get_list {
                         obj        => $obj,
                         message    => 'object should use the pnp template',
                         cleanable  => 1,
+                        action     => 'add_template',
+                        template   => $pnp_template_name,
                     };
                     next;
                 }
@@ -173,6 +176,8 @@ sub get_list {
                         obj        => $obj,
                         message    => 'object should use not the pnp template, as it has no performance data',
                         cleanable  => 1,
+                        action     => 'del_template',
+                        template   => $pnp_template_name,
                     };
                     next;
                 }
@@ -188,6 +193,8 @@ sub get_list {
                         obj        => $obj,
                         message    => 'object should not define '.$attr.' by itself',
                         cleanable  => 1,
+                        action     => 'del_attr',
+                        attr       => $attr,
                     };
                 }
             }
@@ -205,8 +212,26 @@ cleanup this object
 =cut
 sub cleanup {
     my($self, $c, $ident, $ignores) = @_;
-# TODO: implement
-    #my $list = $self->get_list($c, $ignores);
+    my $list = $self->get_list($c, $ignores);
+    for my $data (@{$list}) {
+        if($ident eq 'all' || $data->{'ident'} eq $ident) {
+            if($data->{'action'} eq 'del_attr') {
+                delete $data->{'obj'}->{'conf'}->{$data->{'attr'}};
+            }
+            elsif($data->{'action'} eq 'add_template') {
+                $data->{'obj'}->{'conf'}->{'use'} = [] unless defined $data->{'obj'}->{'conf'}->{'use'};
+                unshift(@{$data->{'obj'}->{'conf'}->{'use'}}, $data->{'template'});
+            }
+            elsif($data->{'action'} eq 'del_template') {
+                my $template_name = $data->{'template'};
+                @{$data->{'obj'}->{'conf'}->{'use'}} = grep(!/^\Q$template_name\E$/mx, @{$data->{'obj'}->{'conf'}->{'use'}});
+            }
+            else {
+                die("unknown action: ".$data->{'action'});
+            }
+            $c->{'obj_db'}->update_object($data->{'obj'}, dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
+        }
+    }
     return;
 }
 

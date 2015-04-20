@@ -898,7 +898,7 @@ returns list with all ignores removed
 =cut
 sub clean_from_tool_ignores {
     my($list, $ignores) = @_;
-    return $list unless $ignores;
+    return(0, $list) unless $ignores;
     my $hidden  = 0;
     my $cleaned = [];
     for my $r (@{$list}) {
