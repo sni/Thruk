@@ -35,15 +35,17 @@
     [% FOREACH r = results %]
       <tr>
         <td nowrap>[% r.type %]</td>
-        <td nowrap><a href="conf.cgi?sub=objects&data.id=[% r.id %]">[% r.name %]</a></td>
-        <td nowrap>[% link_obj(r.obj) %]</td>
+        <td nowrap>[% IF r.id %]<a href="conf.cgi?sub=objects&data.id=[% r.id %]">[% r.name %]</a>[% ELSE %][% r.name %][% END %]</td>
+        <td nowrap>[% IF r.id %][% link_obj(r.obj) %][% END %]</td>
         <td nowrap>[% r.message %]</td>
         <td nowrap>
           [% link = "conf.cgi?sub=objects&tools=" _ tool _ "&amp;ignore=1&amp;ident=" _ r.ident; button(link, 'ignore', 'conf_cut_button conf_cleanup_button width_80', 'return conf_tool_cleanup(this, \'' _ link _ '\', true)', "padding-left: 3px;") %]
+          [% IF r.id %]
           [% IF r.obj.file.readonly %]
           file is read-only
           [% ELSIF r.cleanable %]
           [% link = "conf.cgi?sub=objects&tools=" _ tool _ "&amp;cleanup=1&amp;ident=" _ r.ident; button(link, toolobj.fixlink, 'conf_cleanup_button width_80', 'return conf_tool_cleanup(this, \'' _ link _ '\')') %]
+          [% END %]
           [% END %]
         </td>
       </tr>
