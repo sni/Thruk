@@ -104,23 +104,21 @@ cleanup this object
 
 =cut
 sub cleanup {
-    my($self, $c, $ident) = @_;
-    my $list = $self->get_list($c);
+    my($self, $c, $ident, $ignores) = @_;
+    my $list = $self->get_list($c, $ignores);
     my $data;
-    for my $l (@{$list}) {
-        if($l->{'ident'} eq $ident) {
-            $data = $l;
+    for my $data (@{$list}) {
+        if($ident eq 'all' || $data->{'ident'} eq $ident) {
+            for my $attr (@{$data->{'removeable'}}) {
+                delete $data->{'obj'}->{'conf'}->{$attr};
+            }
+            $data->{'obj'}->{'conf'}->{'use'} = [] unless defined $data->{'obj'}->{'conf'}->{'use'};
+            if(!grep(/\Q$data->{'template'}\E/mx, @{$data->{'obj'}->{'conf'}->{'use'}})) {
+                push @{$data->{'obj'}->{'conf'}->{'use'}}, $data->{'template'};
+            }
+            $c->{'obj_db'}->update_object($data->{'obj'}, dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
         }
     }
-    return unless $data;
-    for my $attr (@{$data->{'removeable'}}) {
-        delete $data->{'obj'}->{'conf'}->{$attr};
-    }
-    $data->{'obj'}->{'conf'}->{'use'} = [] unless defined $data->{'obj'}->{'conf'}->{'use'};
-    if(!grep(/\Q$data->{'template'}\E/mx, @{$data->{'obj'}->{'conf'}->{'use'}})) {
-        push @{$data->{'obj'}->{'conf'}->{'use'}}, $data->{'template'};
-    }
-    $c->{'obj_db'}->update_object($data->{'obj'}, dclone($data->{'obj'}->{'conf'}), join("\n", @{$data->{'obj'}->{'comments'}}));
     return;
 }
 

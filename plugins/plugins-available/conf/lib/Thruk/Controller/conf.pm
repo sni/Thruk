@@ -1262,8 +1262,11 @@ sub _process_tools_page {
             Thruk::Utils::IO::json_lock_store($ignore_file, $ignores);
         }
         $c->stash->{'toolobj'} = $tools->{$tool};
-        if($c->{'request'}->{'parameters'}->{'cleanup'}) {
-            $tools->{$tool}->cleanup($c, $c->{'request'}->{'parameters'}->{'ident'});
+        if($c->{'request'}->{'parameters'}->{'cleanup'} && $c->{'request'}->{'parameters'}->{'ident'}) {
+            $tools->{$tool}->cleanup($c, $c->{'request'}->{'parameters'}->{'ident'}, $ignores->{$tool});
+            if($c->{'request'}->{'parameters'}->{'ident'} eq 'all') {
+                return $c->response->redirect('conf.cgi?sub=objects&tools='.$tool);
+            }
         } else {
             my $results = $tools->{$tool}->get_list($c, $ignores->{$tool});
             @{$results} = sort { $a->{'type'} cmp $b->{'type'} || $a->{'name'} cmp $b->{'name'} } @{$results};

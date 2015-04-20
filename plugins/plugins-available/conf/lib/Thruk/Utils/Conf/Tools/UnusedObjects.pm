@@ -57,7 +57,15 @@ cleanup this object
 
 =cut
 sub cleanup {
-    my($self, $c, $ident) = @_;
+    my($self, $c, $ident, $ignores) = @_;
+    if($ident eq 'all') {
+        my $list = $self->get_list($c, $ignores);
+        for my $data (@{$list}) {
+            next if $data->{'obj'}->{'file'}->{'readonly'};
+            $self->cleanup($c, $data->{'obj'}->get_id());
+        }
+        return;
+    }
     my $obj = $c->{'obj_db'}->get_object_by_id($ident);
     if($obj) {
         if($obj->{'file'}->{'readonly'}) {

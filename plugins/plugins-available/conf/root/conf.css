@@ -305,6 +305,7 @@ LI#o_objects > UL {
 TABLE.conf_tool_results {
   border-collapse: collapse;
   margin-bottom: 15px;
+  margin-right: 15px;
 }
 
 TABLE.conf_tool_results TH, TABLE.conf_tool_results TD {

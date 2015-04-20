@@ -58,7 +58,7 @@ cleanup this object
 =cut
 sub cleanup {
     my($self, $c, $obj) = @_;
-    Thruk::Utils::set_message( $c, 'fail_message', 'not yet implemented' );
+    Thruk::Utils::set_message( $c, 'fail_message', 'automatic cleanup not possible' );
     return;
 }
 
