@@ -196,9 +196,9 @@ plugins/plugins-available/conf/lib/Thruk/Controller/conf.pm
 plugins/plugins-available/conf/lib/Thruk/Model/Objects.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
-plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/CheckPNPTemplates.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/DuplicateTemplateAttributes.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/ObjectReferences.pm
+plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/PerformanceDataTemplates.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/SuggestPossibleTemplates.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/UnusedObjects.pm
 plugins/plugins-available/conf/preview.png

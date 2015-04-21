@@ -79,7 +79,7 @@ sub get_list {
                 }
                 next unless $ok;
                 next unless $identical > 1;
-                push $result, {
+                push @{$result}, {
                     ident      => $obj->get_id(),
                     id         => $obj->get_id(),
                     name       => $obj->get_name(),

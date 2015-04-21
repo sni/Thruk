@@ -1281,6 +1281,8 @@ sub _process_tools_page {
             $c->stash->{'results'} = $results;
             $c->stash->{'hidden'}  = $hidden;
         }
+    } else {
+        $c->stash->{'tool'} = "start";
     }
 
     # sort tools into categories

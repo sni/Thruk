@@ -726,6 +726,78 @@ sub get_services_for_host {
 
 ##########################################################
 
+=head2 get_hosts_for_service
+
+    get_hosts_for_service($svcobj)
+
+Get hosts for service. Returns a list of hosts using this service.
+
+=cut
+sub get_hosts_for_service {
+    my($self, $service) = @_;
+
+    $self->{'stats'}->profile(begin => "M::C::get_hosts_for_service()") if defined $self->{'stats'};
+
+    my($svc_conf_keys, $svc_config) = $service->get_computed_config($self);
+
+    my $hosts = {};
+
+    # directly assigned to service
+    if(defined $svc_config->{'host_name'}) {
+        for my $hst_name (@{$svc_config->{'host_name'}}) {
+            my $hsts = $self->get_objects_by_name('host', $hst_name);
+            if(scalar @{$hsts} > 0) {
+                for my $hst (@{$hsts}) {
+                    next if $hst->is_template();
+                    $hosts->{$hst_name} = $hst->get_id();
+                }
+            }
+        }
+    }
+
+    # assigned by hostgroup
+    if(defined $svc_config->{'hostgroup_name'}) {
+        for my $group_name (@{$svc_config->{'hostgroup_name'}}) {
+            my $groups = $self->get_objects_by_name('hostgroup', $group_name);
+            if($groups->[0]) {
+                my $group = $groups->[0];
+                my($grp_conf_keys, $grp_config) = $group->get_computed_config($self);
+                if($grp_config->{'members'}) {
+                    for my $hst_name (@{$grp_config->{'members'}}) {
+                        my $hsts = $self->get_objects_by_name('host', $hst_name);
+                        $hosts->{$hst_name} = $hsts->[0]->get_id() if $hsts->[0];
+                    }
+                }
+                my $refs = $self->get_references($group);
+                if($refs->{'host'}) {
+                    for my $hst_id (keys %{$refs->{'host'}}) {
+                        my $hst = $self->get_object_by_id($hst_id);
+                        if($hst->is_template()) {
+                            # check all refs for this host template too
+                            my $child_refs = $self->get_references($hst);
+                            if($refs->{'host'}) {
+                                for my $hst_id (keys %{$child_refs->{'host'}}) {
+                                    my $hst = $self->get_object_by_id($hst_id);
+                                    $hosts->{$hst->get_name()} = $hst->get_id() if $hst;
+                                }
+                            }
+                        } else {
+                            $hosts->{$hst->get_name()} = $hst->get_id() if $hst;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $self->{'stats'}->profile(end => "M::C::get_hosts_for_service()") if defined $self->{'stats'};
+
+    return $hosts;
+}
+
+
+##########################################################
+
 =head2 update
 
     update()

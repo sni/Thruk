@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    my $tests = 1387;
+    my $tests = 1399;
     $tests    = $tests - 12 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }
@@ -91,7 +91,8 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=ObjectReferences',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=UnusedObjects',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=SuggestPossibleTemplates',
-    { url => '/thruk/cgi-bin/conf.cgi?sub=objects&tools=reset_ignores&oldtool=CheckPNPTemplates', follow => 1 },
+    '/thruk/cgi-bin/conf.cgi?sub=objects&tools=PerformanceDataTemplates',
+    { url => '/thruk/cgi-bin/conf.cgi?sub=objects&tools=reset_ignores&oldtool=ObjectReferences', follow => 1 },
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree_objects&type=command',
     '/thruk/cgi-bin/conf.cgi?sub=backends',
