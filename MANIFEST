@@ -196,6 +196,7 @@ plugins/plugins-available/conf/lib/Thruk/Controller/conf.pm
 plugins/plugins-available/conf/lib/Thruk/Model/Objects.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
+plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/CombineIdenticalServices.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/DuplicateTemplateAttributes.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/ObjectReferences.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/PerformanceDataTemplates.pm
