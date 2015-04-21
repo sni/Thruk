@@ -183,7 +183,7 @@ sub get_list {
                 @skip_attributes = qw/action_url process_perf_data/;
             } else {
                 # this object should not use the pnp template and have no process_perf_data defined by itself
-                if($obj->{'conf'}->{'use'} && grep(/^\Q$pnp_template_name\E$/mx)) {
+                if($obj->{'conf'}->{'use'} && grep(/^\Q$pnp_template_name\E$/mx, @{$obj->{'conf'}->{'use'}})) {
                     push @{$result}, {
                         ident      => $obj->get_id().'/del_pnp_template',
                         id         => $obj->get_id(),
