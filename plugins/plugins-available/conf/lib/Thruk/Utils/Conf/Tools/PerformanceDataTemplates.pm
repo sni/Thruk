@@ -143,7 +143,7 @@ sub get_list {
                 my $first_hst;
                 for my $hst_name (keys %{$hosts}) {
                     my $hst = $c->{'obj_db'}->get_object_by_id($hosts->{$hst_name});
-                    $first_hst = $hst unless $first_hst;
+                    $first_hst = $live_objects->{$hst_name}->{$description} unless $first_hst;
                     if($live_objects->{$hst_name}->{$description} && $live_objects->{$hst_name}->{$description}->{'perf_data'}) {
                         $liveobj = $live_objects->{$hst_name}->{$description};
                         last;
