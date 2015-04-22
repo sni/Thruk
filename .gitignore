@@ -41,10 +41,10 @@ panorama_default_view
 notes.txt
 themes/themes-available/*/images/logos/*.png
 .~ko-*-perllint~
-root/thruk/javascript/all_in_one-1.88-3.js
-plugins/plugins-available/panorama/root/all_in_one-1.88-3_panorama.js
-themes/themes-available/Thruk/stylesheets/all_in_one-1.88-3.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.88-3.css
+root/thruk/javascript/all_in_one-1.88-4.js
+plugins/plugins-available/panorama/root/all_in_one-1.88-4_panorama.js
+themes/themes-available/Thruk/stylesheets/all_in_one-1.88-4.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.88-4.css
 test_hook.sh
 bp/*.tbp
 bp/*.tbp.edit

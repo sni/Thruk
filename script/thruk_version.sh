@@ -75,9 +75,8 @@ if [ -n "$newversion" -a "$fileversion" != "${VERSION}-${BRANCH}" ]; then
                 -i MANIFEST                 \
                 -i root/thruk/startup.html  \
                 -i .gitignore
-    sed -r "s/${VERSION}\s*not yet released/$newversion     $fulldate/"  -i Changes
-    sed -r "s/^next/$newversion     $fulldate/"                          -i Changes
-    sed -r "s/$newversion\s*not yet released/$newversion     $fulldate/" -i Changes
+    changesheader=$(printf "%-8s %s\n" "$fileversion" "$fulldate")
+    sed -r "s/^next.*/$changesheader/" -i Changes
     sed -r "s/${VERSION}/$newversion/" -i dist.ini
     git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.css plugins/plugins-available/mobile/root/mobile-$fileversion.css
     git mv plugins/plugins-available/mobile/root/mobile-${VERSION}-${BRANCH}.js plugins/plugins-available/mobile/root/mobile-$fileversion.js
