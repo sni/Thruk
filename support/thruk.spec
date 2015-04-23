@@ -125,6 +125,8 @@ a2enmod rewrite
 %else
 if [ -x /usr/sbin/systemctl ]; then
     /usr/sbin/systemctl restart httpd
+elif [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl restart httpd
 else
     /etc/init.d/httpd restart || /etc/init.d/httpd start
 fi
