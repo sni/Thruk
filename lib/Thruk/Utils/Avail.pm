@@ -550,7 +550,9 @@ sub calculate_availability {
             push @typefilter, { -or => [ @logservicefilter ] };
         }
     }
-    push @typefilter, { class => 2 }; # programm messages
+    if ($c->config->{'report_include_class2'} == 1) {
+        push @typefilter, { class => 2 }; # programm messages
+    }
     if($rpttimeperiod) {
         push @typefilter, { '-or' => [
                                       { message => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }},                               # livestatus
@@ -570,10 +572,12 @@ sub calculate_availability {
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
-    $c->stats->profile(begin => "avail.pm updatecache");
-    Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
-    $c->{'db'}->renew_logcache($c, 1);
-    $c->stats->profile(end   => "avail.pm updatecache");
+    if ($c->config->{'report_update_logcache'} == 1) {
+        $c->stats->profile(begin => "avail.pm updatecache");
+        Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 7, 'updating cache') if $ENV{'THRUK_JOB_DIR'};
+        $c->{'db'}->renew_logcache($c, 1);
+        $c->stats->profile(end   => "avail.pm updatecache");
+    }
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 10, 'fetching logs') if $ENV{'THRUK_JOB_DIR'};
 

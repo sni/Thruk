@@ -192,6 +192,8 @@ sub set_default_config {
         'precompile_templates'              => 0,
         'report_use_temp_files'             => 14,
         'report_max_objects'                => 1000,
+        'report_include_class2'             => 1,
+        'report_update_logcache'            => 1,
         'perf_bar_pnp_popup'                => 1,
         'status_color_background'           => 0,
         'apache_status'                     => {},
