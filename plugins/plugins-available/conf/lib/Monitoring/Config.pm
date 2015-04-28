@@ -8,6 +8,7 @@ use Encode qw/decode_utf8/;
 use Data::Dumper;
 use Config::General;
 use Carp;
+use Storable qw/dclone/;
 use Thruk::Utils;
 
 =head1 NAME
@@ -1135,6 +1136,87 @@ sub rename_dependencies {
 
 ##########################################################
 
+=head2 clone_refs
+
+    clone_refs($obj, $cloned_name, $newname)
+
+clone all incoming references of object
+
+=cut
+sub clone_refs {
+    my($self, $obj, $cloned_name, $new_name) = @_;
+
+    # clone incoming references
+    my $clonedtype = $obj->get_type();
+    my($incoming, $outgoing) = $self->gather_references($obj);
+    if($incoming) {
+        for my $type (keys %{$incoming}) {
+            for my $name (keys %{$incoming->{$type}}) {
+                my $ref_id = $incoming->{$type}->{$name};
+                my $ref    = $self->get_object_by_id($ref_id);
+                next if $ref->{'file'}->{'readonly'};
+                for my $attr (keys %{$ref->{'conf'}}) {
+                    if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
+                        if(grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
+                            push @{$ref->{'conf'}->{$attr}}, $new_name;
+                            $self->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
+##########################################################
+
+=head2 gather_references
+
+    gather_references($obj)
+
+return incoming and outgoing references
+
+=cut
+sub gather_references {
+    my($self, $obj) = @_;
+
+    # references from other objects
+    my $refs = $self->get_references($obj);
+    my $incoming = {};
+    for my $type (keys %{$refs}) {
+        $incoming->{$type} = {};
+        for my $id (keys %{$refs->{$type}}) {
+            my $obj = $self->get_object_by_id($id);
+            $incoming->{$type}->{$obj->get_name()} = $id;
+        }
+    }
+
+    # references from this to other objects
+    my $outgoing = {};
+    my $resolved = $obj->get_resolved_config($self);
+    for my $attr (keys %{$resolved}) {
+        my $refs = $resolved->{$attr};
+        if(ref $refs eq '') { $refs = [$refs]; }
+        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
+            my $type = $obj->{'default'}->{$attr}->{'link'};
+            for my $r (@{$refs}) {
+                if($type eq 'command') { $r =~ s/\!.*$//mx; }
+                $outgoing->{$type}->{$r} = '';
+            }
+        }
+    }
+    # add used templates
+    if(defined $obj->{'conf'}->{'use'}) {
+        for my $t (@{$obj->{'conf'}->{'use'}}) {
+            $outgoing->{$obj->get_type()}->{$t} = '';
+        }
+    }
+    return($incoming, $outgoing);
+}
+
+##########################################################
+
 =head2 get_references
 
     get_references($obj, [ $name ])
@@ -1191,7 +1273,6 @@ sub get_references {
             }
         }
     }
-
 
     return $list;
 }

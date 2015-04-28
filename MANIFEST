@@ -241,6 +241,7 @@ plugins/plugins-available/conf/t/conf_utils.t
 plugins/plugins-available/conf/t/conf_utils_api.t
 plugins/plugins-available/conf/t/controller_conf.t
 plugins/plugins-available/conf/t/data/1/host.cfg
+plugins/plugins-available/conf/t/data/10/host.cfg
 plugins/plugins-available/conf/t/data/2/host.cfg
 plugins/plugins-available/conf/t/data/3/timeperiods.cfg
 plugins/plugins-available/conf/t/data/4/core.cfg

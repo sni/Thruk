@@ -1871,39 +1871,21 @@ sub _object_clone {
 sub _clone_refs {
     my($self, $c, $obj, $cloned_id) = @_;
     return unless $cloned_id;
-    my $clonedtype  = $obj->get_type();
-    my $new_name    = $obj->get_name();
-    my $orig        = $c->{'obj_db'}->get_object_by_id($cloned_id);
+    my $new_name = $obj->get_name();
+    my $orig     = $c->{'obj_db'}->get_object_by_id($cloned_id);
     if(!$orig) {
         Thruk::Utils::set_message( $c, 'fail_message', 'Could not find object to clone from.' );
         return;
     }
-    my $cloned_name = $orig->get_name();
-    my $refs        = $self->_gather_references($c, $orig);
 
+    my $cloned_name = $orig->get_name();
     if($new_name eq $cloned_name) {
         Thruk::Utils::set_message( $c, 'fail_message', 'New name must be different' );
         return;
     }
 
-    # clone incoming references
-    if($refs->{'incoming'}) {
-        for my $type (keys %{$refs->{'incoming'}}) {
-            for my $name (keys %{$refs->{'incoming'}->{$type}}) {
-                my $ref_id = $refs->{'incoming'}->{$type}->{$name};
-                my $ref    = $c->{'obj_db'}->get_object_by_id($ref_id);
-                next if $ref->{'file'}->{'readonly'};
-                for my $attr (keys %{$ref->{'conf'}}) {
-                    if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
-                        if(grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
-                            push @{$ref->{'conf'}->{$attr}}, $new_name;
-                            $c->{'obj_db'}->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
-                        }
-                    }
-                }
-            }
-        }
-    }
+    $c->{'obj_db'}->clone_refs($obj, $cloned_name, $new_name);
+
     return;
 }
 
@@ -2378,37 +2360,7 @@ sub _gather_references {
 
     #&timing_breakpoint('_gather_references');
 
-    # references from other objects
-    my $refs = $c->{'obj_db'}->get_references($obj);
-    my $incoming = {};
-    for my $type (keys %{$refs}) {
-        $incoming->{$type} = {};
-        for my $id (keys %{$refs->{$type}}) {
-            my $obj = $c->{'obj_db'}->get_object_by_id($id);
-            $incoming->{$type}->{$obj->get_name()} = $id;
-        }
-    }
-
-    # references from this to other objects
-    my $outgoing = {};
-    my $resolved = $obj->get_resolved_config($c->{'obj_db'});
-    for my $attr (keys %{$resolved}) {
-        my $refs = $resolved->{$attr};
-        if(ref $refs eq '') { $refs = [$refs]; }
-        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
-            my $type = $obj->{'default'}->{$attr}->{'link'};
-            for my $r (@{$refs}) {
-                if($type eq 'command') { $r =~ s/\!.*$//mx; }
-                $outgoing->{$type}->{$r} = '';
-            }
-        }
-    }
-    # add used templates
-    if(defined $obj->{'conf'}->{'use'}) {
-        for my $t (@{$obj->{'conf'}->{'use'}}) {
-            $outgoing->{$obj->get_type()}->{$t} = '';
-        }
-    }
+    my($incoming, $outgoing) = $c->{'obj_db'}->gather_references($obj);
 
     # linked from delete object page?
     $c->stash->{'force_delete'} = $c->{'request'}->{'parameters'}->{'show_force'} ? 1 : 0;

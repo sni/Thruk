@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 672;
+    plan tests => 674;
 }
 
 BEGIN {
@@ -346,3 +346,15 @@ my $testhost = {
 };
 my($computed_keys, $computed) = $obj->get_computed_config($objects);
 is_deeply($computed, $testhost, 'parsed nested templates');
+
+
+###########################################################
+# clone with references
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/10' });
+$objects->init();
+$parsedfile = $objects->{'files'}->[0];
+$obj = $parsedfile->{'objects'}->[0];
+$objects->clone_refs($obj, $obj->{'conf'}->{'host_name'}, "cloned host");
+$tmp = $objects->get_objects_by_name('hostgroup', 'group3');
+isa_ok($tmp->[0], 'Monitoring::Config::Object::Hostgroup');
+is_deeply($tmp->[0]->{'conf'}->{'members'}, ['hostname1', 'cloned host'], "cloned host is now member of group");
