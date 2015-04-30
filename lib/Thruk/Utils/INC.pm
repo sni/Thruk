@@ -27,6 +27,7 @@ sub clean {
     my $dups = {};
     my @new;
     for my $d (@INC) {
+        next if ref $d;
         next if $dups->{$d};
         next if !-d $d.'/.';
         $dups->{$d} = 1;
