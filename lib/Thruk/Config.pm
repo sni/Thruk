@@ -318,22 +318,21 @@ return git branch name
 sub get_git_name {
     my $project_root = $INC{'Thruk/Config.pm'};
     $project_root =~ s/\/Config\.pm$//gmx;
-    if(-d $project_root.'/../../.git') {
-        # directly on git tag?
-        my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
-        return '' if $tag;
+    return '' unless -d $project_root.'/../../.git';
 
-        my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-        chomp($branch);
-        $branch =~ s/^\*\s+//gmx;
-        my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
-        chomp($hash);
-        if($branch eq 'master') {
-            return $hash;
-        }
-        return $branch.'.'.$hash;
+    # directly on git tag?
+    my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
+    return '' if $tag;
+
+    my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+    chomp($branch);
+    $branch =~ s/^\*\s+//gmx;
+    my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
+    chomp($hash);
+    if($branch eq 'master') {
+        return $hash;
     }
-    return '';
+    return $branch.'.'.$hash;
 }
 
 ########################################
