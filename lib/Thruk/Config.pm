@@ -2,9 +2,7 @@ package Thruk::Config;
 
 use strict;
 use warnings;
-use utf8;
-use Carp;
-use Config::Any;
+use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
 use Catalyst::Plugin::Thruk::ConfigLoader;
@@ -290,8 +288,8 @@ sub get_config {
 
 ######################################
 sub _load_any {
-    my ($files) = @_;
-    my $cfg   = Config::Any->load_files({
+    my($files) = @_;
+    my $cfg   = Catalyst::Plugin::Thruk::ConfigLoader::load_any({
             files       => $files,
             filter      => \&Catalyst::Plugin::Thruk::ConfigLoader::_fix_syntax,
             use_ext     => 1,
@@ -299,10 +297,7 @@ sub _load_any {
         }
     );
 
-    # map the array of hashrefs to a simple hash
-    my %configs = map { %$_ } @$cfg;
-
-    return \%configs;
+    return $cfg;
 }
 
 ##############################################

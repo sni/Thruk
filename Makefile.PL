@@ -15,7 +15,6 @@ resources(
 requires 'parent'                                 => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
-requires 'Config::Any'                            => 0;     # required by Thruk::Config
 requires 'Class::Data::Inheritable'               => 0;     # required by Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam
 requires 'MRO::Compat'                            => 0;     # required by Catalyst::Plugin::Unicode::Encoding
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::Utils::CLI

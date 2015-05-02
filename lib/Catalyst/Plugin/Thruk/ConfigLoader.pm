@@ -261,23 +261,20 @@ sub switch_user {
 =cut
 
 sub setup {
-    my $c     = shift;
-    my @files = $c->find_files;
-    my $cfg   = Config::Any->load_files(
+    my($c)      = @_;
+    my @files   = $c->find_files;
+    my $configs = load_any(
         {   files       => \@files,
             filter      => \&_fix_syntax,
-            use_ext     => 1,
             driver_args => $c->config->{ 'Plugin::ConfigLoader' }->{ driver }
                 || {},
         }
     );
-    # map the array of hashrefs to a simple hash
-    my %configs = map { %$_ } @$cfg;
 
     # split the responses into normal and local cfg
     my $local_suffix = $c->get_config_local_suffix;
     my ( @main, @locals );
-    for ( sort keys %configs ) {
+    for ( sort keys %{$configs} ) {
         if ( m{$local_suffix\.}ms ) {
             push @locals, $_;
         }
@@ -288,7 +285,7 @@ sub setup {
 
     # load all the normal cfgs, then the local cfgs last so they can override
     # normal cfgs
-    $c->load_config( { $_ => $configs{ $_ } } ) for @main, @locals;
+    $c->load_config( { $_ => $configs->{ $_ } } ) for @main, @locals;
 
     $c->finalize_config;
     $c->next::method( @_ );
@@ -319,7 +316,8 @@ sub find_files {
     my $c = shift;
     my ( $path, $extension ) = $c->get_config_path;
     my $suffix     = $c->get_config_local_suffix;
-    my @extensions = @{ Config::Any->extensions };
+    #my @extensions = @{ Config::Any->extensions };
+    my @extensions = ('conf');
 
     my @files;
     if ( $extension ) {
@@ -374,7 +372,7 @@ sub get_config_local_suffix {
 }
 
 sub _fix_syntax {
-    my $config     = shift;
+    my($config) = @_;
     my @components = (
         map +{
             prefix => $_ eq 'Component' ? '' : $_ . '::',
@@ -424,6 +422,22 @@ sub config_substitutions {
 
 ## use critic
 
+=head2 load_any( $options )
+
+replacement function for Config::Any->load_files
+
+=cut
+
+sub load_any {
+    my($options) = @_;
+    my $result = {};
+    for my $f (@{$options->{'files'}}) {
+        my $config = Thruk::Backend::Pool::read_config_file($f);
+        &{$options->{'filter'}}($config);
+        $result->{$f} = $config;
+    }
+    return($result);
+}
 
 =head1 NAME
 
