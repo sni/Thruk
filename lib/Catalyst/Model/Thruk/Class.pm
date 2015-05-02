@@ -1,5 +1,6 @@
 package Catalyst::Model::Thruk::Class;
 
+use namespace::autoclean;
 use Moose;
 use Thruk::Backend::Manager;
 

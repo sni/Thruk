@@ -17,10 +17,10 @@ creates backend manager
 
 use strict;
 use warnings;
+use namespace::autoclean;
 use Moose;
 use Carp;
 use Data::Dumper;
-use Thruk::Backend::Pool;
 
 extends 'Catalyst::Action';
 

@@ -14,7 +14,6 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Fcntl qw/:mode :flock/;
-use Thruk::Backend::Pool qw//;
 use JSON::XS qw//;
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;

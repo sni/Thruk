@@ -2,13 +2,11 @@ package Thruk::Controller::Root;
 
 use strict;
 use warnings;
-use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape qw/uri_escape/;
-use File::Slurp;
-use JSON::XS;
 use POSIX qw/strftime/;
+use JSON::XS qw/encode_json/;
 use Thruk::Utils::Filter;
 
 #

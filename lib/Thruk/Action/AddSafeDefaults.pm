@@ -14,8 +14,8 @@ same like AddDefaults but does not redirect to error page on backend errors
 
 use strict;
 use warnings;
+use namespace::autoclean;
 use Moose;
-use Carp;
 
 extends 'Catalyst::Action';
 

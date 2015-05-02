@@ -1,6 +1,6 @@
 package Catalyst::Script::Thrukembedded;
-use Moose;
 use namespace::autoclean;
+use Moose;
 
 sub _plack_engine_name { return 'Thrukembedded'; }
 

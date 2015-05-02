@@ -1,9 +1,5 @@
 package Thruk;
 
-#BEGIN {
-#    use Devel::Module::Trace;
-#}
-
 =head1 NAME
 
 Thruk - Catalyst based monitoring web interface
@@ -17,7 +13,6 @@ Catalyst based monitoring web interface for Nagios, Icinga and Shinken
 use 5.008000;
 use strict;
 use warnings;
-use utf8;
 
 ###################################################
 # create connection pool
@@ -53,13 +48,12 @@ use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Data::Dumper;
-use MRO::Compat;
-use Thruk::Utils;
 use Thruk::Config;
+use Thruk::Utils;
 use Thruk::Utils::Auth;
-use Thruk::Utils::Menu;
 use Thruk::Utils::External;
 use Thruk::Utils::Livecache;
+use Thruk::Utils::Menu;
 use Thruk::Utils::Status;
 use Thruk::Utils::Cache qw/cache/;
 use Catalyst::Runtime '5.70';
@@ -507,5 +501,7 @@ it under the same terms as Perl itself.
 
 #print Dumper(\%INC);
 #exit;
+
+no Moose;
 
 1;

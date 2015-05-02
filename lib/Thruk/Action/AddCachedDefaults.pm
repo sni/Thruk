@@ -14,8 +14,8 @@ same like AddDefaults but trys to use cached things
 
 use strict;
 use warnings;
+use namespace::autoclean;
 use Moose;
-use Carp;
 
 extends 'Catalyst::Action';
 

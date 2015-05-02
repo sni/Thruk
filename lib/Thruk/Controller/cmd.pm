@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
-use Template;
 
 =head1 NAME
 
