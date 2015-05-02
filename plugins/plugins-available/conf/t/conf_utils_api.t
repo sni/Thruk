@@ -18,6 +18,7 @@ BEGIN {
     $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
     $ENV{'THRUK_TEST_NO_STDOUT_LOG'} = 1;
+    $ENV{'THRUK_TEST_CONF_NO_LOG'}   = 1;
 }
 
 ###########################################################
