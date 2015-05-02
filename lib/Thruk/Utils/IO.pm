@@ -12,12 +12,10 @@ IO Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw/confess/;
 use Fcntl qw/:mode :flock/;
-use Thruk::Backend::Pool;
-use JSON::XS;
-use Encode qw(decode_utf8 encode_utf8);
-use File::Temp qw/tempfile/;
+use Thruk::Backend::Pool qw//;
+use JSON::XS qw//;
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 
@@ -123,7 +121,10 @@ sub ensure_permissions {
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
-    $Thruk::Utils::IO::config = Thruk::Backend::Pool::get_config() unless $Thruk::Utils::IO::config;
+    if(!$Thruk::Utils::IO::config) {
+        require Thruk::Backend::Pool;
+        $Thruk::Utils::IO::config = Thruk::Backend::Pool::get_config();
+    }
     my $config = $Thruk::Utils::IO::config;
     # set modes
     if($mode eq 'file') {
@@ -221,10 +222,12 @@ save logfiles to tempfile
 
 sub save_logs_to_tempfile {
     my($data) = @_;
-    my($fh, $filename) = tempfile();
+    require Encode;
+    require File::Temp;
+    my($fh, $filename) = File::Temp::tempfile();
     open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     for my $r (@{$data}) {
-        print $fh encode_utf8($r->{'message'}),"\n";
+        print $fh Encode::encode_utf8($r->{'message'}),"\n";
     }
     &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);;
     return($filename);

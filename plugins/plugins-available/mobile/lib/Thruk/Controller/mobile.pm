@@ -2,8 +2,6 @@ package Thruk::Controller::mobile;
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
 use parent 'Catalyst::Controller';
 
 =head1 NAME

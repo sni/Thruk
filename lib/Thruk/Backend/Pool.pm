@@ -337,11 +337,6 @@ sub init_backend_thread_pool {
         }
     }
 
-    if($pool_size > 1) {
-        require threads;
-        require Thruk::Pool::Simple;
-    }
-
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
         if($https_count > 2 and $pool_size > 1) {
             eval {
@@ -379,6 +374,7 @@ sub init_backend_thread_pool {
         if($pool_size > 1) {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
+            require Thruk::Pool::Simple;
             $pool = Thruk::Pool::Simple->new(
                 size    => $pool_size,
                 handler => \&Thruk::Backend::Pool::_do_thread,

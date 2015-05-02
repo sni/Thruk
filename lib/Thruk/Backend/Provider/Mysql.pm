@@ -3,14 +3,9 @@ package Thruk::Backend::Provider::Mysql;
 use strict;
 use warnings;
 #use Thruk::Timer qw/timing_breakpoint/;
-use Carp;
 use Data::Dumper;
 use Digest::MD5 qw/md5_hex/;
-use utf8;
-use DBI;
-use File::Temp qw/tempfile/;
-use Thruk::Utils;
-use Encode qw/encode_utf8/;
+use Module::Load qw/load/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -146,6 +141,12 @@ sub _dbh {
     my($self) = @_;
     if(!defined $self->{'mysql'}) {
         #&timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
+        if(!$self->{'modules_loaded'}) {
+            load DBI;
+            load File::Temp, qw/tempfile/;
+            load Encode, qw/encode_utf8/;
+            $self->{'modules_loaded'} = 1;
+        }
         my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};

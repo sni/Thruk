@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use GD;
 use POSIX qw(strftime);
+use Thruk::Utils::Avail;
 
 =head1 NAME
 

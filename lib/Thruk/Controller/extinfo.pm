@@ -2,11 +2,7 @@ package Thruk::Controller::extinfo;
 
 use strict;
 use warnings;
-use utf8;
 use parent 'Catalyst::Controller';
-use Data::Page;
-use Thruk::UserAgent;
-use Thruk::Utils::RecurringDowntimes;
 
 =head1 NAME
 
@@ -28,6 +24,11 @@ Catalyst Controller.
 sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
+
+    if(!$c->config->{'extinfo_modules_loaded'}) {
+        require Thruk::Utils::RecurringDowntimes;
+        $c->config->{'extinfo_modules_loaded'} = 1;
+    }
 
     $c->stash->{title}        = 'Extended Information';
     $c->stash->{page}         = 'extinfo';
@@ -735,6 +736,7 @@ sub _set_backend_selector {
 # get apache status
 sub _apache_status {
     my($c, $name, $url) = @_;
+    require Thruk::UserAgent;
     my $ua = Thruk::UserAgent->new($c->config);
     $ua->timeout(10);
     $ua->agent("thruk");

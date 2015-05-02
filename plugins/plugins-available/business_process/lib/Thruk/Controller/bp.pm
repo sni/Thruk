@@ -1,14 +1,8 @@
 package Thruk::Controller::bp;
-use parent 'Catalyst::Controller';
 
 use strict;
 use warnings;
-use Data::Dumper;
-use Thruk 1.76;
-use Thruk::BP::Utils;
-
-use Carp;
-use Config::General;
+use parent 'Catalyst::Controller';
 
 =head1 NAME
 
@@ -43,6 +37,13 @@ page: /thruk/cgi-bin/bp.cgi
 sub bp_cgi : Path('/thruk/cgi-bin/bp.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    if(!$c->config->{'bp_modules_loaded'}) {
+        require Data::Dumper;
+        require Thruk::BP::Utils;
+        $c->config->{'bp_modules_loaded'} = 1;
+    }
+
     return $c->detach('/bp/index');
 }
 
@@ -226,8 +227,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                                     'function' => $function,
                                     'depends'  => [],
                 });
-                die('could not create node: '.Dumper($c->{'request'}->{'parameters'})) unless $node;
-                die('got no parent'.Dumper($c->{'request'}->{'parameters'})) unless $parent;
+                die('could not create node: '.Data::Dumper($c->{'request'}->{'parameters'})) unless $node;
+                die('got no parent'.Data::Dumper($c->{'request'}->{'parameters'})) unless $parent;
                 $bp->add_node($node);
                 $parent->append_child($node);
             }

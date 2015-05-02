@@ -22,6 +22,7 @@ use File::Copy qw/move/;
 use MIME::Base64;
 use Encode qw/encode_utf8/;
 use Digest::MD5 qw(md5_hex);
+use Thruk::Utils::Avail;
 
 $Thruk::Utils::Reports::Render::c      = undef;
 $Thruk::Utils::Reports::Render::locale = {};

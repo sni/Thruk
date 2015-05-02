@@ -1,7 +1,7 @@
 package Catalyst::Model::Objects::Class;
 
 use Moose;
-use Monitoring::Config::Multi;
+use Module::Load qw/load/;
 
 extends 'Catalyst::Model';
 
@@ -12,6 +12,7 @@ has obj => (
 
 sub BUILD {
     my ( $self, $args ) = @_;
+    load Monitoring::Config::Multi;
     $self->{obj} = Monitoring::Config::Multi->new();
     return;
 }

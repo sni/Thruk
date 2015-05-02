@@ -2,9 +2,7 @@ package Thruk::Controller::login;
 
 use strict;
 use warnings;
-use utf8;
 use parent 'Catalyst::Controller';
-use Thruk::Utils::CookieAuth;
 
 =head1 NAME
 
@@ -25,6 +23,12 @@ page: /thruk/cgi-bin/login.cgi
 sub login_cgi : Path('/thruk/cgi-bin/login.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    if(!$c->config->{'login_modules_loaded'}) {
+        require Thruk::Utils::CookieAuth;
+        $c->config->{'login_modules_loaded'} = 1;
+    }
+
     return $c->detach('/login/index');
 }
 

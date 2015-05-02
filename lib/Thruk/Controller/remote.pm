@@ -2,10 +2,7 @@ package Thruk::Controller::remote;
 
 use strict;
 use warnings;
-use utf8;
-use Data::Dumper;
-use Thruk::Utils::CLI;
-use File::Slurp;
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -36,6 +33,14 @@ sub remote_cgi : Path('/thruk/cgi-bin/remote.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     Thruk::Utils::check_pid_file($c);
+
+    if(!$c->config->{'remote_modules_loaded'}) {
+        load Data::Dumper;
+        load Thruk::Utils::CLI;
+        load File::Slurp, qw/read_file/;
+        $c->config->{'remote_modules_loaded'} = 1;
+    }
+
     return $c->detach('/remote/index');
 }
 

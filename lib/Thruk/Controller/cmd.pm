@@ -2,7 +2,6 @@ package Thruk::Controller::cmd;
 
 use strict;
 use warnings;
-use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use Template;

@@ -2,11 +2,7 @@ package Thruk::Controller::statusmap;
 
 use strict;
 use warnings;
-use Thruk 1.0.8;
-use Carp;
-use JSON::XS;
-use Data::Dumper;
-use Encode qw/decode_utf8/;
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -40,6 +36,15 @@ page: /thruk/cgi-bin/statusmap.cgi
 sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    if(!$c->config->{'statusmap_modules_loaded'}) {
+        load Carp, qw/confess carp/;
+        load JSON::XS;
+        load Data::Dumper, qw/Dumper/;
+        load Encode, qw/decode_utf8/;
+        $c->config->{'statusmap_modules_loaded'} = 1;
+    }
+
     return $c->detach('/statusmap/index');
 }
 
@@ -144,7 +149,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger and not valid js code)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
-    $c->stash->{json}         = decode_utf8($coder->encode($json));
+    $c->stash->{json}          = decode_utf8($coder->encode($json));
 
     $c->stash->{title}         = 'Network Map';
     $c->stash->{page}          = 'statusmap';

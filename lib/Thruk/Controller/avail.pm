@@ -2,9 +2,7 @@ package Thruk::Controller::avail;
 
 use strict;
 use warnings;
-use utf8;
-use Data::Dumper;
-use Monitoring::Availability 0.48;
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -27,6 +25,12 @@ Catalyst Controller.
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
+
+    if(!$c->config->{'avail_modules_loaded'}) {
+        load Monitoring::Availability;
+        load Thruk::Utils::Avail;
+        $c->config->{'avail_modules_loaded'} = 1;
+    }
 
     # set defaults
     $c->stash->{title}            = 'Availability';

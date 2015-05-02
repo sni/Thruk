@@ -2,12 +2,8 @@ package Thruk::Controller::reports2;
 
 use strict;
 use warnings;
-use Thruk 1.60;
-use Carp;
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
-use File::Slurp;
-use JSON::XS;
-use Thruk::Utils::Reports;
 
 =head1 NAME
 
@@ -41,6 +37,14 @@ page: /thruk/cgi-bin/reports2.cgi
 sub reports2_cgi : Path('/thruk/cgi-bin/reports2.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    if(!$c->config->{'reports2_modules_loaded'}) {
+        load Carp, qw/confess carp/;
+        load Thruk::Utils::Reports;
+        load Thruk::Utils::Avail;
+        $c->config->{'reports2_modules_loaded'} = 1;
+    }
+
     return $c->detach('/reports2/index');
 }
 

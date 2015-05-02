@@ -151,6 +151,7 @@ sub get_object_db {
     my($self) = @_;
     my $c = $self->get_c();
     die("Config tool not enabled!") unless $c->config->{'use_feature_configtool'} == 1;
+    require Thruk::Utils::Conf;
     Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model. Object configuration enabled?");
     return $c->{'obj_db'};
 }
@@ -171,6 +172,7 @@ sub store_objects {
     die("config tool not enabled") unless $c->config->{'use_feature_configtool'} == 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->{'obj_db'}->{'last_changed'} = time();
+    require Thruk::Utils::Conf;
     Thruk::Utils::Conf::store_model_retention($c) or die("failed to store objects model");
     return;
 }
@@ -345,6 +347,7 @@ sub _run {
     my $c;
     unless(defined $result) {
         # initialize backend pool here to safe some memory
+        require Thruk::Backend::Pool;
         if($self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ m/livecache/mx) {
             local $ENV{'USE_SHADOW_NAEMON'}        = 1;
             local $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
@@ -752,11 +755,14 @@ sub _cmd_installcron {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_installcron()");
     Thruk::Utils::switch_realuser($c);
+    require Thruk::Utils::RecurringDowntimes;
     Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {
+        require Thruk::Utils::Reports;
         Thruk::Utils::Reports::update_cron_file($c);
     }
     if($c->config->{'use_feature_bp'}) {
+        require Thruk::BP::Utils;
         Thruk::BP::Utils::update_cron_file($c);
     }
     $c->stats->profile(end => "_cmd_installcron()");
@@ -954,6 +960,7 @@ sub _cmd_downtimetask {
     my($c, $file) = @_;
     $c->stats->profile(begin => "_cmd_downtimetask()");
     require URI::Escape;
+    require Thruk::Utils::RecurringDowntimes;
 
     # do auth stuff
     Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
@@ -1274,6 +1281,7 @@ sub _cmd_configtool {
     $c->stash->{'param_backend'}                 = $peerkey;
     $c->{'request'}->{'parameters'}->{'backend'} = $peerkey;
 
+    require Thruk::Utils::Conf;
     if(!Thruk::Utils::Conf::set_object_model($c) || $peerkey ne $c->stash->{'param_backend'}) {
         return("failed to set objects model", 1);
     }

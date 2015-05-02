@@ -2,19 +2,7 @@ package Thruk::Controller::panorama;
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
-use JSON::XS;
-use URI::Escape qw/uri_unescape/;
-use IO::Socket;
-use File::Slurp;
-use File::Copy qw/move copy/;
-use Encode qw(decode_utf8);
-use Scalar::Util qw/looks_like_number/;
-use DateTime;
-use DateTime::TimeZone;
-use Thruk::Utils::PanoramaCpuStats;
-
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -60,6 +48,23 @@ page: /thruk/cgi-bin/panorama.cgi
 sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    if(!$c->config->{'panorama_modules_loaded'}) {
+        load Data::Dumper, qw/Dumper/;
+        load JSON::XS, qw/decode_json encode_json/;
+        load URI::Escape, qw/uri_unescape/;
+        load IO::Socket;
+        load File::Slurp, qw/read_file/;
+        load File::Copy, qw/move copy/;
+        load Encode, qw(decode_utf8);
+        load Scalar::Util, qw/looks_like_number/;
+        load DateTime;
+        load DateTime::TimeZone;
+        load Thruk::Utils::PanoramaCpuStats;
+        load Thruk::Utils::Avail;
+        $c->config->{'panorama_modules_loaded'} = 1;
+    }
+
     return $c->detach('/panorama/index');
 }
 

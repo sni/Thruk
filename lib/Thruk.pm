@@ -1,5 +1,9 @@
 package Thruk;
 
+#BEGIN {
+#    use Devel::Module::Trace;
+#}
+
 =head1 NAME
 
 Thruk - Catalyst based monitoring web interface
@@ -44,7 +48,6 @@ BEGIN {
 }
 use Carp;
 use Moose;
-use GD;
 use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
@@ -54,11 +57,10 @@ use MRO::Compat;
 use Thruk::Utils;
 use Thruk::Config;
 use Thruk::Utils::Auth;
-use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
-use Thruk::Utils::Avail;
 use Thruk::Utils::External;
 use Thruk::Utils::Livecache;
+use Thruk::Utils::Status;
 use Thruk::Utils::Cache qw/cache/;
 use Catalyst::Runtime '5.70';
 
@@ -502,5 +504,8 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+#print Dumper(\%INC);
+#exit;
 
 1;

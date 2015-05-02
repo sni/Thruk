@@ -22,15 +22,7 @@ sub new {
     my($class, $c, $args) = @_;
     my $self = $class->NEXT::new($c, $args);
 
-    eval {
-        require("GD.pm");
-        GD->import;
-    };
-    if($@) {
-        $c->log->error("error loading gd, did you forget to install libgd, libxml or GD.pm?\n".$@);
-    }
-
-    my $config = $c->config->{'View::GD'};
+   my $config = $c->config->{'View::GD'};
 
     $args->{gd_image_type}         ||= $config->{gd_image_type}         || 'gif';
     $args->{gd_image_content_type} ||= $config->{gd_image_content_type} || ('image/' . $args->{gd_image_type});
@@ -46,6 +38,14 @@ sub new {
 sub process {
     #my($self, $c, @args)...
     my($self, $c, undef) = @_;
+
+    eval {
+        require("GD.pm");
+        GD->import;
+    };
+    if($@) {
+        $c->log->error("error loading gd, did you forget to install libgd, libxml or GD.pm?\n".$@);
+    }
 
     my $gd_image_type         = $c->stash->{gd_image_type}         || $self->gd_image_type;
     my $gd_image_content_type = $c->stash->{gd_image_content_type} || $self->gd_image_content_type;

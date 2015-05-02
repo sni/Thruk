@@ -29,6 +29,9 @@ $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::HTTP',
           'Thruk::Backend::Provider::Mysql',
 ];
+$Thruk::Backend::Manager::ProviderLoaded = {
+          'livestatus' => 'Thruk::Backend::Provider::Livestatus',
+};
 
 ##########################################################
 
@@ -89,13 +92,16 @@ sub _create_backend {
     my($self, $config, $peerconfig, $product_prefix) = @_;
 
     my $name    = $config->{'name'};
-    my $type    = $config->{'type'};
+    my $type    = lc $config->{'type'};
     my $options = $config->{'options'};
     my $class;
 
-    if(lc $type eq 'livestatus') {
+    if($type eq 'livestatus') {
         # speed up things here, since this class is 99% of the use cases
         $class = 'Thruk::Backend::Provider::Livestatus';
+    }
+    elsif($Thruk::Backend::Manager::ProviderLoaded->{$type}) {
+        $class = $Thruk::Backend::Manager::ProviderLoaded->{$type};
     } else {
         my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
         if(scalar @provider == 0) {
@@ -108,6 +114,7 @@ sub _create_backend {
         $require =~ s/::/\//gmx;
         require $require . ".pm";
         $class->import;
+        $Thruk::Backend::Manager::ProviderLoaded->{$type} = $class;
     }
 
     $options->{'name'} = $name;
@@ -187,8 +194,11 @@ sub _initialise_peer {
     # log cache?
     if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
         if($logcache =~ m/^mysql/mxi) {
-            require Thruk::Backend::Provider::Mysql;
-            Thruk::Backend::Provider::Mysql->import;
+            if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+                require Thruk::Backend::Provider::Mysql;
+                Thruk::Backend::Provider::Mysql->import;
+                $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+            }
             $self->{'logcache'} = Thruk::Backend::Provider::Mysql->new({
                                                     peer     => $logcache,
                                                     peer_key => $self->{'key'},

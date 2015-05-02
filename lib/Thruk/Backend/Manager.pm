@@ -10,11 +10,7 @@ use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils ();
-use Thruk::Pool::Simple ();
-use Thruk::Config ();
-use Thruk::Backend::Peer ();
 use Thruk::Backend::Pool ();
-use Thruk::Utils::IO ();
 #use Thruk::Timer qw/timing_breakpoint/;
 
 our $AUTOLOAD;

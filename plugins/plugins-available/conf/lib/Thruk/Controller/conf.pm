@@ -2,22 +2,8 @@ package Thruk::Controller::conf;
 
 use strict;
 use warnings;
-use Thruk 1.1.5;
-use Thruk::Utils::Menu;
-use Thruk::Utils::Conf;
-use Thruk::Utils::Conf::Defaults;
-use Monitoring::Config;
-use Socket qw/inet_ntoa/;
-use Carp;
-use File::Copy;
-use JSON::XS;
+use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
-use Storable qw/dclone/;
-use Data::Dumper;
-use File::Slurp;
-use Encode qw(decode_utf8 encode_utf8);
-use Config::General qw(ParseConfig);
-use Digest::MD5 qw(md5_hex);
 #use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
@@ -56,6 +42,23 @@ sub conf_cgi : Path('/thruk/cgi-bin/conf.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     $c->stash->{'config_backends_only'} = 1;
+
+    if(!$c->config->{'conf_modules_loaded'}) {
+        load Thruk::Utils::Conf;
+        load Thruk::Utils::Conf::Defaults;
+        load Monitoring::Config;
+        load Socket, qw/inet_ntoa/;
+        load File::Copy;
+        load JSON::XS;
+        load Storable, qw/dclone/;
+        load Data::Dumper;
+        load File::Slurp, qw/read_file/;
+        load Encode, qw(decode_utf8 encode_utf8);
+        load Config::General, qw(ParseConfig);
+        load Digest::MD5, qw(md5_hex);
+        $c->config->{'conf_modules_loaded'} = 1;
+    }
+
     return $c->detach('/conf/index');
 }
 

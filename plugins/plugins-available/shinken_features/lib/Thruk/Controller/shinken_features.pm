@@ -2,10 +2,7 @@ package Thruk::Controller::shinken_features;
 
 use strict;
 use warnings;
-use utf8;
-use Thruk 1.0.8;
 use parent 'Catalyst::Controller';
-use Thruk::Utils::Status;
 
 =head1 NAME
 

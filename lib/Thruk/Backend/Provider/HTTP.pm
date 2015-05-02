@@ -2,11 +2,9 @@ package Thruk::Backend::Provider::HTTP;
 
 use strict;
 use warnings;
-use Carp;
 use Data::Dumper;
-use JSON::XS;
-use Thruk::UserAgent;
-use Encode qw/encode_utf8/;
+use Module::Load qw/load/;
+use JSON::XS qw/decode_json encode_json/;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -50,18 +48,6 @@ sub new {
     };
     bless $self, $class;
 
-    if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
-        if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $options->{'peer'} =~ m/^https:/mx) {
-            eval {
-                # required for new IO::Socket::SSL versions
-                require IO::Socket::SSL;
-                IO::Socket::SSL->import();
-                IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
-            };
-        }
-    }
-
-    $self->reconnect();
     return $self;
 }
 
@@ -123,6 +109,19 @@ recreate lwp object
 =cut
 sub reconnect {
     my($self) = @_;
+
+    if(!$self->{'modules_loaded'}) {
+        if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+            if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
+                eval {
+                    # required for new IO::Socket::SSL versions
+                    load IO::Socket::SSL;
+                    IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+                };
+            }
+        }
+        load Thruk::UserAgent;
+    }
 
     if(defined $self->{'logcache'}) {
         $self->{'logcache'}->reconnect();

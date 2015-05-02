@@ -2,7 +2,6 @@ package Thruk::Controller::outages;
 
 use strict;
 use warnings;
-use utf8;
 use parent 'Catalyst::Controller';
 
 =head1 NAME

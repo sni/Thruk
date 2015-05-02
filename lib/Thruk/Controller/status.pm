@@ -2,10 +2,7 @@ package Thruk::Controller::status;
 
 use strict;
 use warnings;
-use utf8;
-use Carp;
 use parent 'Catalyst::Controller';
-use Thruk::Utils::Status;
 
 =head1 NAME
 
