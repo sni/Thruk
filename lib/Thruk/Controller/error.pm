@@ -3,7 +3,7 @@ package Thruk::Controller::error;
 use strict;
 use warnings;
 use Data::Dumper;
-use Carp qw/cluck confess/;
+use Carp qw/cluck confess longmess/;
 
 use parent 'Catalyst::Controller';
 
@@ -225,6 +225,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         for my $error ( @{ $c->error } ) {
             $c->stash->{'stacktrace'} .= $error;
         }
+        $c->stash->{'stacktrace'} .= "\n".longmess();
     }
 
     # clear errors to avoid invinite loops

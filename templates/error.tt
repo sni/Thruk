@@ -51,6 +51,9 @@
     <img src="[% url_prefix %]themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
     Help making Thruk better and send a bug report</a>.<br>
   </div>
+  [% IF thruk_debug %]
+  <pre style="margin-top: 50px;">[% stacktrace %]</pre>
+  [% END %]
   [% END %]
 [% IF make_test_mode || thruk_debug %]
 <!--error:
