@@ -499,9 +499,6 @@ it under the same terms as Perl itself.
 
 =cut
 
-#print Dumper(\%INC);
-#exit;
-
 no Moose;
 
 1;
