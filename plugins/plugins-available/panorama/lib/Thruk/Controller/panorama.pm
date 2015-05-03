@@ -644,13 +644,14 @@ sub _get_wms_provider {
         $name =~ s/\s*$//gmx;
         $data =~ s/^\s*//gmx;
         $data =~ s/\s*$//gmx;
+        next unless $data;
         eval {
             my $test = JSON::XS::decode_json($data);
         };
         if($@) {
             print STDERR "error in wms provider: ".$@;
             print STDERR $entry,"\n";
-            die("error in wms provider: ".$@);
+            die("error in wms provider: ".$@."\nat entry: ".$entry."\n");
         }
         push @{$provider}, { name => $name, provider => $data };
     }
