@@ -1186,10 +1186,7 @@ script/test_cpan_modules.pl
 script/test_page_rps.sh
 script/thruk
 script/thruk_auth
-script/thruk_cgi.pl
-script/thruk_create.pl
 script/thruk_create_combined_static_content.pl
-script/thruk_create_package.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
