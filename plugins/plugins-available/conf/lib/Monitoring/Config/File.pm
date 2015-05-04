@@ -515,7 +515,7 @@ sub diff {
     my ($fh, $filename) = tempfile();
     my $content         = $self->get_new_file_content();
     print $fh $content;
-    Thruk::Utils::IO::close($fh, $filename);
+    CORE::close($fh);
 
     my $diff = "";
     my $cmd = 'diff -wuN "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
