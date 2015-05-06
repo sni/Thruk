@@ -859,7 +859,10 @@ ex.:
 
 === perf_bar_pnp_popup
 Show pnp popup if performance data are available and
-pnp is used as graph engine.
+pnp is used as graph engine. The popup will be available
+on the performance data bar chart on the right side of each
+host/service. It uses the normal pnp popup logic, so you
+need to install the proper SSI files.
 
 ex.:
 
