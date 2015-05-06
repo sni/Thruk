@@ -102,6 +102,10 @@ sub index :Path :Args(0) {
         $referer = $referer.'/';
     }
     $referer =~ s/%3f/?/mx;
+    # add trailing slash if referer ends with the product prefix and nothing else
+    if($referer =~ m|\Q/$product_prefix\E$|mx) {
+        $referer = $referer.'/';
+    }
 
     # make lowercase username
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
