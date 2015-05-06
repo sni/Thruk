@@ -123,10 +123,6 @@ sub reconnect {
         load Thruk::UserAgent;
     }
 
-    if(defined $self->{'logcache'}) {
-        $self->{'logcache'}->reconnect();
-    }
-
     # correct address
     $self->{'addr'} =~ s|remote\.cgi$||mx;
     $self->{'addr'} =~ s|/$||mx;

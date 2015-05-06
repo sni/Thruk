@@ -1008,13 +1008,13 @@ sub _import_logs {
         # backends maybe down, we still want to continue updates
         eval {
             if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
-                $log_count += $self->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $log_count += $peer->{'logcache'}->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'authupdate') {
-                $log_count += $self->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
+                $log_count += $peer->{'logcache'}->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
             }
             elsif($mode eq 'optimize') {
-                $log_count += $self->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
+                $log_count += $peer->{'logcache'}->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
             } else {
                 print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
