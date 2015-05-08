@@ -148,16 +148,20 @@ sub _start_shadownaemon_for_peer {
     my($config, $peer, $key, $basedir, $c, $log_missing) = @_;
     Thruk::Utils::IO::mkdir_r($basedir.'/tmp');
     $c->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}))) if $log_missing;
-    my $cmd = sprintf("%s -d -i %s -o %s%s >> %s/tmp/shadownaemon.log 2>&1",
-                      $config->{'shadow_naemon_bin'} || 'shadownaemon',
-                      $peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'},
-                      $config->{'shadow_naemon_dir'}.'/'.$key,
-                      $config->{'shadow_naemon_ls'} ? " -l ".$config->{'shadow_naemon_ls'} : '',
-                      $config->{'shadow_naemon_dir'}.'/'.$key,
-                    );
-    $c->log->error($cmd) if $log_missing;
+    my $cmd = [
+            ($config->{'shadow_naemon_bin'} || 'shadownaemon'),
+            '-d',
+            '-i', ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}),
+            '-o',  $config->{'shadow_naemon_dir'}.'/'.$key,
+    ];
+    if($config->{'shadow_naemon_ls'}) {
+        push @{$cmd}, ('-l', $config->{'shadow_naemon_ls'});
+    }
+    push @{$cmd}, ('>>', $config->{'shadow_naemon_dir'}.'/'.$key.'/tmp/shadownaemon.log 2>&1');
+    $c->log->error(join(' ', @{$cmd})) if $log_missing;
     # starting in background is not faster here since the daemon immediatly backgrounds
-    system($cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    $c->log->error(sprintf('starting shadownaemon failed with rc %d: %s', $rc, $output)) if $rc != 0;
     return;
 }
 
