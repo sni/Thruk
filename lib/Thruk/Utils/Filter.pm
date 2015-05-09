@@ -282,7 +282,7 @@ sub short_uri {
         $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
-        for my $key (%{$data}) {
+        for my $key (keys %{$data}) {
             $filter->{$key} = $data->{$key};
         }
     }
