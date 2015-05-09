@@ -1183,7 +1183,7 @@ script/nagexp
 script/nagimp
 script/naglint
 script/test_cpan_modules.pl
-script/test_page_rps.sh
+script/test_page_rps
 script/thruk
 script/thruk_auth
 script/thruk_create_combined_static_content.pl
