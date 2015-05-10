@@ -342,9 +342,25 @@ sub test_page {
             like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
         }
     }
+    if($content_type =~ m|text/html|) {
+        # test without having to change the test number in all tests
+        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+    }
+    if($content_type =~ m|application/json|) {
+        # test without having to change the test number in all tests
+        fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
+    }
+    my $is_length  = length($request->content);
+    my $got_length = $request->header('Content-Length');
+    if($got_length && $is_length != $got_length) {
+        fail("Content-Length did not match, $is_length != $got_length");
+    }
+    if($got_length && ($content_type =~ m|text/html| || $content_type =~ m|application/json|)) {
+        fail("no Content-Length set");
+    }
 
     SKIP: {
-        if($content_type =~ 'text\/html' and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
+        if($content_type =~ m|text/html| and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
             if($use_html_lint == 0) {
                 skip "no HTML::Lint installed", 2;
             }
