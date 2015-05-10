@@ -1,98 +1,134 @@
-#!/bin/bash
+#!/usr/bin/env perl
 
-set -e
-set -u
+use warnings;
+use strict;
+use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 #################################################
 # settings
-NUM=10
-REQUESTS=${REQUESTS:-100}
-CONCURRENCY=${CONCURRENCY:-5}
-DELAY=${DELAY:-2}
-BASEPORT="3000"
-BASEURL="http://127.0.0.1:$BASEPORT/thruk"
-
-#################################################
-cleanup() {
-  ps -efl | grep thruk_server | grep perl | awk '{ print $4 }' | xargs -r kill >/dev/null 2>&1
-}
-
-#################################################
-test_page() {
-  NAME=$1
-  URL=$2
-  sleep $DELAY
-  pageres=$(ab -c $CONCURRENCY -n $REQUESTS $URL 2>&1)
-  page=$(echo "$pageres" | grep 'Requests per second:' | awk '{ print $4 }')
-  pageerr=$(echo "$pageres" | grep 'Non-2xx responses:' | awk '{ print $3 }')
-  if [ "$pageerr" != "" ]; then if [ $pageerr -gt 5 ]; then page='err'; fi; fi
-  printf "     %s: %5s #/sec" "$NAME" "$page"
-}
-
-#################################################
-switch_tag() {
-  TAG="$1"
-  git=$(git checkout $TAG 2>&1 || echo -n)
-  if [[ $git == *error:* ]]; then
-    printf "\n$git"
-    exit
-  fi
-  rm -rf tmp/ttc_*
-}
-
-#################################################
-test_tag() {
-  TAG="$1"
-  printf "%-14s" "$TAG"
-  switch_tag "$TAG"
-  pid=$(./script/thruk_server.pl >/dev/null 2>&1 & echo $!);
-
-  while [ $(lsof -i:$BASEPORT | grep -c LISTEN) -ne 1 ]; do
-    sleep 0.5
-    ps -p $pid >/dev/null 2>&1 || { echo "failed to start!"; exit; }
-  done
-
-  # warm up
-  ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1
-
-  test_page 'tac'    "$BASEURL/cgi-bin/tac.cgi"
-  test_page 'status' "$BASEURL/cgi-bin/status.cgi"
-  mem=$(cat /proc/$pid/status | grep VmRSS:  | awk '{print $2}')
-  test_page 'json'   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json"
-  test_page 'bp'     "$BASEURL/cgi-bin/bp.cgi"
-  max=$(cat /proc/$pid/status | grep VmPeak: | awk '{print $2}')
-
-  load=$(cat /proc/loadavg | awk '{ print $1 }')
-
-  kill $pid
-  printf "     mem: %3d MB (max. %4dMB)     load: %5s\n" $(echo $mem/1000|bc) $(echo $max/1000|bc) "$load"
-}
+my $NUM         = 10;
+my $REQUESTS    = $ENV{REQUESTS}    || 100;
+my $CONCURRENCY = $ENV{CONCURRENCY} || 5;
+my $DELAY       = $ENV{DELAY}       || 2;
+my $BASEPORT    = 3000;
+my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
 
 #################################################
 # prepare
-cleanup
-trap "cleanup" EXIT
-test -f .author && echo "WARNING: .author mode active";
+cleanup();
+my $author = -f '.author' ? 1 : 0;
+unlink('.author');
 
 #################################################
 # run tests
-branch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
-if [ "x$*" = "x" ]; then
-  tags=$(git tag -l | awk -F- '{ print $1 }' | sort -u | tail -$NUM | tac)
-  if [ "$branch" != "master" ]; then tags="master $tags"; fi
-  tags="$branch $tags"
-else
-  tags="$*"
-fi
-for tag in $tags; do
-  if [[ $tag == v* ]]; then
-    # get latest sp for this tag
-    tag=$(git tag -l | grep $tag | tail -n 1)
-  fi
-  test_tag "$tag"
-done
+print("| Branch        | Startup | Static HTML       | Tactical CGI      | Status CGI        | JSON CGI          | Business P. CGI   | Memory                | LOAD  |\n");
+print("+---------------+---------+-------------------+-------------------+-------------------+-------------------+-------------------+-----------------------+-------+\n");
+chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
+$branch =~ s|^\*\s+||mx;
+my $tags = [];
+if(scalar @ARGV == 0) {
+    $tags = [reverse split(/\n/, `git tag -l | awk -F- '{ print \$1 }' | sort -u | tail -$NUM`)];
+    if($branch ne 'master') { unshift @{$tags}, 'master' }
+    unshift @{$tags}, $branch;
+} else {
+    $tags = \@ARGV;
+}
 
 #################################################
-# clean up
-cleanup
-switch_tag "$branch"
+END {
+    cleanup();
+    switch_tag($branch);
+    `touch .author` if $author;
+}
+$SIG{'INT'}  = sub {
+    cleanup();
+    switch_tag($branch);
+    `touch .author` if $author;
+    exit;
+};
+
+#################################################
+# run tests
+for my $tag (@{$tags}) {
+    $tag =~ s|^\*\s+||gmx;
+    if($tag =~ /^v/mx) {
+        # get latest sp for this tag
+        $tag = `git tag -l | grep \$tag | tail -n 1`;
+    }
+    test_tag($tag);
+}
+print "+---------------+---------+-------------------+-------------------+-------------------+-------------------+-------------------+-----------------------+-------+\n";
+cleanup();
+exit;
+
+
+#################################################
+# SUBS
+#################################################
+sub cleanup {
+  `ps -efl | grep thruk_server | grep -v grep | awk '{ print \$4 }' | xargs -r kill >/dev/null 2>&1`;
+}
+
+#################################################
+sub test_page {
+    my($name, $url) = @_;
+    our $currenttag;
+    sleep $DELAY;
+    my $pageres  = `ab -c $CONCURRENCY -n $REQUESTS $url 2>&1`;
+    my($page)    = $pageres =~ m/\QRequests per second:\E\s+([\d\.]+)/mx;
+    my($pageerr) = $pageres =~ m/\QNon-2xx responses:\E|\QFailed requests:\E\s+([\d\.]+)/mx;
+    if($pageerr && $pageerr >= 5) {
+        printf "errored           | ";
+        if($currenttag !~ m/^v/mx) {
+            printf(STDERR "\n**********\n%s\n**********\n", $pageres);
+            exit;
+        }
+    } else {
+        printf("%6s #/sec      | ", $page);
+    }
+}
+
+#################################################
+sub switch_tag {
+    my($tag) = @_;
+    die("no tag") unless $tag;
+    my $git = `git checkout $tag 2>&1`;
+    if($git =~ /error:/) {
+        printf("\n| %s", $git);
+        exit;
+    }
+    `rm -rf tmp/ttc_*`;
+}
+
+#################################################
+sub test_tag {
+    my($tag) = @_;
+    our $currenttag = $tag;
+    printf("| %-13s | ", $tag);
+    switch_tag($tag);
+    chomp(my $pid = `./script/thruk_server.pl >/dev/null 2>&1 & echo \$!`);
+
+    my $t0 = [gettimeofday];
+    while(`lsof -i:$BASEPORT | grep -c LISTEN` != 1) {
+        sleep(0.1);
+        `ps -p $pid >/dev/null 2>&1`;
+        die("failed to start!\n") unless $? == 0;
+    }
+    my $elapsed = tv_interval ( $t0 );
+    printf(" %.2fs  | ", $elapsed);
+
+    # warm up
+    `ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
+
+    test_page('main',   "$BASEURL/changes.html");
+    test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
+    test_page('status', "$BASEURL/cgi-bin/status.cgi");
+    my $mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`;
+    test_page('json',   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json");
+    test_page('bp',     "$BASEURL/cgi-bin/bp.cgi");
+    my $max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`;
+    my $load = `cat /proc/loadavg | awk '{ print \$1 }'`;
+
+    kill('TERM', $pid);
+    printf(" %3d MB (max. %4dMB) | %5s |\n", $mem/1000, $max/1000, $load);
+}
