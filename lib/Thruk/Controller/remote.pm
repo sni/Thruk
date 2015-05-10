@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Module::Load qw/load/;
 use parent 'Catalyst::Controller';
+use Data::Dumper;
 
 =head1 NAME
 

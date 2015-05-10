@@ -355,7 +355,7 @@ sub test_page {
     if($got_length && $is_length != $got_length) {
         fail("Content-Length did not match, $is_length != $got_length");
     }
-    if($got_length && ($content_type =~ m|text/html| || $content_type =~ m|application/json|)) {
+    if(!$got_length && ($content_type =~ m|text/html| || $content_type =~ m|application/json|)) {
         fail("no Content-Length set");
     }
 
