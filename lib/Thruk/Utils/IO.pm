@@ -247,6 +247,7 @@ array like ['/bin/prog', 'arg1', 'arg2']
 
 sub cmd {
     my($c, $cmd) = @_;
+    confess("no c") unless $c;
 
     local $SIG{CHLD}='';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};

@@ -2,8 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 use File::Copy;
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
 use lib('t');
 
 my $log4perl_created;
@@ -30,6 +28,7 @@ unlink('/tmp/thruk_test_debug.log');
 ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("$0: copy failed: $!");
 $log4perl_created = 1;
 
+# this either works because we are root otherwise it will silently fail but isn't neccessary at all either
 move('/etc/thruk/log4perl.conf', '/etc/thruk/log4perl.conf.orig');
 move('log4perl.conf', '/etc/thruk/log4perl.conf');
 

@@ -818,7 +818,7 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
                                                       message   => 'please stand by while your initial logfile cache will be created...',
-                                                      forward   => $c->request->uri(),
+                                                      forward   => $c->req->url,
                                                       backends  => $backends2import,
                                                       nofork    => $noforks,
                                                     });
@@ -1292,13 +1292,13 @@ sub select_backends {
             delete $arg{'pager'};
             if($c->stash->{'use_pager'}) {
                 $arg{'pager'} = {
-                    entries  => $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'},
-                    page     => $c->{'request'}->{'parameters'}->{'page'} || 1,
-                    next     => exists $c->{'request'}->{'parameters'}->{'next'}      || $c->{'request'}->{'parameters'}->{'next.x'},
-                    previous => exists $c->{'request'}->{'parameters'}->{'previous'}  || $c->{'request'}->{'parameters'}->{'previous.x'},
-                    first    => exists $c->{'request'}->{'parameters'}->{'first'}     || $c->{'request'}->{'parameters'}->{'first.x'},
-                    last     => exists $c->{'request'}->{'parameters'}->{'last'}      || $c->{'request'}->{'parameters'}->{'last.x'},
-                    pages    => $c->{'request'}->{'parameters'}->{'total_pages'}      || '',
+                    entries  => $c->req->parameters->{'entries'} || $c->stash->{'default_page_size'},
+                    page     => $c->req->parameters->{'page'} || 1,
+                    next     => exists $c->req->parameters->{'next'}      || $c->req->parameters->{'next.x'},
+                    previous => exists $c->req->parameters->{'previous'}  || $c->req->parameters->{'previous.x'},
+                    first    => exists $c->req->parameters->{'first'}     || $c->req->parameters->{'first.x'},
+                    last     => exists $c->req->parameters->{'last'}      || $c->req->parameters->{'last.x'},
+                    pages    => $c->req->parameters->{'total_pages'}      || '',
                 };
             } else {
                 $arg{'pager'} = {};
@@ -1306,7 +1306,7 @@ sub select_backends {
         }
 
         # no paging except on html pages
-        my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+        my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
         if($view_mode ne 'html') {
             delete $arg{'pager'};
             delete $c->stash->{'use_pager'};
@@ -1709,12 +1709,12 @@ sub _page_data {
 
     # set some defaults
     $c->stash->{'pager'} = "";
-    $c->stash->{'data'}  = $data;
+    $c->stash->{'data'} = $data;
 
     # page only in html mode
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    my $entries = $c->req->parameters->{'entries'} || $default_result_size;
     return $data unless defined $entries;
     $c->stash->{'entries_per_page'} = $entries;
 
@@ -1742,13 +1742,13 @@ sub _page_data {
 
     my $page = 1;
     # current page set by get parameter
-    if(defined $c->{'request'}->{'parameters'}->{'page'}) {
-        $page = $c->{'request'}->{'parameters'}->{'page'};
+    if(defined $c->req->parameters->{'page'}) {
+        $page = $c->req->parameters->{'page'};
     }
     # current page set by jump anchor
-    elsif(defined $c->{'request'}->{'parameters'}->{'jump'}) {
+    elsif(defined $c->req->parameters->{'jump'}) {
         my $nr = 0;
-        my $jump = $c->{'request'}->{'parameters'}->{'jump'};
+        my $jump = $c->req->parameters->{'jump'};
         if(exists $data->[0]->{'description'}) {
             for my $row (@{$data}) {
                 $nr++;
@@ -1770,20 +1770,20 @@ sub _page_data {
     }
 
     # last/first/prev or next button pressed?
-    if(   exists $c->{'request'}->{'parameters'}->{'next'}
-       or exists $c->{'request'}->{'parameters'}->{'next.x'} ) {
+    if(   exists $c->req->parameters->{'next'}
+       or exists $c->req->parameters->{'next.x'} ) {
         $page++;
     }
-    elsif (   exists $c->{'request'}->{'parameters'}->{'previous'}
-           or exists $c->{'request'}->{'parameters'}->{'previous.x'} ) {
+    elsif (   exists $c->req->parameters->{'previous'}
+           or exists $c->req->parameters->{'previous.x'} ) {
         $page-- if $page > 1;
     }
-    elsif (    exists $c->{'request'}->{'parameters'}->{'first'}
-            or exists $c->{'request'}->{'parameters'}->{'first.x'} ) {
+    elsif (    exists $c->req->parameters->{'first'}
+            or exists $c->req->parameters->{'first.x'} ) {
         $page = 1;
     }
-    elsif (    exists $c->{'request'}->{'parameters'}->{'last'}
-            or exists $c->{'request'}->{'parameters'}->{'last.x'} ) {
+    elsif (    exists $c->req->parameters->{'last'}
+            or exists $c->req->parameters->{'last.x'} ) {
         $page = $pages;
     }
 

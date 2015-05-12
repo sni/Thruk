@@ -447,21 +447,21 @@ sub get_start_end_for_timeperiod_from_param {
     confess("no c") unless defined($c);
 
     # get timeperiod
-    my $timeperiod   = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
-    my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
-    my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
-    my $shour        = $c->{'request'}->{'parameters'}->{'shour'}  || 0;
-    my $smin         = $c->{'request'}->{'parameters'}->{'smin'}   || 0;
-    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'}   || 0;
-    my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
-    my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
-    my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
-    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'}  || 0;
-    my $emin         = $c->{'request'}->{'parameters'}->{'emin'}   || 0;
-    my $esec         = $c->{'request'}->{'parameters'}->{'esec'}   || 0;
-    my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
-    my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
+    my $timeperiod   = $c->req->parameters->{'timeperiod'};
+    my $smon         = $c->req->parameters->{'smon'};
+    my $sday         = $c->req->parameters->{'sday'};
+    my $syear        = $c->req->parameters->{'syear'};
+    my $shour        = $c->req->parameters->{'shour'}  || 0;
+    my $smin         = $c->req->parameters->{'smin'}   || 0;
+    my $ssec         = $c->req->parameters->{'ssec'}   || 0;
+    my $emon         = $c->req->parameters->{'emon'};
+    my $eday         = $c->req->parameters->{'eday'};
+    my $eyear        = $c->req->parameters->{'eyear'};
+    my $ehour        = $c->req->parameters->{'ehour'}  || 0;
+    my $emin         = $c->req->parameters->{'emin'}   || 0;
+    my $esec         = $c->req->parameters->{'esec'}   || 0;
+    my $t1           = $c->req->parameters->{'t1'};
+    my $t2           = $c->req->parameters->{'t2'};
 
     $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
     return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
@@ -479,7 +479,7 @@ gets the authorized_for_read_only role and group based roles
 sub get_dynamic_roles {
     my($c, $username, $user) = @_;
 
-    $user = Catalyst::Authentication::Store::FromCGIConf->find_user( { username => $username }, $c ) unless defined $user;
+    $user = $c->user unless defined $user;
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data);
@@ -573,20 +573,21 @@ sets the authorized_for_read_only role and group based roles
 sub set_dynamic_roles {
     my $c = shift;
 
-    my $username = $c->request->{'user'}->{'username'};
+    return unless $c->user_exists;
+    my $username = $c->user->{'username'};
     return unless defined $username;
 
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
 
     #my($roles, $can_submit_commands, $alias)...
-    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
+    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->user);
 
     if(defined $alias) {
-        $c->request->{'user'}->{'alias'} = $alias;
+        $c->user->{'alias'} = $alias;
     }
 
     for my $role (@{$roles}) {
-        push @{$c->request->{'user'}->{'roles'}}, $role;
+        push @{$c->user->{'roles'}}, $role;
     }
 
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
@@ -620,13 +621,10 @@ sub set_message {
         $code    = shift;
     }
 
-    $c->res->cookies->{'thruk_message'} = {
-        value => $style.'~~'.$message,
-        path  => $c->stash->{'cookie_path'}
-    };
+    $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
     $c->stash->{'thruk_message'}         = $style.'~~'.$message;
     $c->stash->{'thruk_message_details'} = $details;
-    $c->response->status($code) if defined $code;
+    $c->res->code($code) if defined $code;
 
     return 1;
 }
@@ -1272,24 +1270,16 @@ sub savexls {
     $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] .  $c->stash->{'file_name'} . q["] ];
     $c->stash->{'res_ctype'}  = 'application/x-msexcel';
 
-    # Excel::Template::Plus pulls in Moose, so load this later
-    require Excel::Template::Plus;
-    Excel::Template::Plus->import();
-    my $template = Excel::Template::Plus->new(
-        engine   => 'TT',
-        template => $c->stash->{'template'},
-        config   => $c->config->{'View::TT'},
-        params   => {},
-    );
-    $template->param(%{ $c->stash });
+    my $template = $c->stash->{'template'};
+    my $output = Thruk::Views::ExcelRenderer::render($c, $template);
     if($c->config->{'no_external_job_forks'}) {
         #my($fh, $filename)...
-        my(undef, $filename) = tempfile();
+        my(undef, $filename)     = tempfile();
         $c->stash->{'file_name'} = $filename;
         $c->stash->{job_dir}     = '';
         $c->stash->{cleanfile}   = 1;
     }
-    $template->write_file($c->stash->{job_dir}.$c->stash->{'file_name'});
+    Thruk::Utils::IO::write($c->stash->{job_dir}.$c->stash->{'file_name'}, $output);
     return;
 }
 
@@ -1472,26 +1462,25 @@ let the user choose a mobile page or not
 sub choose_mobile {
     my($c,$url) = @_;
 
-    return unless defined $c->{'request'}->{'headers'}->{'user-agent'};
+    return unless defined $c->req->header('user-agent');
     my $found = 0;
     for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
-        $found++ if $c->{'request'}->{'headers'}->{'user-agent'} =~ m/$agent/mx;
+        $found++ if $c->req->header('user-agent') =~ m/$agent/mx;
     }
     return unless $found;
 
     my $choose_mobile;
-    if(defined $c->request->cookie('thruk_mobile')) {
-        my $cookie = $c->request->cookie('thruk_mobile');
+    if(defined $c->cookie('thruk_mobile')) {
+        my $cookie = $c->cookie('thruk_mobile');
         $choose_mobile = $cookie->value;
         return if $choose_mobile == 0;
     }
 
-    $c->{'canceled'}        = 1;
-    $c->stash->{'title'}    = $c->config->{'name'};
+    $c->stash->{'title'}     = $c->config->{'name'};
     $c->stash->{'template'} = 'mobile_choose.tt';
-    $c->stash->{'redirect'} = $url;
+    $c->stash->{'redirect'}  = $url;
     if(defined $choose_mobile and $choose_mobile == 1) {
-        return $c->response->redirect($c->stash->{'redirect'});
+        return $c->redirect_to($c->stash->{'redirect'});
     }
     return 1;
 }
@@ -1764,10 +1753,10 @@ sub restart_later {
         my $pid = $$;
         system("sleep 1 && kill -HUP $pid &");
         Thruk::Utils::append_message($c, ' Thruk has been restarted.');
-        return $c->response->redirect($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
+        return $c->redirect_to($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
     } else {
         Thruk::Utils::append_message($c, ' Changes take effect after Restart.');
-        return $c->response->redirect($redirect);
+        return $c->redirect_to($redirect);
     }
     return;
 }
@@ -2092,7 +2081,7 @@ sub get_template_variable {
     $c->stash->{'var'}   = $var;
     my $data;
     eval {
-        $data = $c->view('TT')->render($c, 'get_variable.tt');
+        $data = Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt');
     };
     if($@) {
         return "" if $noerror;
@@ -2284,8 +2273,8 @@ make sure this is a post request
 =cut
 sub is_post {
     my($c) = @_;
-    return(1) if $c->request->method eq 'POST';
-    $c->log->error("insecure request, post method required: ".Dumper($c->request));
+    return(1) if $c->req->method eq 'POST';
+    $c->log->error("insecure request, post method required: ".Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }
@@ -2304,21 +2293,21 @@ sub check_csrf {
     return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
     return unless is_post($c);
     for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
-        return 1 if $c->request->address eq $addr;
+        return 1 if $c->req->address eq $addr;
         if(CORE::index( $addr, '*' ) >= 0) {
             # convert wildcards into real regexp
             my $search = $addr;
             $search =~ s/\.\*/*/gmx;
             $search =~ s/\*/.*/gmx;
-            return 1 if $c->request->address =~ m/$search/mx;
+            return 1 if $c->req->address =~ m/$search/mx;
         }
     }
-    my $post_token  = $c->request->{'parameters'}->{'token'};
+    my $post_token  = $c->req->parameters->{'token'};
     my $valid_token = Thruk::Utils::Filter::get_user_token($c);
     if($valid_token and $post_token and $valid_token eq $post_token) {
         return(1);
     }
-    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->request));
+    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }

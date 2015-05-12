@@ -1,0 +1,16 @@
+ - root -> public
+ - $c->user_exists
+ - template => _template (http://search.cpan.org/~sri/Mojolicious-6.10/lib/Mojolicious/Controller.pm#stash)
+   - write test
+   - data => _data
+   - text => _text
+ - $c->{'canceled'} ??
+ - $c->response->redirect  -> $c->redirect_to
+ - $c->res->content_type   -> $c->res->headers->content_type
+ - $c->forward("View::JSON"); return $c->render(json => $json);
+ - $c->response->status()  -> $c->res->code()
+ - $c->res->cookies->{'name'} = {...  ->  $c->cookie('name' => $val, { path  => ... });
+
+
+ - CATALYST_SERVER -> PLACK_TEST_EXTERNALSERVER_URI
+ - remove mongodb

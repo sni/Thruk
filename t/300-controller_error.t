@@ -20,7 +20,7 @@ $ENV{'TEST_ERROR'} = 1;
 for(0..24) {
     my $nr = $_;
     my $test = {
-        'url'     => '/error/'.$nr,
+        'url'     => '/thruk/cgi-bin/error.cgi?error='.$nr,
         'fail'    => 1,
     };
     if($nr == 13) {

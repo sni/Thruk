@@ -43,7 +43,7 @@ sub new {
 sub _show_step_2 {
     my ( $self, $c ) = @_;
 
-    my $input = $c->{'request'}->{'parameters'}->{'input'};
+    my $input = $c->req->parameters->{'input'};
 
     return unless defined $input;
 
@@ -64,8 +64,8 @@ sub _show_step_2 {
     }
 
     $c->stash->{input}       = $input;
-    $c->stash->{data}        = $data;
-    $c->stash->{template}    = 'trends_step_2.tt';
+    $c->stash->{data}       = $data;
+    $c->stash->{template}   = 'trends_step_2.tt';
 
     return 1;
 }
@@ -75,13 +75,13 @@ sub _show_step_2 {
 sub _show_step_3 {
     my ( $self, $c ) = @_;
 
-    my $input = $c->{'request'}->{'parameters'}->{'input'};
+    my $input = $c->req->parameters->{'input'};
 
     return unless defined $input;
     return unless $input eq 'getoptions';
 
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
+    my $host    = $c->req->parameters->{'host'};
+    my $service = $c->req->parameters->{'service'};
 
     if(!defined $host and !defined $service) {
         return;
@@ -95,7 +95,7 @@ sub _show_step_3 {
     $c->stash->{service}     = $service || '';
     $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
 
-    $c->stash->{template}    = 'trends_step_3.tt';
+    $c->stash->{template}   = 'trends_step_3.tt';
 
     return 1;
 }
@@ -105,8 +105,8 @@ sub _show_step_3 {
 sub _show_report {
     my ( $self, $c ) = @_;
 
-    my $host       = $c->{'request'}->{'parameters'}->{'host'}       || '';
-    my $service    = $c->{'request'}->{'parameters'}->{'service'}    || '';
+    my $host       = $c->req->parameters->{'host'}       || '';
+    my $service    = $c->req->parameters->{'service'}    || '';
 
     $c->stash->{host}    = $host;
     $c->stash->{service} = $service;
@@ -124,7 +124,7 @@ sub _do_report {
     my $start_time = time();
 
     # calculate availability data
-    $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+    $c->req->parameters->{'full_log_entries'} = 1;
     Thruk::Utils::Avail::calculate_availability($c);
 
     # create the image map
@@ -140,9 +140,9 @@ sub _do_report {
         Thruk::Utils::IO::close($fh, $dir."/graph.png");
     }
 
-    unless(exists $c->{'request'}->{'parameters'}->{'nomap'}) {
+    unless(exists $c->req->parameters->{'nomap'}) {
         $c->stash->{image_map} = $image_map;
-        $c->stash->{nomap}     = $c->{'request'}->{'parameters'}->{'nomap'};
+        $c->stash->{nomap}     = $c->req->parameters->{'nomap'};
     }
     $c->stash->{nomap}     = '' unless defined $c->stash->{nomap};
     $c->stash->{image_map} = '' unless defined $c->stash->{image_map};
@@ -156,7 +156,7 @@ sub _do_report {
         $c->stash->{image_height} = '320';
     }
 
-    $c->stash->{template}    = 'trends_report.tt';
+    $c->stash->{template}   = 'trends_report.tt';
 
     return 1;
 }
@@ -167,9 +167,9 @@ sub _create_image {
     my ( $c, $mode ) = @_;
 
     my $smallimage = 0;
-    $smallimage = 1 if exists $c->{'request'}->{'parameters'}->{'smallimage'};
+    $smallimage = 1 if exists $c->req->parameters->{'smallimage'};
     my $service = 0;
-    $service = 1 if exists $c->{'request'}->{'parameters'}->{'service'};
+    $service = 1 if exists $c->req->parameters->{'service'};
 
     my $host_drawing_width          = 498;
     my $host_drawing_height         = 70;
@@ -192,7 +192,7 @@ sub _create_image {
     my $small_svc_drawing_y_offset  = 0;
 
     unless(defined $c->stash->{'logs'}) {
-        $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+        $c->req->parameters->{'full_log_entries'} = 1;
         Thruk::Utils::Avail::calculate_availability($c);
     }
 
@@ -276,13 +276,13 @@ sub _create_image {
 
         unless($smallimage) {
             # draw horizontal grid lines
-            _draw_horizontal_grid_lines($im, $colors->{'black'}, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_horizontal_grid_lines($im, $colors->{'black'}, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->req->parameters->{'service'});
 
             # draw total times / percentages
-            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
+            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_x_offset, $drawing_y_offset, $c->req->parameters->{'host'}, $c->req->parameters->{'service'} );
 
             # draw text
-            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_x_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_x_offset, $c->req->parameters->{'host'}, $c->req->parameters->{'service'});
         }
 
         # draw a border

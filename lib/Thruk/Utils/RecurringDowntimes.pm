@@ -343,7 +343,7 @@ sub get_default_recurring_downtime {
             service      => $service,
             servicegroup => [$servicegroup],
             hostgroup    => [$hostgroup],
-            backends     => $c->request->parameters->{'backend'} || $c->{'db'}->peer_key(),
+            backends     => $c->req->parameters->{'backend'} || $c->{'db'}->peer_key(),
             schedule     => [],
             duration     => 120,
             comment      => 'automatic downtime',

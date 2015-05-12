@@ -2,7 +2,6 @@ package Thruk::Controller::notifications;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
@@ -22,24 +21,26 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     my($start,$end);
     my $timeframe = 86400;
     my $filter;
 
-    my $type        = $c->{'request'}->{'parameters'}->{'type'}        || 0;
-    my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
-    my $contact     = $c->{'request'}->{'parameters'}->{'contact'}     || '';
-    my $host        = $c->{'request'}->{'parameters'}->{'host'}        || '';
-    my $service     = $c->{'request'}->{'parameters'}->{'service'}     || '';
-    my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
+    my $type        = $c->req->parameters->{'type'}        || 0;
+    my $archive     = $c->req->parameters->{'archive'}     || 0;
+    my $contact     = $c->req->parameters->{'contact'}     || '';
+    my $host        = $c->req->parameters->{'host'}        || '';
+    my $service     = $c->req->parameters->{'service'}     || '';
+    my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
 
-    push @{$filter}, $self->_get_log_prop_filter($type);
+    push @{$filter}, _get_log_prop_filter($type);
 
-    my $param_start = $c->{'request'}->{'parameters'}->{'start'};
-    my $param_end   = $c->{'request'}->{'parameters'}->{'end'};
+    my $param_start = $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'end'};
 
     # start / end date from formular values?
     if(defined $param_start and defined $param_end) {
@@ -100,7 +101,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
 
-    if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
+    if( defined $c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'xls' ) {
         $c->stash->{'template'}   = 'excel/notifications.tt';
         $c->stash->{'file_name'}  = 'notifications.xls';
         $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
@@ -138,7 +139,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 sub _get_log_prop_filter {
-    my ( $self, $number ) = @_;
+    my ( $number ) = @_;
 
     $number = 0 if !defined $number or $number <= 0 or $number > 32767;
     my @prop_filter;
@@ -204,7 +205,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

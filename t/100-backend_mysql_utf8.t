@@ -15,7 +15,6 @@ BEGIN {
     import TestUtils;
 }
 
-use Catalyst::Test 'Thruk';
 use_ok('Thruk::Backend::Provider::Mysql');
 use_ok('Thruk::Config');
 use_ok('Thruk::Action::AddDefaults');
@@ -39,7 +38,7 @@ Thruk::Action::AddDefaults::_set_possible_backends($c, {});
 my $backends = $c->stash->{'backends'};
 $backends    = Thruk::Utils::list($backends);
 my $prefix   = $backends->[0];
-isnt($prefix, undef, 'got peer key: '.$prefix);
+isnt($prefix, undef, 'got peer key: '.$prefix) or BAIL_OUT("got no peer key, cannot test");
 my $peer     = $c->{'db'}->get_peer_by_key($prefix);
 isnt($peer, undef, 'got backend by key');
 $peer->{'logcache'} = $m;

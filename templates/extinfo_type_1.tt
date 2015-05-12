@@ -22,7 +22,7 @@
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
                 <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
                 <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
-                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                [% IF c.check_user_roles('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a>
                 [% END %]
               </td>
@@ -454,7 +454,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles_wrapper('authorized_for_read_only') %]
+          [% IF c.check_user_roles('authorized_for_read_only') %]
           [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>
@@ -494,7 +494,7 @@
         </tr>
 
         [% IF   show_full_commandline == 2 ||
-              ( show_full_commandline == 1 && c.check_user_roles_wrapper('authorized_for_configuration_information') )
+              ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
         %]
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
@@ -504,7 +504,7 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
-                [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
                 <td valign="middle"><a href='conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Configure This Host</a></td>
                 [% ELSE %]
                 <td valign="middle"><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a></td>

@@ -31,6 +31,7 @@ my $choose_pages = [
 ];
 for my $url (@{$choose_pages}) {
     next if $url eq '/thruk' and $ENV{'CATALYST_SERVER'};
+    TestUtils::set_cookie( 'thruk_mobile', 0, -1);
     TestUtils::test_page(
         'url'      => $url,
         'like'     => 'Do you want to use the mobile version',
@@ -88,7 +89,7 @@ my $jsonpages = [
 for my $url (@{$jsonpages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an array");

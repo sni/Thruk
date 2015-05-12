@@ -22,7 +22,7 @@
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert Histogram For This Service</a><br>[% END %]
                 <a href='avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries'>View Availability Report For This Service</a><br>
                 <a href='notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Notifications For This Service</a>
-                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                [% IF c.check_user_roles('authorized_for_configuration_information') %]
                 <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
                 [% END %]
                 <br><a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]'>View All '[% service.description %]' Services</a> (<a href='status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap'>As Performance Map</a>)
@@ -452,7 +452,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles_wrapper('authorized_for_read_only') %]
+          [% IF c.check_user_roles('authorized_for_read_only') %]
           [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>
@@ -492,7 +492,7 @@
         </tr>
 
         [% IF   show_full_commandline == 2 ||
-              ( show_full_commandline == 1 && c.check_user_roles_wrapper('authorized_for_configuration_information') )
+              ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
         %]
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
@@ -502,7 +502,7 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='[% url_prefix %]themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
-                [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+                [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
                 <td valign="middle"><a href='conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Configure This Service</a></td>
                 [% ELSE %]
                 <td valign="middle"><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a></td>

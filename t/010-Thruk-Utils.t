@@ -9,14 +9,12 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 46;
+    plan tests => 45;
 
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-
-use Catalyst::Test 'Thruk';
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
@@ -62,11 +60,8 @@ my $sorted_by_abc_exp = [
 ];
 #########################
 # initialize backend manager
-my $m;
-use_ok 'Thruk::Model::Thruk';
-$m = Thruk::Model::Thruk->new();
-isa_ok($m, 'Thruk::Model::Thruk');
-my $b = $m->{'obj'};
+use_ok 'Thruk::Backend::Manager';
+my $b = Thruk::Backend::Manager->new();
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();

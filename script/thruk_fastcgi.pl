@@ -2,67 +2,22 @@
 
 use strict;
 use warnings;
+use lib 'lib';
+use Thruk::Backend::Pool;
 
 ###################################################
 # create connection pool
 # has to be done really early to save memory
-use lib 'lib';
-use Thruk::Backend::Pool;
 BEGIN {
     $ENV{'THRUK_SRC'} = 'FastCGI';
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
-###################################################
-# clean up env
-use Thruk::Utils::INC;
-BEGIN {
-    Thruk::Utils::INC::clean();
-}
+push @ARGV, '-s', 'FCGI';
+push @ARGV, '--no-default-middleware';
+unshift(@ARGV, 'script/thruk.psgi');
 
-require Catalyst::ScriptRunner;
-Catalyst::ScriptRunner->import();
-Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
-
-1;
-
-=head1 NAME
-
-thruk_fastcgi.pl - Catalyst FastCGI
-
-=head1 SYNOPSIS
-
-thruk_fastcgi.pl [options]
-
- Options:
-   -? -help      display this help and exits
-   -l --listen   Socket path to listen on
-                 (defaults to standard input)
-                 can be HOST:PORT, :PORT or a
-                 filesystem path
-   -n --nproc    specify number of processes to keep
-                 to serve requests (defaults to 1,
-                 requires -listen)
-   -p --pidfile  specify filename for pid file
-                 (requires -listen)
-   -d --daemon   daemonize (requires -listen)
-   -M --manager  specify alternate process manager
-                 (FCGI::ProcManager sub-class)
-                 or empty string to disable
-   -e --keeperr  send error messages to STDOUT, not
-                 to the webserver
-
-=head1 DESCRIPTION
-
-Run a Catalyst application as fastcgi.
-
-=head1 AUTHORS
-
-Catalyst Contributors, see Catalyst.pm
-
-=head1 COPYRIGHT
-
-This library is free software. You can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
+require Plack::Runner;
+my $runner = Plack::Runner->new;
+$runner->parse_options(@ARGV);
+$runner->run;

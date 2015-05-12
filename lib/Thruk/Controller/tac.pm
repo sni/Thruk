@@ -2,27 +2,26 @@ package Thruk::Controller::tac;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::tac - Catalyst Controller
+Thruk::Controller::tac - Tactical Overview Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller
 
 =head1 METHODS
-
-=cut
 
 =head2 index
 
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my($c) = @_;
+
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     $c->stash->{'audiofile'}     = '';
     $c->stash->{'stats'}         = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
@@ -51,7 +50,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

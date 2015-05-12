@@ -2,11 +2,11 @@ package Thruk::UserAgent;
 
 =head1 NAME
 
-Thruk::UserAgent - LWP::UserAgent wrapper for Thruk
+Thruk::UserAgent - UserAgent wrapper for Thruk
 
 =head1 DESCRIPTION
 
-LWP::UserAgent wrapper for Thruk
+UserAgent wrapper for Thruk
 
 =cut
 

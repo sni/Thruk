@@ -35,10 +35,10 @@ sub calculate_availability {
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 6, 'preparing logs') if $ENV{'THRUK_JOB_DIR'};
 
-    my $host           = $c->{'request'}->{'parameters'}->{'host'};
-    my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'};
-    my $service        = $c->{'request'}->{'parameters'}->{'service'};
-    my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'};
+    my $host           = $c->req->parameters->{'host'};
+    my $hostgroup      = $c->req->parameters->{'hostgroup'};
+    my $service        = $c->req->parameters->{'service'};
+    my $servicegroup   = $c->req->parameters->{'servicegroup'};
 
     if(defined $service and CORE::index($service, ';') > 0) {
         ($host,$service) = split/;/mx, $service;
@@ -48,13 +48,13 @@ sub calculate_availability {
 
     if(defined $host and $host eq 'null') { undef $host; }
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     if($view_mode eq 'csv') {
-        $c->{'request'}->{'parameters'}->{'csvoutput'} = 1;
+        $c->req->parameters->{'csvoutput'} = 1;
     }
 
     my $csvoutput = 0;
-    $csvoutput = 1 if exists $c->{'request'}->{'parameters'}->{'csvoutput'};
+    $csvoutput = 1 if exists $c->req->parameters->{'csvoutput'};
 
     if(defined $hostgroup and $hostgroup ne '') {
         if($csvoutput) {
@@ -70,7 +70,7 @@ sub calculate_availability {
             $c->stash->{template}   = 'avail_report_service.tt';
         }
     }
-    elsif((defined $service and $service eq 'all') || $c->{request}->{parameters}->{s_filter}) {
+    elsif((defined $service and $service eq 'all') || $c->req->parameters->{s_filter}) {
         if($csvoutput) {
             $c->stash->{template} = 'avail_report_services_csv.tt';
         } else {
@@ -91,7 +91,7 @@ sub calculate_availability {
             $c->stash->{template}   = 'avail_report_host.tt';
         }
     }
-    elsif((defined $host and $host eq 'all') || $c->{request}->{parameters}->{h_filter}) {
+    elsif((defined $host and $host eq 'all') || $c->req->parameters->{h_filter}) {
         if($csvoutput) {
             $c->stash->{template}   = 'avail_report_hosts_csv.tt';
         } else {
@@ -106,8 +106,8 @@ sub calculate_availability {
     if($csvoutput) {
         $c->stash->{'res_ctype'}  = 'text/csv';
         $c->stash->{'res_header'} = [ 'Content-Disposition', 'attachment; filename="availability.csv"' ];
-        delete $c->{'request'}->{'parameters'}->{'show_log_entries'};
-        delete $c->{'request'}->{'parameters'}->{'full_log_entries'};
+        delete $c->req->parameters->{'show_log_entries'};
+        delete $c->req->parameters->{'full_log_entries'};
     }
 
     # get start/end from timeperiod in params
@@ -116,26 +116,26 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    if(defined $c->{'request'}->{'parameters'}->{'timeperiod'}) {
-        $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    } elsif(!defined $c->{'request'}->{'parameters'}->{'t1'} and !defined $c->{'request'}->{'parameters'}->{'t2'}) {
+    if(defined $c->req->parameters->{'timeperiod'}) {
+        $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
+    } elsif(!defined $c->req->parameters->{'t1'} and !defined $c->req->parameters->{'t2'}) {
         $c->stash->{timeperiod} = 'last24hours';
     } else {
         $c->stash->{timeperiod} = '';
     }
 
-    my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'} || '';
-    my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};
-    my $assumestateretention         = $c->{'request'}->{'parameters'}->{'assumestateretention'};
-    my $assumestatesduringnotrunning = $c->{'request'}->{'parameters'}->{'assumestatesduringnotrunning'};
-    my $includesoftstates            = $c->{'request'}->{'parameters'}->{'includesoftstates'};
-    my $initialassumedhoststate      = $c->{'request'}->{'parameters'}->{'initialassumedhoststate'};
-    my $initialassumedservicestate   = $c->{'request'}->{'parameters'}->{'initialassumedservicestate'};
-    my $backtrack                    = $c->{'request'}->{'parameters'}->{'backtrack'};
-    my $show_log_entries             = $c->{'request'}->{'parameters'}->{'show_log_entries'};
-    my $full_log_entries             = $c->{'request'}->{'parameters'}->{'full_log_entries'};
-    my $zoom                         = $c->{'request'}->{'parameters'}->{'zoom'};
-    my $breakdown                    = $c->{'request'}->{'parameters'}->{'breakdown'} || '';
+    my $rpttimeperiod                = $c->req->parameters->{'rpttimeperiod'} || '';
+    my $assumeinitialstates          = $c->req->parameters->{'assumeinitialstates'};
+    my $assumestateretention         = $c->req->parameters->{'assumestateretention'};
+    my $assumestatesduringnotrunning = $c->req->parameters->{'assumestatesduringnotrunning'};
+    my $includesoftstates            = $c->req->parameters->{'includesoftstates'};
+    my $initialassumedhoststate      = $c->req->parameters->{'initialassumedhoststate'};
+    my $initialassumedservicestate   = $c->req->parameters->{'initialassumedservicestate'};
+    my $backtrack                    = $c->req->parameters->{'backtrack'};
+    my $show_log_entries             = $c->req->parameters->{'show_log_entries'};
+    my $full_log_entries             = $c->req->parameters->{'full_log_entries'};
+    my $zoom                         = $c->req->parameters->{'zoom'};
+    my $breakdown                    = $c->req->parameters->{'breakdown'} || '';
 
     # calculate zoom
     $zoom = 4 unless defined $zoom;
@@ -148,10 +148,10 @@ sub calculate_availability {
     $zoom = 1 if $zoom == 0;
 
     # show_log_entries is true if it exists
-    $show_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'show_log_entries'};
+    $show_log_entries = 1 if exists $c->req->parameters->{'show_log_entries'};
 
     # full_log_entries is true if it exists
-    $full_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'full_log_entries'};
+    $full_log_entries = 1 if exists $c->req->parameters->{'full_log_entries'};
 
     # default backtrack is 4 days
     $backtrack = 4 unless defined $backtrack;
@@ -228,12 +228,12 @@ sub calculate_availability {
 
     # services
     $c->stash->{'services'} = {};
-    if(defined $service || $c->{request}->{parameters}->{s_filter}) {
+    if(defined $service || $c->req->parameters->{s_filter}) {
         my $all_services;
         my @servicefilter;
         my @hostfilter;
-        if($c->{request}->{parameters}->{s_filter}) {
-            $servicefilter = $c->{request}->{parameters}->{s_filter};
+        if($c->req->parameters->{s_filter}) {
+            $servicefilter = $c->req->parameters->{s_filter};
             $service       = 1;
         }
         elsif($service ne 'all') {
@@ -291,11 +291,11 @@ sub calculate_availability {
     }
 
     # single/multiple hosts
-    elsif((defined $host and $host ne 'all') || $c->{request}->{parameters}->{h_filter}) {
+    elsif((defined $host and $host ne 'all') || $c->req->parameters->{h_filter}) {
         my @servicefilter;
         my @hostfilter;
-        if($c->{request}->{parameters}->{h_filter}) {
-            $hostfilter = $c->{request}->{parameters}->{h_filter};
+        if($c->req->parameters->{h_filter}) {
+            $hostfilter = $c->req->parameters->{h_filter};
         }
         else {
             for my $h (split(/\s*,\s*/mx, $host)) {
@@ -309,7 +309,7 @@ sub calculate_availability {
                     push @servicefilter, { 'host_name' => $h };
                 }
             }
-            if($c->{'request'}->{'parameters'}->{'include_host_services'}) {
+            if($c->req->parameters->{'include_host_services'}) {
                 # host availability page includes services too, so
                 # calculate service availability for services on these hosts too
                 my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
@@ -417,7 +417,7 @@ sub calculate_availability {
             }
         }
 
-        if($c->{'request'}->{'parameters'}->{'include_host_services'}) {
+        if($c->req->parameters->{'include_host_services'}) {
             # some pages includes services too, so
             # calculate service availability for services on these hosts too
             my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
@@ -512,7 +512,7 @@ sub calculate_availability {
             $logserviceheadfilter = Thruk::Utils::combine_filter('-or', \@services_from_groups);
         }
     } else {
-        croak("unknown report type: ".Dumper($c->{'request'}->{'parameters'}));
+        croak("unknown report type: ".Dumper($c->req->parameters));
     }
 
 
@@ -525,7 +525,7 @@ sub calculate_availability {
         push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
     }
     push @loghostfilter, { type => 'HOST DOWNTIME ALERT' };
-    if($service or $servicegroup or $c->{'request'}->{'parameters'}->{'include_host_services'}) {
+    if($service or $servicegroup or $c->req->parameters->{'include_host_services'}) {
         push @logservicefilter, [ { type => 'SERVICE ALERT' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'INITIAL SERVICE STATE' }, $softlogfilter ];
         push @logservicefilter, [ { type => 'CURRENT SERVICE STATE' }, $softlogfilter ];
@@ -564,7 +564,7 @@ sub calculate_availability {
     my $total_nr = 0;
     $total_nr += scalar @{$hosts}    if defined $hosts;
     $total_nr += scalar @{$services} if defined $services;
-    return(scalar @{$hosts}, scalar @{$services}) if $c->{'request'}->{'parameters'}->{'get_total_numbers_only'};
+    return(scalar @{$hosts}, scalar @{$services}) if $c->req->parameters->{'get_total_numbers_only'};
     if($total_nr > $c->config->{'report_max_objects'}) {
         die("too many objects: ".$total_nr.", maximum ".$c->config->{'report_max_objects'}.", please use more specific filter or raise limit (report_max_objects)!");
     }
@@ -623,7 +623,7 @@ sub calculate_availability {
     $c->stats->profile(end => "calculate availability");
 
     Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 75, 'finished calculation') if $ENV{'THRUK_JOB_DIR'};
-    if($c->{'request'}->{'parameters'}->{'debug'}) {
+    if($c->req->parameters->{'debug'}) {
         $c->stash->{'debug_info'} .= "\$ma_options\n";
         $c->stash->{'debug_info'} .= Dumper($ma_options);
     } else {
@@ -664,15 +664,16 @@ sub calculate_availability {
         $c->stash->{'json'} = $return;
     }
     if( $view_mode eq 'xls' ) {
-        $c->stash->{'file_name'} = 'availability.xls';
-        $c->stash->{'name'}      = 'Availability';
+        $c->stash->{'file_name'}  = 'availability.xls';
+        $c->stash->{'name'}       = 'Availability';
         $c->stash->{'template'}  = 'excel/availability.tt';
         if(defined $c->stash->{job_id}) {
             # store resulting xls in file, forked reports cannot handle detaches
             Thruk::Utils::savexls($c);
         } else {
-            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$c->stash->{'file_name'}.'"' );
-            return $c->detach('View::Excel');
+            $c->res->headers->header('Content-Disposition', 'attachment; filename="'.$c->stash->{'file_name'}.'"');
+            delete $c->stash->{'file_name'}; # iritates the finished job page
+            return $c->render_excel();
         }
     }
 
@@ -766,33 +767,33 @@ removes all parameters used for availability calculation from c->request->parame
 
 sub reset_req_parameters {
     my($c) = @_;
-    delete $c->{request}->{parameters}->{h_filter};
-    delete $c->{request}->{parameters}->{s_filter};
-    delete $c->{request}->{parameters}->{filter};
-    delete $c->{request}->{parameters}->{host};
-    delete $c->{request}->{parameters}->{hostgroup};
-    delete $c->{request}->{parameters}->{service};
-    delete $c->{request}->{parameters}->{servicegroup};
+    delete $c->req->parameters->{h_filter};
+    delete $c->req->parameters->{s_filter};
+    delete $c->req->parameters->{filter};
+    delete $c->req->parameters->{host};
+    delete $c->req->parameters->{hostgroup};
+    delete $c->req->parameters->{service};
+    delete $c->req->parameters->{servicegroup};
 
-    delete $c->{request}->{parameters}->{view_mode};
-    delete $c->{request}->{parameters}->{csvoutput};
-    delete $c->{request}->{parameters}->{show_log_entries};
-    delete $c->{request}->{parameters}->{full_log_entries};
-    delete $c->{request}->{parameters}->{timeperiod};
-    delete $c->{request}->{parameters}->{rpttimeperiod};
-    delete $c->{request}->{parameters}->{assumeinitialstates};
-    delete $c->{request}->{parameters}->{assumestateretention};
-    delete $c->{request}->{parameters}->{assumestatesduringnotrunning};
-    delete $c->{request}->{parameters}->{includesoftstates};
-    delete $c->{request}->{parameters}->{initialassumedhoststate};
-    delete $c->{request}->{parameters}->{initialassumedservicestate};
-    delete $c->{request}->{parameters}->{backtrack};
-    delete $c->{request}->{parameters}->{show_log_entries};
-    delete $c->{request}->{parameters}->{full_log_entries};
-    delete $c->{request}->{parameters}->{zoom};
-    delete $c->{request}->{parameters}->{breakdown};
-    delete $c->{request}->{parameters}->{include_host_services};
-    delete $c->{request}->{parameters}->{get_total_numbers_only};
+    delete $c->req->parameters->{view_mode};
+    delete $c->req->parameters->{csvoutput};
+    delete $c->req->parameters->{show_log_entries};
+    delete $c->req->parameters->{full_log_entries};
+    delete $c->req->parameters->{timeperiod};
+    delete $c->req->parameters->{rpttimeperiod};
+    delete $c->req->parameters->{assumeinitialstates};
+    delete $c->req->parameters->{assumestateretention};
+    delete $c->req->parameters->{assumestatesduringnotrunning};
+    delete $c->req->parameters->{includesoftstates};
+    delete $c->req->parameters->{initialassumedhoststate};
+    delete $c->req->parameters->{initialassumedservicestate};
+    delete $c->req->parameters->{backtrack};
+    delete $c->req->parameters->{show_log_entries};
+    delete $c->req->parameters->{full_log_entries};
+    delete $c->req->parameters->{zoom};
+    delete $c->req->parameters->{breakdown};
+    delete $c->req->parameters->{include_host_services};
+    delete $c->req->parameters->{get_total_numbers_only};
 
     return;
 }

@@ -1,19 +1,16 @@
-package Catalyst::Plugin::Authorization::ThrukRoles;
-use parent 'Catalyst::Plugin::Authorization::Roles';
+package Thruk::Authentication::User;
 
 =head1 NAME
 
-Catalyst::Plugin::Authorization::ThrukRoles - Authorization for monitoring objects like host/services...
+Thruk::Authentication::User - Authenticate a remote user configured using a cgi.cfg
 
 =head1 SYNOPSIS
 
-    use Catalyst qw/
-        Authorization::ThrukRoles
-    /;
+use Thruk::Authentication::User
 
 =head1 DESCRIPTION
 
-This authorization module provides authorization for monitoring objects like host/services.
+This module allows you to authenticate the users.
 
 =cut
 
@@ -21,6 +18,130 @@ use strict;
 use warnings;
 
 =head1 METHODS
+
+=head2 new
+
+create a new C<Thruk::Authentication::User> object.
+
+ Thruk::Authentication::User->new();
+
+=cut
+
+sub new {
+    my($class, $c) = @_;
+    my $self = {};
+    bless $self, $class;
+
+    my $username;
+    my $env = $c->{'env'};
+
+    # authenticated by ssl
+    if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
+        and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
+            $username = $env->{'SSL_CLIENT_S_DN_CN'};
+    }
+    # from cli
+    elsif(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
+        $username = $c->stash->{'remote_user'};
+    }
+    # basic authentication
+    elsif(defined $env->{'REMOTE_USER'}) {
+        $username = $env->{'REMOTE_USER'};
+    }
+    elsif(defined $ENV{'REMOTE_USER'}) {
+        $username = $ENV{'REMOTE_USER'};
+    }
+
+    # default_user_name?
+    elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
+        $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
+    }
+
+    elsif(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        $username = $c->config->{'default_cli_user_name'};
+    }
+
+    if(!defined $username or $username eq '') {
+        return;
+    }
+
+    # change case?
+    $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
+    $username = uc($username) if $c->config->{'make_auth_user_uppercase'};
+
+    # regex replace?
+    if($c->config->{'make_auth_replace_regex'}) {
+        $c->log->debug("authentication regex replace before: ".$username);
+        ## no critic
+        eval('$username =~ '.$c->config->{'make_auth_replace_regex'});
+        ## use critic
+        $c->log->error("authentication regex replace error: ".$@) if $@;
+        $c->log->debug("authentication regex replace after : ".$username);
+    }
+
+    $self->{'username'}      = $username;
+    $self->{'roles'}         = [];
+    $self->{'alias'}         = undef;
+
+    # add roles from cgi_conf
+    my $possible_roles = [
+                      'authorized_for_all_host_commands',
+                      'authorized_for_all_hosts',
+                      'authorized_for_all_service_commands',
+                      'authorized_for_all_services',
+                      'authorized_for_configuration_information',
+                      'authorized_for_system_commands',
+                      'authorized_for_system_information',
+                      'authorized_for_read_only'
+                    ];
+    for my $role (@{$possible_roles}) {
+        if(defined $c->config->{'cgi_cfg'}->{$role}) {
+            my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+            push @{$self->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
+        }
+    }
+
+    if($username eq '(cron)') {
+        $self->{'roles'} = [qw/authorized_for_all_hosts
+                               authorized_for_all_host_commands
+                               authorized_for_all_services
+                               authorized_for_all_service_commands
+                               authorized_for_configuration_information
+                               authorized_for_system_commands
+                               authorized_for_system_information
+                           /];
+    }
+
+    return $self;
+}
+
+=head2 get
+
+get user attribute
+
+ get($attribute)
+
+=cut
+
+sub get {
+    my($self, $attr) = @_;
+    return($self->{$attr});
+}
+
+=head2 check_user_roles
+
+ check_user_roles(<$role>)
+
+ for example:
+ $c->user->check_user_roles('authorized_for_all_services')
+
+=cut
+
+sub check_user_roles {
+    my($self, $role) = @_;
+    my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
+    return(scalar @found);
+}
 
 =head2 check_permissions
 
@@ -35,7 +156,7 @@ use warnings;
 =cut
 
 sub check_permissions {
-    my($c, $type, $value, $value2, $value3) = @_;
+    my($self, $c, $type, $value, $value2, $value3) = @_;
 
     $type   = '' unless defined $type;
     $value  = '' unless defined $value;
@@ -96,7 +217,7 @@ sub check_permissions {
 =cut
 
 sub check_cmd_permissions {
-    my($c, $type, $value, $value2) = @_;
+    my($self, $c, $type, $value, $value2) = @_;
 
     $type   = '' unless defined $type;
     $value  = '' unless defined $value;

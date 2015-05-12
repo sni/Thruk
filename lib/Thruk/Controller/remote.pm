@@ -2,9 +2,8 @@ package Thruk::Controller::remote;
 
 use strict;
 use warnings;
-use Module::Load qw/load/;
-use parent 'Catalyst::Controller';
 use Data::Dumper;
+use Module::Load qw/load/;
 
 =head1 NAME
 
@@ -23,17 +22,8 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-
-=head2 remote_cgi
-
-page: /thruk/cgi-bin/remote.cgi
-
-=cut
-
-sub remote_cgi : Path('/thruk/cgi-bin/remote.cgi') {
-    my( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
-    Thruk::Utils::check_pid_file($c);
+sub index {
+    my ( $c ) = @_;
 
     if(!$c->config->{'remote_modules_loaded'}) {
         load Data::Dumper;
@@ -41,28 +31,24 @@ sub remote_cgi : Path('/thruk/cgi-bin/remote.cgi') {
         load File::Slurp, qw/read_file/;
         $c->config->{'remote_modules_loaded'} = 1;
     }
+    Thruk::Utils::check_pid_file($c);
 
-    return $c->detach('/remote/index');
-}
-
-##########################################################
-sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
-    $c->stash->{'text'} = 'OK';
-    if(defined $c->{'request'}->{'parameters'}->{'data'}) {
-        $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->{'request'}->{'parameters'}->{'data'});
-    }
     $c->stash->{'template'} = 'passthrough.tt';
+    $c->stash->{'text'}     = 'OK';
 
-    my $action = $c->{'request'}->query_keywords() || '';
+    if(defined $c->req->parameters->{'data'}) {
+        $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
+    }
+
+    my $action = $c->req->uri->query || '';
 
     # startup request?
     if($action eq 'startup') {
         if(!$c->config->{'started'}) {
             $c->config->{'started'} = 1;
-            $c->log->info("started ($$)");
+            $c->log->info("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
             $c->stash->{'text'} = 'startup done';
-            if(defined $c->{'request'}->{'headers'}->{'user-agent'} and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/wget/mix) {
+            if(defined $c->req->header('user-agent') and $c->req->header('user-agent') =~ m/wget/mix) {
                 # compile templates in background
                 $c->run_after_request('Thruk::Utils::precompile_templates($c)');
             }
@@ -71,7 +57,7 @@ sub index :Path :Args(0) {
     }
 
     # compile request?
-    if($action eq 'compile' or exists $c->{'request'}->{'parameters'}->{'compile'}) {
+    if($action eq 'compile' or exists $c->req->parameters->{'compile'}) {
         if($c->config->{'precompile_templates'} == 2) {
             $c->stash->{'text'} = 'already compiled';
         } else {
@@ -82,8 +68,8 @@ sub index :Path :Args(0) {
     }
 
     # log requests?
-    if($action eq 'log' and $c->{'request'}->{'method'} eq 'POST') {
-        my $body = $c->{'request'}->body();
+    if($action eq 'log' and $c->req->method eq 'POST') {
+        my $body = $c->req->body;
         if($body) {
             if(ref $body eq 'File::Temp') {
                 my $file = $body->filename();
@@ -94,8 +80,14 @@ sub index :Path :Args(0) {
                     return;
                 }
             }
+            if(ref $body eq 'FileHandle') {
+                while(<$body>) {
+                    $c->log->error($_);
+                }
+                return;
+            }
         }
-        $c->log->error('log request without a file: '.Dumper($c->{'request'}));
+        $c->log->error('log request without a file: '.Dumper($c->req));
         return;
     }
 
@@ -112,7 +104,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

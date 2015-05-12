@@ -107,7 +107,7 @@ my $json_pages = [
 for my $url (@{$json_pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);

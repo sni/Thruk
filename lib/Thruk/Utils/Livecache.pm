@@ -57,14 +57,14 @@ sub check_shadow_naemon_procs {
 
 =head2 restart_shadow_naemon_procs
 
-  restart_shadow_naemon_procs($config)
+  restart_shadow_naemon_procs($c, $config)
 
 restart all shadownaemon processes sequentially
 
 =cut
 
 sub restart_shadow_naemon_procs {
-    my($config) = @_;
+    my($c, $config) = @_;
     return unless $config->{'shadow_naemon_dir'};
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
@@ -82,7 +82,7 @@ sub restart_shadow_naemon_procs {
             }
             #&timing_breakpoint("stopped");
         }
-        _start_shadownaemon_for_peer($config, $peer, $key, $basedir);
+        _start_shadownaemon_for_peer($config, $peer, $key, $basedir, $c);
         #&timing_breakpoint("started");
     }
     return;

@@ -5,8 +5,6 @@ use warnings;
 use Data::Dumper;
 use Carp qw/cluck confess longmess/;
 
-use parent 'Catalyst::Controller';
-
 =head1 NAME
 
 Thruk::Controller::error - Catalyst Controller
@@ -34,16 +32,23 @@ Catalyst Controller.
 
 =cut
 
-sub index :Path :Args(1) :ActionClass('RenderView') {
-    my ( $self, $c, $arg1 ) = @_;
+sub index {
+    my ( $c, $arg1 ) = @_;
 
+    if(!defined $arg1 && defined $c->stash->{'err'}) {
+        $arg1 = $c->stash->{'err'};
+    }
+    if(!defined $arg1 && defined $c->req->parameters->{'error'}) {
+        $arg1 = $c->req->parameters->{'error'};
+    }
     if(!defined $c) {
         confess("undefined c in error/index");
     }
 
-    Thruk::Action::AddDefaults::add_defaults(1, undef, $self, $c) unless defined $c->stash->{'defaults_added'};
+    Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
 
-    $c->{'canceled'}          = 1;
+    $c->{'errored'}           = 1;
     $c->stash->{errorDetails} = '';
 
     # status code must be != 200, otherwise compressed output will fail
@@ -203,13 +208,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{errorDetails} .= join('<br>', @{$c->error});
     }
 
-    Thruk->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
-    Thruk->config->{'custom-error-message'}->{'response-status'}   = $code;
-    $c->response->status($code);
     unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
         if($code >= 500) {
             $c->log->error($errors->{$arg1}->{'mess'});
-            $c->log->error("on page: ".$c->request->uri) if defined $c->request->uri;
+            $c->log->error("on page: ".$c->req->url) if defined $c->req->url;
             if($errors->{$arg1}->{'details'}) {
                 for my $row (split(/\n/mx, $errors->{$arg1}->{'details'})) {
                     $c->log->error($row);
@@ -217,7 +219,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             }
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
-            $c->log->debug("on page: ".$c->request->uri) if defined $c->request->uri;
+            $c->log->debug("on page: ".$c->req->url) if defined $c->req->url;
         }
     }
 
@@ -238,7 +240,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{'remote_user'}  = '?';
     }
 
-    $c->stash->{'template'} = Thruk->config->{'custom-error-message'}->{'error-template'};
+    $c->stash->{'template'} = 'error.tt';
 
     ###############################
     # try to set the refresh
@@ -254,11 +256,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     if($c->config->{'use_frames'} == 0) {
         Thruk::Utils::Menu::read_navigation($c);
     }
-
-    # do not cache errors
-    $c->response->headers->last_modified(time);
-    $c->response->headers->expires(time - 3600);
-    $c->response->headers->header(cache_control => "public, max-age=0");
 
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
@@ -277,6 +274,18 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         }
     }
 
+    # going back on error pages is ok
+    $c->stash->{'disable_backspace'} = 0;
+
+    # do not download errors
+    $c->res->headers->header('Content-Disposition', '');
+    $c->res->headers->content_type('');
+
+    # do not cache errors
+    $c->res->code($code);
+    $c->res->headers->last_modified(time);
+    $c->res->headers->expires(time - 3600);
+    $c->res->headers->header(cache_control => "public, max-age=0");
     return 1;
 }
 
@@ -300,7 +309,5 @@ This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

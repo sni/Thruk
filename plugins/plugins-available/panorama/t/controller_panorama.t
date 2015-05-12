@@ -178,7 +178,7 @@ sub _test_json_page {
     }
     delete $subs->{$url->{'url'}};
     $url->{'post'}         = {} unless $url->{'post'};
-    $url->{'content_type'} = 'application/json; charset=utf-8' unless $url->{'content_type'};
+    $url->{'content_type'} = 'application/json;charset=UTF-8' unless $url->{'content_type'};
 
     $url = _set_dynamic_url_parts($url);
 

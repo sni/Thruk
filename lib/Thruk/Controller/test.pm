@@ -2,16 +2,14 @@ package Thruk::Controller::test;
 
 use strict;
 use warnings;
-use utf8;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::test - Catalyst Controller
+Thruk::Controller::test - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
@@ -22,17 +20,19 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
 
     if(   (!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'TEST_LEAK' and $ENV{'THRUK_SRC'} ne 'TEST'))
        and !$c->config->{'thruk_debug'}) {
         die("test.cgi is disabled unless in test mode!");
     }
 
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+
     $c->stash->{'template'} = 'main.tt';
 
-    my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
+    my $action = $c->req->parameters->{'action'} || '';
 
     if($action eq 'leak') {
         my $leak = Thruk::Backend::Manager->new();
@@ -53,7 +53,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

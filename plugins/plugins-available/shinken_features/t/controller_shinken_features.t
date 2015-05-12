@@ -11,7 +11,6 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-use Catalyst::Test 'Thruk';
 
 plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
 

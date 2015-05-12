@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
-use Catalyst::Plugin::Thruk::ConfigLoader;
+use Thruk::ConfigLoader;
 
 =head1 NAME
 
@@ -206,12 +206,6 @@ our %config = ('name'                   => 'Thruk',
                                     2 => 'UNREACHABLE',
                                 },
               },
-              'View::GD'               => {
-                  gd_image_type      => 'png',
-              },
-              'View::JSON'               => {
-                  expose_stash       => 'json',
-              },
               'Plugin::Thruk::ConfigLoader' => { file => $project_root.'/thruk.conf' },
               'Plugin::Authentication' => {
                   default_realm => 'Thruk',
@@ -221,16 +215,6 @@ our %config = ('name'                   => 'Thruk',
                       }
                   }
               },
-              'custom-error-message' => {
-                  'error-template'    => 'error.tt',
-                  'response-status'   => 500,
-              },
-              'Plugin::Static::Simple' => {
-                  'ignore_extensions' => [ qw/tpl tt tt2/ ],
-              },
-              'Plugin::ConfigLoader'  => {
-                driver => { General => { '-CComments' => 0  } }
-              }
 );
 # set TT strict mode only for authors
 $config{'thruk_debug'} = 0;
@@ -242,9 +226,8 @@ if(-f $project_root."/.author") {
     $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
     $config{'thruk_debug'} = 1;
 }
-$config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
-$config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
-$config{'View::PDF::Reuse'}                            = $config{'View::TT'}; # use same config as well
+$config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
+$config{'View::Excel::Template::Plus'}            = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 
 ######################################
 
@@ -282,18 +265,16 @@ sub get_config {
         }
     }
 
-    Catalyst::Plugin::Thruk::ConfigLoader::_do_finalize_config(\%config);
+    Thruk::ConfigLoader::_do_finalize_config(\%config);
     return \%config;
 }
 
 ######################################
 sub _load_any {
     my($files) = @_;
-    my $cfg   = Catalyst::Plugin::Thruk::ConfigLoader::load_any({
+    my $cfg   = Thruk::ConfigLoader::load_any({
             files       => $files,
-            filter      => \&Catalyst::Plugin::Thruk::ConfigLoader::_fix_syntax,
-            use_ext     => 1,
-            driver_args => $Thruk::Config::config{'Plugin::ConfigLoader'}->{'driver'},
+            filter      => \&Thruk::ConfigLoader::_fix_syntax,
         }
     );
 

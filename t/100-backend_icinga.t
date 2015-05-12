@@ -12,7 +12,6 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-use Catalyst::Test 'Thruk';
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_icinga_features'}) {

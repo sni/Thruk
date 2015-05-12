@@ -2,48 +2,47 @@ package Thruk::Controller::minemap;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::minemap - Catalyst Controller
+Thruk::Controller::minemap - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
 =cut
 
-######################################
-# add new menu item
-Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
-                                    'href'  => Thruk->config->{'Thruk::Plugin::Minemap'}->{'default_link'} || Thruk->config->{'minemap_default_link'} || '/thruk/cgi-bin/minemap.cgi',
-                                    'name'  => 'Mine Map',
-                         });
+##########################################################
 
-Thruk::Utils::Status::add_view({'group' => 'Mine Map',
-                                'name'  => 'Mine Map',
-                                'value' => 'minemap',
-                                'url'   => 'minemap.cgi'
-                            });
-
-Thruk->config->{'has_feature_minemap'} = 1;
-
-######################################
-
-=head2 minemap_cgi
+=head2 add_routes
 
 page: /thruk/cgi-bin/minemap.cgi
 
 =cut
-sub minemap_cgi : Path('/thruk/cgi-bin/minemap.cgi') {
-    my ( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
-    return $c->detach('/minemap/index');
-}
 
+sub add_routes {
+    my($self, $app, $routes) = @_;
+
+    $routes->{'/thruk/cgi-bin/minemap.cgi'} = 'Thruk::Controller::minemap::index';
+
+    Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
+                                    'href'  => $app->config->{'Thruk::Plugin::Minemap'}->{'default_link'} || $app->config->{'minemap_default_link'} || '/thruk/cgi-bin/minemap.cgi',
+                                    'name'  => 'Mine Map',
+    });
+
+    Thruk::Utils::Status::add_view({'group' => 'Mine Map',
+                                    'name'  => 'Mine Map',
+                                    'value' => 'minemap',
+                                    'url'   => 'minemap.cgi'
+    });
+
+    $app->config->{'has_feature_minemap'} = 1;
+
+    return;
+}
 
 ##########################################################
 
@@ -52,13 +51,15 @@ sub minemap_cgi : Path('/thruk/cgi-bin/minemap.cgi') {
 minemap index page
 
 =cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'minemap';
+    my $style = $c->req->parameters->{'style'} || 'minemap';
     if($style ne 'minemap') {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
@@ -105,7 +106,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

@@ -9,7 +9,7 @@ $Data::Dumper::Sortkeys = 1;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 39;
+    plan tests => 37;
 }
 
 BEGIN {
@@ -17,15 +17,10 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-use_ok 'Thruk::Model::Thruk';
-use Catalyst::Test 'Thruk';
 
 ################################################################################
 # initialize backend manager
-my $m;
-$m = Thruk::Model::Thruk->new();
-isa_ok($m, 'Thruk::Model::Thruk');
-my $b = $m->{'obj'};
+my $b = Thruk::Backend::Manager->new();
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
@@ -180,7 +175,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 ################################################################################
 # set expand user macros
 $b->{'config'}->{'expand_user_macros'} = ["USER1-2"];
-Catalyst::Plugin::Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -193,7 +188,7 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p tes
 ################################################################################
 # set expand user macros
 $b->{'config'}->{'expand_user_macros'} = ["ALL"];
-Catalyst::Plugin::Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {

@@ -108,9 +108,9 @@ sub outages {
 
     my $c                  = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $u                  = $c->stash->{'unavailable_states'};
-    my $host               = $c->{'request'}->{'parameters'}->{'host'};
-    my $service            = $c->{'request'}->{'parameters'}->{'service'};
-    my $only_host_services = $c->{'request'}->{'parameters'}->{'only_host_services'};
+    my $host               = $c->req->parameters->{'host'};
+    my $service            = $c->req->parameters->{'service'};
+    my $only_host_services = $c->req->parameters->{'only_host_services'};
 
     # combine outages
     my @reduced_logs;
@@ -223,8 +223,8 @@ set events by pattern from eventlog
 sub get_events {
     my $c             = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my($start,$end)   = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    my $pattern          = $c->{'request'}->{'parameters'}->{'pattern'};
-    my $exclude_pattern  = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    my $pattern          = $c->req->parameters->{'pattern'};
+    my $exclude_pattern  = $c->req->parameters->{'exclude_pattern'};
     die('no pattern') unless defined $pattern;
 
     my @filter;
@@ -240,7 +240,7 @@ sub get_events {
         push @filter, { message => { '!~~' => $exclude_pattern }};
     }
 
-    my $event_types = $c->{'request'}->{'parameters'}->{'event_types'};
+    my $event_types = $c->req->parameters->{'event_types'};
     # event type filter set?
     if(defined $event_types and @{$event_types} > 0) {
         my @evt_filter;
@@ -318,7 +318,7 @@ sub get_events {
     $c->{'db'}->renew_logcache($c, 1);
     my $logs = $c->{'db'}->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
 
-    if($c->{'request'}->{'parameters'}->{'reverse'}) {
+    if($c->req->parameters->{'reverse'}) {
         @{$logs} = reverse @{$logs};
     }
 
@@ -384,10 +384,10 @@ sub get_url {
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
-        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
+        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'content-type'};
         $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
-        if(defined $result->{'headers'}->{'Content-Disposition'}) {
-            my $file = $result->{'headers'}->{'Content-Disposition'};
+        if(defined $result->{'headers'}->{'content-disposition'}) {
+            my $file = $result->{'headers'}->{'content-disposition'};
             if($file =~ m/filename="(.*)"/mx) {
                 $Thruk::Utils::PDF::attachment = $1;
             }
@@ -475,11 +475,11 @@ return list of availability percent as json list
 sub get_availability_percents {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
 
-    my $host               = $c->{'request'}->{'parameters'}->{'host'};
-    my $service            = $c->{'request'}->{'parameters'}->{'service'};
+    my $host               = $c->req->parameters->{'host'};
+    my $service            = $c->req->parameters->{'service'};
     my $avail_data         = $c->stash->{'avail_data'};
     my $unavailable_states = $c->stash->{'unavailable_states'};
-    confess("No host in parameters:\n".    Dumper($c->{'request'}->{'parameters'})) unless defined $host;
+    confess("No host in parameters:\n".    Dumper($c->req->parameters)) unless defined $host;
     return(Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service));
 }
 
@@ -783,7 +783,7 @@ sub _replace_img {
         my @res      = _read_static_content_file($baseurl, $report_base_url, $url);
         return('') if $res[0] != 200;
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
         confess("no datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
@@ -859,7 +859,7 @@ sub _replace_css_img {
         my @res      = _read_static_content_file($css, $report_base_url, $file);
         return($pre.$post) if $res[0] != 200;
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
         confess("no datatype in ".$css." - ".$file." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$css." - ".$file." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;

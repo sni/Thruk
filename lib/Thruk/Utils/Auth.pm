@@ -69,7 +69,7 @@ sub get_auth_filter {
         if(!$strict and $c->check_user_roles('authorized_for_all_services')) {
             return();
         }
-        if(Thruk->config->{'use_strict_host_authorization'}) {
+        if($c->config->{'use_strict_host_authorization'}) {
             return('contacts' => { '>=' => $c->user->get('username') });
         } else {
             return('-or' => [ 'contacts'      => { '>=' => $c->user->get('username') },

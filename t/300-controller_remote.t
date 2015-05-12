@@ -6,6 +6,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
+    $ENV{'THRUK_TEST_NO_LOG'} = 1;
 }
 BEGIN { use_ok 'Thruk::Controller::remote' }
 

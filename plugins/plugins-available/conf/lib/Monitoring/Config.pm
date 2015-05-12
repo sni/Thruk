@@ -2292,14 +2292,14 @@ sub remote_file_sync {
             $dir          =~ s/\/[^\/]+$//mx;
             Thruk::Utils::IO::mkdir_r($dir);
             Thruk::Utils::IO::write($localpath, $f->{'content'}, $f->{'mtime'});
-            $c->{'request'}->{'parameters'}->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
         }
     }
     for my $f (@{$self->{'files'}}) {
         $c->log->debug('checking file: '.$f->{'display'});
         if(!defined $remotefiles->{$f->{'display'}}) {
             $c->log->debug('deleting file: '.$f->{'display'});
-            $c->{'request'}->{'parameters'}->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
             unlink($f->{'path'});
         } else {
             $c->log->debug('keeping file: '.$f->{'display'});

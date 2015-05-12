@@ -32,8 +32,8 @@
 
 [%# PREPARE REPORT #%]
 [% IF block == 'prepare' %]
-[% c.request.parameters.host    = param.businessprocess %]
-[% c.request.parameters.service = param.businessprocess %]
+[% c.req.parameters.host    = param.businessprocess %]
+[% c.req.parameters.service = param.businessprocess %]
 [% PROCESS 'reports/comp/sla_prepare.tt' %]
 [% END %]
 
@@ -54,8 +54,8 @@
 
     [% FOREACH hst = avail_data.services.keys.sort %]
       [% FOREACH svc = avail_data.services.$hst.keys.sort %]
-        [% c.request.parameters.host    = hst %]
-        [% c.request.parameters.service = svc %]
+        [% c.req.parameters.host    = hst %]
+        [% c.req.parameters.service = svc %]
         [% pagetitle                    = loc("Business Process: %s", hst) %]
 
         [% WRAPPER 'reports/comp/page_standard.tt'  %]

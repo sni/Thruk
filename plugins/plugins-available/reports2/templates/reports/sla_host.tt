@@ -52,8 +52,8 @@
     [% END %]
 
     [% FOREACH hst = avail_data.hosts.keys.sort %]
-    [% c.request.parameters.host    = hst %]
-    [% c.request.parameters.service = "" %]
+    [% c.req.parameters.host    = hst %]
+    [% c.req.parameters.service = "" %]
     [% available = get_availability_percents() %]
     [% p = available.total.percent; IF p == -1; p = 100; END; IF param.details_max_level != -1 && p >= param.details_max_level; NEXT; END %]
     [% pagetitle = loc("Host: %s", hst) %]

@@ -77,7 +77,7 @@ sub report_show {
     my $report = _read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
-        return $c->response->redirect('reports2.cgi');
+        return $c->redirect_to('reports2.cgi');
     }
 
     my $report_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
@@ -87,7 +87,7 @@ sub report_show {
 
     if(defined $report_file and -f $report_file) {
         $c->stash->{'template'} = 'passthrough.tt';
-        if($c->{'request'}->{'parameters'}->{'html'}) {
+        if($c->req->parameters->{'html'}) {
             my $html_file   = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
             if(!-e $html_file) {
                 $html_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
@@ -100,20 +100,24 @@ sub report_show {
             my $name = $report->{'var'}->{'attachment'};
             $name    =~ s/\s+/_/gmx;
             $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
-            $c->res->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
-            $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
+            $c->res->headers->header( 'Content-Disposition', 'attachment; filename="'.$name.'"' );
+            $c->res->headers->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
             open(my $fh, '<', $report_file);
             binmode $fh;
             $c->res->body($fh);
+            $c->{'rendered'} = 1;
+            return 1;
         } else {
             my $name = $report->{'name'};
             $name    =~ s/\s+/_/gmx;
             $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
-            $c->res->content_type('application/pdf');
-            $c->res->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
+            $c->res->headers->content_type('application/pdf');
+            $c->res->headers->header( 'Content-Disposition', 'filename='.$name.'.pdf' );
             open(my $fh, '<', $report_file);
             binmode $fh;
             $c->res->body($fh);
+            $c->{'rendered'} = 1;
+            return 1;
         }
     } else {
         if($Thruk::Utils::Reports::error) {
@@ -121,7 +125,7 @@ sub report_show {
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'generating report failed' );
         }
-        return $c->response->redirect('reports2.cgi');
+        return $c->redirect_to('reports2.cgi');
     }
     return 1;
 }
@@ -140,13 +144,13 @@ sub report_send {
 
     if($c->config->{'demo_mode'}) {
         Thruk::Utils::set_message( $c, 'fail_message', 'sending mails disabled in demo mode');
-        return $c->response->redirect('reports2.cgi');
+        return $c->redirect_to('reports2.cgi');
     }
 
     my $report = _read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
-        return $c->response->redirect('reports2.cgi');
+        return $c->redirect_to('reports2.cgi');
     }
     # make report available in template
     $report->{'desc'} = $desc if $to;
@@ -159,7 +163,7 @@ sub report_send {
         $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
         if(!-s $attachment) {
             Thruk::Utils::set_message( $c, 'fail_message', 'report not yet generated' );
-            return $c->response->redirect('reports2.cgi');
+            return $c->redirect_to('reports2.cgi');
         }
         _initialize_report_templates($c, $report);
     } else {
@@ -171,7 +175,7 @@ sub report_send {
         my $mailtext;
         eval {
             $c->stash->{'start'} = '' unless defined $c->stash->{'start'};
-            $mailtext = $c->view("TT")->render($c, 'reports/'.$report->{'template'});
+            $mailtext = Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$report->{'template'});
         };
         if($@) {
             Thruk::Utils::CLI::_error($@);
@@ -417,12 +421,12 @@ sub generate_report {
 
     # set some defaults
     Thruk::Utils::Reports::Render::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
-    $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
-    $c->{'request'}->{'parameters'}->{'assumeinitialstates'}        = 'yes';
-    #$c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 3; # UP
-    #$c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 6; # OK
-    $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 0; # Unspecified
-    $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 0; # Unspecified
+    $c->req->parameters->{'show_log_entries'}           = 1;
+    $c->req->parameters->{'assumeinitialstates'}        = 'yes';
+    #$c->req->parameters->{'initialassumedhoststate'}    = 3; # UP
+    #$c->req->parameters->{'initialassumedservicestate'} = 6; # OK
+    $c->req->parameters->{'initialassumedhoststate'}    = 0; # Unspecified
+    $c->req->parameters->{'initialassumedservicestate'} = 0; # Unspecified
 
     if(!defined $options->{'template'}) {
         confess('template reports/'.$options->{'template'}.' does not exist');
@@ -432,14 +436,14 @@ sub generate_report {
     _initialize_report_templates($c, $options);
 
     # disable tt cache to read custom templates every time
-    my $orig_stat_ttl = $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
-    $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
+    my $orig_stat_ttl = $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'};
+    $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = 0;
 
     # prepage stage, functions here could still change stash
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 5, 'preparing') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'prepare';
-        $c->view("TT")->render($c, 'reports/'.$options->{'template'});
+        Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'});
     };
     if($@) {
         return(_report_die($c, $@, $logfile));
@@ -450,7 +454,7 @@ sub generate_report {
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'rendering') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'render';
-        $reportdata = $c->view("TT")->render($c, 'reports/'.$options->{'template'});
+        $reportdata = Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'});
     };
     if($@) {
         return(_report_die($c, $@, $logfile));
@@ -501,7 +505,7 @@ sub generate_report {
     }
 
     # restore tt cache settings
-    $c->view("TT")->{'template'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = $orig_stat_ttl;
+    $c->app->{'tt'}->context->{'LOAD_TEMPLATES'}->[0]->{'STAT_TTL'} = $orig_stat_ttl;
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
 
@@ -1000,12 +1004,12 @@ sub _read_report_file {
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
     if($report->{'template'} and !defined $available_templates->{$report->{'template'}}) {
         my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
-        $report->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
     if(!$report->{'template'}) {
-        $report->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
         $needs_save = 1;
         Thruk::Utils::set_message( $c, 'fail_message', 'No Report Template set in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
     }
@@ -1203,7 +1207,7 @@ sub _convert_to_pdf {
     my $htmlonly = 0;
 
     # skip pdf creator for ondemand html preview
-    if($c->{'request'}->{'parameters'}->{'html'} and $c->{'request'}->{'parameters'}->{'refresh'}) {
+    if($c->req->parameters->{'html'} and $c->req->parameters->{'refresh'}) {
         $htmlonly = 1;
     }
 
@@ -1254,7 +1258,7 @@ sub _initialize_report_templates {
     $c->stash->{'r'}                  = $options;
     $c->stash->{'show_empty_outages'} = 1;
     for my $p (keys %{$options->{'params'}}) {
-        $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
+        $c->req->parameters->{$p} = $options->{'params'}->{$p};
     }
 
     # set some render helper

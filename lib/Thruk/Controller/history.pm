@@ -2,7 +2,6 @@ package Thruk::Controller::history;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
@@ -22,22 +21,24 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     my($start,$end);
     my $timeframe = 86400;
     my $filter;
 
-    my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
-    my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
-    my $type        = $c->{'request'}->{'parameters'}->{'type'}        || 0;
-    my $statetype   = $c->{'request'}->{'parameters'}->{'statetype'}   || 0;
-    my $noflapping  = $c->{'request'}->{'parameters'}->{'noflapping'}  || 0;
-    my $nodowntime  = $c->{'request'}->{'parameters'}->{'nodowntime'}  || 0;
-    my $nosystem    = $c->{'request'}->{'parameters'}->{'nosystem'}    || 0;
-    my $host        = $c->{'request'}->{'parameters'}->{'host'}        || 'all';
-    my $service     = $c->{'request'}->{'parameters'}->{'service'};
+    my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
+    my $archive     = $c->req->parameters->{'archive'}     || 0;
+    my $type        = $c->req->parameters->{'type'}        || 0;
+    my $statetype   = $c->req->parameters->{'statetype'}   || 0;
+    my $noflapping  = $c->req->parameters->{'noflapping'}  || 0;
+    my $nodowntime  = $c->req->parameters->{'nodowntime'}  || 0;
+    my $nosystem    = $c->req->parameters->{'nosystem'}    || 0;
+    my $host        = $c->req->parameters->{'host'}        || 'all';
+    my $service     = $c->req->parameters->{'service'};
 
     if(defined $service and $host ne 'all') {
         $c->stash->{infoBoxTitle} = 'Service Alert History';
@@ -47,8 +48,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{infoBoxTitle} = 'Alert History';
     }
 
-    my $param_start = $c->{'request'}->{'parameters'}->{'start'};
-    my $param_end   = $c->{'request'}->{'parameters'}->{'end'};
+    my $param_start = $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'end'};
 
     # start / end date from formular values?
     if(defined $param_start and defined $param_end) {
@@ -92,7 +93,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     push @{$filter}, { time => { '<=' => $end }};
 
     # type filter
-    my $typefilter = $self->_get_log_type_filter($type);
+    my $typefilter = _get_log_type_filter($type);
 
     # normal alerts
     my @prop_filter;
@@ -137,7 +138,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $order = "ASC";
     }
 
-    if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
+    if( defined $c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'xls' ) {
         $c->stash->{'template'}   = 'excel/logs.tt';
         $c->stash->{'file_name'}  = 'history.xls';
         $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
@@ -175,7 +176,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 sub _get_log_type_filter {
-    my ( $self, $number ) = @_;
+    my ( $number ) = @_;
 
     $number = 0 if !defined $number or $number <= 0 or $number > 511;
     my @prop_filter;
@@ -223,7 +224,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

@@ -1,4 +1,4 @@
-package Catalyst::Plugin::Thruk::ConfigLoader;
+package Thruk::ConfigLoader;
 
 use strict;
 use Carp qw/confess/;
@@ -262,13 +262,10 @@ sub switch_user {
 sub setup {
     my($c)      = @_;
     my @files   = $c->find_files;
-    my $configs = load_any(
-        {   files       => \@files,
-            filter      => \&_fix_syntax,
-            driver_args => $c->config->{ 'Plugin::ConfigLoader' }->{ driver }
-                || {},
-        }
-    );
+    my $configs = load_any({
+        files       => \@files,
+        filter      => \&_fix_syntax,
+    });
 
     # split the responses into normal and local cfg
     my $local_suffix = $c->get_config_local_suffix;
@@ -337,11 +334,9 @@ sub find_files {
 
 sub get_config_path {
     my $c = shift;
-
-
     my $appname = ref $c || $c;
-    my $prefix  = Catalyst::Utils::appprefix( $appname );
-    my $path    = Catalyst::Utils::env_value( $appname, 'CONFIG' )
+    my $prefix  = $appname;
+    my $path    = $ENV{'THRUK_CONFIG'}
         || $c->config->{ 'Plugin::ConfigLoader' }->{ file }
         || $c->path_to( $prefix );
 
@@ -360,14 +355,7 @@ sub get_config_path {
 =cut
 
 sub get_config_local_suffix {
-    my $c = shift;
-
-    my $appname = ref $c || $c;
-    my $suffix = Catalyst::Utils::env_value( $appname, 'CONFIG_LOCAL_SUFFIX' )
-        || $c->config->{ 'Plugin::ConfigLoader' }->{ config_local_suffix }
-        || 'local';
-
-    return $suffix;
+    return('local');
 }
 
 sub _fix_syntax {
@@ -386,36 +374,6 @@ sub _fix_syntax {
         foreach my $element ( keys %{ $comp->{ values } } ) {
             $config->{ "$prefix$element" } = $comp->{ values }->{ $element };
         }
-    }
-}
-
-=head2 config_substitutions( $value )
-
-=cut
-
-sub config_substitutions {
-    my $c    = shift;
-    my $subs = $c->config->{ 'Plugin::ConfigLoader' }->{ substitutions }
-        || {};
-    $subs->{ HOME }    ||= sub { shift->path_to( '' ); };
-    $subs->{ ENV }    ||=
-        sub {
-            #my ( $c, $v )...
-            my ( undef, $v ) = @_;
-            if (! defined($ENV{$v})) {
-                Catalyst::Exception->throw( message =>
-                    "Missing environment variable: $v" );
-                return "";
-            } else {
-                return $ENV{ $v };
-            }
-        };
-    $subs->{ path_to } ||= sub { shift->path_to( @_ ); };
-    $subs->{ literal } ||= sub { return $_[ 1 ]; };
-    my $subsre = join( '|', keys %$subs );
-
-    for ( @_ ) {
-        s{__($subsre)(?:\((.+?)\))?__}{ $subs->{ $1 }->( $c, $2 ? split( /,/, $2 ) : () ) }eg;
     }
 }
 
@@ -440,11 +398,11 @@ sub load_any {
 
 =head1 NAME
 
-Catalyst::Plugin::Thruk::ConfigLoader - rearrange config just before application starts
+Thruk::ConfigLoader - rearrange config just before application starts
 
 =head1 SYNOPSIS
 
-    use Catalyst qw[Thruk::ConfigLoader];
+    use Thruk::ConfigLoader;
 
 
 =head1 DESCRIPTION
@@ -464,7 +422,7 @@ rearrange config
 
 =head1 SEE ALSO
 
-L<Catalyst>.
+L<Thruk>.
 
 =head1 AUTHORS
 

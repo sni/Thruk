@@ -657,8 +657,6 @@ sub get_host_stats {
         confess("get_host_stats() should not be called in scalar context");
     }
 
-    # TODO: implement %options
-
     my $map = "function() {
     var state = {
         total: 0,
@@ -829,8 +827,6 @@ sub get_service_stats {
     unless(wantarray) {
         confess("get_service_stats() should not be called in scalar context");
     }
-
-    # TODO: implement %options
 
     my $map = "function() {
     var state = {
@@ -1036,8 +1032,6 @@ returns the service /host execution statistics
 =cut
 sub get_performance_stats {
     my($self, %options) = @_;
-
-    # TODO: implement %options
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -1291,7 +1285,7 @@ sub _get_query_size {
     }
 
     my $c = $options->{'pager'};
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'};
+    my $entries = $c->req->parameters->{'entries'} || $c->stash->{'default_page_size'};
     return if $entries !~ m/^\d+$/mx;
 
     my $stats = [
@@ -1303,14 +1297,14 @@ sub _get_query_size {
     return unless defined $size;
 
     my $pages = 0;
-    my $page  = $c->{'request'}->{'parameters'}->{'page'} || 1;
+    my $page  = $c->req->parameters->{'page'} || 1;
     if( $entries > 0 ) {
         $pages = POSIX::ceil( $size / $entries );
     }
-    if( exists $c->{'request'}->{'parameters'}->{'next'} )         { $page++; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'previous'} ) { $page--; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'first'} )    { $page = 1; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'last'} )     { $page = $pages; }
+    if( exists $c->req->parameters->{'next'} )         { $page++; }
+    elsif ( exists $c->req->parameters->{'previous'} ) { $page--; }
+    elsif ( exists $c->req->parameters->{'first'} )    { $page = 1; }
+    elsif ( exists $c->req->parameters->{'last'} )     { $page = $pages; }
     if( $page < 0 ) { $page = 1; }
 
     unless(wantarray) {

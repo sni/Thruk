@@ -9,7 +9,7 @@
 [% PROCESS 'reports/comp/sla_total_table.tt' data = available.total %]
 
 [% IF param.max_pnp_sources >= 1 %]
-  [% pnpdata = get_pnp_image(c.request.parameters.host, c.request.parameters.service, start, end, 400, 100, 0) %]
+  [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, 0) %]
   [% IF pnpdata %]
   <div align="center">
     <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
