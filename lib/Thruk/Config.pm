@@ -664,7 +664,7 @@ sub array2hash {
 
 sub finalize {
     my($c) = @_;
-# TODO: fix and call
+
     # restore user adjusted config
     if($c->stash->{'config_adjustments'}) {
         for my $key (keys %{$c->stash->{'config_adjustments'}}) {
@@ -684,7 +684,7 @@ sub finalize {
         undef $Thruk::deprecations_log;
     }
 
-    return $c->next::method(@_);
+    return;
 }
 
 ########################################
