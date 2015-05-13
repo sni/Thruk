@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use FindBin qw($Bin);
 use lib 'lib';
 use Thruk::Backend::Pool;
 
@@ -15,7 +16,7 @@ BEGIN {
 
 push @ARGV, '-s', 'FCGI';
 push @ARGV, '--no-default-middleware';
-unshift(@ARGV, 'script/thruk.psgi');
+unshift(@ARGV, $Bin.'/thruk.psgi');
 
 require Plack::Runner;
 my $runner = Plack::Runner->new;

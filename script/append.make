@@ -82,6 +82,7 @@ local_install: local_patches
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
 	cp -p script/thruk_fastcgi.pl ${DESTDIR}${DATADIR}/script/
+	cp -p script/thruk.psgi       ${DESTDIR}${DATADIR}/script/
 	cp -p script/thruk_auth ${DESTDIR}${DATADIR}/
 	[ ! -f script/wkhtmltopdf ] || cp -p script/wkhtmltopdf ${DESTDIR}${DATADIR}/script/
 	echo " " > ${DESTDIR}${DATADIR}/dist.ini

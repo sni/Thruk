@@ -17,6 +17,7 @@ use Fcntl qw/:mode :flock/;
 use JSON::XS qw//;
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
+#use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
 
@@ -122,7 +123,7 @@ sub ensure_permissions {
 
     if(!$Thruk::Utils::IO::config) {
         require Thruk::Backend::Pool;
-        $Thruk::Utils::IO::config = Thruk::Backend::Pool::get_config();
+        $Thruk::Utils::IO::config = Thruk::Config::get_config();
     }
     my $config = $Thruk::Utils::IO::config;
     # set modes
@@ -247,14 +248,14 @@ array like ['/bin/prog', 'arg1', 'arg2']
 
 sub cmd {
     my($c, $cmd) = @_;
-    confess("no c") unless $c;
 
     local $SIG{CHLD}='';
-    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
+    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'} if $c;
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
-        $c->log->debug('running cmd: '.join(' ', @{$cmd}));
+        #&timing_breakpoint('IO::cmd: '.$prog.' <args...>');
+        $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
         while(waitpid($pid, WNOHANG) == 0) {
@@ -264,7 +265,8 @@ sub cmd {
         push @lines, <$rdr>;
         chomp($output = join('', @lines) || '');
     } else {
-        $c->log->debug( "running cmd: ". $cmd );
+        #&timing_breakpoint('IO::cmd: '.$cmd);
+        $c->log->debug( "running cmd: ". $cmd ) if $c;
         $output = `$cmd 2>&1`;
         $rc = $?;
     }
@@ -273,8 +275,9 @@ sub cmd {
     } else {
         $rc = $rc>>8;
     }
-    $c->log->debug( "rc:     ". $rc );
-    $c->log->debug( "output: ". $output );
+    $c->log->debug( "rc:     ". $rc )     if $c;
+    $c->log->debug( "output: ". $output ) if $c;
+    #&timing_breakpoint('IO::cmd done');
     return($rc, $output);
 }
 

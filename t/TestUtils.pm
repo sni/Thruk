@@ -476,7 +476,7 @@ sub set_cookie {
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
-    my $config      = Thruk::Backend::Pool::get_config();
+    my $config      = Thruk::Config::get_config();
     my $cookie_path = $config->{'cookie_path'};
     $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
     $cookie_jar->save();
@@ -558,7 +558,7 @@ sub get_user {
 sub wait_for_job {
     my $job = shift;
     my $start  = time();
-    my $config = Thruk::Backend::Pool::get_config();
+    my $config = Thruk::Config::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);

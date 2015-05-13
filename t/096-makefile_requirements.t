@@ -81,6 +81,7 @@ for my $mod (sort keys %{$reqs}) {
     if(!defined $all_used->{$mod} && (!defined $replace->{$mod} || !defined $all_used->{$replace->{$mod}})) {
       next if $mod eq 'Plack';
       next if $mod eq 'Net::HTTP';
+      next if $mod eq 'FCGI::ProcManager';
       fail("$mod not used at all");
     }
   }

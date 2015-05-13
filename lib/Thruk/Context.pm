@@ -245,7 +245,7 @@ sub cookies {
     my $cookie = $c->req->cookies->{$name};
     return unless defined $cookie;
     my $vars = [split/&/mx, $cookie];
-    return(Thruk::Request::Cookie->new([$vars]));
+    return(Thruk::Request::Cookie->new($vars));
 };
 
 =head2 redirect_to

@@ -246,10 +246,11 @@ make config available without loading complete dependencies
 sub get_config {
     my @files = @_;
     if(scalar @files == 0) {
-        for my $path ('.', $ENV{'THRUK_CONFIG'}) {
+        for my $path ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $path;
             push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
             push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
+            last if scalar @files > 0;
         }
     }
 

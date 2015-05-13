@@ -528,8 +528,10 @@ sub _do_child_stuff {
     $ENV{'NO_EXTERNAL_JOBS'}         = 1;
 
     # make remote user available
-    confess('no remote_user') unless defined $c->stash->{'remote_user'};
-    $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+    if($c) {
+        confess('no remote_user') unless defined $c->stash->{'remote_user'};
+        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+    }
 
     # make job id available
     $ENV{'THRUK_JOB_ID'}  = $id;
@@ -544,7 +546,7 @@ sub _do_child_stuff {
         POSIX::close($fd);
     }
 
-    $c->stats->enable(1);
+    $c->stats->enable(1) if $c;
 
     return;
 }

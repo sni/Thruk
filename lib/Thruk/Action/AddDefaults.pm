@@ -469,14 +469,7 @@ sub add_defaults {
 
     ###############################
     # start shadow naemon process on first request
-    if($c->config->{'use_shadow_naemon'} and !$c->config->{'_shadow_naemon_started'}) {
-        if(defined $ENV{'THRUK_SRC'} and ($ENV{'THRUK_SRC'} eq 'FastCGI' or $ENV{'THRUK_SRC'} eq 'DebugServer')) {
-            $c->stats->profile(begin => "AddDefaults::check_shadow_naemon_procs");
-            Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 0, 1);
-            $c->stats->profile(end => "AddDefaults::check_shadow_naemon_procs");
-            $c->config->{'_shadow_naemon_started'} = 1;
-        }
-    }
+    Thruk::Utils::Livecache::check_initial_start($c, $c->config);
 
     ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, undef, $safe, $cached_data);
@@ -821,7 +814,7 @@ sub _any_backend_enabled {
 
 =head2 set_processinfo
 
-  set_processinfo($c, [$cached_user_data, $safe, $cached_data])
+  set_processinfo($c, [$cached_user_data, $safe, $cached_data,$skip_cache_update])
 
 set process info into stash
 
@@ -970,7 +963,6 @@ sub _set_enabled_backends {
     if(defined $backends) {
         $c->log->debug('_set_enabled_backends() by args');
         # reset
-        $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
         }
@@ -996,7 +988,6 @@ sub _set_enabled_backends {
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
         $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'}));
         # reset
-        $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
         }
@@ -1010,7 +1001,6 @@ sub _set_enabled_backends {
     elsif(defined $backend) {
         $c->log->debug('_set_enabled_backends() by param');
         # reset
-        $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = 2;  # set all hidden
         }

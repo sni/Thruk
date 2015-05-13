@@ -126,7 +126,7 @@ sub _build_app {
 
     $self->{'errors'} = [];
 
-    $config           = Thruk::Config::get_config();
+    $config           = $Thruk::Utils::IO::config || Thruk::Config::get_config();
     $self->{'config'} = $config;
     $self->_init_logging();
 
@@ -187,6 +187,10 @@ sub _build_app {
     Thruk::Views::JSONRenderer::register($self, {});
     Thruk::Views::ExcelRenderer::register($self, {config => $self->{'config'}->{'View::Excel::Template::Plus'}});
     Thruk::Views::GDRenderer::register($self, {});
+
+    ###################################################
+    # start shadownaemons in background
+    Thruk::Utils::Livecache::check_initial_start(undef, $config, 1);
 
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDERR, ":encoding(UTF-8)");

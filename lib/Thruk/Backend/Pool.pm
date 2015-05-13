@@ -16,6 +16,7 @@ use Cwd qw/getcwd/;
 use File::Slurp qw/read_file/;
 use File::Copy qw/move/;
 use Time::HiRes qw/gettimeofday tv_interval/;
+use Thruk::Config;
 
 =head1 NAME
 
@@ -297,7 +298,8 @@ sub init_backend_thread_pool {
     $peer_order  = [];
     $peers       = {};
 
-    my $config       = get_config();
+    my $config       = Thruk::Config::get_config();
+    $Thruk::Utils::IO::config = $config;
     my $peer_configs = $config->{'Component'}->{'Thruk::Backend'}->{'peer'} || $config->{'Thruk::Backend'}->{'peer'};
     $peer_configs    = ref $peer_configs eq 'HASH' ? [ $peer_configs ] : $peer_configs;
     $peer_configs    = [] unless defined $peer_configs;
@@ -536,41 +538,6 @@ sub do_on_peer {
     }
 
     return([$type, $size, $data, $last_error]);
-}
-
-########################################
-
-=head2 get_config
-
-  get_config()
-
-return small thruks config. Needed for the backends only.
-
-=cut
-
-sub get_config {
-    my @files;
-    for my $path ('.', $ENV{'THRUK_CONFIG'}) {
-        next unless defined $path;
-        push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
-        push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
-    }
-
-    my %config;
-    for my $file (@files) {
-        my %conf = %{read_config_file($file)};
-        for my $key (keys %conf) {
-            if(defined $config{$key} and ref $config{$key} eq 'HASH') {
-                $config{$key} = { %{$config{$key}}, %{$conf{$key}} };
-            } else {
-                $config{$key} = $conf{$key};
-            }
-        }
-    }
-
-    set_default_config(\%config);
-
-    return \%config;
 }
 
 ########################################
