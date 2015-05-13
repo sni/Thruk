@@ -33,7 +33,7 @@ sub new {
     bless $self, $class;
 
     my $username;
-    my $env = $c->{'env'};
+    my $env = $c->env;
 
     # authenticated by ssl
     if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1

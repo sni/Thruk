@@ -46,7 +46,7 @@ sub index {
     if($action eq 'startup') {
         if(!$c->config->{'started'}) {
             $c->config->{'started'} = 1;
-            $c->log->info("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
+            $c->log->debug("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
             $c->stash->{'text'} = 'startup done';
         }
         return;

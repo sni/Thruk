@@ -14,11 +14,10 @@ BEGIN {
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
-push @ARGV, '-s', 'FCGI';
-push @ARGV, '--no-default-middleware';
-unshift(@ARGV, $Bin.'/thruk.psgi');
-
-require Plack::Runner;
-my $runner = Plack::Runner->new;
-$runner->parse_options(@ARGV);
-$runner->run;
+use Plack::Handler::FCGI;
+use Thruk;
+my $server = Plack::Handler::FCGI->new(
+    nproc  => 1,
+    detach => 1,
+);
+$server->run(Thruk->startup);

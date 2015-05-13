@@ -7,7 +7,7 @@ use Thruk::Request;
 use Thruk::Authentication::User;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
-use Plack::Util::Accessor qw(app db req res stash config user stats obj_db);
+use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
 use Scalar::Util qw/weaken/;
 use Time::HiRes qw/gettimeofday/;
 

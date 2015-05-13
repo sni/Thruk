@@ -106,7 +106,7 @@ sub index {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");
-            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'}, $c->stats);
+            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
             $c->stats->profile(end => "login::external_authentication");
             if($success eq '-1') {
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
@@ -123,7 +123,12 @@ sub index {
                 }
                 return $c->redirect_to($referer);
             } else {
-                $c->log->info("login failed for $login on $referer");
+                $c->log->info(sprintf("login failed for %s on %s from %s%s",
+                                        $login,
+                                        $referer,
+                                        $c->req->address,
+                                       ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
+                              ));
                 Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
             }
