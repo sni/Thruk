@@ -56,7 +56,6 @@ use File::Slurp qw(read_file);
 use Data::Dumper;
 use Module::Load qw/load/;
 use Thruk::Context;
-use Thruk::Config;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
 use Thruk::Utils::External;
@@ -123,7 +122,11 @@ sub _build_app {
 
     $self->{'errors'} = [];
 
-    $config           = $Thruk::Utils::IO::config || Thruk::Config::get_config();
+    $config = $Thruk::Utils::IO::config;
+    if(!$config) {
+        require Thruk::Config;
+        $config = Thruk::Config::get_config();
+    }
     $self->{'config'} = $config;
     $self->_init_logging();
 
@@ -181,9 +184,6 @@ sub _build_app {
     #&timing_breakpoint('startup() plugins loaded');
 
     Thruk::Views::ToolkitRenderer::register($self, {config => $self->{'config'}->{'View::TT'}});
-    Thruk::Views::JSONRenderer::register($self, {});
-    Thruk::Views::ExcelRenderer::register($self, {config => $self->{'config'}->{'View::Excel::Template::Plus'}});
-    Thruk::Views::GDRenderer::register($self, {});
 
     ###################################################
     # start shadownaemons in background

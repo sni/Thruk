@@ -233,7 +233,7 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
-        $config->{'cgi_cfg'}           = Thruk::Backend::Pool::read_config_file($file);
+        $config->{'cgi_cfg'}           = Thruk::Config::read_config_file($file);
     }
 
     $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;

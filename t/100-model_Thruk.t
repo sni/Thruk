@@ -175,7 +175,7 @@ is($cmd->{'note'}, '', 'note should be empty');
 ################################################################################
 # set expand user macros
 $b->{'config'}->{'expand_user_macros'} = ["USER1-2"];
-Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+Thruk::Config::_do_finalize_config($b->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {
@@ -188,7 +188,7 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p tes
 ################################################################################
 # set expand user macros
 $b->{'config'}->{'expand_user_macros'} = ["ALL"];
-Thruk::ConfigLoader::_do_finalize_config($b->{'config'});
+Thruk::Config::_do_finalize_config($b->{'config'});
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {

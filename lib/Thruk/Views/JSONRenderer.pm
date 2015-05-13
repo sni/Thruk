@@ -13,12 +13,6 @@ use JSON::XS ();
 
 =cut
 sub register {
-    my($app) = @_;
-    $app->{'jsonencoder'} = JSON::XS->new
-                                    ->ascii
-                                    ->pretty
-                                    ->allow_blessed
-                                    ->allow_nonref;
     return;
 }
 
@@ -29,11 +23,23 @@ sub register {
 =cut
 sub render_json {
     my($c, $data) = @_;
-    my $output = $c->app->{'jsonencoder'}->encode($data);
+    my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
+    my $output = $encoder->encode($data);
     $c->{'rendered'} = 1;
     $c->res->content_type('application/json;charset=UTF-8');
     $c->res->body($output);
     return($output);
+}
+
+sub _get_encoder {
+    my($c) = @_;
+        $c->app->{'jsonencoder'} =
+            JSON::XS->new
+                    ->ascii
+                    ->pretty
+                    ->allow_blessed
+                    ->allow_nonref;
+    return($c->app->{'jsonencoder'});
 }
 
 1;
