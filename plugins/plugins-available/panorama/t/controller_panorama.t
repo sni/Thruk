@@ -27,7 +27,7 @@ my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 my($host,$service) = TestUtils::get_test_service();
 
-my $config   = Thruk::Backend::Pool::get_config();
+my $config   = Thruk::Config::get_config();
 my $var_path = $config->{'var_path'};
 
 #################################################
