@@ -24,7 +24,7 @@ TestUtils::test_page(
 
 TestUtils::test_page(
     'url'          => '/thruk/cgi-bin/remote.cgi?compile',
-    'like'         => '\d+ templates precompiled in \d+\.\d+s',
+    'like'         => ($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} ? 'already compiled' : '\d+ templates precompiled in \d+\.\d+s'),
     'skip_doctype' => 1,
 );
 
