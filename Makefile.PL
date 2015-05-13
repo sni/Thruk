@@ -14,7 +14,7 @@ resources(
 
 requires 'parent'                                 => 0;     # required by Thruk
 requires 'Module::Load'                           => 0;     # required by Thruk
-requires 'Plack'                                  => 0;     # required by Thruk
+requires 'Plack'                                  => 1;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
