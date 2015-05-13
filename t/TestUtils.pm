@@ -342,7 +342,7 @@ sub test_page {
             like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
         }
     }
-    if($content_type =~ m|text/html|) {
+    if($content_type =~ m|text/html| && !defined $return->{'content_type'}) {
         # test without having to change the test number in all tests
         fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
     }
