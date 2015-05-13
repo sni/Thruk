@@ -5,7 +5,6 @@ use warnings;
 use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
-use Config::General qw//;
 
 =head1 NAME
 
@@ -892,13 +891,74 @@ return parsed config file
 
 sub read_config_file {
     my($file) = @_;
-    # this is faster than letting Config::General read the file by itself
+    # this seems to be the fastest way to trim comments
     my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file)));
-    my %conf = Config::General::ParseConfig(-String     => \@config_lines,
-                                            -UTF8       => 1,
-                                            -CComments  => 0,
-    );
-    return(\%conf);
+    my $conf = {};
+    _parse_rows($file, \@config_lines, $conf);
+    return($conf);
+}
+
+######################################
+sub _parse_rows {
+    my($file, $rows, $conf, $until) = @_;
+    my $lastline = '';
+    while(my $line = shift @{$rows}) {
+        # concatenate by trailing backslash
+        if($line =~ m/^\s*(.*)\s*\\$/mxo) {
+            $lastline = $lastline.$1;
+            next;
+        }
+        $line =~ s|\#.*$||gmxo;
+        $line =~ s|^\s*||gmxo;
+        $line =~ s|\s*$||gmxo;
+        $line     = $lastline.$line;
+        $lastline = '';
+        next unless $line ne '';
+        return if $until && $line =~ m|$until|mxi;
+
+        # nested structures
+        if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
+            my($k,$v) = ($1,$2);
+            my $next  = {};
+            _parse_rows($file, $rows, $next, '</'.$k.'>');
+            if(!defined $conf->{$k}->{$v}) {
+                $conf->{$k}->{$v} = $next;
+            } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
+                push @{$conf->{$k}->{$v}}, $next;
+            } else {
+                $conf->{$k}->{$v} = [$conf->{$k}->{$v}, $next];
+            }
+            next;
+        }
+        if($line =~ m|^<([^>]+)>|mxo) {
+            my $k = $1;
+            my $next  = {};
+            _parse_rows($file, $rows, $next, '</'.$k.'>');
+            if(!defined $conf->{$k}) {
+                $conf->{$k} = $next;
+            } elsif(ref $conf->{$k} eq 'ARRAY') {
+                push @{$conf->{$k}}, $next;
+            } else {
+                $conf->{$k} = [$conf->{$k}, $next];
+            }
+            next;
+        }
+
+        # simple key / value pairs
+        my($k,$v) = split(/\s*=\s*/mxo, $line, 2);
+        if(!defined $v) {
+            die("unknow config entry: ".$line." in ".$file);
+        }
+        $v =~ s|^"([^"]*)"$|$1|gmxo;
+        if(!defined $conf->{$k}) {
+            $conf->{$k} = $v;
+        } elsif(ref $conf->{$k} eq 'ARRAY') {
+            push @{$conf->{$k}}, $v;
+        } else {
+            $conf->{$k} = [$conf->{$k}, $v];
+        }
+    }
+    return;
 }
 
 ######################################

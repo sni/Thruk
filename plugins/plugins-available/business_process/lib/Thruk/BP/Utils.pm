@@ -6,10 +6,9 @@ use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
-use Thruk::BP::Components::BP;
-
 use Carp;
-use Config::General;
+
+use Thruk::BP::Components::BP;
 
 =head1 NAME
 

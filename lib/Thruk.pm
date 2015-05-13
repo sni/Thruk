@@ -582,7 +582,7 @@ sub _after_dispatch {
     }
 
     return;
-};
+}
 
 =head1 SEE ALSO
 

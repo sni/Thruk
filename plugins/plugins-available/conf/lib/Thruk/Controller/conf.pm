@@ -66,7 +66,6 @@ sub index { # Safe Defaults required for changing backends
         load Data::Dumper;
         load File::Slurp, qw/read_file/;
         load Encode, qw(decode_utf8 encode_utf8);
-        load Config::General, qw(ParseConfig);
         load Digest::MD5, qw(md5_hex);
         $c->config->{'conf_modules_loaded'} = 1;
     }
@@ -874,24 +873,21 @@ sub _process_backends_page {
     }
 
     my $backends = [];
-    my %conf;
+    my $conf;
     if(-f $file) {
-        %conf = ParseConfig($file);
+        $conf = Thruk::Config::read_config_file($file);
     }
-    if(!defined $conf{'Component'}->{'Thruk::Backend'}) {
+    if(!defined $conf->{'Component'}->{'Thruk::Backend'}) {
         $file =~ s/thruk_local\.conf/thruk.conf/mx;
-        %conf = Config::General::ParseConfig(-ConfigFile => $file,
-                                             -UTF8       => 1,
-                                             -CComments  => 0,
-        ) if $file;
+        $conf = Thruk::Config::read_config_file($file) if $file;
     }
 
-    if(keys %conf > 0) {
-        if(defined $conf{'Component'}->{'Thruk::Backend'}->{'peer'}) {
-            if(ref $conf{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
-                $backends = $conf{'Component'}->{'Thruk::Backend'}->{'peer'};
+    if(keys %{$conf} > 0) {
+        if(defined $conf->{'Component'}->{'Thruk::Backend'}->{'peer'}) {
+            if(ref $conf->{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
+                $backends = $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
             } else {
-                push @{$backends}, $conf{'Component'}->{'Thruk::Backend'}->{'peer'};
+                push @{$backends}, $conf->{'Component'}->{'Thruk::Backend'}->{'peer'};
             }
         }
     }

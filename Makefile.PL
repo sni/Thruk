@@ -16,7 +16,6 @@ requires 'parent'                                 => 0;     # required by Thruk
 requires 'Module::Load'                           => 0;     # required by Thruk
 requires 'Plack'                                  => 1;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
-requires 'Config::General'                        => 0;     # required by Thruk::Utils
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'HTTP::Request'                          => 0;     # required by Thruk::Utils::CLI
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::UserAgent
@@ -149,16 +148,8 @@ WriteAll;
 print `./script/thruk_patch_makefile.pl`;
 
 # create combined javascript/css files
-eval {
-  require Config::General;
-};
-if ($@) {
-  print "*NOT* creating cached js/css files, missing modules\n";
-}
-else {
-  print `./script/thruk_create_combined_static_content.pl`;
-  print "created cached js/css files\n";
-}
+print `./script/thruk_create_combined_static_content.pl`;
+print "created cached js/css files\n";
 
 print "finished\n";
 exit 0

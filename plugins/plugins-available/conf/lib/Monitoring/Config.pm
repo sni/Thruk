@@ -6,10 +6,10 @@ use Carp qw/cluck/;
 use Monitoring::Config::File;
 use Encode qw/decode_utf8/;
 use Data::Dumper;
-use Config::General;
 use Carp;
 use Storable qw/dclone/;
 use Thruk::Utils;
+use Thruk::Config;
 
 =head1 NAME
 
@@ -2432,17 +2432,16 @@ sub read_rc_file {
         }
     }
 
-    my %settings;
+    my $settings;
     if($file and -r $file) {
-        my $conf = new Config::General($file);
-        %settings = $conf->getall();
+        $settings = Thruk::Config::read_config_file($file);
         for my $key (qw/object_attribute_key_order object_cust_var_order/) {
-            next unless defined $settings{$key};
-            $settings{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
-            $settings{$key} = [ split/\s+/mx, $settings{$key} ];
+            next unless defined $settings->{$key};
+            $settings->{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
+            $settings->{$key} = [ split/\s+/mx, $settings->{$key} ];
         }
     }
-    $self->set_save_config(\%settings);
+    $self->set_save_config($settings);
     return;
 }
 
