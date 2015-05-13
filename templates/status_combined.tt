@@ -30,7 +30,7 @@
 </table>
 
 <form action="" method="GET" id="[% paneprefix %]filterForm">
-<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;">
+<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:none;" alt="show">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]

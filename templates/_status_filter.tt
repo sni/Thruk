@@ -1,6 +1,6 @@
 ﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
-<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
+<input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;" alt="show">
 [% IF show_form %]
 <form action="" method="GET" id="[% paneprefix %]filterForm">
 [%# make sure IE can submit form by pressing enter #%]
@@ -67,8 +67,8 @@
            [% END %]
           </td>
           <td align="right">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search">
-            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
+            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search" alt="accept">
+            <input type="image" src="[% url_prefix %]themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)" alt="remove">
           </td>
           <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
             <img src="[% url_prefix %]themes/[% theme %]/images/right.png" alt="add new filter"><br>
@@ -88,7 +88,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht2n" onclick="toggleFilterCheckBox(this.id)">Up</td>
@@ -127,7 +127,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -229,7 +229,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Service Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;" alt="accept"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">OK</td>
@@ -272,7 +272,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle filterDisplayTitle'>Service Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;" alt="update"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -414,7 +414,7 @@
           </td>
 
 
-          <td class='newfilter' onclick="delete_filter_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete Filter">
+          <td class='newfilter' onclick="delete_filter_row(this); return false;"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete Filter" alt="remove filter">
             <script type="text/javascript">
             <!--
               verify_op("[% paneprefix %][% prefix %]_[% loop.index %]_ts");
