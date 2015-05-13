@@ -48,10 +48,6 @@ sub index {
             $c->config->{'started'} = 1;
             $c->log->info("started ($$)") unless $ENV{'THRUK_TEST_NO_LOG'};
             $c->stash->{'text'} = 'startup done';
-            if(defined $c->req->header('user-agent') and $c->req->header('user-agent') =~ m/wget/mix) {
-                # compile templates in background
-                $c->run_after_request('Thruk::Utils::precompile_templates($c)');
-            }
         }
         return;
     }

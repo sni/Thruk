@@ -130,8 +130,8 @@ sub index {
         }
     }
     else {
-        # clean up in background
-        $c->run_after_request('Thruk::Utils::CookieAuth::clean_session_files($c->config)');
+        # clean up
+        Thruk::Utils::CookieAuth::clean_session_files($c->config);
     }
 
     Thruk::Utils::ssi_include($c, 'login');

@@ -267,13 +267,6 @@ sub index {
         }
     }
 
-    # check if our shadows are still up and running
-    if($arg1 eq "9") {
-        if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
-            $c->run_after_request('Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 1);');
-        }
-    }
-
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 

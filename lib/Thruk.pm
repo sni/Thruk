@@ -244,10 +244,12 @@ sub _dispatcher {
 
     $c->stats->profile(end => "_dispatcher");
 
-    # TODO: do this really after the request if possible
-    _after_dispatch($c);
+    $c->stats->profile(begin => "_res_finalize");
+    my $res = $c->res->finalize;
+    $c->stats->profile(end => "_res_finalize");
 
-    return($c->res->finalize);
+    _after_dispatch($c, $res);
+    return($res);
 }
 
 ###################################################
@@ -514,36 +516,12 @@ if($ENV{'MALLINFO'}) {
 
 ###################################################
 sub _after_dispatch {
-    my($c) = @_;
+    my($c, $res) = @_;
     $c->stats->profile(begin => "_after_dispatch");
-
-    while(my $sub = shift @{$c->stash->{'run_after_request_cb'}}) {
-        ## no critic
-        eval($sub);
-        ## use critic
-        $c->log->info($@) if $@;
-    }
-
-    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
-        my $elapsed = tv_interval($c->stash->{'time_begin'});
-        $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
-        my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
-        $url     = $c->req->url unless $url;
-        $url     =~ s/^cgi\-bin\///mxo;
-        if(length($url) > 60) { $url = substr($url, 0, 60).'...' }
-        $c->log->info(sprintf("Req: %03d  mem:% 7s MB  % 10.2f MB     %.2fs %8s    %s",
-                                $Thruk::COUNT,
-                                $c->stash->{'memory_end'},
-                                ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
-                                $elapsed,
-                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '',
-                                $url,
-                    ));
-    }
 
     # check if our shadows are still up and running
     if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
-        $c->run_after_request('Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 1);');
+        Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 1);
     }
 
     if($ENV{THRUK_LEAK_CHECK}) {
@@ -571,7 +549,33 @@ sub _after_dispatch {
 
     # last possible time to report/save profile
     Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
+
+    if($ENV{'THRUK_PERFORMANCE_DEBUG'} and $c->stash->{'memory_begin'}) {
+        my $elapsed = tv_interval($c->stash->{'time_begin'});
+        $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
+        my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
+        $url     = $c->req->url unless $url;
+        $url     =~ s/^cgi\-bin\///mxo;
+        if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
+        if(!$url) { $url = $c->req->url; }
+        $c->log->info(sprintf("Req: %03d  mem:% 7s MB  % 10.2f MB     %.2fs %8s   %d    %s",
+                                $Thruk::COUNT,
+                                $c->stash->{'memory_end'},
+                                ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
+                                $elapsed,
+                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '',
+                                $res->[0],
+                                $url,
+                    ));
+    }
     $c->log->debug($c->stats->report()) if Thruk->debug;
+
+    # does this process need a restart?
+    if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        if($c->config->{'max_process_memory'} && $Thruk::COUNT && $Thruk::COUNT%10 == 0) {
+            Thruk::Utils::check_memory_usage($c);
+        }
+    }
 
     return;
 };

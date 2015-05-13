@@ -228,13 +228,6 @@ sub begin {
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
 
-
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        if($c->config->{'max_process_memory'} && $Thruk::COUNT && $Thruk::COUNT%10 == 0) {
-            $c->run_after_request('Thruk::Utils::check_memory_usage($c);');
-        }
-    }
-
     # initialize our backends
     if(!$c->{'db'} ) {
         $c->{'db'} = $c->app->{'db'};
@@ -683,7 +676,7 @@ sub add_cached_defaults {
     add_defaults($c, 2);
     # make sure process info is not getting too old
     if(!$c->stash->{'processinfo_time'} or $c->stash->{'processinfo_time'} < time() - 90) {
-        $c->run_after_request('Thruk::Action::AddDefaults::delayed_proc_info_update($c);');
+        Thruk::Action::AddDefaults::delayed_proc_info_update($c);
     }
     return;
 }

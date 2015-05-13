@@ -272,18 +272,6 @@ sub url_with {
     return(Thruk::Utils::Filter::uri_with($c, $args));
 }
 
-=head2 run_after_request
-
-run callbacks after the request had been send to the client
-
-=cut
-sub run_after_request {
-    my ($c, $sub) = @_;
-    $c->stash->{'run_after_request_cb'} = [] unless defined $c->stash->{'run_after_request_cb'};
-    push @{$c->stash->{'run_after_request_cb'}}, $sub;
-    return;
-}
-
 1;
 __END__
 
