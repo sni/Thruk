@@ -550,7 +550,7 @@ return small thruks config. Needed for the backends only.
 
 sub get_config {
     my @files;
-    for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
+    for my $path ('.', $ENV{'THRUK_CONFIG'}) {
         next unless defined $path;
         push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
         push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';

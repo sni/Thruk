@@ -5,11 +5,11 @@ use warnings;
 
 =head1 NAME
 
-Thruk::Controller::history - Catalyst Controller
+Thruk::Controller::history - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 

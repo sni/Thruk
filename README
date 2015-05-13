@@ -28,7 +28,6 @@ Main Features / Advantages
   * Valid HTML code
   * No frames (can be reenabled for better addon integration)
   * Easy to extend with plugins
-  * 100% Perl (using Catalyst Framework)
   * Pagination
   * Multiple themes included
   * Excel export for status and logfiles

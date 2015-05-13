@@ -6,11 +6,11 @@ use Module::Load qw/load/;
 
 =head1 NAME
 
-Thruk::Controller::avail - Catalyst Controller
+Thruk::Controller::avail - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 

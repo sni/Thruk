@@ -13,7 +13,7 @@ my $request = request('/thruk/side.html');
 ok( $request->is_success, 'Request /thruk/side.html should succeed' ) or TestUtils::bail_out_req('request should succeed', $request);
 
 SKIP: {
-    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     ok( request('/')->is_redirect, 'Request / should redirect' );
 };

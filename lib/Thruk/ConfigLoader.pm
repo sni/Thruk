@@ -244,120 +244,6 @@ sub switch_user {
     return;
 }
 
-
-
-
-
-
-
-######################################
-# demoosified version of Catalyst::Plugin::ConfigLoader
-## no critic
-######################################
-
-=head2 setup()
-
-=cut
-
-sub setup {
-    my($c)      = @_;
-    my @files   = $c->find_files;
-    my $configs = load_any({
-        files       => \@files,
-        filter      => \&_fix_syntax,
-    });
-
-    # split the responses into normal and local cfg
-    my $local_suffix = $c->get_config_local_suffix;
-    my ( @main, @locals );
-    for ( sort keys %{$configs} ) {
-        if ( m{$local_suffix\.}ms ) {
-            push @locals, $_;
-        }
-        else {
-            push @main, $_;
-        }
-    }
-
-    # load all the normal cfgs, then the local cfgs last so they can override
-    # normal cfgs
-    $c->load_config( { $_ => $configs->{ $_ } } ) for @main, @locals;
-
-    $c->finalize_config;
-    $c->next::method( @_ );
-}
-
-=head2 load_config
-
-=cut
-
-sub load_config {
-    my $c   = shift;
-    my $ref = shift;
-
-    my ( $file, $config ) = %$ref;
-
-    $c->config( $config );
-    $c->log->debug( qq(Loaded Config "$file") )
-        if $c->debug;
-
-    return;
-}
-
-=head2 find_files
-
-=cut
-
-sub find_files {
-    my $c = shift;
-    my ( $path, $extension ) = $c->get_config_path;
-    my $suffix     = $c->get_config_local_suffix;
-    #my @extensions = @{ Config::Any->extensions };
-    my @extensions = ('conf');
-
-    my @files;
-    if ( $extension ) {
-        die "Unable to handle files with the extension '${extension}'"
-            unless grep { $_ eq $extension } @extensions;
-        ( my $local = $path ) =~ s{\.$extension}{_$suffix.$extension};
-        push @files, $path, $local;
-    }
-    else {
-        @files = map { ( "$path.$_", "${path}_${suffix}.$_" ) } @extensions;
-    }
-    @files;
-}
-
-=head2 get_config_path
-
-=cut
-
-sub get_config_path {
-    my $c = shift;
-    my $appname = ref $c || $c;
-    my $prefix  = $appname;
-    my $path    = $ENV{'THRUK_CONFIG'}
-        || $c->config->{ 'Plugin::ConfigLoader' }->{ file }
-        || $c->path_to( $prefix );
-
-    my ( $extension ) = ( $path =~ m{\.([^\/\\.]{1,4})$} );
-
-    if ( -d $path ) {
-        $path =~ s{[\/\\]$}{};
-        $path .= "/$prefix";
-    }
-
-    return ( $path, $extension );
-}
-
-=head2 get_config_local_suffix
-
-=cut
-
-sub get_config_local_suffix {
-    return('local');
-}
-
 sub _fix_syntax {
     my($config) = @_;
     my @components = (
@@ -375,9 +261,8 @@ sub _fix_syntax {
             $config->{ "$prefix$element" } = $comp->{ values }->{ $element };
         }
     }
+    return;
 }
-
-## use critic
 
 =head2 load_any( $options )
 

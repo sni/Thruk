@@ -4,7 +4,7 @@ use Test::More;
 use JSON::XS;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan tests => 116;
 }
 
@@ -17,12 +17,12 @@ BEGIN {
 
 ###########################################################
 # test modules
-if(defined $ENV{'CATALYST_SERVER'}) {
+if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
     unshift @INC, 'plugins/plugins-available/reports2/lib';
 }
 
 SKIP: {
-    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     use_ok 'Thruk::Controller::reports2';
 };

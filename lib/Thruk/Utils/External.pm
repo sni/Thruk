@@ -503,10 +503,8 @@ sub save_profile {
 
     my $file = $dir.'/profile.log';
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
-    local $ENV{COLUMNS} = 140;
-    local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
     eval {
-        print $fh "".$c->stats->report(),"\n";
+        print $fh $c->stats->report(),"\n";
     };
     print $fh $@,"\n" if $@;
     CORE::close($fh);

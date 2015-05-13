@@ -37,10 +37,6 @@ sub read_navigation {
 
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
-    if(defined $ENV{'CATALYST_CONFIG'}) {
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
-    }
     if(defined $ENV{'THRUK_CONFIG'}) {
         $file = $ENV{'THRUK_CONFIG'}.'/menu.conf'       if -e $ENV{'THRUK_CONFIG'}.'/menu.conf';
         $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';

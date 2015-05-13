@@ -22,7 +22,7 @@ my $testport = 51234;
 my $pattern  = $ARGV[0];
 
 #####################################################################
-# start test catalyst server
+# start test server
 $SIG{INT} = sub { do_clean_exit(); };
 END {
     do_clean_exit();

@@ -5,8 +5,8 @@ use File::Copy qw/copy/;
 use JSON::XS;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => 300;
 }
 

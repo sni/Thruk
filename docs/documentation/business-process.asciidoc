@@ -136,7 +136,7 @@ sub echofunction {
 
 Input arguments are:
 
- - $c: catalyst context object containing livestatus connection pool
+ - $c: thruk context object containing livestatus connection pool
  - $bp: business process object
  - $node: business process node object
  - $args: array ref of arguments from the node edit dialog

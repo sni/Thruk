@@ -7,7 +7,7 @@
     errorDescription: '[% escape_quotes(errorDescription) %]'
   [% ELSE %]
     errorMessage: 'internal server error',
-    errorDescription: 'internal server error occured, please look at your catalyst logfile'
+    errorDescription: 'internal server error occured, please look at your logfiles'
   [% END %]
   [% IF errorDetails %]
   , errorDetails: '[% escape_quotes(errorDetails) %]'
@@ -32,7 +32,7 @@
   [% ELSE %]
   [% hide_output = c.log.error('on page: ' _ c.request.method _ ' ' _ c.request.uri) %]
   <div class='errorMessage'>internal server error</div>
-  <div class='errorDescription'>internal server error occured, please look at your catalyst logfile</div>
+  <div class='errorDescription'>internal server error occured, please look at your logfiles</div>
   [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
   [% END %]
 

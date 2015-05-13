@@ -6,7 +6,7 @@ use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
-plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 `ps -fu root | grep cron >/dev/null 2>&1`;
 plan skip_all => 'crond required' if $? != 0;
 
@@ -17,8 +17,8 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+$BIN    = $BIN.' --remote-url="'.$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.'"' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 # get test host
 my $host = TestUtils::get_test_host_cli($BIN);

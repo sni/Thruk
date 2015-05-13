@@ -7,11 +7,11 @@ use Carp qw/cluck confess longmess/;
 
 =head1 NAME
 
-Thruk::Controller::error - Catalyst Controller
+Thruk::Controller::error - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
     predefined errors:
 

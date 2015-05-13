@@ -6,11 +6,11 @@ use Data::Dumper;
 
 =head1 NAME
 
-Thruk::Controller::cmd - Catalyst Controller
+Thruk::Controller::cmd - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 

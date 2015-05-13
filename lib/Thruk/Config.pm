@@ -239,14 +239,14 @@ $config{'View::Excel::Template::Plus'}            = $config{'View::TT'}; # use s
 
 =head2 get_config
 
-make config available without loading complete catalyst
+make config available without loading complete dependencies
 
 =cut
 
 sub get_config {
     my @files = @_;
     if(scalar @files == 0) {
-        for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
+        for my $path ('.', $ENV{'THRUK_CONFIG'}) {
             next unless defined $path;
             push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
             push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
@@ -346,7 +346,7 @@ EOT
 
   home()
 
-faster variant of Catalyst::Utils::home
+return home folder
 
 =cut
 sub home {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# set omd environment
-export CATALYST_CONFIG="/etc/thruk"
+# set thruk environment
+export THRUK_CONFIG="/etc/thruk"
 
 # load extra environment variables
 if [ -f /etc/sysconfig/thruk ]; then

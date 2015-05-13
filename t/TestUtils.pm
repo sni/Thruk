@@ -8,7 +8,7 @@ package TestUtils;
 BEGIN {
   $ENV{'THRUK_SRC'} = 'TEST';
 
-  $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
+  $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ s#/$##gmx if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 }
 
 ###################################################
@@ -151,7 +151,7 @@ sub get_test_timeperiod {
 sub get_test_host_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -166,7 +166,7 @@ sub get_test_host_cli {
 sub get_test_hostgroup_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -220,7 +220,7 @@ sub test_page {
 
     # make tests with http://localhost/naemon possible
     my $product = 'thruk';
-    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
         $product = $1;
         $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
@@ -412,8 +412,8 @@ sub test_page {
             next if $match =~ m/^\/$product\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
-            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'CATALYST_SERVER'};
-            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -710,7 +710,7 @@ sub _request {
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
 
-    if(defined $ENV{'CATALYST_SERVER'}) {
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         return(_external_request(@_));
     }
     # add pseudo domain, otherwise cookies from set_cookie() won't work
@@ -740,13 +740,13 @@ sub _external_request {
     # make tests with http://localhost/naemon possible
     unless($url =~ m/^http/) {
         my $product = 'thruk';
-        if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
             $product = $1;
             $url =~ s|/$product/|/|gmx;
             $url =~ s|/thruk/|/|gmx;
         }
         $url =~ s#//#/#gmx;
-        $url = $ENV{'CATALYST_SERVER'}.$url;
+        $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
     }
 
     our($cookie_jar, $cookie_file);

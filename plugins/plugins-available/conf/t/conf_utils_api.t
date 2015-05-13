@@ -13,7 +13,7 @@ use Storable qw/dclone/;
 
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
-    plan skip_all => 'local test only' if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => 28;
     $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
@@ -71,7 +71,7 @@ BEGIN {
     $cmd = "cat $http_dir/thruk_local.conf | sed -e 's|%TESTPORT%|$testport|g' > $http_dir/thruk_local.conf2 && mv $http_dir/thruk_local.conf2 $http_dir/thruk_local.conf";
     `$cmd`;
 
-    $ENV{'CATALYST_CONFIG'} = $http_dir;
+    $ENV{'THRUK_CONFIG'} = $http_dir;
     use lib('t');
     require TestUtils;
     import TestUtils;
@@ -81,7 +81,7 @@ BEGIN {
 # start test server
 my $httppid = fork();
 if(!$httppid) {
-    exec("MOJO_LISTEN='http://*:$testport' CATALYST_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1') or
+    exec("THRUK_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1') or
         fail(read_file($http_dir.'/tmp/server.log'));
     exit 1;
 }

@@ -100,7 +100,7 @@ sub new {
 
     get_c()
 
-return L<Catalyst|Catalyst> context object
+return L<Thruk::Context> context object
 
 =cut
 sub get_c {
@@ -286,9 +286,9 @@ sub _read_secret {
     my($self) = @_;
     my $files = [];
     push @{$files}, 'thruk.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk.conf'       if defined $ENV{'THRUK_CONFIG'};
     push @{$files}, 'thruk_local.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk_local.conf' if defined $ENV{'THRUK_CONFIG'};
     my $var_path = './var';
     for my $file (@{$files}) {
         next unless -f $file;
@@ -433,15 +433,12 @@ sub _external_request {
 sub _dummy_c {
     my($self, $url) = @_;
     _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
-    delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
+    delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     $url = '/thruk/cgi-bin/remote.cgi' unless defined $url;
     require Thruk;
     require HTTP::Request;
     require Plack::Test;
-#    open(my $saveerr, ">&STDERR") if $Thruk::Utils::CLI::verbose <= 1;
-#    close(STDERR)                 if $Thruk::Utils::CLI::verbose <= 1;
     my $app = Plack::Test->create(Thruk->startup);
-#    open(STDERR, ">&", $saveerr)  if $Thruk::Utils::CLI::verbose <= 1;
     my $res = $app->request(HTTP::Request->new(GET => $url));
     my $c    = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );

@@ -2256,8 +2256,8 @@ return base etc folder
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'CATALYST_CONFIG'}) {
-        return($ENV{'CATALYST_CONFIG'});
+    if($ENV{'THRUK_CONFIG'}) {
+        return($ENV{'THRUK_CONFIG'});
     }
     return($c->config->{'home'});
 }

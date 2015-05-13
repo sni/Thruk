@@ -4,7 +4,7 @@ use Test::More;
 use Data::Dumper;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan tests => 14;
 }
 
@@ -18,7 +18,7 @@ BEGIN {
 ###########################################################
 # check module
 SKIP: {
-    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     use_ok 'Thruk::Controller::mobile';
 };

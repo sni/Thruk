@@ -24,15 +24,6 @@ just use figlet for that:
 the following environment variables are used within Thruk:
 
 
-
-==== CATALYST_CONFIG
-Specify location of config files.
-
-
-==== CATALYST_SERVER
-Used to specify catalyst url during tests.
-
-
 ==== HTTP_RESULT
 temporary storage of http result used in cli tool.
 
@@ -75,7 +66,7 @@ Can be set to specify location of the thruk binary used for tests.
 
 
 ==== THRUK_CONFIG
-Specify location of config files. Overrides CATALYST_CONFIG.
+Specify location of config files.
 
 
 ==== THRUK_DEBUG
@@ -127,6 +118,10 @@ Don't log stdout messages during some tests
 ==== THRUK_USER_ID
 Contains thruks user id.
 
-
 ==== THRUK_PERFORMANCE_DEBUG
 print memory and cpu usage to stderr
+
+==== PLACK_TEST_EXTERNALSERVER_URI
+Used to specify external test url during tests.
+
+

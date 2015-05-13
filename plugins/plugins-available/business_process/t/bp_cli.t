@@ -8,7 +8,7 @@ eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 }
 
 BEGIN {
@@ -18,7 +18,7 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 TestUtils::test_command({
     cmd  => $BIN.' -a bpd',

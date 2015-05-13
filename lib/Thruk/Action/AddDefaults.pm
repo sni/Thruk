@@ -226,7 +226,6 @@ sub begin {
     $ENV{'THRUK_USE_SHADOW'} = 0 if $c->req->parameters->{'nocache'};
 
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
-    $c->stash->{'usercontent_folder'} = $ENV{'CATALYST_CONFIG'}.'/usercontent' if $ENV{'CATALYST_CONFIG'};
     $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
 
 

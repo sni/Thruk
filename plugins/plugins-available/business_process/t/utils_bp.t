@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => 10;
 }
 

@@ -247,9 +247,6 @@ sub _dispatcher {
     # TODO: do this really after the request if possible
     _after_dispatch($c);
 
-    # last possible time to report/save profile
-    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
-    $c->log->debug($c->stats->report()) if Thruk->debug;
     return($c->res->finalize);
 }
 
@@ -571,6 +568,11 @@ sub _after_dispatch {
     }
     $c->stats->profile(end => "_after_dispatch");
     $c->stats->profile(comment => 'total time waited on backends: '.sprintf('%.2fs', $c->stash->{'total_backend_waited'})) if defined $c->stash->{'total_backend_waited'};
+
+    # last possible time to report/save profile
+    Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
+    $c->log->debug($c->stats->report()) if Thruk->debug;
+
     return;
 };
 

@@ -2,12 +2,12 @@
 +++ b/thruk	2013-12-04 00:06:39.171075669 +0100
 @@ -11,8 +11,9 @@
    export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
-   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+   if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
  else
 -  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
--  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+-  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
 +  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
-+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='@SYSCONFDIR@'; fi
++  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
 +  if [ -z $REMOTEURL ]; then export REMOTEURL='http://localhost@HTMLURL@/cgi-bin/remote.cgi'; fi
  fi
  
@@ -16,12 +16,12 @@
 +++ b/naglint	2013-12-03 10:30:57.548100062 +0100
 @@ -11,8 +11,8 @@
    export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
-   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+   if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
  else
 -  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
--  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+-  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
 +  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@DATADIR@/plugins/plugins-available/conf/lib:@THRUKLIBS@;
-+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='@SYSCONFDIR@'; fi
++  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
  fi
  
  eval 'exec perl -x $0 ${1+"$@"} ;'

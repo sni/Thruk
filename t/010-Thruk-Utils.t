@@ -8,7 +8,7 @@ use Data::Dumper;
 use Encode qw/is_utf8/;
 
 BEGIN {
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => 45;
 
     use lib('t');
