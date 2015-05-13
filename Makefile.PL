@@ -34,7 +34,6 @@ requires 'File::Slurp'                            => 0;     # required by Thruk:
 requires 'Date::Manip'                            => 0;     # required by Thruk::Utils
 requires 'DateTime::TimeZone'                     => 0;     # required by Panorama Plugin
 requires 'DateTime'                               => 0;     # required by Panorama Plugin
-requires 'Digest::MD4'                            => 0;     # required by Excel::Template
 requires 'Excel::Template'                        => 0;     # required by Mojolicious::Plugin::Thruk::ExcelRenderer
 requires 'IO::String'                             => 0;     # required by Mojolicious::Plugin::Thruk::ExcelRenderer
 requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
