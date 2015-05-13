@@ -101,7 +101,7 @@
           [% IF can_edit %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt"add">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
                 add more
             </td>
           </tr>
