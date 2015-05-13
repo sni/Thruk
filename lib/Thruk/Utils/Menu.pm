@@ -13,8 +13,7 @@ Menu Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use Data::Dumper;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 use Thruk::Utils::Filter;
 
