@@ -93,9 +93,6 @@ sub startup {
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require Plack::Middleware::Lint;
         $app = Plack::Middleware::Lint->wrap($app);
-
-        require Plack::Middleware::StackTrace;
-        $app = Plack::Middleware::StackTrace->wrap($app);
     }
 
     require Plack::Middleware::ContentLength;
