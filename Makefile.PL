@@ -42,13 +42,6 @@ requires 'Storable'                               => 0;     # required by Thruk:
 requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
 requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
 
-# shinken features plugin
-feature     ('plugin_shinken',
-  -default                                        => 1,
-  'MongoDB'                                       => 0,
-  'Tie::IxHash'                                   => 0,
-);
-
 # dashboard plugin
 feature     ('plugin_dashboard',
   -default                                        => 0,

@@ -625,7 +625,7 @@ sub _run_command_action {
         $data->{'output'} = "cache cleared";
     }
 
-    # import mongodb/mysql logs
+    # import mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
@@ -1093,7 +1093,7 @@ sub _cmd_import_logs {
         }
     }
 
-    my $type = 'mongodb';
+    my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
 
     my $verbose = 0;
@@ -1104,8 +1104,7 @@ sub _cmd_import_logs {
             require Thruk::Backend::Provider::Mysql;
             Thruk::Backend::Provider::Mysql->import;
         } else {
-            require Thruk::Backend::Provider::Mongodb;
-            Thruk::Backend::Provider::Mongodb->import;
+            die("unknown logcache type: ".$type);
         }
     };
     if($@) {
@@ -1117,7 +1116,7 @@ sub _cmd_import_logs {
         if($type eq 'mysql') {
             $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
         } else {
-            $stats= Thruk::Backend::Provider::Mongodb->_log_stats($c);
+            die("unknown logcache type: ".$type);
         }
         $c->stats->profile(end => "_cmd_import_logs()");
         Thruk::Backend::Manager::close_logcache_connections($c);
@@ -1139,7 +1138,7 @@ sub _cmd_import_logs {
         if($type eq 'mysql') {
             ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         } else {
-            ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+            die("unknown logcache type: ".$type);
         }
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
@@ -1450,14 +1449,6 @@ sub _cmd_raw {
                 'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
                 'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
             };
-        }
-    }
-
-    # remove useless mongodb _id if using logcache
-    if($function eq 'get_logs' and $c->config->{'logcache'} and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'ARRAY') {
-        if($c->config->{'logcache'} =~ m/^mysql/mx) {
-        } else {
-            for (@{$res->[2]}) { delete $_->{'_id'} }
         }
     }
 

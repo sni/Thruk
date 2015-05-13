@@ -726,21 +726,20 @@ sub logcache_stats {
     my($self, $c, $with_dates) = @_;
     return unless defined $c->config->{'logcache'};
 
-    my $type = 'mongodb';
+    my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
     my(@stats);
     if($type eq 'mysql') {
         @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
     } else {
-        @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        die("unknown type: ".$type);
     }
     my $stats = Thruk::Utils::array2hash(\@stats, 'key');
 
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my $table = $type eq 'mongodb' ? 'logs_'.$key : undef;
-            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end('collection' => $table)};
+            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end()};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
         }
@@ -808,7 +807,7 @@ sub _renew_logcache {
 
     if($check) {
         $c->stash->{'backends'} = $get_results_for;
-        my $type = 'mongodb';
+        my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         my $stats = $self->logcache_stats($c);
         my $backends2import = [];

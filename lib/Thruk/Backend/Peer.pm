@@ -24,7 +24,6 @@ Manager of backend connections
 # use static list instead of slow module find
 $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Livestatus',
-          'Thruk::Backend::Provider::Mongodb',
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
           'Thruk::Backend::Provider::Mysql',
@@ -204,17 +203,7 @@ sub _initialise_peer {
                                                     peer_key => $self->{'key'},
                                                 });
         } else {
-            require Thruk::Backend::Provider::Mongodb;
-            if(!$config->{'deprecations_shown'}->{'mongodb_logcache'}) {
-                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
-                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using mongodb logcache is deprecated and will be removed in future releases.";
-                $config->{'deprecations_shown'}->{'mongodb_logcache'} = 1;
-            }
-            Thruk::Backend::Provider::Mongodb->import;
-            $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
-                                                    peer     => $logcache,
-                                                    peer_key => $self->{'key'},
-                                                });
+            die("no or unknown type in logcache connection: ".$logcache);
         }
         $self->{'class'}->{'logcache'} = $self->{'logcache'};
     }
