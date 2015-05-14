@@ -39,7 +39,7 @@ if(grep {/^\-v/} @ARGV) {
 # use -d for verbose mode for backwards compatibility
 if(grep {/^\-d/} @ARGV) {
     @ARGV = grep {!/^\-d/} @ARGV;
-    $ENV{'THRUK_VERBOSE'} = 2;
+    $ENV{'THRUK_VERBOSE'} = 3;
 }
 
 unshift(@ARGV, $Bin.'/thruk.psgi');
@@ -60,10 +60,15 @@ thruk_server.pl - Thruk Development Server
 
 thruk_server.pl [options]
 
-   -d --debug           force debug mode
-   -? --help            display this help and exits
-   -r --restart         restart when files get modified
-   --follow_symlinks    follow symlinks in search directories
+   -p <port>            use tcp port. default: 3000
+   -d                   debug mode
+   -v                   verbose mode
+   -vv                  very verbose mode
+   -vvv                 debug mode
+   -h                   display this help and exits
+   -r                   restart when files get modified
+
+  also all options from plackup -h should work.
 
 =head1 DESCRIPTION
 
