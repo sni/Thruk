@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
 use lib 'lib';
 
 BEGIN {
@@ -42,7 +41,9 @@ if(grep {/^\-d/} @ARGV) {
     $ENV{'THRUK_VERBOSE'} = 3;
 }
 
-unshift(@ARGV, $Bin.'/thruk.psgi');
+my $bin = $0;
+$bin =~ s|/thruk_server.pl$||gmx;
+unshift(@ARGV, $bin.'/thruk.psgi');
 push @ARGV, '--no-default-middleware';
 
 require Plack::Runner;
