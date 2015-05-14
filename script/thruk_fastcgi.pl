@@ -11,6 +11,7 @@ use Thruk::Backend::Pool;
 # has to be done really early to save memory
 BEGIN {
     $ENV{'THRUK_SRC'} = 'FastCGI';
+    $ENV{'PLACK_ENV'} = 'deployment' unless $ENV{'PLACK_ENV'};
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
