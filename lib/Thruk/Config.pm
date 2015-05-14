@@ -5,6 +5,8 @@ use warnings;
 use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
+use POSIX;
+use Thruk::Utils::Filter;
 
 =head1 NAME
 
@@ -527,11 +529,9 @@ sub get_git_name {
     my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
     return '' if $tag;
 
-    my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-    chomp($branch);
+    chomp(my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`);
     $branch =~ s/^\*\s+//gmx;
-    my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
-    chomp($hash);
+    chomp(my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`);
     if($branch eq 'master') {
         return $hash;
     }
@@ -549,7 +549,7 @@ return details useful for debuging
 =cut
 
 sub get_debug_details {
-    chomp(my $uname = `uname -a`);
+    my $uname = join(" ", POSIX::uname());
     my $release = "";
     for my $f (qw|/etc/redhat-release /etc/issue|) {
         if(-e $f) {
@@ -825,7 +825,7 @@ sub _do_finalize_config {
         for my $item (ref $config->{'expand_user_macros'} eq 'ARRAY' ? @{$config->{'expand_user_macros'}} : ($config->{'expand_user_macros'})) {
             next unless $item;
             if($item =~ m/^USER([\d\-]+$)/mx) {
-                my $list = Thruk::Config::expand_numeric_list($1);
+                my $list = expand_numeric_list($1);
                 for my $nr (@{$list}) {
                     push @{$new_expand_user_macros}, 'USER'.$nr;
                 }
@@ -838,7 +838,7 @@ sub _do_finalize_config {
 
 
     # set default config
-    Thruk::Config::set_default_config($config);
+    set_default_config($config);
 
     return;
 }
@@ -906,45 +906,48 @@ sub _parse_rows {
     my($file, $rows, $conf, $until) = @_;
     my $lastline = '';
     while(my $line = shift @{$rows}) {
+        $line =~ s|\#.*$||gmxo;
+        $line =~ s|^\s+||gmxo;
+        $line =~ s|\s+$||gmxo;
+
         # concatenate by trailing backslash
-        if($line =~ m/^\s*(.*)\s*\\$/mxo) {
+        if(substr($line, -1, 1) eq '\\' && $line =~ m/^\s*(.*)\s*\\$/mxo) {
             $lastline = $lastline.$1;
             next;
         }
-        $line =~ s|\#.*$||gmxo;
-        $line =~ s|^\s*||gmxo;
-        $line =~ s|\s*$||gmxo;
         $line     = $lastline.$line;
         $lastline = '';
         next unless $line ne '';
-        return if $until && $line =~ m|$until|mxi;
+        return if $until && lc($line) eq $until;
 
         # nested structures
-        if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
-            my($k,$v) = ($1,$2);
-            my $next  = {};
-            _parse_rows($file, $rows, $next, '</'.$k.'>');
-            if(!defined $conf->{$k}->{$v}) {
-                $conf->{$k}->{$v} = $next;
-            } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
-                push @{$conf->{$k}->{$v}}, $next;
-            } else {
-                $conf->{$k}->{$v} = [$conf->{$k}->{$v}, $next];
+        if(substr($line,0,1) eq '<') {
+            if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
+                my($k,$v) = ($1,$2);
+                my $next  = {};
+                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                if(!defined $conf->{$k}->{$v}) {
+                    $conf->{$k}->{$v} = $next;
+                } elsif(ref $conf->{$k}->{$v} eq 'ARRAY') {
+                    push @{$conf->{$k}->{$v}}, $next;
+                } else {
+                    $conf->{$k}->{$v} = [$conf->{$k}->{$v}, $next];
+                }
+                next;
             }
-            next;
-        }
-        if($line =~ m|^<([^>]+)>|mxo) {
-            my $k = $1;
-            my $next  = {};
-            _parse_rows($file, $rows, $next, '</'.$k.'>');
-            if(!defined $conf->{$k}) {
-                $conf->{$k} = $next;
-            } elsif(ref $conf->{$k} eq 'ARRAY') {
-                push @{$conf->{$k}}, $next;
-            } else {
-                $conf->{$k} = [$conf->{$k}, $next];
+            if($line =~ m|^<([^>]+)>|mxo) {
+                my $k = $1;
+                my $next  = {};
+                _parse_rows($file, $rows, $next, '</'.lc($k).'>');
+                if(!defined $conf->{$k}) {
+                    $conf->{$k} = $next;
+                } elsif(ref $conf->{$k} eq 'ARRAY') {
+                    push @{$conf->{$k}}, $next;
+                } else {
+                    $conf->{$k} = [$conf->{$k}, $next];
+                }
+                next;
             }
-            next;
         }
 
         # simple key / value pairs
@@ -956,7 +959,9 @@ sub _parse_rows {
                 die("unknow config entry: ".$line." in ".$file);
             }
         }
-        $v =~ s|^"([^"]*)"$|$1|gmxo;
+        if(substr($v,0,1) eq '"') {
+            $v =~ s|^"([^"]*)"$|$1|gmxo;
+        }
         if(!defined $conf->{$k}) {
             $conf->{$k} = $v;
         } elsif(ref $conf->{$k} eq 'ARRAY') {
@@ -1018,7 +1023,7 @@ sub load_any {
     my($options) = @_;
     my $result = {};
     for my $f (@{$options->{'files'}}) {
-        my $config = Thruk::Config::read_config_file($f);
+        my $config = read_config_file($f);
         &{$options->{'filter'}}($config);
         $result->{$f} = $config;
     }

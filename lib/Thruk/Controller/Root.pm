@@ -2,11 +2,7 @@ package Thruk::Controller::Root;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use URI::Escape qw/uri_escape/;
-use POSIX qw/strftime/;
-use JSON::XS qw/encode_json/;
-use Thruk::Utils::Filter;
 
 =head1 NAME
 

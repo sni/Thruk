@@ -22,6 +22,7 @@ use Data::Dumper;
 use JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX;
+use Thruk::Utils::Filter;
 
 ######################################
 
