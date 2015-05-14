@@ -247,6 +247,9 @@ sub get_config {
     my %configs = %{_load_any(\@files)};
     my %config  = %Thruk::Config::config;
     for my $file (@files) {
+        if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
+            print STDERR "reading config file: ".$file."\n";
+        }
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
@@ -947,7 +950,11 @@ sub _parse_rows {
         # simple key / value pairs
         my($k,$v) = split(/\s*=\s*/mxo, $line, 2);
         if(!defined $v) {
-            die("unknow config entry: ".$line." in ".$file);
+            # try split by space
+            ($k,$v) = split(/\s+/mxo, $line, 2);
+            if(!defined $v) {
+                die("unknow config entry: ".$line." in ".$file);
+            }
         }
         $v =~ s|^"([^"]*)"$|$1|gmxo;
         if(!defined $conf->{$k}) {
