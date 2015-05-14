@@ -1159,7 +1159,6 @@ root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
 script/append.make
 script/disable_debug_timer.sh
-script/dump_storable.pl
 script/enable_debug_timer.sh
 script/generate_timeperiod_transitions.pl
 script/nagexp
@@ -1181,7 +1180,6 @@ script/thruk_server.pl
 script/thruk_update.sh
 script/thruk_update_help.pl
 script/thruk_version.sh
-script/waitmax
 ssi/extinfo-header.ssi-tickets
 ssi/README
 ssi/status-header.ssi-pnp
@@ -1321,6 +1319,7 @@ t/data/userfiles/encoding_ok
 t/perlcriticrc
 t/TestUtils.pm
 t/timed_test.sh
+t/waitmax
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_backends_select_multi.tt
