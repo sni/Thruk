@@ -352,9 +352,9 @@ sub _run {
         if(!$ENV{'THRUK_JOB_ID'} && $self->{'opt'}->{'action'} && $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
             # create fake job
             my($id,$dir) = Thruk::Utils::External::_init_external($c);
+            ## no critic
             $SIG{CHLD} = 'DEFAULT';
             Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
-            ## no critic
             $ENV{'THRUK_JOB_ID'}  = $id;
             $ENV{'THRUK_JOB_DIR'} = $dir;
             ## use critic

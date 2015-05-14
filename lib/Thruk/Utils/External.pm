@@ -68,7 +68,9 @@ sub cmd {
     } else {
         _do_child_stuff($c, $dir, $id);
 
+        ## no critic
         $SIG{CHLD} = 'DEFAULT';
+        ## use critic
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
@@ -631,7 +633,9 @@ sub _init_external {
         }
     }
 
+    ## no critic
     $SIG{CHLD} = 'IGNORE';
+    ## use critic
 
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
