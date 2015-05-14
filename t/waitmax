@@ -9,6 +9,7 @@ my $pid = fork();
 die("fork: $!") unless defined $pid;
 if(!$pid) {
     exec(@ARGV);
+    exit(1);
 } else {
     $SIG{'ALRM'} = sub {
         kill(9, $pid);
