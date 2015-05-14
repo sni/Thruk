@@ -68,7 +68,6 @@ sub cmd {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
-
         local $SIG{CHLD} = 'DEFAULT';
 
         open STDERR, '>', $dir."/stderr";
@@ -129,7 +128,6 @@ sub perl {
     if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        local $SIG{CHLD} = 'DEFAULT';
         if(defined $conf->{'backends'}) {
             $c->{'db'}->disable_backends();
             $c->{'db'}->enable_backends($conf->{'backends'});
@@ -137,6 +135,7 @@ sub perl {
         eval {
             $c->stats->profile(begin => 'External::perl');
             _do_child_stuff($c, $dir, $id);
+            local $SIG{CHLD} = 'DEFAULT';
 
             do {
                 ## no critic
