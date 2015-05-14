@@ -81,7 +81,7 @@ BEGIN {
 
 ###########################################################
 # start test server
-my $cmd     = "THRUK_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+my $cmd     = "THRUK_CONFIG=".$local_dir." ./t/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
 ok($cmd, $cmd);
 $SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
 my $httppid = fork();
