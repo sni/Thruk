@@ -1501,6 +1501,9 @@ sub update_cron_file {
         return;
     }
 
+    # prevents 'No child processes' error
+    local $SIG{CHLD} = 'DEFAULT';
+
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);

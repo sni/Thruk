@@ -221,6 +221,7 @@ sub commit {
     # run pre hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
         $c->log->debug('pre save hook: '.$cmd);
         my $out = `$cmd`;
@@ -284,6 +285,7 @@ sub commit {
     # run post hook
     if($c and $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        local $SIG{CHLD}        = 'DEFAULT';
         system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
         if($? == -1) {
             Thruk::Utils::set_message( $c, 'fail_message', 'post save hook failed: '.$?.': '.$! );

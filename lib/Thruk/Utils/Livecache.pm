@@ -31,6 +31,7 @@ makes sure all shadownaemon processes are running
 
 sub check_shadow_naemon_procs {
     my($config, $c, $log_missing, $force) = @_;
+    local $SIG{CHLD} = 'DEFAULT';
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};

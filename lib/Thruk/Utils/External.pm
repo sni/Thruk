@@ -60,15 +60,15 @@ sub cmd {
 
     my($id,$dir) = _init_external($c);
     return unless $id;
-    local $SIG{CHLD} = 'IGNORE';
-    my $pid = fork();
+    my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir, $id);
-        local $SIG{CHLD} = 'DEFAULT';
+
+        $SIG{CHLD} = 'DEFAULT';
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
@@ -121,8 +121,7 @@ sub perl {
 
     my ($id,$dir) = _init_external($c);
     return unless $id;
-    local $SIG{CHLD} = 'IGNORE';
-    my $pid = fork();
+    my $pid       = fork();
     die "fork() failed: $!" unless defined $pid;
 
     if($pid) {
@@ -266,6 +265,9 @@ sub get_status {
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
+
+    # reap pending zombies
+    waitpid(-1, WNOHANG);
 
     if( -f $dir."/user" ) {
         my $user = read_file($dir."/user");
@@ -629,6 +631,8 @@ sub _init_external {
         }
     }
 
+    $SIG{CHLD} = 'IGNORE';
+
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
     $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c, 1);
@@ -650,9 +654,6 @@ sub _is_running {
     my $dir = shift;
 
     return 0 unless -s $dir."/pid";
-
-    # reap pending zombies
-    waitpid(-1, WNOHANG);
 
     my $pid = read_file($dir."/pid");
     if(kill(0, $pid) > 0) {

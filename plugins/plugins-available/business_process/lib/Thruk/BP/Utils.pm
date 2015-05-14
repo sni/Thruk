@@ -211,6 +211,7 @@ sub save_bp_objects {
         my $pkey;
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         if($cmd) {
+            local $SIG{CHLD}='';
             local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
             my $out = `$cmd 2>&1`;
             ($rc, $msg) = ($?, $out);
