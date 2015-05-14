@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use utf8;
 use Test::More;
-use Data::Dumper;
 use Encode qw/is_utf8/;
 
 BEGIN {

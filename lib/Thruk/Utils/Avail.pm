@@ -706,7 +706,7 @@ sub fix_and_sort_logs {
         $c->stats->profile(begin => "avail.pm fix timeperiod transitions timestamps");
         for my $l (@{$logs}) {
             if($l->{'type'} eq 'TIMEPERIOD TRANSITION') {
-                $l->{'time'} = floor(($l->{'time'}+30)/120) * 120;
+                $l->{'time'} = POSIX::floor(($l->{'time'}+30)/120) * 120;
             }
         }
         $c->stats->profile(end => "avail.pm fix timeperiod transitions timestamps");
@@ -723,7 +723,7 @@ sub fix_and_sort_logs {
                 open(my $fh2, '<', $fname) or die("cannot open file $fname: $!");
                 while(my $line = <$fh2>) {
                     if($line =~ m/^\[(\d+)\]\ TIMEPERIOD\ TRANSITION:(.*)/mxo) {
-                        my $t = floor(($1+30)/120) * 120;
+                        my $t = POSIX::floor(($1+30)/120) * 120;
                         print $fh '['.$t.'] TIMEPERIOD TRANSITION:'.$2."\n";
                     } else {
                         print $fh $line;

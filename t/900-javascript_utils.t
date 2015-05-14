@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 use File::Slurp qw/read_file/;
 use File::Temp qw/tempfile/;
 

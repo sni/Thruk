@@ -257,7 +257,7 @@ sub cmd {
         $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-        while(waitpid($pid, WNOHANG) == 0) {
+        while(POSIX::waitpid($pid, WNOHANG) == 0) {
             push @lines, <$rdr>;
         }
         $rc = $?;

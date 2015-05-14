@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
+use File::Slurp qw/read_file/;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -32,9 +32,10 @@ my $packages = _get_packages($files);
 for my $file (@{$files}) {
   my $modules = _get_modules($file);
   for my $mod (@{$modules}) {
+    next if _is_core_module($mod);
     $all_used->{$mod} = 1;
     next if $mod eq 'IO::Socket::SSL'; # optional
-    next if $mod eq 'DBI'                            and defined $reqs->{'mysql_support'}->{$mod};
+    next if $mod eq 'DBI' and defined $reqs->{'mysql_support'}->{$mod};
     $mod = $replace->{$mod} if defined $replace->{$mod};
     if(defined $reqs->{$mod}) {
       pass("$mod required by $file exists in Makefile.PL");
@@ -59,6 +60,29 @@ for my $file (@{$files}) {
     else {
       next if $mod =~ m/^Devel/mx;
       fail("$mod required by $file missing");
+    }
+  }
+
+  # try to remove some commonly unused modules
+  my $content = read_file($file);
+  if(grep/^\QCarp\E$/mx, @{$modules}) {
+    if($content !~ /confess|croak|cluck|longmess/mxi) {
+      fail("using Carp could be removed from $file");
+    }
+  }
+  if(grep/^\Qutf8\E$/mx, @{$modules}) {
+    if($content !~ /utf8::/mxi) {
+      fail("using utf8 could be removed from $file");
+    }
+  }
+  if(grep/^\QData::Dumper\E$/mx, @{$modules}) {
+    if($content !~ /Dumper\(/mxi) {
+      fail("using Data::Dumper could be removed from $file");
+    }
+  }
+  if(grep/^\QPOSIX\E$/mx, @{$modules}) {
+    if($content !~ /POSIX::/mxi) {
+      fail("using POSIX could be removed from $file");
     }
   }
 }
@@ -128,8 +152,10 @@ sub _get_modules {
   my $file     = shift;
   my $modules  = {};
   my $packages = {};
-  open(my $fh, '<', $file) or die("cannot open $file: $!");
-  while(my $line = <$fh>) {
+  my $content  = read_file($file);
+  # remove pod
+  $content =~ s|^=.*?^=cut||sgmx;
+  for my $line (split/\n+/mx, $content) {
     next if $line =~ m|^\s*\#|mx;
     if($line =~ m/(^|eval.*)\s*(use|require)\s+(\S+)/) {
       $modules->{$3} = 1;
@@ -150,7 +176,6 @@ sub _get_modules {
       $modules->{$mod} = 1;
     }
   }
-  close($fh);
   my @mods;
   for my $key (sort keys %{$modules}) {
     $key = _clean($key);
@@ -165,7 +190,6 @@ sub _get_modules {
     next if $key eq 'strict';
     next if $key eq 'warnings';
     next if $key eq 'utf8';
-    next if _is_core_module($key);
     push @mods, $key;
   }
   return \@mods;

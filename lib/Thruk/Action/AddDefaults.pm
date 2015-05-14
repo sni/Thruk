@@ -17,11 +17,11 @@ creates backend manager
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
+use Carp qw/confess/;
+use Data::Dumper qw/Dumper/;
 use JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
-use POSIX;
+use POSIX qw//;
 use Thruk::Utils::Filter;
 
 ######################################

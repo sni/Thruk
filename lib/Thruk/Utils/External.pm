@@ -263,7 +263,7 @@ sub get_status {
     confess("got no id") unless $id;
 
     # reap pending zombies
-    waitpid(-1, WNOHANG);
+    POSIX::waitpid(-1, WNOHANG);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;

@@ -1,10 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 use Log::Log4perl qw(:easy);
-
-$Data::Dumper::Sortkeys = 1;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};

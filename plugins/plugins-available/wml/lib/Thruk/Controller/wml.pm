@@ -2,8 +2,6 @@ package Thruk::Controller::wml;
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
 
 =head1 NAME
 

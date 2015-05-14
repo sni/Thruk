@@ -327,7 +327,7 @@ sub _draw_timestamp {
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
-    my $string       = strftime($c->config->{'datetime_format_trends'}, localtime($timestamp));
+    my $string       = POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($timestamp));
     my $string_width = $font_width * length($string);
 
     unless($smallimage) {
@@ -454,8 +454,8 @@ sub _draw_states {
 
                 "state"              => $state,
 
-                "start_human"        => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'start'})),
-                "end_human"          => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
+                "start_human"        => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'start'})),
+                "end_human"          => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
                 "start"              => $log->{'start'},
                 "end"                => $log->{'end'},
                 "plugin_output"      => $log->{'plugin_output'},
@@ -507,7 +507,7 @@ sub _draw_text {
     }
 
     # report start/end date
-    my $from_to = strftime($c->config->{'datetime_format_trends'}, localtime($start))." to ".strftime($c->config->{'datetime_format_trends'}, localtime($end));
+    my $from_to = POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($start))." to ".POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($end));
     $string_width  = length($from_to) * $font_width;
     $im->string(gdSmallFont,($drawing_width/2)-($string_width/2)+$drawing_x_offset,($font_height*2)+5,$from_to,$color);
 

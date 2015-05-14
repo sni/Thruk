@@ -1608,8 +1608,8 @@ sub _calculate_log {
 
         # convert time format
         if($self->{'report_options'}->{'timeformat'} ne '%s') {
-            $log->{'end'}   = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
-            $log->{'start'} = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
+            $log->{'end'}   = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
+            $log->{'start'} = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
         }
 
         push @{$self->{'log_output'}}, $log unless defined $log_entry->{'full_only'};
@@ -1701,13 +1701,13 @@ sub _get_break_timestr {
     my @localtime = localtime($timestamp);
 
     if($self->{'report_options'}->{'breakdown'} == BREAK_DAYS) {
-        return strftime('%Y-%m-%d', @localtime);
+        return POSIX::strftime('%Y-%m-%d', @localtime);
     }
     elsif($self->{'report_options'}->{'breakdown'} == BREAK_WEEKS) {
-        return strftime('%G-WK%V', @localtime);
+        return POSIX::strftime('%G-WK%V', @localtime);
     }
     elsif($self->{'report_options'}->{'breakdown'} == BREAK_MONTHS) {
-        return strftime('%Y-%m', @localtime);
+        return POSIX::strftime('%Y-%m', @localtime);
     }
     die("report failed, debug data is available in ".$self->_write_debug_file("unknown break definition"));
     return;
@@ -1724,10 +1724,10 @@ sub _set_breakpoints {
     my $start = $self->{'report_options'}->{'start'} - 86400;
     # round to next 0:00
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
-    $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
+    $cur = POSIX::mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
     while($cur < $self->{'report_options'}->{'end'}) {
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
-        $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
+        $cur = POSIX::mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
         push @{$self->{'breakpoints'}}, $cur if $cur >= $start;
         $cur = $cur + 86400;
     }

@@ -1,8 +1,6 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
-$Data::Dumper::Sortkeys = 1;
 
 plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};

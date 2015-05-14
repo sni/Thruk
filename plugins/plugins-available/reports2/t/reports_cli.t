@@ -2,7 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 use URI::Escape;
-use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;

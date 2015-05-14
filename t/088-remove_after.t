@@ -2,7 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 use POSIX qw/mktime/;
-use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -25,7 +24,7 @@ sub check_remove_afters {
         chomp($line);
         if($line =~ m/REMOVE\s*AFTER:\s*([\d]+)\.([\d]+)\.([\d]+)/mxi) {
             my($day,$month,$year) = ($1,$2,$3);
-            my $ts = mktime(0, 0, 0, $day, ($month-1), ($year-1900));
+            my $ts = POSIX::mktime(0, 0, 0, $day, ($month-1), ($year-1900));
             if(!$ts || $ts < 0 || $ts < $now) {
                 fail($line.' -> '.(scalar localtime($ts)));
             } else {

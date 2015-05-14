@@ -3,8 +3,6 @@ package Thruk::BP::Functions;
 use strict;
 use warnings;
 
-use Carp;
-
 =head1 NAME
 
 Thruk::BP::Functions - functions used to calculate business processes

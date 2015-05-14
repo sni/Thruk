@@ -3,7 +3,6 @@ package Thruk::Controller::dashboard;
 use strict;
 use warnings;
 use utf8;
-use Carp;
 use List::Compare;
 use List::MoreUtils;
 use Thruk::Utils::Status;

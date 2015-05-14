@@ -53,7 +53,6 @@ use Carp qw/confess/;
 use POSIX qw(tzset);
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
-use Data::Dumper;
 use Module::Load qw/load/;
 use Thruk::Context;
 use Thruk::Utils;

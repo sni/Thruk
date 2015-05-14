@@ -4,6 +4,9 @@
 # use this as your own, or make modifications.
 ##############################################################################
 
+theme    = pbp || security || bugs || pulp
+severity = 4
+
 [Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData]
 severity   = 3
 
@@ -282,3 +285,37 @@ severity   = 5
 
 [Perl::Critic::Policy::Variables::RequireNegativeIndices]
 severity   = 4
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitArrayAssignAref]
+severity   = 4
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitDuplicateHashKeys]
+severity   = 4
+
+[Perl::Critic::Policy::Documentation::RequireEndBeforeLastPod]
+severity   = 4
+
+[Perl::Critic::Policy::Modules::ProhibitPOSIXimport]
+severity   = 4
+
+[Perl::Critic::Policy::CodeLayout::RequireTrailingCommaAtNewline]
+severity   = 4
+
+[Perl::Critic::Policy::CodeLayout::RequireFinalSemicolon]
+severity   = 4
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitEmptyCommas]
+severity   = 4
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitNullStatements]
+severity   = 4
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitUnknownBackslash]
+severity   = 4
+
+[Perl::Critic::Policy::Modules::RequireVersionVar]
+severity   = 1
+
+[ControlStructures::ProhibitPostfixControls]
+allow = if until
+

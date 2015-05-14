@@ -2,7 +2,6 @@ package Thruk::Controller::error;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Carp qw/cluck confess longmess/;
 
 =head1 NAME

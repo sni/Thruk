@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
 use File::Slurp qw/read_file/;
 
