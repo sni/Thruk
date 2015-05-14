@@ -21,7 +21,7 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     # which style to display?
     my $allowed_subpages = {

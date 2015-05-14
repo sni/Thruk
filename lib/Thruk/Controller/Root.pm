@@ -151,7 +151,7 @@ page: /thruk/side.html
 
 sub thruk_side_html {
     my( $c ) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     Thruk::Utils::check_pid_file($c);
     Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 

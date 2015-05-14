@@ -49,7 +49,7 @@ sub add_routes {
 sub index {
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'bp_modules_loaded'}) {
         require Data::Dumper;

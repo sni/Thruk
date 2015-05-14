@@ -73,7 +73,7 @@ page: /thruk/cgi-bin/dashboard.cgi
 sub index {
     my( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     my $style = $c->req->parameters->{'style'} || 'dashboard';
     if($style ne 'dashboard') {

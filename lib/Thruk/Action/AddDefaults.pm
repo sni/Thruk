@@ -405,6 +405,7 @@ sub add_defaults {
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
+    $c->stash->{'enable_shinken_features'} = 0;
     if(exists $c->config->{'enable_shinken_features'}) {
         $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
     }
@@ -436,7 +437,7 @@ sub add_defaults {
            or $c->req->path_info eq $product_prefix.'/docs'
            or $c->req->path_info eq $product_prefix.'\\/docs\\/' ) {
             $c->stash->{'no_auto_reload'} = 1;
-            return;
+            return 1;
         }
         # redirect to backends manager if admin user
         if( $c->config->{'use_feature_configtool'} ) {
@@ -501,7 +502,7 @@ sub add_defaults {
         # side.html and some other pages should not be redirect to the error page on backend errors
         _set_possible_backends($c, $disabled_backends);
         print STDERR $@ if $c->config->{'thruk_debug'};
-        return if $safe == 1;
+        return 1 if $safe == 1;
         $c->log->debug("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -518,14 +519,14 @@ sub add_defaults {
     }
     _set_possible_backends($c, $disabled_backends);
 
-    ###############################
-    die_when_no_backends($c);
-
     $c->stats->profile(end => "AddDefaults::get_proc_info");
 
     ###############################
     # set some more roles
     Thruk::Utils::set_dynamic_roles($c);
+
+    ###############################
+    die_when_no_backends($c);
 
     ###############################
     # do we have only shinken backends?
@@ -636,7 +637,7 @@ sub add_defaults {
 
     ###############################
     $c->stats->profile(end => "AddDefaults::add_defaults");
-    return;
+    return 1;
 }
 
 ########################################

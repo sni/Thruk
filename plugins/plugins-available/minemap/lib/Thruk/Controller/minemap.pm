@@ -54,7 +54,7 @@ minemap index page
 sub index {
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);

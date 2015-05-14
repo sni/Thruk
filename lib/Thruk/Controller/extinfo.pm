@@ -23,7 +23,7 @@ Thruk Controller.
 sub index {
     my( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     my $type = $c->req->parameters->{'type'} || 0;
 

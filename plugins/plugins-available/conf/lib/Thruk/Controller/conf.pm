@@ -53,7 +53,7 @@ sub add_routes {
 sub index { # Safe Defaults required for changing backends
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
 
     if(!$c->config->{'conf_modules_loaded'}) {
         load Thruk::Utils::Conf;

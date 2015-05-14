@@ -213,33 +213,41 @@ sub _dispatcher {
 
     ###############################################
     # route cgi request
-    eval {
-        my $path_info = $c->req->path_info;
-        if($self->{'routes'}->{$path_info}) {
-            my $route = $self->{'routes'}->{$path_info};
-            if(ref $route eq '') {
-                my($class) = $route =~ m|^(.*)::.*?$|mx;
-                load $class;
-                $self->{'routes'}->{$path_info} = \&{$route};
-                $route = $self->{'routes'}->{$path_info};
+    unless($c->{'errored'}) {
+        eval {
+            my $path_info = $c->req->path_info;
+            my $rc;
+            if($self->{'routes'}->{$path_info}) {
+                my $route = $self->{'routes'}->{$path_info};
+                if(ref $route eq '') {
+                    my($class) = $route =~ m|^(.*)::.*?$|mx;
+                    load $class;
+                    $self->{'routes'}->{$path_info} = \&{$route};
+                    $route = $self->{'routes'}->{$path_info};
+                }
+                $rc = &{$route}($c);
             }
-            &{$route}($c);
-        }
-        else {
-            return([404, ['Content-Type' => 'text/plain', 'Content-Length' => 9], ['not found']]);
-        }
-        Thruk::Action::AddDefaults::end($c);
+            else {
+                return([404, ['Content-Type' => 'text/plain', 'Content-Length' => 9], ['not found']]);
+            }
+            if($rc) {
+                Thruk::Action::AddDefaults::end($c);
 
-        ###########################################
-        # request post processing and rendering
-        unless($c->{'rendered'}) {
-            Thruk::Views::ToolkitRenderer::render_tt($c);
+                ###################################
+                # request post processing and rendering
+                unless($c->{'rendered'}) {
+                    Thruk::Views::ToolkitRenderer::render_tt($c);
+                }
+            }
+        };
+        if($@) {
+            $c->error($@);
+            $c->log->error($@);
+            Thruk::Controller::error::index($c, 13);
         }
-    };
-    if($@) {
-        $c->error($@);
-        $c->log->error($@);
-        Thruk::Controller::error::index($c, 13);
+    }
+    unless($c->{'rendered'}) {
+        Thruk::Action::AddDefaults::end($c);
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }
 

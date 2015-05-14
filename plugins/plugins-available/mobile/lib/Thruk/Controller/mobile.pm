@@ -42,7 +42,7 @@ sub add_routes {
 sub index {
     my ( $c ) = @_;
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     if(defined $c->req->parameters->{'data'}) {
         my $type   = $c->req->parameters->{'data'};

@@ -279,6 +279,7 @@ sub index {
     $c->res->headers->last_modified(time);
     $c->res->headers->expires(time - 3600);
     $c->res->headers->header(cache_control => "public, max-age=0");
+    $c->{'rendered'} = 0; # force rerendering
     return 1;
 }
 

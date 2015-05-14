@@ -3,8 +3,9 @@ package Thruk::Context;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Thruk::Request;
 use Thruk::Authentication::User;
+use Thruk::Controller::error;
+use Thruk::Request;
 use Thruk::Request::Cookie;
 use Thruk::Stats;
 use Plack::Util::Accessor qw(app db req res stash config user stats obj_db env);
@@ -98,8 +99,8 @@ detach to other controller
 =cut
 sub detach {
     if(!$_[0]->{'errored'} && $_[1] =~ m|/error/index/(\d+)$|mx) {
-        use Thruk::Controller::error;
-        return(Thruk::Controller::error::index($_[0], $1));
+        Thruk::Controller::error::index($_[0], $1);
+        return;
     }
     confess("detach: ".$_[1]." at ".$_[0]->req->url->path);
 }
@@ -259,7 +260,7 @@ sub redirect_to {
     $c->res->body('This item has moved');
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
-    return($c);
+    return;
 }
 
 =head2 url_with

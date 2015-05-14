@@ -51,7 +51,7 @@ sub outages_pbimp_index {
         return $c->detach('/error/index/21');
     }
 
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     _process_outagespbimp($c);
 
