@@ -98,6 +98,7 @@ lib/Thruk/Utils/Livecache.pm
 lib/Thruk/Utils/Log.pm
 lib/Thruk/Utils/Menu.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
+lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm
 lib/Thruk/Utils/Status.pm
 lib/Thruk/Utils/Trends.pm
