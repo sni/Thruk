@@ -8,3 +8,4 @@
  - ENV: CATALYST_SERVER -> PLACK_TEST_EXTERNALSERVER_URI
  - ENV: CATALYST_CONFIG -> THRUK_CONFIG
  - remove mongodb
+ - remove startup page

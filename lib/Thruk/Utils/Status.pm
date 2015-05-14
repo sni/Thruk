@@ -13,7 +13,6 @@ Status Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use utf8;
 
 ##############################################
 
