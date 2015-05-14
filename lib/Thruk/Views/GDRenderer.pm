@@ -22,11 +22,13 @@ sub register {
 =cut
 sub render_gd {
     my($c) = @_;
+    $c->stats->profile(begin => "render_gd");
     my $gd_image = $c->stash->{gd_image} or die('no gd_image found in stash');
     $c->res->content_type('image/png');
     my $output = $gd_image->png;
     $c->{'rendered'} = 1;
     $c->res->body($output);
+    $c->stats->profile(end => "render_gd");
     return($output);
 }
 

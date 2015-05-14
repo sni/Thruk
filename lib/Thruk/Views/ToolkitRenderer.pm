@@ -27,10 +27,12 @@ sub register {
 sub render_tt {
     my($c) = @_;
     my $template = $c->stash->{'template'};
+    $c->stats->profile(begin => "render_tt: ".$template);
     my $output = render($c, $template);
     $c->{'rendered'} = 1;
     $c->res->content_type('text/html; charset=utf-8') unless $c->res->content_type();
     $c->res->body($output);
+    $c->stats->profile(end => "render_tt: ".$template);
     return($output);
 }
 
@@ -42,6 +44,7 @@ sub render_tt {
 sub render {
     my($c, $template) = @_;
     my $tt = $c->app->{'tt'};
+    $c->stats->profile(begin => "render: ".$template);
 
     if($c->stash->{'additional_template_paths'}) {
         $tt->context->{'LOAD_TEMPLATES'}->[0]->{'INCLUDE_PATH'} =
@@ -56,9 +59,9 @@ sub render {
         $c->stash,
         \$output,
     ) || do {
-        my $err = $tt->error.' on '.$template;
-        die($err);
+        die($tt->error.' on '.$template);
     };
+    $c->stats->profile(end => "render: ".$template);
     return(encode_utf8($output));
 }
 

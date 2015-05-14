@@ -23,10 +23,12 @@ sub register {
 sub render_excel {
     my($c) = @_;
     my $template = $c->stash->{'template'};
+    $c->stats->profile(begin => "render_excel: ".$template);
     my $output = render($c, $template);
     $c->{'rendered'} = 1;
     $c->res->content_type('application/x-msexcel');
     $c->res->body($output);
+    $c->stats->profile(end => "render_excel: ".$template);
     return($output);
 }
 
@@ -37,6 +39,7 @@ sub render_excel {
 =cut
 sub render {
     my($c, $template) = @_;
+    $c->stats->profile(begin => "render: ".$template);
     my $worksheets = Thruk::Views::ToolkitRenderer::render($c, $template);
     require IO::String;
     require Excel::Template;
@@ -49,6 +52,7 @@ sub render {
         confess $@;
     }
     my $output = ''.$excel_template->output;
+    $c->stats->profile(end => "render: ".$template);
     return($output);
 }
 

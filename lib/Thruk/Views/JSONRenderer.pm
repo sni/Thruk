@@ -23,11 +23,13 @@ sub register {
 =cut
 sub render_json {
     my($c, $data) = @_;
+    $c->stats->profile(begin => "render_json");
     my $encoder = $c->app->{'jsonencoder'} || _get_encoder($c);
     my $output = $encoder->encode($data);
     $c->{'rendered'} = 1;
     $c->res->content_type('application/json;charset=UTF-8');
     $c->res->body($output);
+    $c->stats->profile(end => "render_json");
     return($output);
 }
 
