@@ -875,7 +875,7 @@ sub _replace_css_img {
         if($@) {
             $text = 'data:'.$datatype.";base64,".encode_base64(encode_utf8($data), '');
         }
-        return "$pre$a$text$b$post";
+        return "$pre$aa$text$bb$post";
     }
     croak("_replace_css_img($baseurl, ".($report_base_url||'').", $css) $file: unknown url format") if $ENV{'TEST_AUTHOR'};
     return($pre.$post);
