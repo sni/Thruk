@@ -113,13 +113,6 @@ sub _build_app {
 
     #&timing_breakpoint('startup()');
 
-    #if(Thruk->debug) {
-    #    $ENV{'THRUK_PERFORMANCE_DEBUG'} = 3 unless defined $ENV{'THRUK_PERFORMANCE_DEBUG'};
-    #}
-    #elsif(Thruk->verbose) {
-    #    $ENV{'THRUK_PERFORMANCE_DEBUG'} = 1 unless defined $ENV{'THRUK_PERFORMANCE_DEBUG'};
-    #}
-
     $self->{'errors'} = [];
 
     $config = $Thruk::Utils::IO::config;
