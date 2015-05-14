@@ -60,7 +60,6 @@ sub new {
     };
     bless($self, $class);
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
-    #if(Thruk->debug) { $self->stats->enable(); }
     $self->stats->enable();
     return($self);
 }
