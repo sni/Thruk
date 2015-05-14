@@ -61,7 +61,7 @@ sub new {
         $username = $c->config->{'default_cli_user_name'};
     }
 
-    if(!defined $username or $username eq '') {
+    if(!defined $username || $username eq '') {
         return;
     }
 
@@ -92,7 +92,7 @@ sub new {
                       'authorized_for_configuration_information',
                       'authorized_for_system_commands',
                       'authorized_for_system_information',
-                      'authorized_for_read_only'
+                      'authorized_for_read_only',
                     ];
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {

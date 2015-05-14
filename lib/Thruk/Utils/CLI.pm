@@ -64,11 +64,13 @@ sub new {
     }
 
     # set some env defaults
+    ## no critic
     $ENV{'THRUK_SRC'}        = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
+    ## use critic
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
         $options->{'remoteurl_specified'} = 0;
@@ -206,7 +208,7 @@ sub request_url {
         return $result->{'result'};
     }
 
-    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} && $c->stash->{'remote_user'});
     local $ENV{'NO_EXTERNAL_JOBS'} = 1;
 
     # fork setting may be overriden in child requests
@@ -323,7 +325,7 @@ sub _run {
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
-        if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
+        if(!defined $result && $self->{'opt'}->{'remoteurl_specified'}) {
             _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
@@ -347,15 +349,17 @@ sub _run {
             print STDERR "command failed";
             return 1;
         }
-        if(!$ENV{'THRUK_JOB_ID'} and $self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
+        if(!$ENV{'THRUK_JOB_ID'} && $self->{'opt'}->{'action'} && $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
             # create fake job
             my($id,$dir) = Thruk::Utils::External::_init_external($c);
             Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
+            ## no critic
             $ENV{'THRUK_JOB_ID'}  = $id;
             $ENV{'THRUK_JOB_DIR'} = $dir;
+            ## use critic
             Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
         }
-        $result = $self->_from_local($c, $self->{'opt'})
+        $result = $self->_from_local($c, $self->{'opt'});
     }
 
     # no output?
@@ -384,7 +388,7 @@ sub _request {
         data => encode_json({
             credential => $credential,
             options    => $options,
-        })
+        }),
     });
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
@@ -449,7 +453,9 @@ sub _dummy_c {
 sub _from_local {
     my($self, $c, $options) = @_;
     _debug("_from_local()") if $Thruk::Utils::CLI::verbose >= 2;
+    ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    ## use critic
     return _run_commands($c, $options, 'local');
 }
 
@@ -472,10 +478,10 @@ sub _from_fcgi {
     # check credentials
     my $res = {};
     if(   !defined $c->config->{'secret_key'}
-       or !defined $data->{'credential'}
-       or $c->config->{'secret_key'} ne $data->{'credential'}) {
+       || !defined $data->{'credential'}
+       || $c->config->{'secret_key'} ne $data->{'credential'}) {
         my $msg = "authorization failed, ". $c->req->url." does not accept this key.\n";
-        if(!defined $data->{'credential'} or $data->{'credential'} eq '') {
+        if(!defined $data->{'credential'} || $data->{'credential'} eq '') {
             $msg = "authorization failed, no auth key specified for ". $c->req->url."\n";
         }
         $res = {
@@ -719,7 +725,7 @@ sub _cmd_listbackends {
         my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         $addr    =~ s|/cgi-bin/remote.cgi$||mx;
         $output .= sprintf("%-4s %-8s %-10s %s",
-                (!defined $peer->{'hidden'} or $peer->{'hidden'} == 0) ? ' * ' : '',
+                (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? ' * ' : '',
                 $key,
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
                 $addr,
@@ -834,7 +840,7 @@ sub _cmd_report {
         require Thruk::Utils::Reports;
     };
     if($@) {
-        return("reports plugin is not enabled.\n", 1)
+        return("reports plugin is not enabled.\n", 1);
     }
     my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     # breaks tests on centos 6/7
@@ -859,7 +865,7 @@ sub _cmd_report {
                     $output = read_file($report_file);
                 } else {
                     my $errors = read_file($logfile);
-                    return("generating report failed:\n".$errors, 1)
+                    return("generating report failed:\n".$errors, 1);
                 }
             }
         }
@@ -872,7 +878,7 @@ sub _cmd_report {
     #}
 
     $c->stats->profile(end => "_cmd_report()");
-    return($output, 0)
+    return($output, 0);
 }
 
 ##############################################
@@ -1044,7 +1050,7 @@ sub _cmd_url {
     my($c, $url, $opt) = @_;
     $c->stats->profile(begin => "_cmd_url()");
 
-    if($opt->{'all_inclusive'} and !$c->config->{'use_feature_reports'}) {
+    if($opt->{'all_inclusive'} && !$c->config->{'use_feature_reports'}) {
         return("all-inclusive options requires the reports plugin to be enabled", 1);
     }
 
@@ -1055,7 +1061,7 @@ sub _cmd_url {
     my @res = request_url($c, $url);
 
     # All Inclusive?
-    if($res[0] == 200 && $res[1]->{'result'} and $opt->{'all_inclusive'}) {
+    if($res[0] == 200 && $res[1]->{'result'} && $opt->{'all_inclusive'}) {
         require Thruk::Utils::Reports::Render;
         $Thruk::Utils::Reports::Render::c = $c;
         $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
@@ -1082,7 +1088,7 @@ sub _cmd_import_logs {
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
-    if($mode eq 'import' and !$opt->{'yes'}) {
+    if($mode eq 'import' && !$opt->{'yes'}) {
         print "import removes current cache and imports new logfile data.\n";
         print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
@@ -1277,8 +1283,8 @@ sub _cmd_configtool {
             # use display instead of path to make cascaded http backends work
             $transfer->{$f->{'display'}} = { mtime => $f->{'mtime'} };
             if(   !defined $remotefiles->{$f->{'display'}}
-               or !defined $remotefiles->{$f->{'display'}}->{'mtime'}
-               or $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
+               || !defined $remotefiles->{$f->{'display'}}->{'mtime'}
+               || $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
                 $transfer->{$f->{'display'}}->{'content'} = read_file($f->{'path'});
             }
         }
@@ -1339,7 +1345,7 @@ sub _cmd_configtool {
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;
-            if($file and !$file->readonly()) {
+            if($file && !$file->readonly()) {
                 # update file
                 Thruk::Utils::IO::write($path, $content, $mtime);
                 $saved = 'updated';
@@ -1347,7 +1353,7 @@ sub _cmd_configtool {
                 # new file
                 if($path =~ m/^\Q$filesroot\E/mx) {
                     $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
-                    if(defined $file and !$file->readonly()) {
+                    if(defined $file && !$file->readonly()) {
                         Thruk::Utils::IO::write($path, $content, $mtime);
                         $saved = 'created';
                     }
@@ -1367,7 +1373,7 @@ sub _cmd_configtool {
         my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
         for my $f (@{$deleted}) {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
-            if($file and !$file->readonly()) {
+            if($file && !$file->readonly()) {
                 unlink($f);
 
                 # create log message

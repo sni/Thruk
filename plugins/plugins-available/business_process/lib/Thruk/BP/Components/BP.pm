@@ -254,8 +254,11 @@ sub set_file {
     $self->{'file'}     = Thruk::BP::Utils::base_folder($c).'/'.$basename;
     $self->{'datafile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.runtime';
     $self->{'editfile'} = $c->config->{'var_path'}.'/bp/'.$basename.'.edit';
-    $basename =~ m/(\d+).tbp/mx;
-    $self->{'id'}       = $1;
+    if($basename =~ m/(\d+).tbp/mx) {
+        $self->{'id'} = $1;
+    } else {
+        die("wrong file format in ".$basename);
+    }
     return;
 }
 
@@ -594,7 +597,7 @@ sub bulk_fetch_live_data {
         'hosts'         => $hostdata,
         'services'      => $servicedata,
         'hostgroups'    => $hostgroupdata,
-        'servicegroups' => $servicegroupdata
+        'servicegroups' => $servicegroupdata,
     });
 }
 

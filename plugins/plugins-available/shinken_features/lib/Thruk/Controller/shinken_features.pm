@@ -47,7 +47,7 @@ outages impacts index page
 sub outages_pbimp_index {
     my ( $c ) = @_;
 
-    unless($c->stash->{'enable_shinken_features'}) {
+    if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
 
@@ -71,7 +71,7 @@ shinken status index page
 sub shinken_status {
     my ( $c ) = @_;
 
-    unless($c->stash->{'enable_shinken_features'}) {
+    if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
 
@@ -91,10 +91,10 @@ sub _process_outagespbimp {
 
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    is_problem => 1
+                                                    is_problem => 1,
                                                   ]);
     my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    is_problem => 1
+                                                    is_problem => 1,
                                                   ]);
 
     my $priorities = [];
@@ -284,7 +284,7 @@ businessview index page
 sub businessview_index {
     my ( $c ) = @_;
 
-    unless($c->stash->{'enable_shinken_features'}) {
+    if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
 
@@ -297,10 +297,10 @@ sub businessview_index {
 
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    got_business_rule => 1
+                                                    got_business_rule => 1,
                                                   ]);
     my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    got_business_rule => 1
+                                                    got_business_rule => 1,
                                                   ]);
 
     # First for hosts

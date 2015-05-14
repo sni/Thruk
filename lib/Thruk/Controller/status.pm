@@ -33,7 +33,7 @@ sub index {
                         };
     my $style = $c->req->parameters->{'style'} || '';
 
-    if($style ne '' and ! defined $allowed_subpages->{$style}) {
+    if($style ne '' && !defined $allowed_subpages->{$style}) {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
@@ -227,7 +227,7 @@ sub _process_raw_request {
                 my $total = scalar @{$data};
                 Thruk::Backend::Manager::_page_data(undef, $c, $data);
                 my $list = [];
-                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } };
+                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
                 $json = { 'data' => $list, 'total' => $total };
             }
             return $c->render(json => $json);
@@ -384,7 +384,7 @@ sub _process_details_page {
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns  );
 
-    if(scalar @{$services} == 0 and !$c->stash->{'has_service_filter'}) {
+    if(scalar @{$services} == 0 && !$c->stash->{'has_service_filter'}) {
         # try to find matching hosts, maybe we got some hosts without service
         my $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
         $c->stash->{'num_hosts'} = $host_stats->{'total'};
@@ -394,7 +394,7 @@ sub _process_details_page {
             my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail'});
             $url =~ s/&amp;/&/gmx;
             Thruk::Utils::set_message( $c, 'info_message', 'No services found for this filter, redirecting to host view.' );
-            return $c->redirect_to($url)
+            return $c->redirect_to($url);
         }
     }
 
@@ -907,7 +907,7 @@ sub _process_combined_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';;
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # services
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;

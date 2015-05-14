@@ -427,7 +427,7 @@ sub do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and (!$c->stash->{'minimal'} or $c->stash->{'play_sounds'}) and ( $prefix eq 'dfl_' or $prefix eq '')) {
+    if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq '')) {
         Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
@@ -467,7 +467,7 @@ fill host and service totals box
 sub fill_totals_box {
     my( $c, $hostfilter, $servicefilter, $force ) = @_;
 
-    return 1 if($c->stash->{'no_totals'} and !$force);
+    return 1 if($c->stash->{'no_totals'} && !$force);
 
     # host status box
     my $host_stats    = {};
@@ -905,27 +905,27 @@ sub single_search {
                 or ($op eq '='  and ($now - $c->stash->{'last_program_restart'}) == $value)
                ) {
                 push @hostfilter,    { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value }
-                                                        ]
+                                                          last_state_change => { $rop => $now - $value },
+                                                        ],
                                               },
-                                              { last_state_change => { '=' => 0 } }
+                                              { last_state_change => { '=' => 0 } },
                                               ],
                                      };
                 push @servicefilter, { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value }
-                                                        ]
+                                                          last_state_change => { $rop => $now - $value },
+                                                        ],
                                               },
                                               { last_state_change => { '=' => 0 } },
                                               ],
                                      };
             } else {
                 push @hostfilter,    { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value }
-                                               ]
+                                                 last_state_change => { $rop => $now - $value },
+                                               ],
                                      };
                 push @servicefilter, { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value }
-                                               ]
+                                                 last_state_change => { $rop => $now - $value },
+                                               ],
                                      };
             }
         }
@@ -941,8 +941,8 @@ sub single_search {
             if($op eq '!=')  { $cop = '-and' }
             if($op eq '!~~') { $cop = '-and' }
             push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
-                                                  custom_variables => { $op => $pre." ".$value }
-                                          ]
+                                                  custom_variables => { $op => $pre." ".$value },
+                                          ],
                                  };
         }
         else {
@@ -980,7 +980,7 @@ sub get_host_statustype_filter {
     my @hoststatusfilter;
     my @servicestatusfilter;
 
-    $number = 15 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 15;
+    $number = 15 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 15;
     my $hoststatusfiltername = 'All';
     if( $number and $number != 15 ) {
         my @hoststatusfiltername;
@@ -1032,7 +1032,7 @@ sub get_host_prop_filter {
     my @host_prop_filter;
     my @host_prop_filter_service;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
+    $number = 0 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 67108863;
     my $host_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @host_prop_filtername;
@@ -1194,7 +1194,7 @@ sub get_service_statustype_filter {
     my @servicestatusfilter;
     my @servicestatusfiltername;
 
-    $number = 31 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 31;
+    $number = 31 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 31;
     my $servicestatusfiltername = 'All';
     if( $number and $number != 31 ) {
         $c->stash->{'has_service_filter'} = 1 if $c;
@@ -1245,7 +1245,7 @@ sub get_service_prop_filter {
     my @service_prop_filter;
     my @service_prop_filtername;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
+    $number = 0 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 67108863;
     my $service_prop_filtername = 'Any';
     if( $number > 0 ) {
         $c->stash->{'has_service_filter'} = 1 if $c;
@@ -1632,8 +1632,10 @@ sub redirect_view {
 
     my $new = 'status.cgi';
     my $uri = $c->req->url();
-    $uri =~ m/\/cgi\-bin\/(.*?\.cgi)/mx;
-    my $old = $1 || 'status.cgi';
+    my $old = 'status.cgi';
+    if($uri =~ m/\/cgi\-bin\/(.*?\.cgi)/mx) {
+        $old = $1;
+    }
 
     VIEW_SEARCH:
     for my $groupname (keys %{$c->stash->{'additional_views'}}) {
@@ -1871,7 +1873,7 @@ sub set_favicon_counter {
     my $totals = {
             'red'    => $total_red,
             'yellow' => $total_yellow,
-            'orange' => $total_orange
+            'orange' => $total_orange,
     };
 
     return $totals;
@@ -1961,10 +1963,11 @@ sub serveraction {
     my $host    = $c->req->parameters->{'host'};
     my $service = $c->req->parameters->{'service'};
     my $link    = $c->req->parameters->{'link'};
+    my $action;
 
-    $link =~ m/^server:\/\/(.*)$/mx;
-    my $action = $1;
-    if(!$action) {
+    if($link =~ m/^server:\/\/(.*)$/mx) {
+        $action = $1;
+    } else {
         return(1, 'not a valid customaction url');
     }
 

@@ -35,7 +35,7 @@ sub check_shadow_naemon_procs {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
         # faster check if nothing failed
-        next if(!$force and $c and !$c->stash->{'failed_backends'}->{$key});
+        next if(!$force && $c && !$c->stash->{'failed_backends'}->{$key});
         my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
         my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         my $started = 0;
@@ -154,8 +154,8 @@ do the initial start unless it has been started already or isn't used at all
 =cut
 sub check_initial_start {
     my($c, $config, $background) = @_;
-    return if(!$config->{'use_shadow_naemon'} or $config->{'_shadow_naemon_started'});
-    return if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'FastCGI' and $ENV{'THRUK_SRC'} ne 'DebugServer'));
+    return if(!$config->{'use_shadow_naemon'} || $config->{'_shadow_naemon_started'});
+    return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
 
     #&timing_breakpoint("livecache check_initial_start");
 
@@ -208,6 +208,8 @@ sub _start_shadownaemon_for_peer {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

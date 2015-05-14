@@ -187,7 +187,6 @@ returns peer by name
 sub get_peer_by_name {
     my($self, $name) = @_;
     return $self->{'by_name'}->{$name};
-    return;
 }
 
 ##########################################################
@@ -361,16 +360,14 @@ sub get_scheduling_queue {
 
     my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                            { 'check_options' => { '!=' => '0' }}]
-                                                 }
-                                                 ]
+                                                            { 'check_options' => { '!=' => '0' }}],
+                                                 }],
                                       );
     my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                         { 'check_options' => { '!=' => '0' }}]
-                                              }
-                                              ],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } }
+                                                         { 'check_options' => { '!=' => '0' }}],
+                                              }],
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
                                     );
 
     my $queue = [];
@@ -396,11 +393,10 @@ wrapper around get_performance_stats
 =cut
 
 sub get_performance_stats {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_performance_stats', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_performance_stats', \@args );
 }
 
 ########################################
@@ -414,11 +410,10 @@ wrapper around get_hosts
 =cut
 
 sub get_hosts {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_hosts', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_hosts', \@args );
 }
 
 ########################################
@@ -432,11 +427,10 @@ wrapper around get_services
 =cut
 
 sub get_services {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_services', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_services', \@args );
 }
 
 ########################################
@@ -481,9 +475,9 @@ respect permissions
 =cut
 
 sub get_hostgroup_names_from_hosts {
-    my $self = shift; # keep this
-    if(scalar @_ == 0) { return $self->get_hostgroup_names(); }
-    my $hosts = $self->get_hosts( @_, 'columns', ['groups'] );
+    my($self, @args) = @_;
+    if(scalar @args == 0) { return $self->get_hostgroup_names(); }
+    my $hosts = $self->get_hosts( @args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
         for my $group (@{$host->{'groups'}}) {
@@ -506,9 +500,9 @@ respect permissions
 =cut
 
 sub get_servicegroup_names_from_services {
-    my $self = shift; # keep this
-    if(scalar @_ == 0) { return $self->get_servicegroup_names(); }
-    my $services = $self->get_services( @_, 'columns', ['groups'] );
+    my($self, @args) = @_;
+    if(scalar @args == 0) { return $self->get_servicegroup_names(); }
+    my $services = $self->get_services( @args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
         for my $group (@{$service->{'groups'}}) {
@@ -530,10 +524,10 @@ runs reconnect on all peers
 =cut
 
 sub reconnect {
-    my $self = shift; # keep this
+    my($self, @args) = @_;
     my $c = $Thruk::Backend::Manager::c;
     eval {
-        $self->_do_on_peers( 'reconnect', \@_);
+        $self->_do_on_peers( 'reconnect', \@args);
     };
     $c->log->debug($@) if $@;
     return 1;
@@ -575,7 +569,7 @@ sub expand_command {
     my($name, @com_args) = split(/(?<!\\)!/mx, $command_name, 255);
 
     # it is possible to define hosts without a command
-    if(!defined $name or $name =~ m/^\s*$/mx) {
+    if(!defined $name || $name =~ m/^\s*$/mx) {
         my $return = {
             'line'          => 'no command defined',
             'line_expanded' => '',
@@ -789,13 +783,13 @@ update the logcache (internal sub)
 =cut
 
 sub _renew_logcache {
-    my $self = shift;
-    my($c, $noforks) = @_;
+    my($self, @args) = @_;
+    my($c, $noforks) = @args;
 
     # check if this is the first import at all
     # and do a external import in that case
     #my($get_results_for, $arg_array, $arg_hash)...
-    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@_);
+    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@args);
     my $check = 0;
     $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
     for my $key (@{$get_results_for}) {
@@ -822,7 +816,7 @@ sub _renew_logcache {
                                                       nofork    => $noforks,
                                                     });
         }
-        $self->_do_on_peers( 'renew_logcache', \@_, 1);
+        $self->_do_on_peers( 'renew_logcache', \@args, 1);
     }
     return;
 }
@@ -984,7 +978,7 @@ sub _get_replaced_string {
             if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
                 my $replacement = $macros->{$block};
                 $replacement    = '' unless defined $replacement;
-                if(!$skip_args and $block =~ m/\$ARG\d+\$$/mx) {
+                if(!$skip_args && $block =~ m/\$ARG\d+\$$/mx) {
                     my $sub_rc;
                     ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
                     $rc = 0 unless $sub_rc;
@@ -1133,7 +1127,7 @@ sub _do_on_peers {
     $c->stash->{'num_selected_backends'} = $selected_backends;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     #&timing_breakpoint('_get_result: '.$function);
-    if(!defined $result and $selected_backends != 0) {
+    if(!defined $result && $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
@@ -1394,7 +1388,7 @@ sub _get_result_serial {
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         chomp($last_error) if $last_error;
-        if(!$last_error and defined $size) {
+        if(!$last_error && defined $size) {
             $totalsize += $size;
             $type       = $typ;
             $result->{ $key } = $data;
@@ -1447,7 +1441,7 @@ sub _get_result_parallel {
         my $peer = $self->get_peer_by_key($key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
         $peer->{'last_error'} = $last_error;
-        if(!$last_error and defined $size) {
+        if(!$last_error && defined $size) {
             $totalsize += $size;
             $type       = $typ;
             $result->{$key} = $data;
@@ -1610,7 +1604,7 @@ sub _get_results_xs_pool {
                 }
             }
             # sort our arrays
-            if((!$type or $type ne 'sorted') and scalar @{$sortkeys} > 0) {
+            if((!$type || $type ne 'sorted') && scalar @{$sortkeys} > 0) {
                 $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
             }
             # apply limit
@@ -1723,7 +1717,7 @@ sub _page_data {
         return $data;
     }
 
-    my $pager = new Data::Page;
+    my $pager = Data::Page->new;
     if(defined $totalsize) {
         $pager->total_entries( $totalsize );
     } else {
@@ -2144,9 +2138,9 @@ sub _sort {
     $order = "ASC" if !defined $order;
 
     if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
-    if(!defined $data or scalar @{$data} == 0) {
+    if(!defined $data || scalar @{$data} == 0) {
         $c->stats->profile( end => "_sort()" ) if $c;
-        return \@sorted
+        return \@sorted;
     }
 
     my @keys;
@@ -2315,7 +2309,7 @@ sub _set_user_macros {
     if(defined $args->{'file'}) {
         $res = Thruk::Utils::read_resource_file($args->{'file'});
     }
-    if(!defined $res and defined $args->{'peer_key'}) {
+    if(!defined $res && defined $args->{'peer_key'}) {
         my $backend = $self->get_peer_by_key($args->{'peer_key'});
         if(defined $backend->{'resource_file'}) {
             $res = Thruk::Utils::read_resource_file($backend->{'resource_file'});

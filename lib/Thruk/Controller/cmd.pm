@@ -447,25 +447,25 @@ sub _redirect_or_success {
                                 'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
                                 'WaitTrigger'   => 'all', # using something else seems not to work all the time
                                 'WaitCondition' => $waitcondition,
-                            }
+                            },
                 };
                 eval { # this query is not critical, so it can safely fail
-                    if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
+                    if(!defined $c->stash->{'lastservice'} || $c->stash->{'lastservice'} eq '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
                         $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                            { 'name' => $c->stash->{'lasthost'} } ],
                                                 columns => [ 'name' ],
-                                                options => $options
+                                                options => $options,
                                             );
                     }
                     if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
                         $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                                               { 'host_name'   => $c->stash->{'lasthost'} },
-                                                              { 'description' => $c->stash->{'lastservice'} }
+                                                              { 'description' => $c->stash->{'lastservice'} },
                                                              ],
                                                   columns => [ 'description' ],
-                                                  options => $options
+                                                  options => $options,
                                                 );
                     }
                 };
@@ -514,7 +514,7 @@ sub _do_send_command {
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
-    if( $c->config->{'cgi_cfg'}->{'lock_author_names'} or !defined $c->req->parameters->{'com_author'} ) {
+    if( $c->config->{'cgi_cfg'}->{'lock_author_names'} || !defined $c->req->parameters->{'com_author'} ) {
         my $author = $c->user->get('username');
         $author = $c->user->get('alias') if $c->user->get('alias');
         $c->req->parameters->{'com_author'} = $author;
@@ -595,8 +595,7 @@ sub _do_send_command {
                 hostdowntimes             => '',
                 servicedowntimes          => '',
             },
-            \$cmd
-        ) || die $tt->error();
+            \$cmd) || die $tt->error();
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
@@ -630,8 +629,7 @@ sub _do_send_command {
                 hostdowntimes             => '',
                 servicedowntimes          => '',
             },
-            \$form
-        ) || die $tt->error();
+            \$form) || die $tt->error();
     };
     if($@) {
         $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
@@ -642,7 +640,7 @@ sub _do_send_command {
             my $req  = shift @matches;
             my $name = shift @matches;
             my $key  = shift @matches;
-            if( $req eq 'optBoxRequiredItem' and ( !defined $c->req->parameters->{$key} or $c->req->parameters->{$key} =~ m/^\s*$/mx ) ) {
+            if( $req eq 'optBoxRequiredItem' && ( !defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx ) ) {
                 push @errors, { message => $name . ' is a required field' };
             }
         }
@@ -725,12 +723,12 @@ sub _generate_spread_startdates {
     my $spread_dates = [];
 
     # check for a valid number
-    if( !defined $spread or $spread !~ m/^\d+$/mx or $spread <= 1 ) {
+    if( !defined $spread || $spread !~ m/^\d+$/mx || $spread <= 1 ) {
         return;
     }
 
     # check for a valid number
-    if( $number !~ m/^\d+$/mx or $number <= 1 ) {
+    if( $number !~ m/^\d+$/mx || $number <= 1 ) {
         return;
     }
 

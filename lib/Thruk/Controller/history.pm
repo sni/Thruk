@@ -57,7 +57,7 @@ sub index {
         $start = Thruk::Utils::parse_date($c, $param_start);
         $end   = Thruk::Utils::parse_date($c, $param_end);
     }
-    if(!defined $start or $start == 0 or !defined $end or $end == 0) {
+    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
         $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
         $end   = $start + $timeframe;
@@ -178,7 +178,7 @@ sub index {
 sub _get_log_type_filter {
     my ( $number ) = @_;
 
-    $number = 0 if !defined $number or $number <= 0 or $number > 511;
+    $number = 0 if !defined $number || $number <= 0 || $number > 511;
     my @prop_filter;
     if($number > 0) {
         my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));

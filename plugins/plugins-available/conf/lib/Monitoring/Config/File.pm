@@ -200,7 +200,7 @@ sub update_objects_from_text {
         }
         ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
-        if(defined $lastline and $lastline ne '' and !defined $object_at_line) {
+        if(defined $lastline && $lastline ne '' && !defined $object_at_line) {
             if($linenr >= $lastline) {
                 $object_at_line = $current_object;
             }
@@ -282,9 +282,9 @@ sub _parse_line {
 
     # full line comments
     if(!$in_disabled_object
-       and (   substr($line, 0, 1) eq '#'
-            or substr($line, 0, 1) eq ';')
-       and $line !~ m/^(;|\#)\s*define\s+/mxo
+       && (    substr($line, 0, 1) eq '#'
+            || substr($line, 0, 1) eq ';')
+       && $line !~ m/^(;|\#)\s*define\s+/mxo
     ) {
         $line =~ s/^(;|\#)\s+//mx;
         push @{$comments}, $line;
@@ -298,9 +298,10 @@ sub _parse_line {
     # inline comments only with ; not with #
     if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
         $line = $1;
+        my $comment = $2;
         # save inline comments if possible
         my($key, $value) = split(/\s+/mxo, $line, 2);
-        $inl_comments->{$key} = $2 if defined $key;
+        $inl_comments->{$key} = $comment if defined $key;
     }
 
     $line =~ s/$semicolonreplacement/\\;/gmxo;
@@ -347,7 +348,7 @@ sub _parse_line {
     elsif(defined $current_object) {
         if($in_disabled_object) { $line =~ s/^(\#|;)\s*//mxo; }
         my($key, $value) = split(/\s+/mxo, $line, 2);
-        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if($in_disabled_object and !defined $key);
+        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if($in_disabled_object && !defined $key);
         # different parsing for timeperiods
         if($current_object->{'type'} eq 'timeperiod'
            and $key ne 'use'
@@ -426,14 +427,14 @@ sub get_meta_data {
     if($self->{'is_new_file'}) {
         return $meta;
     }
-    if(!-f $self->{'path'} or !-r $self->{'path'}) {
+    if(!-f $self->{'path'} || !-r $self->{'path'}) {
         push @{$self->{'errors'}}, "cannot read file: ".$self->{'path'}.": ".$!;
         return $meta;
     }
 
     # md5 hex
     my $ctx = Digest::MD5->new;
-    open(my $fh, $self->{'path'});
+    open(my $fh, '<', $self->{'path'});
     $ctx->addfile($fh);
     $meta->{'md5'} = $ctx->hexdigest;
     CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);

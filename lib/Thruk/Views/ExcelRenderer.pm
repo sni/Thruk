@@ -48,7 +48,7 @@ sub render {
 
     my $excel_template = eval { Excel::Template->new(file => $fh) };
     if($@) {
-        warn $$worksheets;
+        warn ${$worksheets};
         confess $@;
     }
     my $output = ''.$excel_template->output;

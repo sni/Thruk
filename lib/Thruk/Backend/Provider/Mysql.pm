@@ -204,7 +204,6 @@ sub peer_name {
 =cut
 sub send_command {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -214,7 +213,6 @@ sub send_command {
 =cut
 sub get_processinfo {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -224,7 +222,6 @@ sub get_processinfo {
 =cut
 sub get_can_submit_commands {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -234,7 +231,6 @@ sub get_can_submit_commands {
 =cut
 sub get_contactgroups_by_contact {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -244,7 +240,6 @@ sub get_contactgroups_by_contact {
 =cut
 sub get_hosts {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -254,7 +249,6 @@ sub get_hosts {
 =cut
 sub get_hosts_by_servicequery {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -264,7 +258,6 @@ sub get_hosts_by_servicequery {
 =cut
 sub get_host_names{
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -274,7 +267,6 @@ sub get_host_names{
 =cut
 sub get_hostgroups {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -284,7 +276,6 @@ sub get_hostgroups {
 =cut
 sub get_hostgroup_names {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -294,7 +285,6 @@ sub get_hostgroup_names {
 =cut
 sub get_services {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -304,7 +294,6 @@ sub get_services {
 =cut
 sub get_service_names {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -314,7 +303,6 @@ sub get_service_names {
 =cut
 sub get_servicegroups {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -324,7 +312,6 @@ sub get_servicegroups {
 =cut
 sub get_servicegroup_names {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -334,7 +321,6 @@ sub get_servicegroup_names {
 =cut
 sub get_comments {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -344,7 +330,6 @@ sub get_comments {
 =cut
 sub get_downtimes {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -354,7 +339,6 @@ sub get_downtimes {
 =cut
 sub get_contactgroups {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -434,7 +418,7 @@ sub get_logs {
                 if($strict) {
                     next if(!defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 } else {
-                    next if(!defined $hosts_lookup->{$r->{'host_name'}} and !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
+                    next if(!defined $hosts_lookup->{$r->{'host_name'}} && !defined $services_lookup->{$r->{'host_name'}}->{$r->{'service_description'}});
                 }
             }
             elsif($r->{'host_name'}) {
@@ -476,7 +460,6 @@ sub get_logs {
 =cut
 sub get_timeperiods {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -486,7 +469,6 @@ sub get_timeperiods {
 =cut
 sub get_timeperiod_names {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -496,7 +478,6 @@ sub get_timeperiod_names {
 =cut
 sub get_commands {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -506,7 +487,6 @@ sub get_commands {
 =cut
 sub get_contacts {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -516,7 +496,6 @@ sub get_contacts {
 =cut
 sub get_contact_names {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -526,7 +505,6 @@ sub get_contact_names {
 =cut
 sub get_host_stats {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -536,7 +514,6 @@ sub get_host_stats {
 =cut
 sub get_service_stats {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -546,7 +523,6 @@ sub get_service_stats {
 =cut
 sub get_performance_stats {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -556,7 +532,6 @@ sub get_performance_stats {
 =cut
 sub get_extra_perf_stats {
     confess("not implemented");
-    return;
 }
 
 ##########################################################
@@ -1154,7 +1129,7 @@ sub _update_logcache_auth {
         my @values;
         for my $contact (@{$host->{'contacts'}}) {
             my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
-            push @values, '('.$contact_id.','.$host_id.')'
+            push @values, '('.$contact_id.','.$host_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
         print "." if $verbose;
@@ -1171,7 +1146,7 @@ sub _update_logcache_auth {
         my @values;
         for my $contact (@{$service->{'contacts'}}) {
             my $contact_id = _contact_lookup($contact_lookup, $contact, $dbh, $prefix);
-            push @values, '('.$contact_id.','.$service_id.')'
+            push @values, '('.$contact_id.','.$service_id.')';
         }
         $dbh->do($stm.join(',', @values)) if scalar @values > 0;
         print "." if $verbose;
@@ -1191,7 +1166,7 @@ sub _update_logcache_optimize {
 
     # update sort order / optimize every day
     my @times = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 3 LIMIT 1')};
-    if(!$options->{'force'} and scalar @times > 0 and $times[0] and $times[0] > time()-86400) {
+    if(!$options->{'force'} && scalar @times > 0 && $times[0] && $times[0] > time()-86400) {
         print "no optimize neccessary, last optimize: ".(scalar localtime $times[0]).", use -f to force\n" if $verbose;
         return(-1);
     }
@@ -1468,8 +1443,8 @@ sub _fill_lookup_logs {
     my($mlogs) = $peer->{'class'}->get_logs(
                                         filter  => [{ '-and' => [
                                                                 { time => { '>=' => $start } },
-                                                                { time => { '<=' => $end } }
-                                                   ]}]
+                                                                { time => { '<=' => $end } },
+                                                   ]}],
                               );
     for my $l (@{$mlogs}) {
         $lookup->{$l->{'message'}} = 1;
@@ -1523,7 +1498,7 @@ sub _import_peer_logfiles {
             ($logs) = $peer->{'class'}->get_logs(nocache => 1,
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
-                                                                    { time => { '<'  => $time + $blocksize } }
+                                                                    { time => { '<'  => $time + $blocksize } },
                                                             ]}],
                                                  columns => \@columns,
                                                 );

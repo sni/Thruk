@@ -288,14 +288,14 @@ sub _process_recurring_downtimes_page {
         }
 
         # does this downtime makes sense?
-        if(    $target eq 'service'      and !$host) {
+        if(    $target eq 'service'      && !$host) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'host cannot be empty!' });
             $failed = 1;
         }
-        if(   ($target eq 'host'         and !$host)
-           or ($target eq 'service'      and !$service)
-           or ($target eq 'servicegroup' and !$servicegroup)
-           or ($target eq 'hostgroup'    and !$hostgroup)
+        if(   ($target eq 'host'         && !$host)
+           or ($target eq 'service'      && !$service)
+           or ($target eq 'servicegroup' && !$servicegroup)
+           or ($target eq 'hostgroup'    && !$hostgroup)
         ) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $target.' cannot be empty!' });
             $failed = 1;
@@ -303,7 +303,7 @@ sub _process_recurring_downtimes_page {
 
         Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
         my $old_file;
-        if($nr and !$failed) {
+        if($nr && !$failed) {
             $old_file  = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
             if(-s $old_file) {
                 my $old_rd = Thruk::Utils::read_data_file($old_file);

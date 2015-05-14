@@ -36,7 +36,7 @@ sub add_routes {
     Thruk::Utils::Status::add_view({'group' => 'Mine Map',
                                     'name'  => 'Mine Map',
                                     'value' => 'minemap',
-                                    'url'   => 'minemap.cgi'
+                                    'url'   => 'minemap.cgi',
     });
 
     $app->config->{'has_feature_minemap'} = 1;

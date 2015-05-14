@@ -58,7 +58,7 @@ sub index {
             $state    = 0 if $c->stash->{'backend_detail'}->{$pd}->{'running'};
             $state    = 2 if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2;
             $connection_status->{$pd} = { name  => $name,
-                                          state => $state
+                                          state => $state,
                                         };
         }
 
@@ -69,7 +69,7 @@ sub index {
                                 { 'time' => { '>=' => time() - 86400*3 } },
                                 { 'time' => { '<=' => time() } },
                                 { 'class' => 3 },
-                            ]
+                            ],
             };
 
             $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
@@ -84,8 +84,8 @@ sub index {
                                     { '-and' => [ { 'state_type' => { '=' => 'HARD' }}, { 'type' => 'HOST ALERT' } ] },
                                     { 'type' => 'SERVICE FLAPPING ALERT' },
                                     { 'type' => 'HOST FLAPPING ALERT' },
-                                ]
-                            }]
+                                ],
+                            }],
             };
             $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
         }

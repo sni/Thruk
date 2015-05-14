@@ -187,7 +187,7 @@ $c->check_user_roles(<role>)
 
 =cut
 sub check_user_roles {
-    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_user_roles($_[1]))
+    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_user_roles($_[1]));
 }
 
 =head2 check_permissions
@@ -196,7 +196,7 @@ $c->check_permissions(<type>, ...)
 
 =cut
 sub check_permissions {
-    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_permissions(@_))
+    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_permissions(@_));
 }
 
 =head2 check_cmd_permissions
@@ -205,7 +205,7 @@ $c->check_cmd_permissions(<type>, ...)
 
 =cut
 sub check_cmd_permissions {
-    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_cmd_permissions(@_))
+    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_cmd_permissions(@_));
 }
 
 =head2 cache
@@ -214,7 +214,7 @@ $c->cache()
 
 =cut
 sub cache {
-    my $c = shift; return($c->app->cache(@_))
+    my $c = shift; return($c->app->cache(@_));
 }
 
 =head2 cookie
@@ -234,7 +234,7 @@ sub cookie {
     my $cookie = $c->req->cookies->{$name};
     return unless defined $cookie;
     return(Thruk::Request::Cookie->new($cookie));
-};
+}
 
 =head2 cookies
 
@@ -247,7 +247,7 @@ sub cookies {
     return unless defined $cookie;
     my $vars = [split/&/mx, $cookie];
     return(Thruk::Request::Cookie->new($vars));
-};
+}
 
 =head2 redirect_to
 

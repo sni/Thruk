@@ -423,12 +423,12 @@ return string with joined args
 sub join_args {
     my($args) = @_;
     my @arg;
-    for my $a (@{$args}) {
-        $a = '' unless defined $a;
-        if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
-            push @arg, $a;
+    for my $e (@{$args}) {
+        $e = '' unless defined $e;
+        if($e =~ m/^(\d+|\d+\.\d+)$/mx) {
+            push @arg, $e;
         } else {
-            push @arg, "'".$a."'";
+            push @arg, "'".$e."'";
         }
     }
     return(join(', ', @arg));

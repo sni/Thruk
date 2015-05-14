@@ -71,7 +71,7 @@ sub format_date {
     if(!defined $tpd) {
         require Template::Plugin::Date;
         Template::Plugin::Date->import();
-        $tpd = Template::Plugin::Date->new()
+        $tpd = Template::Plugin::Date->new();
     }
     confess("no format") unless defined $format;
     my $date = $tpd->format($timestamp, $format);
@@ -195,7 +195,7 @@ sub read_cgi_cfg {
 
     # read only if its changed
     my $file = $config->{'cgi.cfg'};
-    if(!defined $file or $file eq '') {
+    if(!defined $file || $file eq '') {
         $config->{'cgi_cfg'} = 'undef';
         if(defined $c) {
             $c->log->error("cgi.cfg not set");
@@ -226,8 +226,8 @@ sub read_cgi_cfg {
 
     my $last_stat = $config->{'cgi_cfg_stat'};
     if(!defined $last_stat
-       or $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
-       or $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
+       || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
+       || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
       ) {
         $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
         $c->log->debug("reading $file") if defined $c;
@@ -417,7 +417,7 @@ sub get_start_end_for_timeperiod {
         }
     }
 
-    if(!defined $start or !defined $end) {
+    if(!defined $start || !defined $end) {
         return(undef, undef);
     }
 
@@ -463,7 +463,7 @@ sub get_start_end_for_timeperiod_from_param {
     my $t1           = $c->req->parameters->{'t1'};
     my $t2           = $c->req->parameters->{'t2'};
 
-    $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
+    $timeperiod = 'last24hours' if(!defined $timeperiod && !defined $t1 && !defined $t2);
     return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 }
 
@@ -549,7 +549,7 @@ sub get_dynamic_roles {
                 if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
                     $roles_by_group->{$role} = [] unless defined $roles_by_group->{$role};
                     push @{$roles_by_group->{$role}}, $contactgroup;
-                    push @{$roles}, $role
+                    push @{$roles}, $role;
                 }
             }
         }
@@ -642,7 +642,7 @@ append text to current message
 sub append_message {
     my($c, $txt) = @_;
     if(defined $c->res->cookies->{'thruk_message'}) {
-        $c->res->cookies->{'thruk_message'}->{'value'} .= ' '.$txt
+        $c->res->cookies->{'thruk_message'}->{'value'} .= ' '.$txt;
     }
     if(defined $c->stash->{'thruk_message'}) {
         $c->stash->{'thruk_message'} .= ' '.$txt;
@@ -762,7 +762,7 @@ compare too version strings and return 1 if v1 >= v2
 =cut
 sub version_compare {
     my($v1,$v2) = @_;
-    confess("version_compare() needs two params, got: ".Dumper(\@_)) unless defined $v2;
+    confess("version_compare() needs two params") unless defined $v2;
 
     # replace non-numerical characters
     $v1 =~ s/[^\d\.]/./gmx;
@@ -800,15 +800,14 @@ sub combine_filter {
     my $operator = shift;
     my $filter   = shift;
 
-    my $return;
-    if(!defined $operator and $operator ne '-or' and $operator ne '-and') {
-        confess("unknown operator: ".Dumper($operator));
+    if(!defined $operator && $operator ne '-or' && $operator ne '-and') {
+        confess("unknown operator: ".Data::Dumper($operator));
     }
 
     return unless defined $filter;
 
     if(ref $filter ne 'ARRAY') {
-        confess("expected arrayref, got: ".Dumper(ref $filter));
+        confess("expected arrayref, got: ".Data::Dumper(ref $filter));
     }
 
     return if scalar @{$filter} == 0;
@@ -818,8 +817,6 @@ sub combine_filter {
     }
 
     return { $operator => $filter };
-
-    return $return;
 }
 
 
@@ -1011,7 +1008,7 @@ sub set_custom_vars {
                         ($cust_value, undef) = $c->{'db'}->_replace_macros({
                             string  => $cust_value,
                             host    => $host,
-                            service => $service
+                            service => $service,
                         });
                 } elsif (defined $host) {
                         #($cust_value, $rc)...
@@ -1084,7 +1081,7 @@ sub get_user_data {
 
     return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
 
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return {};
     }
 
@@ -1117,7 +1114,7 @@ sub store_user_data {
         return;
     }
 
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return 1;
     }
 
@@ -1136,7 +1133,7 @@ sub store_user_data {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$tmpfile.' : '.$! );
         return;
     };
-    print $fh Dumper($data);
+    print $fh Data::Dumper($data);
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $file);
 
@@ -1203,7 +1200,7 @@ sub store_global_user_data {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
         return;
     };
-    CORE::close($fh) or die("cannot close file ".$file.".new: ".$!);;
+    CORE::close($fh) or die("cannot close file ".$file.".new: ".$!);
     write_data_file($file.'.new', $data);
     Thruk::Utils::IO::ensure_permissions('file', $file.'.new');
 
@@ -1557,7 +1554,7 @@ sub update_cron_file {
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
         }
-        CORE::close($fh) or die("cannot close file ".$c->config->{'cron_file'}.": ".$!);;
+        CORE::close($fh) or die("cannot close file ".$c->config->{'cron_file'}.": ".$!);
     }
 
     # write out new file
@@ -1704,12 +1701,14 @@ switch real user and groups
 =cut
 
 sub switch_realuser {
+    ## no critic
     if($< != $>) {
         $< = $> or confess("setuid failed: ".$!);
     }
     if($) != $() {
         $( = $) or confess("setgid failed: ".$!);
     }
+    ## use critic
     return;
 }
 
@@ -1726,7 +1725,7 @@ check and write pid file if none exists
 sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI' and ! -f $pidfile) {
+    if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'FastCGI' && ! -f $pidfile) {
         open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
         Thruk::Utils::IO::close($fh, $pidfile);
@@ -1910,7 +1909,7 @@ write data to datafile
 sub write_data_file {
     my($filename, $data) = @_;
 
-    # make data::dumper save utf-8 directly
+    # make Data::dumper save utf-8 directly
     local $Data::Dumper::Useqq = 1;
 
     # avoid self-referential structures
@@ -1921,7 +1920,7 @@ sub write_data_file {
 
     my(undef, $tmpfile) = tempfile();
 
-    my $d = Dumper($data);
+    my $d = Data::Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/JSON::PP::Boolean/JSON::XS::Boolean/gmx;
     open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
@@ -2146,14 +2145,16 @@ sub precompile_templates {
     eval {
         # breaks on fastcgi server with strange error
         close STDERR;
+        ## no critic
         open STDERR, ">&".$savestderr;
+        ## use critic
     };
     $c->log->error($@) if $@;
 
     $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
     my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
-    $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));
+    $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));
     return $result;
 }
 
@@ -2271,7 +2272,7 @@ make sure this is a post request
 sub is_post {
     my($c) = @_;
     return(1) if $c->req->method eq 'POST';
-    $c->log->error("insecure request, post method required: ".Dumper($c->req));
+    $c->log->error("insecure request, post method required: ".Data::Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }
@@ -2304,7 +2305,7 @@ sub check_csrf {
     if($valid_token and $post_token and $valid_token eq $post_token) {
         return(1);
     }
-    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
+    $c->log->error("possible csrf, no or invalid token: ".Data::Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }
@@ -2384,6 +2385,8 @@ sub _parse_date {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

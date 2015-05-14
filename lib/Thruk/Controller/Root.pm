@@ -90,7 +90,7 @@ sub thruk_index {
     }
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
 
-    if( $c->stash->{'use_frames'} and !$c->stash->{'show_nav_button'} ) {
+    if( $c->stash->{'use_frames'} && !$c->stash->{'show_nav_button'} ) {
         return(thruk_index_html($c));
     }
 

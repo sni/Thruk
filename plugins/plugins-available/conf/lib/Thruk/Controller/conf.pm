@@ -74,9 +74,9 @@ sub index { # Safe Defaults required for changing backends
     unless( $c->check_user_roles( "authorized_for_configuration_information")
         and $c->check_user_roles( "authorized_for_system_commands")) {
         if(    !defined $c->{'db'}
-            or !defined $c->{'db'}->{'backends'}
-            or ref $c->{'db'}->{'backends'} ne 'ARRAY'
-            or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+            || !defined $c->{'db'}->{'backends'}
+            || ref $c->{'db'}->{'backends'} ne 'ARRAY'
+            || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
             # no backends configured or thruk config not possible
             if($c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'}) {
                 return $c->detach("/error/index/14");
@@ -104,8 +104,8 @@ sub index { # Safe Defaults required for changing backends
 
     # check if we have at least one file configured
     if(   !defined $c->config->{'Thruk::Plugin::ConfigTool'}
-       or ref($c->config->{'Thruk::Plugin::ConfigTool'}) ne 'HASH'
-       or scalar keys %{$c->config->{'Thruk::Plugin::ConfigTool'}} == 0
+       || ref($c->config->{'Thruk::Plugin::ConfigTool'}) ne 'HASH'
+       || scalar keys %{$c->config->{'Thruk::Plugin::ConfigTool'}} == 0
     ) {
         Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
     }
@@ -351,7 +351,7 @@ sub _process_json_page {
             my $name = $use_long ? $dat->get_long_name(undef, '  -  ') : $dat->get_name();
             if(defined $name) {
                 if($dat->{'disabled'}) { $name = $name.' (disabled)' }
-                push @{$objects}, $name
+                push @{$objects}, $name;
             } else {
                 $c->log->warn("object without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
             }
@@ -369,7 +369,7 @@ sub _process_json_page {
                   },
                   { 'name' => $type.' templates',
                     'data' => [ sort @{Thruk::Utils::array_uniq($templates)} ],
-                  }
+                  },
                 ];
     }
     return $c->render(json => $json);
@@ -399,7 +399,7 @@ sub _process_cgi_page {
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     # create a default config from the current used cgi.cfg
-    if(!-e $file and $file ne $c->config->{'cgi.cfg_effective'}) {
+    if(!-e $file && $file ne $c->config->{'cgi.cfg_effective'}) {
         copy($c->config->{'cgi.cfg_effective'}, $file) or die('cannot copy '.$c->config->{'cgi.cfg_effective'}.' to '.$file.': '.$!);
     }
 
@@ -448,7 +448,7 @@ sub _process_cgi_page {
                         escape_html_tags
                         action_url_target
                         notes_url_target
-                    /]
+                    /],
         ],
         [ 'Authorization', [qw/
                         use_authentication
@@ -463,7 +463,7 @@ sub _process_cgi_page {
                         authorized_for_system_commands
                         authorized_for_configuration_information
                         authorized_for_read_only
-                    /]
+                    /],
         ],
         [ 'Authorization Groups', [qw/
                       authorized_contactgroup_for_all_services
@@ -474,7 +474,7 @@ sub _process_cgi_page {
                       authorized_contactgroup_for_system_commands
                       authorized_contactgroup_for_configuration_information
                       authorized_contactgroup_for_read_only
-                    /]
+                    /],
         ],
     ];
 
@@ -528,21 +528,21 @@ sub _process_thruk_page {
                         info_popup_options
                         resource_file
                         can_submit_commands
-                     /]
+                     /],
         ],
         [ 'Paths', [qw/
                         tmp_path
                         ssi_path
                         plugin_path
                         user_template_path
-                    /]
+                    /],
         ],
         [ 'Menu', [qw/
                         start_page
                         documentation_link
                         all_problems_link
                         allowed_frame_links
-                    /]
+                    /],
         ],
         [ 'Display', [qw/
                         default_theme
@@ -559,7 +559,7 @@ sub _process_thruk_page {
                         datetime_format_trends
                         use_new_command_box
                         show_custom_vars
-                    /]
+                    /],
         ],
         [ 'Search', [qw/
                         use_new_search
@@ -569,7 +569,7 @@ sub _process_thruk_page {
                         ajax_search_services
                         ajax_search_servicegroups
                         ajax_search_timeperiods
-                    /]
+                    /],
         ],
         [ 'Paging', [qw/
                         use_pager
@@ -577,7 +577,7 @@ sub _process_thruk_page {
                         group_paging_overview
                         group_paging_summary
                         group_paging_grid
-                    /]
+                    /],
         ],
     ];
 
@@ -702,7 +702,7 @@ sub _process_plugins_page {
     my $plugin_available_dir = $project_root.'/plugins/plugins-available';
 
     $c->stash->{'readonly'}  = 0;
-    if(! -d $plugin_enabled_dir or ! -w $plugin_enabled_dir ) {
+    if(! -d $plugin_enabled_dir || ! -w $plugin_enabled_dir ) {
         $c->stash->{'readonly'}  = 1;
     }
 
@@ -727,13 +727,13 @@ sub _process_plugins_page {
             Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
             return $c->redirect_to('conf.cgi?sub=plugins');
         }
-        if(! -d $plugin_enabled_dir or ! -w $plugin_enabled_dir ) {
+        if(! -d $plugin_enabled_dir || ! -w $plugin_enabled_dir ) {
             Thruk::Utils::set_message( $c, 'fail_message', 'Make sure plugins folder ('.$plugin_enabled_dir.') is writeable: '.$! );
         }
         else {
             for my $addon (glob($plugin_available_dir.'/*/')) {
                 my($addon_name, $dir) = _nice_addon_name($addon);
-                if(!defined $c->req->parameters->{'plugin.'.$dir} or $c->req->parameters->{'plugin.'.$dir} == 0) {
+                if(!defined $c->req->parameters->{'plugin.'.$dir} || $c->req->parameters->{'plugin.'.$dir} == 0) {
                     unlink($plugin_enabled_dir.'/'.$dir);
                 }
                 if(defined $c->req->parameters->{'plugin.'.$dir} and $c->req->parameters->{'plugin.'.$dir} == 1) {
@@ -819,7 +819,7 @@ sub _process_backends_page {
             $backend->{'options'}->{'proxy'}        = $c->req->parameters->{'proxy'.$x}       if $c->req->parameters->{'proxy'.$x};
             $backend->{'options'}->{'remote_name'}  = $c->req->parameters->{'remote_name'.$x} if $c->req->parameters->{'remote_name'.$x};
             $x++;
-            $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} and $backend->{'options'}->{'peer'});
+            $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} && $backend->{'options'}->{'peer'});
             next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
@@ -1146,9 +1146,8 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
-                                               message => 'please stand by while configuration is beeing checked...'
-                                              }
-                                        );
+                                               message => 'please stand by while configuration is beeing checked...',
+                                        });
             return;
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', "please set 'obj_check_cmd' in your thruk_local.conf" );
@@ -1167,8 +1166,7 @@ sub _apply_config_changes {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
                                                message => 'please stand by while configuration is beeing reloaded...',
-                                              }
-                                        );
+                                        });
             return;
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', "please set 'obj_reload_cmd' in your thruk_local.conf" );
@@ -1359,10 +1357,10 @@ sub _store_changes {
     my ( $c, $file, $data, $defaults, $update_in_conf ) = @_;
     return unless Thruk::Utils::check_csrf($c);
     my $old_md5 = $c->req->parameters->{'md5'};
-    if(!defined $old_md5 or $old_md5 eq '') {
+    if(!defined $old_md5 || $old_md5 eq '') {
         Thruk::Utils::set_message( $c, 'success_message', "no changes made." );
         return;
-    };
+    }
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
         Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode." );
@@ -1463,7 +1461,7 @@ sub _get_context_object {
     }
 
     # link from file to an object?
-    if(!defined $obj && defined $c->stash->{'file_name'} && defined $c->stash->{'file_line'} and $c->stash->{'file_line'} =~ m/^\d+$/mx) {
+    if(!defined $obj && defined $c->stash->{'file_name'} && defined $c->stash->{'file_line'} && $c->stash->{'file_line'} =~ m/^\d+$/mx) {
         $obj = $c->{'obj_db'}->get_object_by_location($c->stash->{'file_name'}, $c->stash->{'file_line'});
         unless(defined $obj) {
             Thruk::Utils::set_message( $c, 'fail_message', 'No such object found in this file' );
@@ -1489,7 +1487,7 @@ sub _get_context_object {
                     push @newobjs, $o if $o->is_template();
                 }
                 if($templates == 2) {
-                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} or $o->{'conf'}->{'register'} != 0;
+                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} || $o->{'conf'}->{'register'} != 0;
                 }
             }
             @{$objs} = @newobjs;
@@ -1777,7 +1775,7 @@ sub _object_save {
             return; # return, otherwise details would not be displayed
         } else {
             # does the object have a name?
-            if(!defined $c->stash->{'data_name'} or $c->stash->{'data_name'} eq '') {
+            if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
                 $obj->set_name('undefined');
                 $c->{'obj_db'}->_rebuild_index();
                 Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
@@ -1952,7 +1950,7 @@ sub _file_save {
             Thruk::Utils::set_message( $c,
                                       'fail_message',
                                       'File '.$c->stash->{'file_name'}.' changed with errors',
-                                      $file->{'errors'}
+                                      $file->{'errors'},
                                     );
         } else {
             Thruk::Utils::set_message( $c, 'success_message', 'File '.$c->stash->{'file_name'}.' changed successfully' );
@@ -2174,7 +2172,7 @@ sub _object_tree_objects {
         my $filter;
         if(defined $template) {
             $filter = {};
-            $filter->{'use'} = $template
+            $filter->{'use'} = $template;
         }
         $objs = $c->{'obj_db'}->get_objects_by_type($type, $filter, $origin);
         $c->stash->{'objects_type'} = $type;
@@ -2223,10 +2221,10 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
-    if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_check($c)) {
+    if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_check($c)) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     }
-    elsif(!$c->{'obj_db'}->is_remote() and _cmd($c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
+    elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
         Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
@@ -2250,12 +2248,12 @@ sub _config_reload {
     my $wait = 1;
 
     if($c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
-        if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
+        if($c->{'obj_db'}->is_remote() && $c->{'obj_db'}->remote_config_reload($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
             $c->stash->{'last_changed'} = 0;
             $c->stash->{'needs_commit'} = 0;
         }
-        elsif(!$c->{'obj_db'}->is_remote() and _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
+        elsif(!$c->{'obj_db'}->is_remote() && _cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
             Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
             $c->stash->{'last_changed'} = 0;
             $c->stash->{'needs_commit'} = 0;

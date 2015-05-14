@@ -51,7 +51,7 @@ create folder and ensure permissions and ownership
 sub mkdir {
     for my $dirname (@_) {
         unless(-d $dirname) {
-            CORE::mkdir($dirname) or confess("failed to create ".$dirname.": ".$!)
+            CORE::mkdir($dirname) or confess("failed to create ".$dirname.": ".$!);
         }
         ensure_permissions('dir', $dirname);
     }
@@ -176,7 +176,7 @@ sub json_lock_store {
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
     print $fh $json->encode($data);
-    Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);;
+    Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);
     alarm(0);
     return 1;
 }
@@ -205,7 +205,7 @@ sub json_lock_retrieve {
         $json->incr_parse($line);
     }
     $data = $json->incr_parse;
-    CORE::close($fh) or die("cannot close file ".$file.": ".$!);;
+    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     alarm(0);
     return $data;
 }
@@ -229,7 +229,7 @@ sub save_logs_to_tempfile {
     for my $r (@{$data}) {
         print $fh Encode::encode_utf8($r->{'message'}),"\n";
     }
-    &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);;
+    &close($fh, $filename) or die("cannot close file ".$filename.": ".$!);
     return($filename);
 }
 
@@ -283,6 +283,8 @@ sub cmd {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

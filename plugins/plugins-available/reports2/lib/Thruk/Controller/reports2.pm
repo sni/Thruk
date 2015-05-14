@@ -164,7 +164,7 @@ sub index {
         }
     }
 
-    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} and !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
+    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
         $c->stash->{'wkhtmltopdf'} = 0;
         $c->stash->{'wkhtmltopdf_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'};
     }
@@ -209,7 +209,7 @@ sub report_edit {
         }
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
-        if(!defined $r or $r->{'readonly'}) {
+        if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
@@ -236,7 +236,7 @@ sub report_edit_step2 {
         $r = Thruk::Utils::Reports::_get_new_report($c);
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
-        if(!defined $r or $r->{'readonly'}) {
+        if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }

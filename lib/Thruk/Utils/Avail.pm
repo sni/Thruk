@@ -112,13 +112,13 @@ sub calculate_availability {
 
     # get start/end from timeperiod in params
     my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    return $c->detach('/error/index/19') if (!defined $start or !defined $end);
+    return $c->detach('/error/index/19') if (!defined $start || !defined $end);
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
     if(defined $c->req->parameters->{'timeperiod'}) {
         $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
-    } elsif(!defined $c->req->parameters->{'t1'} and !defined $c->req->parameters->{'t2'}) {
+    } elsif(!defined $c->req->parameters->{'t1'} && !defined $c->req->parameters->{'t2'}) {
         $c->stash->{timeperiod} = 'last24hours';
     } else {
         $c->stash->{timeperiod} = '';
@@ -213,7 +213,7 @@ sub calculate_availability {
     my $services = [];
 
     my $softlogfilter;
-    if(!$includesoftstates or $includesoftstates eq 'no') {
+    if(!$includesoftstates || $includesoftstates eq 'no') {
         $softlogfilter = { state_type => { '=' => 'HARD' }};
     }
 
@@ -259,7 +259,7 @@ sub calculate_availability {
             }
             $servicefilter = Thruk::Utils::combine_filter('-and', [
                 Thruk::Utils::combine_filter('-or', \@hostfilter),
-                Thruk::Utils::combine_filter('-or', \@servicefilter)
+                Thruk::Utils::combine_filter('-or', \@servicefilter),
             ]);
         }
         $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
@@ -556,7 +556,7 @@ sub calculate_availability {
         push @typefilter, { '-or' => [
                                       { message => { '~~' => 'TIMEPERIOD TRANSITION: '.$rpttimeperiod }},                               # livestatus
                                       { -and => [ {'type' => 'TIMEPERIOD TRANSITION' }, { 'message' => { '~~' => $rpttimeperiod }} ] }, # logcache
-                                    ]
+                                    ],
                           };
     }
 
@@ -894,6 +894,8 @@ sub _sum_availability {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

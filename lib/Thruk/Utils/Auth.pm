@@ -53,7 +53,7 @@ sub get_auth_filter {
 
     # host authorization
     if($type eq 'hosts') {
-        if(!$strict and $c->check_user_roles('authorized_for_all_hosts')) {
+        if(!$strict && $c->check_user_roles('authorized_for_all_hosts')) {
             return();
         }
         return('contacts' => { '>=' => $c->user->get('username') });
@@ -66,15 +66,15 @@ sub get_auth_filter {
 
     # service authorization
     elsif($type eq 'services') {
-        if(!$strict and $c->check_user_roles('authorized_for_all_services')) {
+        if(!$strict && $c->check_user_roles('authorized_for_all_services')) {
             return();
         }
         if($c->config->{'use_strict_host_authorization'}) {
             return('contacts' => { '>=' => $c->user->get('username') });
         } else {
             return('-or' => [ 'contacts'      => { '>=' => $c->user->get('username') },
-                              'host_contacts' => { '>=' => $c->user->get('username') }
-                            ]
+                              'host_contacts' => { '>=' => $c->user->get('username') },
+                            ],
                   );
         }
     }
@@ -107,7 +107,7 @@ sub get_auth_filter {
             push @filter, { 'service_description' => { '!=' => undef } };
         } else {
             push @filter, '-and' => [ 'service_contacts'    => { '>=' => $c->user->get('username') },
-                                      'service_description' => { '!=' => undef }
+                                      'service_description' => { '!=' => undef },
                                     ];
         }
 
@@ -116,7 +116,7 @@ sub get_auth_filter {
         } else {
             if(Thruk->config->{'use_strict_host_authorization'}) {
                 push @filter, '-and ' => [ 'host_contacts'       => { '>=' => $c->user->get('username') },
-                                           'service_description' => undef
+                                           'service_description' => undef,
                                          ];
             } else {
                 push @filter, { 'host_contacts' => { '>=' => $c->user->get('username') }};
@@ -151,7 +151,7 @@ sub get_auth_filter {
         if($c->check_user_roles('authorized_for_all_hosts')) {
             # allowed for all host related log entries
             push @filter, { '-and' => [ 'service_description' => undef,
-                                        'host_name'           => { '!=' => undef } ]
+                                        'host_name'           => { '!=' => undef } ],
                           };
         }
         else {
@@ -185,11 +185,12 @@ sub get_auth_filter {
     }
 
     confess("cannot authorize query");
-    return;
 }
 
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

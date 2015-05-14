@@ -566,6 +566,8 @@ sub _remove_item_from_links {
 
 1;
 
+__END__
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-2014, <sven@nierlein.org>

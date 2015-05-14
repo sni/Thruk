@@ -49,7 +49,7 @@ sub render {
     if($c->stash->{'additional_template_paths'}) {
         $tt->context->{'LOAD_TEMPLATES'}->[0]->{'INCLUDE_PATH'} =
             [ @{$c->stash->{'additional_template_paths'}},
-                $c->config->{'View::TT'}->{'INCLUDE_PATH'}
+                $c->config->{'View::TT'}->{'INCLUDE_PATH'},
             ];
     }
 

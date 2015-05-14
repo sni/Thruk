@@ -251,7 +251,7 @@ sub index {
 
             my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label_'.$type} || 'none');
             # first node renames business process itself too
-            if(!$new and $nodeid eq 'node1') {
+            if(!$new && $nodeid eq 'node1') {
                 if($bp->get_node('node1')->{'label'} ne $label) {
                     $label = Thruk::BP::Utils::make_uniq_label($c, $label, $bp->{'id'});
                     $bp->set_label($c, $label);
@@ -289,7 +289,7 @@ sub index {
             }, {
                 'label'    => 'Example Node',
                 'function' => 'Fixed("OK")',
-            }]
+            }],
         });
         $bp->set_label($c, $label);
         die("internal error") unless $bp;

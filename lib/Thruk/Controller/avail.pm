@@ -81,8 +81,8 @@ sub index {
 
     # Step 4 - create report
     elsif(!$report_type
-       and ($host or $service or $servicegroup or $hostgroup)
-       and _create_report($c)) {
+       && ($host || $service || $servicegroup || $hostgroup)
+       && _create_report($c)) {
     }
 
 

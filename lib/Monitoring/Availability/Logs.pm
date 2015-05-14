@@ -57,8 +57,7 @@ Creates an C<Monitoring::Availability::Log> object.
 =cut
 
 sub new {
-    my $class = shift;
-    my(%options) = @_;
+    my($class, %options) = @_;
 
     my $self = {
         'verbose'        => 0,       # enable verbose output
@@ -127,11 +126,10 @@ return parsed logfile line
 
 =cut
 
+## no critic (Subroutines::RequireArgUnpacking)
 sub parse_line {
     return if substr($_[0], 0, 1, '') ne '[';
-    my $return = {
-        'time' => substr($_[0], 0, 10, '')
-    };
+    my $return = { 'time' => substr($_[0], 0, 10, '') };
     substr($_[0], 0, 2, '');
 
     ($return->{'type'},$_[0]) = split(/:\ /mxo, $_[0], 2);
@@ -146,6 +144,7 @@ sub parse_line {
 
     return $return;
 }
+## use critic
 
 ########################################
 # INTERNAL SUBS

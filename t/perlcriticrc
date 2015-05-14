@@ -319,3 +319,28 @@ severity   = 1
 [ControlStructures::ProhibitPostfixControls]
 allow = if until
 
+[Perl::Critic::Policy::Subroutines::ProhibitBuiltinHomonyms]
+severity   = 1
+
+[Perl::Critic::Policy::ErrorHandling::RequireCarping]
+severity   = 1
+
+[Perl::Critic::Policy::InputOutput::RequireBriefOpen]
+severity   = 1
+
+[Perl::Critic::Policy::ControlStructures::ProhibitUnlessBlocks]
+severity   = 1
+
+[Perl::Critic::Policy::BuiltinFunctions::RequireBlockGrep]
+severity   = 1
+
+[Perl::Critic::Policy::BuiltinFunctions::RequireBlockMap]
+severity   = 1
+
+[Subroutines::RequireArgUnpacking]
+short_subroutine_statements = 5
+allow_delegation_to = new Data::Dumper
+
+[Perl::Critic::Policy::ValuesAndExpressions::ProhibitConstantPragma]
+severity   = 1
+

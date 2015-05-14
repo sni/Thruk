@@ -24,14 +24,14 @@ our $VERSION = '1.88';
 use Thruk::Backend::Pool;
 BEGIN {
     Thruk::Backend::Pool::init_backend_thread_pool();
-};
+}
 
 ###################################################
 # load timing class
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('starting thruk');
-};
+}
 
 ###################################################
 # clean up env
@@ -167,11 +167,14 @@ sub _build_app {
     ###################################################
     # load routes dynamically from plugins
     for my $plugin_dir (glob($self->{'config'}->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
-        $plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx;
-        my $plugin = $1;
-        $plugin =~ s|/|::|gmx;
-        load $plugin;
-        $plugin->add_routes($self, $self->{'routes'});
+        if($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
+            my $plugin = $1;
+            $plugin =~ s|/|::|gmx;
+            load $plugin;
+            $plugin->add_routes($self, $self->{'routes'});
+        } else {
+            die("unknown plugin folder format: $plugin_dir");
+        }
     }
     #&timing_breakpoint('startup() plugins loaded');
 
@@ -341,7 +344,9 @@ sub _setup_pidfile {
 }
 sub _remove_pid {
     return unless $pidfile;
+    ## no critic
     $SIG{PIPE} = 'IGNORE';
+    ## use critic
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         if($pidfile && -f $pidfile) {
             my $pids = [split(/\s/mx, read_file($pidfile))];
@@ -372,23 +377,25 @@ sub _remove_pid {
     }
     return;
 }
+## no critic
 $SIG{INT}  = sub { _remove_pid(); exit; };
 $SIG{TERM} = sub { _remove_pid(); exit; };
+## use critic
 END {
     _remove_pid();
-};
+}
 
 ###################################################
 # create secret file
 sub _create_secret_file {
     my($self) = @_;
-    if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
+    if(!defined $ENV{'THRUK_SRC'} || $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
         my $var_path   = $self->config->{'var_path'} or die("no var path!");
         my $secretfile = $var_path.'/secret.key';
         unless(-s $secretfile) {
             my $digest = md5_hex(rand(1000).time());
             chomp($digest);
-            open(my $fh, ">$secretfile") or warn("cannot write to $secretfile: $!");
+            open(my $fh, '>', $secretfile) or warn("cannot write to $secretfile: $!");
             if(defined $fh) {
                 print $fh $digest;
                 Thruk::Utils::IO::close($fh, $secretfile);
@@ -410,7 +417,9 @@ sub _set_timezone {
     my($self) = @_;
     my $timezone = $self->config->{'use_timezone'};
     if(defined $timezone) {
+        ## no critic
         $ENV{'TZ'} = $timezone;
+        ## use critic
         POSIX::tzset();
     }
     return;
@@ -429,7 +438,7 @@ sub _set_ssi {
         for my $entry (readdir($dh)) {
             next if $entry eq '.' or $entry eq '..';
             next if $entry !~ /\.ssi$/mx;
-            $ssi{$entry} = { name => $entry }
+            $ssi{$entry} = { name => $entry };
         }
         closedir $dh;
     }
@@ -443,8 +452,8 @@ sub _set_ssi {
 sub _init_logging {
     my($self) = @_;
     my $log4perl_conf;
-    if(!defined $ENV{'THRUK_SRC'} or ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
-        if(defined $self->config->{'log4perl_conf'} and ! -s $self->config->{'log4perl_conf'} ) {
+    if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
+        if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
             die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
         }
         $log4perl_conf = $self->config->{'log4perl_conf'} || $self->config->{'home'}.'/log4perl.conf';
@@ -484,6 +493,7 @@ sub _init_logging {
 if($ENV{'SIZEME'}) {
     # add signal handler to print memory information
     # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
+    ## no critic
     $SIG{'USR1'} = sub {
         printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
         eval {
@@ -491,11 +501,13 @@ if($ENV{'SIZEME'}) {
             Devel::SizeMe::perl_size();
         };
         print STDERR $@ if $@;
-    }
+    };
+    ## use critic
 }
 if($ENV{'MALLINFO'}) {
     # add signal handler to print memory information
     # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR2
+    ## no critic
     $SIG{'USR2'} = sub {
         eval {
             require Devel::Mallinfo;
@@ -512,7 +524,8 @@ if($ENV{'MALLINFO'}) {
             printf STDERR "   %-30s %5.1f %2s\n", 'free within program',      Thruk::Utils::reduce_number($info->{'fordblks'} + $info->{'fsmblks'}, 'B');
         };
         print STDERR $@ if $@;
-    }
+    };
+    ## use critic
 }
 
 ###################################################
@@ -538,8 +551,8 @@ sub _after_dispatch {
                 $counter++;
                 $c->log->error("found leaks:") if $counter == 1;
                 $c->log->error("Cycle ($counter):");
-                foreach (@$path) {
-                    my ($type,$index,$ref,$value,$is_weak) = @$_;
+                foreach (@{$path}) {
+                    my($type,$index,$ref,$value,$is_weak) = @{$_};
                     $c->log->error(sprintf "\t%30s => %-30s\n",($is_weak ? 'w-> ' : '').Devel::Cycle::_format_reference($type,$index,$ref,0),Devel::Cycle::_format_reference(undef,undef,$value,1));
                 }
             });

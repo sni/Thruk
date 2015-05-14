@@ -42,7 +42,7 @@ sub add_routes {
     Thruk::Utils::Menu::insert_item('General', {
                                     'href'  => '/thruk/cgi-bin/panorama.cgi',
                                     'name'  => 'Panorama View',
-                                    target  => '_parent'
+                                    target  => '_parent',
     });
 
     # enable panorama features if this plugin is loaded
@@ -635,7 +635,7 @@ sub _get_wms_provider {
     my($c) = @_;
     my $provider = [];
     my $list     = $c->config->{'Thruk::Plugin::Panorama'}->{'wms_provider'};
-    if(ref $list eq "") { $list = [$list] };
+    if(ref $list eq "") { $list = [$list] }
     for my $entry (@{$list}) {
         my($name, $data) = split(/\s*=\s*/mx, $entry, 2);
         $name =~ s/^\s*//gmx;
@@ -689,7 +689,7 @@ sub _get_timezone_data {
     push @{$timezones}, {
         text   => $localname,
         abbr   => '',
-        offset => 0
+        offset => 0,
     };
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
     for my $name (DateTime::TimeZone->all_names) {
@@ -700,14 +700,14 @@ sub _get_timezone_data {
             hour      => $hour,
             minute    => $min,
             second    => $sec,
-            time_zone => $name
+            time_zone => $name,
         );
         push @{$timezones}, {
             text   => $name,
             abbr   => $dt->time_zone()->short_name_for_datetime($dt),
             offset => $dt->offset(),
             isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
-        }
+        };
     }
     $cache->set('timezones', {
         timestamp => $timestamp,
@@ -731,9 +731,8 @@ sub _task_availability {
     $c->stats->profile(begin => "_task_avail");
     my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
                                                    message    => 'availability is being calculated',
-                                                   background => 1
-                                                 }
-    );
+                                                   background => 1,
+                                            });
     my $res = _avail_update($c, 1);
     $c->stats->profile(end => "_task_avail");
     return($res);
@@ -968,7 +967,7 @@ sub _avail_calc {
         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                     $unavailable_states,
                                                                     $host,
-                                                                    $service
+                                                                    $service,
                                                                    );
         return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
         return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
@@ -998,7 +997,7 @@ sub _avail_calc {
                 for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
                     my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                                 $unavailable_states,
-                                                                                $host
+                                                                                $host,
                                                                                );
                     if($totals->{'total'}->{'percent'} != -1) {
                         $total += $totals->{'total'}->{'percent'};
@@ -1028,7 +1027,7 @@ sub _avail_calc {
                         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                                     $unavailable_states,
                                                                                     $host,
-                                                                                    $service
+                                                                                    $service,
                                                                                    );
                         if($totals->{'total'}->{'percent'} != -1) {
                             $total += $totals->{'total'}->{'percent'};
@@ -1063,7 +1062,7 @@ sub _task_stats_core_metrics {
             { type => 'Requests',            total => $data->{'requests'},       rate => $data->{'requests_rate'} },
             { type => 'NEB Callbacks',       total => $data->{'neb_callbacks'},  rate => $data->{'neb_callbacks_rate'} },
             { type => 'Cached Log Messages', total => $data->{'cached_log_messages'}, rate => '' },
-        ]
+        ],
     };
 
     _add_misc_details($c, undef, $json);
@@ -1088,7 +1087,7 @@ sub _task_stats_check_metrics {
             { type => 'Service Check Latency',        min => $data->{'services_latency_min'},        max => $data->{'services_latency_max'},        avg => $data->{'services_latency_avg'} },
             { type => 'Host Check Execution Time',    min => $data->{'hosts_execution_time_min'},    max => $data->{'hosts_execution_time_max'},    avg => $data->{'hosts_execution_time_avg'} },
             { type => 'Host Check Latency',           min => $data->{'hosts_latency_min'},           max => $data->{'hosts_latency_max'},           avg => $data->{'hosts_latency_avg'} },
-        ]
+        ],
     };
 
     _add_misc_details($c, undef, $json);
@@ -1125,7 +1124,7 @@ sub _task_server_stats {
            $cpu  = $pcs->get();
            $cpucount = (scalar keys %{$cpu}) - 1;
         # don't save more often than 5 seconds to keep a better reference
-        if(!defined $lastcpu->{'time'} or $lastcpu->{'time'} +5 < time()) {
+        if(!defined $lastcpu->{'time'} || $lastcpu->{'time'} +5 < time()) {
             $c->cache->set('panorama_sys_cpu', { init => $pcs->{'init'}, time => time() });
         }
         $cpu     = $cpu->{'cpu'};
@@ -1188,7 +1187,7 @@ sub _task_stats_gearman_grid {
             { 'header' => 'Running', dataIndex => 'running', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
             { 'header' => 'Waiting', dataIndex => 'waiting', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
         ],
-        data    => []
+        data    => [],
     };
     for my $queue (sort keys %{$data}) {
         # hide empty queues
@@ -1235,7 +1234,7 @@ sub _task_show_logs {
             { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'TP.render_date' },
             { 'header' => 'Message', dataIndex => 'message', flex => 1 },
         ],
-        data    => []
+        data    => [],
     };
     for my $row (@{$data}) {
         push @{$json->{'data'}}, {
@@ -1281,7 +1280,7 @@ sub _task_site_status {
             { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
             { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
         ],
-        data    => []
+        data    => [],
     };
 
     # get sections
@@ -1297,7 +1296,7 @@ sub _task_site_status {
         }
     }
     for my $key (@{$c->stash->{'backends'}}) {
-        next if($backend_filter and !defined $backend_filter->{$key});
+        next if($backend_filter && !defined $backend_filter->{$key});
         my $b    = $c->stash->{'backend_detail'}->{$key};
         my $d    = {};
         $d       = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
@@ -1657,7 +1656,7 @@ sub _task_servicesminemap {
                     'height'    => $height,
                     'dataIndex' => $index,
                     'align'     => 'center',
-                    'tdCls'     => 'mine_map_cell'
+                    'tdCls'     => 'mine_map_cell',
         };
         $x++;
     }
@@ -1817,7 +1816,7 @@ sub _task_userdata_iconsets {
     }
     $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
     if($c->req->parameters->{'withempty'}) {
-        unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' }
+        unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' };
     }
     return $folders if $return_only;
     my $json = { data => $folders };
@@ -1890,7 +1889,7 @@ sub _task_host_detail {
     my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
-        sort => { 'DESC' => 'id' }
+        sort => { 'DESC' => 'id' },
     );
     if(defined $hosts and scalar @{$hosts} > 0) {
         if($c->stash->{'escape_html_tags'}) {
@@ -1928,7 +1927,7 @@ sub _task_service_detail {
     my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
-        sort => { 'DESC' => 'id' }
+        sort => { 'DESC' => 'id' },
     );
     if(defined $services and scalar @{$services} > 0) {
         if($c->stash->{'escape_html_tags'}) {
@@ -1965,9 +1964,9 @@ sub _task_dashboard_data {
         return if $c->stash->{'readonly'};
         $dashboard = {
             tab     => {
-                xdata => _get_default_tab_xdata($c)
+                xdata => _get_default_tab_xdata($c),
             },
-            id      => 'new'
+            id      => 'new',
         };
         $dashboard = _save_dashboard($c, $dashboard);
     } else {
@@ -2059,7 +2058,7 @@ sub _task_dashboard_list {
     my($c) = @_;
 
     my $type = $c->req->parameters->{'list'} || 'my';
-    return if($type eq 'all' and !$c->stash->{'is_admin'});
+    return if($type eq 'all' && !$c->stash->{'is_admin'});
 
     my $dashboards = _get_dashboard_list($c, $type);
 
@@ -2085,13 +2084,13 @@ sub _task_dashboard_list {
                       items => [{
                             icon => '../plugins/panorama/images/edit.png',
                             handler => 'TP.dashboardActionHandler',
-                            action  => 'edit'
+                            action  => 'edit',
                       }, {
                             icon => '../plugins/panorama/images/delete.png',
                             handler => 'TP.dashboardActionHandler',
-                            action  => 'remove'
+                            action  => 'remove',
                       }],
-                      tdCls => 'clickable icon_column'
+                      tdCls => 'clickable icon_column',
             },
         ],
         data        => $dashboards,
@@ -2109,7 +2108,7 @@ sub _task_dashboard_update {
     my $nr     = $c->req->parameters->{'nr'};
     my $action = $c->req->parameters->{'action'};
     my $dashboard = _load_dashboard($c, $nr);
-    if($action and $dashboard and !$dashboard->{'readonly'}) {
+    if($action && $dashboard && !$dashboard->{'readonly'}) {
         $json = { 'status' => 'ok' };
         if($action eq 'remove') {
             unlink($dashboard->{'file'});
@@ -2153,10 +2152,13 @@ sub _task_dashboard_restore_list {
         my @files = reverse sort glob($c->{'panorama_var'}.'/'.$nr.'.tab.*');
         for my $file (@files) {
             next if $file =~ m/\.runtime$/mx;
-            $file =~ m/\.(\d+)\.(\w)$/mx;
-            my $date = $1;
-            my $mode = $2;
-            push(@{$list->{$mode}}, { num => $date })
+            if($file =~ m/\.(\d+)\.(\w)$/mx) {
+                my $date = $1;
+                my $mode = $2;
+                push(@{$list->{$mode}}, { num => $date });
+            } else {
+                die("wrong file name format in $file");
+            }
         }
         $json = { data => $list };
     }
@@ -2261,7 +2263,7 @@ sub _do_filter {
     # reset existing filter
     Thruk::Utils::Status::reset_filter($c);
 
-    if(!defined $c->req->parameters->{'filter'} or $c->req->parameters->{'filter'} eq '') {
+    if(!defined $c->req->parameters->{'filter'} || $c->req->parameters->{'filter'} eq '') {
         my @f = Thruk::Utils::Status::do_filter($c);
         return @f;
     }
@@ -2301,7 +2303,7 @@ sub _do_filter {
                     }
                 }
                 elsif($type eq 'type') {
-                    $val = lc($val || '')
+                    $val = lc($val || '');
                 }
                 elsif($type eq 'val_pre') {
                     if(!defined $val) { $val = ''; }
@@ -2355,7 +2357,7 @@ sub _summarize_hostgroup_query {
                 $hostgroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                                         hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                                         name     => $grp,
-                                      }
+                                      };
             }
             if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'pending'}++;     }
             elsif($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'up'}++;          }
@@ -2410,7 +2412,7 @@ sub _summarize_servicegroup_query {
             if(!defined $servicegroups->{$grp}) {
                 $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                                            name     => $grp,
-                                         }
+                                         };
             }
             if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'pending'}++;  }
             elsif($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'ok'}++;       }
@@ -2444,7 +2446,7 @@ sub _summarize_query {
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k}             = $host_sum->{$k};
             if($k ne 'up' and $k ne 'pending') {
-                $sum->{'hosts'}->{'ack_'.$k}  = $host_sum->{$k.'_and_ack'}
+                $sum->{'hosts'}->{'ack_'.$k}  = $host_sum->{$k.'_and_ack'};
             }
             $sum->{'hosts'}->{'downtime_'.$k} = $host_sum->{$k.'_and_scheduled'};
         }
@@ -2454,7 +2456,7 @@ sub _summarize_query {
         for my $k (qw/ok warning critical unknown pending/) {
             $sum->{'services'}->{$k}             = $service_sum->{$k};
             if($k ne 'ok' and $k ne 'pending') {
-                $sum->{'services'}->{'ack_'.$k}  = $service_sum->{$k.'_and_ack'}
+                $sum->{'services'}->{'ack_'.$k}  = $service_sum->{$k.'_and_ack'};
             }
             $sum->{'services'}->{'downtime_'.$k} = $service_sum->{$k.'_and_scheduled'};
         }

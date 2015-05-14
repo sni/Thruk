@@ -377,11 +377,11 @@ sub get_result {
     my $retries = 10;
     while($retries > 0) {
         if(-f $dir."/stdout") {
-            @end = stat($dir."/stdout")
+            @end = stat($dir."/stdout");
         } elsif(-f $dir."/stderr") {
-            @end = stat($dir."/stderr")
+            @end = stat($dir."/stderr");
         } elsif(-f $dir."/rc") {
-            @end = stat($dir."/rc")
+            @end = stat($dir."/rc");
         }
         if(!defined $end[9]) {
             sleep(1);
@@ -458,11 +458,11 @@ sub job_page {
         #my($out,$err,$time,$dir,$stash)...
         my($out,$err,undef,$dir,$stash) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
-        if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
+        if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
         if(defined $err and $err ne '') {
             $c->error($err);
             $c->log->error($err);
-            return $c->detach('/error/index/23')
+            return $c->detach('/error/index/23');
         }
         delete($stash->{'all_in_one_css'});
         return _finished_job_page($c, $stash, $forward, $out);
@@ -523,11 +523,11 @@ sub _do_child_stuff {
     delete $ENV{'THRUK_VERBOSE'};
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
-    # don't use connection pool after forking
-    $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
-
-    # don't fork twice
-    $ENV{'NO_EXTERNAL_JOBS'}         = 1;
+    ## no critic
+    $ENV{'THRUK_NO_CONNECTION_POOL'} = 1; # don't use connection pool after forking
+    $ENV{'NO_EXTERNAL_JOBS'}         = 1; # don't fork twice
+    $ENV{'THRUK_JOB_ID'}             = $id;
+    $ENV{'THRUK_JOB_DIR'}            = $dir; # make job id available
 
     # make remote user available
     if($c) {
@@ -535,11 +535,8 @@ sub _do_child_stuff {
         $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
     }
 
-    # make job id available
-    $ENV{'THRUK_JOB_ID'}  = $id;
-    $ENV{'THRUK_JOB_DIR'} = $dir;
-
     $|=1; # autoflush
+    ## use critic
 
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
@@ -575,7 +572,7 @@ sub _do_parent_stuff {
     print $fh "\n";
 
     # write user file
-    if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
+    if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
         confess("no remote_user") unless defined $c->stash->{'remote_user'};
         open($fh, '>', $dir."/user") or die("cannot write user: $!");
         print $fh $c->stash->{'remote_user'};
@@ -731,7 +728,7 @@ sub _clean_unstorable_refs {
     for my $key (keys %{$var}) {
         my $ref = ref $var->{$key};
         if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
-            delete $var->{$key}
+            delete $var->{$key};
         }
     }
     return $var;
@@ -750,6 +747,8 @@ sub _reconnect {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

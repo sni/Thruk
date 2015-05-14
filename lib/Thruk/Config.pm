@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
-use POSIX qw//;
+use POSIX qw/uname/;
 use Thruk::Utils::Filter;
 
 =head1 NAME
@@ -29,8 +29,9 @@ my $filebranch   = $branch || 1;
 $branch          = $gitbranch if($gitbranch ne '' and $branch eq '');
 $branch          = $branch.'~'.$gitbranch if($gitbranch ne '' and $branch ne '');
 confess('got no project_root') unless $project_root;
-
+## no critic
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
+## use critic
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
@@ -167,7 +168,7 @@ our %config = ('name'                   => 'Thruk',
                                           ],
                                           'all_in_one_css_frames' => [
                                                'thruk_global.css',
-                                               'Thruk.css'
+                                               'Thruk.css',
                                           ],
                                           'all_in_one_css_noframes' => [
                                               'thruk_global.css',
@@ -455,7 +456,9 @@ sub set_default_config {
         $config->{'command_disabled'} = array2hash(expand_numeric_list($config->{'command_disabled'}));
     }
 
+    ## no critic
     $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
+    ## use critic
     # external jobs can be disabled by env
     # don't disable for CLI, breaks config reload over http somehow
     if(defined $ENV{'NO_EXTERNAL_JOBS'} or $ENV{'THRUK_SRC'} eq 'SCRIPTS') {
@@ -492,7 +495,9 @@ sub set_default_config {
     # ensure csrf hosts is a list
     $config->{'csrf_allowed_hosts'} = [split(/\s*,\s*/mx, join(",", @{list($config->{'csrf_allowed_hosts'})}))];
 
+    ## no critic
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = $config->{'ssl_verify_hostnames'};
+    ## use critic
 
     #&timing_breakpoint('set_default_config done');
     return;
@@ -504,7 +509,7 @@ sub _load_any {
     my $cfg    = load_any({
             files       => $files,
             filter      => \&_fix_syntax,
-        }
+        },
     );
 
     return $cfg;
@@ -529,7 +534,7 @@ sub get_git_name {
     my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
     return '' if $tag;
 
-    chomp(my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`);
+    chomp(my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep '^*'`);
     $branch =~ s/^\*\s+//gmx;
     chomp(my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`);
     if($branch eq 'master') {
@@ -560,7 +565,7 @@ sub get_debug_details {
     $release =~ s/^\s*//gmx;
     $release =~ s/\\\w//gmx;
     $release =~ s/\s*$//gmx;
-    my $details =<<EOT;
+    my $details =<<"EOT";
 uname:      $uname
 release:    $release
 EOT
@@ -701,9 +706,10 @@ sub _do_finalize_config {
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
-    if($> != 0 and !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
+    if($> != 0 && !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
     my ($uid, $groups) = get_user($var_path);
+    ## no critic
     $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
     $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
 
@@ -715,6 +721,8 @@ sub _do_finalize_config {
     }
 
     $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
+    ## use critic
+
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         if(defined $uid and $> == 0) {
             switch_user($uid, $groups);
@@ -736,7 +744,7 @@ sub _do_finalize_config {
         $addon_name =~ s/^.*\///gmx;
 
         # does the plugin directory exist? (only when running as normal user)
-        if($> != 0 and ! -d $config->{home}.'/root/thruk/plugins/' and -w $config->{home}.'/root/thruk' ) {
+        if($> != 0 && ! -d $config->{home}.'/root/thruk/plugins/' && -w $config->{home}.'/root/thruk' ) {
             CORE::mkdir($config->{home}.'/root/thruk/plugins');
         }
 
@@ -806,7 +814,9 @@ sub _do_finalize_config {
     }
 
     # make this setting available in env
+    ## no critic
     $ENV{'THRUK_CURL'} = $config->{'use_curl'} ? 1 : 0;
+    ## use critic
 
     if($config->{'action_menu_apply'}) {
         for my $menu (keys %{$config->{'action_menu_apply'}}) {
@@ -985,10 +995,12 @@ switch user and groups
 
 sub switch_user {
     my($uid, $groups) = @_;
+    ## no critic
     $) = join(" ", @{$groups});
     # using POSIX::setuid here leads to
     # 'Insecure dependency in eval while running setgid'
     $> = $uid or confess("setuid failed: ".$!);
+    ## use critic
     return;
 }
 
@@ -998,10 +1010,9 @@ sub _fix_syntax {
     my @components = (
         map +{
             prefix => $_ eq 'Component' ? '' : $_ . '::',
-            values => delete $config->{ lc $_ } || delete $config->{ $_ }
+            values => delete $config->{ lc $_ } || delete $config->{ $_ },
         },
-        grep { ref $config->{ lc $_ } || ref $config->{ $_ } }
-            qw( Component Model M View V Controller C Plugin )
+        grep { ref $config->{ lc $_ } || ref $config->{ $_ } } qw( Component Model M View V Controller C Plugin ),
     );
 
     foreach my $comp ( @components ) {

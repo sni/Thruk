@@ -101,8 +101,8 @@ sub index {
             path    => $cookie_path,
             domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
         });
-        if(   (!defined $testcookie or !$testcookie->value)
-           && (!defined $c->req->header('user-agent') or $c->req->header('user-agent') !~ m/wget/mix)) {
+        if(   (!defined $testcookie || !$testcookie->value)
+           && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");

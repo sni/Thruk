@@ -70,16 +70,15 @@ sub set_object_model {
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                message => 'please stand by while reading the configuration files...',
-                                               forward => $c->req->url
-                                              }
-                                        );
+                                               forward => $c->req->url,
+                                              });
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
             $c->stash->{'obj_model_changed'} = 0 unless $c->req->parameters->{'refreshdata'};
-            if($c->config->{'no_external_job_forks'} == 1 and !$no_recursion) {
+            if($c->config->{'no_external_job_forks'} == 1 && !$no_recursion) {
                 # should be parsed now
                 return set_object_model($c, 1);
             }
-            return;
+            return 0;
         }
         return 0;
     }
@@ -171,13 +170,13 @@ sub update_conf {
            or $old_data->{$key}->[0] eq 'LIST'
            ) {
             if($old_data->{$key}->[1] eq $data->{$key}) {
-                delete $data->{$key}
+                delete $data->{$key};
             }
         }
         elsif(   $old_data->{$key}->[0] eq 'ARRAY'
               or $old_data->{$key}->[0] eq 'MULTI_LIST') {
             if(join(',',@{$old_data->{$key}->[1]}) eq join(',',@{$data->{$key}})) {
-                delete $data->{$key}
+                delete $data->{$key};
             }
         } else {
             confess("unknown type: ".$old_data->{$key}->[0]);
@@ -189,11 +188,13 @@ sub update_conf {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
             if($key eq 'use_timezone') {
+                ## no critic
                 if($data->{$key} ne '') {
-                    $ENV{'TZ'} = $data->{$key}
+                    $ENV{'TZ'} = $data->{$key};
                 } else {
                     delete $ENV{'TZ'};
                 }
+                ## use critic
                 POSIX::tzset();
             }
         }
@@ -753,9 +754,9 @@ sub _compare_configs {
     my($c1, $c2) = @_;
 
     for my $key (qw/core_conf core_type/) {
-        return 0 if !defined $c1->{$key} and  defined $c2->{$key};
-        return 0 if  defined $c1->{$key} and !defined $c2->{$key};
-        next if !defined $c1->{$key} and !defined $c2->{$key};
+        return 0 if !defined $c1->{$key} &&  defined $c2->{$key};
+        return 0 if  defined $c1->{$key} && !defined $c2->{$key};
+        next if !defined $c1->{$key} && !defined $c2->{$key};
         return 0 if $c1->{$key} ne $c2->{$key};
     }
 
@@ -848,7 +849,7 @@ sub get_backends_with_obj_config {
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
-            $backends->{$peer->{'key'}} = $peer->{'configtool'}
+            $backends->{$peer->{'key'}} = $peer->{'configtool'};
         }
     }
 
@@ -857,7 +858,7 @@ sub get_backends_with_obj_config {
         for my $peer (@peers) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
-                $backends->{$peer->{'key'}} = $peer->{'configtool'}
+                $backends->{$peer->{'key'}} = $peer->{'configtool'};
             }
         }
     }

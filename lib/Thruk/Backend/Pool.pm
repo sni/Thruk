@@ -6,7 +6,7 @@ use warnings;
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
     #&timing_breakpoint('starting pool');
-};
+}
 
 use Carp qw/confess/;
 use Thruk::Backend::Peer qw//;
@@ -28,9 +28,9 @@ Pool of backend connections
 
 =cut
 
-$SIG{PIPE} = sub {
-    confess("broken pipe");
-};
+## no critic
+$SIG{PIPE} = sub { confess("broken pipe"); };
+## use critic
 
 ########################################
 
@@ -56,7 +56,9 @@ sub init_backend_thread_pool {
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
+        ## no critic
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
+        ## use critic
         chdir($ENV{'HOME'});
     }
 
@@ -113,7 +115,7 @@ sub init_backend_thread_pool {
             if($@) {
                 die('IO::Socket::SSL and Net::SSLeay (>1.43) is required for multiple parallel https connections: '.$@);
             }
-            if(!$Net::SSLeay::VERSION or $Net::SSLeay::VERSION < 1.43) {
+            if(!$Net::SSLeay::VERSION || $Net::SSLeay::VERSION < 1.43) {
                 die('Net::SSLeay (>=1.43) is required for multiple parallel https connections, you have '.($Net::SSLeay::VERSION ? $Net::SSLeay::VERSION : 'unknown'));
             }
             if($INC{'Crypt/SSLeay.pm'}) {
@@ -124,14 +126,16 @@ sub init_backend_thread_pool {
     #&timing_breakpoint('configs gathered');
 
     if($num_peers > 0) {
+        ## no critic
         $SIG{'ALRM'} = 'IGNORE'; # shared signals will kill waiting threads
+        ## use critic
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
             my $peer = Thruk::Backend::Peer->new( $peer_config, $config->{'logcache'}, $peer_keys, $config->{'product_prefix'}, $use_shadow_naemon );
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};
-            if($peer_config->{'groups'} and !$config->{'deprecations_shown'}->{'backend_groups'}) {
+            if($peer_config->{'groups'} && !$config->{'deprecations_shown'}->{'backend_groups'}) {
                 $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
                 push @{$Thruk::deprecations_log}, "*** DEPRECATED: using groups option in peers is deprecated and will be removed in future releases.";
                 $config->{'deprecations_shown'}->{'backend_groups'} = 1;
@@ -140,7 +144,9 @@ sub init_backend_thread_pool {
         #&timing_breakpoint('peers created');
         if($pool_size > 1) {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", get_memory_usage(), $pool_size) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            ## no critic
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
+            ## use critic
             require Thruk::Pool::Simple;
             $pool = Thruk::Pool::Simple->new(
                 size    => $pool_size,
@@ -149,7 +155,9 @@ sub init_backend_thread_pool {
             printf(STDERR "mem:% 7s MB after pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
         } else {
             printf(STDERR "mem:% 7s MB without pool\n", get_memory_usage()) if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+            ## no critic
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+            ## use critic
         }
     }
 
@@ -178,7 +186,7 @@ sub shutdown_backend_thread_pool {
             $pool = undef;
         };
         alarm(0);
-    };
+    }
     return;
 }
 
@@ -270,7 +278,7 @@ sub do_on_peer {
                     move($tmpfile, $filename);
                 }
             }
-            if(defined $data and !defined $size) {
+            if(defined $data && !defined $size) {
                 if(ref $data eq 'ARRAY') {
                     $size = scalar @{$data};
                 }

@@ -211,9 +211,9 @@ return the objects template name or undef
 
 =cut
 sub get_template_name {
-    my $self = shift;
+    my($self) = @_;
     # in case there is no name set, use the primary name
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and !defined $self->{'conf'}->{'name'} and defined $self->{'conf'}->{$self->{'primary_key'}}) {
+    if(defined $self->{'conf'}->{'register'} && $self->{'conf'}->{'register'} == 0 && !defined $self->{'conf'}->{'name'} && defined $self->{'conf'}->{$self->{'primary_key'}}) {
         return $self->{'conf'}->{$self->{'primary_key'}};
     }
     return $self->{'conf'}->{'name'};
@@ -689,7 +689,7 @@ sub set_uniq_id {
     my $self    = shift;
     my $objects = shift;
 
-    if(!defined $self->{'id'} or $self->{'id'} eq 'new') {
+    if(!defined $self->{'id'} || $self->{'id'} eq 'new') {
         $self->{'id'} = $self->_make_id();
     }
 
@@ -793,7 +793,7 @@ sub _make_id {
 ##########################################################
 sub _count_quotes {
     my($string, $char, $number) = @_;
-    my @chars = split//mx, $_[0];
+    my @chars = split//mx, $string;
     my $size  = scalar @chars - 1;
     for my $x (0..$size) {
         if($chars[$x] eq $char and $chars[$x-1] ne '\\') {

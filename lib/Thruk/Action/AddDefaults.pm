@@ -21,7 +21,7 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
-use POSIX qw//;
+use POSIX qw/strftime/;
 use Thruk::Utils::Filter;
 
 ######################################
@@ -135,7 +135,7 @@ sub begin {
     $c->stash->{'menu_states_json'} = encode_json($menu_states);
 
     my $target = $c->req->parameters->{'target'};
-    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
+    if( !$c->stash->{'use_frames'} && defined $target && $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
     }
 
@@ -183,7 +183,7 @@ sub begin {
                 # return 403 forbidden or kick out the user in other way
                 $c->log->debug("user is not authenticated");
                 return $c->detach('/error/index/10');
-            };
+            }
         }
         if($c->user_exists) {
             $c->log->debug("user authenticated as: ".$c->user->get('username'));
@@ -223,8 +223,10 @@ sub begin {
     }
 
     # bypass shadownaemon by url
+    ## no critic
     $ENV{'THRUK_USE_SHADOW'} = 1;
     $ENV{'THRUK_USE_SHADOW'} = 0 if $c->req->parameters->{'nocache'};
+    ## use critic
 
     $c->stash->{'usercontent_folder'} = $c->config->{'home'}.'/root/thruk/usercontent';
     $c->stash->{'usercontent_folder'} = $ENV{'THRUK_CONFIG'}.'/usercontent'    if $ENV{'THRUK_CONFIG'};
@@ -256,7 +258,7 @@ sub end {
 
     $c->stats->profile(begin => "Root end");
 
-    if(!defined $c->stash->{'navigation'} or $c->stash->{'navigation'} eq '') {
+    if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
         Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
     }
 
@@ -318,7 +320,7 @@ sub end {
             }
             for my $key (keys %{$refs}) {
                 if(!$c->config->{'arena'}->{$key} || $c->config->{'arena'}->{$key} < $refs->{$key}) {
-                    $c->config->{'arena'}->{$key} = $refs->{$key}
+                    $c->config->{'arena'}->{$key} = $refs->{$key};
                 }
             }
         };
@@ -368,7 +370,7 @@ sub end {
         }
     }
 
-    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} && (!defined $c->stash->{'no_auto_reload'} || $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
     $c->stash->{'refresh_rate'} = $c->req->parameters->{'refresh'} if(defined $c->req->parameters->{'refresh'} and $c->req->parameters->{'refresh'} =~ m/^\d+$/mx);
@@ -393,7 +395,6 @@ sub end {
 sub add_defaults {
     my ($c, $safe) = @_;
     $safe = 0 unless defined $safe;
-    confess("wrong arguments") if $_[2];
 
     confess("no c?") unless defined $c;
     $c->stats->profile(begin => "AddDefaults::add_defaults");
@@ -420,9 +421,9 @@ sub add_defaults {
     ###############################
     # redirect to error page unless we have a connection
     if(    !$c->{'db'}
-        or !defined $c->{'db'}->{'backends'}
-        or ref $c->{'db'}->{'backends'} ne 'ARRAY'
-        or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+        || !defined $c->{'db'}->{'backends'}
+        || ref $c->{'db'}->{'backends'} ne 'ARRAY'
+        || scalar @{$c->{'db'}->{'backends'}} == 0 ) {
 
         my $product_prefix = $c->config->{'product_prefix'};
 
@@ -515,7 +516,7 @@ sub add_defaults {
 
     ###############################
     # disable backends by groups
-    if(!defined $ENV{'THRUK_BACKENDS'} and $has_groups and defined $c->{'db'}) {
+    if(!defined $ENV{'THRUK_BACKENDS'} && $has_groups && defined $c->{'db'}) {
         $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_user_data);
     }
     _set_possible_backends($c, $disabled_backends);
@@ -549,7 +550,7 @@ sub add_defaults {
 
     ###############################
     # do we have only icinga backends?
-    if(!exists $c->config->{'enable_icinga_features'} and defined $ENV{'OMD_ROOT'}) {
+    if(!exists $c->config->{'enable_icinga_features'} && defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
             my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
@@ -670,7 +671,7 @@ sub add_cached_defaults {
     my ($c) = @_;
     add_defaults($c, 2);
     # make sure process info is not getting too old
-    if(!$c->stash->{'processinfo_time'} or $c->stash->{'processinfo_time'} < time() - 90) {
+    if(!$c->stash->{'processinfo_time'} || $c->stash->{'processinfo_time'} < time() - 90) {
         Thruk::Action::AddDefaults::delayed_proc_info_update($c);
     }
     return;
@@ -739,10 +740,10 @@ sub _set_possible_backends {
     my @new_possible_backends;
 
     for my $back (@possible_backends) {
-        if(defined $disabled_backends->{$back} and $disabled_backends->{$back} == 4) {
+        if(defined $disabled_backends->{$back} && $disabled_backends->{$back} == 4) {
             $c->{'db'}->disable_backend($back);
         }
-        if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
+        if(!defined $disabled_backends->{$back} || $disabled_backends->{$back} != 4) {
             my $peer = $c->{'db'}->get_peer_by_key($back);
             $backend_detail{$back} = {
                 'name'       => $peer->{'name'},
@@ -836,7 +837,7 @@ sub set_processinfo {
     if($safe) {
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
-            if(!defined $processinfo->{$key} or !defined $processinfo->{$key}->{'program_start'}) {
+            if(!defined $processinfo->{$key} || !defined $processinfo->{$key}->{'program_start'}) {
                 $fetch = 1;
                 last;
             }
@@ -861,7 +862,7 @@ sub set_processinfo {
 
                 # check if we have original datasource and core version when using shadownaemon
                 # but only if the backend itself is available
-                if($peer->{'cacheproxy'} and !$cached_data->{'real_processinfo'}->{$key} and !$c->stash->{'failed_backends'}->{$key}) {
+                if($peer->{'cacheproxy'} && !$cached_data->{'real_processinfo'}->{$key} && !$c->stash->{'failed_backends'}->{$key}) {
                     push @{$missing_keys}, $key;
                 }
             }
@@ -908,12 +909,12 @@ sub set_processinfo {
 
     # check if we have to build / clean our per user cache
     if(   !defined $cached_user_data
-       or !defined $cached_user_data->{'prev_last_program_restart'}
-       or $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
-       or $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
-       or ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
+       || !defined $cached_user_data->{'prev_last_program_restart'}
+       || $cached_user_data->{'prev_last_program_restart'} < $last_program_restart
+       || $cached_user_data->{'prev_last_program_restart'} < time() - 600 # update at least every 10 minutes
+       || ($ENV{THRUK_SRC} && $ENV{THRUK_SRC} eq 'CLI')
       ) {
-        if(defined $c->stash->{'remote_user'} and !$skip_cache_update) {
+        if(defined $c->stash->{'remote_user'} && !$skip_cache_update) {
             my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
             $cached_user_data = {
@@ -1066,7 +1067,7 @@ sub _set_enabled_backends {
 =cut
 sub die_when_no_backends {
     my($c) = @_;
-    if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
+    if(!defined $c->stash->{'pi_detail'} && _any_backend_enabled($c)) {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
         return $c->detach('/error/index/9');
     }

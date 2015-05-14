@@ -37,35 +37,6 @@ sub parameters {
     });
 }
 
-sub raw_body_parameters {
-    return(shift->SUPER::body_parameters);
-}
-
-sub raw_query_parameters {
-    return(shift->SUPER::query_parameters);
-}
-
-sub raw_parameters {
-    my $self = shift;
-
-    return($self->env->{'plack.request.merged'} ||= do {
-        my $query = $self->SUPER::query_parameters();
-        my $body  = $self->SUPER::body_parameters();
-        Hash::MultiValue->new( $query->flatten, $body->flatten );
-    });
-}
-
-sub raw_param {
-    my $self = shift;
-
-    my $raw_parameters = $self->raw_parameters;
-    return keys %{ $raw_parameters } if @_ == 0;
-
-    my $key = shift;
-    return $raw_parameters->{$key} unless wantarray;
-    return $raw_parameters->get_all($key);
-}
-
 sub _decode_parameters {
     my ($self, $stuff) = @_;
     return $stuff unless $self->encoding; # return raw value if encoding method is `undef`
@@ -132,22 +103,6 @@ and POST parameters.
 =head2 param
 
 Returns B<decoded> GET and POST parameters.
-
-=head2 raw_query_parameters
-
-This attribute is the same as C<query_parameters> of L<Plack::Request>.
-
-=head2 raw_body_parameters
-
-This attribute is the same as C<body_parameters> of L<Plack::Request>.
-
-=head2 raw_parameters
-
-This attribute is the same as C<parameters> of L<Plack::Request>.
-
-=head2 raw_param
-
-This attribute is the same as C<param> of L<Plack::Request>.
 
 =head2 url
 

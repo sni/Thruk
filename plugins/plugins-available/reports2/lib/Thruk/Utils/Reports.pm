@@ -81,7 +81,7 @@ sub report_show {
     }
 
     my $report_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
-    if($refresh or ! -f $report_file) {
+    if($refresh || ! -f $report_file) {
         generate_report($c, $nr, $report);
     }
 
@@ -96,7 +96,7 @@ sub report_show {
             $report_text    =~ s/^<body>/<body class="preview">/mx;
             $c->stash->{'text'} = $report_text;
         }
-        elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} or $report->{'var'}->{'ctype'} ne 'html2pdf')) {
+        elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             my $name = $report->{'var'}->{'attachment'};
             $name    =~ s/\s+/_/gmx;
             $name    =~ s/[^\wöäüÖÄÜß\-_\.]+//gmx;
@@ -189,7 +189,7 @@ sub report_send {
                 $bodystarted = 1;
             }
             if($bodystarted) {
-                $mailbody .= $line."\n"
+                $mailbody .= $line."\n";
             } elsif($line =~ m/^([A-Z]+):\s*(.*)$/mx) {
                 $mailheader->{lc($1)} = $2;
             }
@@ -358,7 +358,7 @@ sub generate_report {
     }
 
     Thruk::Utils::set_user($c, $options->{'user'});
-    $ENV{'REMOTE_USER'} = $options->{'user'};
+    local $ENV{'REMOTE_USER'} = $options->{'user'};
     $c->stash->{'remote_user'} = $options->{'user'};
 
     # clean up first
@@ -475,7 +475,7 @@ sub generate_report {
     set_running($c, $nr, 0, undef, time());
 
     # set error if not already set
-    if(!-f $attachment and !$Thruk::Utils::Reports::error) {
+    if(!-f $attachment && !$Thruk::Utils::Reports::error) {
         $Thruk::Utils::Reports::error = read_file($logfile);
     }
     Thruk::Utils::CLI::_error($Thruk::Utils::Reports::error);
@@ -641,7 +641,7 @@ sub get_report_data_from_param {
     }
 
     # only save backends if checkbox checked
-    if(!$params->{'backends_toggle'} and !$params->{'report_backends_toggle'}) {
+    if(!$params->{'backends_toggle'} && !$params->{'report_backends_toggle'}) {
         $params->{'report_backends'} = [];
     }
 
@@ -710,7 +710,7 @@ sub update_cron_file {
                         $e = sprintf('cd %s && echo %s >> %s',
                                         $c->config->{'project_root'},
                                         $1,
-                                        $queue_file
+                                        $queue_file,
                                     );
                     }
                 } else {
@@ -878,7 +878,7 @@ sub add_report_defaults {
         my $f   = $d->{$key};
 
         # fill in default
-        if(defined $f->[4] and $f->[2] ne '' and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ /^\s*$/mx)) {
+        if(defined $f->[4] && $f->[2] ne '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ /^\s*$/mx)) {
             $report->{'params'}->{$key} = $f->[2];
         }
 
@@ -911,9 +911,9 @@ sub get_running_reports_number {
     my $waiting = 0;
     for my $r (@{$reports}) {
         if($r->{'var'}->{'is_waiting'}) {
-            $waiting++
+            $waiting++;
         } elsif($r->{'var'}->{'is_running'} > 0) {
-            $running++
+            $running++;
         }
     }
     return($running, $waiting);
@@ -1000,7 +1000,7 @@ sub _read_report_file {
 
     my $needs_save = 0;
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
-    if($report->{'template'} and !defined $available_templates->{$report->{'template'}}) {
+    if($report->{'template'} && !defined $available_templates->{$report->{'template'}}) {
         my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
         $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
         $needs_save = 1;
@@ -1053,7 +1053,7 @@ sub _read_report_file {
     }
 
     my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
-    if(!$report->{'var'}->{'is_running'} and $report->{'var'}->{'job'}) {
+    if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'}) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
         if($err) {
@@ -1181,12 +1181,12 @@ sub _verify_fields {
         my $f   = $d->{$key};
 
         # required fields
-        if(defined $f->[4] and $f->[2] eq '' and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
+        if(defined $f->[4] && $f->[2] eq '' && (!defined $report->{'params'}->{$key} || $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
             push @errors, $f->[0].': required field';
         }
 
         # regular expressions
-        if($f->[1] eq 'pattern' and !Thruk::Utils::is_valid_regular_expression($c, $report->{'params'}->{$key})) {
+        if($f->[1] eq 'pattern' && !Thruk::Utils::is_valid_regular_expression($c, $report->{'params'}->{$key})) {
             push @errors, $f->[0].': invalid regular expression';
         }
     }

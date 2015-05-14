@@ -39,7 +39,7 @@ sub status {
             my $orig_description = $description;
             my $function = 'worst';
             if($description =~ m/^(b|w):(.*)$/mx) {
-                if($1 eq 'b') { $function = 'worst' };
+                if($1 eq 'b') { $function = 'worst' }
                 $description = $2;
             }
             $description =~ s/\*/.*/gmx;
@@ -72,7 +72,7 @@ sub status {
         return($data->{'last_hard_state'},
                ($n->{'status_text'} || 'no plugin output yet'), # return last status text
                undef,
-               {'last_state_change' => $data->{'last_hard_state_change'}}
+               {'last_state_change' => $data->{'last_hard_state_change'}},
         );
     }
 

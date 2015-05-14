@@ -77,7 +77,7 @@ sub get_downtimes_list {
 
     # skip further auth tests if this user has admins permission anyway
     if($auth) {
-        $auth = 0 if(!$hostfilter[0] and !$servicefilter[0]);
+        $auth = 0 if(!$hostfilter[0] && !$servicefilter[0]);
     }
 
     # host and service filter
@@ -221,7 +221,7 @@ sub read_downtime {
             }
         }
         elsif($d->{'target'} eq 'service') {
-            return if $host and !$service;
+            return if $host && !$service;
             for my $hst (@{$d->{'host'}}) {
                 if(defined $services->{$hst}->{$d->{'service'}}) {
                     $found++;
@@ -230,7 +230,7 @@ sub read_downtime {
             }
         }
         elsif($d->{'target'} eq 'servicegroup') {
-            return if $host and !$service;
+            return if $host && !$service;
             for my $grp (@{$d->{'servicegroup'}}) {
                 if(defined $servicegroups->{$grp}) {
                     $found++;
@@ -251,7 +251,7 @@ sub read_downtime {
 
     # backend filter?
     my $backends = Thruk::Utils::list($d->{'backends'});
-    if(!$backendfilter and scalar @{$backends} > 0) {
+    if(!$backendfilter && scalar @{$backends} > 0) {
         my $found = 0;
         $found = 1 if $backends->[0] eq ''; # no backends at all
         for my $b (@{$backends}) {
@@ -422,7 +422,7 @@ return filename for data file
 =cut
 sub get_data_file_name {
     my($c, $nr) = @_;
-    if(!defined $nr or $nr !~ m/^\d+$/mx) {
+    if(!defined $nr || $nr !~ m/^\d+$/mx) {
         $nr = 1;
     }
 

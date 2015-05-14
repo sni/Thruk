@@ -33,7 +33,7 @@ sub index {
     require Thruk::Utils::Trends;
     Thruk::Utils::Trends->import();
 
-    my $trends_helper = new Thruk::Utils::Trends;
+    my $trends_helper = Thruk::Utils::Trends->new;
 
     # set defaults
     $c->stash->{title}            = 'Trends';

@@ -32,7 +32,7 @@ sub add_routes {
     Thruk::Utils::Status::add_view({'group' => 'Status Map',
                                     'name'  => 'Status Map',
                                     'value' => 'statusmap',
-                                    'url'   => 'statusmap.cgi'
+                                    'url'   => 'statusmap.cgi',
     });
 
 
@@ -177,7 +177,7 @@ sub _get_json_for_hosts {
 
     my $children = [];
 
-    unless(defined $data) {
+    if(!defined $data) {
         return($children,0,0,0,0,0);
     }
 
@@ -211,7 +211,7 @@ sub _get_json_for_hosts {
                    $child_sum_up,
                    $child_sum_down,
                    $child_sum_unreachable,
-                   $child_sum_pending
+                   $child_sum_pending,
                 ) = _get_json_for_hosts($c, $dat, ($level+1));
                 $sum_hosts          += $child_sum_hosts;
                 $state_up           += $child_sum_up;
@@ -284,7 +284,7 @@ sub _get_hosts_by_split_attribute {
                         my $old = $subtree->{$key};
                         $subtree->{$key} = [
                             $json_host,
-                            $old
+                            $old,
                         ];
                     }
                 } else {
@@ -292,7 +292,7 @@ sub _get_hosts_by_split_attribute {
                 }
             }
             else {
-                if(!exists $subtree->{$key} or ref $subtree->{$key} ne 'HASH') { $subtree->{$key} = {}; }
+                if(!exists $subtree->{$key} || ref $subtree->{$key} ne 'HASH') { $subtree->{$key} = {}; }
                 $subtree = \%{$subtree->{$key}};
             }
         }
@@ -303,7 +303,7 @@ sub _get_hosts_by_split_attribute {
        $child_sum_up,
        $child_sum_down,
        $child_sum_unreachable,
-       $child_sum_pending
+       $child_sum_pending,
     ) = _get_json_for_hosts($c, $host_tree, 0);
     my $rootnode = {
         'id'       => 'rootid',
@@ -352,7 +352,7 @@ sub _get_hosts_by_attribute {
        $child_sum_up,
        $child_sum_down,
        $child_sum_unreachable,
-       $child_sum_pending
+       $child_sum_pending,
     ) = _get_json_for_hosts($c, $host_tree, 0);
     my $rootnode = {
         'id'       => 'rootid',
@@ -472,7 +472,7 @@ sub _fill_subtree {
         $sum_state_pending                          += $json_host->{'data'}->{'state_pending'};
     }
 
-    return($tree, $remaining_hosts, $sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending)
+    return($tree, $remaining_hosts, $sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending);
 }
 
 

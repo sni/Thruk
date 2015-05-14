@@ -146,7 +146,7 @@ sub _create_report {
 
     # get start/end from timeperiod in params
     my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    return if (!defined $start or !defined $end);
+    return if (!defined $start || !defined $end);
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
     $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
@@ -483,7 +483,7 @@ sub _get_filter {
 sub _get_host_statustype_filter {
     my ( $number ) = @_;
 
-    $number = 7 if !defined $number or $number <= 0 or $number > 7;
+    $number = 7 if !defined $number || $number <= 0 || $number > 7;
     my $hoststatusfiltername = 'All';
     my @hoststatusfilter;
     if($number and $number != 7) {
@@ -512,7 +512,7 @@ sub _get_host_statustype_filter {
 sub _get_service_statustype_filter {
     my ( $number ) = @_;
 
-    $number = 120 if !defined $number or $number <= 0 or $number > 120;
+    $number = 120 if !defined $number || $number <= 0 || $number > 120;
     my $servicestatusfiltername = 'All';
     my @servicestatusfilter;
     if($number and $number != 120) {

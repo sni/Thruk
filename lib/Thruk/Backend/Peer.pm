@@ -213,17 +213,17 @@ sub _initialise_peer {
         if($ENV{'NO_SHADOW_NAEMON'}) {
             undef $use_shadow_naemon;
         }
-        elsif(defined $self->{'use_shadow'} and $self->{'use_shadow'} == 0) {
+        elsif(defined $self->{'use_shadow'} && $self->{'use_shadow'} == 0) {
             undef $use_shadow_naemon;
         }
-        elsif($self->{'local'} == 1 and (!defined $self->{'use_shadow'} or $self->{'use_shadow'} == 0)) {
+        elsif($self->{'local'} == 1 && (!defined $self->{'use_shadow'} || $self->{'use_shadow'} == 0)) {
             undef $use_shadow_naemon;
         }
-        elsif($config->{'type'} ne 'livestatus' and !$config->{'options'}->{'fallback_peer'}) {
+        elsif($config->{'type'} ne 'livestatus' && !$config->{'options'}->{'fallback_peer'}) {
             undef $use_shadow_naemon;
         }
     }
-    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
+    if($use_shadow_naemon && !$ENV{'NO_SHADOW_NAEMON'}) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
                                                 peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
                                                 peer_key  => $self->{'key'},

@@ -83,7 +83,7 @@ sub _show_step_3 {
     my $host    = $c->req->parameters->{'host'};
     my $service = $c->req->parameters->{'service'};
 
-    if(!defined $host and !defined $service) {
+    if(!defined $host && !defined $service) {
         return;
     }
 

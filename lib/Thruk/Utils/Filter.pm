@@ -242,7 +242,7 @@ sub full_uri {
     my $url_prefix = $c->stash->{'url_prefix'};
     $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     if($amps) {
-        $uri = escape_ampersand($uri)
+        $uri = escape_ampersand($uri);
     }
     return $uri;
 }
@@ -646,7 +646,7 @@ sub get_message {
         my $cookie = $c->cookie('thruk_message');
         $c->cookie('thruk_message' => '', {
             expires => 0,
-            path    => $c->stash->{'cookie_path'}
+            path    => $c->stash->{'cookie_path'},
         });
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data
@@ -997,7 +997,7 @@ returns user token which can be used to validate requests
 sub get_user_token {
     my($c) = @_;
     return $c->stash->{'user_token'} if $c->stash->{'user_token'};
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return("");
     }
     my $store  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
@@ -1020,6 +1020,8 @@ sub get_user_token {
 ########################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

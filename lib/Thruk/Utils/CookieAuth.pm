@@ -23,7 +23,9 @@ use Encode qw/encode_utf8/;
 ##############################################
 BEGIN {
     if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
+        ## no critic
         $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+        ## use critic
         eval {
             # required for new IO::Socket::SSL versions
             require IO::Socket::SSL;
@@ -31,7 +33,7 @@ BEGIN {
             IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
         };
     }
-};
+}
 
 ##############################################
 

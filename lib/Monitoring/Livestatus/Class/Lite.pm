@@ -197,7 +197,7 @@ sub hashref_pk {
 
     my %indexed;
     my @data = $self->hashref_array();
-    confess('undefined index: '.$key) if(defined $data[0] and !defined $data[0]->{$key});
+    confess('undefined index: '.$key) if(defined $data[0] && !defined $data[0]->{$key});
     for my $row (@data) {
         $indexed{$row->{$key}} = $row;
     }
@@ -340,7 +340,7 @@ sub _recurse_cond {
     $combining_count = $combining_count || 0;
     print STDERR "#IN _recurse_cond $cond $combining_count\n" if $TRACE > 9;
     my $method = &_METHOD_FOR_refkind('_cond', $cond);
-    my ( $child_combining_count, @statment ) = &{\&$method}($cond,$combining_count);
+    my($child_combining_count, @statment) = &{\&{$method}}($cond,$combining_count);
     $combining_count = $child_combining_count;
     print STDERR "#OUT _recurse_cond $cond $combining_count ( $method )\n" if $TRACE > 9;
     return ( $combining_count, @statment );
@@ -388,7 +388,7 @@ sub _cond_HASHREF {
             $combining_count = $child_combining_count;
         } else {
             my $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
-            ( $child_combining_count, @child_statment ) = &{\&$method}($key, $value, undef ,$combining_count);
+            ($child_combining_count, @child_statment) = &{\&{$method}}($key, $value, undef ,$combining_count);
             $combining_count = $child_combining_count;
         }
 
@@ -407,12 +407,10 @@ sub _cond_hashpair_UNDEF {
     $operator = '=' unless $operator;
     print STDERR "# _cond_hashpair_UNDEF\n" if $TRACE > 9 ;
 
-    my @statment = (
-        sprintf("%s: %s %s",$filter_mode,$key,$operator)
-    );
+    my @statment = (sprintf("%s: %s %s",$filter_mode,$key,$operator));
     $combining_count++;
     return ( $combining_count, @statment );
-};
+}
 
 ################################################################################
 sub _cond_hashpair_SCALAR {
@@ -422,12 +420,10 @@ sub _cond_hashpair_SCALAR {
     print STDERR "# _cond_hashpair_SCALAR\n" if $TRACE > 9 ;
 
     my $combining_count = shift || 0;
-    my @statment = (
-        sprintf("%s: %s %s %s",$filter_mode,$key,$operator,$value)
-    );
+    my @statment = (sprintf("%s: %s %s %s",$filter_mode,$key,$operator,$value));
     $combining_count++;
     return ( $combining_count, @statment );
-};
+}
 
 ################################################################################
 sub _cond_hashpair_ARRAYREF {
@@ -475,12 +471,12 @@ sub _cond_hashpair_HASHREF {
             # <=    less or equal
             # >=    greater or equal
             my $method = &_METHOD_FOR_refkind("_cond_hashpair",$child_value);
-            my ( $child_combining_count, @child_statment ) = &{\&$method}($key, $child_value,$child_key);
+            my($child_combining_count, @child_statment) = &{\&{$method}}($key, $child_value,$child_key);
             $combining_count += $child_combining_count;
             push @statment, @child_statment;
         } else {
             my $method = &_METHOD_FOR_refkind("_cond_hashpair",$child_value);
-            my ( $child_combining_count, @child_statment ) = &{\&$method}($key, $child_value);
+            my ( $child_combining_count, @child_statment ) = &{\&{$method}}($key, $child_value);
             $combining_count += $child_combining_count;
             push @statment, @child_statment;
         }
@@ -510,15 +506,15 @@ sub _cond_op_in_hash {
         handler => '_cond_op_groupby',
     }, {
         regexp  => qr/(sum|min|max|avg|std)/mix,
-        handler => '_cond_op_simple'
+        handler => '_cond_op_simple',
     }, {
         regexp  => qr/(isa)/mix,
-        handler => '_cond_op_isa'
+        handler => '_cond_op_isa',
     }];
     my $operator_config = first { $operator =~ $_->{'regexp'} } @{ $operators };
     my $operator_handler = $operator_config->{handler};
     if ( not ref $operator_handler ){
-        return &{\&$operator_handler}($operator,$value,$combining_count);
+        return &{\&{$operator_handler}}($operator,$value,$combining_count);
     }elsif ( ref $operator_handler eq 'CODE' ) {
         return $operator_handler->($operator,$value,$combining_count);
     }
@@ -634,18 +630,19 @@ sub _cond_op_isa {
 
     my ( $child_combining_count, @statment ) = &_dispatch_refkind($value, {
         HASHREF  => sub {
-            my @keys = keys %$value;
+            my @keys = keys %{$value};
             if ( scalar @keys != 1 ){
                 die "Isa operator doesn't support more then one key.";
             }
             $as_name = shift @keys;
-            my @values = values(%$value);
+            my @values = values(%{$value});
             return &_recurse_cond(shift( @values ), 0 );
         },
     });
     $combining_count += $child_combining_count;
 
-    $statment[ $#statment ] = $statment[$#statment] . " as " . $as_name;
+    # append alias to last operator
+    $statment[-1] .= " as ".$as_name;
 
     #print STDERR "#OUT _cond_op_isa $operator $value $combining_count isa key: " . $self->{_isa_key} . "\n" if $TRACE > 9;
     return ( $combining_count, @statment );

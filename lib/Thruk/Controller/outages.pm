@@ -28,7 +28,7 @@ sub index {
 
     my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     state => 1,
-                                                    childs => { '!=' => undef }
+                                                    childs => { '!=' => undef },
                                                   ]);
 
     if(defined $outages and scalar @{$outages} > 0) {

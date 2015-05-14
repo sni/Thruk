@@ -142,13 +142,17 @@ sub reconnect {
         $self->{'ua'}->proxy('http', $self->{'proxy'});
         # ssl depends on which class we have
         if($INC{'IO/Socket/SSL.pm'}) {
+            ## no critic
             $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
+            ## use critic
             my $con_proxy = $self->{'proxy'};
             $con_proxy =~ s#^(http|https)://#connect://#mx;
             $self->{'ua'}->proxy('https', $con_proxy);
         } else {
             # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
+            ## no critic
             $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+            ## use critic
             # env proxy breaks the ssl proxy above
             #$self->{'ua'}->env_proxy();
         }
@@ -186,7 +190,7 @@ sub renew_logcache {
     my($self, $c) = @_;
     return unless defined $self->{'logcache'};
     # renew cache?
-    if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
+    if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
         $self->{'lastcacheupdate'} = time();
         $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
     }
@@ -473,7 +477,7 @@ returns logfile entries
 sub get_logs {
     my($self, @options) = @_;
     my %options = @options;
-    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+    if(defined $self->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'logcache'}->get_logs(%options);
     }
@@ -688,8 +692,8 @@ sub _req {
                         { data => encode_json({
                                     credential => $self->{'auth'},
                                     options    => $options,
-                                })
-                        }
+                                }),
+                        },
                     );
 
     if($response->{'_request'}->{'_uri'} =~ m/job\.cgi(\?|&|%3f)job=(.*)$/mx) {
@@ -733,7 +737,6 @@ sub _req {
         die("not an array ref, got ".ref($data->{'output'}));
     }
     die(_format_response_error($response));
-    return;
 }
 
 ##########################################################
@@ -756,9 +759,11 @@ sub _ua_post_with_timeout {
 
     # make sure nobody else calls alarm in between
     {
+        ## no critic
         no warnings qw(redefine prototype);
         *CORE::GLOBAL::alarm = sub {};
-    };
+        ## use critic
+    }
 
     # try to fetch result
     my $res = $ua->post($url, $data);

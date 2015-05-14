@@ -14,7 +14,7 @@ the report layout, the mail content and the required parameters for a report.
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/confess croak/;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
 use File::Slurp;
@@ -139,8 +139,8 @@ sub outages {
         }
         # combine classes if report should contain downtimes too
         if($downtime) {
-            if(   (defined $u->{$l->{'class'}}  and !defined $u->{$l->{'class'}.'_downtime'})
-               or (!defined $u->{$l->{'class'}} and defined $u->{$l->{'class'}.'_downtime'})
+            if(   (defined $u->{$l->{'class'}}  && !defined $u->{$l->{'class'}.'_downtime'})
+               or (!defined $u->{$l->{'class'}} && defined $u->{$l->{'class'}.'_downtime'})
             ) {
                 $combined->{'class'} = $combined->{'class'}.'_downtime';
             }
@@ -406,7 +406,7 @@ sub get_url {
         }
         if($Thruk::Utils::PDF::ctype eq 'text/html') {
             my $include_js = 1;
-            if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
+            if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
             #$result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
@@ -495,10 +495,12 @@ return human readable month name
 =cut
 sub get_month_name {
     my($date, $months) = @_;
-    $date =~ m/\d+\-(\d+)/mx;
-    my $nr = $1 - 1;
-    if($nr > 11) { $nr = $nr - 12; }
-    return($months->[$nr]);
+    if($date =~ m/\d+\-(\d+)/mx) {
+        my $nr = $1 - 1;
+        if($nr > 11) { $nr = $nr - 12; }
+        return($months->[$nr]);
+    }
+    confess("wrong format");
 }
 
 ##########################################################
@@ -512,8 +514,10 @@ return human readable week name
 =cut
 sub get_week_name {
     my($date, $abbr) = @_;
-    $date =~ m/\d+\-WK(\d+)/mx;
-    return($abbr.$1);
+    if($date =~ m/\d+\-WK(\d+)/mx) {
+        return($abbr.$1);
+    }
+    confess("wrong format");
 }
 
 ##########################################################
@@ -527,8 +531,10 @@ return human readable day name
 =cut
 sub get_day_name {
     my($date, $months) = @_;
-    $date =~ m/(\d+)\-(\d+)\-(\d+)/mx;
-    return(get_month_name($1.'-'.$2, $months).' '.$3);
+    if($date =~ m/(\d+)\-(\d+)\-(\d+)/mx) {
+        return(get_month_name($1.'-'.$2, $months).' '.$3);
+    }
+    confess("wrong format");
 }
 
 
@@ -585,7 +591,7 @@ dump variables to stderr
 
 =cut
 sub dump {
-    print STDERR  Dumper(@_);
+    print STDERR  Dumper(\@_);
     return "";
 }
 
@@ -823,7 +829,7 @@ sub _replace_css {
 sub _replace_js {
     my($baseurl, $report_base_url, $url) = @_;
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
+    if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
         return "";
     }
     if($url =~ m/excanvas\.js$/mx) {
@@ -837,12 +843,12 @@ sub _replace_js {
 
 ##############################################
 sub _replace_css_img {
-    my($baseurl, $report_base_url,$css, $a,$file,$b,$pre,$post) = @_;
+    my($baseurl, $report_base_url,$css,$aa,$file,$bb,$pre,$post) = @_;
     # static images
     $pre  = '' unless defined $pre;
     $post = '' unless defined $post;
-    $a    = '' unless defined $a;
-    $b    = '' unless defined $b;
+    $aa   = '' unless defined $aa;
+    $bb   = '' unless defined $bb;
 
     $file =~ s/\?.*$//gmx;
     $file =~ s/\#.*$//gmx;
@@ -901,7 +907,7 @@ sub _read_static_content_file {
         $url =~ s|^themes/||gmx;
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
         $file = $themes_dir . '/themes-enabled/' . $url;
-        if(!-e $file and defined $default) {
+        if(!-e $file && defined $default) {
             $url =~ s|^Thruk/|$default/|gmx;
             # disabled theme? try available folder
             $file = $themes_dir . '/themes-available/' . $url;
@@ -982,8 +988,8 @@ sub _absolutize_url {
     # split original baseurl in host, path and file
     if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
         my $host     = $1."://".$2.$3;
-        $host        =~ s/\/$//mx;      # remove last /
         my $fullpath = $4 || '';
+        $host        =~ s/\/$//mx;      # remove last /
         $fullpath    =~ s/\?.*$//mx;
         $fullpath    =~ s/^\///mx;
         my($path,$file) = ('', '');
@@ -1010,7 +1016,6 @@ sub _absolutize_url {
     }
 
     confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
-    return;
 }
 
 ##############################################
@@ -1034,10 +1039,10 @@ sub _get_datatype {
 
 ##############################################
 sub _locale {
-    my($fmt) = shift;
+    my($fmt, @args) = @_;
     my $tr  = $Thruk::Utils::Reports::Render::locale;
     $fmt = $tr->{$fmt} || $fmt;
-    return sprintf($fmt, @_);
+    return sprintf($fmt, @args);
 }
 
 ##############################################

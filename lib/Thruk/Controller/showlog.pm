@@ -38,7 +38,7 @@ sub index {
         $start = Thruk::Utils::parse_date($c, $param_start);
         $end   = Thruk::Utils::parse_date($c, $param_end);
     }
-    if(!defined $start or $start == 0 or !defined $end or $end == 0) {
+    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
         # start with today 00:00
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
         $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
@@ -88,9 +88,9 @@ sub index {
                         ]},
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }},
                         ]},
-                ]
+                ],
         };
     }
     elsif($host) {
@@ -99,9 +99,9 @@ sub index {
                         { host_name => $host },
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }},
                         ]},
-                ]
+                ],
         };
     }
     $c->stash->{'host'}    = $host;
