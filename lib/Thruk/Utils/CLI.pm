@@ -350,7 +350,6 @@ sub _run {
         if(!$ENV{'THRUK_JOB_ID'} and $self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
             # create fake job
             my($id,$dir) = Thruk::Utils::External::_init_external($c);
-            $SIG{CHLD} = 'DEFAULT';
             Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
             $ENV{'THRUK_JOB_ID'}  = $id;
             $ENV{'THRUK_JOB_DIR'} = $dir;
@@ -1321,7 +1320,6 @@ sub _cmd_configtool {
 
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
             local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-            local $SIG{CHLD}        = 'DEFAULT';
             my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
             $c->log->debug('pre save hook: '.$cmd);
             my $out = `$cmd`;
@@ -1385,7 +1383,6 @@ sub _cmd_configtool {
         # run post hook
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
             local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-            local $SIG{CHLD}        = 'DEFAULT';
             system($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot);
         }
     } else {

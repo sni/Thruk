@@ -936,7 +936,6 @@ sub _process_objects_page {
     my $files_root = _set_files_stash($c);
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
     if(-d $dir) {
-        local $SIG{CHLD} = 'DEFAULT';
         my $cmd          = "cd '".$dir."' && git log --pretty='format:%H' -1 2>&1";
         my $out          = `$cmd`;
         $c->stash->{'has_history'} = 1 if $? == 0;

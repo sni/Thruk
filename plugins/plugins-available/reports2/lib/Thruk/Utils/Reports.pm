@@ -156,8 +156,6 @@ sub report_send {
     $report->{'desc'} = $desc if $to;
     $c->stash->{'r'} = $report;
 
-    local $SIG{CHLD} = 'DEFAULT';
-
     my $attachment;
     if($skip_generate) {
         $attachment = $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.dat';
