@@ -91,8 +91,20 @@ sub _format_row {
     my $output  = "";
     my $indent  = " "x(2*($row->{'level'}-1));
     my $elapsed = "";
-    if($row->{end}) {
-        $elapsed = sprintf("%.5fs", tv_interval($row->{start}, $row->{end}));
+    if($row->{start}) {
+        if(!defined $row->{end}) {
+            # get parents end date
+            my $parent = $row->{'parent'};
+            while(defined $parent->{'parent'} && !defined $parent->{'end'}) {
+                $parent = $parent->{'parent'};
+            }
+            my $end = $parent->{'end'};
+            if(defined $end) {
+                $elapsed = sprintf("~%.5fs", tv_interval($row->{start}, $end));
+            }
+        } else {
+            $elapsed = sprintf("%.5fs", tv_interval($row->{start}, $row->{end}));
+        }
     }
     my $name    = substr($indent.$row->{'name'}, 0, 78);
     $output .= sprintf("| %-80s | %11s |\n", $name, $elapsed);
