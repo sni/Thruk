@@ -14,7 +14,7 @@ use Storable qw/dclone/;
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 28;
+    plan tests => 32;
     $SIG{'ALRM'} = sub { confess('alarm'); };
     alarm(60);
     $ENV{'THRUK_TEST_NO_STDOUT_LOG'} = 1;
@@ -66,9 +66,11 @@ BEGIN {
     print $fh "tmp_path  = ".$http_dir."/tmp\n";
     close($fh);
     my $cmd = "cat $local_dir/thruk_local.conf | sed -e 's|/tmp/live|$local_dir/tmp/live|g' -e 's|= plugins/.*\$|$local_dir/$input_dir|g' > $local_dir/thruk_local.conf2 && mv $local_dir/thruk_local.conf2 $local_dir/thruk_local.conf";
+    ok($cmd, $cmd);
     `$cmd`;
 
     $cmd = "cat $http_dir/thruk_local.conf | sed -e 's|%TESTPORT%|$testport|g' > $http_dir/thruk_local.conf2 && mv $http_dir/thruk_local.conf2 $http_dir/thruk_local.conf";
+    ok($cmd, $cmd);
     `$cmd`;
 
     $ENV{'THRUK_CONFIG'} = $http_dir;
@@ -79,19 +81,27 @@ BEGIN {
 
 ###########################################################
 # start test server
+my $cmd     = "THRUK_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1';
+ok($cmd, $cmd);
+$SIG{CHLD} = 'IGNORE'; # avoid zombie and detect failed starts without having to wait()
 my $httppid = fork();
 if(!$httppid) {
-    exec("THRUK_CONFIG=".$local_dir." ./script/waitmax 60 ./script/thruk_server.pl -p ".$testport." >".$http_dir.'/tmp/server.log 2>&1') or
-        fail(read_file($http_dir.'/tmp/server.log'));
+    exec($cmd) or fail(read_file($http_dir.'/tmp/server.log'));
     exit 1;
 }
+ok($httppid, "http server started with pid: ".$httppid);
 my $now = time();
+my $connected;
 for my $x (1..15) {
     my $socket = IO::Socket::INET->new('127.0.0.1:'.$testport);
-    last if($socket and $socket->connected());
+    $connected = 1 if($socket and $socket->connected());
+    last if $connected;
+    last unless -d "/proc/$httppid";
     sleep(1);
 }
+bail_out_with_kill('server did not start: '.read_file($http_dir.'/tmp/server.log')) unless $connected;
 ok($httppid, 'test server started: '.$httppid);
+$SIG{CHLD} = 'DEFAULT';
 sleep(2);
 alarm(30);
 
@@ -146,7 +156,7 @@ for my $x (1..30) {
     }
     sleep(1);
 }
-bail_out_with_kill('server did not start') unless $started;
+bail_out_with_kill('server did not start properly') unless $started;
 
 ###########################################################
 # init our components
@@ -244,6 +254,6 @@ sub bail_out_with_kill {
     `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1`;
     kill(9, $socketpid)             if $socketpid;
     `rm -rf $http_dir $local_dir`;
-    BAIL_OUT($msg);
+    BAIL_OUT($msg.' (in '.$0.')');
 }
 
