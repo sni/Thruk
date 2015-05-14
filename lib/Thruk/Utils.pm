@@ -801,13 +801,13 @@ sub combine_filter {
     my $filter   = shift;
 
     if(!defined $operator && $operator ne '-or' && $operator ne '-and') {
-        confess("unknown operator: ".Data::Dumper($operator));
+        confess("unknown operator: ".Dumper($operator));
     }
 
     return unless defined $filter;
 
     if(ref $filter ne 'ARRAY') {
-        confess("expected arrayref, got: ".Data::Dumper(ref $filter));
+        confess("expected arrayref, got: ".Dumper(ref $filter));
     }
 
     return if scalar @{$filter} == 0;
@@ -1133,7 +1133,7 @@ sub store_user_data {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$tmpfile.' : '.$! );
         return;
     };
-    print $fh Data::Dumper($data);
+    print $fh Dumper($data);
     Thruk::Utils::IO::close($fh, $tmpfile);
     Thruk::Utils::IO::ensure_permissions('file', $file);
 
@@ -1920,7 +1920,7 @@ sub write_data_file {
 
     my(undef, $tmpfile) = tempfile();
 
-    my $d = Data::Dumper($data);
+    my $d = Dumper($data);
     $d    =~ s/^\$VAR1\ =\ //mx;
     $d    =~ s/JSON::PP::Boolean/JSON::XS::Boolean/gmx;
     open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
@@ -2272,7 +2272,7 @@ make sure this is a post request
 sub is_post {
     my($c) = @_;
     return(1) if $c->req->method eq 'POST';
-    $c->log->error("insecure request, post method required: ".Data::Dumper($c->req));
+    $c->log->error("insecure request, post method required: ".Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }
@@ -2305,7 +2305,7 @@ sub check_csrf {
     if($valid_token and $post_token and $valid_token eq $post_token) {
         return(1);
     }
-    $c->log->error("possible csrf, no or invalid token: ".Data::Dumper($c->req));
+    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
     $c->detach('/error/index/24');
     return;
 }
