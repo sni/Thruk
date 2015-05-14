@@ -242,18 +242,21 @@ sleep(1);
 
 ###########################################################
 # really stop test server
-END {
-    `ps auxww | grep -- '-p $testport' | awk '{ print \$2 }' | xargs kill >/dev/null 2>&1` if $httppid;
+sub stop_clean_all {
+    # kill thruk_server by match, because it forks and cannot be killed by the original pid
+    `ps auxww | grep -- './script/thruk_server.pl' | awk '{ print \$2 }' | xargs kill -2 >/dev/null 2>&1` if $httppid;
     kill(9, $socketpid) if $socketpid;
+    kill(9, $httppid)   if $httppid;
     `rm -rf $http_dir $local_dir`;
 }
+END {
+    stop_clean_all();
+};
 
 ###########################################################
 sub bail_out_with_kill {
     my($msg) = @_;
-    `ps -efl | grep -- '-p $testport' | awk '{ print \$4 }' | xargs kill >/dev/null 2>&1`;
-    kill(9, $socketpid)             if $socketpid;
-    `rm -rf $http_dir $local_dir`;
+    stop_clean_all();
     BAIL_OUT($msg.' (in '.$0.')');
 }
 
