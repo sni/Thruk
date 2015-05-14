@@ -99,6 +99,8 @@ sub startup {
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app, path => qr{\.(css|png|js|gif|jpg|ico|html|wav)$}mx, root => './root/', pass_through => 1);
+
+        _setup_development_signals();
     }
 
     return($app);
@@ -489,43 +491,48 @@ sub _init_logging {
 }
 
 ###################################################
-# SizeMe and other devel internals
-if($ENV{'SIZEME'}) {
-    # add signal handler to print memory information
-    # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
-    ## no critic
-    $SIG{'USR1'} = sub {
-        printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
-        eval {
-            require Devel::SizeMe;
-            Devel::SizeMe::perl_size();
+sub _setup_development_signals {
+    # SizeMe and other devel internals
+    if($ENV{'SIZEME'}) {
+        # add signal handler to print memory information
+        # ps -efl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
+        print STDERR "adding USR1 signal handler\n";
+        ## no critic
+        $SIG{'USR1'} = sub {
+            printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Backend::Pool::get_memory_usage());
+            eval {
+                require Devel::SizeMe;
+                Devel::SizeMe::perl_size();
+            };
+            print STDERR $@ if $@;
         };
-        print STDERR $@ if $@;
-    };
-    ## use critic
-}
-if($ENV{'MALLINFO'}) {
-    # add signal handler to print memory information
-    # ps -efl | grep perl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR2
-    ## no critic
-    $SIG{'USR2'} = sub {
-        eval {
-            require Devel::Mallinfo;
-            my $info = Devel::Mallinfo::mallinfo();
-            printf STDERR "%s\n", '*******************************************';
-            printf STDERR "%-30s    %5.1f %2s\n", 'arena',                              Thruk::Utils::reduce_number($info->{'arena'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, ordinary blocks',  Thruk::Utils::reduce_number($info->{'uordblks'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, small blocks',     Thruk::Utils::reduce_number($info->{'usmblks'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, ordinary blocks',    Thruk::Utils::reduce_number($info->{'fordblks'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, small blocks',       Thruk::Utils::reduce_number($info->{'fsmblks'}, 'B');
-            printf STDERR "%-30s\n", 'total';
-            printf STDERR "   %-30s %5.1f %2s\n", 'taken from the system',    Thruk::Utils::reduce_number($info->{'arena'} + $info->{'hblkhd'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'in use by program',        Thruk::Utils::reduce_number($info->{'uordblks'} + $info->{'usmblks'} + $info->{'hblkhd'}, 'B');
-            printf STDERR "   %-30s %5.1f %2s\n", 'free within program',      Thruk::Utils::reduce_number($info->{'fordblks'} + $info->{'fsmblks'}, 'B');
+        ## use critic
+    }
+    if($ENV{'MALLINFO'}) {
+        # add signal handler to print memory information
+        # ps -efl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR2
+        ## no critic
+        $SIG{'USR2'} = sub {
+            print STDERR "adding USR2 signal handler\n";
+            eval {
+                require Devel::Mallinfo;
+                my $info = Devel::Mallinfo::mallinfo();
+                printf STDERR "%s\n", '*******************************************';
+                printf STDERR "%-30s    %5.1f %2s\n", 'arena',                              Thruk::Utils::reduce_number($info->{'arena'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, ordinary blocks',  Thruk::Utils::reduce_number($info->{'uordblks'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'bytes in use, small blocks',     Thruk::Utils::reduce_number($info->{'usmblks'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, ordinary blocks',    Thruk::Utils::reduce_number($info->{'fordblks'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'free bytes, small blocks',       Thruk::Utils::reduce_number($info->{'fsmblks'}, 'B');
+                printf STDERR "%-30s\n", 'total';
+                printf STDERR "   %-30s %5.1f %2s\n", 'taken from the system',    Thruk::Utils::reduce_number($info->{'arena'} + $info->{'hblkhd'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'in use by program',        Thruk::Utils::reduce_number($info->{'uordblks'} + $info->{'usmblks'} + $info->{'hblkhd'}, 'B');
+                printf STDERR "   %-30s %5.1f %2s\n", 'free within program',      Thruk::Utils::reduce_number($info->{'fordblks'} + $info->{'fsmblks'}, 'B');
+            };
+            print STDERR $@ if $@;
         };
-        print STDERR $@ if $@;
-    };
-    ## use critic
+        ## use critic
+    }
+    return;
 }
 
 ###################################################
@@ -575,12 +582,13 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d  mem:% 7s MB  % 10.2f MB     %.2fs %8s   %d    %s",
+        $c->log->info(sprintf("Req: %03d   mem:% 7s MB  % 5.2f MB   dur: %.2fs %8s   size: %sB   stat: %d   url: %s",
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
                                 $elapsed,
                                 defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '',
+                                length("@{$res->[2]}"),
                                 $res->[0],
                                 $url,
                     ));

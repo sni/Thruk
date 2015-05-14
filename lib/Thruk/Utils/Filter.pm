@@ -278,11 +278,11 @@ sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
     my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
-    for my $key (keys %uri_filter) {
+    for my $key (sort keys %uri_filter) {
         $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
-        for my $key (keys %{$data}) {
+        for my $key (sort keys %{$data}) {
             $filter->{$key} = $data->{$key};
         }
     }
@@ -333,7 +333,7 @@ sub uri_with {
         }
         push(@new_param, $k, $v);
     }
-    for my $k (keys %{$data}) {
+    for my $k (sort keys %{$data}) {
         push(@new_param, $k, $data->{$k}) if defined $data->{$k};
     }
     $uri->query_form(@new_param);
