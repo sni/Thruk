@@ -31,8 +31,8 @@ sub add_routes {
     my($self, $app, $routes) = @_;
 
     $routes->{'/thruk/cgi-bin/shinken_status.cgi'} = 'Thruk::Controller::shinken_features::shinken_status';
-    $routes->{'/thruk/cgi-bin/outagespbimp.cgi'} = 'Thruk::Controller::shinken_features::outages_pbimp_index';
-    $routes->{'/thruk/cgi-bin/businessview.cgi'} = 'Thruk::Controller::shinken_features::businessview_index';
+    $routes->{'/thruk/cgi-bin/outagespbimp.cgi'}   = 'Thruk::Controller::shinken_features::outages_pbimp_index';
+    $routes->{'/thruk/cgi-bin/businessview.cgi'}   = 'Thruk::Controller::shinken_features::businessview_index';
 
     return;
 }
@@ -47,11 +47,11 @@ outages impacts index page
 sub outages_pbimp_index {
     my ( $c ) = @_;
 
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
-
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     _process_outagespbimp($c);
 
@@ -71,11 +71,11 @@ shinken status index page
 sub shinken_status {
     my ( $c ) = @_;
 
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
-
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     _process_bothtypes_page($c);
 
@@ -284,11 +284,11 @@ businessview index page
 sub businessview_index {
     my ( $c ) = @_;
 
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+
     if(!$c->stash->{'enable_shinken_features'}) {
         return $c->detach('/error/index/21');
     }
-
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     my $priorities = [];
     for my $crit (sort keys %{$c->config->{'priorities'}}) {
