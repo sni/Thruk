@@ -394,7 +394,7 @@ sub end {
 
 sub add_defaults {
     my ($c, $safe) = @_;
-    $safe = 0 unless defined $safe;
+    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
     confess("no c?") unless defined $c;
     $c->stats->profile(begin => "AddDefaults::add_defaults");
@@ -486,7 +486,7 @@ sub add_defaults {
     my $retrys = 1;
     # try 3 times if all cores are local
     $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
-    $retrys = 1 if $safe; # but only once on safe pages
+    $retrys = 1 if $safe; # but only once on safe/cached pages
 
     for my $x (1..$retrys) {
         # reset failed states, otherwise retry would be useless
@@ -504,7 +504,7 @@ sub add_defaults {
         # side.html and some other pages should not be redirect to the error page on backend errors
         _set_possible_backends($c, $disabled_backends);
         print STDERR $@ if $c->config->{'thruk_debug'};
-        return 1 if $safe == 1;
+        return 1 if $safe == Thruk::ADD_SAFE_DEFAULTS;
         $c->log->debug("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -653,7 +653,7 @@ sub add_defaults {
 sub add_safe_defaults {
     my ($c) = @_;
     eval {
-        add_defaults($c, 1);
+        add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     };
     print STDERR $@ if($@ and $c->config->{'thruk_debug'});
     return;
@@ -669,7 +669,7 @@ sub add_safe_defaults {
 
 sub add_cached_defaults {
     my ($c) = @_;
-    add_defaults($c, 2);
+    add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
     # make sure process info is not getting too old
     if(!$c->stash->{'processinfo_time'} || $c->stash->{'processinfo_time'} < time() - 90) {
         Thruk::Action::AddDefaults::delayed_proc_info_update($c);
@@ -824,8 +824,8 @@ set process info into stash
 =cut
 sub set_processinfo {
     my($c, $cached_user_data, $safe, $cached_data, $skip_cache_update) = @_;
-    my $last_program_restart     = 0;
-    $safe = 0 unless defined $safe;
+    my $last_program_restart = 0;
+    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
     $c->stats->profile(begin => "AddDefaults::set_processinfo");
 
@@ -834,7 +834,7 @@ sub set_processinfo {
     $cached_data->{'processinfo'} = {} unless defined $cached_data->{'processinfo'};
     my $fetch = 0;
     my($selected) = $c->{'db'}->select_backends('get_status');
-    if($safe) {
+    if($safe) { # cached or safe
         $processinfo = $cached_data->{'processinfo'};
         for my $key (@{$selected}) {
             if(!defined $processinfo->{$key} || !defined $processinfo->{$key}->{'program_start'}) {

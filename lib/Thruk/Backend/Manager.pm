@@ -621,7 +621,7 @@ enables/disables remote backends based on a state from local instances
 
 sub set_backend_state_from_local_connections {
     my( $self, $disabled, $safe, $cached_data ) = @_;
-    $safe = 0 unless defined $safe;
+    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
     my $c = $Thruk::Backend::Manager::c;
 
@@ -651,7 +651,7 @@ sub set_backend_state_from_local_connections {
 
         eval {
             my $data;
-            if($safe == 2) {
+            if($safe == Thruk::ADD_CACHED_DEFAULTS) {
                 $data = $cached_data->{'local_states'};
             }
             $data = $self->_do_on_peers( "get_hosts", $options ) unless defined $data;
