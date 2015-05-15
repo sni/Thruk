@@ -33,12 +33,14 @@ sub index {
     }
     Thruk::Utils::check_pid_file($c);
 
-    $c->stash->{'template'} = 'passthrough.tt';
     $c->stash->{'text'}     = 'OK';
 
     if(defined $c->req->parameters->{'data'}) {
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
     }
+
+    # set template after the CLI call above, it might get lost otherwise
+    $c->stash->{'template'} = 'passthrough.tt';
 
     my $action = $c->req->uri->query || '';
 
