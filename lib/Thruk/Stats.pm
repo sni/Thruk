@@ -27,6 +27,11 @@ sub enable {
     return;
 }
 
+sub clear {
+    $_[0]->{'profile'} = [];
+    return;
+}
+
 sub report {
     my($self) = @_;
     my $data = $self->{'profile'};
@@ -58,8 +63,14 @@ sub report {
             }
             if($cur && $cur->{'name'} eq $val) {
                 $cur->{'end'} = $time;
-                $cur    = $cur->{'parent'};
-                $childs = $cur->{'childs'};
+                if(!defined $cur->{'parent'}->{'name'}) {
+                    # add to result root
+                    $cur    = $entry;
+                    $childs = $result;
+                } else {
+                    $cur    = $cur->{'parent'};
+                    $childs = $cur->{'childs'};
+                }
             } else {
                 # found no start
                 die("no start found for: ".Dumper($entry));
@@ -154,6 +165,12 @@ sets breakpoint with message
     enable()
 
 enable profiling
+
+=head2 clear
+
+    clear()
+
+reset current profile
 
 =head2 report
 
