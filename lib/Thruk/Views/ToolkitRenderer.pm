@@ -44,6 +44,7 @@ sub render_tt {
 sub render {
     my($c, $template) = @_;
     my $tt = $c->app->{'tt'};
+    confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
 
     if($c->stash->{'additional_template_paths'}) {
