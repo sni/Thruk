@@ -7,6 +7,6 @@
 -use lib 'lib';
 +use lib '@THRUKLIBS@';
 +use lib '@DATADIR@/lib';
- use Thruk::Backend::Pool;
  
  ###################################################
+ # create connection pool
