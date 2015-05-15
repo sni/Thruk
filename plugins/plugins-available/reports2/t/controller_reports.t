@@ -5,7 +5,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 116;
+    plan tests => 126;
 }
 
 BEGIN {
@@ -53,6 +53,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&html=1', like => [ 'SLA Report' ], skip_js_check => 1, fail_message_ok => 1, unlike => [ 'internal server error', 'HASH' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=edit' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=email' },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['Profile:','_dispatcher:', 'Utils::Reports::generate_report'], 'content_type' => 'application/json;charset=UTF-8', },
     { url => '/thruk/cgi-bin/reports2.cgi', post => { 'action' => 'remove', 'report' => 999 }, 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports2.cgi?action=edit&report=new', like => ['Create Report'] },
 ];
