@@ -58,7 +58,8 @@ sub report {
             }
             if($cur && $cur->{'name'} eq $val) {
                 $cur->{'end'} = $time;
-                $cur = $cur->{'parent'};
+                $cur    = $cur->{'parent'};
+                $childs = $cur->{'childs'};
             } else {
                 # found no start
                 die("no start found for: ".Dumper($entry));
