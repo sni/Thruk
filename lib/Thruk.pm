@@ -587,13 +587,13 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d   mem:% 7s MB  % 5.2f MB   dur: %.2fs %8s   size: %sB   stat: %d   url: %s",
+        $c->log->info(sprintf("Req: %03d   mem:% 7s MB  % 5.2f MB   dur: %.2fs %8s   size: % 11s   stat: %d   url: %s",
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
                                 $elapsed,
-                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '',
-                                length("@{$res->[2]}"),
+                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '----',
+                                sprintf("% 5.3f kb", (length("@{$res->[2]}")/1024)),
                                 $res->[0],
                                 $url,
                     ));
