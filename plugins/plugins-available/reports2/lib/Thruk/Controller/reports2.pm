@@ -3,49 +3,41 @@ package Thruk::Controller::reports2;
 use strict;
 use warnings;
 use Module::Load qw/load/;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::reports2 - Catalyst Controller
+Thruk::Controller::reports2 - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
 =cut
 
-######################################
-# add new menu item
-Thruk::Utils::Menu::insert_item('Reports', {
-                                    'href'  => '/thruk/cgi-bin/reports2.cgi',
-                                    'name'  => 'Reporting',
-                         });
+##########################################################
 
-# enable reporting features if this plugin is loaded
-Thruk->config->{'use_feature_reports'} = 'reports2.cgi';
-
-######################################
-
-=head2 reports2_cgi
+=head2 add_routes
 
 page: /thruk/cgi-bin/reports2.cgi
 
 =cut
-sub reports2_cgi : Path('/thruk/cgi-bin/reports2.cgi') {
-    my ( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
 
-    if(!$c->config->{'reports2_modules_loaded'}) {
-        load Carp, qw/confess carp/;
-        load Thruk::Utils::Reports;
-        load Thruk::Utils::Avail;
-        $c->config->{'reports2_modules_loaded'} = 1;
-    }
+sub add_routes {
+    my($self, $app, $routes) = @_;
 
-    return $c->detach('/reports2/index');
+    $routes->{'/thruk/cgi-bin/reports2.cgi'} = 'Thruk::Controller::reports2::index';
+
+    Thruk::Utils::Menu::insert_item('Reports', {
+                                    'href'  => '/thruk/cgi-bin/reports2.cgi',
+                                    'name'  => 'Reporting',
+    });
+
+    # enable reporting features if this plugin is loaded
+    $app->config->{'use_feature_reports'} = 'reports2.cgi';
+
+    return;
 }
 
 ##########################################################
@@ -53,8 +45,17 @@ sub reports2_cgi : Path('/thruk/cgi-bin/reports2.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+
+    if(!$c->config->{'reports2_modules_loaded'}) {
+        load Carp, qw/confess carp/;
+        load Thruk::Utils::Reports;
+        load Thruk::Utils::Avail;
+        $c->config->{'reports2_modules_loaded'} = 1;
+    }
 
     $c->stash->{'no_auto_reload'}      = 1;
     $c->stash->{title}                 = 'Reports';
@@ -68,11 +69,11 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $Thruk::Utils::CLI::c              = $c;
 
-    my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
-    my $action    = $c->{'request'}->{'parameters'}->{'action'}    || 'show';
-    my $highlight = $c->{'request'}->{'parameters'}->{'highlight'} || '';
+    my $report_nr = $c->req->parameters->{'report'};
+    my $action    = $c->req->parameters->{'action'}    || 'show';
+    my $highlight = $c->req->parameters->{'highlight'} || '';
     my $refresh   = 0;
-    $refresh = $c->{'request'}->{'parameters'}->{'refresh'} if exists $c->{'request'}->{'parameters'}->{'refresh'};
+    $refresh = $c->req->parameters->{'refresh'} if exists $c->req->parameters->{'refresh'};
 
     if(ref $action eq 'ARRAY') { $action = pop @{$action}; }
 
@@ -82,14 +83,14 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         } else {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to update crontab' });
         }
-        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
     }
 
     if($action eq 'check_affected_objects') {
-        $c->{'request'}->{'parameters'}->{'get_total_numbers_only'} = 1;
+        $c->req->parameters->{'get_total_numbers_only'} = 1;
         my @res;
-        my $backends = $c->{'request'}->{'parameters'}->{'backends'} || $c->{'request'}->{'parameters'}->{'backends[]'};
-        my $template = $c->{'request'}->{'parameters'}->{'template'};
+        my $backends = $c->req->parameters->{'backends'} || $c->req->parameters->{'backends[]'};
+        my $template = $c->req->parameters->{'template'};
         my $sub;
         if($template) {
             eval {
@@ -97,15 +98,15 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             };
         }
         $sub = 'Thruk::Utils::Avail::calculate_availability' unless $sub;
-        if($backends and ($c->{'request'}->{'parameters'}->{'backends_toggle'} or $c->{'request'}->{'parameters'}->{'report_backends_toggle'})) {
+        if($backends and ($c->req->parameters->{'backends_toggle'} or $c->req->parameters->{'report_backends_toggle'})) {
             $c->{'db'}->disable_backends();
             $c->{'db'}->enable_backends($backends);
         }
-        if($c->{'request'}->{'parameters'}->{'param'}) {
-            for my $str (split/&/mx, $c->{'request'}->{'parameters'}->{'param'}) {
+        if($c->req->parameters->{'param'}) {
+            for my $str (split/&/mx, $c->req->parameters->{'param'}) {
                 my($key,$val) = split(/=/mx, $str, 2);
                 if($key =~ s/^params\.//mx) {
-                    $c->{'request'}->{'parameters'}->{$key} = $val unless exists $c->{'request'}->{'parameters'}->{$key};
+                    $c->req->parameters->{$key} = $val unless exists $c->req->parameters->{$key};
                 }
             }
         }
@@ -116,20 +117,21 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             };
             @res = &{\&{$sub}}($c);
         };
+        my $json;
         if($@ or scalar @res == 0) {
-            $c->stash->{'json'}   = { 'hosts' => 0, 'services' => 0, 'error' => $@ };
+            $json        = { 'hosts' => 0, 'services' => 0, 'error' => $@ };
         } else {
             my $total    = $res[0] + $res[1];
             my $too_many = $total > $c->config->{'report_max_objects'} ? 1 : 0;
-            $c->stash->{'json'}   = { 'hosts' => $res[0], 'services' => $res[1], 'too_many' => $too_many };
+            $json        = { 'hosts' => $res[0], 'services' => $res[1], 'too_many' => $too_many };
         }
-        return $c->forward('Thruk::View::JSON');
+        return $c->render(json => $json);
     }
 
     if(defined $report_nr) {
         if($report_nr !~ m/^\d+$/mx and $report_nr ne 'new') {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'invalid report number: '.$report_nr });
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
         if($action eq 'show') {
             if(!Thruk::Utils::Reports::report_show($c, $report_nr, $refresh)) {
@@ -137,32 +139,32 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
             }
         }
         elsif($action eq 'edit') {
-            return $self->report_edit($c, $report_nr);
+            return report_edit($c, $report_nr);
         }
         elsif($action eq 'edit2') {
-            return $self->report_edit_step2($c, $report_nr);
+            return report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
-            return $self->report_update($c, $report_nr);
+            return report_update($c, $report_nr);
         }
         elsif($action eq 'save') {
-            return $self->report_save($c, $report_nr);
+            return report_save($c, $report_nr);
         }
         elsif($action eq 'remove') {
-            return $self->report_remove($c, $report_nr);
+            return report_remove($c, $report_nr);
         }
         elsif($action eq 'cancel') {
-            return $self->report_cancel($c, $report_nr);
+            return report_cancel($c, $report_nr);
         }
         elsif($action eq 'email') {
-            return $self->report_email($c, $report_nr);
+            return report_email($c, $report_nr);
         }
         elsif($action eq 'profile') {
-            return $self->report_profile($c, $report_nr);
+            return report_profile($c, $report_nr);
         }
     }
 
-    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} and !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
+    if($c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} && !-x $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'}) {
         $c->stash->{'wkhtmltopdf'} = 0;
         $c->stash->{'wkhtmltopdf_file'} = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'};
     }
@@ -183,7 +185,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 =cut
 sub report_edit {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $r;
     $c->stash->{'params'} = {};
@@ -194,27 +196,27 @@ sub report_edit {
         for my $b (keys %{$c->stash->{'backend_detail'}}) {
             push @{$r->{'backends'}}, $b if $c->stash->{'backend_detail'}->{$b}->{'disabled'} == 0;
         }
-        for my $key (keys %{$c->{'request'}->{'parameters'}}) {
+        for my $key (keys %{$c->req->parameters}) {
             if($key =~ m/^params\.(.*)$/mx) {
-                $c->stash->{'params'}->{$1} = $c->{'request'}->{'parameters'}->{$key};
+                $c->stash->{'params'}->{$1} = $c->req->parameters->{$key};
             } else {
-                $r->{$key} = $c->{'request'}->{'parameters'}->{$key} if defined $c->{'request'}->{'parameters'}->{$key};
+                $r->{$key} = $c->req->parameters->{$key} if defined $c->req->parameters->{$key};
             }
         }
-        $r->{'template'} = $c->{'request'}->{'parameters'}->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
-        if($c->{'request'}->{'parameters'}->{'params.url'}) {
-            $r->{'params'}->{'url'} = $c->{'request'}->{'parameters'}->{'params.url'};
+        $r->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_host.tt';
+        if($c->req->parameters->{'params.url'}) {
+            $r->{'params'}->{'url'} = $c->req->parameters->{'params.url'};
         }
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
-        if(!defined $r or $r->{'readonly'}) {
+        if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
     }
 
     $c->stash->{templates} = Thruk::Utils::Reports::get_report_templates($c);
-    $self->_set_report_data($c, $r);
+    _set_report_data($c, $r);
 
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit.tt';
@@ -227,23 +229,23 @@ sub report_edit {
 
 =cut
 sub report_edit_step2 {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $r;
     if($report_nr eq 'new') {
         $r = Thruk::Utils::Reports::_get_new_report($c);
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
-        if(!defined $r or $r->{'readonly'}) {
+        if(!defined $r || $r->{'readonly'}) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
         }
     }
 
-    my $template     = $c->{'request'}->{'parameters'}->{'template'};
+    my $template     = $c->req->parameters->{'template'};
     $r->{'template'} = $template if defined $template;
 
-    $self->_set_report_data($c, $r);
+    _set_report_data($c, $r);
 
     $c->stash->{template} = 'reports_edit_step2.tt';
     return;
@@ -256,11 +258,11 @@ sub report_edit_step2 {
 
 =cut
 sub report_save {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     return unless Thruk::Utils::check_csrf($c);
 
-    my $params = $c->{'request'}->{'parameters'};
+    my $params = $c->req->parameters;
     $params->{'params.t1'} = Thruk::Utils::parse_date($c, $params->{'t1'}) if defined $params->{'t1'};
     $params->{'params.t2'} = Thruk::Utils::parse_date($c, $params->{'t2'}) if defined $params->{'t2'};
 
@@ -279,7 +281,7 @@ sub report_save {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
 }
 
 ##########################################################
@@ -288,7 +290,7 @@ sub report_save {
 
 =cut
 sub report_update {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
@@ -297,7 +299,7 @@ sub report_update {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################
@@ -306,7 +308,7 @@ sub report_update {
 
 =cut
 sub report_remove {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     return unless Thruk::Utils::check_csrf($c);
 
@@ -315,7 +317,7 @@ sub report_remove {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################
@@ -324,7 +326,7 @@ sub report_remove {
 
 =cut
 sub report_cancel {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if($report) {
@@ -342,7 +344,7 @@ sub report_cancel {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
 }
 
 ##########################################################
@@ -351,7 +353,7 @@ sub report_cancel {
 
 =cut
 sub report_profile {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $data = '';
     my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
@@ -364,8 +366,8 @@ sub report_profile {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    $c->stash->{'json'} = { 'data' => $data };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { 'data' => $data };
+    return $c->render(json => $json);
 }
 
 ##########################################################
@@ -374,24 +376,24 @@ sub report_profile {
 
 =cut
 sub report_email {
-    my($self, $c, $report_nr) = @_;
+    my($c, $report_nr) = @_;
 
     my $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
     if(!defined $r) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'report does not exist' });
-        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi");
     }
 
-    if($c->{'request'}->{'parameters'}->{'send'}) {
+    if($c->req->parameters->{'send'}) {
         return unless Thruk::Utils::check_csrf($c);
-        my $to      = $c->{'request'}->{'parameters'}->{'to'}      || '';
-        my $cc      = $c->{'request'}->{'parameters'}->{'cc'}      || '';
-        my $desc    = $c->{'request'}->{'parameters'}->{'desc'}    || '';
-        my $subject = $c->{'request'}->{'parameters'}->{'subject'} || '';
+        my $to      = $c->req->parameters->{'to'}      || '';
+        my $cc      = $c->req->parameters->{'cc'}      || '';
+        my $desc    = $c->req->parameters->{'desc'}    || '';
+        my $subject = $c->req->parameters->{'subject'} || '';
         if($to) {
             Thruk::Utils::Reports::report_send($c, $report_nr, 1, $to, $cc, $subject, $desc);
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report successfully sent by e-mail' });
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/reports2.cgi?highlight=".$report_nr);
         }
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => '\'to\' address missing' });
     }
@@ -412,7 +414,7 @@ sub report_email {
 
 ##########################################################
 sub _set_report_data {
-    my($self, $c, $r) = @_;
+    my($c, $r) = @_;
 
     $c->stash->{'t1'} = $r->{'params'}->{'t1'} || time() - 86400;
     $c->stash->{'t2'} = $r->{'params'}->{'t2'} || time();
@@ -440,7 +442,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

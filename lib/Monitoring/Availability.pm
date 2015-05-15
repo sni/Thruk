@@ -135,10 +135,10 @@ my $report_options_start;
 my $report_options_end;
 my $report_options_includesoftstates;
 my $report_options_calc_all;
+my $xs = 0;
 
 sub new {
-    my $class = shift;
-    my(%options) = @_;
+    my($class, %options) = @_;
 
     my $self = {
         'verbose'                        => 0,       # enable verbose output
@@ -188,11 +188,10 @@ sub new {
     $self->_log('initialized '.$class) if $self->{'verbose'};
     $self->_log($self)                 if $self->{'verbose'};
 
-    $self->{'xs'} = 0;
     eval {
         require Thruk::Utils::XS;
         Thruk::Utils::XS->import();
-        $self->{'xs'} = 1;
+        $xs = 1;
     };
 
     return $self;
@@ -282,8 +281,7 @@ valid values for services are: ok, warning, unknown and critical
 =cut
 
 sub calculate {
-    my $self      = shift;
-    my(%opts)     = @_;
+    my($self, %opts) = @_;
 
     # allow setting debug mode from env
     if(defined $ENV{'MONITORING_AVAILABILITY_DEBUG'}) {
@@ -291,12 +289,12 @@ sub calculate {
     }
 
     # init log4perl, may require additional modules
-    if($self->{'verbose'} and !defined $self->{'logger'}) {
+    if($self->{'verbose'} && !defined $self->{'logger'}) {
         require Log::Log4perl;
         Log::Log4perl->import(qw(:easy));
         Log::Log4perl->easy_init({
             level   => 'DEBUG',
-            file    => ">/tmp/Monitoring-Availability-Debug.log"
+            file    => ">/tmp/Monitoring-Availability-Debug.log",
         });
         $self->{'logger'} = get_logger();
     }
@@ -354,7 +352,7 @@ sub calculate {
         if(ref $service ne 'HASH') {
             croak("services have to be an array of hashes, for example: [{host => 'hostname', service => 'description'}, ...]\ngot: ".Dumper($service));
         }
-        if(!defined $service->{'host'} or !defined $service->{'service'}) {
+        if(!defined $service->{'host'} || !defined $service->{'service'}) {
             croak("services have to be an array of hashes, for example: [{host => 'hostname', service => 'description'}, ...]\ngot: ".Dumper($service));
         }
         $result->{'services'}->{$service->{'host'}}->{$service->{'service'}} = 1;
@@ -389,11 +387,11 @@ sub calculate {
     $report_options_calc_all          = $self->{'report_options'}->{'calc_all'};
 
     # read in logs
-    if($self->{'report_options'}->{'log_file'} and !$self->{'report_options'}->{'log_string'} and !$self->{'report_options'}->{'log_dir'}) {
+    if($self->{'report_options'}->{'log_file'} && !$self->{'report_options'}->{'log_string'} && !$self->{'report_options'}->{'log_dir'}) {
         # single file can be read line by line to save memory
         $self->_compute_availability_line_by_line($result, $self->{'report_options'}->{'log_file'});
     }
-    elsif(defined $self->{'report_options'}->{'log_string'} or $self->{'report_options'}->{'log_file'} or $self->{'report_options'}->{'log_dir'}) {
+    elsif(defined $self->{'report_options'}->{'log_string'} || $self->{'report_options'}->{'log_file'} || $self->{'report_options'}->{'log_dir'}) {
         my $mal = Monitoring::Availability::Logs->new(
             'log_string'        => $self->{'report_options'}->{'log_string'},
             'log_file'          => $self->{'report_options'}->{'log_file'},
@@ -626,8 +624,6 @@ sub _compute_availability_line_by_line {
     open(my $fh, '<', $file) or die("cannot read ".$file.": ".$!);
     binmode($fh);
 
-    my $xs = $self->{xs};
-
     # process all log lines we got
     # logs should be sorted already
     my $count     = 0;
@@ -724,8 +720,6 @@ sub _compute_availability_on_the_fly {
                                  $result);
         $last_time = $self->{'report_options'}->{'end'};
     }
-
-    my $xs = $self->{xs};
 
     # process all log lines we got
     # make sure our logs are sorted by time
@@ -834,7 +828,7 @@ sub _process_log_line {
     }
 
     # only hard states?
-    if(exists $data->{'hard'} and !$report_options_includesoftstates and $data->{'hard'} != 1) {
+    if(exists $data->{'hard'} && !$report_options_includesoftstates && $data->{'hard'} != 1) {
         $self->_log('  -> skipped soft state') if $verbose;
         return;
     }
@@ -942,16 +936,16 @@ sub _process_log_line {
     }
 
     # skip hosts we dont need
-    if($report_options_calc_all == FALSE and defined $data->{'host_name'} and !defined $self->{'host_data'}->{$data->{'host_name'}} and !defined $self->{'service_data'}->{$data->{'host_name'}}) {
+    if($report_options_calc_all == FALSE && defined $data->{'host_name'} && !defined $self->{'host_data'}->{$data->{'host_name'}} && !defined $self->{'service_data'}->{$data->{'host_name'}}) {
         $self->_log('  -> skipped not needed host event') if $verbose;
         return;
     }
 
     # skip services we dont need
     if($report_options_calc_all == FALSE
-       and $data->{'host_name'}
-       and $data->{'service_description'}
-       and !defined $self->{'service_data'}->{$data->{'host_name'}}->{$data->{'service_description'}}
+       && $data->{'host_name'}
+       && $data->{'service_description'}
+       && !defined $self->{'service_data'}->{$data->{'host_name'}}->{$data->{'service_description'}}
       ) {
         $self->_log('  -> skipped not needed service event') if $verbose;
         return;
@@ -1118,7 +1112,7 @@ sub _set_service_event {
     my $service_data = $result->{'services'}->{$host_name}->{$service_description};
 
     # check if we are inside the report time
-    if($report_options_start < $data->{'time'} and $report_options_end >= $data->{'time'}) {
+    if($report_options_start < $data->{'time'} && $report_options_end >= $data->{'time'}) {
         # we got a last state?
         if(defined $service_hist->{'last_state'}) {
             my $diff = $data->{'time'} - $service_hist->{'last_state_time'};
@@ -1127,7 +1121,7 @@ sub _set_service_event {
                 $diff = 0;
             }
             # outside timeperiod
-            if(defined $self->{'in_timeperiod'} and !$self->{'in_timeperiod'}) {
+            if(defined $self->{'in_timeperiod'} && !$self->{'in_timeperiod'}) {
                 $self->_add_time($service_data, $data->{'time'}, 'time_indeterminate_outside_timeperiod', $diff);
             }
 
@@ -1187,13 +1181,13 @@ sub _set_host_event {
     my $host_data = $result->{'hosts'}->{$host_name};
 
     # check if we are inside the report time
-    if($report_options_start < $data->{'time'} and $report_options_end >= $data->{'time'}) {
+    if($report_options_start < $data->{'time'} && $report_options_end >= $data->{'time'}) {
         # we got a last state?
         if(defined $host_hist->{'last_state'}) {
             my $diff = $data->{'time'} - $host_hist->{'last_state_time'};
 
             # outside timeperiod
-            if(defined $self->{'in_timeperiod'} and !$self->{'in_timeperiod'}) {
+            if(defined $self->{'in_timeperiod'} && !$self->{'in_timeperiod'}) {
                 $self->_add_time($host_data, $data->{'time'}, 'time_indeterminate_outside_timeperiod', $diff);
             }
 
@@ -1557,7 +1551,7 @@ sub _calculate_log {
                 'class'         => $type,
                 'start'         => $fake_start,
                 'plugin_output' => 'First Service State Assumed (Faked Log Entry)',
-            }
+            },
         };
         unshift @{$self->{'full_log_store'}}, $fakelog;
     }
@@ -1580,7 +1574,7 @@ sub _calculate_log {
                 'class'         => $type,
                 'start'         => $fake_start,
                 'plugin_output' => 'First Host State Assumed (Faked Log Entry)',
-            }
+            },
         };
         unshift @{$self->{'full_log_store'}}, $fakelog;
     }
@@ -1608,8 +1602,8 @@ sub _calculate_log {
 
         # convert time format
         if($self->{'report_options'}->{'timeformat'} ne '%s') {
-            $log->{'end'}   = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
-            $log->{'start'} = strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
+            $log->{'end'}   = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'end'});
+            $log->{'start'} = POSIX::strftime $self->{'report_options'}->{'timeformat'}, localtime($log->{'start'});
         }
 
         push @{$self->{'log_output'}}, $log unless defined $log_entry->{'full_only'};
@@ -1701,16 +1695,15 @@ sub _get_break_timestr {
     my @localtime = localtime($timestamp);
 
     if($self->{'report_options'}->{'breakdown'} == BREAK_DAYS) {
-        return strftime('%Y-%m-%d', @localtime);
+        return POSIX::strftime('%Y-%m-%d', @localtime);
     }
     elsif($self->{'report_options'}->{'breakdown'} == BREAK_WEEKS) {
-        return strftime('%G-WK%V', @localtime);
+        return POSIX::strftime('%G-WK%V', @localtime);
     }
     elsif($self->{'report_options'}->{'breakdown'} == BREAK_MONTHS) {
-        return strftime('%Y-%m', @localtime);
+        return POSIX::strftime('%Y-%m', @localtime);
     }
     die("report failed, debug data is available in ".$self->_write_debug_file("unknown break definition"));
-    return;
 }
 
 ########################################
@@ -1724,10 +1717,10 @@ sub _set_breakpoints {
     my $start = $self->{'report_options'}->{'start'} - 86400;
     # round to next 0:00
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
-    $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
+    $cur = POSIX::mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
     while($cur < $self->{'report_options'}->{'end'}) {
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($cur);
-        $cur = mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
+        $cur = POSIX::mktime(0, 0, 0, $mday, $mon, $year, $wday, $yday, $isdst);
         push @{$self->{'breakpoints'}}, $cur if $cur >= $start;
         $cur = $cur + 86400;
     }

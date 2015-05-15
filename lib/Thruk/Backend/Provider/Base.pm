@@ -42,7 +42,6 @@ recreate database connection
 sub reconnect {
     my($self) = @_;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -56,7 +55,6 @@ return the peers key
 sub peer_key {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -70,7 +68,6 @@ return the peers address
 sub peer_addr {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -84,7 +81,6 @@ return the peers name
 sub peer_name {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -98,7 +94,6 @@ sends a command
 sub send_command {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -112,7 +107,6 @@ return the process info
 sub get_processinfo {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -126,7 +120,6 @@ returns if this user is allowed to submit commands
 sub get_can_submit_commands {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -142,7 +135,6 @@ returns a list of contactgroups by contact
 sub get_contactgroups_by_contact {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -158,7 +150,6 @@ returns a list of commands
 sub get_commands {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -174,7 +165,6 @@ returns a list of comments
 sub get_comments {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -190,7 +180,6 @@ returns a list of contactgroups
 sub get_contactgroups {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -206,7 +195,6 @@ returns a list of contacts
 sub get_contacts {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -222,7 +210,6 @@ returns a list of contact names
 sub get_contact_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -238,7 +225,6 @@ returns a list of downtimes
 sub get_downtimes {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -254,7 +240,6 @@ returns a list of hostgroups
 sub get_hostgroups {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -270,7 +255,6 @@ returns a list of hostgroup names
 sub get_hostgroup_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -286,7 +270,6 @@ returns a list of hosts
 sub get_hosts {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -302,7 +285,6 @@ returns a list of host by a services query
 sub get_hosts_by_servicequery {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -318,7 +300,6 @@ returns a list of host names
 sub get_host_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -334,7 +315,6 @@ returns a list of servicegroups
 sub get_servicegroups {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -350,7 +330,6 @@ returns a list of servicegroup names
 sub get_servicegroup_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -366,7 +345,6 @@ returns a list of services
 sub get_services {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -382,7 +360,6 @@ returns a list of service names
 sub get_service_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -398,7 +375,6 @@ returns a list of timeperiods
 sub get_timeperiods {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -413,7 +389,6 @@ returns a list of timeperiod names
 sub get_timeperiod_names {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -429,7 +404,6 @@ returns logfile entries
 sub get_logs {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -445,7 +419,6 @@ returns a performance statistics
 sub get_performance_stats {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -461,7 +434,6 @@ returns extra performance statistics
 sub get_extra_perf_stats {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -477,7 +449,6 @@ returns hosts statistics used in the tac page
 sub get_host_stats {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -493,7 +464,6 @@ returns service statistics used in the tac page
 sub get_service_stats {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 ##########################################################
@@ -509,7 +479,6 @@ sets verbose mode for this backend and returns old value
 sub set_verbose {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 
@@ -525,7 +494,6 @@ renew logcache
 sub renew_logcache {
     my $self = shift;
     confess("unimplemented");
-    return;
 }
 
 

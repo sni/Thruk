@@ -13,12 +13,12 @@ Filter Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
 use JSON::XS;
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
+use HTML::Entities qw//;
 
 ##############################################
 
@@ -216,7 +216,7 @@ returns a correct uri
 sub uri {
     my $c = shift;
     carp("no c") unless defined $c;
-    my $uri = $c->request->uri();
+    my $uri = $c->req->url();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
     $uri    = escape_ampersand($uri);
     return $uri;
@@ -236,13 +236,13 @@ sub full_uri {
     my $c    = shift;
     my $amps = shift || 0;
     carp("no c") unless defined $c;
-    my $uri = ''.$c->request->uri_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
+    my $uri = ''.$c->url_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
 
     # uri always contains /thruk/, so replace it with our product prefix
     my $url_prefix = $c->stash->{'url_prefix'};
     $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     if($amps) {
-        $uri = escape_ampersand($uri)
+        $uri = escape_ampersand($uri);
     }
     return $uri;
 }
@@ -278,11 +278,11 @@ sub short_uri {
     my($c, $data) = @_;
     my $filter = {};
     my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
-    for my $key (keys %uri_filter) {
+    for my $key (sort keys %uri_filter) {
         $filter->{$key} = $uri_filter{$key};
     }
     if(defined $data) {
-        for my $key (keys %{$data}) {
+        for my $key (sort keys %{$data}) {
             $filter->{$key} = $data->{$key};
         }
     }
@@ -322,27 +322,22 @@ returns a correct uri
 
 =cut
 sub uri_with {
-    my $c    = shift;
-    my $data = shift;
-
-    my $filter = {};
-    my %uri_filter = %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}};
-    for my $key (keys %uri_filter) {
-        $filter->{$key} = $uri_filter{$key};
+    my($c, $data) = @_;
+    my $uri = $c->req->uri;
+    my @old_param = $uri->query_form();
+    my @new_param;
+    while(my $k = shift @old_param) {
+        my $v = shift @old_param;
+        if(exists $data->{$k} && !defined $data->{$k}) {
+            next;
+        }
+        push(@new_param, $k, $v);
     }
-    for my $key (keys %{$data}) {
-        next unless defined $data->{$key};
-        $filter->{$key} = $data->{$key};
-        $filter->{$key} = undef if $filter->{$key} eq 'undef';
+    for my $k (sort keys %{$data}) {
+        push(@new_param, $k, $data->{$k}) if defined $data->{$k};
     }
-
-    my $uri;
-    eval {
-        $uri = $c->request->uri_with($filter);
-    };
-    if($@) {
-        confess("ERROR in uri_with(): ".$@);
-    }
+    $uri->query_form(@new_param);
+    $uri = $uri->as_string;
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     $uri = escape_ampersand($uri);
     # make relative url
@@ -647,17 +642,16 @@ sub get_message {
     my $has_details = 0;
 
     # message from cookie?
-    if(defined $c->request->cookie('thruk_message')) {
-        my $cookie = $c->request->cookie('thruk_message');
-        $c->res->cookies->{'thruk_message'} = {
-            value   => '',
-            expires => '-1M',
-            path    => $c->stash->{'cookie_path'}
-        };
+    if(defined $c->cookie('thruk_message')) {
+        my $cookie = $c->cookie('thruk_message');
+        $c->cookie('thruk_message' => '', {
+            expires => 0,
+            path    => $c->stash->{'cookie_path'},
+        });
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data
-        if(defined $cookie and defined $cookie->value) {
-            my($style,$message) = split/~~/mx, $cookie->value;
+        if(defined $cookie and $cookie->value) {
+            my($style,$message) = split(/~~/mx, $cookie->value, 2);
             my @msg = split(/\n/mx, $message);
             if(scalar @msg > 1) {
                 $has_details = 2;
@@ -670,8 +664,7 @@ sub get_message {
     # message from stash
     elsif(defined $c->stash->{'thruk_message'}) {
         my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
-        delete $c->res->cookies->{'thruk_message'};
-
+        delete $c->res->{'cookies'}->{'thruk_message'};
         if(defined $c->stash->{'thruk_message_details'}) {
             $has_details = 1;
         }
@@ -1004,7 +997,7 @@ returns user token which can be used to validate requests
 sub get_user_token {
     my($c) = @_;
     return $c->stash->{'user_token'} if $c->stash->{'user_token'};
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return("");
     }
     my $store  = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/token');
@@ -1027,6 +1020,8 @@ sub get_user_token {
 ########################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

@@ -4,9 +4,9 @@ use Test::More;
 use JSON::XS qw/decode_json/;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     my $tests = 277;
-    $tests = $tests - 35 if $ENV{'CATALYST_SERVER'};
+    $tests = $tests - 35 if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => $tests;
 }
 
@@ -17,7 +17,7 @@ BEGIN {
 }
 
 SKIP: {
-    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     use_ok 'Thruk::Controller::mobile';
 };
@@ -30,7 +30,8 @@ my $choose_pages = [
     '/thruk/index.html',
 ];
 for my $url (@{$choose_pages}) {
-    next if $url eq '/thruk' and $ENV{'CATALYST_SERVER'};
+    next if $url eq '/thruk' and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    TestUtils::set_cookie( 'thruk_mobile', 0, -1);
     TestUtils::test_page(
         'url'      => $url,
         'like'     => 'Do you want to use the mobile version',
@@ -88,7 +89,7 @@ my $jsonpages = [
 for my $url (@{$jsonpages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an array");

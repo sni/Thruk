@@ -8,26 +8,11 @@ package TestUtils;
 BEGIN {
   $ENV{'THRUK_SRC'} = 'TEST';
 
-  $ENV{'CATALYST_SERVER'} =~ s#/$##gmx if $ENV{'CATALYST_SERVER'};
+  $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ s#/$##gmx if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 }
 
 ###################################################
-# create connection pool
-# has to be done really early to save memory
 use lib 'lib';
-use Thruk::Backend::Pool;
-BEGIN {
-    Thruk::Backend::Pool::init_backend_thread_pool();
-}
-
-###################################################
-# clean up env
-use Thruk::Utils::INC;
-BEGIN {
-    Thruk::Utils::INC::clean();
-}
-
-###################################################
 use strict;
 use Data::Dumper;
 use Test::More;
@@ -35,14 +20,21 @@ use URI::Escape;
 use Encode qw/decode_utf8/;
 use File::Slurp;
 use HTTP::Request::Common qw(POST);
+use HTTP::Response;
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/ tempfile /;
+use HTML::Entities qw//;
 use Carp;
 use Thruk::Utils;
 use Thruk::Utils::External;
+use Plack::Test;
+use HTTP::Request::Common;
 
-use Catalyst::Test 'Thruk';
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT    = qw(request ctx_request);
+our @EXPORT_OK = qw(request ctx_request);
 
 my $use_html_lint = 0;
 my $lint;
@@ -51,6 +43,29 @@ eval {
     $use_html_lint = 1;
     $lint          = new HTML::Lint;
 };
+
+use Thruk;
+my $app = Plack::Test->create(Thruk->startup);
+
+#########################
+sub request {
+    my($url) = @_;
+    my($req, $res);
+    if(ref $url eq "") {
+        $res = $app->request(GET $url);
+    } else {
+        $res = $app->request($url);
+    }
+    return($res);
+}
+
+#########################
+sub ctx_request {
+    my($url) = @_;
+    my $res = request($url);
+    my $c = $Thruk::Request::c;
+    return($res, $c);
+}
 
 #########################
 sub get_test_servicegroup {
@@ -136,7 +151,7 @@ sub get_test_timeperiod {
 sub get_test_host_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -151,7 +166,7 @@ sub get_test_host_cli {
 sub get_test_hostgroup_cli {
     my($binary) = @_;
     my $auth = '';
-    if(!$ENV{'CATALYST_SERVER'}) {
+    if(!$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         my $user = Thruk->config->{'cgi_cfg'}->{'default_user_name'};
         $auth = ' -A "'.$user.'"' if($user and $user ne 'thrukadmin');
     }
@@ -205,7 +220,7 @@ sub test_page {
 
     # make tests with http://localhost/naemon possible
     my $product = 'thruk';
-    if(defined $ENV{'CATALYST_SERVER'} and $ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
         $product = $1;
         $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
@@ -321,8 +336,8 @@ sub test_page {
     }
 
     # test the content type
-    $return->{'content_type'} = $request->header('Content-Type');
-    my $content_type = $request->header('Content-Type');
+    $return->{'content_type'} = $request->header('content-type');
+    my $content_type = $request->header('content-type') || '';
     if(defined $opts->{'content_type'}) {
         is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) or diag($opts->{'url'});
     }
@@ -351,7 +366,7 @@ sub test_page {
         fail("Content-Type should contain UTF-8") unless $content_type =~ m/\;\s*charset=utf\-8/i;
     }
     my $is_length  = length($request->content);
-    my $got_length = $request->header('Content-Length');
+    my $got_length = $request->header('content-length');
     if($got_length && $is_length != $got_length) {
         fail("Content-Length did not match, $is_length != $got_length");
     }
@@ -397,8 +412,8 @@ sub test_page {
             next if $match =~ m/^\/$product\/cgi\-bin/mxo;
             next if $match =~ m/^\w+\.cgi/mxo;
             next if $match =~ m/^javascript:/mxo;
-            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'CATALYST_SERVER'};
-            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m/^'\+\w+\+'$/mxo         and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+            next if $match =~ m|^/$product/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match =~ m/data:image\/png;base64/mxo;
@@ -461,7 +476,7 @@ sub set_cookie {
         unlink ($cookie_file);
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
-    my $config = Thruk::Backend::Pool::get_config();
+    my $config      = Thruk::Config::get_config();
     my $cookie_path = $config->{'cookie_path'};
     $cookie_jar->set_cookie( 0, $var, $val, $cookie_path, 'localhost.local', undef, 1, 0, $expire, 1, {});
     $cookie_jar->save();
@@ -543,7 +558,7 @@ sub get_user {
 sub wait_for_job {
     my $job = shift;
     my $start  = time();
-    my $config = Thruk::Backend::Pool::get_config();
+    my $config = Thruk::Config::get_config();
     my $jobdir = $config->{'var_path'} ? $config->{'var_path'}.'/jobs/'.$job : './var/jobs/'.$job;
     if(!-e $jobdir) {
         fail("job folder ".$jobdir.": ".$!);
@@ -695,26 +710,24 @@ sub _request {
         $cookie_jar = HTTP::Cookies::Netscape->new(file => $cookie_file);
     }
 
-    if(defined $ENV{'CATALYST_SERVER'}) {
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
         return(_external_request(@_));
     }
-    $url = 'http://localhost.local'.$url;
+    # add pseudo domain, otherwise cookies from set_cookie() won't work
+    $url = 'http://localhost.local'.$url unless $url =~ m|^https?:|mx;
 
-    my $response;
+    my $request;
     if($post) {
         $post->{'token'} = 'test';
-        my $request = POST($url, [%{$post}]);
-        $cookie_jar->add_cookie_header($request);
-        $request->header("User-Agent" => $agent) if $agent;
-        $response = request($request);
+        $request = POST($url, [%{$post}]);
     } else {
-        my $request = HTTP::Request->new(GET => $url);
-        $request->header("User-Agent" => $agent) if $agent;
-        $cookie_jar->add_cookie_header($request);
-        $response = request($request);
+        $request = HTTP::Request->new(GET => $url);
     }
+    $request->header("User-Agent" => $agent) if $agent;
+    $cookie_jar->add_cookie_header($request);
+    my $response = request($request);
     $cookie_jar->extract_cookies($response);
-    $response      = _check_startup_redirect($response, $start_to);
+    $response = _check_startup_redirect($response, $start_to);
 
     return $response;
 }
@@ -727,13 +740,13 @@ sub _external_request {
     # make tests with http://localhost/naemon possible
     unless($url =~ m/^http/) {
         my $product = 'thruk';
-        if($ENV{'CATALYST_SERVER'} =~ m|/(\w+)$|mx) {
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
             $product = $1;
             $url =~ s|/$product/|/|gmx;
             $url =~ s|/thruk/|/|gmx;
         }
         $url =~ s#//#/#gmx;
-        $url = $ENV{'CATALYST_SERVER'}.$url;
+        $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
     }
 
     our($cookie_jar, $cookie_file);
@@ -809,10 +822,15 @@ sub bail_out_req {
     my($msg, $req) = @_;
     my $page    = $req->content;
     my $error   = "";
-    if($page =~ m/<!--error:(.*?):error-->/smxo) {
+    if($page =~ m/<!--error:(.*?):error-->/smx) {
         $error = $1;
         $error =~ s/\A\s*//gmsx;
         $error =~ s/\s*\Z//gmsx;
+        BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
+    }
+    if($page =~ m/<pre\s+id="error">(.*)$/mx) {
+        $error = HTML::Entities::decode($1);
+        $error =~ s|</pre>$||gmx;
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     diag(Dumper($msg));
@@ -822,15 +840,27 @@ sub bail_out_req {
 }
 
 #########################
+my $test_token_set = 0;
 sub set_test_user_token {
+    my($remove) = @_;
     require Thruk::Config;
     require Thruk::Utils::Cache;
     my $config = Thruk::Config::get_config();
     my $store  = Thruk::Utils::Cache->new($config->{'var_path'}.'/token');
     my $tokens = $store->get('token');
-    $tokens->{get_test_user()} = { token => 'test', time => time() };
+    if($remove) {
+        delete $tokens->{get_test_user()};
+    } else {
+        $tokens->{get_test_user()} = { token => 'test', time => time() };
+    }
     $store->set('token', $tokens);
     return;
+}
+END {
+    # remove test token again
+    if($test_token_set) {
+        set_test_user_token(1);
+    }
 }
 
 #########################

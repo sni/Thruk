@@ -6,10 +6,10 @@ use Carp qw/cluck/;
 use Monitoring::Config::File;
 use Encode qw/decode_utf8/;
 use Data::Dumper;
-use Config::General;
 use Carp;
 use Storable qw/dclone/;
 use Thruk::Utils;
+use Thruk::Config;
 
 =head1 NAME
 
@@ -59,7 +59,7 @@ $Monitoring::Config::save_options = {
                                    '_TYPE',
                                    '_TAGS',
                                    '_APPS',
-                                ]
+                                ],
 };
 $Monitoring::Config::key_sort = undef;
 
@@ -169,7 +169,7 @@ sub init {
 
     # set default excludes when defined manual paths
     if(!defined $self->{'config'}->{'obj_exclude'}
-       and !$self->{'config'}->{'core_conf'}) {
+       && !$self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_exclude'} = [
                     '^cgi.cfg$',
                     '^resource.cfg$',
@@ -248,7 +248,7 @@ sub commit {
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
                                         $file->{'path'},
-            )) if($c and !$ENV{'THRUK_TEST_CONF_NO_LOG'});
+            )) if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'});
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }
@@ -256,7 +256,7 @@ sub commit {
     # remove deleted files from files
     my @new_files;
     for my $f (@{$self->{'files'}}) {
-        if(!$f->{'deleted'} or -f $f->{'path'}) {
+        if(!$f->{'deleted'} || -f $f->{'path'}) {
             push @new_files, $f;
         } else {
             if($c && $f->{'deleted'}) {
@@ -1117,7 +1117,7 @@ sub rename_dependencies {
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                     my($cmd,$arg) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                    if(!defined $arg or $arg eq '') {
+                    if(!defined $arg || $arg eq '') {
                         $obj->{'conf'}->{$key} = $new;
                     } else {
                         $obj->{'conf'}->{$key} = $new.'!'.$arg;
@@ -1410,10 +1410,10 @@ sub _set_config {
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
-           and -s $ENV{'OMD_ROOT'}."/version"
-           and !$core_conf
-           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
-           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
+           && -s $ENV{'OMD_ROOT'}."/version"
+           && !$core_conf
+           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
+           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
@@ -1454,7 +1454,7 @@ sub _update_core_conf {
     my $self      = shift;
     my $core_conf = shift;
 
-    if(!defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
+    if(!defined $self->{'_coreconf'} || $self->{'_coreconf'} ne $core_conf) {
         if($core_conf) {
             $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'relative'});
         } else {
@@ -1681,7 +1681,7 @@ sub _get_files_names {
         }
     }
 
-    if(!defined $config->{'obj_dir'} and !defined $config->{'obj_file'}) {
+    if(!defined $config->{'obj_dir'} && !defined $config->{'obj_file'}) {
         push @{$self->{'parse_errors'}}, "you need to configure paths (obj_dir, obj_file)";
     }
 
@@ -1714,7 +1714,7 @@ sub _check_files_changed {
         my $check = $self->_check_file_changed($file);
 
         if($check == 1) {
-            if(!$reload or $file->{'changed'}) {
+            if(!$reload || $file->{'changed'}) {
                 push @newfiles, $file;
                 push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
                 $self->{'needs_index_update'} = 1;
@@ -1722,7 +1722,7 @@ sub _check_files_changed {
             }
         }
         elsif($check == 2) {
-            if($reload or !$file->{'changed'}) {
+            if($reload || !$file->{'changed'}) {
                 $file->{'parsed'} = 0;
                 $file->update_objects();
                 $file->_update_meta_data();
@@ -1765,7 +1765,7 @@ sub _check_file_changed {
        $atime,$mtime,$ctime,$blksize,$blocks)
        = stat($file->{'path'});
 
-    if(!defined $ino or !defined $file->{'inode'}) {
+    if(!defined $ino || !defined $file->{'inode'}) {
         return 1;
     }
     else {
@@ -1935,9 +1935,9 @@ sub _update_obj_in_index {
         $found++;
     }
 
-    if($found or defined $primary) {
+    if($found || defined $primary) {
         # by type
-        if(!defined $obj->{'conf'}->{'register'} or $obj->{'conf'}->{'register'} != 0) {
+        if(!defined $obj->{'conf'}->{'register'} || $obj->{'conf'}->{'register'} != 0) {
             push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
         }
     }
@@ -1974,8 +1974,7 @@ sub _newest_file {
 
 ##########################################################
 sub _check_references {
-    my $self = shift;
-    my %options = @_;
+    my($self, %options) = @_;
 
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
     my @parse_errors;
@@ -2124,11 +2123,11 @@ sub _all_object_links_callback {
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
                         next if $ref2 eq '';
-                        &$cb($file, $obj, $key, $link, $ref2);
+                        &{$cb}($file, $obj, $key, $link, $ref2);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
-                    &$cb($file, $obj, $key, $link, $obj->{'conf'}->{$key});
+                    &{$cb}($file, $obj, $key, $link, $obj->{'conf'}->{$key});
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
@@ -2141,12 +2140,12 @@ sub _all_object_links_callback {
                         if($obj->{'default'}->{$key}->{'link'} eq 'command') {
                             ($ref2,$args) = split(/!/mx, $ref2, 2);
                         }
-                        &$cb($file, $obj, $key, $link, $ref2, $args);
+                        &{$cb}($file, $obj, $key, $link, $ref2, $args);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                     my($cmd,$args) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                    &$cb($file, $obj, $key, $link, $cmd, $args);
+                    &{$cb}($file, $obj, $key, $link, $cmd, $args);
                 }
             }
         }
@@ -2162,7 +2161,7 @@ sub _resolve_relative_path {
         $file = $basedir.'/'.$file;
         $file =~ s|//|/|gmx;
         my $x = 0;
-        while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ };
+        while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ }
     }
     return $file;
 }
@@ -2171,7 +2170,7 @@ sub _resolve_relative_path {
 ##########################################################
 sub _array_diff {
     my($self, $list1, $list2) = @_;
-    return 0 if(!defined $list1 and !defined $list2);
+    return 0 if(!defined $list1 && !defined $list2);
     return 1 if !defined $list1;
     return 1 if !defined $list2;
 
@@ -2180,7 +2179,7 @@ sub _array_diff {
     return 1 if $nr1 != $nr2;
 
     for my $x (0..$nr1) {
-        next if(!defined $list1->[$x] and !defined $list2->[$x]);
+        next if(!defined $list1->[$x] && !defined $list2->[$x]);
         return 1 if !defined $list1->[$x];
         return 1 if !defined $list2->[$x];
         return 1 if $list1->[$x] ne $list2->[$x];
@@ -2220,7 +2219,7 @@ sub _remote_do {
         Thruk::Utils::set_message( $c, 'fail_message', $text[0] );
         return;
     } else {
-        die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+        die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
         return $res->[2];
     }
 }
@@ -2237,7 +2236,7 @@ sub _remote_do_bg {
                             args     => $args,
                             wait     => 1,
                     });
-    die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+    die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     return $res->[2];
 }
 
@@ -2292,14 +2291,14 @@ sub remote_file_sync {
             $dir          =~ s/\/[^\/]+$//mx;
             Thruk::Utils::IO::mkdir_r($dir);
             Thruk::Utils::IO::write($localpath, $f->{'content'}, $f->{'mtime'});
-            $c->{'request'}->{'parameters'}->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
         }
     }
     for my $f (@{$self->{'files'}}) {
         $c->log->debug('checking file: '.$f->{'display'});
         if(!defined $remotefiles->{$f->{'display'}}) {
             $c->log->debug('deleting file: '.$f->{'display'});
-            $c->{'request'}->{'parameters'}->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
             unlink($f->{'path'});
         } else {
             $c->log->debug('keeping file: '.$f->{'display'});
@@ -2432,17 +2431,16 @@ sub read_rc_file {
         }
     }
 
-    my %settings;
+    my $settings;
     if($file and -r $file) {
-        my $conf = new Config::General($file);
-        %settings = $conf->getall();
+        $settings = Thruk::Config::read_config_file($file);
         for my $key (qw/object_attribute_key_order object_cust_var_order/) {
-            next unless defined $settings{$key};
-            $settings{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
-            $settings{$key} = [ split/\s+/mx, $settings{$key} ];
+            next unless defined $settings->{$key};
+            $settings->{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
+            $settings->{$key} = [ split/\s+/mx, $settings->{$key} ];
         }
     }
-    $self->set_save_config(\%settings);
+    $self->set_save_config($settings);
     return;
 }
 
@@ -2480,8 +2478,10 @@ sub _sort_by_object_keys {
     my($attr_keys, $cust_var_keys) = @_;
 
     return sub {
+        ## no critic
         $a = $Monitoring::Config::Object::Parent::a;
         $b = $Monitoring::Config::Object::Parent::b;
+        ## use critic
         my $order = $attr_keys;
         my $num   = scalar @{$attr_keys} + 5;
 
@@ -2508,7 +2508,7 @@ sub _sort_by_object_keys {
         if(substr($b, 0, 1) eq '_') { return -$result; }
 
         return $result;
-    }
+    };
 }
 
 ##########################################################
@@ -2592,7 +2592,7 @@ sub get_plugin_help {
             $cmd = $cmd." -h 2>/dev/null";
             $help = `$cmd`;
             alarm(0);
-        }
+        };
     }
     return $help;
 }
@@ -2650,7 +2650,7 @@ sub get_plugin_preview {
             $cmd = $cmd." 2>/dev/null";
             $output = `$cmd`;
             alarm(0);
-        }
+        };
     }
     return $output;
 }

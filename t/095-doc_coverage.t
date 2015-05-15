@@ -2,7 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 use Config::General;
-use Data::Dumper;
 use File::Temp qw/tempfile/;
 
 # ensure that all config options are well documented

@@ -1,8 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
+use Test::More tests => 4;
 
 ################################################################################
 # check if we have all subs in Provider/Base.pm

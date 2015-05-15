@@ -2,15 +2,14 @@ package Thruk::Controller::summary;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::summary - Catalyst Controller
+Thruk::Controller::summary - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =cut
 
@@ -56,8 +55,10 @@ use constant {
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     # set defaults
     $c->stash->{title}            = 'Event Summary';
@@ -67,13 +68,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
-    if(exists $c->{'request'}->{'parameters'}->{'report'}
-       and $self->_create_report($c)) {
+    if(exists $c->req->parameters->{'report'}
+       and _create_report($c)) {
         # report created
     }
     else {
         # Step 1 - select report type
-        $self->_show_step_1($c);
+        _show_step_1($c);
     }
 
     return 1;
@@ -81,7 +82,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 sub _show_step_1 {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
     $c->stats->profile(begin => "_show_step_1()");
 
     $c->stash->{hosts}         = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
@@ -95,16 +96,16 @@ sub _show_step_1 {
 
 ##########################################################
 sub _create_report {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
     $c->stats->profile(begin => "_create_report()");
 
     my($displaytype, $alerttypes, $hoststates, $servicestates);
-    my $standardreport = $c->{'request'}->{'parameters'}->{'standardreport'};
+    my $standardreport = $c->req->parameters->{'standardreport'};
     if(defined $standardreport) {
         # set options from standard report options
-        $c->{'request'}->{'parameters'}->{'timeperiod'} = "last7days";
-        $c->{'request'}->{'parameters'}->{'statetypes'} = 2;
-        $c->{'request'}->{'parameters'}->{'limit'}      = 25;
+        $c->req->parameters->{'timeperiod'} = "last7days";
+        $c->req->parameters->{'statetypes'} = 2;
+        $c->req->parameters->{'limit'}      = 25;
 
         if($standardreport == SREPORT_RECENT_ALERTS) {
             $displaytype   = REPORT_RECENT_ALERTS;
@@ -135,23 +136,23 @@ sub _create_report {
         else {
             return;
         }
-        $c->{'request'}->{'parameters'}->{'alerttypes'}    = $alerttypes;
-        $c->{'request'}->{'parameters'}->{'servicestates'} = $servicestates;
-        $c->{'request'}->{'parameters'}->{'hoststates'}    = $hoststates;
+        $c->req->parameters->{'alerttypes'}    = $alerttypes;
+        $c->req->parameters->{'servicestates'} = $servicestates;
+        $c->req->parameters->{'hoststates'}    = $hoststates;
     } else {
         # set options from parameters
-        $displaytype    = $c->{'request'}->{'parameters'}->{'displaytype'};
+        $displaytype    = $c->req->parameters->{'displaytype'};
     }
 
     # get start/end from timeperiod in params
     my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    return if (!defined $start or !defined $end);
+    return if (!defined $start || !defined $end);
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    $c->stash->{timeperiod} = $c->req->parameters->{'timeperiod'};
 
     # get filter from parameters
-    my($hostfilter, $servicefilter) = $self->_get_filter($c);
+    my($hostfilter, $servicefilter) = _get_filter($c);
 
     unshift @{$hostfilter}, { time => { '<=' => $end }};
     unshift @{$hostfilter}, { time => { '>=' => $start }};
@@ -159,17 +160,17 @@ sub _create_report {
     unshift @{$servicefilter}, { time => { '<=' => $end }};
     unshift @{$servicefilter}, { time => { '>=' => $start }};
 
-    my $alertlogs = $self->_get_alerts_from_log($c, $hostfilter, $servicefilter);
+    my $alertlogs = _get_alerts_from_log($c, $hostfilter, $servicefilter);
 
     if($displaytype == REPORT_RECENT_ALERTS) {
         $c->stash->{report_title}    = 'Most Recent Alerts';
         $c->stash->{report_template} = 'summary_report_recent_alerts.tt';
-        $self->_display_recent_alerts($c, $alertlogs);
+        _display_recent_alerts($c, $alertlogs);
     }
     elsif($displaytype == REPORT_TOP_ALERTS) {
         $c->stash->{report_title}    = 'Top Alert Producers';
         $c->stash->{report_template} = 'summary_report_alert_producer.tt';
-        $self->_display_top_alerts($c, $alertlogs);
+        _display_top_alerts($c, $alertlogs);
     }
     elsif(   $displaytype == REPORT_ALERT_TOTALS
           or $displaytype == REPORT_HOSTGROUP_ALERT_TOTALS
@@ -179,14 +180,14 @@ sub _create_report {
          ) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs, $displaytype);
+        _display_alert_totals($c, $alertlogs, $displaytype);
     }
     else {
         return;
     }
 
-    $c->stash->{template} = 'summary_report.tt';
-    $c->stash->{limit}    = $c->{'request'}->{'parameters'}->{'limit'};
+    $c->stash->{template}  = 'summary_report.tt';
+    $c->stash->{limit}     = $c->req->parameters->{'limit'};
 
     $c->stats->profile(end => "_create_report()");
     return 1;
@@ -195,11 +196,11 @@ sub _create_report {
 ##########################################################
 # Most Recent Alerts
 sub _display_recent_alerts {
-    my ( $self, $c, $alerts ) = @_;
+    my ( $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_recent_alerts()");
 
     my $sortedtotals = Thruk::Backend::Manager::_sort($c, $alerts, { 'DESC' => 'time'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_recent_alerts()");
     return 1;
@@ -208,7 +209,7 @@ sub _display_recent_alerts {
 ##########################################################
 # Top Alert Producers
 sub _display_top_alerts {
-    my ( $self, $c, $alerts ) = @_;
+    my ( $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_top_alerts()");
 
     my $totals = {};
@@ -228,7 +229,7 @@ sub _display_top_alerts {
 
     my @totals = values %{$totals};
     my $sortedtotals = Thruk::Backend::Manager::_sort($c, \@totals, { 'DESC' => 'alerts'});
-    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->req->parameters->{'limit'});
 
     $c->stats->profile(end => "_display_top_alerts()");
     return 1;
@@ -237,7 +238,7 @@ sub _display_top_alerts {
 ##########################################################
 # Alert Totals
 sub _display_alert_totals {
-    my ( $self, $c, $alerts, $displaytype ) = @_;
+    my ( $c, $alerts, $displaytype ) = @_;
     $c->stats->profile(begin => "_display_alert_totals()");
 
     # set overall title
@@ -368,7 +369,7 @@ sub _display_alert_totals {
 
 ##########################################################
 sub _get_alerts_from_log {
-    my ( $self, $c, $hostfilter, $servicefilter ) = @_;
+    my ( $c, $hostfilter, $servicefilter ) = @_;
 
     my($hostlogs, $servicelogs);
 
@@ -397,24 +398,24 @@ sub _get_alerts_from_log {
 
 ##########################################################
 sub _get_filter {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     my(@hostfilter, @servicefilter);
 
     # host state filter
     my($hoststatusfiltername,$hoststatusfilter)
-        = $self->_get_host_statustype_filter($c->{'request'}->{'parameters'}->{'hoststates'});
+        = _get_host_statustype_filter($c->req->parameters->{'hoststates'});
     $c->stash->{hoststatusfilter} = $hoststatusfiltername;
     push @hostfilter, $hoststatusfilter if $hoststatusfilter;
 
     # service state filter
     my($servicestatusfiltername,$servicestatusfilter)
-        = $self->_get_service_statustype_filter($c->{'request'}->{'parameters'}->{'servicestates'});
+        = _get_service_statustype_filter($c->req->parameters->{'servicestates'});
     $c->stash->{servicestatusfilter} = $servicestatusfiltername;
     push @servicefilter, $servicestatusfilter if $servicestatusfilter;
 
     # hard or soft?
-    my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'} || 3;
+    my $statetypes = $c->req->parameters->{'statetypes'} || 3;
     if($statetypes == AE_SOFT) {
         $c->stash->{statetypefilter} = "Soft";
         push @servicefilter, { state_type => { '=' => 'SOFT' }};
@@ -432,7 +433,7 @@ sub _get_filter {
     # only hosts or services?
     push @hostfilter,    { type => 'HOST ALERT'};
     push @servicefilter, { type => 'SERVICE ALERT'};
-    my $alerttypes = $c->{'request'}->{'parameters'}->{'alerttypes'} || 3;
+    my $alerttypes = $c->req->parameters->{'alerttypes'} || 3;
     if($alerttypes == AE_HOST_ALERT) {
         $c->stash->{alerttypefilter} = "Host";
     }
@@ -444,9 +445,9 @@ sub _get_filter {
     }
 
     # hostgroups?
-    my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'};
-    my $host         = $c->{'request'}->{'parameters'}->{'host'};
-    my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
+    my $hostgroup    = $c->req->parameters->{'hostgroup'};
+    my $host         = $c->req->parameters->{'host'};
+    my $servicegroup = $c->req->parameters->{'servicegroup'};
     if(defined $hostgroup and $hostgroup ne 'all') {
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { groups => { '>=' => $hostgroup }} ]);
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
@@ -480,9 +481,9 @@ sub _get_filter {
 
 ##########################################################
 sub _get_host_statustype_filter {
-    my ( $self, $number ) = @_;
+    my ( $number ) = @_;
 
-    $number = 7 if !defined $number or $number <= 0 or $number > 7;
+    $number = 7 if !defined $number || $number <= 0 || $number > 7;
     my $hoststatusfiltername = 'All';
     my @hoststatusfilter;
     if($number and $number != 7) {
@@ -509,9 +510,9 @@ sub _get_host_statustype_filter {
 
 ##########################################################
 sub _get_service_statustype_filter {
-    my ( $self, $number ) = @_;
+    my ( $number ) = @_;
 
-    $number = 120 if !defined $number or $number <= 0 or $number > 120;
+    $number = 120 if !defined $number || $number <= 0 || $number > 120;
     my $servicestatusfiltername = 'All';
     my @servicestatusfilter;
     if($number and $number != 120) {
@@ -552,7 +553,5 @@ This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

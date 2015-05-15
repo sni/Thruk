@@ -2,15 +2,14 @@ package Thruk::Controller::trends;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::trends - Catalyst Controller
+Thruk::Controller::trends - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =cut
 
@@ -26,13 +25,15 @@ use constant {
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     require Thruk::Utils::Trends;
     Thruk::Utils::Trends->import();
 
-    my $trends_helper = new Thruk::Utils::Trends;
+    my $trends_helper = Thruk::Utils::Trends->new;
 
     # set defaults
     $c->stash->{title}            = 'Trends';
@@ -42,14 +43,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
-    if(exists $c->{'request'}->{'parameters'}->{'createimage'}) {
-        if(exists $c->{'request'}->{'parameters'}->{'job_id'}) {
-            my $dir = $c->config->{'var_path'}."/jobs/".$c->{'request'}->{'parameters'}->{'job_id'};
+    if(exists $c->req->parameters->{'createimage'}) {
+        if(exists $c->req->parameters->{'job_id'}) {
+            my $dir = $c->config->{'var_path'}."/jobs/".$c->req->parameters->{'job_id'};
             $c->stash->{gd_image} = Thruk::Utils::Trends::_get_image($dir."/graph.png");
         } else {
             $c->stash->{gd_image} = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
         }
-        $c->forward('Thruk::View::GD');
+        return($c->render_gd());
     }
     elsif($trends_helper->_show_step_2($c)) {
         # show step 2
@@ -78,7 +79,5 @@ This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

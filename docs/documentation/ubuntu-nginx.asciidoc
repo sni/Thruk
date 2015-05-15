@@ -91,7 +91,7 @@ case "$1" in
         fi
 
         echo -n "Starting Thruk... "
-        CATALYST_CONFIG=$CONFDIR /usr/share/naemon/script/thruk_fastcgi.pl -l $FCGIWRAP_SOCKET >/dev/null 2>&1 &
+        THRUK_CONFIG=$CONFDIR /usr/share/naemon/script/thruk_fastcgi.pl -l $FCGIWRAP_SOCKET >/dev/null 2>&1 &
         echo $! > $PIDFILE
         sleep 2
         echo "Done!"

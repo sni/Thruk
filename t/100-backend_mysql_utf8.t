@@ -1,10 +1,8 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
-$Data::Dumper::Sortkeys = 1;
 
-plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Set $ENV{TEST_MYSQL} to a test database connection.' unless $ENV{TEST_MYSQL};
 plan tests => 14;
@@ -15,7 +13,6 @@ BEGIN {
     import TestUtils;
 }
 
-use Catalyst::Test 'Thruk';
 use_ok('Thruk::Backend::Provider::Mysql');
 use_ok('Thruk::Config');
 use_ok('Thruk::Action::AddDefaults');
@@ -39,7 +36,7 @@ Thruk::Action::AddDefaults::_set_possible_backends($c, {});
 my $backends = $c->stash->{'backends'};
 $backends    = Thruk::Utils::list($backends);
 my $prefix   = $backends->[0];
-isnt($prefix, undef, 'got peer key: '.$prefix);
+isnt($prefix, undef, 'got peer key: '.$prefix) or BAIL_OUT("got no peer key, cannot test");
 my $peer     = $c->{'db'}->get_peer_by_key($prefix);
 isnt($peer, undef, 'got backend by key');
 $peer->{'logcache'} = $m;

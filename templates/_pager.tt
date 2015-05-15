@@ -1,8 +1,9 @@
 ﻿[% IF use_pager AND pager %]
 
   <form action="" method="GET">
-  [% FOREACH par = c.request.query_params.keys %]
-    [% NEXT IF !c.request.query_params.defined(par) %]
+[% IF c.request.parameters.defined('keys') %]
+  [% FOREACH par = c.request.parameters.keys %]
+    [% NEXT IF !c.request.parameters.defined(par) %]
     [% NEXT IF par == 'entries' %]
     [% NEXT IF par == 'next' %]
     [% NEXT IF par == 'next.x' %]
@@ -22,10 +23,11 @@
     [% NEXT IF par == 'page' %]
     [% NEXT IF par == 'total_pages' %]
     [% NEXT IF par == 'noheader' %]
-    [% FOR value IN c.request.query_params.$par.list %]
+    [% FOR value IN c.request.parameters.$par.list %]
       <input type="hidden" name="[% par %]" value="[% value %]">
     [% END %]
   [% END %]
+[% END %]
 
   [% IF pages > 1 %]
   <br>

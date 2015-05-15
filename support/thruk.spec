@@ -220,6 +220,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/bp/bp_functions.pm
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
+%attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi
 %attr(0755,root,root) %{_datadir}/thruk/script/wkhtmltopdf
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates

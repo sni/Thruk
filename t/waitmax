@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+use POSIX ":sys_wait_h";
+
+my $timeout = shift @ARGV;
+my $pid = fork();
+die("fork: $!") unless defined $pid;
+if(!$pid) {
+    exec(@ARGV);
+    exit(1);
+} else {
+    $SIG{'ALRM'} = sub {
+        kill(9, $pid);
+        exit 1;
+    };
+    alarm($timeout);
+    while(waitpid($pid, 0) == -1) {}
+    my $rc = $?>>8;
+    exit($rc);
+}

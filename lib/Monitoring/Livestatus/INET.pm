@@ -29,9 +29,9 @@ be a the C<server> specification. Use either socker OR server.
 =cut
 
 sub new {
-    my $class = shift;
-    unshift(@_, "peer") if scalar @_ == 1;
-    my(%options) = @_;
+    my($class, @args) = @_;
+    unshift(@args, "peer") if scalar @args == 1;
+    my(%options) = @args;
     $options{'name'} = $options{'peer'} unless defined $options{'name'};
 
     $options{'backend'} = $class;
@@ -61,7 +61,7 @@ sub _open {
                                          Type     => SOCK_STREAM,
                                          Timeout  => $self->{'connect_timeout'},
                                          );
-        if(!defined $sock or !$sock->connected()) {
+        if(!defined $sock || !$sock->connected()) {
             my $msg = "failed to connect to $self->{'peer'}: $!";
             if($self->{'errors_are_fatal'}) {
                 croak($msg);

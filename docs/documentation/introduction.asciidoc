@@ -25,7 +25,6 @@ Main Features / Advantages
   * Valid HTML code
   * No frames (can be reenabled for better addon integration)
   * Easy to extend with plugins
-  * 100% Perl (using Catalyst Framework)
   * Pagination
   * Multiple themes included
   * Excel export for status and logfiles
@@ -44,7 +43,7 @@ Main Features / Advantages
 == How it works
 
 Thruk is written in Perl using the
-http://www.catalystframework.org[Catalyst Framework]. Backend
+http://plackperl.org[Plack Framework]. Backend
 monitoring systems will be connected with the
 http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
 Perl Module. Thruk itself is running as a fastcgi process.

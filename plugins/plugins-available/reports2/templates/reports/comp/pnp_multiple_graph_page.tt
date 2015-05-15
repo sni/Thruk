@@ -10,7 +10,7 @@
   [% source = 1 %]
   [% WHILE page <= nb_page %]
     [% nb_graph = 0 %]
-    [% pnpdata = get_pnp_image(c.request.parameters.host, c.request.parameters.service, start, end, 400, 100, source) %]
+    [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]
     [% IF pnpdata %]
       [% nb_graph = nb_graph + 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="" %]
@@ -22,7 +22,7 @@
           [% nb_graph = 3 %]
         [% END %]
         [% WHILE nb_graph < 3 %]
-          [% pnpdata = get_pnp_image(c.request.parameters.host, c.request.parameters.service, start, end, 400, 100, source) %]
+          [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]
           [% IF pnpdata %]
             [% nb_graph = nb_graph + 1 %]
             <div align="center">

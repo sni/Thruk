@@ -8,9 +8,9 @@ my @stack;
 my %totals;
 
 sub process {
-  my $self = shift;
+  my($self, @args) = @_;
 
-  my $template = $_[0];
+  my $template = $args[0];
   if(UNIVERSAL::isa($template, "Template::Document")) {
     $template = $template->name || $template;
   }
@@ -18,8 +18,8 @@ sub process {
   push @stack, [time, times];
 
   my @return = wantarray ?
-    $self->SUPER::process(@_) :
-      scalar $self->SUPER::process(@_);
+    $self->SUPER::process(@args) :
+      scalar $self->SUPER::process(@args);
 
   my @delta_times = @{pop @stack};
   @delta_times = map { $_ - shift @delta_times } time, times;

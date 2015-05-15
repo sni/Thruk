@@ -1,18 +1,13 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
-use File::Temp qw/ tempfile /;
+use File::Temp qw/tempfile/;
 
 BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     eval "use Test::JavaScript";
     plan skip_all => 'Test::JavaScript required' if $@;
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-
-    use lib('t');
-    require TestUtils;
-    import TestUtils;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 }
 
 #################################################
@@ -65,6 +60,9 @@ ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 
 #################################################
+use lib('t');
+require TestUtils;
+import TestUtils;
 my $tst = TestUtils::test_page(
     'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
     'like'          => 'BLANK_IMAGE_URL',

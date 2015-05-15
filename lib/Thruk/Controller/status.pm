@@ -2,27 +2,26 @@ package Thruk::Controller::status;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::status - Catalyst Controller
+Thruk::Controller::status - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
-
-=cut
 
 =head2 index
 
 =cut
 
 ##########################################################
-sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
-    my( $self, $c ) = @_;
+sub index {
+    my($c) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     # which style to display?
     my $allowed_subpages = {
@@ -32,41 +31,39 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
                             'summary'    => 1, 'hostsummary'  => 1, 'servicesummary'  => 1,
                             'combined'   => 1, 'perfmap'      => 1,
                         };
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
+    my $style = $c->req->parameters->{'style'} || '';
 
-    if($style ne '' and ! defined $allowed_subpages->{$style}) {
+    if($style ne '' && !defined $allowed_subpages->{$style}) {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
     if( $style eq '' ) {
-        if( defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '' ) {
+        if( defined $c->req->parameters->{'hostgroup'} and $c->req->parameters->{'hostgroup'} ne '' ) {
             $style = 'overview';
         }
-        if( defined $c->{'request'}->{'parameters'}->{'servicegroup'} and $c->{'request'}->{'parameters'}->{'servicegroup'} ne '' ) {
+        if( defined $c->req->parameters->{'servicegroup'} and $c->req->parameters->{'servicegroup'} ne '' ) {
             $style = 'overview';
         }
     }
 
-    if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
-        return $self->_process_bookmarks($c);
+    if(defined $c->req->parameters->{'addb'} or defined $c->req->parameters->{'saveb'}) {
+        return _process_bookmarks($c);
     }
 
-    if(defined $c->{'request'}->{'parameters'}->{'verify'} and $c->{'request'}->{'parameters'}->{'verify'} eq 'time') {
-        return $self->_process_verify_time($c);
+    if(defined $c->req->parameters->{'verify'} and $c->req->parameters->{'verify'} eq 'time') {
+        return _process_verify_time($c);
     }
 
-    if($c->{'request'}->{'parameters'}->{'serveraction'}) {
+    if($c->req->parameters->{'serveraction'}) {
         my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
         my $json = { 'rc' => $rc, 'msg' => $msg };
-        $c->stash->{'json'} = $json;
-        return $c->forward('Thruk::View::JSON');
+        return $c->render(json => $json);
     }
 
-    if($c->{'request'}->{'parameters'}->{'replacemacros'}) {
-        my($rc, $data) = $self->_replacemacros($c);
+    if($c->req->parameters->{'replacemacros'}) {
+        my($rc, $data) = _replacemacros($c);
         my $json = { 'rc' => $rc, 'data' => $data };
-        $c->stash->{'json'} = $json;
-        return $c->forward('Thruk::View::JSON');
+        return $c->render(json => $json);
     }
 
     # set some defaults
@@ -75,8 +72,8 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
     $style = 'detail' unless defined $allowed_subpages->{$style};
 
     # did we get a search request?
-    if( defined $c->{'request'}->{'parameters'}->{'navbarsearch'} and $c->{'request'}->{'parameters'}->{'navbarsearch'} eq '1' ) {
-        $style = $self->_process_search_request($c);
+    if( defined $c->req->parameters->{'navbarsearch'} and $c->req->parameters->{'navbarsearch'} eq '1' ) {
+        $style = _process_search_request($c);
     }
 
     $c->stash->{title}         = 'Current Network Status';
@@ -102,38 +99,38 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
     }
 
     # raw data request?
-    $c->stash->{'output_format'} = $c->{'request'}->{'parameters'}->{'format'} || 'html';
+    $c->stash->{'output_format'} = $c->req->parameters->{'format'} || 'html';
     if( $c->stash->{'output_format'} ne 'html' ) {
-        $self->_process_raw_request($c);
+        _process_raw_request($c);
         return 1;
     }
 
     # normal pages
     elsif ( $style eq 'detail' ) {
         $c->stash->{substyle} = 'service';
-        $self->_process_details_page($c);
+        _process_details_page($c);
     }
     elsif ( $style eq 'hostdetail' ) {
-        $self->_process_hostdetails_page($c);
+        _process_hostdetails_page($c);
     }
     elsif ( $style =~ m/overview$/mx ) {
         $style = 'overview';
-        $self->_process_overview_page($c);
+        _process_overview_page($c);
     }
     elsif ( $style =~ m/grid$/mx ) {
         $style = 'grid';
-        $self->_process_grid_page($c);
+        _process_grid_page($c);
     }
     elsif ( $style =~ m/summary$/mx ) {
         $style = 'summary';
-        $self->_process_summary_page($c);
+        _process_summary_page($c);
     }
     elsif ( $style eq 'combined' ) {
-        $self->_process_combined_page($c);
+        _process_combined_page($c);
     }
     elsif ( $style eq 'perfmap' ) {
         $c->stash->{substyle} = 'service';
-        $self->_process_perfmap_page($c);
+        _process_perfmap_page($c);
     }
 
     $c->stash->{template} = 'status_' . $style . '.tt';
@@ -146,16 +143,16 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 ##########################################################
 # check for search results
 sub _process_raw_request {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     if( $c->stash->{'output_format'} eq 'search' ) {
-        if( exists $c->{'request'}->{'parameters'}->{'type'} ) {
+        if( exists $c->req->parameters->{'type'} ) {
             my $filter;
-            if($c->{'request'}->{'parameters'}->{'query'}) {
-                $filter = $c->{'request'}->{'parameters'}->{'query'};
+            if($c->req->parameters->{'query'}) {
+                $filter = $c->req->parameters->{'query'};
                 $filter =~ s/\s+/\.\*/gmx;
             }
-            my $type = $c->{'request'}->{'parameters'}->{'type'};
+            my $type = $c->req->parameters->{'type'};
             my $data;
             if($type eq 'contact') {
                 my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ] );
@@ -177,7 +174,7 @@ sub _process_raw_request {
                 @{$data} = grep {/$filter/mx} @{$data} if $filter;
             }
             elsif($type eq 'service' or $type eq 'services') {
-                my $host = $c->{'request'}->{'parameters'}->{'host'};
+                my $host = $c->req->parameters->{'host'};
                 my $additional_filter;
                 my @hostfilter;
                 if(defined $host and $host ne '') {
@@ -207,7 +204,7 @@ sub _process_raw_request {
             }
             elsif($type eq 'contactgroup') {
                 $data = [];
-                if($c->{'request'}->{'parameters'}->{'wildcards'}) {
+                if($c->req->parameters->{'wildcards'}) {
                     push @{$data}, '*';
                 }
                 my $groups = $c->{'db'}->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contactgroups'), name => { '~~' => $filter } ], columns => [qw/name/], remove_duplicates => 1, sort => {ASC=> 'name'});
@@ -226,16 +223,14 @@ sub _process_raw_request {
                 die("unknown type: " . $type);
             }
             my $json = [ { 'name' => $type."s", 'data' => $data } ];
-            if($c->{'request'}->{'parameters'}->{'hash'}) {
+            if($c->req->parameters->{'hash'}) {
                 my $total = scalar @{$data};
                 Thruk::Backend::Manager::_page_data(undef, $c, $data);
                 my $list = [];
-                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } };
+                for my $d (@{$c->stash->{'data'}}) { push @{$list}, { 'text' => $d } }
                 $json = { 'data' => $list, 'total' => $total };
             }
-            $c->stash->{'json'} = $json;
-            $c->forward('Thruk::View::JSON');
-            return;
+            return $c->render(json => $json);
         }
 
         my( $hostgroups, $servicegroups, $hosts, $services, $timeperiods );
@@ -262,9 +257,7 @@ sub _process_raw_request {
             $timeperiods = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
             push @json, { 'name' => 'timeperiods', 'data' => $timeperiods };
         }
-        $c->stash->{'json'} = \@json;
-        $c->forward('Thruk::View::JSON');
-        return;
+        return $c->render(json => \@json);
     }
 
     # which host to display?
@@ -272,7 +265,7 @@ sub _process_raw_request {
     my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 0;
+    my $limit = $c->req->parameters->{'limit'} || 0;
 
     my @columns = qw/
         comments
@@ -296,46 +289,43 @@ sub _process_raw_request {
         next_check
         long_plugin_output/;
 
-    if( defined $c->{'request'}->{'parameters'}->{'column'} ) {
-        if( ref $c->{'request'}->{'parameters'}->{'column'} eq 'ARRAY' ) {
-            @columns = @{ $c->{'request'}->{'parameters'}->{'column'} };
+    if( defined $c->req->parameters->{'column'} ) {
+        if( ref $c->req->parameters->{'column'} eq 'ARRAY' ) {
+            @columns = @{ $c->req->parameters->{'column'} };
         }
         else {
-            @columns = ( $c->{'request'}->{'parameters'}->{'column'} );
+            @columns = ( $c->req->parameters->{'column'} );
         }
     }
 
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => \@columns, limit => $limit );
-    $c->stash->{'json'} = $hosts;
-    $c->forward('Thruk::View::JSON');
-
-    return 1;
+    return $c->render(json => $hosts);
 }
 
 ##########################################################
 # check for search results
 sub _process_search_request {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     # search pattern is in host param
-    my $host = $c->{'request'}->{'parameters'}->{'host'};
-    $c->{'request'}->{'parameters'}->{'hidesearch'} = 2;    # force show search
+    my $host = $c->req->parameters->{'host'};
+    $c->req->parameters->{'hidesearch'} = 2;    # force show search
 
     return ('detail') unless defined $host;
 
     # is there a servicegroup with this name?
     my $servicegroups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), 'name' => $host ] );
     if( scalar @{$servicegroups} > 0 ) {
-        delete $c->{'request'}->{'parameters'}->{'host'};
-        $c->{'request'}->{'parameters'}->{'servicegroup'} = $host;
+        delete $c->req->parameters->{'host'};
+        $c->req->parameters->{'servicegroup'} = $host;
         return ('overview');
     }
 
     # is there a hostgroup with this name?
     my $hostgroups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), 'name' => $host ] );
     if( scalar @{$hostgroups} > 0 ) {
-        delete $c->{'request'}->{'parameters'}->{'host'};
-        $c->{'request'}->{'parameters'}->{'hostgroup'} = $host;
+        delete $c->req->parameters->{'host'};
+        $c->req->parameters->{'hostgroup'} = $host;
         return ('overview');
     }
 
@@ -345,9 +335,9 @@ sub _process_search_request {
 ##########################################################
 # create the status details page
 sub _process_details_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
@@ -359,8 +349,8 @@ sub _process_details_page {
     Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
-    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
@@ -380,8 +370,8 @@ sub _process_details_page {
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state, $keep_state_order);
-    if($view_mode eq 'json' and $c->{'request'}->{'parameters'}->{'columns'}) {
-        @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
+    if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
+        @{$columns} = split(/\s*,\s*/mx, $c->req->parameters->{'columns'});
         my $col_hash = Thruk::Utils::array2hash($columns);
         $keep_peer_addr   = delete $col_hash->{'peer_addr'};
         $keep_peer_name   = delete $col_hash->{'peer_name'};
@@ -394,7 +384,7 @@ sub _process_details_page {
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns  );
 
-    if(scalar @{$services} == 0 and !$c->stash->{'has_service_filter'}) {
+    if(scalar @{$services} == 0 && !$c->stash->{'has_service_filter'}) {
         # try to find matching hosts, maybe we got some hosts without service
         my $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
         $c->stash->{'num_hosts'} = $host_stats->{'total'};
@@ -404,16 +394,16 @@ sub _process_details_page {
             my $url = $c->stash->{'url_prefix'}.'cgi-bin/'.Thruk::Utils::Filter::uri_with($c, {'style' => 'hostdetail'});
             $url =~ s/&amp;/&/gmx;
             Thruk::Utils::set_message( $c, 'info_message', 'No services found for this filter, redirecting to host view.' );
-            return $c->response->redirect($url)
+            return $c->redirect_to($url);
         }
     }
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
-        $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
-        return $c->detach('View::Excel');
+        return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
         # remove unwanted colums
@@ -426,8 +416,7 @@ sub _process_details_page {
                 delete $s->{'state_order'}             unless $keep_state_order;
             }
         }
-        $c->stash->{'json'} = $services;
-        return $c->detach('Thruk::View::JSON');
+        return $c->render(json => $services);
     }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -447,9 +436,9 @@ sub _process_details_page {
 ##########################################################
 # create the hostdetails page
 sub _process_hostdetails_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
 
     # which host to display?
@@ -461,8 +450,8 @@ sub _process_hostdetails_page {
     Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
-    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
@@ -480,8 +469,8 @@ sub _process_hostdetails_page {
     if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
 
     my($columns, $keep_peer_addr, $keep_peer_name, $keep_peer_key, $keep_last_state);
-    if($view_mode eq 'json' and $c->{'request'}->{'parameters'}->{'columns'}) {
-        @{$columns} = split(/\s*,\s*/mx, $c->{'request'}->{'parameters'}->{'columns'});
+    if($view_mode eq 'json' and $c->req->parameters->{'columns'}) {
+        @{$columns} = split(/\s*,\s*/mx, $c->req->parameters->{'columns'});
         my $col_hash = Thruk::Utils::array2hash($columns);
         $keep_peer_addr  = delete $col_hash->{'peer_addr'};
         $keep_peer_name  = delete $col_hash->{'peer_name'};
@@ -496,10 +485,10 @@ sub _process_hostdetails_page {
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
         my $filename = 'status.xls';
-        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
         $c->stash->{'data'}     = $hosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
-        return $c->detach('View::Excel');
+        return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
         # remove unwanted colums
@@ -511,8 +500,7 @@ sub _process_hostdetails_page {
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
         }
-        $c->stash->{'json'} = $hosts;
-        return $c->detach('Thruk::View::JSON');
+        return $c->render(json => $hosts);
     }
 
     $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
@@ -525,9 +513,9 @@ sub _process_hostdetails_page {
 ##########################################################
 # create the status details page
 sub _process_overview_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    $c->stash->{'columns'} = $c->{'request'}->{'parameters'}->{'columns'} || 3;
+    $c->stash->{'columns'} = $c->req->parameters->{'columns'} || 3;
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
@@ -665,7 +653,7 @@ sub _process_overview_page {
 ##########################################################
 # create the status grid page
 sub _process_grid_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
@@ -760,7 +748,7 @@ sub _process_grid_page {
 ##########################################################
 # create the status summary page
 sub _process_summary_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
@@ -906,7 +894,7 @@ sub _process_summary_page {
 ##########################################################
 # create the status details page
 sub _process_combined_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     $c->stash->{hidetop}    = 1 unless $c->stash->{hidetop} ne '';
     $c->stash->{hidesearch} = 1;
@@ -916,14 +904,14 @@ sub _process_combined_page {
     my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
     return if $c->stash->{'has_error'};
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';;
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # services
-    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || 1;
+    my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
@@ -948,8 +936,8 @@ sub _process_combined_page {
 
 
     # hosts
-    $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
-    $sortoption = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || 7;
+    $sorttype   = $c->req->parameters->{'sorttype_hst'}   || 1;
+    $sortoption = $c->req->parameters->{'sortoption_hst'} || 7;
     $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     $sortoptions = {
@@ -973,18 +961,18 @@ sub _process_combined_page {
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
-        $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
-        $c->stash->{'hosts'}    = $hosts;
-        $c->stash->{'services'} = $services;
-        $c->stash->{'template'} = 'excel/status_combined.tt';
-        return $c->detach('View::Excel');
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
+        $c->stash->{'hosts'}     = $hosts;
+        $c->stash->{'services'}  = $services;
+        $c->stash->{'template'}  = 'excel/status_combined.tt';
+        return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
-        $c->stash->{'json'} = {
+        my $json = {
             'hosts'    => $hosts,
             'services' => $services,
         };
-        return $c->detach('Thruk::View::JSON');
+        return $c->render(json => $json);
     }
 
     # set audio file to play
@@ -996,9 +984,9 @@ sub _process_combined_page {
 ##########################################################
 # create the perfmap details page
 sub _process_perfmap_page {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
@@ -1009,8 +997,8 @@ sub _process_perfmap_page {
     Thruk::Utils::Status::set_comments_and_downtimes($c);
 
     # do the sort
-    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
 
@@ -1044,14 +1032,14 @@ sub _process_perfmap_page {
         Thruk::Utils::Status::set_selected_columns($c);
         $c->stash->{'last_col'} = chr(65+(scalar keys %{$keys})-1);
         my $filename = 'performancedata.xls';
-        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
-        $c->stash->{'name'}     = 'Performance';
+        $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->stash->{'name'}      = 'Performance';
         $c->stash->{'data'}     = $data;
-        $c->stash->{'col_sel'}  = $c->stash->{'columns'};
-        $c->stash->{'col_tr'}   = { 'host_name' => 'Hostname', 'description' => 'Service' };
-        $c->stash->{'columns'}  = ['host_name', 'description', sort keys %{$keys}];
-        $c->stash->{'template'} = 'excel/generic.tt';
-        return $c->detach('View::Excel');
+        $c->stash->{'col_sel'}   = $c->stash->{'columns'};
+        $c->stash->{'col_tr'}    = { 'host_name' => 'Hostname', 'description' => 'Service' };
+        $c->stash->{'columns'}   = ['host_name', 'description', sort keys %{$keys}];
+        $c->stash->{'template'}  = 'excel/generic.tt';
+        return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
         # remove unwanted colums
@@ -1063,8 +1051,7 @@ sub _process_perfmap_page {
                 delete $d->{$k.'_sort'};
             }
         }
-        $c->stash->{'json'} = $data;
-        return $c->detach('Thruk::View::JSON');
+        return $c->render(json => $data);
     }
 
     # sort things?
@@ -1089,17 +1076,17 @@ sub _process_perfmap_page {
 ##########################################################
 # store bookmarks and redirect to last page
 sub _process_bookmarks {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    my $referer    = $c->{'request'}->{'parameters'}->{'referer'} || 'status.cgi';
-    my $bookmark   = $c->{'request'}->{'parameters'}->{'bookmark'};
-    my $bookmarks  = $c->{'request'}->{'parameters'}->{'bookmarks'};
-    my $bookmarksp = $c->{'request'}->{'parameters'}->{'bookmarksp'};
-    my $section    = $c->{'request'}->{'parameters'}->{'section'};
-    my $newname    = $c->{'request'}->{'parameters'}->{'newname'};
-    my $button     = $c->{'request'}->{'parameters'}->{'addb'};
-    my $save       = $c->{'request'}->{'parameters'}->{'saveb'};
-    my $public     = $c->{'request'}->{'parameters'}->{'public'} || 0;
+    my $referer    = $c->req->parameters->{'referer'} || 'status.cgi';
+    my $bookmark   = $c->req->parameters->{'bookmark'};
+    my $bookmarks  = $c->req->parameters->{'bookmarks'};
+    my $bookmarksp = $c->req->parameters->{'bookmarksp'};
+    my $section    = $c->req->parameters->{'section'};
+    my $newname    = $c->req->parameters->{'newname'};
+    my $button     = $c->req->parameters->{'addb'};
+    my $save       = $c->req->parameters->{'saveb'};
+    my $public     = $c->req->parameters->{'public'} || 0;
 
     # public only allowed for admins
     if($public) {
@@ -1197,18 +1184,18 @@ sub _process_bookmarks {
         Thruk::Utils::set_message( $c, 'fail_message', 'nothing to do!' );
     }
 
-    return $c->response->redirect($referer."&reload_nav=1");
+    return $c->redirect_to($referer."&reload_nav=1");
 }
 
 
 ##########################################################
 # check for search results
 sub _process_verify_time {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     my $verified = 'false';
     my $error    = 'not a valid date';
-    my $time = $c->{'request'}->{'parameters'}->{'time'};
+    my $time = $c->req->parameters->{'time'};
     if(defined $time) {
         eval {
             if(Thruk::Utils::_parse_date($c, $time)) {
@@ -1224,22 +1211,20 @@ sub _process_verify_time {
     }
 
     my $json = { 'verified' => $verified, 'error' => $error };
-    $c->stash->{'json'} = $json;
-    $c->forward('Thruk::Thruk::View::JSON');
-    return;
+    return $c->render(json => $json);
 }
 
 
 ##########################################################
 # replace macros in given string for a host/service
 sub _replacemacros {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
 
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
-    my $data    = $c->{'request'}->{'parameters'}->{'data'};
+    my $host    = $c->req->parameters->{'host'};
+    my $service = $c->req->parameters->{'service'};
+    my $data    = $c->req->parameters->{'data'};
 
     # replace macros
     my $objs;
@@ -1268,7 +1253,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

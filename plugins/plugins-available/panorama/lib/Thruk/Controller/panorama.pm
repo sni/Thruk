@@ -3,31 +3,18 @@ package Thruk::Controller::panorama;
 use strict;
 use warnings;
 use Module::Load qw/load/;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::panorama - Catalyst Controller
+Thruk::Controller::panorama - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
 =cut
-
-##########################################################
-# enable panorama features if this plugin is loaded
-Thruk->config->{'use_feature_panorama'} = 1;
-
-##########################################################
-# add new menu item
-Thruk::Utils::Menu::insert_item('General', {
-                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
-                                    'name'  => 'Panorama View',
-                                    target  => '_parent'
-                         });
 
 ##########################################################
 use constant {
@@ -40,14 +27,39 @@ my @runtime_keys = qw/state/;
 
 ##########################################################
 
-=head2 panorama_cgi
+=head2 add_routes
 
 page: /thruk/cgi-bin/panorama.cgi
 
 =cut
-sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
-    my ( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
+
+sub add_routes {
+    my($self, $app, $routes) = @_;
+
+    $routes->{'/thruk/cgi-bin/panorama.cgi'} = 'Thruk::Controller::panorama::index';
+
+    # add new menu item
+    Thruk::Utils::Menu::insert_item('General', {
+                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
+                                    'name'  => 'Panorama View',
+                                    target  => '_parent',
+    });
+
+    # enable panorama features if this plugin is loaded
+    $app->config->{'use_feature_panorama'} = 1;
+
+    return;
+}
+
+##########################################################
+
+=head2 index
+
+=cut
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
         load Data::Dumper, qw/Dumper/;
@@ -65,28 +77,16 @@ sub panorama_cgi : Path('/thruk/cgi-bin/panorama.cgi') {
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
-    return $c->detach('/panorama/index');
-}
-
-
-##########################################################
-
-=head2 index
-
-=cut
-sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
-    my ( $self, $c ) = @_;
-
     $c->stash->{'skip_navigation'} = 1;
     $c->stash->{'no_totals'}       = 1;
     $c->stash->{default_nagvis_base_url} = '';
     $c->stash->{default_nagvis_base_url} = '/'.$ENV{'OMD_SITE'}.'/nagvis' if $ENV{'OMD_SITE'};
 
     $c->stash->{'readonly'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'readonly'} : 0;
-    $c->stash->{'readonly'} = 1 if defined $c->request->parameters->{'readonly'};
+    $c->stash->{'readonly'} = 1 if defined $c->req->parameters->{'readonly'};
 
     $c->stash->{'dashboard_ignore_changes'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'dashboard_ignore_changes'} : 0;
-    $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->request->parameters->{'dashboard_ignore_changes'};
+    $c->stash->{'dashboard_ignore_changes'} = 1 if defined $c->req->parameters->{'dashboard_ignore_changes'};
 
     $c->stash->{'is_admin'} = 0;
     if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
@@ -98,131 +98,131 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
     $c->stash->{'extjs_version'} = "4.1.1";
 
-    $self->{'var'} = $c->config->{'var_path'}.'/panorama';
-    Thruk::Utils::IO::mkdir_r($self->{'var'});
+    $c->{'panorama_var'} = $c->config->{'var_path'}.'/panorama';
+    Thruk::Utils::IO::mkdir_r($c->{'panorama_var'});
 
-    if(defined $c->request->query_keywords) {
-        if($c->request->query_keywords eq 'state') {
-            return($self->_stateprovider($c));
+    if(defined $c->req->uri->query) {
+        if($c->req->uri->query eq 'state') {
+            return(_stateprovider($c));
         }
     }
 
-    if(defined $c->request->parameters->{'js'}) {
-        return($self->_js($c));
+    if(defined $c->req->parameters->{'js'}) {
+        return(_js($c));
     }
 
-    if(defined $c->request->parameters->{'task'}) {
-        my $task = $c->request->parameters->{'task'};
+    if(defined $c->req->parameters->{'task'}) {
+        my $task = $c->req->parameters->{'task'};
         if($task eq 'status') {
-            return($self->_task_status($c));
+            return(_task_status($c));
         }
         if($task eq 'availability') {
-            return($self->_task_availability($c));
+            return(_task_availability($c));
         }
         elsif($task eq 'dashboard_data') {
-            return($self->_task_dashboard_data($c));
+            return(_task_dashboard_data($c));
         }
         elsif($task eq 'dashboard_list') {
-            return($self->_task_dashboard_list($c));
+            return(_task_dashboard_list($c));
         }
         elsif($task eq 'dashboard_update') {
-            return($self->_task_dashboard_update($c));
+            return(_task_dashboard_update($c));
         }
         elsif($task eq 'dashboard_restore_list') {
-            return($self->_task_dashboard_restore_list($c));
+            return(_task_dashboard_restore_list($c));
         }
         elsif($task eq 'dashboard_restore_point') {
-            return($self->_task_dashboard_restore_point($c));
+            return(_task_dashboard_restore_point($c));
         }
         elsif($task eq 'dashboard_restore') {
-            return($self->_task_dashboard_restore($c));
+            return(_task_dashboard_restore($c));
         }
         elsif($task eq 'stats_core_metrics') {
-            return($self->_task_stats_core_metrics($c));
+            return(_task_stats_core_metrics($c));
         }
         elsif($task eq 'stats_check_metrics') {
-            return($self->_task_stats_check_metrics($c));
+            return(_task_stats_check_metrics($c));
         }
         elsif($task eq 'server_stats') {
-            return($self->_task_server_stats($c));
+            return(_task_server_stats($c));
         }
         elsif($task eq 'show_logs') {
-            return($self->_task_show_logs($c));
+            return(_task_show_logs($c));
         }
         elsif($task eq 'site_status') {
-            return($self->_task_site_status($c));
+            return(_task_site_status($c));
         }
         elsif($task eq 'hosts') {
-            return($self->_task_hosts($c));
+            return(_task_hosts($c));
         }
         elsif($task eq 'hosttotals') {
-            return($self->_task_hosttotals($c));
+            return(_task_hosttotals($c));
         }
         elsif($task eq 'services') {
-            return($self->_task_services($c));
+            return(_task_services($c));
         }
         elsif($task eq 'servicesminemap') {
-            return($self->_task_servicesminemap($c));
+            return(_task_servicesminemap($c));
         }
         elsif($task eq 'servicetotals') {
-            return($self->_task_servicetotals($c));
+            return(_task_servicetotals($c));
         }
         elsif($task eq 'hosts_pie') {
-            return($self->_task_hosts_pie($c));
+            return(_task_hosts_pie($c));
         }
         elsif($task eq 'host_list') {
-            return($self->_task_host_list($c));
+            return(_task_host_list($c));
         }
         elsif($task eq 'host_detail') {
-            return($self->_task_host_detail($c));
+            return(_task_host_detail($c));
         }
         elsif($task eq 'service_list') {
-            return($self->_task_service_list($c));
+            return(_task_service_list($c));
         }
         elsif($task eq 'service_detail') {
-            return($self->_task_service_detail($c));
+            return(_task_service_detail($c));
         }
         elsif($task eq 'services_pie') {
-            return($self->_task_services_pie($c));
+            return(_task_services_pie($c));
         }
         elsif($task eq 'stats_gearman') {
-            return($self->_task_stats_gearman($c));
+            return(_task_stats_gearman($c));
         }
         elsif($task eq 'stats_gearman_grid') {
-            return($self->_task_stats_gearman_grid($c));
+            return(_task_stats_gearman_grid($c));
         }
         elsif($task eq 'pnp_graphs') {
-            return($self->_task_pnp_graphs($c));
+            return(_task_pnp_graphs($c));
         }
         elsif($task eq 'userdata_backgroundimages') {
-            return($self->_task_userdata_backgroundimages($c));
+            return(_task_userdata_backgroundimages($c));
         }
         elsif($task eq 'userdata_images') {
-            return($self->_task_userdata_images($c));
+            return(_task_userdata_images($c));
         }
         elsif($task eq 'userdata_iconsets') {
-            return($self->_task_userdata_iconsets($c));
+            return(_task_userdata_iconsets($c));
         }
         elsif($task eq 'userdata_sounds') {
-            return($self->_task_userdata_sounds($c));
+            return(_task_userdata_sounds($c));
         }
         elsif($task eq 'userdata_shapes') {
-            return($self->_task_userdata_shapes($c));
+            return(_task_userdata_shapes($c));
         }
         elsif($task eq 'redirect_status') {
-            return($self->_task_redirect_status($c));
+            return(_task_redirect_status($c));
         }
         elsif($task eq 'textsave') {
-            return($self->_task_textsave($c));
+            return(_task_textsave($c));
         }
         elsif($task eq 'serveraction') {
-            return($self->_task_serveraction($c));
+            return(_task_serveraction($c));
         }
         elsif($task eq 'timezones') {
-            return($self->_task_timezones($c));
+            return(_task_timezones($c));
         }
         elsif($task eq 'wms_provider') {
-            return($self->_task_wms_provider($c));
+            return(_task_wms_provider($c));
         }
     }
 
@@ -230,14 +230,14 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
     _set_preload_images($c);
 
     # clean up?
-    if($c->request->parameters->{'clean'}) {
+    if($c->req->parameters->{'clean'}) {
         my $data = Thruk::Utils::get_user_data($c);
         delete $data->{'panorama'};
         Thruk::Utils::store_user_data($c, $data);
-        return $c->response->redirect("panorama.cgi");
+        return $c->redirect_to("panorama.cgi");
     }
 
-    $self->_js($c, 1);
+    _js($c, 1);
 
     $c->stash->{template} = 'panorama.tt';
     return 1;
@@ -245,14 +245,14 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 ##########################################################
 sub _js {
-    my($self, $c, $only_data) = @_;
+    my($c, $only_data) = @_;
 
     my $open_tabs;
-    if(defined $c->request->parameters->{'map'}) {
-        my $dashboard = $self->_get_dashboard_by_name($c, $c->request->parameters->{'map'});
+    if(defined $c->req->parameters->{'map'}) {
+        my $dashboard = _get_dashboard_by_name($c, $c->req->parameters->{'map'});
         if(!$dashboard) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
-            return $c->response->redirect($c->stash->{'url_prefix'});
+            return $c->redirect_to($c->stash->{'url_prefix'});
         }
         $open_tabs = [$dashboard->{'nr'}];
         $c->stash->{one_tab_only} = $dashboard->{'nr'};
@@ -294,7 +294,7 @@ sub _js {
                     }
                     delete $tabdata->{'xdata'}->{'window_ids'};
                     delete $tabdata->{'window_ids'};
-                    $dashboard = $self->_save_dashboard($c, $dashboard);
+                    $dashboard = _save_dashboard($c, $dashboard);
                     $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'} = $key if $key eq $tabpan->{'activeTab'};
                     push @{$data->{'panorama'}->{'dashboards'}->{'tabpan'}->{open_tabs}}, $dashboard->{'id'};
                 }
@@ -309,8 +309,8 @@ sub _js {
         $c->stash->{state} = '';
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
         for my $nr (@{$open_tabs}) {
-            my $dashboard = $self->_load_dashboard($c, $nr);
-            $self->_merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
+            my $dashboard = _load_dashboard($c, $nr);
+            _merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
             for my $key (keys %{$dashboard}) {
                 if(ref $dashboard->{$key} eq 'HASH' && $dashboard->{$key}->{'xdata'} && $dashboard->{$key}->{'xdata'}->{'appearance'}) {
@@ -341,12 +341,12 @@ sub _js {
     }
 
 
-    $c->stash->{shape_data}   = $self->_task_userdata_shapes($c, 1);
-    $c->stash->{iconset_data} = $self->_task_userdata_iconsets($c, 1);
+    $c->stash->{shape_data}   = _task_userdata_shapes($c, 1);
+    $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
 
     unless($only_data) {
-        $c->res->content_type('text/javascript; charset=UTF-8');
+        $c->res->headers->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';
     }
     return 1;
@@ -354,14 +354,15 @@ sub _js {
 
 ##########################################################
 sub _stateprovider {
-    my ( $self, $c ) = @_;
+    my ( $c ) = @_;
 
-    my $param = $c->request->parameters;
+    my $json;
+    my $param = $c->req->parameters;
     my $task  = delete $param->{'task'};
     my $value = $param->{'value'};
     my $name  = $param->{'name'};
     if($c->stash->{'readonly'} || $c->stash->{'dashboard_ignore_changes'}) {
-        $c->stash->{'json'} = { 'status' => 'failed' };
+        $json = { 'status' => 'failed' };
     }
     # REMOVE AFTER: 01.01.2016
     elsif(defined $task and ($task eq 'set' or $task eq 'update')) {
@@ -374,16 +375,16 @@ sub _stateprovider {
                 $c->log->debug("panorama: removed ".$name);
                 delete $data->{'panorama'}->{'state'}->{$name};
             } else {
-                $c->log->debug("panorama: set ".$name." to ".$self->_nice_ext_value($value));
+                $c->log->debug("panorama: set ".$name." to "._nice_ext_value($value));
                 $data->{'panorama'}->{'state'}->{$name} = $value;
             }
         }
         Thruk::Utils::store_user_data($c, $data);
 
-        $c->stash->{'json'} = { 'status' => 'ok' };
+        $json = { 'status' => 'ok' };
     }
     elsif(defined $task and $task eq 'update2') {
-        $c->stash->{'json'} = { 'status' => 'ok' };
+        $json = { 'status' => 'ok' };
         my $replace = delete $param->{'replace'} || 0;
         my $newids  = [];
         my $newid   = delete $param->{'nr'} || '';
@@ -404,11 +405,11 @@ sub _stateprovider {
                 }
                 $param_data->{'id'}   = $newid || $key;
                 $param_data->{'user'} = $c->stash->{'remote_user'};
-                if(!$self->_save_dashboard($c, $param_data)) {
-                    $c->stash->{'json'} = { 'status' => 'failed' };
+                if(!_save_dashboard($c, $param_data)) {
+                    $json = { 'status' => 'failed' };
                 } else {
                     if($newid) {
-                        $c->stash->{'json'}->{'newid'} = $param_data->{'id'};
+                        $json->{'newid'} = $param_data->{'id'};
                         push @{$newids}, $param_data->{'id'};
                     }
                 }
@@ -420,16 +421,16 @@ sub _stateprovider {
             Thruk::Utils::store_user_data($c, $data);
         }
     } else {
-        $c->stash->{'json'} = { 'status' => 'failed' };
+        $json = { 'status' => 'failed' };
     }
 
-    $self->_add_misc_details($c, 1);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _nice_ext_value {
-    my($self, $orig) = @_;
+    my($orig) = @_;
     my $value = uri_unescape($orig);
     $value =~ s/^o://gmx;
     my @val   = split/\^/mx, $value;
@@ -465,15 +466,15 @@ sub _nice_ext_value {
 
 ##########################################################
 sub _task_status {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     # make status group filter faster
     $c->stash->{'cache_groups_filter'} = {};
 
     my $types        = {};
-    my $tab_backends = $c->request->parameters->{'backends'};
-    if($c->request->parameters->{'types'}) {
-        $types = decode_json($c->request->parameters->{'types'});
+    my $tab_backends = $c->req->parameters->{'backends'};
+    if($c->req->parameters->{'types'}) {
+        $types = decode_json($c->req->parameters->{'types'});
     }
 
     my $hostfilter    = Thruk::Utils::combine_filter('-or', [map {{name => $_}} keys %{$types->{'hosts'}}]);
@@ -485,35 +486,35 @@ sub _task_status {
     }
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
 
-    if($c->request->parameters->{'reschedule'}) {
+    if($c->req->parameters->{'reschedule'}) {
         # works only for a single host or service
         $c->stash->{'now'}                               = time();
-        $c->{'request'}->{'parameters'}->{'cmd_mod'}     = 2;
-        $c->{'request'}->{'parameters'}->{'force_check'} = 0;
-        $c->{'request'}->{'parameters'}->{'start_time'}  = time();
-        $c->{'request'}->{'parameters'}->{'json'}        = 1;
-        $c->{'request'}->{'parameters'}->{'service'}     = '';
+        $c->req->parameters->{'cmd_mod'}     = 2;
+        $c->req->parameters->{'force_check'} = 0;
+        $c->req->parameters->{'start_time'}  = time();
+        $c->req->parameters->{'json'}        = 1;
+        $c->req->parameters->{'service'}     = '';
         if(scalar keys %{$types->{'hosts'}} == 1) {
             my $hosts  = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
                                                columns => [qw/name/]);
             if(scalar @{$hosts} == 1) {
-                $c->{'request'}->{'parameters'}->{'cmd_typ'} = 96;
-                $c->{'request'}->{'parameters'}->{'host'}    = $hosts->[0]->{'name'};
-                $c->{'request'}->{'parameters'}->{'backend'} = [$hosts->[0]->{'peer_key'}];
+                $c->req->parameters->{'cmd_typ'} = 96;
+                $c->req->parameters->{'host'}    = $hosts->[0]->{'name'};
+                $c->req->parameters->{'backend'} = [$hosts->[0]->{'peer_key'}];
             }
         }
         elsif(scalar keys %{$types->{'services'}} == 1) {
             my $services = $c->{'db'}->get_services(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ],
                                                     columns => [qw/host_name description/]);
             if(scalar @{$services} == 1) {
-                $c->{'request'}->{'parameters'}->{'cmd_typ'} = 7;
-                $c->{'request'}->{'parameters'}->{'host'}    = $services->[0]->{'host_name'};
-                $c->{'request'}->{'parameters'}->{'service'} = $services->[0]->{'description'};
-                $c->{'request'}->{'parameters'}->{'backend'} = [$services->[0]->{'peer_key'}];
+                $c->req->parameters->{'cmd_typ'} = 7;
+                $c->req->parameters->{'host'}    = $services->[0]->{'host_name'};
+                $c->req->parameters->{'service'} = $services->[0]->{'description'};
+                $c->req->parameters->{'backend'} = [$services->[0]->{'peer_key'}];
             }
         }
         $c->stash->{'use_csrf'} = 0;
-        if($c->{'request'}->{'parameters'}->{'cmd_typ'}) {
+        if($c->req->parameters->{'cmd_typ'}) {
             if(Thruk::Controller::cmd->_do_send_command($c)) {
                 Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
                 Thruk::Controller::cmd::_redirect_or_success($c, -2, 1);
@@ -526,24 +527,24 @@ sub _task_status {
         for my $f (keys %{$types->{'filter'}}) {
             my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
             next if $c->stash->{'has_error'};
-            delete $c->request->parameters->{'backend'};
-            delete $c->request->parameters->{'backends'};
+            delete $c->req->parameters->{'backend'};
+            delete $c->req->parameters->{'backends'};
             if($backends && scalar @{$backends} > 0) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
             }
-            $c->request->parameters->{'filter'} = $filter;
+            $c->req->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
-            $data->{'filter'}->{$f} = $self->_summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
+            $data->{'filter'}->{$f} = _summarize_query($c, $incl_hst, $incl_svc, $hfilter, $sfilter);
         }
         Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
     }
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
-        $data->{'hostgroups'} = [values %{$self->_summarize_hostgroup_query($c, $types->{'hostgroups'})}];
+        $data->{'hostgroups'} = [values %{_summarize_hostgroup_query($c, $types->{'hostgroups'})}];
     }
     if(scalar keys %{$types->{'servicegroups'}} > 0) {
-        $data->{'servicegroups'} = [values %{$self->_summarize_servicegroup_query($c, $types->{'servicegroups'})}];
+        $data->{'servicegroups'} = [values %{_summarize_servicegroup_query($c, $types->{'servicegroups'})}];
     }
     if(scalar keys %{$types->{'hosts'}} > 0) {
         $data->{'hosts'} = $c->{'db'}->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ],
@@ -572,64 +573,61 @@ sub _task_status {
 
     my $json = { data => $data };
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_redirect_status {
-    my($self, $c) = @_;
+    my($c) = @_;
     my $types = {};
-    if($c->request->parameters->{'filter'}) {
+    if($c->req->parameters->{'filter'}) {
         _do_filter($c);
-        $c->request->parameters->{'filter'} = '';
-        $c->request->parameters->{'task'}   = '';
-        my $url = Thruk::Utils::Filter::uri_with($c, $c->request->parameters);
+        $c->req->parameters->{'filter'} = '';
+        $c->req->parameters->{'task'}   = '';
+        my $url = Thruk::Utils::Filter::uri_with($c, $c->req->parameters);
         $url    =~ s/^panorama.cgi/status.cgi/gmx;
         $url    =~ s/\&amp;filter=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;task=.*?\&amp;/&amp;/gmx;
         $url    =~ s/\&amp;/&/gmx;
-        return $c->response->redirect($url);
+        return $c->redirect_to($url);
     }
-    return $c->response->redirect("status.cgi");
+    return $c->redirect_to("status.cgi");
 }
 
 ##########################################################
 sub _task_textsave {
-    my($self, $c) = @_;
+    my($c) = @_;
     $c->res->headers->header('Content-Disposition', qq[attachment; filename="log.txt"]);
-    $c->res->content_type('application/octet-stream');
-    $c->stash->{text}         = $c->request->parameters->{'text'};
-    $c->stash->{template}     = 'passthrough.tt';
+    $c->res->headers->content_type('application/octet-stream');
+    $c->stash->{text}     = $c->req->parameters->{'text'};
+    $c->stash->{template} = 'passthrough.tt';
     return;
 }
 
 ##########################################################
 sub _task_serveraction {
-    my($self, $c) = @_;
+    my($c) = @_;
     my($rc, $msg);
     # if there is a dashboard in our parameters, make sure we have proper permissions
-    if($c->{'request'}->{'parameters'}->{'dashboard'} && $self->_is_authorized_for_dashboard($c, $c->{'request'}->{'parameters'}->{'dashboard'}) == ACCESS_NONE) {
+    if($c->req->parameters->{'dashboard'} && _is_authorized_for_dashboard($c, $c->req->parameters->{'dashboard'}) == ACCESS_NONE) {
         ($rc, $msg) = (1, 'no permission for this dashboard');
     } else {
         ($rc, $msg) = Thruk::Utils::Status::serveraction($c);
     }
     my $json = { 'rc' => $rc, 'msg' => $msg };
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c, 1);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_wms_provider {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $provider = _get_wms_provider($c);
     my $json = { 'rc' => 0, 'data' => $provider };
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
@@ -637,7 +635,7 @@ sub _get_wms_provider {
     my($c) = @_;
     my $provider = [];
     my $list     = $c->config->{'Thruk::Plugin::Panorama'}->{'wms_provider'};
-    if(ref $list eq "") { $list = [$list] };
+    if(ref $list eq "") { $list = [$list] }
     for my $entry (@{$list}) {
         my($name, $data) = split(/\s*=\s*/mx, $entry, 2);
         $name =~ s/^\s*//gmx;
@@ -661,9 +659,9 @@ sub _get_wms_provider {
 
 ##########################################################
 sub _task_timezones {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $query = $c->{'request'}->{'parameters'}->{'query'} || '';
+    my $query = $c->req->parameters->{'query'} || '';
     my $data  = [];
     for my $tz (@{_get_timezone_data($c)}) {
         next unless $tz->{'text'} =~ m/$query/mxi;
@@ -671,9 +669,8 @@ sub _task_timezones {
     }
 
     my $json = { 'rc' => 0, 'data' => $data };
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
@@ -692,7 +689,7 @@ sub _get_timezone_data {
     push @{$timezones}, {
         text   => $localname,
         abbr   => '',
-        offset => 0
+        offset => 0,
     };
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
     for my $name (DateTime::TimeZone->all_names) {
@@ -703,14 +700,14 @@ sub _get_timezone_data {
             hour      => $hour,
             minute    => $min,
             second    => $sec,
-            time_zone => $name
+            time_zone => $name,
         );
         push @{$timezones}, {
             text   => $name,
             abbr   => $dt->time_zone()->short_name_for_datetime($dt),
             offset => $dt->offset(),
             isdst  => $dt->is_dst() ? JSON::XS::true : JSON::XS::false,
-        }
+        };
     }
     $cache->set('timezones', {
         timestamp => $timestamp,
@@ -722,21 +719,20 @@ sub _get_timezone_data {
 
 ##########################################################
 sub _task_availability {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     # make status group filter faster
     $c->stash->{'cache_groups_filter'} = {};
 
-    if($c->request->parameters->{'force'}) {
+    if($c->req->parameters->{'force'}) {
         return(_avail_update($c));
     }
 
     $c->stats->profile(begin => "_task_avail");
     my $jobid = Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::_avail_update($c)',
                                                    message    => 'availability is being calculated',
-                                                   background => 1
-                                                 }
-    );
+                                                   background => 1,
+                                            });
     my $res = _avail_update($c, 1);
     $c->stats->profile(end => "_task_avail");
     return($res);
@@ -750,9 +746,9 @@ sub _avail_update {
     my $in    = {};
     my $types = {};
 
-    my $tab_backends = $c->request->parameters->{'backends'};
-    if($c->request->parameters->{'avail'}) { $in    = decode_json($c->request->parameters->{'avail'}); }
-    if($c->request->parameters->{'types'}) { $types = decode_json($c->request->parameters->{'types'}); }
+    my $tab_backends = $c->req->parameters->{'backends'};
+    if($c->req->parameters->{'avail'}) { $in    = decode_json($c->req->parameters->{'avail'}); }
+    if($c->req->parameters->{'types'}) { $types = decode_json($c->req->parameters->{'types'}); }
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/availability.cache');
 
     # cache hit?
@@ -787,14 +783,14 @@ sub _avail_update {
             Thruk::Utils::Avail::reset_req_parameters($c);
             my $filtername = "$f"; # results in *** glibc detected *** perl: double free or corruption (!prev): 0x0e482c38 *** otherwise
             my($incl_hst, $incl_svc, $filter, $backends) = @{decode_json($f)};
-            delete $c->request->parameters->{'backend'};
-            delete $c->request->parameters->{'backends'};
+            delete $c->req->parameters->{'backend'};
+            delete $c->req->parameters->{'backends'};
             if((ref $backends eq "" and $backends) || (ref $backends eq 'ARRAY' && scalar @{$backends} > 0)) {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $backends);
             } else {
                 Thruk::Action::AddDefaults::_set_enabled_backends($c, $tab_backends);
             }
-            $c->request->parameters->{'filter'} = $filter;
+            $c->req->parameters->{'filter'} = $filter;
             my( $hfilter, $sfilter, $groupfilter ) = _do_filter($c);
             next if $c->stash->{'has_error'};
             for my $panel (@{$types->{'filter'}->{$f}}) {
@@ -803,16 +799,16 @@ sub _avail_update {
                     Thruk::Utils::Avail::reset_req_parameters($c);
                     if($opts->{'incl_hst'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
                         if($hfilter) {
-                            $c->{request}->{parameters}->{h_filter} = $hfilter;
+                            $c->req->parameters->{h_filter} = $hfilter;
                         } else {
-                            $c->{request}->{parameters}->{host}     = 'all';
+                            $c->req->parameters->{host}     = 'all';
                         }
                     }
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
                         if($sfilter) {
-                            $c->{request}->{parameters}->{s_filter} = $sfilter;
+                            $c->req->parameters->{s_filter} = $sfilter;
                         } else {
-                            $c->{request}->{parameters}->{service}  = 'all';
+                            $c->req->parameters->{service}  = 'all';
                         }
                     }
                     my $cached = $cache->get(@cache_prefix, 'filter', $filtername, $key);
@@ -826,13 +822,13 @@ sub _avail_update {
     if(scalar keys %{$types->{'hostgroups'}} > 0) {
         for my $group (keys %{$types->{'hostgroups'}}) {
             Thruk::Utils::Avail::reset_req_parameters($c);
-            $c->{request}->{parameters}->{hostgroup} = $group;
+            $c->req->parameters->{hostgroup} = $group;
             for my $panel (@{$types->{'hostgroups'}->{$group}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $opts   = $in->{$panel}->{$key}->{opts};
                     my $cached = $cache->get(@cache_prefix, 'hostgroups', $group, $key);
                     if($opts->{'incl_svc'} || (!$opts->{'incl_hst'} && !$opts->{'incl_svc'})) {
-                        $c->{request}->{parameters}->{include_host_services} = 1;
+                        $c->req->parameters->{include_host_services} = 1;
                     }
                     $data->{$panel}->{$key} = _avail_calc($c, $cached_only, $now, $cached, $opts);
                     $cache->set(@cache_prefix, 'hostgroups', $group, $key, {val => $data->{$panel}->{$key}, time => $now}) if(!$cached || $cached->{'time'} == $now);
@@ -843,7 +839,7 @@ sub _avail_update {
     if(scalar keys %{$types->{'servicegroups'}} > 0) {
         for my $group (keys %{$types->{'servicegroups'}}) {
             Thruk::Utils::Avail::reset_req_parameters($c);
-            $c->{request}->{parameters}->{servicegroup} = $group;
+            $c->req->parameters->{servicegroup} = $group;
             for my $panel (@{$types->{'servicegroups'}->{$group}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'servicegroups', $group, $key);
@@ -856,8 +852,8 @@ sub _avail_update {
     if(scalar keys %{$types->{'hosts'}} > 0) {
         for my $host (keys %{$types->{'hosts'}}) {
             Thruk::Utils::Avail::reset_req_parameters($c);
-            $c->{request}->{parameters}->{host} = $host;
-            $c->{request}->{parameters}->{include_host_services} = 0;
+            $c->req->parameters->{host} = $host;
+            $c->req->parameters->{include_host_services} = 0;
             for my $panel (@{$types->{'hosts'}->{$host}}) {
                 for my $key (keys %{$in->{$panel}}) {
                     my $cached = $cache->get(@cache_prefix, 'hosts', $host, $key);
@@ -871,8 +867,8 @@ sub _avail_update {
         for my $host (keys %{$types->{'services'}}) {
             for my $service (keys %{$types->{'services'}->{$host}}) {
                 Thruk::Utils::Avail::reset_req_parameters($c);
-                $c->{request}->{parameters}->{host}    = $host;
-                $c->{request}->{parameters}->{service} = $service;
+                $c->req->parameters->{host}    = $host;
+                $c->req->parameters->{service} = $service;
                 for my $panel (@{$types->{'services'}->{$host}->{$service}}) {
                     for my $key (keys %{$in->{$panel}}) {
                         my $cached = $cache->get(@cache_prefix, 'services', $host, $service, $key);
@@ -891,10 +887,10 @@ sub _avail_update {
     $cache->set($cached);
     $c->stats->profile(end => "_avail_clean_cache");
 
-    $c->stash->{'json'} = { data => $data };
+    my $json = { data => $data };
 
     $c->stats->profile(end => "_avail_clean_cache");
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 ##########################################################
@@ -925,7 +921,7 @@ sub _avail_calc {
     my $cache_retrieve_factor = $c->config->{'Thruk::Plugin::Panorama'}->{'cache_retrieve_factor'} || 0.0025; # ~ once a day for yearly values, every ~ 3.5 minutes for daily averages
 
     # cache hit?
-    if($cached && !$c->request->parameters->{'force'}) {
+    if($cached && !$c->req->parameters->{'force'}) {
         my $refresh = 0;
         if($now > $cached->{'time'} + $duration * $cache_retrieve_factor) {
             $refresh = 1;
@@ -953,16 +949,16 @@ sub _avail_calc {
 
     $cached->{'time'} = $now;
 
-    $c->{request}->{parameters}->{t2}            = time();
-    $c->{request}->{parameters}->{t1}            = $c->{request}->{parameters}->{t2} - $duration;
-    $c->{request}->{parameters}->{rpttimeperiod} = $opts->{'tm'};
+    $c->req->parameters->{t2}            = time();
+    $c->req->parameters->{t1}            = $c->req->parameters->{t2} - $duration;
+    $c->req->parameters->{rpttimeperiod} = $opts->{'tm'};
     if(!$filter) {
         eval {
             Thruk::Utils::Avail::calculate_availability($c)
         };
         if($@) {
             $c->log->error("calculating availability failed for filter:");
-            $c->log->error(Dumper($c->{request}->{parameters}));
+            $c->log->error(Dumper($c->req->parameters));
             $c->log->error($@);
             return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
         }
@@ -971,7 +967,7 @@ sub _avail_calc {
         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                     $unavailable_states,
                                                                     $host,
-                                                                    $service
+                                                                    $service,
                                                                    );
         return("found no data for service: ".$host." - ".$service) if($service && $totals->{'total'}->{'percent'} == -1);
         return("found no data for host: ".$host) if $totals->{'total'}->{'percent'} == -1;
@@ -984,7 +980,7 @@ sub _avail_calc {
             $opts->{'incl_svc'} = 1;
         }
         if($opts->{'incl_hst'}) {
-            my $s_filter = delete $c->{request}->{parameters}->{s_filter};
+            my $s_filter = delete $c->req->parameters->{s_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'hosts'};
                 eval {
@@ -992,7 +988,7 @@ sub _avail_calc {
                 };
                 if($@) {
                     $c->log->error("calculating availability failed for host filter:");
-                    $c->log->error(Dumper($c->{request}->{parameters}));
+                    $c->log->error(Dumper($c->req->parameters));
                     $c->log->error($@);
                     return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
@@ -1001,7 +997,7 @@ sub _avail_calc {
                 for my $host (keys %{$c->stash->{avail_data}->{'hosts'}}) {
                     my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                                 $unavailable_states,
-                                                                                $host
+                                                                                $host,
                                                                                );
                     if($totals->{'total'}->{'percent'} != -1) {
                         $total += $totals->{'total'}->{'percent'};
@@ -1009,10 +1005,10 @@ sub _avail_calc {
                     }
                 }
             }
-            $c->{request}->{parameters}->{s_filter} = $s_filter;
+            $c->req->parameters->{s_filter} = $s_filter;
         }
         if($opts->{'incl_svc'}) {
-            delete $c->{request}->{parameters}->{h_filter};
+            delete $c->req->parameters->{h_filter};
             if($filter) {
                 delete $c->stash->{avail_data}->{'services'};
                 eval {
@@ -1020,7 +1016,7 @@ sub _avail_calc {
                 };
                 if($@) {
                     $c->log->error("calculating availability failed for service filter:");
-                    $c->log->error(Dumper($c->{request}->{parameters}));
+                    $c->log->error(Dumper($c->req->parameters));
                     $c->log->error($@);
                     return(($ENV{'THRUK_JOB_ID'} ? '('.$ENV{'THRUK_JOB_ID'}.') ' : '').$@);
                 }
@@ -1031,7 +1027,7 @@ sub _avail_calc {
                         my $totals = Thruk::Utils::Avail::get_availability_percents($c->stash->{avail_data},
                                                                                     $unavailable_states,
                                                                                     $host,
-                                                                                    $service
+                                                                                    $service,
                                                                                    );
                         if($totals->{'total'}->{'percent'} != -1) {
                             $total += $totals->{'total'}->{'percent'};
@@ -1050,7 +1046,7 @@ sub _avail_calc {
 
 ##########################################################
 sub _task_stats_core_metrics {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $data = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
     my $json = {
@@ -1066,17 +1062,16 @@ sub _task_stats_core_metrics {
             { type => 'Requests',            total => $data->{'requests'},       rate => $data->{'requests_rate'} },
             { type => 'NEB Callbacks',       total => $data->{'neb_callbacks'},  rate => $data->{'neb_callbacks_rate'} },
             { type => 'Cached Log Messages', total => $data->{'cached_log_messages'}, rate => '' },
-        ]
+        ],
     };
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_stats_check_metrics {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $data = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
 
@@ -1092,21 +1087,20 @@ sub _task_stats_check_metrics {
             { type => 'Service Check Latency',        min => $data->{'services_latency_min'},        max => $data->{'services_latency_max'},        avg => $data->{'services_latency_avg'} },
             { type => 'Host Check Execution Time',    min => $data->{'hosts_execution_time_min'},    max => $data->{'hosts_execution_time_max'},    avg => $data->{'hosts_execution_time_avg'} },
             { type => 'Host Check Latency',           min => $data->{'hosts_latency_min'},           max => $data->{'hosts_latency_max'},           avg => $data->{'hosts_latency_avg'} },
-        ]
+        ],
     };
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_server_stats {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $show_load   = $c->request->parameters->{'load'}   || 'true';
-    my $show_cpu    = $c->request->parameters->{'cpu'}    || 'true';
-    my $show_memory = $c->request->parameters->{'memory'} || 'true';
+    my $show_load   = $c->req->parameters->{'load'}   || 'true';
+    my $show_cpu    = $c->req->parameters->{'cpu'}    || 'true';
+    my $show_memory = $c->req->parameters->{'memory'} || 'true';
 
     my $json = {
         columns => [
@@ -1121,8 +1115,7 @@ sub _task_server_stats {
         data  => [],
         group => 'cat',
     };
-    $c->stash->{'json'} = $json;
-    return $c->forward('Thruk::View::JSON') unless -e '/proc'; # all beyond is linux only
+    return $c->render(json => $json) unless -e '/proc'; # all beyond is linux only
 
     my($cpu, $cpucount);
     if($show_load eq 'true' or $show_cpu eq 'true') {
@@ -1131,7 +1124,7 @@ sub _task_server_stats {
            $cpu  = $pcs->get();
            $cpucount = (scalar keys %{$cpu}) - 1;
         # don't save more often than 5 seconds to keep a better reference
-        if(!defined $lastcpu->{'time'} or $lastcpu->{'time'} +5 < time()) {
+        if(!defined $lastcpu->{'time'} || $lastcpu->{'time'} +5 < time()) {
             $c->cache->set('panorama_sys_cpu', { init => $pcs->{'init'}, time => time() });
         }
         $cpu     = $cpu->{'cpu'};
@@ -1169,23 +1162,23 @@ sub _task_server_stats {
             { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' };
     }
 
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_stats_gearman {
-    my($self, $c) = @_;
-    $c->stash->{'json'} = $self->_get_gearman_stats($c);
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    my($c) = @_;
+    my $json = _get_gearman_stats($c);
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_stats_gearman_grid {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $data = $self->_get_gearman_stats($c);
+    my $data = _get_gearman_stats($c);
 
     my $json = {
         columns => [
@@ -1194,7 +1187,7 @@ sub _task_stats_gearman_grid {
             { 'header' => 'Running', dataIndex => 'running', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
             { 'header' => 'Waiting', dataIndex => 'waiting', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
         ],
-        data    => []
+        data    => [],
     };
     for my $queue (sort keys %{$data}) {
         # hide empty queues
@@ -1207,24 +1200,23 @@ sub _task_stats_gearman_grid {
         };
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_show_logs {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $filter;
     my $end   = time();
-    my $start = $end - Thruk::Utils::Status::convert_time_amount($c->{'request'}->{'parameters'}->{'time'} || '15m');
+    my $start = $end - Thruk::Utils::Status::convert_time_amount($c->req->parameters->{'time'} || '15m');
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<=' => $end }};
 
     # additional filters set?
-    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
-    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude'};
+    my $pattern         = $c->req->parameters->{'pattern'};
+    my $exclude_pattern = $c->req->parameters->{'exclude'};
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
         push @{$filter}, { message => { '~~' => $pattern }};
     }
@@ -1242,7 +1234,7 @@ sub _task_show_logs {
             { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'TP.render_date' },
             { 'header' => 'Message', dataIndex => 'message', flex => 1 },
         ],
-        data    => []
+        data    => [],
     };
     for my $row (@{$data}) {
         push @{$json->{'data'}}, {
@@ -1252,14 +1244,13 @@ sub _task_show_logs {
         };
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_site_status {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     if(!$c->stash->{'pi_detail'} || scalar keys %{$c->stash->{'pi_detail'}} == 0) {
         my $cached_data = $c->cache->get->{'global'} || {};
@@ -1267,9 +1258,9 @@ sub _task_site_status {
     }
 
     my $backend_filter;
-    if($c->request->parameters->{'backends'}) {
+    if($c->req->parameters->{'backends'}) {
         $backend_filter = {};
-        for my $b (ref $c->request->parameters->{'backends'} eq 'ARRAY' ? @{$c->request->parameters->{'backends'}} : $c->request->parameters->{'backends'}) {
+        for my $b (ref $c->req->parameters->{'backends'} eq 'ARRAY' ? @{$c->req->parameters->{'backends'}} : $c->req->parameters->{'backends'}) {
             $backend_filter->{$b} = 1;
         }
     }
@@ -1289,7 +1280,7 @@ sub _task_site_status {
             { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
             { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
         ],
-        data    => []
+        data    => [],
     };
 
     # get sections
@@ -1305,7 +1296,7 @@ sub _task_site_status {
         }
     }
     for my $key (@{$c->stash->{'backends'}}) {
-        next if($backend_filter and !defined $backend_filter->{$key});
+        next if($backend_filter && !defined $backend_filter->{$key});
         my $b    = $c->stash->{'backend_detail'}->{$key};
         my $d    = {};
         $d       = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
@@ -1331,20 +1322,19 @@ sub _task_site_status {
         push @{$json->{'data'}}, $row;
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_hosts {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
-    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'currentPage'};
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
 
@@ -1402,20 +1392,19 @@ sub _task_hosts {
         }
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_services {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
-    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'currentPage'};
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'pageSize'};
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'currentPage'};
 
     $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => 1);
 
@@ -1494,14 +1483,13 @@ sub _task_services {
         }
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_hosttotals {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
@@ -1523,14 +1511,13 @@ sub _task_hosttotals {
         };
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_servicetotals {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
@@ -1552,14 +1539,13 @@ sub _task_servicetotals {
         };
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_hosts_pie {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
@@ -1590,14 +1576,13 @@ sub _task_hosts_pie {
         push @{$json->{'colors'}}, $colors->{$state};
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_services_pie {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
@@ -1629,14 +1614,13 @@ sub _task_services_pie {
         push @{$json->{'colors'}}, $colors->{$state};
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_servicesminemap {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
@@ -1672,7 +1656,7 @@ sub _task_servicesminemap {
                     'height'    => $height,
                     'dataIndex' => $index,
                     'align'     => 'center',
-                    'tdCls'     => 'mine_map_cell'
+                    'tdCls'     => 'mine_map_cell',
         };
         $x++;
     }
@@ -1693,23 +1677,22 @@ sub _task_servicesminemap {
             my $text    = '&nbsp;';
             if($service->{'scheduled_downtime_depth'}) { $text = '<img src="'.$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/downtime.gif" alt="downtime" height="15" width="15">' }
             if($service->{'acknowledged'})             { $text = '<img src="'.$c->stash->{'url_prefix'}.'themes/'.$c->stash->{'theme'}.'/images/ack.gif" alt="acknowledged" height="15" width="15">' }
-            $data->{$service2index->{$svc}} = '<div class="clickable '.$cls.'" '.$self->_generate_service_popup($c, $service).'>'.$text.'</div>';
+            $data->{$service2index->{$svc}} = '<div class="clickable '.$cls.'" '._generate_service_popup($c, $service).'>'.$text.'</div>';
         }
         push @{$json->{'data'}}, $data;
     }
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_pnp_graphs {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
-    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
-    my $search = $c->{'request'}->{'parameters'}->{'query'};
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
+    my $search = $c->req->parameters->{'query'};
     my $graphs = [];
     my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     for my $hst (@{$data}) {
@@ -1739,21 +1722,21 @@ sub _task_pnp_graphs {
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
     $c->{'db'}->_page_data($c, $graphs);
 
-    $c->stash->{'json'} = {
+    my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
     };
 
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_userdata_backgroundimages {
-    my($self, $c) = @_;
+    my($c) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/backgrounds/';
-    my $query  = $c->{'request'}->{'parameters'}->{'query'};
+    my $query  = $c->req->parameters->{'query'};
     my $images = [];
     my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
     for my $img (@{$files}) {
@@ -1767,25 +1750,25 @@ sub _task_userdata_backgroundimages {
             image => $path,
         };
     }
-    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
-    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
     unshift @{$images}, { path => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', image => 'none'} unless($query);
     $c->{'db'}->_page_data($c, $images);
-    $c->stash->{'json'} = {
+    my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
     };
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_userdata_images {
-    my($self, $c) = @_;
+    my($c) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/images/';
-    my $query  = $c->{'request'}->{'parameters'}->{'query'};
+    my $query  = $c->req->parameters->{'query'};
     my $images = [];
     my $files = Thruk::Utils::find_files($folder, '\.(png|gif|jpg|jpeg)$') || [];
     for my $img (@{$files}) {
@@ -1799,22 +1782,22 @@ sub _task_userdata_images {
             image => $path,
         };
     }
-    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'limit'} || 15;
-    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'page'}  || 1;
+    $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} || 15;
+    $c->req->parameters->{'page'}    = $c->req->parameters->{'page'}  || 1;
     $images = Thruk::Backend::Manager::_sort({}, $images, 'path');
     $c->{'db'}->_page_data($c, $images);
-    $c->stash->{'json'} = {
+    my $json = {
         data        => $c->stash->{'data'},
         total       => $c->stash->{'pager'}->{'total_entries'},
         currentPage => $c->stash->{'pager'}->{'current_page'},
         paging      => JSON::XS::true,
     };
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_userdata_iconsets {
-    my($self, $c, $return_only) = @_;
+    my($c, $return_only) = @_;
     my $folder  = $c->stash->{'usercontent_folder'}.'/images/status';
     my $folders = [];
     for my $f (glob("$folder/*/.")) {
@@ -1832,17 +1815,17 @@ sub _task_userdata_iconsets {
         push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/".$fileset->{'ok'}, value => $name, fileset => $fileset };
     }
     $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
-    if($c->request->parameters->{'withempty'}) {
-        unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' }
+    if($c->req->parameters->{'withempty'}) {
+        unshift @{$folders}, { name => 'use dashboards default iconset', 'sample' => $c->stash->{'url_prefix'}.'plugins/panorama/images/s.gif', value => '' };
     }
     return $folders if $return_only;
-    $c->stash->{'json'} = { data => $folders };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { data => $folders };
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_userdata_sounds {
-    my($self, $c) = @_;
+    my($c) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/sounds/';
     my $sounds = [];
     for my $file (glob("$folder/*.mp3 $folder/*/*.mp3")) {
@@ -1857,13 +1840,13 @@ sub _task_userdata_sounds {
     }
     $sounds = Thruk::Backend::Manager::_sort({}, $sounds, 'name');
     unshift @{$sounds}, { path => '', name => 'none'};
-    $c->stash->{'json'} = { data => $sounds };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { data => $sounds };
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_userdata_shapes {
-    my($self, $c, $return_only) = @_;
+    my($c, $return_only) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/shapes/';
     my $shapes = [];
     for my $file (glob("$folder/*.js $folder/*/*.js")) {
@@ -1878,13 +1861,13 @@ sub _task_userdata_shapes {
     }
     $shapes = Thruk::Backend::Manager::_sort({}, $shapes, 'name');
     return $shapes if $return_only;
-    $c->stash->{'json'} = { data => $shapes };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { data => $shapes };
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_host_list {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     my $data = [];
@@ -1893,36 +1876,36 @@ sub _task_host_list {
     }
 
     $data = Thruk::Backend::Manager::_sort({}, $data, 'name');
-    $c->stash->{'json'} = { data => $data };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { data => $data };
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_host_detail {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $host        = $c->request->parameters->{'host'}    || '';
-    $c->stash->{'json'} = {};
+    my $host        = $c->req->parameters->{'host'}    || '';
+    my $json      = {};
     my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
-        sort => { 'DESC' => 'id' }
+        sort => { 'DESC' => 'id' },
     );
     if(defined $hosts and scalar @{$hosts} > 0) {
         if($c->stash->{'escape_html_tags'}) {
             _escape($hosts->[0]);
         }
-        $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
+        $json = { data => $hosts->[0], downtimes => $downtimes };
     }
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_service_list {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $host     = $c->request->parameters->{'host'} || '';
+    my $host     = $c->req->parameters->{'host'} || '';
     my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }]);
     my $data = [];
     for my $svc (@{$services}) {
@@ -1930,42 +1913,42 @@ sub _task_service_list {
     }
 
     $data = Thruk::Backend::Manager::_sort({}, $data, 'description');
-    $c->stash->{'json'} = { data => $data };
-    return $c->forward('Thruk::View::JSON');
+    my $json = { data => $data };
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_service_detail {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $host        = $c->request->parameters->{'host'}    || '';
-    my $description = $c->request->parameters->{'service'} || '';
-    $c->stash->{'json'} = {};
-    my $services  = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    my $host        = $c->req->parameters->{'host'}    || '';
+    my $description = $c->req->parameters->{'service'} || '';
+    my $json        = {};
+    my $services    = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
-        sort => { 'DESC' => 'id' }
+        sort => { 'DESC' => 'id' },
     );
     if(defined $services and scalar @{$services} > 0) {
         if($c->stash->{'escape_html_tags'}) {
             _escape($services->[0]);
         }
-        $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
+        $json = { data => $services->[0], downtimes => $downtimes };
     }
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_dashboard_data {
-    my($self, $c) = @_;
-    my $nr = $c->request->parameters->{'nr'} || die('no number supplied');
+    my($c) = @_;
+    my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
     my $dashboard;
 
     my $new_override = 0;
     if($nr eq 'new_or_empty' || $nr eq 'first_or_new') {
         # avoid too many empty dashboards, so return the first existing empty dashboard for this user
-        my $dashboards = $self->_get_dashboard_list($c, 'my');
+        my $dashboards = _get_dashboard_list($c, 'my');
         for my $d (@{$dashboards}) {
             if($nr eq 'first_or_new' || $d->{'objects'} == 0) {
                 $nr = $d->{'nr'};
@@ -1981,36 +1964,37 @@ sub _task_dashboard_data {
         return if $c->stash->{'readonly'};
         $dashboard = {
             tab     => {
-                xdata => $self->_get_default_tab_xdata($c)
+                xdata => _get_default_tab_xdata($c),
             },
-            id      => 'new'
+            id      => 'new',
         };
-        $dashboard = $self->_save_dashboard($c, $dashboard);
+        $dashboard = _save_dashboard($c, $dashboard);
     } else {
-        $dashboard = $self->_load_dashboard($c, $nr);
+        $dashboard = _load_dashboard($c, $nr);
     }
+    my $json;
     if(!$dashboard) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such dashboard', code => 404 });
-        $c->stash->{'json'} = { 'status' => 'failed' };
+        $json = { 'status' => 'failed' };
     } else {
         my $data = {};
-        $self->_merge_dashboard_into_hash($dashboard, $data);
+        _merge_dashboard_into_hash($dashboard, $data);
         if($nr eq 'new' || $new_override) {
             $data->{'newid'} = $dashboard->{'id'};
         }
-        $c->stash->{'json'} = { data => $data };
+        $json = { data => $data };
     }
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _get_dashboard_list {
-    my($self, $c, $type) = @_;
+    my($c, $type) = @_;
 
     my $dashboards = [];
-    for my $file (glob($self->{'var'}.'/*.tab')) {
+    for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $d = $self->_load_dashboard($c, $1);
+            my $d = _load_dashboard($c, $1);
             if($d) {
                 if($type eq 'all') {
                     # all
@@ -2052,12 +2036,12 @@ sub _get_dashboard_list {
 
 ##########################################################
 sub _get_dashboard_by_name {
-    my($self, $c, $name) = @_;
+    my($c, $name) = @_;
     return unless $name;
 
-    for my $file (glob($self->{'var'}.'/*.tab')) {
+    for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $d = $self->_load_dashboard($c, $1);
+            my $d = _load_dashboard($c, $1);
             if($d) {
                 if(  ($d->{'tab'}->{'xdata'}->{'title'} && $d->{'tab'}->{'xdata'}->{'title'} eq $name)
                    || $d->{'nr'} eq $name) {
@@ -2071,12 +2055,12 @@ sub _get_dashboard_by_name {
 
 ##########################################################
 sub _task_dashboard_list {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $type = $c->request->parameters->{'list'} || 'my';
-    return if($type eq 'all' and !$c->stash->{'is_admin'});
+    my $type = $c->req->parameters->{'list'} || 'my';
+    return if($type eq 'all' && !$c->stash->{'is_admin'});
 
-    my $dashboards = $self->_get_dashboard_list($c, $type);
+    my $dashboards = _get_dashboard_list($c, $type);
 
     my $json = {
         columns => [
@@ -2100,33 +2084,32 @@ sub _task_dashboard_list {
                       items => [{
                             icon => '../plugins/panorama/images/edit.png',
                             handler => 'TP.dashboardActionHandler',
-                            action  => 'edit'
+                            action  => 'edit',
                       }, {
                             icon => '../plugins/panorama/images/delete.png',
                             handler => 'TP.dashboardActionHandler',
-                            action  => 'remove'
+                            action  => 'remove',
                       }],
-                      tdCls => 'clickable icon_column'
+                      tdCls => 'clickable icon_column',
             },
         ],
         data        => $dashboards,
     };
 
-    $c->stash->{'json'} = $json;
-    $self->_add_misc_details($c, 1);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_dashboard_update {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    $c->stash->{'json'} = { 'status' => 'failed' };
-    my $nr     = $c->request->parameters->{'nr'};
-    my $action = $c->request->parameters->{'action'};
-    my $dashboard = $self->_load_dashboard($c, $nr);
-    if($action and $dashboard and !$dashboard->{'readonly'}) {
-        $c->stash->{'json'} = { 'status' => 'ok' };
+    my $json   = { 'status' => 'failed' };
+    my $nr     = $c->req->parameters->{'nr'};
+    my $action = $c->req->parameters->{'action'};
+    my $dashboard = _load_dashboard($c, $nr);
+    if($action && $dashboard && !$dashboard->{'readonly'}) {
+        $json = { 'status' => 'ok' };
         if($action eq 'remove') {
             unlink($dashboard->{'file'});
             # and also all backups
@@ -2134,8 +2117,8 @@ sub _task_dashboard_update {
         }
         if($action eq 'update') {
             my $extra_settings = {};
-            my $field = $c->request->parameters->{'field'};
-            my $value = $c->request->parameters->{'value'};
+            my $field = $c->req->parameters->{'field'};
+            my $value = $c->req->parameters->{'value'};
             if($field eq 'description') {
                 $extra_settings->{$field} = $value;
             }
@@ -2145,51 +2128,55 @@ sub _task_dashboard_update {
             elsif($field eq 'user' and $c->stash->{'is_admin'}) {
                 $extra_settings->{$field} = $value;
             }
-            $self->_save_dashboard($c, $dashboard, $extra_settings);
+            _save_dashboard($c, $dashboard, $extra_settings);
         }
     }
-    $self->_add_misc_details($c, 1);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_dashboard_restore_list {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $nr         = $c->request->parameters->{'nr'};
-    my $dashboard  = $self->_load_dashboard($c, $nr);
-    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $nr         = $c->req->parameters->{'nr'};
+    my $dashboard  = _load_dashboard($c, $nr);
+    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $json;
     if($permission >= ACCESS_READWRITE) {
         my $list = {
             a => [],
             m => [],
         };
         $nr       =~ s/^tabpan-tab_//gmx;
-        my @files = reverse sort glob($self->{'var'}.'/'.$nr.'.tab.*');
+        my @files = reverse sort glob($c->{'panorama_var'}.'/'.$nr.'.tab.*');
         for my $file (@files) {
             next if $file =~ m/\.runtime$/mx;
-            $file =~ m/\.(\d+)\.(\w)$/mx;
-            my $date = $1;
-            my $mode = $2;
-            push(@{$list->{$mode}}, { num => $date })
+            if($file =~ m/\.(\d+)\.(\w)$/mx) {
+                my $date = $1;
+                my $mode = $2;
+                push(@{$list->{$mode}}, { num => $date });
+            } else {
+                die("wrong file name format in $file");
+            }
         }
-        $c->stash->{'json'} = { data => $list };
+        $json = { data => $list };
     }
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_dashboard_restore_point {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $nr         = $c->request->parameters->{'nr'};
-    my $mode       = $c->request->parameters->{'mode'} || 'm';
-    my $dashboard  = $self->_load_dashboard($c, $nr);
-    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $nr         = $c->req->parameters->{'nr'};
+    my $mode       = $c->req->parameters->{'mode'} || 'm';
+    my $dashboard  = _load_dashboard($c, $nr);
+    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
         $nr =~ s/^tabpan-tab_//gmx;
-        my $file = $self->{'var'}.'/'.$nr.'.tab';
+        my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
         if(!$mode || $mode eq 'm') {
             Thruk::Utils::backup_data_file($file, 'm', 5, 0, 1);
         } else {
@@ -2197,41 +2184,42 @@ sub _task_dashboard_restore_point {
         }
     }
 
-    $c->stash->{'json'} = { msg => "ok" };
-    $self->_add_misc_details($c);
-    return $c->forward('Thruk::View::JSON');
+    my $json = { msg => "ok" };
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _task_dashboard_restore {
-    my($self, $c) = @_;
+    my($c) = @_;
 
-    my $nr         = $c->request->parameters->{'nr'};
-    my $mode       = $c->request->parameters->{'mode'};
+    my $nr         = $c->req->parameters->{'nr'};
+    my $mode       = $c->req->parameters->{'mode'};
        $nr         =~ s/^tabpan-tab_//gmx;
-    my $timestamp  = $c->request->parameters->{'timestamp'};
-    my $dashboard  = $self->_load_dashboard($c, $nr);
-    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $timestamp  = $c->req->parameters->{'timestamp'};
+    my $dashboard  = _load_dashboard($c, $nr);
+    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
-        die("no such dashboard") unless -e $self->{'var'}.'/'.$nr.'.tab';
-        die("no such restore point") unless -e $self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
-        unlink($self->{'var'}.'/'.$nr.'.tab');
-        copy($self->{'var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $self->{'var'}.'/'.$nr.'.tab');
+        die("no such dashboard") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab';
+        die("no such restore point") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
+        unlink($c->{'panorama_var'}.'/'.$nr.'.tab');
+        copy($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $c->{'panorama_var'}.'/'.$nr.'.tab');
     }
-    $self->_add_misc_details($c, 1);
-    return $c->forward('Thruk::View::JSON');
+    my $json = {};
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
 }
 
 ##########################################################
 sub _get_gearman_stats {
-    my($self, $c) = @_;
+    my($c) = @_;
 
     my $data = {};
     my $host = 'localhost';
     my $port = 4730;
 
-    if(defined $c->request->parameters->{'server'}) {
-        ($host,$port) = split(/:/mx, $c->request->parameters->{'server'}, 2);
+    if(defined $c->req->parameters->{'server'}) {
+        ($host,$port) = split(/:/mx, $c->req->parameters->{'server'}, 2);
     }
 
     my $handle = IO::Socket::INET->new(
@@ -2275,14 +2263,14 @@ sub _do_filter {
     # reset existing filter
     Thruk::Utils::Status::reset_filter($c);
 
-    if(!defined $c->request->parameters->{'filter'} or $c->request->parameters->{'filter'} eq '') {
+    if(!defined $c->req->parameters->{'filter'} || $c->req->parameters->{'filter'} eq '') {
         my @f = Thruk::Utils::Status::do_filter($c);
         return @f;
     }
 
     my $filter;
     eval {
-        $filter = decode_json($c->request->parameters->{'filter'});
+        $filter = decode_json($c->req->parameters->{'filter'});
     };
     if($@) {
         $c->log->warn('filter failed: '.$@);
@@ -2297,7 +2285,7 @@ sub _do_filter {
     for my $f (@{$filter}) {
         my $pre = 'dfl_s'.$nr.'_';
         for my $key (qw/hostprops hoststatustypes serviceprops servicestatustypes/) {
-            $c->request->parameters->{$pre.$key} = $f->{$key};
+            $c->req->parameters->{$pre.$key} = $f->{$key};
         }
         for my $type (qw/op type value value_date val_pre/) {
             if(ref $f->{$type} ne 'ARRAY') { $f->{$type} = [$f->{$type}]; }
@@ -2306,7 +2294,7 @@ sub _do_filter {
         for my $type (qw/op type value val_pre/) {
             my $x = 0;
             for my $val (@{$f->{$type}}) {
-                $c->request->parameters->{$pre.$type} = [] unless defined $c->request->parameters->{$pre.$type};
+                $c->req->parameters->{$pre.$type} = [] unless defined $c->req->parameters->{$pre.$type};
                 if($type eq 'value') {
                     if(!defined $val) { $val = ''; }
                     if($f->{'type'}->[$x] eq 'last check' or $f->{'type'}->[$x] eq 'next check') {
@@ -2315,13 +2303,13 @@ sub _do_filter {
                     }
                 }
                 elsif($type eq 'type') {
-                    $val = lc($val || '')
+                    $val = lc($val || '');
                 }
                 elsif($type eq 'val_pre') {
                     if(!defined $val) { $val = ''; }
                 }
 
-                push @{$c->request->parameters->{$pre.$type}}, $val;
+                push @{$c->req->parameters->{$pre.$type}}, $val;
                 $x++;
             }
         }
@@ -2334,7 +2322,7 @@ sub _do_filter {
 
 ##########################################################
 sub _generate_service_popup {
-    my ($self, $c, $service) = @_;
+    my ($c, $service) = @_;
     return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'" onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.Thruk::Utils::Filter::escape_bslash($service->{'host_name'}).'\', service: \''.Thruk::Utils::Filter::escape_bslash($service->{'description'}).'\', }}})"';
 }
 
@@ -2358,7 +2346,7 @@ sub _long_plugin {
 
 ##########################################################
 sub _summarize_hostgroup_query {
-    my($self, $c, $type_groups) = @_;
+    my($c, $type_groups) = @_;
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
     my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter ], columns => [qw/name groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $hostgroups = {};
@@ -2369,7 +2357,7 @@ sub _summarize_hostgroup_query {
                 $hostgroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                                         hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                                         name     => $grp,
-                                      }
+                                      };
             }
             if($hst->{'has_been_checked'} == 0) { $hostgroups->{$grp}->{'hosts'}->{'pending'}++;     }
             elsif($hst->{'state'} == 0)         { $hostgroups->{$grp}->{'hosts'}->{'up'}++;          }
@@ -2414,7 +2402,7 @@ sub _summarize_hostgroup_query {
 
 ##########################################################
 sub _summarize_servicegroup_query {
-    my($self, $c, $type_groups) = @_;
+    my($c, $type_groups) = @_;
     my $filter = Thruk::Utils::combine_filter('-or', [map {{ groups => { '>=' => $_ }}} keys %{$type_groups}]);
     my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter ], columns => [qw/host_name description groups state last_state_change acknowledged scheduled_downtime_depth has_been_checked/]);
     my $servicegroups = {};
@@ -2424,7 +2412,7 @@ sub _summarize_servicegroup_query {
             if(!defined $servicegroups->{$grp}) {
                 $servicegroups->{$grp} = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                                            name     => $grp,
-                                         }
+                                         };
             }
             if($svc->{'has_been_checked'} == 0) { $servicegroups->{$grp}->{'services'}->{'pending'}++;  }
             elsif($svc->{'state'} == 0)         { $servicegroups->{$grp}->{'services'}->{'ok'}++;       }
@@ -2449,7 +2437,7 @@ sub _summarize_servicegroup_query {
 
 ##########################################################
 sub _summarize_query {
-    my($self, $c, $incl_hst, $incl_svc, $hostfilter, $servicefilter) = @_;
+    my($c, $incl_hst, $incl_svc, $hostfilter, $servicefilter) = @_;
     my $sum   = { services => { ok => 0, warning => 0, critical => 0, unknown => 0, pending => 0, ack_warning => 0, ack_critical => 0, ack_unknown => 0, downtime_ok => 0, downtime_warning => 0, downtime_critical => 0, downtime_unknown => 0 },
                   hosts    => { up => 0, down    => 0, unreachable => 0, pending => 0, ack_down => 0, ack_unreachable => 0, downtime_up => 0, downtime_down => 0, downtime_unreachable => 0 },
                 };
@@ -2458,7 +2446,7 @@ sub _summarize_query {
         for my $k (qw/up down unreachable pending/) {
             $sum->{'hosts'}->{$k}             = $host_sum->{$k};
             if($k ne 'up' and $k ne 'pending') {
-                $sum->{'hosts'}->{'ack_'.$k}  = $host_sum->{$k.'_and_ack'}
+                $sum->{'hosts'}->{'ack_'.$k}  = $host_sum->{$k.'_and_ack'};
             }
             $sum->{'hosts'}->{'downtime_'.$k} = $host_sum->{$k.'_and_scheduled'};
         }
@@ -2468,7 +2456,7 @@ sub _summarize_query {
         for my $k (qw/ok warning critical unknown pending/) {
             $sum->{'services'}->{$k}             = $service_sum->{$k};
             if($k ne 'ok' and $k ne 'pending') {
-                $sum->{'services'}->{'ack_'.$k}  = $service_sum->{$k.'_and_ack'}
+                $sum->{'services'}->{'ack_'.$k}  = $service_sum->{$k.'_and_ack'};
             }
             $sum->{'services'}->{'downtime_'.$k} = $service_sum->{$k.'_and_scheduled'};
         }
@@ -2478,22 +2466,22 @@ sub _summarize_query {
 
 ##########################################################
 sub _save_dashboard {
-    my($self, $c, $dashboard, $extra_settings) = @_;
+    my($c, $dashboard, $extra_settings) = @_;
 
     my $nr   = delete $dashboard->{'id'};
     $nr      =~ s/^tabpan-tab_//gmx;
-    my $file = $self->{'var'}.'/'.$nr.'.tab';
+    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
-    my $existing = $nr eq 'new' ? $dashboard : $self->_load_dashboard($c, $nr);
-    return unless $self->_is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
+    my $existing = $nr eq 'new' ? $dashboard : _load_dashboard($c, $nr);
+    return unless _is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
     if($nr eq 'new') {
         # find next free number
         $nr = 1;
-        $file = $self->{'var'}.'/'.$nr.'.tab';
+        $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
         while(-e $file) {
             $nr++;
-            $file = $self->{'var'}.'/'.$nr.'.tab';
+            $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
         }
     }
 
@@ -2537,13 +2525,13 @@ sub _save_dashboard {
 
 ##########################################################
 sub _load_dashboard {
-    my($self, $c, $nr) = @_;
+    my($c, $nr) = @_;
     $nr       =~ s/^tabpan-tab_//gmx;
-    my $file  = $self->{'var'}.'/'.$nr.'.tab';
+    my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
     return unless -s $file;
     my $dashboard  = Thruk::Utils::read_data_file($file);
     $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
-    my $permission = $self->_is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
     return unless $permission >= ACCESS_READONLY;
     if($permission == ACCESS_READONLY) {
         $dashboard->{'readonly'} = 1;
@@ -2574,7 +2562,7 @@ sub _load_dashboard {
     }
 
     if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
-    if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = $self->_get_default_tab_xdata($c) }
+    if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = _get_default_tab_xdata($c) }
     $dashboard->{'tab'}->{'xdata'}->{'owner'} = $dashboard->{'user'};
     return $dashboard;
 }
@@ -2586,16 +2574,16 @@ sub _load_dashboard {
 #     2        private dashboard, readwrite access
 #     3        private dashboard, owner/admin access
 sub _is_authorized_for_dashboard {
-    my($self, $c, $nr, $dashboard) = @_;
+    my($c, $nr, $dashboard) = @_;
     $nr =~ s/^tabpan-tab_//gmx;
-    my $file = $self->{'var'}.'/'.$nr.'.tab';
+    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
     # super user have permission for all reports
     return ACCESS_OWNER if $c->stash->{'is_admin'};
 
     # does that dashboard already exist?
     if(-s $file) {
-        $dashboard = $self->_load_dashboard($c, $nr) unless $dashboard;
+        $dashboard = _load_dashboard($c, $nr) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
             return ACCESS_READONLY if $c->stash->{'readonly'};
             return ACCESS_OWNER;
@@ -2621,7 +2609,7 @@ sub _is_authorized_for_dashboard {
 
 ##########################################################
 sub _merge_dashboard_into_hash {
-    my($self, $dashboard, $data) = @_;
+    my($dashboard, $data) = @_;
     return $data unless $dashboard;
 
     my $id = $dashboard->{'id'};
@@ -2644,9 +2632,9 @@ sub _merge_dashboard_into_hash {
 
 ##########################################################
 sub _get_default_tab_xdata {
-    my($self, $c) = @_;
+    my($c) = @_;
     return({
-        title           => $c->request->parameters->{'title'} || 'Dashboard',
+        title           => $c->req->parameters->{'title'} || 'Dashboard',
         refresh         => $c->config->{'cgi_cfg'}->{'refresh_rate'} || 60,
         select_backends => 0,
         backends        => [],
@@ -2659,34 +2647,34 @@ sub _get_default_tab_xdata {
 
 ##########################################################
 sub _add_json_dashboard_timestamps {
-    my($self, $c) = @_;
+    my($c, $json) = @_;
     my $data = Thruk::Utils::get_user_data($c);
     if($data && $data->{'panorama'} && $data->{'panorama'}->{'dashboards'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'} && $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'}) {
-        $c->stash->{'json'}->{'dashboard_ts'} = {};
+        $json->{'dashboard_ts'} = {};
         my $tab = $data->{'panorama'}->{'dashboards'}->{'tabpan'}->{'activeTab'};
         my $nr = $tab;
         $nr =~ s/^tabpan-tab_//gmx;
-        my $file  = $self->{'var'}.'/'.$nr.'.tab';
+        my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
         my @stat = stat($file);
-        $c->stash->{'json'}->{'dashboard_ts'}->{$tab} = $stat[9];
+        $json->{'dashboard_ts'}->{$tab} = $stat[9];
     }
     return;
 }
 
 ##########################################################
 sub _add_json_pi_detail {
-    my($self, $c) = @_;
-    $c->stash->{'json'}->{'pi_detail'} = $c->stash->{pi_detail};
+    my($c, $json) = @_;
+    $json->{'pi_detail'} = $c->stash->{pi_detail};
     return;
 }
 
 ##########################################################
 sub _add_misc_details {
-    my($self, $c, $always) = @_;
-    if($always || $c->request->parameters->{'update_proc'}) {
+    my($c, $always, $json) = @_;
+    if($always || $c->req->parameters->{'update_proc'}) {
         $c->stats->profile(begin => "_add_misc_details");
-        $self->_add_json_dashboard_timestamps($c);
-        $self->_add_json_pi_detail($c);
+        _add_json_dashboard_timestamps($c, $json);
+        _add_json_pi_detail($c, $json);
         $c->stats->profile(end => "_add_misc_details");
     }
     return;
@@ -2717,7 +2705,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

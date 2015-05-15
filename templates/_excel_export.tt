@@ -36,7 +36,7 @@
       <table border="0" cellspacing="2" cellpadding="0">
         <tr>
           <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
+          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;" alt="update"></td>
         </tr>
           [% IF columns != '' %]
           <tr>
@@ -83,7 +83,7 @@
               <tr>
                 <td>
                   <span onclick="toggleElement('excel_export_url', 'excel_export_url_icon_display'); return false;" style="margin: 0 2px;" class="clickable">
-                    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="excel_export_url_icon_display" style="vertical-align: sub;">
+                    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="excel_export_url_icon_display" style="vertical-align: sub;" alt="show permanent link">
                     permanent link to this export
                   </span><br>
                   <input type="text" value="" id="excel_export_url" style="width: 99%; display: none;">

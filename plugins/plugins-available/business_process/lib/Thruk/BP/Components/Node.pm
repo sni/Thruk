@@ -299,11 +299,11 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $short_desc, $status_text, $extra) = &$function($c,
-                                                                    $bp,
-                                                                    $self,
-                                                                    $self->{'function_args'},
-                                                                    $livedata,
+        my($status, $short_desc, $status_text, $extra) = &{$function}($c,
+                                                                      $bp,
+                                                                      $self,
+                                                                      $self->{'function_args'},
+                                                                      $livedata,
                                                                     );
         $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
@@ -387,7 +387,7 @@ sub _set_function {
         my($fname, $fargs) = $data->{'function'} =~ m|^(\w+)\((.*)\)|mx;
         $fname = lc $fname;
         my $function = \&{'Thruk::BP::Functions::'.$fname};
-        if(!defined &$function) {
+        if(!defined &{$function}) {
             $self->set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
@@ -523,7 +523,7 @@ sub _get_status {
         $status = 0;
         $output = sprintf('OK - business process calculation of %d nodes complete in %.3fs|runtime=%.3fs', scalar @{$bp->{'nodes'}}, $bp->{'time'}, $bp->{'time'});
     } else {
-        if($status == 4) { $status = 0 };
+        if($status == 4) { $status = 0 }
         $string .= "### Nagios Service Check Result ###\n";
         $output = $self->{'status_text'} || $self->{'short_desc'};
         # override status text of first node to be the bps status itself

@@ -13,8 +13,7 @@ Menu Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use Data::Dumper;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 use Thruk::Utils::Filter;
 
@@ -37,10 +36,6 @@ sub read_navigation {
 
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
-    if(defined $ENV{'CATALYST_CONFIG'}) {
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
-    }
     if(defined $ENV{'THRUK_CONFIG'}) {
         $file = $ENV{'THRUK_CONFIG'}.'/menu.conf'       if -e $ENV{'THRUK_CONFIG'}.'/menu.conf';
         $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';
@@ -570,6 +565,8 @@ sub _remove_item_from_links {
 }
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

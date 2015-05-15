@@ -51,7 +51,7 @@ sub cmd {
 
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
-       or exists $c->{'request'}->{'parameters'}->{'noexternalforks'}
+       or exists $c->req->parameters->{'noexternalforks'}
     ) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         my $out = `$cmd`;
@@ -68,8 +68,9 @@ sub cmd {
     } else {
         _do_child_stuff($c, $dir, $id);
 
+        ## no critic
         $SIG{CHLD} = 'DEFAULT';
-
+        ## use critic
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
@@ -102,12 +103,11 @@ run perl expression in an external process
 
 =cut
 sub perl {
-    my $c         = shift;
-    my $conf      = shift;
+    my($c, $conf) = @_;
 
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}
-       or exists $c->{'request'}->{'parameters'}->{'noexternalforks'}
+       or exists $c->req->parameters->{'noexternalforks'}
     ) {
         if(defined $conf->{'backends'}) {
             $c->{'db'}->disable_backends();
@@ -136,6 +136,7 @@ sub perl {
         eval {
             $c->stats->profile(begin => 'External::perl');
             _do_child_stuff($c, $dir, $id);
+            local $SIG{CHLD} = 'DEFAULT';
 
             do {
                 ## no critic
@@ -160,8 +161,14 @@ sub perl {
             };
 
             # save stash
-            _clean_code_refs($c->stash);
+            _clean_unstorable_refs($c->stash);
             store(\%{$c->stash}, $dir."/stash");
+
+            if($c->config->{'thruk_debug'}) {
+                open(my $fh, '>', $dir."/stash.dump");
+                print $fh Dumper($c->stash);
+                CORE::close($fh);
+            }
 
             $c->stats->profile(end => 'External::perl');
             save_profile($c, $dir);
@@ -255,6 +262,9 @@ sub get_status {
     my($c, $id) = @_;
     confess("got no id") unless $id;
 
+    # reap pending zombies
+    POSIX::waitpid(-1, WNOHANG);
+
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
@@ -322,7 +332,7 @@ sub get_json_status {
     return unless defined $time;
 
     $remaining = -1 unless defined $remaining;
-    $c->stash->{'json'}   = {
+    my $json   = {
             'is_running' => 0+$is_running,
             'time'       => 0+$time,
             'percent'    => 0+$percent,
@@ -331,7 +341,7 @@ sub get_json_status {
             'remaining'  => 0+$remaining,
     };
 
-    return $c->forward('Thruk::View::JSON');
+    return $c->render(json => $json);
 }
 
 
@@ -370,11 +380,11 @@ sub get_result {
     my $retries = 10;
     while($retries > 0) {
         if(-f $dir."/stdout") {
-            @end = stat($dir."/stdout")
+            @end = stat($dir."/stdout");
         } elsif(-f $dir."/stderr") {
-            @end = stat($dir."/stderr")
+            @end = stat($dir."/stderr");
         } elsif(-f $dir."/rc") {
-            @end = stat($dir."/rc")
+            @end = stat($dir."/rc");
         }
         if(!defined $end[9]) {
             sleep(1);
@@ -418,8 +428,8 @@ process job result page
 sub job_page {
     my($c) = @_;
 
-    my $job  = $c->{'request'}->{'parameters'}->{'job'};
-    my $json = $c->{'request'}->{'parameters'}->{'json'} || 0;
+    my $job  = $c->req->parameters->{'job'};
+    my $json = $c->req->parameters->{'json'} || 0;
     $c->stash->{no_auto_reload} = 1;
     return $c->detach('/error/index/22') unless defined $job;
     if($json) {
@@ -445,17 +455,17 @@ sub job_page {
         $c->stash->{infoBoxTitle}          = 'please stand by';
         $c->stash->{hide_backends_chooser} = 1;
         $c->stash->{'has_jquery_ui'}       = 1;
-        $c->stash->{template}              = 'waiting_for_job.tt';
+        $c->stash->{template}             = 'waiting_for_job.tt';
     } else {
         # job finished, display result
         #my($out,$err,$time,$dir,$stash)...
         my($out,$err,undef,$dir,$stash) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
-        if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
+        if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} }
         if(defined $err and $err ne '') {
             $c->error($err);
             $c->log->error($err);
-            return $c->detach('/error/index/23')
+            return $c->detach('/error/index/23');
         }
         delete($stash->{'all_in_one_css'});
         return _finished_job_page($c, $stash, $forward, $out);
@@ -498,33 +508,11 @@ sub save_profile {
 
     my $file = $dir.'/profile.log';
     open(my $fh, '>>', $file) or die("cannot write $file: $!");
-    local $ENV{COLUMNS} = 140;
-    local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
     eval {
-        print $fh "".$c->stats->report(),"\n";
+        print $fh $c->stats->report(),"\n";
     };
     print $fh $@,"\n" if $@;
     CORE::close($fh);
-    return;
-}
-
-##############################################
-
-=head2 log_profile
-
-  log_profile($c)
-
-log profile to info channel
-
-=cut
-sub log_profile {
-    my($c) = @_;
-
-    local $ENV{COLUMNS} = 140;
-    local $SIG{__WARN__} = sub { }; # suppress useless warnings from Catalyst::Utils::term_width
-    eval {
-        $c->log->info(sprintf("Req: %03d, profile:\n%s", $Catalyst::COUNT, scalar $c->stats->report()));
-    };
     return;
 }
 
@@ -535,23 +523,23 @@ sub _do_child_stuff {
     POSIX::setsid() or die "Can't start a new session: $!";
 
     delete $ENV{'THRUK_SRC'};
+    delete $ENV{'THRUK_VERBOSE'};
     delete $ENV{'THRUK_PERFORMANCE_DEBUG'};
 
-    # don't use connection pool after forking
-    $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
-
-    # don't fork twice
-    $ENV{'NO_EXTERNAL_JOBS'}         = 1;
+    ## no critic
+    $ENV{'THRUK_NO_CONNECTION_POOL'} = 1; # don't use connection pool after forking
+    $ENV{'NO_EXTERNAL_JOBS'}         = 1; # don't fork twice
+    $ENV{'THRUK_JOB_ID'}             = $id;
+    $ENV{'THRUK_JOB_DIR'}            = $dir; # make job id available
 
     # make remote user available
-    confess('no remote_user') unless defined $c->stash->{'remote_user'};
-    $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-
-    # make job id available
-    $ENV{'THRUK_JOB_ID'}  = $id;
-    $ENV{'THRUK_JOB_DIR'} = $dir;
+    if($c) {
+        confess('no remote_user') unless defined $c->stash->{'remote_user'};
+        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+    }
 
     $|=1; # autoflush
+    ## use critic
 
     Thruk::Backend::Pool::shutdown_backend_thread_pool();
 
@@ -560,7 +548,7 @@ sub _do_child_stuff {
         POSIX::close($fd);
     }
 
-    $c->stats->enable(1);
+    $c->stats->enable(1) if $c;
 
     return;
 }
@@ -587,7 +575,7 @@ sub _do_parent_stuff {
     print $fh "\n";
 
     # write user file
-    if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
+    if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
         confess("no remote_user") unless defined $c->stash->{'remote_user'};
         open($fh, '>', $dir."/user") or die("cannot write user: $!");
         print $fh $c->stash->{'remote_user'};
@@ -613,7 +601,7 @@ sub _do_parent_stuff {
 
     $c->stash->{'job_id'} = $id;
     if(!$conf->{'background'}) {
-        return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$id);
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$id);
     }
     return $id;
 }
@@ -645,7 +633,9 @@ sub _init_external {
         }
     }
 
+    ## no critic
     $SIG{CHLD} = 'IGNORE';
+    ## use critic
 
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
@@ -691,15 +681,17 @@ sub _finished_job_page {
     my($c, $stash, $forward, $out) = @_;
     if(defined $stash and keys %{$stash} > 0) {
         $c->res->headers->header( @{$stash->{'res_header'}} ) if defined $stash->{'res_header'};
-        $c->res->content_type($stash->{'res_ctype'})          if defined $stash->{'res_ctype'};
+        $c->res->headers->content_type($stash->{'res_ctype'}) if defined $stash->{'res_ctype'};
         if(defined $stash->{'file_name'}) {
-            my $file = $stash->{job_dir}.$stash->{'file_name'};
+            # job dir can be undefined when not doing external forks
+            my $file = ($stash->{job_dir}||'').$stash->{'file_name'};
             open(my $fh, '<', $file) or die("cannot open $file: $!");
             binmode $fh;
             local $/ = undef;
             $c->res->body(<$fh>);
             Thruk::Utils::IO::close($fh, $file);
             unlink($file) if defined $c->stash->{cleanfile};
+            $c->{'rendered'} = 1;
             return;
         }
         # merge stash
@@ -710,17 +702,21 @@ sub _finished_job_page {
 
         # model?
         if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
-            my $model  = $c->model($c->stash->{model_type});
-            $model->init(@{$c->stash->{model_init}});
+            if($c->stash->{model_type} eq 'Objects') {
+                my $model = $c->app->obj_db_model;
+                $model->init(@{$c->stash->{model_init}});
+            } else {
+                confess("model not implemented: ".$c->stash->{model_init});
+            }
         }
 
         if(defined $forward) {
             $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
-            return $c->response->redirect($forward);
+            return $c->redirect_to($forward);
         }
 
         if(defined $c->stash->{json}) {
-            $c->forward('Thruk::View::JSON');
+            return $c->render(json => $c->stash->{json});
         }
 
         return;
@@ -731,10 +727,13 @@ sub _finished_job_page {
 }
 
 ##############################################
-sub _clean_code_refs {
-    my $var = shift;
+sub _clean_unstorable_refs {
+    my($var) = @_;
     for my $key (keys %{$var}) {
-        delete $var->{$key} if ref $var->{$key} eq 'CODE';
+        my $ref = ref $var->{$key};
+        if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
+            delete $var->{$key};
+        }
     }
     return $var;
 }
@@ -752,6 +751,8 @@ sub _reconnect {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

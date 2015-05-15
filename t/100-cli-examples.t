@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    plan skip_all => 'local tests only'  if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if !-s 'thruk_local.conf';
 }
 

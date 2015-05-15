@@ -2,45 +2,29 @@ package Thruk::Controller::login;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::login - Catalyst Controller
+Thruk::Controller::login - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
-=head2 login_cgi
-
-page: /thruk/cgi-bin/login.cgi
+=head2 index
 
 =cut
+sub index {
+    my ( $c ) = @_;
 
-sub login_cgi : Path('/thruk/cgi-bin/login.cgi') {
-    my( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
+    $c->stats->profile(begin => "login::index");
 
     if(!$c->config->{'login_modules_loaded'}) {
         require Thruk::Utils::CookieAuth;
         $c->config->{'login_modules_loaded'} = 1;
     }
-
-    return $c->detach('/login/index');
-}
-
-##########################################################
-
-=head2 index
-
-=cut
-sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
-
-    $c->stats->profile(begin => "login::index");
 
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'theme'}          = $c->config->{'default_theme'} unless defined $c->stash->{'theme'};
@@ -53,13 +37,13 @@ sub index :Path :Args(0) {
     my $sdir        = $c->config->{'var_path'}.'/sessions';
     Thruk::Utils::IO::mkdir($sdir);
 
-    my $keywords = $c->req->query_keywords;
+    my $keywords = $c->req->uri->query;
     my $logoutref;
     if($keywords and $keywords =~ m/^logout(\/.*)/mx) {
         $keywords = 'logout';
         $logoutref = $1;
     }
-    if($c->req->uri =~ m/\/\Q$product_prefix\E\/cgi\-bin\/login\.cgi\?logout(\/.*)/mx) {
+    if($c->req->url =~ m/\/\Q$product_prefix\E\/cgi\-bin\/login\.cgi\?logout(\/.*)/mx) {
         $keywords = 'logout';
         $logoutref = $1;
     }
@@ -67,8 +51,8 @@ sub index :Path :Args(0) {
         if($keywords eq 'logout') {
             _invalidate_current_session($c, $cookie_path, $sdir);
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
-            return $c->response->redirect($logoutref) if $logoutref;
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
+            return $c->redirect_to($logoutref) if $logoutref;
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
 
         if($keywords eq 'nocookie') {
@@ -88,10 +72,10 @@ sub index :Path :Args(0) {
         }
     }
 
-    my $login   = $c->request->parameters->{'login'}    || '';
-    my $pass    = $c->request->parameters->{'password'} || '';
-    my $submit  = $c->request->parameters->{'submit'}   || '';
-    my $referer = $c->request->parameters->{'referer'}  || '';
+    my $login   = $c->req->parameters->{'login'}    || '';
+    my $pass    = $c->req->parameters->{'password'} || '';
+    my $submit  = $c->req->parameters->{'submit'}   || '';
+    my $referer = $c->req->parameters->{'referer'}  || '';
     $referer    =~ s#^//#/#gmx;         # strip double slashes
     $referer    =~ s#.*/nocookie$##gmx; # strip nocookie
     $referer    = $c->stash->{'url_prefix'} unless $referer;
@@ -111,55 +95,57 @@ sub index :Path :Args(0) {
     $login      = lc($login) if $c->config->{'make_auth_user_lowercase'};
 
     if($submit ne '' || $login ne '') {
-        my $testcookie = $c->request->cookie('thruk_test');
-        $c->res->cookies->{'thruk_test'} = {
-            value   => '',
-            expires => '-1M',
+        my $testcookie = $c->cookie('thruk_test');
+        $c->cookie('thruk_test' => '', {
+            expires => 0,
             path    => $cookie_path,
             domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-        };
-        if(   (!defined $testcookie or !$testcookie->value)
-           && (!defined $c->{'request'}->{'headers'}->{'user-agent'} or $c->{'request'}->{'headers'}->{'user-agent'} !~ m/wget/mix)) {
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
+        });
+        if(   (!defined $testcookie || !$testcookie->value)
+           && (!defined $c->req->header('user-agent') || $c->req->header('user-agent') !~ m/wget/mix)) {
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?nocookie");
         } else {
             $c->stats->profile(begin => "login::external_authentication");
-            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'}, $c->stats);
+            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->address, $c->stats);
             $c->stats->profile(end => "login::external_authentication");
             if($success eq '-1') {
-                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
+                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
             }
             elsif($success) {
-                $c->res->cookies->{'thruk_auth'} = {
-                    value   => $success,
+                $c->cookie('thruk_auth' => $success, {
                     path    => $cookie_path,
                     domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-                };
+                });
                 # call a script hook after successful login?
                 if($c->config->{'cookie_auth_login_hook'}) {
                     my $cookie_hook = 'REMOTE_USER="'.$login.'" '.$c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1 &';
                     `$cookie_hook`;
                 }
-                return $c->response->redirect($referer);
+                return $c->redirect_to($referer);
             } else {
-                $c->log->info("login failed for $login on $referer");
+                $c->log->info(sprintf("login failed for %s on %s from %s%s",
+                                        $login,
+                                        $referer,
+                                        $c->req->address,
+                                       ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
+                              ));
                 Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
-                return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
+                return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
             }
         }
     }
     else {
-        # clean up in background
-        $c->run_after_request('Thruk::Utils::CookieAuth::clean_session_files($c->config)');
+        # clean up
+        Thruk::Utils::CookieAuth::clean_session_files($c->config);
     }
 
     Thruk::Utils::ssi_include($c, 'login');
 
     # set test cookie
-    $c->res->cookies->{'thruk_test'} = {
-        value   => '****',
+    $c->cookie('thruk_test' => '****', {
         path    => $cookie_path,
         domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-    };
+    });
 
     $c->stats->profile(end => "login::index");
 
@@ -169,13 +155,12 @@ sub index :Path :Args(0) {
 ##########################################################
 sub _invalidate_current_session {
     my($c, $cookie_path, $sdir) = @_;
-    my $cookie = $c->request->cookie('thruk_auth');
-    $c->res->cookies->{'thruk_auth'} = {
-        value   => '',
-        expires => '-1M',
+    my $cookie = $c->cookie('thruk_auth');
+    $c->cookie('thruk_auth' => '', {
+        expires => 0,
         path    => $cookie_path,
         domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
-    };
+    });
     if(defined $cookie and defined $cookie->value) {
         my $sessionid = $cookie->value;
         if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
@@ -197,7 +182,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

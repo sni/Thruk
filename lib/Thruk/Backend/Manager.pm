@@ -187,7 +187,6 @@ returns peer by name
 sub get_peer_by_name {
     my($self, $name) = @_;
     return $self->{'by_name'}->{$name};
-    return;
 }
 
 ##########################################################
@@ -361,16 +360,14 @@ sub get_scheduling_queue {
 
     my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                            { 'check_options' => { '!=' => '0' }}]
-                                                 }
-                                                 ]
+                                                            { 'check_options' => { '!=' => '0' }}],
+                                                 }],
                                       );
     my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                         { 'check_options' => { '!=' => '0' }}]
-                                              }
-                                              ],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } }
+                                                         { 'check_options' => { '!=' => '0' }}],
+                                              }],
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } },
                                     );
 
     my $queue = [];
@@ -396,11 +393,10 @@ wrapper around get_performance_stats
 =cut
 
 sub get_performance_stats {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_performance_stats', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_performance_stats', \@args );
 }
 
 ########################################
@@ -414,11 +410,10 @@ wrapper around get_hosts
 =cut
 
 sub get_hosts {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_hosts', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_hosts', \@args );
 }
 
 ########################################
@@ -432,11 +427,10 @@ wrapper around get_services
 =cut
 
 sub get_services {
-    my $self = shift;
+    my($self, @args) = @_;
     # inject last_program_starts
-    my $args = \@_;
-    push @{$args}, ('last_program_starts', $self->{'last_program_starts'});
-    return $self->_do_on_peers('get_services', \@_ );
+    push @args, ('last_program_starts', $self->{'last_program_starts'});
+    return $self->_do_on_peers('get_services', \@args );
 }
 
 ########################################
@@ -481,9 +475,9 @@ respect permissions
 =cut
 
 sub get_hostgroup_names_from_hosts {
-    my $self = shift; # keep this
-    if(scalar @_ == 0) { return $self->get_hostgroup_names(); }
-    my $hosts = $self->get_hosts( @_, 'columns', ['groups'] );
+    my($self, @args) = @_;
+    if(scalar @args == 0) { return $self->get_hostgroup_names(); }
+    my $hosts = $self->get_hosts( @args, 'columns', ['groups'] );
     my $groups = {};
     for my $host (@{$hosts}) {
         for my $group (@{$host->{'groups'}}) {
@@ -506,9 +500,9 @@ respect permissions
 =cut
 
 sub get_servicegroup_names_from_services {
-    my $self = shift; # keep this
-    if(scalar @_ == 0) { return $self->get_servicegroup_names(); }
-    my $services = $self->get_services( @_, 'columns', ['groups'] );
+    my($self, @args) = @_;
+    if(scalar @args == 0) { return $self->get_servicegroup_names(); }
+    my $services = $self->get_services( @args, 'columns', ['groups'] );
     my $groups = {};
     for my $service (@{$services}) {
         for my $group (@{$service->{'groups'}}) {
@@ -530,10 +524,10 @@ runs reconnect on all peers
 =cut
 
 sub reconnect {
-    my $self = shift; # keep this
+    my($self, @args) = @_;
     my $c = $Thruk::Backend::Manager::c;
     eval {
-        $self->_do_on_peers( 'reconnect', \@_);
+        $self->_do_on_peers( 'reconnect', \@args);
     };
     $c->log->debug($@) if $@;
     return 1;
@@ -575,7 +569,7 @@ sub expand_command {
     my($name, @com_args) = split(/(?<!\\)!/mx, $command_name, 255);
 
     # it is possible to define hosts without a command
-    if(!defined $name or $name =~ m/^\s*$/mx) {
+    if(!defined $name || $name =~ m/^\s*$/mx) {
         my $return = {
             'line'          => 'no command defined',
             'line_expanded' => '',
@@ -627,7 +621,7 @@ enables/disables remote backends based on a state from local instances
 
 sub set_backend_state_from_local_connections {
     my( $self, $disabled, $safe, $cached_data ) = @_;
-    $safe = 0 unless defined $safe;
+    $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
     my $c = $Thruk::Backend::Manager::c;
 
@@ -657,7 +651,7 @@ sub set_backend_state_from_local_connections {
 
         eval {
             my $data;
-            if($safe == 2) {
+            if($safe == Thruk::ADD_CACHED_DEFAULTS) {
                 $data = $cached_data->{'local_states'};
             }
             $data = $self->_do_on_peers( "get_hosts", $options ) unless defined $data;
@@ -726,21 +720,20 @@ sub logcache_stats {
     my($self, $c, $with_dates) = @_;
     return unless defined $c->config->{'logcache'};
 
-    my $type = 'mongodb';
+    my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
     my(@stats);
     if($type eq 'mysql') {
         @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
     } else {
-        @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        die("unknown type: ".$type);
     }
     my $stats = Thruk::Utils::array2hash(\@stats, 'key');
 
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my $table = $type eq 'mongodb' ? 'logs_'.$key : undef;
-            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end('collection' => $table)};
+            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end()};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
         }
@@ -790,13 +783,13 @@ update the logcache (internal sub)
 =cut
 
 sub _renew_logcache {
-    my $self = shift;
-    my($c, $noforks) = @_;
+    my($self, @args) = @_;
+    my($c, $noforks) = @args;
 
     # check if this is the first import at all
     # and do a external import in that case
     #my($get_results_for, $arg_array, $arg_hash)...
-    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@_);
+    my($get_results_for, undef, undef) = $self->select_backends('renew_logcache', \@args);
     my $check = 0;
     $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
     for my $key (@{$get_results_for}) {
@@ -808,7 +801,7 @@ sub _renew_logcache {
 
     if($check) {
         $c->stash->{'backends'} = $get_results_for;
-        my $type = 'mongodb';
+        my $type = '';
         $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
         my $stats = $self->logcache_stats($c);
         my $backends2import = [];
@@ -818,12 +811,12 @@ sub _renew_logcache {
         if(scalar @{$backends2import} > 0) {
             return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
                                                       message   => 'please stand by while your initial logfile cache will be created...',
-                                                      forward   => $c->request->uri(),
+                                                      forward   => $c->req->url,
                                                       backends  => $backends2import,
                                                       nofork    => $noforks,
                                                     });
         }
-        $self->_do_on_peers( 'renew_logcache', \@_, 1);
+        $self->_do_on_peers( 'renew_logcache', \@args, 1);
     }
     return;
 }
@@ -985,7 +978,7 @@ sub _get_replaced_string {
             if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
                 my $replacement = $macros->{$block};
                 $replacement    = '' unless defined $replacement;
-                if(!$skip_args and $block =~ m/\$ARG\d+\$$/mx) {
+                if(!$skip_args && $block =~ m/\$ARG\d+\$$/mx) {
                     my $sub_rc;
                     ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
                     $rc = 0 unless $sub_rc;
@@ -1134,7 +1127,7 @@ sub _do_on_peers {
     $c->stash->{'num_selected_backends'} = $selected_backends;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     #&timing_breakpoint('_get_result: '.$function);
-    if(!defined $result and $selected_backends != 0) {
+    if(!defined $result && $selected_backends != 0) {
         # we don't need a full stacktrace for known errors
         my $err = $@; # only set if there is exact one backend
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
@@ -1292,13 +1285,13 @@ sub select_backends {
             delete $arg{'pager'};
             if($c->stash->{'use_pager'}) {
                 $arg{'pager'} = {
-                    entries  => $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'},
-                    page     => $c->{'request'}->{'parameters'}->{'page'} || 1,
-                    next     => exists $c->{'request'}->{'parameters'}->{'next'}      || $c->{'request'}->{'parameters'}->{'next.x'},
-                    previous => exists $c->{'request'}->{'parameters'}->{'previous'}  || $c->{'request'}->{'parameters'}->{'previous.x'},
-                    first    => exists $c->{'request'}->{'parameters'}->{'first'}     || $c->{'request'}->{'parameters'}->{'first.x'},
-                    last     => exists $c->{'request'}->{'parameters'}->{'last'}      || $c->{'request'}->{'parameters'}->{'last.x'},
-                    pages    => $c->{'request'}->{'parameters'}->{'total_pages'}      || '',
+                    entries  => $c->req->parameters->{'entries'} || $c->stash->{'default_page_size'},
+                    page     => $c->req->parameters->{'page'} || 1,
+                    next     => exists $c->req->parameters->{'next'}      || $c->req->parameters->{'next.x'},
+                    previous => exists $c->req->parameters->{'previous'}  || $c->req->parameters->{'previous.x'},
+                    first    => exists $c->req->parameters->{'first'}     || $c->req->parameters->{'first.x'},
+                    last     => exists $c->req->parameters->{'last'}      || $c->req->parameters->{'last.x'},
+                    pages    => $c->req->parameters->{'total_pages'}      || '',
                 };
             } else {
                 $arg{'pager'} = {};
@@ -1306,7 +1299,7 @@ sub select_backends {
         }
 
         # no paging except on html pages
-        my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+        my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
         if($view_mode ne 'html') {
             delete $arg{'pager'};
             delete $c->stash->{'use_pager'};
@@ -1395,7 +1388,7 @@ sub _get_result_serial {
         my $res = shift @res;
         my($typ, $size, $data, $last_error) = @{$res};
         chomp($last_error) if $last_error;
-        if(!$last_error and defined $size) {
+        if(!$last_error && defined $size) {
             $totalsize += $size;
             $type       = $typ;
             $result->{ $key } = $data;
@@ -1448,7 +1441,7 @@ sub _get_result_parallel {
         my $peer = $self->get_peer_by_key($key);
         $c->stash->{'failed_backends'}->{$key} = $last_error if $last_error;
         $peer->{'last_error'} = $last_error;
-        if(!$last_error and defined $size) {
+        if(!$last_error && defined $size) {
             $totalsize += $size;
             $type       = $typ;
             $result->{$key} = $data;
@@ -1611,7 +1604,7 @@ sub _get_results_xs_pool {
                 }
             }
             # sort our arrays
-            if((!$type or $type ne 'sorted') and scalar @{$sortkeys} > 0) {
+            if((!$type || $type ne 'sorted') && scalar @{$sortkeys} > 0) {
                 $post_process->{'results'} = _sort_nr($post_process->{'results'}, $sortkeys);
             }
             # apply limit
@@ -1709,12 +1702,12 @@ sub _page_data {
 
     # set some defaults
     $c->stash->{'pager'} = "";
-    $c->stash->{'data'}  = $data;
+    $c->stash->{'data'} = $data;
 
     # page only in html mode
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    my $entries = $c->req->parameters->{'entries'} || $default_result_size;
     return $data unless defined $entries;
     $c->stash->{'entries_per_page'} = $entries;
 
@@ -1724,7 +1717,7 @@ sub _page_data {
         return $data;
     }
 
-    my $pager = new Data::Page;
+    my $pager = Data::Page->new;
     if(defined $totalsize) {
         $pager->total_entries( $totalsize );
     } else {
@@ -1742,13 +1735,13 @@ sub _page_data {
 
     my $page = 1;
     # current page set by get parameter
-    if(defined $c->{'request'}->{'parameters'}->{'page'}) {
-        $page = $c->{'request'}->{'parameters'}->{'page'};
+    if(defined $c->req->parameters->{'page'}) {
+        $page = $c->req->parameters->{'page'};
     }
     # current page set by jump anchor
-    elsif(defined $c->{'request'}->{'parameters'}->{'jump'}) {
+    elsif(defined $c->req->parameters->{'jump'}) {
         my $nr = 0;
-        my $jump = $c->{'request'}->{'parameters'}->{'jump'};
+        my $jump = $c->req->parameters->{'jump'};
         if(exists $data->[0]->{'description'}) {
             for my $row (@{$data}) {
                 $nr++;
@@ -1770,20 +1763,20 @@ sub _page_data {
     }
 
     # last/first/prev or next button pressed?
-    if(   exists $c->{'request'}->{'parameters'}->{'next'}
-       or exists $c->{'request'}->{'parameters'}->{'next.x'} ) {
+    if(   exists $c->req->parameters->{'next'}
+       or exists $c->req->parameters->{'next.x'} ) {
         $page++;
     }
-    elsif (   exists $c->{'request'}->{'parameters'}->{'previous'}
-           or exists $c->{'request'}->{'parameters'}->{'previous.x'} ) {
+    elsif (   exists $c->req->parameters->{'previous'}
+           or exists $c->req->parameters->{'previous.x'} ) {
         $page-- if $page > 1;
     }
-    elsif (    exists $c->{'request'}->{'parameters'}->{'first'}
-            or exists $c->{'request'}->{'parameters'}->{'first.x'} ) {
+    elsif (    exists $c->req->parameters->{'first'}
+            or exists $c->req->parameters->{'first.x'} ) {
         $page = 1;
     }
-    elsif (    exists $c->{'request'}->{'parameters'}->{'last'}
-            or exists $c->{'request'}->{'parameters'}->{'last.x'} ) {
+    elsif (    exists $c->req->parameters->{'last'}
+            or exists $c->req->parameters->{'last.x'} ) {
         $page = $pages;
     }
 
@@ -2145,9 +2138,9 @@ sub _sort {
     $order = "ASC" if !defined $order;
 
     if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
-    if(!defined $data or scalar @{$data} == 0) {
+    if(!defined $data || scalar @{$data} == 0) {
         $c->stats->profile( end => "_sort()" ) if $c;
-        return \@sorted
+        return \@sorted;
     }
 
     my @keys;
@@ -2316,7 +2309,7 @@ sub _set_user_macros {
     if(defined $args->{'file'}) {
         $res = Thruk::Utils::read_resource_file($args->{'file'});
     }
-    if(!defined $res and defined $args->{'peer_key'}) {
+    if(!defined $res && defined $args->{'peer_key'}) {
         my $backend = $self->get_peer_by_key($args->{'peer_key'});
         if(defined $backend->{'resource_file'}) {
             $res = Thruk::Utils::read_resource_file($backend->{'resource_file'});

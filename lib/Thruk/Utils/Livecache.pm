@@ -15,6 +15,7 @@ use warnings;
 use utf8;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
+use Thruk::Utils::External;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 ##########################################################
@@ -35,7 +36,7 @@ sub check_shadow_naemon_procs {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
         next unless $peer->{'cacheproxy'};
         # faster check if nothing failed
-        next if(!$force and $c and !$c->stash->{'failed_backends'}->{$key});
+        next if(!$force && $c && !$c->stash->{'failed_backends'}->{$key});
         my $basedir = $config->{'shadow_naemon_dir'}.'/'.$key;
         my $pidfile = $basedir.'/tmp/shadownaemon.pid';
         my $started = 0;
@@ -57,14 +58,14 @@ sub check_shadow_naemon_procs {
 
 =head2 restart_shadow_naemon_procs
 
-  restart_shadow_naemon_procs($config)
+  restart_shadow_naemon_procs($c, $config)
 
 restart all shadownaemon processes sequentially
 
 =cut
 
 sub restart_shadow_naemon_procs {
-    my($config) = @_;
+    my($c, $config) = @_;
     return unless $config->{'shadow_naemon_dir'};
     for my $key (keys %{$Thruk::Backend::Pool::peers}) {
         my $peer    = $Thruk::Backend::Pool::peers->{$key};
@@ -82,7 +83,7 @@ sub restart_shadow_naemon_procs {
             }
             #&timing_breakpoint("stopped");
         }
-        _start_shadownaemon_for_peer($config, $peer, $key, $basedir);
+        _start_shadownaemon_for_peer($config, $peer, $key, $basedir, $c);
         #&timing_breakpoint("started");
     }
     return;
@@ -143,10 +144,48 @@ sub shutdown_shadow_naemon_procs {
     return;
 }
 
+########################################
+
+=head2 check_initial_start
+
+  check_initial_start($c, $config)
+
+do the initial start unless it has been started already or isn't used at all
+
+=cut
+sub check_initial_start {
+    my($c, $config, $background) = @_;
+    return if(!$config->{'use_shadow_naemon'} || $config->{'_shadow_naemon_started'});
+    return if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'FastCGI' && $ENV{'THRUK_SRC'} ne 'DebugServer'));
+
+    #&timing_breakpoint("livecache check_initial_start");
+
+    if($background) {
+        my $pid = fork();
+        if($pid) {
+            $config->{'_shadow_naemon_started'} = 1;
+        } else {
+            Thruk::Utils::External::_do_child_stuff();
+            check_shadow_naemon_procs($config, $c, 0, 1);
+            exit;
+        }
+    } else {
+        check_shadow_naemon_procs($config, $c, 0, 1);
+    }
+
+    #&timing_breakpoint("livecache check_initial_start done");
+
+    return;
+}
+
+
+
 ##############################################
 sub _start_shadownaemon_for_peer {
     my($config, $peer, $key, $basedir, $c, $log_missing) = @_;
     Thruk::Utils::IO::mkdir_r($basedir.'/tmp');
+    #&timing_breakpoint("_start_shadownaemon_for_peer $key");
+
     $c->log->error(sprintf("shadownaemon %s for peer %s (%s) crashed, restarting...", $peer->{'name'}, $key, ($peer->{'config'}->{'options'}->{'fallback_peer'} || $peer->{'config'}->{'options'}->{'peer'}))) if $log_missing;
     my $cmd = [
             ($config->{'shadow_naemon_bin'} || 'shadownaemon'),
@@ -162,6 +201,7 @@ sub _start_shadownaemon_for_peer {
     # starting in background is not faster here since the daemon immediatly backgrounds
     my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
     $c->log->error(sprintf('starting shadownaemon failed with rc %d: %s', $rc, $output)) if $rc != 0;
+    #&timing_breakpoint("_start_shadownaemon_for_peer $key done");
     return;
 }
 
@@ -169,6 +209,8 @@ sub _start_shadownaemon_for_peer {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

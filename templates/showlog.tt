@@ -16,7 +16,7 @@
               <table border="0" cellspacing="2" cellpadding="0">
                 <tr>
                   <td align="left" class='filterTitle'>Display Filters:</td>
-                  <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update"></td>
+                  <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" alt="update"></td>
                 </tr>
                 <tr>
                   <td align="left" class='filterName'>Search Pattern:</td>

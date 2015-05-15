@@ -5,7 +5,7 @@ use JSON::XS;
 use Encode qw/encode_utf8/;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan tests => 437;
 }
 
@@ -16,7 +16,7 @@ BEGIN {
 }
 
 SKIP: {
-    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
     use_ok 'Thruk::Controller::panorama';
 };
@@ -27,7 +27,7 @@ my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 my($host,$service) = TestUtils::get_test_service();
 
-my $config   = Thruk::Backend::Pool::get_config();
+my $config   = Thruk::Config::get_config();
 my $var_path = $config->{'var_path'};
 
 #################################################
@@ -178,7 +178,7 @@ sub _test_json_page {
     }
     delete $subs->{$url->{'url'}};
     $url->{'post'}         = {} unless $url->{'post'};
-    $url->{'content_type'} = 'application/json; charset=utf-8' unless $url->{'content_type'};
+    $url->{'content_type'} = 'application/json;charset=UTF-8' unless $url->{'content_type'};
 
     $url = _set_dynamic_url_parts($url);
 

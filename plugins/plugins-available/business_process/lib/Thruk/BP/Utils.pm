@@ -6,10 +6,9 @@ use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
 use File::Slurp qw/read_file/;
-use Thruk::BP::Components::BP;
-
 use Carp;
-use Config::General;
+
+use Thruk::BP::Components::BP;
 
 =head1 NAME
 
@@ -205,7 +204,7 @@ sub save_bp_objects {
     if($new_hex ne $old_hex) {
         if(!move($filename, $file)) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'move '.$filename.' to '.$file.' failed: '.$! });
-            return $c->response->redirect($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         # and reload
         my $time = time();
@@ -425,12 +424,12 @@ return string with joined args
 sub join_args {
     my($args) = @_;
     my @arg;
-    for my $a (@{$args}) {
-        $a = '' unless defined $a;
-        if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
-            push @arg, $a;
+    for my $e (@{$args}) {
+        $e = '' unless defined $e;
+        if($e =~ m/^(\d+|\d+\.\d+)$/mx) {
+            push @arg, $e;
         } else {
-            push @arg, "'".$a."'";
+            push @arg, "'".$e."'";
         }
     }
     return(join(', ', @arg));

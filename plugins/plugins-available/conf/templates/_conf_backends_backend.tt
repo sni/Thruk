@@ -5,7 +5,7 @@
     <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;" placeholder="connection name">
   </td>
   <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
-    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete">
+    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove">
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">

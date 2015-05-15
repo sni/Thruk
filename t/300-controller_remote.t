@@ -6,6 +6,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
+    $ENV{'THRUK_TEST_NO_LOG'} = 1;
 }
 BEGIN { use_ok 'Thruk::Controller::remote' }
 
@@ -23,7 +24,7 @@ TestUtils::test_page(
 
 TestUtils::test_page(
     'url'          => '/thruk/cgi-bin/remote.cgi?compile',
-    'like'         => '\d+ templates precompiled in \d+\.\d+s',
+    'like'         => '(already compiled|\d+ templates precompiled in \d+\.\d+s)',
     'skip_doctype' => 1,
 );
 

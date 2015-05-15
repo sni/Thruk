@@ -21,8 +21,9 @@ unlink('.author');
 
 #################################################
 # run tests
-print("| Branch        | Startup | Static HTML       | Tactical CGI      | Status CGI        | JSON CGI          | Business P. CGI   | Memory                | LOAD  |\n");
-print("+---------------+---------+-------------------+-------------------+-------------------+-------------------+-------------------+-----------------------+-------+\n");
+print("+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
+print("| Branch        | Startup | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  |\n");
+print("+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
 chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
 $branch =~ s|^\*\s+||mx;
 my $tags = [];
@@ -39,6 +40,7 @@ END {
     cleanup();
     switch_tag($branch);
     `touch .author` if $author;
+    print "\n";
 }
 $SIG{'INT'}  = sub {
     cleanup();
@@ -53,11 +55,11 @@ for my $tag (@{$tags}) {
     $tag =~ s|^\*\s+||gmx;
     if($tag =~ /^v/mx) {
         # get latest sp for this tag
-        $tag = `git tag -l | grep \$tag | tail -n 1`;
+        chomp($tag = `git tag -l 2>/dev/null | grep $tag | tail -n 1`);
     }
     test_tag($tag);
 }
-print "+---------------+---------+-------------------+-------------------+-------------------+-------------------+-------------------+-----------------------+-------+\n";
+print "+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n";
 cleanup();
 exit;
 
@@ -74,17 +76,18 @@ sub test_page {
     my($name, $url) = @_;
     our $currenttag;
     sleep $DELAY;
-    my $pageres  = `ab -c $CONCURRENCY -n $REQUESTS $url 2>&1`;
+    my $cmd      = "ab -l -c $CONCURRENCY -n $REQUESTS $url 2>&1";
+    my $pageres  = `$cmd`;
     my($page)    = $pageres =~ m/\QRequests per second:\E\s+([\d\.]+)/mx;
     my($pageerr) = $pageres =~ m/\QNon-2xx responses:\E|\QFailed requests:\E\s+([\d\.]+)/mx;
     if($pageerr && $pageerr >= 5) {
         printf "errored           | ";
         if($currenttag !~ m/^v/mx) {
-            printf(STDERR "\n**********\n%s\n**********\n", $pageres);
+            printf(STDERR "\n**********\n%s\n\ncmd: %s\n**********\n", $pageres, $cmd);
             exit;
         }
     } else {
-        printf("%6s #/sec      | ", $page);
+        printf("%6s #/sec    | ", $page);
     }
 }
 
@@ -92,7 +95,7 @@ sub test_page {
 sub switch_tag {
     my($tag) = @_;
     die("no tag") unless $tag;
-    my $git = `git checkout $tag 2>&1`;
+    my $git = `git checkout -q $tag 2>&1`;
     if($git =~ /error:/) {
         printf("\n| %s", $git);
         exit;
@@ -123,11 +126,11 @@ sub test_tag {
     test_page('main',   "$BASEURL/changes.html");
     test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
     test_page('status', "$BASEURL/cgi-bin/status.cgi");
-    my $mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`;
+    chomp(my $mem  = `cat /proc/$pid/status | grep VmRSS:  | awk '{print \$2}'`);
     test_page('json',   "$BASEURL/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=json");
     test_page('bp',     "$BASEURL/cgi-bin/bp.cgi");
-    my $max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`;
-    my $load = `cat /proc/loadavg | awk '{ print \$1 }'`;
+    chomp(my $max  = `cat /proc/$pid/status | grep VmPeak: | awk '{print \$2}'`);
+    chomp(my $load = `cat /proc/loadavg | awk '{ print \$1 }'`);
 
     kill('TERM', $pid);
     printf(" %3d MB (max. %4dMB) | %5s |\n", $mem/1000, $max/1000, $load);

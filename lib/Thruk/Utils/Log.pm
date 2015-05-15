@@ -15,8 +15,7 @@ use strict;
 use Carp;
 use Data::Dumper qw/Dumper/;
 
-require Exporter;
-our @ISA = qw(Exporter);
+use base 'Exporter';
 our @EXPORT_OK = qw(_error _info _debug _trace);
 
 ##############################################

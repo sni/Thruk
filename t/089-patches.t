@@ -1,18 +1,17 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 plan skip_all => 'Test skipped, $ENV{NO_PATCH_TEST} was set' if $ENV{NO_PATCH_TEST};
-plan tests => 42;
+plan tests => 44;
 
 alarm(120);
 
 # create a tmp directory
 mkdir('tmppatches') or die("cannot create tmp folder: $!");
 
-my $rsync = 'rsync -av --exclude=".git" --exclude="tmppatches/" --exclude="tmp" --exclude="blib" --exclude="var" . tmppatches/.';
+my $rsync = 'rsync -av --exclude=".git" --exclude="tmppatches/" --exclude="tmp" --exclude="blib" --exclude="var" --exclude="themes" --exclude="plugins" --exclude="logs" --exclude="docs" --exclude="debian" . tmppatches/.';
 `$rsync`;
 is($?, 0, 'rsync ok: '.$rsync);
 

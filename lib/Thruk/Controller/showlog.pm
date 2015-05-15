@@ -2,37 +2,35 @@ package Thruk::Controller::showlog;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::showlog - Catalyst Controller
+Thruk::Controller::showlog - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
-
-=cut
-
 
 =head2 index
 
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
-    my ( $self, $c ) = @_;
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     my($start,$end);
     my $filter;
     my $timeframe = 86400;
 
-    my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
-    my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
-    my $param_start = $c->{'request'}->{'parameters'}->{'start'};
-    my $param_end   = $c->{'request'}->{'parameters'}->{'end'};
+    my $oldestfirst = $c->req->parameters->{'oldestfirst'} || 0;
+    my $archive     = $c->req->parameters->{'archive'}     || 0;
+    my $param_start = $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'end'};
 
     # start / end date from formular values?
     if(defined $param_start and defined $param_end) {
@@ -40,7 +38,7 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         $start = Thruk::Utils::parse_date($c, $param_start);
         $end   = Thruk::Utils::parse_date($c, $param_end);
     }
-    if(!defined $start or $start == 0 or !defined $end or $end == 0) {
+    if(!defined $start || $start == 0 || !defined $end || $end == 0) {
         # start with today 00:00
         my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
         $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
@@ -67,8 +65,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
 
 
     # additional filters set?
-    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
-    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    my $pattern         = $c->req->parameters->{'pattern'};
+    my $exclude_pattern = $c->req->parameters->{'exclude_pattern'};
     my $errors = 0;
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
         $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
@@ -79,8 +77,8 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         push @{$filter}, { message => { '!~~' => $exclude_pattern }};
     }
 
-    my $host    = $c->{'request'}->{'parameters'}->{'host'}    || '';
-    my $service = $c->{'request'}->{'parameters'}->{'service'} || '';
+    my $host    = $c->req->parameters->{'host'}    || '';
+    my $service = $c->req->parameters->{'service'} || '';
     if($service) {
         push @{$filter}, {
                 -or => [
@@ -90,9 +88,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                         ]},
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).';'.quotemeta($service).'(;|$)' }},
                         ]},
-                ]
+                ],
         };
     }
     elsif($host) {
@@ -101,9 +99,9 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
                         { host_name => $host },
                         { -and => [
                             {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }}
+                            {message => { '~~' => '(\s|;)'.quotemeta($host).'(;|$)' }},
                         ]},
-                ]
+                ],
         };
     }
     $c->stash->{'host'}    = $host;
@@ -119,10 +117,10 @@ sub index :Path :Args(0) :MyAction('AddCachedDefaults') {
         $total_filter = Thruk::Utils::combine_filter('-and', $filter);
     }
 
-    if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
-        $c->stash->{'template'}   = 'excel/logs.tt';
-        $c->stash->{'file_name'}  = 'logs.xls';
-        $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
+    if( defined $c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'xls' ) {
+        $c->stash->{'template'}    = 'excel/logs.tt';
+        $c->stash->{'file_name'}   = 'logs.xls';
+        $c->stash->{'log_filter'}  = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
                                       sort => {$order => 'time'},
                                     };
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
@@ -164,7 +162,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

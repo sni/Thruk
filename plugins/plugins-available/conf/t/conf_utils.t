@@ -7,7 +7,7 @@ use Storable qw/ dclone /;
 use File::Slurp;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan tests => 674;
 }
 
@@ -19,7 +19,7 @@ BEGIN {
 
 ###########################################################
 # load modules
-if(defined $ENV{'CATALYST_SERVER'}) {
+if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
     unshift @INC, 'plugins/plugins-available/conf/lib';
 }
 use_ok 'Monitoring::Config';

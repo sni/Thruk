@@ -4,13 +4,11 @@
 #
 use strict;
 use warnings;
-use File::Spec;
 use File::Slurp qw/read_file/;
 use Storable qw/nfreeze thaw/;
 use Test::More;
 use English qw(-no_match_vars);
 use Digest::MD5;
-use Data::Dumper;
 
 my $cachefile = $ENV{'THRUK_CRITIC_CACHE_FILE'} || '/tmp/perl-critic-cache.'.$>.'.storable';
 my $cache     = {};
@@ -37,7 +35,7 @@ sub save_cache {
 }
 $SIG{'INT'} = 'save_cache';
 
-my $rcfile = File::Spec->catfile( 't', 'perlcriticrc' );
+my $rcfile = 't/perlcriticrc';
 Test::Perl::Critic->import( -profile => $rcfile );
 if(-e $cachefile) {
     eval {

@@ -24,7 +24,6 @@ Manager of backend connections
 # use static list instead of slow module find
 $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Livestatus',
-          'Thruk::Backend::Provider::Mongodb',
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
           'Thruk::Backend::Provider::Mysql',
@@ -204,17 +203,7 @@ sub _initialise_peer {
                                                     peer_key => $self->{'key'},
                                                 });
         } else {
-            require Thruk::Backend::Provider::Mongodb;
-            if(!$config->{'deprecations_shown'}->{'mongodb_logcache'}) {
-                $Thruk::deprecations_log = [] unless defined $Thruk::deprecations_log;
-                push @{$Thruk::deprecations_log}, "*** DEPRECATED: using mongodb logcache is deprecated and will be removed in future releases.";
-                $config->{'deprecations_shown'}->{'mongodb_logcache'} = 1;
-            }
-            Thruk::Backend::Provider::Mongodb->import;
-            $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
-                                                    peer     => $logcache,
-                                                    peer_key => $self->{'key'},
-                                                });
+            die("no or unknown type in logcache connection: ".$logcache);
         }
         $self->{'class'}->{'logcache'} = $self->{'logcache'};
     }
@@ -224,17 +213,17 @@ sub _initialise_peer {
         if($ENV{'NO_SHADOW_NAEMON'}) {
             undef $use_shadow_naemon;
         }
-        elsif(defined $self->{'use_shadow'} and $self->{'use_shadow'} == 0) {
+        elsif(defined $self->{'use_shadow'} && $self->{'use_shadow'} == 0) {
             undef $use_shadow_naemon;
         }
-        elsif($self->{'local'} == 1 and (!defined $self->{'use_shadow'} or $self->{'use_shadow'} == 0)) {
+        elsif($self->{'local'} == 1 && (!defined $self->{'use_shadow'} || $self->{'use_shadow'} == 0)) {
             undef $use_shadow_naemon;
         }
-        elsif($config->{'type'} ne 'livestatus' and !$config->{'options'}->{'fallback_peer'}) {
+        elsif($config->{'type'} ne 'livestatus' && !$config->{'options'}->{'fallback_peer'}) {
             undef $use_shadow_naemon;
         }
     }
-    if($use_shadow_naemon and !$ENV{'NO_SHADOW_NAEMON'}) {
+    if($use_shadow_naemon && !$ENV{'NO_SHADOW_NAEMON'}) {
         $self->{'cacheproxy'} = Thruk::Backend::Provider::Livestatus->new({
                                                 peer      => $use_shadow_naemon.'/'.$self->{'key'}.'/live',
                                                 peer_key  => $self->{'key'},

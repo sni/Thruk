@@ -14,7 +14,7 @@ the report layout, the mail content and the required parameters for a report.
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/confess croak/;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
 use File::Slurp;
@@ -108,9 +108,9 @@ sub outages {
 
     my $c                  = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my $u                  = $c->stash->{'unavailable_states'};
-    my $host               = $c->{'request'}->{'parameters'}->{'host'};
-    my $service            = $c->{'request'}->{'parameters'}->{'service'};
-    my $only_host_services = $c->{'request'}->{'parameters'}->{'only_host_services'};
+    my $host               = $c->req->parameters->{'host'};
+    my $service            = $c->req->parameters->{'service'};
+    my $only_host_services = $c->req->parameters->{'only_host_services'};
 
     # combine outages
     my @reduced_logs;
@@ -139,8 +139,8 @@ sub outages {
         }
         # combine classes if report should contain downtimes too
         if($downtime) {
-            if(   (defined $u->{$l->{'class'}}  and !defined $u->{$l->{'class'}.'_downtime'})
-               or (!defined $u->{$l->{'class'}} and defined $u->{$l->{'class'}.'_downtime'})
+            if(   (defined $u->{$l->{'class'}}  && !defined $u->{$l->{'class'}.'_downtime'})
+               or (!defined $u->{$l->{'class'}} && defined $u->{$l->{'class'}.'_downtime'})
             ) {
                 $combined->{'class'} = $combined->{'class'}.'_downtime';
             }
@@ -223,8 +223,8 @@ set events by pattern from eventlog
 sub get_events {
     my $c             = $Thruk::Utils::Reports::Render::c or die("not initialized!");
     my($start,$end)   = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    my $pattern          = $c->{'request'}->{'parameters'}->{'pattern'};
-    my $exclude_pattern  = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    my $pattern          = $c->req->parameters->{'pattern'};
+    my $exclude_pattern  = $c->req->parameters->{'exclude_pattern'};
     die('no pattern') unless defined $pattern;
 
     my @filter;
@@ -240,7 +240,7 @@ sub get_events {
         push @filter, { message => { '!~~' => $exclude_pattern }};
     }
 
-    my $event_types = $c->{'request'}->{'parameters'}->{'event_types'};
+    my $event_types = $c->req->parameters->{'event_types'};
     # event type filter set?
     if(defined $event_types and @{$event_types} > 0) {
         my @evt_filter;
@@ -318,7 +318,7 @@ sub get_events {
     $c->{'db'}->renew_logcache($c, 1);
     my $logs = $c->{'db'}->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
 
-    if($c->{'request'}->{'parameters'}->{'reverse'}) {
+    if($c->req->parameters->{'reverse'}) {
         @{$logs} = reverse @{$logs};
     }
 
@@ -384,10 +384,10 @@ sub get_url {
     my @res = Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $sessionid });
     my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
-        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
+        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'content-type'};
         $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
-        if(defined $result->{'headers'}->{'Content-Disposition'}) {
-            my $file = $result->{'headers'}->{'Content-Disposition'};
+        if(defined $result->{'headers'}->{'content-disposition'}) {
+            my $file = $result->{'headers'}->{'content-disposition'};
             if($file =~ m/filename="(.*)"/mx) {
                 $Thruk::Utils::PDF::attachment = $1;
             }
@@ -406,7 +406,7 @@ sub get_url {
         }
         if($Thruk::Utils::PDF::ctype eq 'text/html') {
             my $include_js = 1;
-            if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
+            if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
                 $include_js = 0;
             }
             #$result->{'result'} = html_all_inclusive($c, $url, $result->{'result'}, $include_js);
@@ -475,11 +475,11 @@ return list of availability percent as json list
 sub get_availability_percents {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
 
-    my $host               = $c->{'request'}->{'parameters'}->{'host'};
-    my $service            = $c->{'request'}->{'parameters'}->{'service'};
+    my $host               = $c->req->parameters->{'host'};
+    my $service            = $c->req->parameters->{'service'};
     my $avail_data         = $c->stash->{'avail_data'};
     my $unavailable_states = $c->stash->{'unavailable_states'};
-    confess("No host in parameters:\n".    Dumper($c->{'request'}->{'parameters'})) unless defined $host;
+    confess("No host in parameters:\n".    Dumper($c->req->parameters)) unless defined $host;
     return(Thruk::Utils::Avail::get_availability_percents($avail_data, $unavailable_states, $host, $service));
 }
 
@@ -495,10 +495,12 @@ return human readable month name
 =cut
 sub get_month_name {
     my($date, $months) = @_;
-    $date =~ m/\d+\-(\d+)/mx;
-    my $nr = $1 - 1;
-    if($nr > 11) { $nr = $nr - 12; }
-    return($months->[$nr]);
+    if($date =~ m/\d+\-(\d+)/mx) {
+        my $nr = $1 - 1;
+        if($nr > 11) { $nr = $nr - 12; }
+        return($months->[$nr]);
+    }
+    confess("wrong format");
 }
 
 ##########################################################
@@ -512,8 +514,10 @@ return human readable week name
 =cut
 sub get_week_name {
     my($date, $abbr) = @_;
-    $date =~ m/\d+\-WK(\d+)/mx;
-    return($abbr.$1);
+    if($date =~ m/\d+\-WK(\d+)/mx) {
+        return($abbr.$1);
+    }
+    confess("wrong format");
 }
 
 ##########################################################
@@ -527,8 +531,10 @@ return human readable day name
 =cut
 sub get_day_name {
     my($date, $months) = @_;
-    $date =~ m/(\d+)\-(\d+)\-(\d+)/mx;
-    return(get_month_name($1.'-'.$2, $months).' '.$3);
+    if($date =~ m/(\d+)\-(\d+)\-(\d+)/mx) {
+        return(get_month_name($1.'-'.$2, $months).' '.$3);
+    }
+    confess("wrong format");
 }
 
 
@@ -585,7 +591,7 @@ dump variables to stderr
 
 =cut
 sub dump {
-    print STDERR  Dumper(@_);
+    print STDERR  Dumper(\@_);
     return "";
 }
 
@@ -783,7 +789,7 @@ sub _replace_img {
         my @res      = _read_static_content_file($baseurl, $report_base_url, $url);
         return('') if $res[0] != 200;
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
         confess("no datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$baseurl." - ".$url." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
@@ -823,7 +829,7 @@ sub _replace_css {
 sub _replace_js {
     my($baseurl, $report_base_url, $url) = @_;
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
+    if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
         return "";
     }
     if($url =~ m/excanvas\.js$/mx) {
@@ -837,12 +843,12 @@ sub _replace_js {
 
 ##############################################
 sub _replace_css_img {
-    my($baseurl, $report_base_url,$css, $a,$file,$b,$pre,$post) = @_;
+    my($baseurl, $report_base_url,$css,$aa,$file,$bb,$pre,$post) = @_;
     # static images
     $pre  = '' unless defined $pre;
     $post = '' unless defined $post;
-    $a    = '' unless defined $a;
-    $b    = '' unless defined $b;
+    $aa   = '' unless defined $aa;
+    $bb   = '' unless defined $bb;
 
     $file =~ s/\?.*$//gmx;
     $file =~ s/\#.*$//gmx;
@@ -859,7 +865,7 @@ sub _replace_css_img {
         my @res      = _read_static_content_file($css, $report_base_url, $file);
         return($pre.$post) if $res[0] != 200;
         my $data     = $res[1]->{'result'};
-        my $datatype = $res[1]->{'headers'}->{'Content-Type'} || _get_datatype($1);
+        my $datatype = $res[1]->{'headers'}->{'content-type'} || _get_datatype($1);
         confess("no datatype in ".$css." - ".$file." - ".Dumper(\@res)) unless $datatype;
         confess("wrong datatype in ".$css." - ".$file." - ".Dumper(\@res)) if $datatype =~ m|text/html|mx;
         my $text;
@@ -869,7 +875,7 @@ sub _replace_css_img {
         if($@) {
             $text = 'data:'.$datatype.";base64,".encode_base64(encode_utf8($data), '');
         }
-        return "$pre$a$text$b$post";
+        return "$pre$aa$text$bb$post";
     }
     croak("_replace_css_img($baseurl, ".($report_base_url||'').", $css) $file: unknown url format") if $ENV{'TEST_AUTHOR'};
     return($pre.$post);
@@ -901,7 +907,7 @@ sub _read_static_content_file {
         $url =~ s|^themes/||gmx;
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
         $file = $themes_dir . '/themes-enabled/' . $url;
-        if(!-e $file and defined $default) {
+        if(!-e $file && defined $default) {
             $url =~ s|^Thruk/|$default/|gmx;
             # disabled theme? try available folder
             $file = $themes_dir . '/themes-available/' . $url;
@@ -982,8 +988,8 @@ sub _absolutize_url {
     # split original baseurl in host, path and file
     if($baseurl =~ m/^(http|https):\/\/([^\/]*)(|\/|:\d+)(.*?)$/mx) {
         my $host     = $1."://".$2.$3;
-        $host        =~ s/\/$//mx;      # remove last /
         my $fullpath = $4 || '';
+        $host        =~ s/\/$//mx;      # remove last /
         $fullpath    =~ s/\?.*$//mx;
         $fullpath    =~ s/^\///mx;
         my($path,$file) = ('', '');
@@ -1010,7 +1016,6 @@ sub _absolutize_url {
     }
 
     confess("unknown url scheme in _absolutize_url('".$baseurl."', '".$link."')");
-    return;
 }
 
 ##############################################
@@ -1034,10 +1039,10 @@ sub _get_datatype {
 
 ##############################################
 sub _locale {
-    my($fmt) = shift;
+    my($fmt, @args) = @_;
     my $tr  = $Thruk::Utils::Reports::Render::locale;
     $fmt = $tr->{$fmt} || $fmt;
-    return sprintf($fmt, @_);
+    return sprintf($fmt, @args);
 }
 
 ##############################################

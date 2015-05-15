@@ -2,16 +2,15 @@ package Thruk::Controller::cmd;
 
 use strict;
 use warnings;
-use parent 'Catalyst::Controller';
 use Data::Dumper;
 
 =head1 NAME
 
-Thruk::Controller::cmd - Catalyst Controller
+Thruk::Controller::cmd - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
@@ -22,8 +21,11 @@ Catalyst Controller.
 =cut
 
 ##########################################################
-sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
-    my( $self, $c ) = @_;
+sub index {
+    my( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+
     my $errors = 0;
 
     $c->stash->{'now'}               = time();
@@ -37,17 +39,17 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 
     # fill in some defaults
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
-        $c->request->parameters->{$param} = '' unless defined $c->request->parameters->{$param};
+        $c->req->parameters->{$param} = '' unless defined $c->req->parameters->{$param};
     }
     for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
-        $c->request->parameters->{$param} = 0 unless defined $c->request->parameters->{$param};
+        $c->req->parameters->{$param} = 0 unless defined $c->req->parameters->{$param};
     }
 
-    $c->request->parameters->{com_data} =~ s/\n//gmx;
+    $c->req->parameters->{com_data} =~ s/\n//gmx;
 
     Thruk::Utils::ssi_include($c);
 
-    $c->stash->{'cmd_typ'} = $c->{'request'}->{'parameters'}->{'cmd_typ'} || '';
+    $c->stash->{'cmd_typ'} = $c->req->parameters->{'cmd_typ'} || '';
 
     # check if authorization is enabled
     if( $c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0 ) {
@@ -59,12 +61,12 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 
     # set authorization information
     my $query_options = { Slice => 1 };
-    if( defined $c->{'request'}->{'parameters'}->{'backend'} ) {
-        my $backend = $c->{'request'}->{'parameters'}->{'backend'};
+    if( defined $c->req->parameters->{'backend'} ) {
+        my $backend = $c->req->parameters->{'backend'};
         $query_options = { Slice => 1, Backend => [$backend] };
     }
 
-    $self->_set_host_service_from_down_com_ids($c);
+    _set_host_service_from_down_com_ids($c);
 
     my $host_quick_commands = {
         1  => 96,    # reschedule host check
@@ -100,60 +102,60 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
     };
 
     # did we receive a quick command from the status page?
-    my $quick_command = $c->{'request'}->{'parameters'}->{'quick_command'};
-    my $quick_confirm = $c->{'request'}->{'parameters'}->{'confirm'};
+    my $quick_command = $c->req->parameters->{'quick_command'};
+    my $quick_confirm = $c->req->parameters->{'confirm'};
     if( defined $quick_confirm and $quick_confirm eq 'no' ) {
-        $c->{'request'}->{'parameters'}->{'cmd_typ'} = 'c'.$quick_command;
-        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+        $c->req->parameters->{'cmd_typ'} = 'c'.$quick_command;
+        delete $c->req->parameters->{'cmd_mod'};
         $c->stash->{'cmd_typ'} = 'c'.$quick_command;
-        $self->_check_for_commands($c);
+        _check_for_commands($c);
     }
     elsif( defined $quick_command and $quick_command or $c->stash->{'cmd_typ'} =~ m/^c(\d+)$/mx ) {
         if(defined $1) {
             $quick_command = $1;
-            my $backends = $c->{'request'}->{'parameters'}->{'backend'};
-            if(ref $c->{'request'}->{'parameters'}->{'backend'} eq 'ARRAY') {
-                $backends = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
+            my $backends = $c->req->parameters->{'backend'};
+            if(ref $c->req->parameters->{'backend'} eq 'ARRAY') {
+                $backends = join('|', @{$c->req->parameters->{'backend'}});
             }
-            if(defined $c->{'request'}->{'parameters'}->{'service'} and $c->{'request'}->{'parameters'}->{'service'} ne '') {
-                $c->{'request'}->{'parameters'}->{'selected_services'} =
-                        $c->{'request'}->{'parameters'}->{'host'}
-                        .';'.$c->{'request'}->{'parameters'}->{'service'}
+            if(defined $c->req->parameters->{'service'} and $c->req->parameters->{'service'} ne '') {
+                $c->req->parameters->{'selected_services'} =
+                        $c->req->parameters->{'host'}
+                        .';'.$c->req->parameters->{'service'}
                         .';'.$backends;
             } else {
-                $c->{'request'}->{'parameters'}->{'selected_hosts'}    =
-                        $c->{'request'}->{'parameters'}->{'host'}
+                $c->req->parameters->{'selected_hosts'}    =
+                        $c->req->parameters->{'host'}
                         .';;'.$backends;
             }
         }
         my $cmd_typ;
-        $c->{'request'}->{'parameters'}->{'cmd_mod'}           = 2;
-        $c->{'request'}->{'parameters'}->{'trigger'}           = 0;
-        $c->{'request'}->{'parameters'}->{'selected_hosts'}    = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
-        $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
-        $c->{'request'}->{'parameters'}->{'selected_ids'}      = '' unless defined $c->{'request'}->{'parameters'}->{'selected_ids'};
-        my @hostdata    = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'};
-        my @servicedata = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'};
-        my @idsdata     = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_ids'};
-        $self->{'spread_startdates'} = $self->_generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->request->parameters->{'start_time'}, $c->request->parameters->{'spread'} );
+        $c->req->parameters->{'cmd_mod'}           = 2;
+        $c->req->parameters->{'trigger'}           = 0;
+        $c->req->parameters->{'selected_hosts'}    = '' unless defined $c->req->parameters->{'selected_hosts'};
+        $c->req->parameters->{'selected_services'} = '' unless defined $c->req->parameters->{'selected_services'};
+        $c->req->parameters->{'selected_ids'}      = '' unless defined $c->req->parameters->{'selected_ids'};
+        my @hostdata    = split /,/mx, $c->req->parameters->{'selected_hosts'};
+        my @servicedata = split /,/mx, $c->req->parameters->{'selected_services'};
+        my @idsdata     = split /,/mx, $c->req->parameters->{'selected_ids'};
+        $c->{'spread_startdates'} = _generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->req->parameters->{'start_time'}, $c->req->parameters->{'spread'} );
 
         # persistent can be set in two ways
-        if(    $c->{'request'}->{'parameters'}->{'persistent'} eq 'ack'
-           and $c->{'request'}->{'parameters'}->{'persistent_ack'}) {
-            $c->{'request'}->{'parameters'}->{'persistent'} = 1;
+        if(    $c->req->parameters->{'persistent'} eq 'ack'
+           and $c->req->parameters->{'persistent_ack'}) {
+            $c->req->parameters->{'persistent'} = 1;
         }
-        elsif(    $c->{'request'}->{'parameters'}->{'persistent'} eq 'comments'
-           and $c->{'request'}->{'parameters'}->{'persistent_comments'}) {
-            $c->{'request'}->{'parameters'}->{'persistent'} = 1;
+        elsif(    $c->req->parameters->{'persistent'} eq 'comments'
+           and $c->req->parameters->{'persistent_comments'}) {
+            $c->req->parameters->{'persistent'} = 1;
         }
         else {
-            $c->{'request'}->{'parameters'}->{'persistent'} = 0;
+            $c->req->parameters->{'persistent'} = 0;
         }
 
         # comments / downtimes quick commands
         for my $id (@idsdata) {
             my($typ, $id, $backend) = split(/_/m,$id, 3);
-            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            $c->req->parameters->{'backend'} = $backend;
             if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
@@ -163,14 +165,14 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
             else {
                 return $c->detach('/error/index/7');
             }
-            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
+            $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             if($quick_command == 5) {
-                $c->{'request'}->{'parameters'}->{'down_id'} = $id;
+                $c->req->parameters->{'down_id'} = $id;
             } elsif($quick_command == 13 ) {
-                $c->{'request'}->{'parameters'}->{'com_id'}  = $id;
+                $c->req->parameters->{'com_id'}  = $id;
             }
-            $self->_set_host_service_from_down_com_ids($c);
-            if( $self->_do_send_command($c) ) {
+            _set_host_service_from_down_com_ids($c);
+            if( _do_send_command($c) ) {
                 $c->log->debug("command succeeded");
             }
             else {
@@ -191,19 +193,19 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
             my( $host, undef, $backend ) = split /;/mx, $hostdata;
             my @backends                 = split /\|/mx, defined $backend ? $backend : '';
             $c->stash->{'lasthost'}      = $host;
-            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
-            $c->{'request'}->{'parameters'}->{'host'}    = $host;
-            $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
+            $c->req->parameters->{'cmd_typ'} = $cmd_typ;
+            $c->req->parameters->{'host'}    = $host;
+            $c->req->parameters->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                if($c->{'request'}->{'parameters'}->{'active_downtimes'}) {
-                    $self->_remove_all_downtimes( $c, $host, undef, 'active' );
+                if($c->req->parameters->{'active_downtimes'}) {
+                    _remove_all_downtimes( $c, $host, undef, 'active' );
                 }
-                if($c->{'request'}->{'parameters'}->{'future_downtimes'}) {
-                    $self->_remove_all_downtimes( $c, $host, undef, 'future' );
+                if($c->req->parameters->{'future_downtimes'}) {
+                    _remove_all_downtimes( $c, $host, undef, 'future' );
                 }
             }
             else {
-                if( $self->_do_send_command($c) ) {
+                if( _do_send_command($c) ) {
                     $c->log->debug("command for host $host succeeded");
                 }
                 else {
@@ -216,7 +218,7 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
         }
 
         # service quick commands
-        for my $servicedata ( split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'} ) {
+        for my $servicedata ( split /,/mx, $c->req->parameters->{'selected_services'} ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
             }
@@ -227,20 +229,20 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
             my @backends                    = split /\|/mx, $backend;
             $c->stash->{'lasthost'}         = $host;
             $c->stash->{'lastservice'}      = $service;
-            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
-            $c->{'request'}->{'parameters'}->{'host'}    = $host;
-            $c->{'request'}->{'parameters'}->{'service'} = $service;
-            $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
+            $c->req->parameters->{'cmd_typ'} = $cmd_typ;
+            $c->req->parameters->{'host'}    = $host;
+            $c->req->parameters->{'service'} = $service;
+            $c->req->parameters->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                if($c->{'request'}->{'parameters'}->{'active_downtimes'}) {
-                    $self->_remove_all_downtimes( $c, $host, $service, 'active' );
+                if($c->req->parameters->{'active_downtimes'}) {
+                    _remove_all_downtimes( $c, $host, $service, 'active' );
                 }
-                if($c->{'request'}->{'parameters'}->{'future_downtimes'}) {
-                    $self->_remove_all_downtimes( $c, $host, $service, 'future' );
+                if($c->req->parameters->{'future_downtimes'}) {
+                    _remove_all_downtimes( $c, $host, $service, 'future' );
                 }
             }
             else {
-                if( $self->_do_send_command($c) ) {
+                if( _do_send_command($c) ) {
                     $c->log->debug("command for $service on host $host succeeded");
                 }
                 else {
@@ -253,18 +255,18 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
         }
 
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
-        delete $c->{'request'}->{'parameters'}->{'backend'};
+        delete $c->req->parameters->{'backend'};
         _redirect_or_success( $c, -1 );
     }
 
     # normal page call
     else {
-        $self->_check_for_commands($c);
+        _check_for_commands($c);
     }
 
-    if($c->{'request'}->{'parameters'}->{'json'} and $c->stash->{'form_errors'}) {
-        $c->stash->{'json'} = {'success' => 0, errors => $c->stash->{'form_errors'} };
-        return $c->detach('Thruk::View::JSON');
+    if($c->req->parameters->{'json'} and $c->stash->{'form_errors'}) {
+        my $json = {'success' => 0, errors => $c->stash->{'form_errors'} };
+        return $c->render(json => $json);
     }
 
     return 1;
@@ -273,9 +275,9 @@ sub index : Path : Args(0) : MyAction('AddCachedDefaults') {
 ######################################
 # remove downtimes
 sub _remove_all_downtimes {
-    my( $self, $c, $host, $service, $type ) = @_;
+    my( $c, $host, $service, $type ) = @_;
 
-    my $backends = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backends = $c->req->parameters->{'backend'};
 
     # send the command
     my $options = {};
@@ -295,8 +297,8 @@ sub _remove_all_downtimes {
     my $data = $c->{'db'}->get_downtimes(%{$options});
     my @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
     for my $id ( @ids ) {
-        $c->{'request'}->{'parameters'}->{'down_id'} = $id;
-        if( $self->_do_send_command($c) ) {
+        $c->req->parameters->{'down_id'} = $id;
+        if( _do_send_command($c) ) {
             $c->log->debug("removing downtime $id succeeded");
             Thruk::Utils::set_message( $c, 'success_message', "removing downtime $id succeeded" );
         }
@@ -313,10 +315,10 @@ sub _remove_all_downtimes {
 ######################################
 # command disabled by config?
 sub _check_for_commands {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
-    my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
-    my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'} || 0;
+    my $cmd_typ = $c->req->parameters->{'cmd_typ'};
+    my $cmd_mod = $c->req->parameters->{'cmd_mod'} || 0;
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
@@ -325,7 +327,7 @@ sub _check_for_commands {
 
     # command commited?
     $c->stash->{'use_csrf'} = 1;
-    if( $cmd_mod == 2 and $self->_do_send_command($c) ) {
+    if( $cmd_mod == 2 and _do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
         _redirect_or_success( $c, -2 );
     }
@@ -336,16 +338,16 @@ sub _check_for_commands {
             $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
         }
 
-        $c->stash->{'backend'} = $c->{'request'}->{'parameters'}->{'backend'} || '';
+        $c->stash->{'backend'} = $c->req->parameters->{'backend'} || '';
 
-        my $comment_author = $c->user->username;
-        $comment_author = $c->user->alias if defined $c->user->alias;
+        my $comment_author = $c->user->get('username');
+        $comment_author = $c->user->get('alias') if $c->user->get('alias');
         $c->stash->{comment_author} = $comment_author;
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_' . $cmd_typ . '.tt';
 
         # set a valid referer
-        my $referer = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
+        my $referer = $c->req->parameters->{'referer'} || $c->req->header('referer') || '';
         $referer =~ s/&amp;/&/gmx;
         $referer =~ s/&/&amp;/gmx;
         $c->stash->{referer} = $referer;
@@ -368,15 +370,15 @@ sub _redirect_or_success {
     }
 
     # no need to wait when no command was sent
-    if(defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'}) {
+    if(defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'}) {
         $wait = 0;
     }
 
     # only wait if we got original backends
-    my $backends = Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend'});
-    if($wait and defined $c->{'request'}->{'parameters'}->{'backend.orig'}) {
+    my $backends = Thruk::Utils::list($c->req->parameters->{'backend'});
+    if($wait and defined $c->req->parameters->{'backend.orig'}) {
         my $backends_str = join('|', @{$backends});
-        my $backendsorig = join('|', @{Thruk::Utils::list($c->{'request'}->{'parameters'}->{'backend.orig'})});
+        my $backendsorig = join('|', @{Thruk::Utils::list($c->req->parameters->{'backend.orig'})});
         $wait = 0 if $backends_str ne $backendsorig;
     }
 
@@ -410,8 +412,8 @@ sub _redirect_or_success {
 
     $c->stash->{how_far_back} = $how_far_back;
 
-    my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
-    if( $referer ne '' or $c->{'request'}->{'parameters'}->{'json'}) {
+    my $referer = $c->req->parameters->{'referer'} || '';
+    if( $referer ne '' or $c->req->parameters->{'json'}) {
         # send a wait header?
         if(    $wait
            and defined $c->stash->{'lasthost'}
@@ -420,23 +422,23 @@ sub _redirect_or_success {
         ) {
             my($waitcondition);
             # reschedules
-            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 7 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96) {
+            if($c->req->parameters->{'cmd_typ'} == 7 or $c->req->parameters->{'cmd_typ'} == 96) {
                 $waitcondition = 'last_check >= '.$c->stash->{'now'};
             }
             # add downtime
-            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 55 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 56) {
+            if($c->req->parameters->{'cmd_typ'} == 55 or $c->req->parameters->{'cmd_typ'} == 56) {
                 $waitcondition = 'scheduled_downtime_depth > 0';
             }
             # remove downtime
-            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 78 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 79) {
+            if($c->req->parameters->{'cmd_typ'} == 78 or $c->req->parameters->{'cmd_typ'} == 79) {
                 $waitcondition = 'scheduled_downtime_depth = 0';
             }
             # add acknowledged
-            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 33 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 34) {
+            if($c->req->parameters->{'cmd_typ'} == 33 or $c->req->parameters->{'cmd_typ'} == 34) {
                 $waitcondition = 'acknowledged = 1';
             }
             # remove acknowledged
-            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 51 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 52) {
+            if($c->req->parameters->{'cmd_typ'} == 51 or $c->req->parameters->{'cmd_typ'} == 52) {
                 $waitcondition = 'acknowledged = 0';
             }
             if($waitcondition and $c->stash->{'lasthost'}) {
@@ -445,25 +447,25 @@ sub _redirect_or_success {
                                 'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
                                 'WaitTrigger'   => 'all', # using something else seems not to work all the time
                                 'WaitCondition' => $waitcondition,
-                            }
+                            },
                 };
                 eval { # this query is not critical, so it can safely fail
-                    if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
+                    if(!defined $c->stash->{'lastservice'} || $c->stash->{'lastservice'} eq '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
                         $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                            { 'name' => $c->stash->{'lasthost'} } ],
                                                 columns => [ 'name' ],
-                                                options => $options
+                                                options => $options,
                                             );
                     }
                     if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
                         $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.$seperator.$c->stash->{'lastservice'};
                         $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                                               { 'host_name'   => $c->stash->{'lasthost'} },
-                                                              { 'description' => $c->stash->{'lastservice'} }
+                                                              { 'description' => $c->stash->{'lastservice'} },
                                                              ],
                                                   columns => [ 'description' ],
-                                                  options => $options
+                                                  options => $options,
                                                 );
                     }
                 };
@@ -479,19 +481,19 @@ sub _redirect_or_success {
         }
 
         return if $just_return;
-        if($c->{'request'}->{'parameters'}->{'json'}) {
-            $c->stash->{'json'} = {'success' => 1};
-            return $c->detach('Thruk::View::JSON');
+        if($c->req->parameters->{'json'}) {
+            my $json = {'success' => 1};
+            return $c->render(json => $json);
         }
         else {
-            $c->response->redirect($referer);
+            $c->redirect_to($referer);
         }
     }
     else {
         return if $just_return;
-        if($c->{'request'}->{'parameters'}->{'json'}) {
-            $c->stash->{'json'} = {'success' => 1};
-            return $c->detach('Thruk::View::JSON');
+        if($c->req->parameters->{'json'}) {
+            my $json = {'success' => 1};
+            return $c->render(json => $json);
         }
         $c->stash->{template} = 'cmd_success.tt';
     }
@@ -502,64 +504,64 @@ sub _redirect_or_success {
 ######################################
 # sending commands
 sub _do_send_command {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
 
     if($c->stash->{'use_csrf'}) {
         return unless Thruk::Utils::check_csrf($c);
     }
 
-    my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
+    my $cmd_typ = $c->req->parameters->{'cmd_typ'};
     return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
-    if( $c->config->{'cgi_cfg'}->{'lock_author_names'} or !defined $c->{'request'}->{'parameters'}->{'com_author'} ) {
-        my $author = $c->user->username;
-        $author = $c->user->alias if defined $c->user->alias;
-        $c->{'request'}->{'parameters'}->{'com_author'} = $author;
+    if( $c->config->{'cgi_cfg'}->{'lock_author_names'} || !defined $c->req->parameters->{'com_author'} ) {
+        my $author = $c->user->get('username');
+        $author = $c->user->get('alias') if $c->user->get('alias');
+        $c->req->parameters->{'com_author'} = $author;
     }
 
     # replace parsed dates
     my $start_time_unix = 0;
     my $end_time_unix   = 0;
-    if( ref $self and defined $self->{'spread_startdates'} and scalar @{ $self->{'spread_startdates'} } > 0 ) {
-        my $new_start_time = shift @{ $self->{'spread_startdates'} };
+    if( ref $c and defined $c->{'spread_startdates'} and scalar @{ $c->{'spread_startdates'} } > 0 ) {
+        my $new_start_time = shift @{ $c->{'spread_startdates'} };
         my $new_date = Thruk::Utils::format_date( $new_start_time, '%Y-%m-%d %H:%M:%S' );
         $c->log->debug( "setting spreaded start date to: " . $new_date );
-        $c->request->parameters->{'start_time'} = $new_date;
+        $c->req->parameters->{'start_time'} = $new_date;
         $start_time_unix = $new_start_time;
     }
-    elsif ( $c->request->parameters->{'start_time'} ) {
-        if( $c->request->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
-            my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'start_time'} ), '%Y-%m-%d %H:%M:%S' );
+    elsif ( $c->req->parameters->{'start_time'} ) {
+        if( $c->req->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
+            my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'start_time'} ), '%Y-%m-%d %H:%M:%S' );
             $c->log->debug( "setting start date to: " . $new_date );
-            $c->request->parameters->{'start_time'} = $new_date;
+            $c->req->parameters->{'start_time'} = $new_date;
         }
-        $start_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'start_time'} );
+        $start_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'start_time'} );
     }
-    if( $c->request->parameters->{'end_time'} ) {
-        if( $c->request->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
-            my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} ), '%Y-%m-%d %H:%M:%S' );
+    if( $c->req->parameters->{'end_time'} ) {
+        if( $c->req->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
+            my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} ), '%Y-%m-%d %H:%M:%S' );
             $c->log->debug( "setting end date to: " . $new_date );
-            $c->request->parameters->{'end_time'} = $new_date;
+            $c->req->parameters->{'end_time'} = $new_date;
         }
-        $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} );
+        $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'end_time'} );
     }
-    if( $c->request->parameters->{'use_expire'}
+    if( $c->req->parameters->{'use_expire'}
        and ($cmd_typ == 33 or $cmd_typ == 34)
       ) {
-        if($c->request->parameters->{'expire_time'}) {
-            if( $c->request->parameters->{'expire_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
-                my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'expire_time'} ), '%Y-%m-%d %H:%M:%S' );
+        if($c->req->parameters->{'expire_time'}) {
+            if( $c->req->parameters->{'expire_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
+                my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->req->parameters->{'expire_time'} ), '%Y-%m-%d %H:%M:%S' );
                 $c->log->debug( "setting expire date to: " . $new_date );
-                $c->request->parameters->{'expire_time'} = $new_date;
+                $c->req->parameters->{'expire_time'} = $new_date;
             }
-            if($c->request->parameters->{'expire_time'}) {
-                $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'expire_time'} );
+            if($c->req->parameters->{'expire_time'}) {
+                $end_time_unix = Thruk::Utils::parse_date( $c, $c->req->parameters->{'expire_time'} );
             }
-            $c->request->parameters->{'end_time'} = $c->request->parameters->{'expire_time'};
+            $c->req->parameters->{'end_time'} = $c->req->parameters->{'expire_time'};
         }
         unless(defined $c->stash->{'com_data_adjusted'}) {
-            $c->request->parameters->{'com_data'} .= ' - The acknowledgement expires at: '.$c->request->parameters->{'end_time'}.'.';
+            $c->req->parameters->{'com_data'} .= ' - The acknowledgement expires at: '.$c->req->parameters->{'end_time'}.'.';
             $c->stash->{'com_data_adjusted'}       = 1;
         }
     }
@@ -593,8 +595,7 @@ sub _do_send_command {
                 hostdowntimes             => '',
                 servicedowntimes          => '',
             },
-            \$cmd
-        ) || die $tt->error();
+            \$cmd) || die $tt->error();
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
@@ -628,8 +629,7 @@ sub _do_send_command {
                 hostdowntimes             => '',
                 servicedowntimes          => '',
             },
-            \$form
-        ) || die $tt->error();
+            \$form) || die $tt->error();
     };
     if($@) {
         $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
@@ -640,18 +640,18 @@ sub _do_send_command {
             my $req  = shift @matches;
             my $name = shift @matches;
             my $key  = shift @matches;
-            if( $req eq 'optBoxRequiredItem' and ( !defined $c->{'request'}->{'parameters'}->{$key} or $c->{'request'}->{'parameters'}->{$key} =~ m/^\s*$/mx ) ) {
+            if( $req eq 'optBoxRequiredItem' && ( !defined $c->req->parameters->{$key} || $c->req->parameters->{$key} =~ m/^\s*$/mx ) ) {
                 push @errors, { message => $name . ' is a required field' };
             }
         }
         if( scalar @errors > 0 ) {
-            delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+            delete $c->req->parameters->{'cmd_mod'};
             $c->stash->{'form_errors'} = \@errors;
             return;
         }
     }
 
-    my $backends      = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backends      = $c->req->parameters->{'backend'};
     my $backends_list = ref $backends eq 'ARRAY' ? $backends : [ $backends ];
     for my $cmd_line ( split /\n/mx, $cmd ) {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
@@ -660,16 +660,16 @@ sub _do_send_command {
 
         # add log comment if removing downtimes and comments by id
         if($cmd_typ == 4 or $cmd_typ == 79) {
-            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->{'request'}->{'parameters'}->{'host'}.';'.$c->{'request'}->{'parameters'}->{'service'}.')';
+            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.';'.$c->req->parameters->{'service'}.')';
         }
         if($cmd_typ == 2 or $cmd_typ == 78) {
-            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->{'request'}->{'parameters'}->{'host'}.')';
+            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
         }
     }
 
     $c->stash->{'start_time_unix'} = $start_time_unix;
-    $c->stash->{'lasthost'}        = $c->{'request'}->{'parameters'}->{'host'};
-    $c->stash->{'lastservice'}     = $c->{'request'}->{'parameters'}->{'service'};
+    $c->stash->{'lasthost'}        = $c->req->parameters->{'host'};
+    $c->stash->{'lastservice'}     = $c->req->parameters->{'service'};
 
     return 1;
 }
@@ -695,12 +695,12 @@ sub _bulk_send {
         my $backends_string = join(',', @names);
 
         my $testmode = 0;
-        $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'});
+        $testmode    = 1 if (defined $ENV{'THRUK_NO_COMMANDS'} or $c->req->parameters->{'test_only'});
 
         for my $cmd (@{$commands2send}) {
             my $logstr = sprintf('%s[%s][%s] cmd: %s%s',
                                     ($testmode ? 'TESTMODE: ' : ''),
-                                    $c->user->username,
+                                    $c->user->get('username'),
                                     $backends_string,
                                     $cmd,
                                     ($c->stash->{'extra_log_comment'}->{$cmd} || ''),
@@ -716,7 +716,6 @@ sub _bulk_send {
 ######################################
 # generate spreaded start dates
 sub _generate_spread_startdates {
-    my $self         = shift;
     my $c            = shift;
     my $number       = shift;
     my $starttime    = shift;
@@ -724,12 +723,12 @@ sub _generate_spread_startdates {
     my $spread_dates = [];
 
     # check for a valid number
-    if( !defined $spread or $spread !~ m/^\d+$/mx or $spread <= 1 ) {
+    if( !defined $spread || $spread !~ m/^\d+$/mx || $spread <= 1 ) {
         return;
     }
 
     # check for a valid number
-    if( $number !~ m/^\d+$/mx or $number <= 1 ) {
+    if( $number !~ m/^\d+$/mx || $number <= 1 ) {
         return;
     }
 
@@ -756,13 +755,13 @@ sub _check_reschedule_alias {
     my( $c ) = @_;
 
     # only for service reschedule requests
-    return unless $c->request->parameters->{'cmd_typ'} == 7;
+    return unless $c->req->parameters->{'cmd_typ'} == 7;
 
     # only if we have alias definitons
     return unless defined $c->config->{'command_reschedule_alias'};
 
-    my $servicename = $c->request->parameters->{'service'};
-    my $hostname    = $c->request->parameters->{'host'};
+    my $servicename = $c->req->parameters->{'service'};
+    my $hostname    = $c->req->parameters->{'host'};
 
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
     return unless defined $services;
@@ -778,8 +777,8 @@ sub _check_reschedule_alias {
 
     for my $alias (@{$aliases}) {
         my($pattern, $master) = split/\s*;\s*/mx, $alias, 2;
-        if($c->request->parameters->{'service'} =~ /$pattern/mx) {
-            $c->request->parameters->{'service'} = $master;
+        if($c->req->parameters->{'service'} =~ /$pattern/mx) {
+            $c->req->parameters->{'service'} = $master;
             $c->stash->{'additional_wait'} = 1;
             return;
         }
@@ -790,7 +789,7 @@ sub _check_reschedule_alias {
         my($command, undef) = split(/!/mx, $commands, 2);
         next unless defined $command;
         if($command =~ /$pattern/mx) {
-            $c->request->parameters->{'service'} = $master;
+            $c->req->parameters->{'service'} = $master;
             $c->stash->{'additional_wait'} = 1;
             return;
         }
@@ -803,27 +802,27 @@ sub _check_reschedule_alias {
 ######################################
 # set host / service from downtime / comment ids
 sub _set_host_service_from_down_com_ids {
-    my( $self, $c ) = @_;
+    my( $c ) = @_;
     my $data;
 
-    if( $c->{'request'}->{'parameters'}->{'com_id'} or $c->{'request'}->{'parameters'}->{'down_id'} ) {
-        $c->{'request'}->{'parameters'}->{'host'}    = '';
-        $c->{'request'}->{'parameters'}->{'service'} = '';
+    if( $c->req->parameters->{'com_id'} or $c->req->parameters->{'down_id'} ) {
+        $c->req->parameters->{'host'}    = '';
+        $c->req->parameters->{'service'} = '';
     }
 
     # for comment ids
-    if( $c->{'request'}->{'parameters'}->{'com_id'} ) {
-        $data = $c->{'db'}->get_comments(filter => [ id => $c->{'request'}->{'parameters'}->{'com_id'} ]);
+    if( $c->req->parameters->{'com_id'} ) {
+        $data = $c->{'db'}->get_comments(filter => [ id => $c->req->parameters->{'com_id'} ]);
     }
 
     # for downtime ids
-    if( $c->{'request'}->{'parameters'}->{'down_id'} ) {
-        $data = $c->{'db'}->get_downtimes(filter => [ id => $c->{'request'}->{'parameters'}->{'down_id'} ]);
+    if( $c->req->parameters->{'down_id'} ) {
+        $data = $c->{'db'}->get_downtimes(filter => [ id => $c->req->parameters->{'down_id'} ]);
     }
 
     if( defined $data->[0] ) {
-        $c->{'request'}->{'parameters'}->{'host'}    = $data->[0]->{'host_name'};
-        $c->{'request'}->{'parameters'}->{'service'} = $data->[0]->{'service_description'};
+        $c->req->parameters->{'host'}    = $data->[0]->{'host_name'};
+        $c->req->parameters->{'service'} = $data->[0]->{'service_description'};
     }
     return;
 }
@@ -840,7 +839,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

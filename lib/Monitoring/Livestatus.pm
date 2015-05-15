@@ -134,9 +134,9 @@ be a the C<peer> specification. Use either socker OR server.
 =cut
 
 sub new {
-    my $class = shift;
-    unshift(@_, 'peer') if scalar @_ == 1;
-    my(%options) = @_;
+    my($class,@args) = @_;
+    unshift(@args, 'peer') if scalar @args == 1;
+    my(%options) = @args;
 
     my $self = {
       'verbose'                     => 0,       # enable verbose output
@@ -154,7 +154,6 @@ sub new {
       'timeout'                     => undef,   # timeout for tcp connections
       'query_timeout'               => 60,      # query timeout for tcp connections
       'connect_timeout'             => 5,       # connect timeout for tcp connections
-      'timeout'                     => undef,   # timeout for tcp connections
       'warnings'                    => 1,       # show warnings, for example on querys without Column: Header
       'logger'                      => undef,   # logger object used for statistical informations and errors / warnings
       'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
@@ -171,9 +170,8 @@ sub new {
         }
     }
 
-    if($self->{'verbose'} and !defined $self->{'logger'}) {
+    if($self->{'verbose'} && !defined $self->{'logger'}) {
         croak('please specify a logger object when using verbose mode');
-        $self->{'verbose'} = 0;
     }
 
     # setting a general timeout?
@@ -191,19 +189,19 @@ sub new {
         $options{'name'} = $peer->{'name'};
         $options{'peer'} = $peer->{'peer'};
         if($peer->{'type'} eq 'UNIX') {
-            $self->{'CONNECTOR'} = new Monitoring::Livestatus::UNIX(%options);
+            $self->{'CONNECTOR'} = Monitoring::Livestatus::UNIX->new(%options);
         }
         elsif($peer->{'type'} eq 'INET') {
-            $self->{'CONNECTOR'} = new Monitoring::Livestatus::INET(%options);
+            $self->{'CONNECTOR'} = Monitoring::Livestatus::INET->new(%options);
         }
         $self->{'peer'} = $peer->{'peer'};
     }
 
     # set names and peer for non multi backends
-    if(defined $self->{'CONNECTOR'}->{'name'} and !defined $self->{'name'}) {
+    if(defined $self->{'CONNECTOR'}->{'name'} && !defined $self->{'name'}) {
         $self->{'name'} = $self->{'CONNECTOR'}->{'name'};
     }
-    if(defined $self->{'CONNECTOR'}->{'peer'} and !defined $self->{'peer'}) {
+    if(defined $self->{'CONNECTOR'}->{'peer'} && !defined $self->{'peer'}) {
         $self->{'peer'} = $self->{'CONNECTOR'}->{'peer'};
     }
 
@@ -291,7 +289,7 @@ sub selectall_arrayref {
     }
 
     # trim result set down to excepted row count
-    if(!$opt->{'offset'} && defined $limit and $limit >= 1) {
+    if(!$opt->{'offset'} && defined $limit && $limit >= 1) {
         if(scalar @{$result->{'result'}} > $limit) {
             @{$result->{'result'}} = @{$result->{'result'}}[0..$limit-1];
         }
@@ -437,7 +435,7 @@ sub selectcol_arrayref {
     $opt = &_lowercase_and_verify_options($self, $opt);
 
     # if now colums are set, use just the first one
-    if(!defined $opt->{'columns'} or ref $opt->{'columns'} ne 'ARRAY') {
+    if(!defined $opt->{'columns'} || ref $opt->{'columns'} ne 'ARRAY') {
         @{$opt->{'columns'}} = qw{1};
     }
 
@@ -1087,7 +1085,7 @@ sub _send_socket {
             return($status, $msg, $recv);
         }
 
-        while((!defined $status or ($status == 491 or $status == 497 or $status == 500)) and $retries < $self->{'retries_on_connection_error'}) {
+        while((!defined $status || ($status == 491 || $status == 497 || $status == 500)) && $retries < $self->{'retries_on_connection_error'}) {
             $retries++;
             ($sock, $msg, $recv) = &_send_socket_do($self, $statement);
             return($status, $msg, $recv) if $msg;
@@ -1450,7 +1448,6 @@ sub _get_peer {
 
     # check if we got a peer
     croak('please specify a peer');
-    return;
 }
 
 

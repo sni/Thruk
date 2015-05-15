@@ -86,7 +86,7 @@
       [% END %]
     </select>
   </td>
-  <td class='newfilter' onclick="delete_cron_row(this); return false;">[% IF can_edit %]<input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete">[% END %]
+  <td class='newfilter' onclick="delete_cron_row(this); return false;">[% IF can_edit %]<input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="delete">[% END %]
     <script type="text/javascript">
     <!--
     cron_change_date("send_type_[% nr %]");

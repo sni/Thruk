@@ -112,7 +112,7 @@ send a command
 =cut
 sub send_command {
     my($self, %options) = @_;
-    cluck("empty command") if (!defined $options{'command'} or $options{'command'} eq '');
+    cluck("empty command") if (!defined $options{'command'} || $options{'command'} eq '');
     $self->{'live'}->{'backend_obj'}->do($options{'command'});
     return;
 }
@@ -656,7 +656,7 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+    if(defined $self->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'logcache'}->get_logs(%options);
     }
@@ -1121,7 +1121,7 @@ sub _get_class {
         }
     }
 
-    $options->{'options'}->{'AddPeer'} = 0 if(!defined $options->{'AddPeer'} or $options->{'AddPeer'} == 0);
+    $options->{'options'}->{'AddPeer'} = 0 if(!defined $options->{'AddPeer'} || $options->{'AddPeer'} == 0);
     $class = $class->options($options->{'options'});
 
     return $class;
@@ -1229,7 +1229,7 @@ sub _get_logs_start_end {
     my($self, %options) = @_;
     my $class = $self->_get_class('log', \%options);
     my $rows  = $class->stats([ 'start' => { -isa => [ -min => 'time' ]},
-                                'end'   => { -isa => [ -max => 'time' ]}
+                                'end'   => { -isa => [ -max => 'time' ]},
                              ])
                       ->hashref_array();
     return([$rows->[0]->{'start'}, $rows->[0]->{'end'}]);
@@ -1248,7 +1248,7 @@ sub renew_logcache {
     my($self, $c) = @_;
     return unless defined $self->{'logcache'};
     # renew cache?
-    if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
+    if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
         $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
         $self->{'lastcacheupdate'} = time();
     }

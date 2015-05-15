@@ -1,9 +1,10 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+
+use_ok("Thruk::Utils::IO");
 
 my $cmds = [
   "grep -nr 'close\(' lib/ plugins/plugins-available/",
@@ -43,5 +44,13 @@ for my $cmd (@{$cmds}) {
 for my $fail (sort @fails) {
     fail($fail);
 }
+
+my($rc, $output) = Thruk::Utils::IO::cmd(undef, 'ls -la');
+is($rc, 0, "ls returned with rc: 0");
+like($output, '/thruk.conf/', "ls returned something");
+
+($rc, $output) = Thruk::Utils::IO::cmd(undef, ['ls', '-l', '-a']);
+is($rc, 0, "ls returned with rc: 0");
+like($output, '/thruk.conf/', "ls array args returned something");
 
 done_testing();

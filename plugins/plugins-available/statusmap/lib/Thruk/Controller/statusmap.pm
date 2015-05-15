@@ -3,39 +3,54 @@ package Thruk::Controller::statusmap;
 use strict;
 use warnings;
 use Module::Load qw/load/;
-use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Thruk::Controller::statusmap - Catalyst Controller
+Thruk::Controller::statusmap - Thruk Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Thruk Controller.
 
 =head1 METHODS
 
 =cut
 
-# enable statusmap if this plugin is loaded
-Thruk->config->{'use_feature_statusmap'} = 1;
+##########################################################
 
-Thruk::Utils::Status::add_view({'group' => 'Status Map',
-                                'name'  => 'Status Map',
-                                'value' => 'statusmap',
-                                'url'   => 'statusmap.cgi'
-                            });
-
-######################################
-
-=head2 statusmap_cgi
+=head2 add_routes
 
 page: /thruk/cgi-bin/statusmap.cgi
 
 =cut
-sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
-    my ( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
+
+sub add_routes {
+    my($self, $app, $routes) = @_;
+
+    $routes->{'/thruk/cgi-bin/statusmap.cgi'} = 'Thruk::Controller::statusmap::index';
+
+    Thruk::Utils::Status::add_view({'group' => 'Status Map',
+                                    'name'  => 'Status Map',
+                                    'value' => 'statusmap',
+                                    'url'   => 'statusmap.cgi',
+    });
+
+
+    # enable statusmap if this plugin is loaded
+    $app->config->{'use_feature_statusmap'} = 1;
+
+    return;
+}
+
+##########################################################
+
+=head2 index
+
+=cut
+sub index {
+    my ( $c ) = @_;
+
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
 
     if(!$c->config->{'statusmap_modules_loaded'}) {
         load Carp, qw/confess carp/;
@@ -45,34 +60,22 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
         $c->config->{'statusmap_modules_loaded'} = 1;
     }
 
-    return $c->detach('/statusmap/index');
-}
-
-
-##########################################################
-
-=head2 index
-
-=cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
-
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'statusmap';
+    my $style = $c->req->parameters->{'style'} || 'statusmap';
     if($style ne 'statusmap') {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
     $c->stash->{substyle} = 'host';
 
-    $c->stash->{type}    = $c->request->parameters->{'type'}    || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_type'}    || $c->config->{'statusmap_default_type'}    || 'table';
-    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_groupby'} || $c->config->{'statusmap_default_groupby'} || 'address';
-    $c->stash->{detail}  = $c->request->parameters->{'detail'}  || '0';
-    my $host             = $c->request->parameters->{'host'}    || 'rootid';
+    $c->stash->{type}    = $c->req->parameters->{'type'}    || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_type'}    || $c->config->{'statusmap_default_type'}    || 'table';
+    $c->stash->{groupby} = $c->req->parameters->{'groupby'} || $c->config->{'Thruk::Plugin::Statusmap'}->{'default_groupby'} || $c->config->{'statusmap_default_groupby'} || 'address';
+    $c->stash->{detail}  = $c->req->parameters->{'detail'}  || '0';
+    my $host             = $c->req->parameters->{'host'}    || 'rootid';
     if($host eq 'all') {
         $host = 'rootid';
     }
 
     # delete host param, otherwise we get false host=rootid filter
-    delete $c->request->parameters->{'host'};
+    delete $c->req->parameters->{'host'};
 
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
@@ -89,7 +92,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{detail} = 0;
     }
 
-    $self->{'all_nodes'} = {};
+    $c->{'all_nodes'} = {};
 
     my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
 
@@ -115,27 +118,27 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $json;
     # oder by parents
     if($c->stash->{groupby} eq 'parent') {
-        $json = $self->_get_hosts_by_parents($c, $hosts);
+        $json = _get_hosts_by_parents($c, $hosts);
         $c->stash->{nodename} = 'Host';
     }
     # order by address
     elsif($c->stash->{groupby} eq 'address') {
-        $json = $self->_get_hosts_by_split_attribute($c, $hosts, 'address', '.', 0);
+        $json = _get_hosts_by_split_attribute($c, $hosts, 'address', '.', 0);
         $c->stash->{nodename} = 'Network';
     }
     # order by domain
     elsif($c->stash->{groupby} eq 'domain') {
-        $json = $self->_get_hosts_by_split_attribute($c, $hosts, 'name', '.', 1);
+        $json = _get_hosts_by_split_attribute($c, $hosts, 'name', '.', 1);
         $c->stash->{nodename} = 'Domain';
     }
     # order by hostgroups
     elsif($c->stash->{groupby} eq 'hostgroup') {
-        $json = $self->_get_hosts_by_attribute($c, $hosts, 'groups');
+        $json = _get_hosts_by_attribute($c, $hosts, 'groups');
         $c->stash->{nodename} = 'Hostgroup';
     }
     # order by servicegroups
     elsif($c->stash->{groupby} eq 'servicegroup') {
-        $json = $self->_get_hosts_by_attribute($c, $hosts, 'servicegroups');
+        $json = _get_hosts_by_attribute($c, $hosts, 'servicegroups');
         $c->stash->{nodename} = 'Servicegroup';
     }
     else {
@@ -143,7 +146,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     # does our root id exist?
-    if(!defined $self->{'all_nodes'}->{$c->stash->{host}}) {
+    if(!defined $c->{'all_nodes'}->{$c->stash->{host}}) {
         $c->stash->{host} = 'rootid';
     }
 
@@ -170,13 +173,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 =cut
 sub _get_json_for_hosts {
-    my $self  = shift;
-    my $data  = shift;
-    my $level = shift;
+    my($c, $data, $level) = @_;
 
     my $children = [];
 
-    unless(defined $data) {
+    if(!defined $data) {
         return($children,0,0,0,0,0);
     }
 
@@ -196,7 +197,7 @@ sub _get_json_for_hosts {
                 confess('not a hash ref: '.Dumper($dat)."\n".Dumper(\@caller));
             }
             if(exists $dat->{'id'}) {
-                $self->{'all_nodes'}->{$dat->{'id'}} = 1;
+                $c->{'all_nodes'}->{$dat->{'id'}} = 1;
                 push @{$children}, $dat;
                 $sum_hosts         += $dat->{'data'}->{'$area'};
                 $state_up          += $dat->{'data'}->{'state_up'};
@@ -210,8 +211,8 @@ sub _get_json_for_hosts {
                    $child_sum_up,
                    $child_sum_down,
                    $child_sum_unreachable,
-                   $child_sum_pending
-                ) = $self->_get_json_for_hosts($dat, ($level+1));
+                   $child_sum_pending,
+                ) = _get_json_for_hosts($c, $dat, ($level+1));
                 $sum_hosts          += $child_sum_hosts;
                 $state_up           += $child_sum_up;
                 $state_down         += $child_sum_down;
@@ -229,7 +230,7 @@ sub _get_json_for_hosts {
                                   },
                     'children' => $childs,
                 };
-                $self->{'all_nodes'}->{'sub_node_'.$level.'_'.$key} = 1;
+                $c->{'all_nodes'}->{'sub_node_'.$level.'_'.$key} = 1;
             }
         }
     }
@@ -244,7 +245,6 @@ sub _get_json_for_hosts {
 
 =cut
 sub _get_hosts_by_split_attribute {
-    my $self     = shift;
     my $c        = shift;
     my $hosts    = shift;
     my $attr     = shift;
@@ -255,7 +255,7 @@ sub _get_hosts_by_split_attribute {
     my $host_tree = {};
     for my $host (@{$hosts}) {
 
-        my $json_host = $self->_get_json_host($c, $host);
+        my $json_host = _get_json_host($c, $host);
         $json_host->{'children'} = [];
         my $id = $json_host->{'id'};
 
@@ -284,7 +284,7 @@ sub _get_hosts_by_split_attribute {
                         my $old = $subtree->{$key};
                         $subtree->{$key} = [
                             $json_host,
-                            $old
+                            $old,
                         ];
                     }
                 } else {
@@ -292,7 +292,7 @@ sub _get_hosts_by_split_attribute {
                 }
             }
             else {
-                if(!exists $subtree->{$key} or ref $subtree->{$key} ne 'HASH') { $subtree->{$key} = {}; }
+                if(!exists $subtree->{$key} || ref $subtree->{$key} ne 'HASH') { $subtree->{$key} = {}; }
                 $subtree = \%{$subtree->{$key}};
             }
         }
@@ -303,8 +303,8 @@ sub _get_hosts_by_split_attribute {
        $child_sum_up,
        $child_sum_down,
        $child_sum_unreachable,
-       $child_sum_pending
-    ) = $self->_get_json_for_hosts($host_tree, 0);
+       $child_sum_pending,
+    ) = _get_json_for_hosts($c, $host_tree, 0);
     my $rootnode = {
         'id'       => 'rootid',
         'name'     => 'monitoring host',
@@ -328,7 +328,6 @@ sub _get_hosts_by_split_attribute {
 
 =cut
 sub _get_hosts_by_attribute {
-    my $self  = shift;
     my $c     = shift;
     my $hosts = shift;
     my $attr  = shift;
@@ -336,7 +335,7 @@ sub _get_hosts_by_attribute {
     my $host_tree;
     for my $host (@{$hosts}) {
 
-        my $json_host = $self->_get_json_host($c, $host);
+        my $json_host = _get_json_host($c, $host);
         $json_host->{'children'} = [];
         my $id = $json_host->{'id'};
 
@@ -353,8 +352,8 @@ sub _get_hosts_by_attribute {
        $child_sum_up,
        $child_sum_down,
        $child_sum_unreachable,
-       $child_sum_pending
-    ) = $self->_get_json_for_hosts($host_tree, 0);
+       $child_sum_pending,
+    ) = _get_json_for_hosts($c, $host_tree, 0);
     my $rootnode = {
         'id'       => 'rootid',
         'name'     => 'monitoring host',
@@ -378,7 +377,6 @@ sub _get_hosts_by_attribute {
 
 =cut
 sub _get_hosts_by_parents {
-    my $self  = shift;
     my $c     = shift;
     my $hosts = shift;
 
@@ -388,7 +386,7 @@ sub _get_hosts_by_parents {
     }
 
     my($subtree, $remaining, $state_up, $state_down, $state_unreachable, $state_pending)
-        = $self->_fill_subtree($c, 'rootid', $hosts, $all_hosts);
+        = _fill_subtree($c, 'rootid', $hosts, $all_hosts);
     my $host_tree = {};
     $host_tree->{'rootid'} = {
         'id'   => 'rootid',
@@ -407,7 +405,7 @@ sub _get_hosts_by_parents {
         $host_tree = $subtree;
     }
 
-    my $array = $self->_hash_tree_to_array($host_tree);
+    my $array = _hash_tree_to_array($host_tree);
     return($array->[0]);
 }
 
@@ -417,7 +415,6 @@ sub _get_hosts_by_parents {
 
 =cut
 sub _fill_subtree {
-    my $self      = shift;
     my $c         = shift;
     my $parent    = shift;
     my $hosts     = shift;
@@ -457,8 +454,8 @@ sub _fill_subtree {
     for my $parent (keys %{$tree}) {
         my($subtree, $state_up, $state_down, $state_unreachable, $state_pending);
         ($subtree, $remaining_hosts, $state_up, $state_down, $state_unreachable, $state_pending)
-            = $self->_fill_subtree($c, $parent, $remaining_hosts, $all_hosts);
-        my $json_host = $self->_get_json_host($c, $all_hosts->{$parent});
+            = _fill_subtree($c, $parent, $remaining_hosts, $all_hosts);
+        my $json_host = _get_json_host($c, $all_hosts->{$parent});
         $json_host->{'data'}->{'state_up'}          += $state_up;
         $json_host->{'data'}->{'state_down'}        += $state_down;
         $json_host->{'data'}->{'state_unreachable'} += $state_unreachable;
@@ -475,7 +472,7 @@ sub _fill_subtree {
         $sum_state_pending                          += $json_host->{'data'}->{'state_pending'};
     }
 
-    return($tree, $remaining_hosts, $sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending)
+    return($tree, $remaining_hosts, $sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending);
 }
 
 
@@ -485,7 +482,6 @@ sub _fill_subtree {
 
 =cut
 sub _get_json_host {
-    my $self = shift;
     my $c    = shift;
     my $host = shift;
 
@@ -560,7 +556,7 @@ sub _get_json_host {
            $icon_image =~ s/'//gmx;
            $json_host->{'data'}->{'icon_image'} = $icon_image;
     }
-    $self->{'all_nodes'}->{$host->{'name'}} = 1;
+    $c->{'all_nodes'}->{$host->{'name'}} = 1;
 
     return $json_host;
 }
@@ -571,14 +567,13 @@ sub _get_json_host {
 
 =cut
 sub _hash_tree_to_array {
-    my $self = shift;
     my $hash = shift;
 
     my $array = [];
     for my $key (sort keys %{$hash}) {
         my $val = $hash->{$key};
         if(defined $val->{'children'}) {
-            my $childs = $self->_hash_tree_to_array($val->{'children'});
+            my $childs = _hash_tree_to_array($val->{'children'});
             $val->{'children'} = $childs;
             push @{$array}, $val;
         }
@@ -597,7 +592,5 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__PACKAGE__->meta->make_immutable;
 
 1;

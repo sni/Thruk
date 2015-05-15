@@ -17,8 +17,7 @@ use Thruk::Utils::IO;
 use Storable qw(nstore retrieve);
 use File::Copy qw(move);
 
-require Exporter;
-our @ISA = qw(Exporter);
+use base 'Exporter';
 our @EXPORT_OK = qw(cache);
 
 ##########################################################
@@ -230,6 +229,8 @@ sub _retrieve {
 ##############################################
 
 1;
+
+__END__
 
 =head1 AUTHOR
 

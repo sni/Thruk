@@ -30,10 +30,13 @@ sub timing_breakpoint {
     my $deltamem = '';
     if($has_memory) {
         my $status   = read_file('/proc/'.$$.'/status');
-        $status     =~ m/^VmRSS:\s*(\d+)\s+kB/smxo;
-        $memory     = $1;
-        $deltamem   = $memory - $lastmemory;
-        $lastmemory = $memory;
+        if($status     =~ m/^VmRSS:\s*(\d+)\s+kB/smxo) {
+            $memory     = $1;
+            $deltamem   = $memory - $lastmemory;
+            $lastmemory = $memory;
+        } else {
+            die("no VmRSS found in:\n".$status);
+        }
     }
     my $thr    = 'global';
     if($has_threads) {
