@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 17;
+    plan tests => 81;
 }
 
 BEGIN {
@@ -57,4 +57,17 @@ my $urls = [
 ];
 for my $url (@{$urls}) {
     is(Thruk::Utils::Reports::Render::_absolutize_url($url->[0], $url->[1]), $url->[2], '_absolutize_url('.($url->[0]||'').', '.$url->[1].') -> '.$url->[2]);
+}
+
+
+###########################################################
+# test report templates
+use_ok('Thruk::Utils::Reports');
+my $c = $Thruk::Utils::Reports::Render::c;
+my $templates = Thruk::Utils::Reports::get_report_templates($c);
+for my $template (sort keys %{$templates}) {
+    TestUtils::test_page(
+        url          => '/thruk/cgi-bin/reports2.cgi?report=new&template='.$template.'&action=edit2',
+        skip_doctype => 1,
+    );
 }

@@ -13,7 +13,7 @@
         { 'assumeinitialstates'         => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
         { 'initialassumedservicestate'  => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
         { 'includesoftstates'           => [ 'Include Soft States',   'yes_no',          'no'                         ] },
-        { 'unavailable'                 => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown']      ] },
+        { 'unavailable'                 => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
         { 'includeoutages'              => [ 'Include Outage Events', 'yes_no',          'yes'                        ] },
         { 'max_outages_pages'           => [ 'Latest Outages',        'int',             '1'          ,'max. # pages', 1 ] },
         { 'max_worst_pages'             => [ 'Worst Outages',         'int',             '1'          ,'max. # pages', 1 ] },
