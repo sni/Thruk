@@ -1055,7 +1055,7 @@ sub _read_report_file {
     }
 
     my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
-    if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'}) {
+    if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'} && !Thruk::Utils::External::is_running($c, $report->{'var'}->{'job'}, 1)) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
         if($err) {
