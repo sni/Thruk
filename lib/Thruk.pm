@@ -200,7 +200,7 @@ sub _dispatcher {
     my($self, $env) = @_;
     $Thruk::COUNT++;
     my $c = Thruk::Context->new($self, $env);
-    $c->stats->profile(begin => "_dispatcher");
+    $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
     if(Thruk->verbose) {
         $c->log->debug($c->req->url);
@@ -250,14 +250,16 @@ sub _dispatcher {
     }
     unless($c->{'rendered'}) {
         Thruk::Action::AddDefaults::end($c);
+        if(!$c->stash->{'template'}) {
+            confess(Dumper("not rendered and no template for: ", $c->req, $c->stash->{'text'}));
+        }
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }
-
-    $c->stats->profile(end => "_dispatcher");
 
     $c->stats->profile(begin => "_res_finalize");
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_res_finalize");
+    $c->stats->profile(end => "_dispatcher: ".$c->req->url);
 
     _after_dispatch($c, $res);
     return($res);
@@ -587,10 +589,10 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d   mem:% 7s MB  % 5.2f MB   dur: %.2fs %8s   size: % 11s   stat: %d   url: %s",
+        $c->log->info(sprintf("Req: %03d   mem: % 7s MB  %5s MB   dur: %.2fs %8s   size: % 11s   stat: %d   url: %s",
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
-                                ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'}),
+                                sprintf("% 5.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 $elapsed,
                                 defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '----',
                                 sprintf("% 5.3f kb", (length("@{$res->[2]}")/1024)),
