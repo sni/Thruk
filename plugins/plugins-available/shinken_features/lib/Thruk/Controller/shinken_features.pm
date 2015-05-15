@@ -31,8 +31,8 @@ sub add_routes {
     my($self, $app, $routes) = @_;
 
     $routes->{'/thruk/cgi-bin/shinken_status.cgi'} = 'Thruk::Controller::shinken_features::shinken_status';
-    $routes->{'/thruk/cgi-bin/outagespbimp.cgi'} = 'Thruk::Controller::shinken_features::outagespbimp';
-    $routes->{'/thruk/cgi-bin/businessview.cgi'} = 'Thruk::Controller::shinken_features::businessview';
+    $routes->{'/thruk/cgi-bin/outagespbimp.cgi'} = 'Thruk::Controller::shinken_features::outages_pbimp_index';
+    $routes->{'/thruk/cgi-bin/businessview.cgi'} = 'Thruk::Controller::shinken_features::businessview_index';
 
     return;
 }
