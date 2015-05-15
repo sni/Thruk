@@ -112,6 +112,7 @@ Makefile.PL
 MANIFEST
 menu.conf
 META.yml
+MIGRATE-2.0
 plugins/plugins-available/business_process/description.txt
 plugins/plugins-available/business_process/lib/Thruk/BP/Components/BP.pm
 plugins/plugins-available/business_process/lib/Thruk/BP/Components/Node.pm
