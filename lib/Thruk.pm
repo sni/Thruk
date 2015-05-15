@@ -54,6 +54,7 @@ use POSIX qw(tzset);
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
+use Data::Dumper;
 use Thruk::Context;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
@@ -197,10 +198,14 @@ sub _build_app {
 ###################################################
 sub _dispatcher {
     my($self, $env) = @_;
-    my $c = Thruk::Context->new($self, $env);
     $Thruk::COUNT++;
-
+    my $c = Thruk::Context->new($self, $env);
     $c->stats->profile(begin => "_dispatcher");
+
+    if(Thruk->verbose) {
+        $c->log->debug($c->req->url);
+        $c->log->debug(Dumper($c->req->parameters));
+    }
 
     ###############################################
     # prepare request
