@@ -1006,9 +1006,9 @@ sub _cmd_downtimetask {
     return("failed\n", 1) if $errors; # error is already printed
 
     if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host: \''.join(', ', @{$downtime->{'host'}}).'\'';
+        $output = 'scheduled'.$flexible.' downtime for service \''.encode_utf8($downtime->{'service'}).'\' on host: \''.encode_utf8(join(', ', @{$downtime->{'host'}})).'\'';
     } else {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.join(', ', @{$downtime->{$downtime->{'target'}}}).'\'';
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.encode_utf8(join(', ', @{$downtime->{$downtime->{'target'}}})).'\'';
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
 
@@ -1024,19 +1024,19 @@ sub _set_downtime {
     my $product = $c->config->{'product_prefix'} || 'thruk';
     my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
                       $cmd_typ,
-                      URI::Escape::uri_escape($downtime->{'comment'}),
+                      URI::Escape::uri_escape_utf8($downtime->{'comment'}),
                       '(cron)',
-                      URI::Escape::uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      URI::Escape::uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
                       $hours,
                       $minutes,
                       join(',', @{$backends}),
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape($downtime->{'host'}) : '',
-                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
-                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape($downtime->{'hostgroup'}) : '',
-                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape($downtime->{'servicegroup'}) : '',
+                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape_utf8($downtime->{'host'}) : '',
+                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape_utf8($downtime->{'service'}) : '',
+                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
+                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
