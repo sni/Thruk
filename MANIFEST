@@ -947,6 +947,7 @@ plugins/plugins-available/reports2/script/html2pdf.sh
 plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
+plugins/plugins-available/reports2/t/report_templates.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t
 plugins/plugins-available/reports2/templates/_reports_icon.tt
