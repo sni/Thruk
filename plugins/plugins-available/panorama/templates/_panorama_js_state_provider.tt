@@ -38,7 +38,7 @@ function setStateByTab(state) {
     state = TP.clone(state);
     var data = {};
     for(var key in state) {
-        if(key == 'tabpan') { data.tabpan = state[key]; }
+        if(key == 'tabpan') { data.tabpan = Ext.JSON.decode(state[key]); }
         if(key.search(/tabpan-tab_\d+$/) != -1) {
             if(data[key] == undefined) { data[key] = {}; }
             data[key].tab = state[key];
@@ -61,12 +61,7 @@ function setStateByTab(state) {
         if(matches) {
             var tab_id = matches[1];
             if(data[tab_id] == undefined) { data[tab_id] = {}; }
-            data[tab_id][key] = state[key];
-        }
-    }
-    for(var key in data) {
-        if(key != 'tabpan') {
-            data[key] = Ext.JSON.encode(data[key]);
+            data[tab_id][key] = Ext.JSON.decode(state[key]);
         }
     }
     return(data);
@@ -203,8 +198,9 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var params  = {};
         var changed = 0;
         for(var key in data) {
-            if(!TP.JSONequals(this.lastdata[key], data[key])) {
-                params[key] = data[key];
+            var encoded = Ext.JSON.encode(data[key]);
+            if(!TP.JSONequals(this.lastdata[key], encoded)) {
+                params[key] = encoded;
                 changed++;
             }
         }

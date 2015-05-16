@@ -389,7 +389,11 @@ sub _stateprovider {
         my $newids  = [];
         my $newid   = delete $param->{'nr'} || '';
         for my $key (keys %{$param}) {
-            my $param_data = decode_json($param->{$key});
+            next if !$param->{$key};
+            my $param_data = $param->{$key};
+            if(ref $param_data eq '') {
+                $param_data = decode_json($param->{$key});
+            }
             if($key eq 'tabpan') {
                 my $data = Thruk::Utils::get_user_data($c);
                 $data->{'panorama'}->{dashboards}->{$key} = $param_data;
@@ -400,7 +404,11 @@ sub _stateprovider {
                     if($k2 eq 'id') {
                         $newid = $param_data->{$k2};
                     } else {
-                        $param_data->{$k2} = decode_json($param_data->{$k2});
+                        $param_data->{$k2} = $param_data->{$k2};
+                        if(ref $param_data->{$k2} eq '') {
+                            $param_data->{$k2} = decode_json($param_data->{$k2});
+                        }
+
                     }
                 }
                 $param_data->{'id'}   = $newid || $key;
