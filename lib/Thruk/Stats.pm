@@ -73,7 +73,7 @@ sub report {
                 }
             } else {
                 # found no start
-                die("no start found for: ".Dumper($entry));
+                die("no start found for: ".Dumper($entry)) if Thruk->debug;
             }
         }
         elsif($key eq 'comment') {
