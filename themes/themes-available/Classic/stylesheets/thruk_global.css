@@ -1191,3 +1191,10 @@ UL.action_menu LI.clickable A {
 UL.action_menu LI HR {
   margin: 2px 8px;
 }
+
+DIV.pnpSelector {
+  display: inline;
+  position: absolute;
+  right: 2px;
+  top: 22px;
+}
