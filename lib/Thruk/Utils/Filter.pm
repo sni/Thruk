@@ -328,13 +328,13 @@ sub uri_with {
     my @new_param;
     while(my $k = shift @old_param) {
         my $v = shift @old_param;
-        if(exists $data->{$k} && !defined $data->{$k}) {
+        if(exists $data->{$k} && (!defined $data->{$k} || $data->{$k} eq 'undef')) {
             next;
         }
         push(@new_param, $k, $v);
     }
     for my $k (sort keys %{$data}) {
-        push(@new_param, $k, $data->{$k}) if defined $data->{$k};
+        push(@new_param, $k, $data->{$k}) if(defined $data->{$k} && $data->{$k} ne 'undef');
     }
     $uri->query_form(@new_param);
     $uri = $uri->as_string;
