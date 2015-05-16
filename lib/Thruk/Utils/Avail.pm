@@ -560,6 +560,9 @@ sub calculate_availability {
                           };
     }
 
+    # make hosts uniq
+    $hosts = Thruk::Utils::array_uniq($hosts);
+
     # ensure reports won't wrack our server
     my $total_nr = 0;
     $total_nr += scalar @{$hosts}    if defined $hosts;

@@ -326,8 +326,6 @@ sub calculate {
         'timeformat'                     => $self->{'timeformat'},
         'breakdown'                      => $self->{'breakdown'},
     };
-    $self->_log('calculate()')             if $verbose;
-    $self->_log($self->{'report_options'}) if $verbose;
     my $result;
 
     for my $opt_key (keys %opts) {
@@ -341,6 +339,9 @@ sub calculate {
 
     $self->{'report_options'} = $self->_set_default_options($self->{'report_options'});
     $self->{'report_options'} = $self->_verify_options($self->{'report_options'});
+
+    $self->_log('calculate()')             if $verbose;
+    $self->_log($self->{'report_options'}) if $verbose;
 
     # create lookup hash for faster access
     $result->{'hosts'}    = {};
@@ -631,12 +632,12 @@ sub _compute_availability_line_by_line {
     my $started   = time();
     while(my $line = <$fh>) {
         $count++;
-        &Monitoring::Availability::Logs::_decode_any($line);
-        chomp($line);
         my $data;
         if($xs) {
             $data = &Thruk::Utils::XS::parse_line($line);
         } else {
+            &Monitoring::Availability::Logs::_decode_any($line);
+            chomp($line);
             $data = &Monitoring::Availability::Logs::parse_line($line);
         }
         next unless $data;
