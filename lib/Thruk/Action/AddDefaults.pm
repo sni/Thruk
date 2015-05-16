@@ -632,7 +632,7 @@ sub add_defaults {
 
         # reapply config defaults and config conversions
         if(scalar keys %{$c->stash->{'config_adjustments'}} > 0) {
-            Thruk::Backend::Pool::set_default_config($c->config);
+            Thruk::Config::set_default_config($c->config);
             set_configs_stash($c);
         }
     }
