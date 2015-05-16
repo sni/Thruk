@@ -905,7 +905,7 @@ return parsed config file
 sub read_config_file {
     my($file) = @_;
     # this seems to be the fastest way to trim comments
-    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file)));
+    my @config_lines = grep(!/^\s*\#/mxo, split(/\n+/mxo, read_file($file, binmode => ':utf8')));
     my $conf = {};
     _parse_rows($file, \@config_lines, $conf);
     return($conf);
