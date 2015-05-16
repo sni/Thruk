@@ -12,7 +12,6 @@ Utilities Collection for Reporting
 
 use warnings;
 use strict;
-use utf8;
 use Carp;
 use Class::Inspector;
 use File::Slurp;

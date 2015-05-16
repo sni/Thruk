@@ -12,7 +12,6 @@ Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use utf8;
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;

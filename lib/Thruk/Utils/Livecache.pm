@@ -12,7 +12,6 @@ Livecache Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use utf8;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep/;
 use Thruk::Utils::External;

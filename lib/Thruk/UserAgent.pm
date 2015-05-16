@@ -12,7 +12,6 @@ UserAgent wrapper for Thruk
 
 use strict;
 use warnings;
-use utf8;
 use Carp;
 use IPC::Open3;
 use HTTP::Response;

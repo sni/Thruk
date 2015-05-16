@@ -6,7 +6,6 @@ use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
 use File::Slurp;
-use utf8;
 use Encode qw(encode_utf8 decode);
 use Thruk::Utils;
 use Thruk::Utils::Conf;

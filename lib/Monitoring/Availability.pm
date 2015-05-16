@@ -295,6 +295,7 @@ sub calculate {
         Log::Log4perl->easy_init({
             level   => 'DEBUG',
             file    => ">/tmp/Monitoring-Availability-Debug.log",
+            utf8    => 1,
         });
         $self->{'logger'} = get_logger();
     }
@@ -633,11 +634,11 @@ sub _compute_availability_line_by_line {
     while(my $line = <$fh>) {
         $count++;
         my $data;
+        &Monitoring::Availability::Logs::_decode_any($line);
+        chomp($line);
         if($xs) {
             $data = &Thruk::Utils::XS::parse_line($line);
         } else {
-            &Monitoring::Availability::Logs::_decode_any($line);
-            chomp($line);
             $data = &Monitoring::Availability::Logs::parse_line($line);
         }
         next unless $data;
@@ -645,7 +646,7 @@ sub _compute_availability_line_by_line {
         # set timestamp of last log line
         $last_time = $data->{'time'};
 
-        if($ENV{'THRUK_JOB_DIR'} && $count%10 == 0) {
+        if($count%10 == 0 && $ENV{'THRUK_JOB_DIR'}) {
             my $perc = int(($count / $total * 40) + 35);
             if($perc != $last_perc) {
                 my $elapsed = time() - $started;
@@ -725,27 +726,20 @@ sub _compute_availability_on_the_fly {
     # process all log lines we got
     # make sure our logs are sorted by time
     for my $data ( sort { $a->{'time'} <=> $b->{'time'} } @{$logs} ) {
-        if($xs) {
-            eval {
+        eval {
+            if($xs) {
                 &_compute_for_data($self, $last_time,
                                          &Thruk::Utils::XS::parse_line($data->{'message'}),
                                          $result);
-
-                # set timestamp of last log line
-                $last_time = $data->{'time'};
-            };
-            $self->_log('_compute_availability_on_the_fly(): '.$@) if $@ and $verbose;
-        } else {
-            eval {
+            } else {
                 &_compute_for_data($self, $last_time,
                                          &Monitoring::Availability::Logs::_parse_livestatus_entry($data),
                                          $result);
-
-                # set timestamp of last log line
-                $last_time = $data->{'time'};
-            };
-            $self->_log('_compute_availability_on_the_fly(): '.$@) if $@ and $verbose;
-        }
+            }
+            # set timestamp of last log line
+            $last_time = $data->{'time'};
+        };
+        $self->_log('_compute_availability_on_the_fly(): '.$@) if $@ and $verbose;
     }
 
     # processing logfiles finished
