@@ -1127,23 +1127,18 @@ sub store_user_data {
         }
     }
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    my(undef, $tmpfile) = tempfile();
-    open(my $fh, '>', $tmpfile) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$tmpfile.' : '.$! );
-        return;
-    };
-    print $fh Dumper($data);
-    Thruk::Utils::IO::close($fh, $tmpfile);
-    Thruk::Utils::IO::ensure_permissions('file', $file);
-
     # update cached data
     $c->stash->{'user_data_cached'} = $data;
 
-    move($tmpfile, $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$tmpfile.' '.$file.': '.$! );
-        return;
+    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $rc;
+    eval {
+        $rc = write_data_file($file, $data);
     };
+    if($@ || !$rc) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: '.$file.' '.$@ );
+        return;
+    }
 
     return 1;
 }
@@ -1196,20 +1191,14 @@ sub store_global_user_data {
     }
 
     my $file = $c->config->{'var_path'}."/global_user_data";
-    open(my $fh, '>', $file.'.new') or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
-        return;
+    my $rc;
+    eval {
+        $rc = write_data_file($file, $data);
     };
-    CORE::close($fh) or die("cannot close file ".$file.".new: ".$!);
-    write_data_file($file.'.new', $data);
-    Thruk::Utils::IO::ensure_permissions('file', $file.'.new');
-
-    move($file.'.new', $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
+    if($@ || !$rc) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: '.$file.' '.$@ );
         return;
-    };
-    Thruk::Utils::IO::ensure_permissions('file', $file);
-
+    }
     return 1;
 }
 
@@ -1878,6 +1867,16 @@ return data for datafile
 sub read_data_file {
     my($filename) = @_;
 
+    # just wrap the json writer and keep the rest to read old data files
+    my $res;
+    eval {
+        $res = Thruk::Utils::IO::json_lock_retrieve($filename);
+    };
+    if(!$@ && $res) {
+        return($res);
+    }
+
+    # REMOVE AFTER: 01.01.2018
     my $cont = read_file($filename);
     if($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
 
@@ -1912,27 +1911,8 @@ write data to datafile
 sub write_data_file {
     my($filename, $data) = @_;
 
-    # make Data::dumper save utf-8 directly
-    local $Data::Dumper::Useqq = 1;
-
-    # avoid self-referential structures
-    local $Data::Dumper::Deepcopy = 1;
-
-    # save some disk space
-    local $Data::Dumper::Indent   = 1;
-
-    my(undef, $tmpfile) = tempfile();
-
-    my $d = Dumper($data);
-    $d    =~ s/^\$VAR1\ =\ //mx;
-    $d    =~ s/JSON::PP::Boolean/JSON::XS::Boolean/gmx;
-    open(my $fh, '>:encoding(UTF-8)', $tmpfile) or confess('cannot write to '.$tmpfile.": ".$!);
-    print $fh $d;
-    Thruk::Utils::IO::close($fh, $tmpfile);
-    Thruk::Utils::IO::ensure_permissions('file', $tmpfile);
-    move($tmpfile, $filename) || die('fail_message', 'Saving Data failed: move '.$tmpfile.' '.$filename.': '.$! );
-
-    return;
+    # store new data files in json format
+    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1));
 }
 
 ##############################################

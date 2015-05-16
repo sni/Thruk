@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - changed to json storage format everywhere
           - improved memory usage
           - improved startup time
           - fix redirect without trailing slash on login
