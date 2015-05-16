@@ -50,3 +50,5 @@ td.filter { background-color: white; }
 table.cmd_pane { background: none; }
 table.cmd_pane tbody > tr > td { background: #f0f1ee; border: none; }
 table.cmd_pane th,table.cmd_pane a,table.cmd_pane a:hover { background: #f0f1ee; color: #333333; }
+
+div.pnpSelector { display: inline; position: absolute; right: 2px; top: -6px; }
