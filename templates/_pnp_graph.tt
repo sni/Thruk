@@ -29,7 +29,7 @@
   <tr>
     <td style="position: relative;">
         <div class='commentTitle'>Performance Graph</div>
-        <div style="display: inline; position: absolute; right: 2px; top: 22px;">
+        <div class='pnpSelector'>
           <form action="#">
             <select onchange="pnp_source=this.value; set_png_img();" id="pnp_source_select" style="display: none;">
             </select>
