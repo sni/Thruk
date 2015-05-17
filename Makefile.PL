@@ -28,7 +28,6 @@ requires 'Template'                               => 0;     # required by Thruk
 requires 'Template::Plugin::Date'                 => 0;     # required by Thruk::Utils
 requires 'Date::Calc'                             => 6.3;   # required by Thruk::Utils
 requires 'Date::Calc::XS'                         => 0;     # required by Thruk::Utils
-requires 'Data::Page'                             => 0;     # required by Thruk::Backend::Manager
 requires 'File::Slurp'                            => 0;     # required by Thruk::Utils
 requires 'Date::Manip'                            => 0;     # required by Thruk::Utils
 requires 'DateTime::TimeZone'                     => 0;     # required by Panorama Plugin

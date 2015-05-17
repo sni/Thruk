@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
-use Data::Page ();
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
@@ -1235,7 +1234,7 @@ sub _do_on_peers {
         }
 
         if( $arg{'pager'} ) {
-            $data = $self->_page_data( undef, $data, undef, $totalsize );
+            $data = $self->_page_data(undef, $data, undef, $totalsize);
         }
     }
 
@@ -1717,16 +1716,16 @@ sub _page_data {
         return $data;
     }
 
-    my $pager = Data::Page->new;
+    my $pager = {};
     if(defined $totalsize) {
-        $pager->total_entries( $totalsize );
+        $pager->{'total_entries'} = $totalsize;
     } else {
-        $pager->total_entries( scalar @{$data} );
+        $pager->{'total_entries'} = scalar @{$data};
     }
-    if( $entries eq 'all' ) { $entries = $pager->total_entries; }
+    if($entries eq 'all') { $entries = $pager->{'total_entries'}; }
     my $pages = 0;
-    if( $entries > 0 ) {
-        $pages = POSIX::ceil( $pager->total_entries / $entries );
+    if($entries > 0) {
+        $pages = POSIX::ceil($pager->{'total_entries'} / $entries);
     }
     else {
         $c->stash->{'data'} = $data;
@@ -1780,27 +1779,29 @@ sub _page_data {
         $page = $pages;
     }
 
-    if( $page < 0 )      { $page = 1; }
-    if( $page > $pages ) { $page = $pages; }
+    if($page < 0)      { $page = 1; }
+    if($page > $pages) { $page = $pages; }
 
     $c->stash->{'current_page'} = $page;
 
-    if( $entries eq 'all' ) {
+    if($entries eq 'all') {
         $c->stash->{'data'} = $data;
     }
     else {
-        $pager->entries_per_page($entries);
-        $pager->current_page($page);
-        my @data = $pager->splice($data);
-        $c->stash->{'data'} = \@data;
+        if($page == $pages) {
+            $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
+        } else {
+            $data = [splice(@{$data}, $entries*($page-1), $entries)];
+        }
+        $c->stash->{'data'} = $data;
     }
 
     $c->stash->{'pager'} = $pager;
     $c->stash->{'pages'} = $pages;
 
     # set some variables to avoid undef values in templates
-    $c->stash->{'pager_previous_page'} = $pager->previous_page() || 0;
-    $c->stash->{'pager_next_page'}     = $pager->next_page()     || 0;
+    $c->stash->{'pager_previous_page'} = $page > 1      ? $page - 1 : 0;
+    $c->stash->{'pager_next_page'}     = $page < $pages ? $page + 1 : 0;
 
     return $data;
 }
