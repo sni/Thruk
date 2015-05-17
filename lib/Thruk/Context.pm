@@ -101,7 +101,7 @@ sub detach {
         Thruk::Controller::error::index($_[0], $1);
         return;
     }
-    confess("detach: ".$_[1]." at ".$_[0]->req->url->path);
+    confess("detach: ".$_[1]." at ".$_[0]->req->url);
 }
 
 =head2 render
