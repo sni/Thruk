@@ -12,6 +12,7 @@ Replace the following pattern.
  - $c->res->content_type                -> $c->res->headers->content_type
  - $c->res->header                      -> $c->res->headers->header
  - $c->forward("View::JSON");           -> return $c->render(json => $json);
+ - return $c->detach('View::Excel');    -> return $c->render_excel();
  - $c->response->status()               -> $c->res->code()
  - $c->res->cookies->{'name'} = {...    -> $c->cookie('name' => $val, { path  => ... });
  - $c->{'request'}->{'parameters'}      -> $c->req->parameters
