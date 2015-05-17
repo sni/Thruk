@@ -57,6 +57,9 @@ sub new {
         stats  => Thruk::Stats->new(),
         user   => undef,
         errors => [],
+        # REMOVE AFTER: 01.01.2018
+        request  => 'see MIGRATION-2.0 on $c->request',
+        response => 'see MIGRATION-2.0 on $c->response',
     };
     bless($self, $class);
     weaken($self->{'app'}) unless $ENV{'THRUK_SRC'} eq 'CLI';
