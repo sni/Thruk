@@ -328,10 +328,15 @@ sub uri_with {
     my @new_param;
     while(my $k = shift @old_param) {
         my $v = shift @old_param;
-        if(exists $data->{$k} && (!defined $data->{$k} || $data->{$k} eq 'undef')) {
-            next;
+        if(exists $data->{$k}) {
+            if(!defined $data->{$k} || $data->{$k} eq 'undef') {
+                next;
+            } else {
+                push(@new_param, $k, delete $data->{$k});
+            }
+        } else {
+            push(@new_param, $k, $v);
         }
-        push(@new_param, $k, $v);
     }
     for my $k (sort keys %{$data}) {
         push(@new_param, $k, $data->{$k}) if(defined $data->{$k} && $data->{$k} ne 'undef');
