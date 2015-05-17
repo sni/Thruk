@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 56;
+    plan tests => 57;
 
     use lib('t');
     require TestUtils;
@@ -216,6 +216,9 @@ $c = $context;
 
 my $param_exp = {a=>[1,4], b => 2, c => 3};
 is_deeply($c->req->parameters, $param_exp, 'got array parameters');
+
+$param_exp = {a=>[1,4], b => 2, c => 3};
+is_deeply($c->req->query_parameters, $param_exp, 'got array query parameters');
 
 $uri = Thruk::Utils::Filter::uri_with($c, {});
 is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
