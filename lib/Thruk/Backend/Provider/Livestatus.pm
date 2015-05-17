@@ -479,6 +479,21 @@ sub get_services {
         $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
     }
 
+    # workaround a problem with services beeing reverse sorted if the only filter is a host_name filter
+    if($options{'filter'}) {
+        my $filter = $options{'filter'};
+        while(ref $filter eq 'ARRAY' && scalar @{$filter} == 1) {
+            $filter = $filter->[0];
+        }
+        if(ref $filter eq 'HASH') {
+            my @keys = keys %{$filter};
+            if(scalar @keys == 1 && $keys[0] eq 'host_name') {
+                delete $options{'options'}->{'limit'};
+            }
+        }
+        $options{'filter'} = [$filter];
+    }
+
     # get result
     my $data = $self->_get_table('services', \%options);
     return $data if $ENV{'THRUK_SELECT'};
