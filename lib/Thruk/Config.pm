@@ -190,7 +190,7 @@ our %config = ('name'                   => 'Thruk',
                   POST_CHOMP         => 1,
                   TRIM               => 1,
                   COMPILE_EXT        => '.ttc',
-                  STAT_TTL           => 604800, # template do not change in production
+                  STAT_TTL           => 604800, # templates do not change in production
                   STRICT             => 0,
                   render_die         => 1,
               },
@@ -220,7 +220,6 @@ if(-f $project_root."/.author") {
     $config{'thruk_debug'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'} = $config{released};
-$config{'View::Excel::Template::Plus'}            = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 
 ######################################
 
