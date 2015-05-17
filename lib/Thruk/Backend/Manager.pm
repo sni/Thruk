@@ -1731,6 +1731,10 @@ sub _page_data {
         $c->stash->{'data'} = $data;
         return $data;
     }
+    if($pager->{'total_entries'} == 0) {
+        $c->stash->{'data'} = $data;
+        return $data;
+    }
 
     my $page = 1;
     # current page set by get parameter
@@ -1788,6 +1792,7 @@ sub _page_data {
         $c->stash->{'data'} = $data;
     }
     else {
+use Data::Dumper; print STDERR Dumper(scalar @{$data}, $page, $pages, $entries);
         if($page == $pages) {
             $data = [splice(@{$data}, $entries*($page-1), $pager->{'total_entries'} - $entries*($page-1))];
         } else {
