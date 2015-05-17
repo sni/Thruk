@@ -1,5 +1,15 @@
 package Thruk::Views::ToolkitRenderer;
 
+=head1 NAME
+
+Thruk::Views::ToolkitRenderer - Render TT templates
+
+=head1 DESCRIPTION
+
+TT template renderer
+
+=cut
+
 use strict;
 use warnings;
 use Carp qw/confess/;

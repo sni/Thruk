@@ -1,5 +1,15 @@
 package Thruk::Views::ExcelRenderer;
 
+=head1 NAME
+
+Thruk::Views::ExcelRenderer - Render Excel files
+
+=head1 DESCRIPTION
+
+Excel file renderer
+
+=cut
+
 use strict;
 use warnings;
 use Carp qw/confess/;

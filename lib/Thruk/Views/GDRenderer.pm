@@ -1,5 +1,15 @@
 package Thruk::Views::GDRenderer;
 
+=head1 NAME
+
+Thruk::Views::GDRenderer - Render GD files
+
+=head1 DESCRIPTION
+
+GD file renderer
+
+=cut
+
 use strict;
 use warnings;
 use Carp qw/confess/;

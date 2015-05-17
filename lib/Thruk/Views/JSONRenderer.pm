@@ -1,5 +1,15 @@
 package Thruk::Views::JSONRenderer;
 
+=head1 NAME
+
+Thruk::Views::JSONRenderer - Render JSON data
+
+=head1 DESCRIPTION
+
+JSON data renderer
+
+=cut
+
 use strict;
 use warnings;
 use Carp qw/confess/;
