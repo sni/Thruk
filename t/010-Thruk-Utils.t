@@ -8,7 +8,7 @@ use Encode qw/is_utf8/;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 45;
+    plan tests => 56;
 
     use lib('t');
     require TestUtils;
@@ -199,3 +199,47 @@ $encoded    = $teststring;
 $encoded    = Thruk::Utils::ensure_utf8($encoded);
 is($encoded, "test\x{20ac}", 'ensure utf8 test20ac');
 ok(is_utf8($encoded), 'is_utf8 test20ac');
+
+#########################
+my $uri;
+$uri = Thruk::Utils::Filter::uri_with($c, {});
+is($uri, 'side.html', 'uri_with without params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => 2, c => 3});
+is($uri, 'side.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
+
+$uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => undef, c => 'undef'});
+is($uri, 'side.html?a=1', 'uri_with with undef params');
+
+my($res, $context) = TestUtils::ctx_request('/thruk/cgi-bin/tac.cgi?a=1&b=2&c=3&a=4');
+$c = $context;
+
+my $param_exp = {a=>[1,4], b => 2, c => 3};
+is_deeply($c->req->parameters, $param_exp, 'got array parameters');
+
+$uri = Thruk::Utils::Filter::uri_with($c, {});
+is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
+
+$uri = Thruk::Utils::Filter::full_uri($c);
+is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
+
+$uri = Thruk::Utils::Filter::short_uri($c);
+is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'short_uri with existing params');
+
+#########################
+my $args = Thruk::Utils::Filter::as_url_arg('blah=&blub"');
+is($args, 'blah%3D%26blub%22', 'as_url_arg');
+
+#########################
+Thruk::Utils::set_message($c, 'fail_message', "test_error");
+
+my $exp_cookie = {'value' => 'fail_message~~test_error', 'path' => '/thruk/'};
+is_deeply($c->res->{'cookies'}->{'thruk_message'}, $exp_cookie, 'get_message cookie');
+
+my @msg = Thruk::Utils::Filter::get_message($c);
+my $exp = ['fail_message', 'test_error', 0];
+is_deeply(\@msg, $exp, 'get_message');
+
+is($c->res->{'cookies'}->{'thruk_message'}, undef, 'get_message cookie after');
+
+#########################
