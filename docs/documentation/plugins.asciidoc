@@ -16,6 +16,10 @@ OMD, the plugins folder is in $OMD_ROOT/etc/thruk/plugins.
 Make sure you restart Thruk / Apache after enabling / disabling
 plugins.
 
+WARNING: With Thruk 2.0 a few minor changes are required for plugins. If you
+have own custom plugins, the link:thruk_2_0_migration_guide.html[Migration Guide] will
+help you getting them to work with Thruk 2.0.
+
 Later versions of Thruk have a plugins manager included in the config
 tool and you can manage your plugins there.
 

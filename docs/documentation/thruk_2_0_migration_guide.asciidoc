@@ -1,0 +1,165 @@
+---
+layout: docs
+title: Thruk2 Plugin Migration Guide
+---
+
+Thruk 2 Plugin Migration Guide
+==============================
+
+With Thruk 2.0 does not use the Catalyst framework anymore and is now based on
+the much faster and lighter Plack framework. With this some small changes are
+neccessary to existing plugins. The plugins shiped with Thruk are adopted
+already and might be a good example of how they look now.
+
+
+
+Setting URL routes
+------------------
+
+Instead of the `Path()` decorator a new `add_routes` function has been introduced.
+
+.Old:
+----
+  sub minemap_cgi : Path('/thruk/cgi-bin/minemap.cgi') {
+    my ( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
+    return $c->detach('/minemap/index');
+  }
+----
+
+.New:
+----
+  sub add_routes {
+    my($self, $app, $routes) = @_;
+    $routes->{'/thruk/cgi-bin/minemap.cgi'} = 'Thruk::Controller::minemap::index';
+    return;
+  }
+----
+
+
+Replace MyAction Defaults
+-------------------------
+
+The `MyAction` decorator has been replaced with a direct call to add_defaults. The
+`add_defaults` function adds the (livestatus)-database connection.
+
+.Old:
+----
+  sub index :Path :Args(0) :MyAction('AddDefaults') {
+    my ( $self, $c ) = @_;
+    ...
+----
+
+.New:
+----
+  sub index {
+    my ( $c ) = @_;
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_DEFAULTS);
+    ...
+----
+
+There are 3 variants available:
+
+* Thruk::ADD_DEFAULTS +
+  add connection but redirect to error page if no backends available
+* Thruk::ADD_SAFE_DEFAULTS +
+  add connection and just return for no backends
+* Thruk::ADD_CACHED_DEFAULTS +
+  add connection without requesting process info and backend status
+
+
+Accessing the Request Parameters
+--------------------------------
+
+Previously the request object was available by `$c->request` and `$c->{'request'}`. This
+has changed to `$c->req`.
+
+----
+  Old                                           New
+  $c->{'request'}->{'parameters'}      ->       $c->req->parameters
+----
+
+
+
+Accessing the Response Object
+-----------------------------
+
+The `$c->response` object is now available at `$c->res` and accessing the
+headers and cookies has slightly changed.
+
+----
+  Old                                           New
+  $c->response->redirect               ->       $c->redirect_to
+  $c->res->content_type                ->       $c->res->headers->content_type
+  $c->res->header                      ->       $c->res->headers->header
+  $c->response->status()               ->       $c->res->code()
+----
+
+Cookies handling has been slightly changed:
+
+Get cookie values as list.
+----
+  $c->cookies('name')->{'value'}
+----
+
+Get single cookie values as scalar.
+----
+  $c->cookie('name')->{'value'}
+----
+
+Set new cookies:
+----
+  $c->cookie('name' => 'value', {
+            path    => $c->stash->{'cookie_path'},
+            domain  => ...,
+  });
+----
+
+
+
+Remove Catalyst References
+--------------------------
+
+All references to Catalyst and Moose can be removed.
+
+----
+  Remove
+  use parent 'Catalyst::Controller';
+  __PACKAGE__->meta->make_immutable;
+----
+
+
+
+Rendering JSON Data
+-------------------
+
+----
+  Old                                           New
+  $c->forward("View::JSON");           ->       return $c->render(json => $json);
+----
+
+
+
+Rendering Excel Data
+--------------------
+
+----
+  Old                                           New
+  return $c->detach('View::Excel');    ->       return $c->render_excel();
+----
+
+
+
+Renamed Environment Variables
+-----------------------------
+
+Two environmental variables have also changed. The `CATALYST_SERVER` is mainly
+used for automatic unit tests. The `THRUK_CONFIG` variable is used to
+determince the folder for Thruks configuration files.
+
+----
+  Old                                           New
+  CATALYST_SERVER                      ->       PLACK_TEST_EXTERNALSERVER_URI
+  CATALYST_CONFIG                      ->       THRUK_CONFIG
+----
+
