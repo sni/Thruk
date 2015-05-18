@@ -95,6 +95,7 @@ sub thruk_index {
     }
 
     # custom start page?
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     $c->stash->{'start_page'} = $c->stash->{'url_prefix'}.'main.html' unless defined $c->stash->{'start_page'};
     if( CORE::index($c->stash->{'start_page'}, $c->stash->{'url_prefix'}) != 0 ) {
 
@@ -124,7 +125,8 @@ page: /thruk/index.html
 sub thruk_index_html {
     my( $c ) = @_;
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."cgi-bin/mobile.cgi");
-    unless ( $c->stash->{'use_frames'} ) {
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    unless($c->stash->{'use_frames'}) {
         return(thruk_main_html($c));
     }
 
@@ -171,6 +173,7 @@ page: /thruk/frame.html
 sub thruk_frame_html {
     my( $c ) = @_;
     # allowed links to be framed
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = $c->config->{'allowed_frame_links'};
     if( defined $additional_links ) {
