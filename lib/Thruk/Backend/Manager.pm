@@ -1702,6 +1702,7 @@ sub _page_data {
     # set some defaults
     my $pager = {};
     $c->stash->{'pager'} = $pager;
+    $c->stash->{'pages'} = 0;
     $c->stash->{'data'}  = $data;
 
     # page only in html mode
