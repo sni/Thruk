@@ -1700,8 +1700,9 @@ sub _page_data {
     my $totalsize           = shift;
 
     # set some defaults
-    $c->stash->{'pager'} = "";
-    $c->stash->{'data'} = $data;
+    my $pager = {};
+    $c->stash->{'pager'} = $pager;
+    $c->stash->{'data'}  = $data;
 
     # page only in html mode
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
@@ -1712,11 +1713,10 @@ sub _page_data {
 
     # we dont use paging at all?
     unless($c->stash->{'use_pager'}) {
-        $c->stash->{'pager'} = { 'total_entries' => ($totalsize || scalar @{$data}) };
+        $pager->{'total_entries'} = ($totalsize || scalar @{$data});
         return $data;
     }
 
-    my $pager = {};
     if(defined $totalsize) {
         $pager->{'total_entries'} = $totalsize;
     } else {
@@ -1787,6 +1787,7 @@ sub _page_data {
     if($page > $pages) { $page = $pages; }
 
     $c->stash->{'current_page'} = $page;
+    $pager->{'current_page'}    = $page;
 
     if($entries eq 'all') {
         $c->stash->{'data'} = $data;
@@ -1800,7 +1801,6 @@ sub _page_data {
         $c->stash->{'data'} = $data;
     }
 
-    $c->stash->{'pager'} = $pager;
     $c->stash->{'pages'} = $pages;
 
     # set some variables to avoid undef values in templates
