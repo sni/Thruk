@@ -7,8 +7,8 @@ before_install:
   - gpg --armor --export F8C1CA08A57B9ED7 | sudo apt-key add -
   - sudo apt-get update
   - sudo apt-get install make build-essential rsync perl-doc tofrodos libcurl4-openssl-dev apache2 libcairo2-dev libperl-dev libmysqlclient-dev libgd2-xpm-dev cpanminus yui-compressor wget
-  - sudo apt-get install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl
-  - sudo apt-get install libtest-pod-coverage-perl libperl-critic-perl libtest-perl-critic-perl libtemplate-perl libdate-calc-perl liblog-log4perl-perl libconfig-any-perl libdata-page-perl
+  - sudo apt-get install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl libdevel-cycle-perl
+  - sudo apt-get install libtest-pod-coverage-perl libperl-critic-perl libtest-perl-critic-perl libtemplate-perl libdate-calc-perl liblog-log4perl-perl libconfig-general-perl:
   - sudo apt-get install libmime-lite-perl
   - sudo apt-get install mysql-client mysql-server
   - sudo apt-get install naemon-core naemon-livestatus
