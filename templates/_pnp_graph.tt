@@ -13,13 +13,15 @@
     },
     success: function(data) {
       if(!data.match(/^\[/)) { return; }
-      var sources = eval(data);
+      var sources    = eval(data);
+      var has_graphs = false;
       jQuery('#pnp_source_select').find('option').remove();
       jQuery(sources).each(function(x, s) {
           jQuery('#pnp_source_select').append('<option value="'+x+'"'+(x==pnp_source ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
+          has_graphs = true;
       });
       /* only useful for multiple sources */
-      if(x > 0) {
+      if(has_graphs) {
         jQuery('#pnp_source_select').show();
       }
     }
