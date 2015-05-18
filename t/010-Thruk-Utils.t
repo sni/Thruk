@@ -211,7 +211,7 @@ is($uri, 'side.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
 $uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => undef, c => 'undef'});
 is($uri, 'side.html?a=1', 'uri_with with undef params');
 
-my($res, $context) = TestUtils::ctx_request('/thruk/cgi-bin/tac.cgi?a=1&b=2&c=3&a=4');
+my($res, $context) = TestUtils::ctx_request('/thruk/main.html?a=1&b=2&c=3&a=4');
 $c = $context;
 
 my $param_exp = {a=>[1,4], b => 2, c => 3};
@@ -221,19 +221,19 @@ $param_exp = {a=>[1,4], b => 2, c => 3};
 is_deeply($c->req->query_parameters, $param_exp, 'got array query parameters');
 
 $uri = Thruk::Utils::Filter::uri_with($c, {});
-is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
 
 $uri = Thruk::Utils::Filter::full_uri($c);
-is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
 
 $uri = Thruk::Utils::Filter::short_uri($c);
-is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4', 'short_uri with existing params');
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'short_uri with existing params');
 
 $uri = Thruk::Utils::Filter::uri_with($c, { d => 5 });
-is($uri, 'tac.cgi?a=1&amp;b=2&amp;c=3&amp;a=4&amp;d=5', 'uri_with with added params');
+is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4&amp;d=5', 'uri_with with added params');
 
 $uri = Thruk::Utils::Filter::uri_with($c, { b => 5 });
-is($uri, 'tac.cgi?a=1&amp;b=5&amp;c=3&amp;a=4', 'uri_with with replaced params');
+is($uri, 'main.html?a=1&amp;b=5&amp;c=3&amp;a=4', 'uri_with with replaced params');
 
 #########################
 my $args = Thruk::Utils::Filter::as_url_arg('blah=&blub"');
