@@ -38,6 +38,7 @@ requires 'Log::Dispatch::File'                    => 0;     # required by Thruk 
 requires 'Storable'                               => 0;     # required by Thruk::Utils::External
 requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
 requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
+requires 'Time::HiRes'                            => 0;     # required by Thruk::Backend::Manager
 
 # reporting2 plugin
 feature     ('plugin_reports2',
@@ -64,6 +65,7 @@ feature     ('mysql_support',
 if(scalar @ARGV != 1 || $ARGV[0] ne '--checkdeps') {
 feature     ('author_test',
   -default                                                                  => 0,
+  'Test::Simple'                                                            => 0,
   'HTML::Lint'                                                              => 0,
   'File::BOM'                                                               => 0,
   'Test::Cmd'                                                               => 0,
