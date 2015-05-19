@@ -977,7 +977,6 @@ sub _report_save {
 ##########################################################
 sub _read_report_file {
     my($c, $nr, $rdata, $noauth, $simple) = @_;
-    $Thruk::Utils::CLI::c = $c;
 
     if(!defined $nr || $nr !~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");

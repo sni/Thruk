@@ -49,7 +49,7 @@ sub _debug {
         if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
             print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
         } else {
-            my $c = $Thruk::Utils::CLI::c;
+            my $c = $Thruk::Request::c;
             confess('no c') unless defined $c;
             if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
             if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }

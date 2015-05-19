@@ -13,6 +13,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
+    $ENV{'THRUK_KEEP_CONTEXT'} = 1;
 }
 
 ################################################################################

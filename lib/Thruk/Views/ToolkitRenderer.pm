@@ -16,6 +16,9 @@ use Carp qw/confess/;
 use Template ();
 use Encode qw/encode_utf8 decode_utf8/;
 
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+}
 =head1 METHODS
 
 =head2 register
@@ -64,6 +67,7 @@ sub render {
             ];
     }
 
+    #&timing_breakpoint('render_tt render()');
     my $output = "";
     $tt->process(
         $template,
@@ -72,6 +76,7 @@ sub render {
     ) || do {
         die($tt->error.' on '.$template);
     };
+    #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
     return(encode_utf8($output));
 }

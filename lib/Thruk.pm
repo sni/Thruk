@@ -206,7 +206,6 @@ sub _dispatcher {
     $Thruk::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
     my $c = Thruk::Context->new($self, $env);
-    #&timing_breakpoint("_dispatcher context done");
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
     if(Thruk->verbose) {
@@ -248,9 +247,7 @@ sub _dispatcher {
                 ###################################
                 # request post processing and rendering
                 unless($c->{'rendered'}) {
-                    #&timing_breakpoint("_dispatcher render_tt");
                     Thruk::Views::ToolkitRenderer::render_tt($c);
-                    #&timing_breakpoint("_dispatcher render_tt done");
                 }
             }
         };
@@ -269,9 +266,7 @@ sub _dispatcher {
     }
 
     #&timing_breakpoint("_dispatcher finalize");
-    $c->stats->profile(begin => "_res_finalize");
     my $res = $c->res->finalize;
-    $c->stats->profile(end => "_res_finalize");
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
     #&timing_breakpoint("_dispatcher finalize done");
 
