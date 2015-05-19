@@ -5,7 +5,7 @@ use Test::More;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 273;
+    plan tests => 284;
 }
 
 BEGIN {
@@ -16,7 +16,7 @@ BEGIN {
 use_ok 'Thruk::Controller::error';
 
 $ENV{'TEST_ERROR'} = 1;
-for(0..24) {
+for(0..25) {
     my $nr = $_;
     my $test = {
         'url'     => '/thruk/cgi-bin/error.cgi?error='.$nr,

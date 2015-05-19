@@ -193,6 +193,11 @@ sub index {
             'dscr' => 'This request is not allowed, details can be found in the thruk.log.',
             'code' => 403, # forbidden
         },
+        '25'  => {
+            'mess' => 'This page does not exist...',
+            'dscr' => 'If you believe this is an error, check your configuration and your logfiles.',
+            'code' => 404, # not found
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

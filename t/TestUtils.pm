@@ -455,6 +455,8 @@ sub test_page {
         $opts->{'callback'}($return->{'content'});
     }
 
+    $return->{'response'} = $request;
+    $return->{'code'}     = $request->code();
     return $return;
 }
 

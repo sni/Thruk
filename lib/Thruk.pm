@@ -230,7 +230,7 @@ sub _dispatcher {
                 $rc = &{$route}($c);
             }
             else {
-                return([404, ['Content-Type' => 'text/plain', 'Content-Length' => 9], ['not found']]);
+                $rc = Thruk::Controller::error::index($c, 25);
             }
             if($rc) {
                 Thruk::Action::AddDefaults::end($c);

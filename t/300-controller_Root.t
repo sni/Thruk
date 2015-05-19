@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 99;
+    plan tests => 112;
 }
 
 BEGIN {
@@ -20,6 +20,8 @@ SKIP: {
     TestUtils::test_page(url => '/', redirect => 1, location => '/thruk/');
 }
 TestUtils::test_page(url => '/thruk', redirect => 1, location => '/thruk/');
+my $res = TestUtils::test_page(url => '/thruk/cgi-bin/blah.cgi', fail => 1, like => 'This page does not exist');
+is($res->{'code'}, 404, 'got page not found');
 
 #####################################################################
 my $pages = [
