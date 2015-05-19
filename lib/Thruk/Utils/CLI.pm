@@ -353,8 +353,8 @@ sub _run {
             ## no critic
             $SIG{CHLD} = 'DEFAULT';
             Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
-            $ENV{'THRUK_JOB_ID'}  = $id;
-            $ENV{'THRUK_JOB_DIR'} = $dir;
+            $ENV{'THRUK_JOB_ID'}       = $id;
+            $ENV{'THRUK_JOB_DIR'}      = $dir;
             ## use critic
             Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
         }

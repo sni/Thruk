@@ -63,6 +63,7 @@ sub request {
 sub ctx_request {
     my($url) = @_;
     local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
+    $Thruk::Request::c = undef;
     my $res = request($url);
     my $c = $Thruk::Request::c;
     return($res, $c);
