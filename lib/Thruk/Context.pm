@@ -43,6 +43,11 @@ sub new {
         $memory_begin = Thruk::Backend::Pool::get_memory_usage();
     }
 
+    # translate paths, translate ex.: /naemon/cgi-bin to /thruk/cgi-bin/
+    my $path_info         = translate_request_path($env->{'PATH_INFO'}, $app->config);
+    $env->{'PATH_INFO'}   = $path_info;
+    $env->{'REQUEST_URI'} = $path_info;
+
     my $req = Thruk::Request->new($env);
     my $self = {
         app    => $app,
@@ -274,6 +279,29 @@ sub url_with {
     my($c, $args) = @_;
     return(Thruk::Utils::Filter::uri_with($c, $args));
 }
+
+=head2 translate_request_path
+
+    translate_request_path(<path_info>, $config)
+
+translate paths, /naemon/cgi-bin to /thruk/cgi-bin/
+or /<omd-site/thruk/cgi-bin/... to /thruk/cgi-bin/...
+so later functions can use /thruk/... for everything,
+regardless of the deployment path.
+
+=cut
+sub translate_request_path {
+    my($path_info, $config) = @_;
+    my $product_prefix = $config->{'product_prefix'};
+    if($ENV{'OMD_SITE'}) {
+        $path_info =~ s|^/\Q$ENV{'OMD_SITE'}\E/|/|mx;
+    }
+    if($product_prefix ne 'thruk') {
+        $path_info =~ s|^/\Q$product_prefix\E|/thruk|mx;
+    }
+    return($path_info);
+}
+
 
 1;
 __END__

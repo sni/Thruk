@@ -99,7 +99,11 @@ sub startup {
 
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
-        $app = Plack::Middleware::Static->wrap($app, path => qr{\.(css|png|js|gif|jpg|ico|html|wav)$}mx, root => './root/', pass_through => 1);
+        $app = Plack::Middleware::Static->wrap($app,
+                    path         => sub { $_ = Thruk::Context::translate_request_path($_, $class->config); return($_ =~ /\.(css|png|js|gif|jpg|ico|html|wav)$/mx); },
+                    root         => './root/',
+                    pass_through => 1,
+        );
 
         _setup_development_signals();
     }
