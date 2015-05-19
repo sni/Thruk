@@ -1145,7 +1145,7 @@ sub _read_socket_do {
     if($content_length > 0) {
         if($status == 200) {
             my $remaining = $content_length;
-            my $length    = 8192;
+            my $length    = 32768;
             if($remaining < $length) { $length = $remaining; }
             while($length > 0 && $sock->read(my $buf, $length)) {
                 # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
@@ -1154,7 +1154,8 @@ sub _read_socket_do {
                 $remaining = $remaining -$length;
                 if($remaining < $length) { $length = $remaining; }
             }
-            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, $sock, 'reading body from socket failed: '.$json_decoder->incr_text));
+            $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, $sock, 'reading body from socket failed: '.$json_decoder->incr_text.$json_decoder->incr_reset));
+            $json_decoder->incr_reset;
         } else {
             $sock->read($recv, $content_length) or return($self->_socket_error($statement, $sock, 'reading body from socket failed'));
         }
