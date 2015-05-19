@@ -38,13 +38,6 @@ requires 'Storable'                               => 0;     # required by Thruk:
 requires 'threads'                                => 0;     # required by Thruk::Pool::Simple
 requires 'Thread::Queue'                          => 0;     # required by Thruk::Pool::Simple
 
-# dashboard plugin
-feature     ('plugin_dashboard',
-  -default                                        => 0,
-  'List::Compare'                                 => 0,
-  'List::MoreUtils'                               => 0,
-);
-
 # reporting2 plugin
 feature     ('plugin_reports2',
   -default                                        => 0,

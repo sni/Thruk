@@ -2,8 +2,6 @@ package Thruk::Controller::dashboard;
 
 use strict;
 use warnings;
-use List::Compare;
-use List::MoreUtils;
 use Thruk::Utils::Status;
 use Thruk::Backend::Provider::DashboardLivestatus;
 use Thruk::Backend::Provider::DashboardHTTP;
@@ -223,7 +221,7 @@ sub _process_dashboard_page {
 
             }
 
-            @{$filter_host{'-or'}} = List::MoreUtils::uniq(@{$filter_host{'-or'}});
+            $filter_host{'-or'} = Thruk::Utils::array_uniq($filter_host{'-or'});
 
 
             my $stats;
