@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 97;
+    plan tests => 99;
 }
 
 BEGIN {
@@ -14,10 +14,14 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::Root' }
 
-my $redirects = [
-    '/',
-    '/thruk',
-];
+#####################################################################
+SKIP: {
+    skip 'external tests', 10 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    TestUtils::test_page(url => '/', redirect => 1, location => '/thruk/');
+}
+TestUtils::test_page(url => '/thruk', redirect => 1, location => '/thruk/');
+
+#####################################################################
 my $pages = [
     '/thruk/',
     '/thruk/docs/index.html',
@@ -27,16 +31,9 @@ my $pages = [
     '/thruk/startup.html',
 ];
 
-for my $url (@{$redirects}) {
-    TestUtils::test_page(
-        'url'      => $url,
-        'redirect' => 1,
-    );
-}
-
 for my $url (@{$pages}) {
     TestUtils::test_page(
-        'url'      => $url,
+        'url' => $url,
     );
 }
 SKIP: {

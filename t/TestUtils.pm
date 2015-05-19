@@ -220,8 +220,8 @@ sub test_page {
 
     # make tests with http://localhost/naemon possible
     my $product = 'thruk';
-    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
-        $product = $1;
+    if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
+        $product = $2;
         $opts->{'url'} =~ s|/thruk|/$product|gmx;
     }
 
@@ -740,8 +740,8 @@ sub _external_request {
     # make tests with http://localhost/naemon possible
     unless($url =~ m/^http/) {
         my $product = 'thruk';
-        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|/(\w+)$|mx) {
-            $product = $1;
+        if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
+            $product = $2;
             $url =~ s|/$product/|/|gmx;
             $url =~ s|/thruk/|/|gmx;
         }
