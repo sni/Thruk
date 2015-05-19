@@ -2,6 +2,11 @@ package Thruk::Controller::panorama;
 
 use strict;
 use warnings;
+use Data::Dumper qw/Dumper/;
+use JSON::XS qw/decode_json encode_json/;
+use File::Slurp qw/read_file/;
+use File::Copy qw/move copy/;
+use Encode qw(decode_utf8);
 use Module::Load qw/load/;
 
 =head1 NAME
@@ -15,6 +20,10 @@ Thruk Controller.
 =head1 METHODS
 
 =cut
+
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+}
 
 ##########################################################
 use constant {
@@ -59,21 +68,19 @@ sub add_routes {
 sub index {
     my ( $c ) = @_;
 
+    #&timing_breakpoint('panorama::index');
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
-        load Data::Dumper, qw/Dumper/;
-        load JSON::XS, qw/decode_json encode_json/;
+        #&timing_breakpoint('loading modules');
         load URI::Escape, qw/uri_unescape/;
         load IO::Socket;
-        load File::Slurp, qw/read_file/;
-        load File::Copy, qw/move copy/;
-        load Encode, qw(decode_utf8);
         load Scalar::Util, qw/looks_like_number/;
         load DateTime;
         load DateTime::TimeZone;
         load Thruk::Utils::PanoramaCpuStats;
         load Thruk::Utils::Avail;
+        #&timing_breakpoint('loaded modules');
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
@@ -237,7 +244,9 @@ sub index {
         return $c->redirect_to("panorama.cgi");
     }
 
+    #&timing_breakpoint('loading _js');
     _js($c, 1);
+    #&timing_breakpoint('loading _js done');
 
     $c->stash->{template} = 'panorama.tt';
     return 1;

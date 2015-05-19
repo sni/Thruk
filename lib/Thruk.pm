@@ -219,6 +219,7 @@ sub _dispatcher {
     $c->{'errored'} = 0;
     $Thruk::Request::c = $c;
     Thruk::Action::AddDefaults::begin($c);
+    #&timing_breakpoint("_dispatcher begin done");
 
     ###############################################
     # route cgi request
@@ -234,7 +235,9 @@ sub _dispatcher {
                     $self->{'routes'}->{$path_info} = \&{$route};
                     $route = $self->{'routes'}->{$path_info};
                 }
+                #&timing_breakpoint("_dispatcher route");
                 $rc = &{$route}($c);
+                #&timing_breakpoint("_dispatcher route done");
             }
             else {
                 $rc = Thruk::Controller::error::index($c, 25);
@@ -245,7 +248,9 @@ sub _dispatcher {
                 ###################################
                 # request post processing and rendering
                 unless($c->{'rendered'}) {
+                    #&timing_breakpoint("_dispatcher render_tt");
                     Thruk::Views::ToolkitRenderer::render_tt($c);
+                    #&timing_breakpoint("_dispatcher render_tt done");
                 }
             }
         };
@@ -263,10 +268,12 @@ sub _dispatcher {
         Thruk::Views::ToolkitRenderer::render_tt($c);
     }
 
+    #&timing_breakpoint("_dispatcher finalize");
     $c->stats->profile(begin => "_res_finalize");
     my $res = $c->res->finalize;
     $c->stats->profile(end => "_res_finalize");
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
+    #&timing_breakpoint("_dispatcher finalize done");
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
