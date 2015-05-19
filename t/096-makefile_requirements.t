@@ -97,12 +97,14 @@ for my $mod (sort keys %{$reqs}) {
         next if $pmod eq 'DBD::mysql';
         next if $pmod eq 'LWP::Protocol::https';
         next if $pmod eq 'LWP::Protocol::connect';
+        next if $pmod eq 'Test::Simple';
         fail("$pmod not used at all");
       }
     }
   } else {
     if(!defined $all_used->{$mod} && (!defined $replace->{$mod} || !defined $all_used->{$replace->{$mod}})) {
       next if $mod eq 'Plack';
+      next if $mod eq 'FCGI';
       next if $mod eq 'Net::HTTP';
       fail("$mod not used at all");
     }
