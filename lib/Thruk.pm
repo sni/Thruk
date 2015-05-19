@@ -590,6 +590,7 @@ sub _after_dispatch {
         $c->stash->{'memory_end'} = Thruk::Backend::Pool::get_memory_usage();
         my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
         $url     = $c->req->url unless $url;
+        $url     =~ s|^https?://[^/]+/|/|mxo;
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }

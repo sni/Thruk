@@ -661,23 +661,11 @@ sub _process_grid_page {
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
-    # we need the hostname, address etc...
-    my $host_data;
-    my $tmp_host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
-    if( defined $tmp_host_data ) {
-        for my $host ( @{$tmp_host_data} ) {
-            $host_data->{ $host->{'name'} } = $host;
-        }
-    }
-
-    # create a hash of all services
-    my $services_data;
-    my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
-    if( defined $tmp_services ) {
-        for my $service ( @{$tmp_services} ) {
-            $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
-        }
-    }
+    my($host_data, $services_data) = _fill_host_services_hashes($c,
+                                            [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                            [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                            0, # only name/description columes
+                                    );
 
     # get all host/service groups
     my $groups;
@@ -709,26 +697,17 @@ sub _process_grid_page {
             } else {
                 ( $hostname, $servicename ) = @{$member};
             }
-
             next unless defined $host_data->{$hostname};
-
-            if( !defined $joined_groups{$name}->{'hosts'}->{$hostname} ) {
-
-                # clone host data
-                for my $key ( keys %{ $host_data->{$hostname} } ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
-                }
-            }
 
             # add all services
             $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'} = {} unless defined $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'};
             if( $c->stash->{substyle} eq 'host' ) {
                 for my $service ( sort keys %{ $services_data->{$hostname} } ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{ $services_data->{$hostname}->{$service}->{'description'} } = $services_data->{$hostname}->{$service};
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$service} = 1;
                 }
             }
             else {
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{ $services_data->{$hostname}->{$servicename}->{'description'} } = $services_data->{$hostname}->{$servicename};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$servicename} = 1;
             }
         }
 
@@ -741,6 +720,40 @@ sub _process_grid_page {
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
     Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+
+    $host_data     = undef;
+    $services_data = undef;
+    my @group_names;
+    my @hostfilter;
+    my @servicefilter;
+    if( $c->stash->{substyle} eq 'host' ) {
+        for my $group (@{$c->stash->{'data'}}) {
+            push @hostfilter,    {      groups => { '>=' => $group->{name} } };
+            push @servicefilter, { host_groups => { '>=' => $group->{name} } };
+        }
+        $hostfilter    = [$hostfilter,    Thruk::Utils::combine_filter('-or', \@hostfilter)];
+        $servicefilter = [$servicefilter, Thruk::Utils::combine_filter('-or', \@servicefilter)];
+    } else {
+        for my $group (@{$c->stash->{'data'}}) {
+            push @servicefilter, { groups => { '>=' => $group->{name} } };
+        }
+        $servicefilter = [$servicefilter, Thruk::Utils::combine_filter('-or', \@servicefilter)];
+    }
+    ($host_data, $services_data) = _fill_host_services_hashes($c,
+                                            [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                            [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                            1, # all columes
+                                    );
+
+    for my $group (@{$c->stash->{'data'}}) {
+        for my $hostname (keys %{$group->{hosts}}) {
+            # merge host data
+            %{$group->{hosts}->{$hostname}} = (%{$group->{hosts}->{$hostname}}, %{$host_data->{$hostname}});
+            for my $servicename (keys %{$group->{hosts}->{$hostname}->{'services'}}) {
+                $group->{hosts}->{$hostname}->{'services'}->{$servicename} = $services_data->{$hostname}->{$servicename};
+            }
+        }
+    }
 
     return 1;
 }
@@ -1240,6 +1253,29 @@ sub _replacemacros {
     # replace_macros returns 1 on success, js expects 0 on success, so revert rc here
     return(!$rc, $new);
 }
+
+##########################################################
+sub _fill_host_services_hashes {
+    my($c, $hostfilter, $servicefilter, $all_columns) = @_;
+
+    my $host_data;
+    my $tmp_host_data = $c->{'db'}->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded/] : [qw/name/] );
+    if( defined $tmp_host_data ) {
+        for my $host ( @{$tmp_host_data} ) {
+            $host_data->{ $host->{'name'} } = $host;
+        }
+    }
+
+    my $services_data;
+    my $tmp_services = $c->{'db'}->get_services( filter => $servicefilter, columns => $all_columns ? undef : [qw/host_name description/] );
+    if( defined $tmp_services ) {
+        for my $service ( @{$tmp_services} ) {
+            $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
+        }
+    }
+    return($host_data, $services_data);
+}
+
 
 ##########################################################
 
