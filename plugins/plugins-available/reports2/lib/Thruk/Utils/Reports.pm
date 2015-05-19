@@ -321,8 +321,6 @@ generate a new report
 =cut
 sub generate_report {
     my($c, $nr, $options) = @_;
-    $Thruk::Utils::Reports::Render::c = $c;
-    $Thruk::Utils::CLI::c             = $c;
     $Thruk::Utils::PDF::attachment    = '';
     $Thruk::Utils::PDF::ctype         = 'html2pdf';
 

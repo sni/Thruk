@@ -24,8 +24,7 @@ use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
 use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
-$Thruk::Utils::CLI::verbose  = 0 unless defined $Thruk::Utils::CLI::verbose;
-$Thruk::Utils::CLI::c        = undef;
+$Thruk::Utils::CLI::verbose = 0 unless defined $Thruk::Utils::CLI::verbose;
 
 ##############################################
 
@@ -107,10 +106,9 @@ return L<Thruk::Context> context object
 =cut
 sub get_c {
     my($self) = @_;
-    return $Thruk::Utils::CLI::c if defined $Thruk::Utils::CLI::c;
+    return $Thruk::Request::c if defined $Thruk::Request::c;
     #my($c, $failed)
     my($c, undef, undef) = $self->_dummy_c();
-    $Thruk::Utils::CLI::c = $c;
     $c->stats->enable(1);
     return $c;
 }
@@ -442,9 +440,10 @@ sub _dummy_c {
     require Thruk;
     require HTTP::Request;
     require Plack::Test;
-    my $app = Plack::Test->create(Thruk->startup);
-    my $res = $app->request(HTTP::Request->new(GET => $url));
-    my $c    = $Thruk::Request::c;
+    my $app    = Plack::Test->create(Thruk->startup);
+    local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
+    my $res    = $app->request(HTTP::Request->new(GET => $url));
+    my $c      = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
     _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
     return($c, $failed, $res);
@@ -468,7 +467,6 @@ sub _from_fcgi {
     my $data  = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
-    $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
 
     # ensure secret key is fresh
@@ -844,39 +842,30 @@ sub _cmd_report {
         return("reports plugin is not enabled.\n", 1);
     }
     my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
-    # breaks tests on centos 6/7
-    #eval {
-        # set waiting flag for queued reports, so the show up nicely in the gui
-        Thruk::Utils::Reports::process_queue_file($c);
-        if($mail eq 'mail') {
-            if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
-                $output = "report queued successfully\n";
-            }
-            elsif(Thruk::Utils::Reports::report_send($c, $nr)) {
-                $output = "mail send successfully\n";
-            } else {
-                return("cannot send mail\n", 1)
-            }
+    # set waiting flag for queued reports, so the show up nicely in the gui
+    Thruk::Utils::Reports::process_queue_file($c);
+    if($mail eq 'mail') {
+        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
+            $output = "report queued successfully\n";
+        }
+        elsif(Thruk::Utils::Reports::report_send($c, $nr)) {
+            $output = "mail send successfully\n";
         } else {
-            if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {
-                $output = "report queued successfully\n";
+            return("cannot send mail\n", 1)
+        }
+    } else {
+        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {
+            $output = "report queued successfully\n";
+        } else {
+            my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+            if(defined $report_file and -f $report_file) {
+                $output = read_file($report_file);
             } else {
-                my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
-                if(defined $report_file and -f $report_file) {
-                    $output = read_file($report_file);
-                } else {
-                    my $errors = read_file($logfile);
-                    return("generating report failed:\n".$errors, 1);
-                }
+                my $errors = read_file($logfile);
+                return("generating report failed:\n".$errors, 1);
             }
         }
-    #};
-    #if($Thruk::Utils::Reports::error || $@) {
-    #    open(my $fh, '>>', $logfile);
-    #    print $fh "".($Thruk::Utils::Reports::error || $@);
-    #    Thruk::Utils::IO::close($fh, $logfile);
-    #    #return("generating report failed:\n".($Thruk::Utils::Reports::error || $@), 1)
-    #}
+    }
 
     $c->stats->profile(end => "_cmd_report()");
     return($output, 0);
@@ -1064,7 +1053,6 @@ sub _cmd_url {
     # All Inclusive?
     if($res[0] == 200 && $res[1]->{'result'} && $opt->{'all_inclusive'}) {
         require Thruk::Utils::Reports::Render;
-        $Thruk::Utils::Reports::Render::c = $c;
         $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
     }
 

@@ -24,7 +24,6 @@ use Encode qw/encode_utf8/;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Utils::Avail;
 
-$Thruk::Utils::Reports::Render::c      = undef;
 $Thruk::Utils::Reports::Render::locale = {};
 
 ##########################################################
@@ -75,7 +74,7 @@ calculate availability from stash data
 
 =cut
 sub calculate_availability {
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     Thruk::Utils::Avail::calculate_availability($c);
 
     my $total_hosts    = 0;
@@ -106,7 +105,7 @@ print outages from log entries
 sub outages {
     my($logs, $start, $end) = @_;
 
-    my $c                  = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c                  = $Thruk::Request::c or die("not initialized!");
     my $u                  = $c->stash->{'unavailable_states'};
     my $host               = $c->req->parameters->{'host'};
     my $service            = $c->req->parameters->{'service'};
@@ -187,7 +186,7 @@ set list of states which count as unavailable
 =cut
 sub set_unavailable_states {
     my($states) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     $c->stash->{'unavailable_states'} = {};
     if(defined $states and $states ne '') {
         for my $s (@{$states}) {
@@ -221,10 +220,10 @@ set events by pattern from eventlog
 
 =cut
 sub get_events {
-    my $c             = $Thruk::Utils::Reports::Render::c or die("not initialized!");
-    my($start,$end)   = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    my $pattern          = $c->req->parameters->{'pattern'};
-    my $exclude_pattern  = $c->req->parameters->{'exclude_pattern'};
+    my $c               = $Thruk::Request::c or die("not initialized!");
+    my($start,$end)     = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
+    my $pattern         = $c->req->parameters->{'pattern'};
+    my $exclude_pattern = $c->req->parameters->{'exclude_pattern'};
     die('no pattern') unless defined $pattern;
 
     my @filter;
@@ -339,7 +338,7 @@ save content from url
 
 =cut
 sub get_url {
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
     my $url            = $c->stash->{'param'}->{'url'};
 
@@ -473,7 +472,7 @@ return list of availability percent as json list
 
 =cut
 sub get_availability_percents {
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
 
     my $host               = $c->req->parameters->{'host'};
     my $service            = $c->req->parameters->{'service'};
@@ -550,7 +549,7 @@ A string will be returned if no PNP graph can be exported.
 =cut
 sub get_pnp_image {
     my($hst, $svc, $start, $end, $width, $height, $source) = @_;
-    my $c        = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c        = $Thruk::Request::c or die("not initialized!");
     my $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} || $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
     my $pnpurl   = "";
     $source      = 0 unless defined $source;
@@ -661,7 +660,7 @@ Round number to given decimals. method can be 'floor' or 'round'.
 =cut
 sub round_decimals {
     my($float, $decimals, $round_method) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     $round_method = ($c->config->{'round_method'} || 'round') unless defined $round_method;
     if($round_method eq 'round') {
         my $format  = '%0.'.$decimals.'f';
@@ -685,7 +684,7 @@ sub round_decimals {
 ##########################################################
 sub _replace_css_and_images {
     my($text, $url, $report_base_url) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     # replace images for already existing css
     while(
     $text =~ s/(<style.*?)
@@ -715,7 +714,7 @@ sub _replace_css_and_images {
 sub _replace_links {
     my($text, $url, $baseurl) = @_;
     return $text unless defined $baseurl;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
     $baseurl =~ s|/\Q$product_prefix\E/.*||gmx;
     $baseurl =~ s|/$||gmx;
@@ -740,7 +739,7 @@ sub _replace_links {
 ##########################################################
 sub _replace_link {
     my($baseurl,$a,$b,$url,$d,$e) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
     if(    $url !~ m|^\w+://|mx
        and $url !~ m|^\#|mx
@@ -763,7 +762,7 @@ sub _replace_link {
 sub _replace_img {
     my($baseurl, $report_base_url, $a,$b,$url,$d,$e) = @_;
     return "" if $url eq '';
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
 
     # skip some images
@@ -828,7 +827,7 @@ sub _replace_css {
 ##########################################################
 sub _replace_js {
     my($baseurl, $report_base_url, $url) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     if(!defined $c->stash->{'param'}->{'js'} || $c->stash->{'param'}->{'js'} eq 'no') {
         return "";
     }
@@ -884,7 +883,7 @@ sub _replace_css_img {
 ##############################################
 sub _read_static_content_file {
     my($baseurl, $report_base_url, $url) = @_;
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
     $url = _absolutize_url($baseurl, $url) if $baseurl;
 
@@ -968,7 +967,7 @@ sub _absolutize_url {
     $baseurl = '' unless defined $baseurl;
     confess("empty") if($baseurl eq '' and $link eq '');
 
-    my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $c = $Thruk::Request::c or die("not initialized!");
     my $product_prefix = $c->config->{'product_prefix'};
 
     # append trailing slash

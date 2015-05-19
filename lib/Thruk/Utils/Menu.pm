@@ -222,7 +222,7 @@ returns 1 if the current user has this group
 =cut
 sub has_group {
     my($group, $tmp) = @_;
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
     if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
     my $user  = $c->stash->{'remote_user'};
@@ -246,7 +246,7 @@ returns 1 if the current user has this role
 =cut
 sub has_role {
     my($role, $tmp) = @_;
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
     if(defined $tmp) { $role = $tmp; } # keep backwards compatible with the old call has_role($c, $role)
 
     return 1 if $c->check_user_roles($role);
@@ -264,7 +264,7 @@ returns 1 if the current user has the given name
 =cut
 sub is_user {
     my($name) = @_;
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
 
     my $user  = $c->stash->{'remote_user'} || '';
     if($user eq $name) {
@@ -285,7 +285,6 @@ returns the current prefered target
 sub _renew_navigation {
     my($c, $file) = @_;
 
-    $Thruk::Utils::Menu::c          = $c;
     $Thruk::Utils::Menu::navigation = [];
 
     # make a copy of additional menuitems
@@ -443,7 +442,7 @@ returns the current prefered target
 
 =cut
 sub _get_menu_target {
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
 
     return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
     if($c->stash->{'use_frames'}) {
@@ -464,7 +463,7 @@ returns the link with prefix
 =cut
 sub _get_menu_link {
     my $link = shift;
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
     return "" unless defined $link;
     my $product = $c->config->{'product_prefix'};
     if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {

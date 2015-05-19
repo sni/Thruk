@@ -302,7 +302,6 @@ sub translate_request_path {
     return($path_info);
 }
 
-
 1;
 __END__
 

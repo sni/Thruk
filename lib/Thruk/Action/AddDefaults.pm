@@ -109,9 +109,6 @@ sub begin {
     $c->stash->{minimal}               = $c->req->parameters->{'minimal'} || '';
     $c->stash->{show_nav_button}       = 0 if $c->stash->{minimal};
 
-    # needed for the autoload methods
-    $Thruk::Backend::Manager::c = $c;
-
     # menu cookie set?
     my $menu_states = {};
     for my $key (keys %{$c->config->{'initial_menu_state'}}) {

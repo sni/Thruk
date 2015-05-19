@@ -524,7 +524,7 @@ runs reconnect on all peers
 
 sub reconnect {
     my($self, @args) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
     eval {
         $self->_do_on_peers( 'reconnect', \@args);
     };
@@ -622,7 +622,7 @@ sub set_backend_state_from_local_connections {
     my( $self, $disabled, $safe, $cached_data ) = @_;
     $safe = Thruk::ADD_DEFAULTS unless defined $safe;
 
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     return $disabled unless scalar keys %{$self->{'local_hosts'}} >= 1;
     return $disabled unless scalar keys %{$self->{'state_hosts'}} >= 1;
@@ -1016,7 +1016,7 @@ set host macros
 
 sub _set_host_macros {
     my( $self, $host, $macros ) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     # normal host macros
     $macros->{'$HOSTADDRESS$'}        = (defined $host->{'host_address'})            ? $host->{'host_address'}            : $host->{'address'};
@@ -1065,7 +1065,7 @@ sets service macros
 
 sub _set_service_macros {
     my( $self, $service, $macros ) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     # normal service macros
     $macros->{'$SERVICEDESC$'}           = $service->{'description'};
@@ -1112,7 +1112,7 @@ returns a result for a sub called for all peers
 
 sub _do_on_peers {
     my( $self, $function, $arg, $force_serial, $backends) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     $c->stats->profile( begin => '_do_on_peers('.$function.')');
 
@@ -1259,7 +1259,7 @@ select backends we want to run functions on
 
 sub select_backends {
     my( $self, $function, $arg) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
@@ -1370,7 +1370,7 @@ returns result for given function
 sub _get_result_serial {
     my($self,$peers, $function, $arg, $use_shadow) = @_;
     my ($totalsize, $result, $type) = (0);
-    my $c  = $Thruk::Backend::Manager::c;
+    my $c  = $Thruk::Request::c;
     my $t1 = [gettimeofday];
     $c->stats->profile( begin => "_get_result_serial($function)");
 
@@ -1418,7 +1418,7 @@ returns result for given function and args using the worker pool
 sub _get_result_parallel {
     my($self, $peers, $function, $arg, $use_shadow) = @_;
     my ($totalsize, $result, $type) = (0);
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     $c->stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")");
 
@@ -1467,7 +1467,7 @@ get result from xs thread pool
 =cut
 sub _get_results_xs_pool {
     my($self, $peers, $function, $arg) = @_;
-    my $c               = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
 
     #&timing_breakpoint('_get_results_xs_pool begin: '.$function);
     $c->stats->profile( begin => "_get_results_xs_pool()");
@@ -1633,7 +1633,7 @@ removes duplicate entries from a array of hashes
 sub _remove_duplicates {
     my $self = shift;
     my $data = shift;
-    my $c    = $Thruk::Backend::Manager::c;
+    my $c    = $Thruk::Request::c;
 
     $c->stats->profile( begin => "Utils::remove_duplicates()" );
 
@@ -1693,7 +1693,7 @@ The pager itself as 'pager'
 
 sub _page_data {
     my $self                = shift;
-    my $c                   = shift || $Thruk::Backend::Manager::c;
+    my $c                   = shift || $Thruk::Request::c;
     my $data                = shift || [];
     return $data unless defined $c;
     my $default_result_size = shift || $c->stash->{'default_page_size'};
@@ -1826,7 +1826,7 @@ twice per request.
 
 sub reset_failed_backends {
     my $self = shift;
-    my $c    = shift || $Thruk::Backend::Manager::c;
+    my $c    = shift || $Thruk::Request::c;
     $c->stash->{'failed_backends'} = {};
     return;
 }
@@ -1865,7 +1865,7 @@ sub DESTROY {
 ##########################################################
 sub _merge_answer {
     my($self, $data, $type) = @_;
-    my $c      = $Thruk::Backend::Manager::c;
+    my $c      = $Thruk::Request::c;
     my $return = [];
     if( defined $type and $type eq 'hash' ) {
         $return = {};
@@ -1911,7 +1911,7 @@ sub _merge_answer {
 # merge hostgroups and merge 'members' of matching groups
 sub _merge_hostgroup_answer {
     my($self, $data) = @_;
-    my $c      = $Thruk::Backend::Manager::c;
+    my $c      = $Thruk::Request::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_hostgroup_answer()" );
@@ -1954,7 +1954,7 @@ sub _merge_hostgroup_answer {
 # merge servicegroups and merge 'members' of matching groups
 sub _merge_servicegroup_answer {
     my($self, $data) = @_;
-    my $c      = $Thruk::Backend::Manager::c;
+    my $c      = $Thruk::Request::c;
     my $groups = {};
 
     $c->stats->profile( begin => "_merge_servicegroup_answer()" );
@@ -1996,7 +1996,7 @@ sub _merge_servicegroup_answer {
 ##########################################################
 sub _merge_stats_answer {
     my($self, $data) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
     my $return;
 
     $c->stats->profile( begin => "_merge_stats_answer()" );
@@ -2071,10 +2071,7 @@ sub _merge_stats_answer {
 ##########################################################
 sub _sum_answer {
     my($self, $data) = @_;
-    #my $c    = $Thruk::Backend::Manager::c;
     my $return;
-
-    #$c->stats->profile( begin => "_sum_answer()" );
 
     my @peers = keys %{$data};
     return if scalar @peers == 0;
@@ -2090,8 +2087,6 @@ sub _sum_answer {
             for my $peername ( @peers ) { $return->{$key} += $data->{$peername}->{$key}; }
         }
     }
-
-    #$c->stats->profile( end => "_sum_answer()" );
 
     return $return;
 }
@@ -2120,7 +2115,7 @@ sort a array of hashes by hash keys
 
 sub _sort {
     my($self, $data, $sortby) = @_;
-    my $c = $Thruk::Backend::Manager::c;
+    my $c = $Thruk::Request::c;
     my( @sorted, $key, $order );
 
     $c->stats->profile( begin => "_sort()" ) if $c;
@@ -2305,7 +2300,7 @@ sub _set_user_macros {
     my $self   = shift;
     my $args   = shift;
     my $macros = shift || {};
-    my $c      = $Thruk::Backend::Manager::c;
+    my $c      = $Thruk::Request::c;
 
     my $search = $args->{'search'} || 'expand_user_macros';
     my $filter = (defined $args->{'filter'}) ? $args->{'filter'} : 1;

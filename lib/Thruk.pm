@@ -266,6 +266,7 @@ sub _dispatcher {
     $c->stats->profile(end => "_dispatcher: ".$c->req->url);
 
     _after_dispatch($c, $res);
+    $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
     return($res);
 }
 
@@ -594,7 +595,7 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d   mem: % 7s MB  %5s MB   dur: %.2fs %8s   size: % 11s   stat: %d   url: %s",
+        $c->log->info(sprintf("Req: %03d   mem: % 7s MB % 6s MB   dur: %.2fs %8s   size: % 11s   stat: %d   url: %s",
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("% 5.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),

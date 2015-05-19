@@ -67,8 +67,6 @@ sub index {
     $c->stash->{'wkhtmltopdf'}         = 1;
     $c->stash->{'disable_backspace'}   = 1;
 
-    $Thruk::Utils::CLI::c              = $c;
-
     my $report_nr = $c->req->parameters->{'report'};
     my $action    = $c->req->parameters->{'action'}    || 'show';
     my $highlight = $c->req->parameters->{'highlight'} || '';
@@ -111,7 +109,6 @@ sub index {
             }
         }
         eval {
-            $Thruk::Utils::Reports::Render::c = $c;
             eval {
                 require Thruk::Utils::Reports::CustomRender;
             };
