@@ -2102,7 +2102,7 @@ sub precompile_templates {
     }
 
     # no backends required
-    $c->{'db'}->disable_backends();
+    $c->{'db'}->disable_backends() if $c->{'db'};
 
     my $stderr_output;
     # First, save away STDERR

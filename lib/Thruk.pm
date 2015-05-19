@@ -202,8 +202,11 @@ sub _build_app {
 ###################################################
 sub _dispatcher {
     my($self, $env) = @_;
+
     $Thruk::COUNT++;
+    #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
     my $c = Thruk::Context->new($self, $env);
+    #&timing_breakpoint("_dispatcher context done");
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
     if(Thruk->verbose) {
@@ -267,6 +270,7 @@ sub _dispatcher {
 
     _after_dispatch($c, $res);
     $Thruk::Request::c = undef unless $ENV{'THRUK_KEEP_CONTEXT'};
+    #&timing_breakpoint("_dispatcher done");
     return($res);
 }
 

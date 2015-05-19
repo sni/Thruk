@@ -18,6 +18,13 @@ Generic Access to Thruks Config
 
 =cut
 
+###################################################
+# load timing class
+BEGIN {
+    #use Thruk::Timer qw/timing_breakpoint/;
+    #&timing_breakpoint('starting thruk');
+}
+
 ######################################
 
 our $VERSION = '1.88';
