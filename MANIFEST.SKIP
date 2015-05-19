@@ -70,3 +70,4 @@ bp/\d+\.tbp
 root/tests/
 script/append.make.options
 ^bp/.*\.pm
+t/testurls.txt
