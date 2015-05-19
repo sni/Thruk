@@ -15,6 +15,7 @@ resources(
 requires 'parent'                                 => 0;     # required by Thruk
 requires 'Module::Load'                           => 0;     # required by Thruk
 requires 'Plack'                                  => 1;     # required by Thruk
+requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'HTTP::Request'                          => 0;     # required by Thruk::Utils::CLI
