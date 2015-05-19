@@ -18,7 +18,6 @@ use_ok("Thruk::Utils::Reports::Render");
 
 # extract languages
 my $c = TestUtils::get_c();
-$Thruk::Utils::CLI::c = $c;
 my $languages = Thruk::Utils::Reports::get_report_languages($c);
 is(ref $languages, 'HASH', 'got some languages');
 ok(scalar keys %{$languages} > 0, 'got some languages');

@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use_ok("Thruk::Utils::Reports::Render");
-$Thruk::Utils::Reports::Render::c = TestUtils::get_c();
+TestUtils::get_c();
 
 ###########################################################
 # _replace_link
