@@ -723,7 +723,6 @@ sub _process_grid_page {
 
     $host_data     = undef;
     $services_data = undef;
-    my @group_names;
     my @hostfilter;
     my @servicefilter;
     if( $c->stash->{substyle} eq 'host' ) {
