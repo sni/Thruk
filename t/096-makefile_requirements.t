@@ -20,6 +20,7 @@ my $replace = {
     'Plack::Test'                                 => 'Plack',
     'Digest::MD4'                                 => 'Excel::Template',
     'Log::Dispatch::File'                         => 'Log::Log4perl',
+    'Template::Plugin::Date'                      => 'Template',
 };
 
 # first get all we have already
