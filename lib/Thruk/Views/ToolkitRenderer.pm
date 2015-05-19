@@ -52,7 +52,7 @@ sub render_tt {
 
 =cut
 sub render {
-    my($c, $template) = @_;
+    my($c, $template, $stash) = @_;
     my $tt = $c->app->{'tt'};
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
@@ -67,7 +67,7 @@ sub render {
     my $output = "";
     $tt->process(
         $template,
-        $c->stash,
+        ($stash || $c->stash),
         \$output,
     ) || do {
         die($tt->error.' on '.$template);

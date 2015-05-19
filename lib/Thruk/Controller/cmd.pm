@@ -572,11 +572,9 @@ sub _do_send_command {
         return $c->detach('/error/index/12');
     }
 
-    my $tt  = Template->new( $c->config->{'View::TT'} );
     my $cmd = '';
     eval {
-        $tt->process(
-            'cmd/cmd_typ_' . $cmd_typ . '.tt',
+        $cmd = Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
             {   c                         => $c,
                 cmd_tt                    => 'cmd_line.tt',
                 start_time_unix           => $start_time_unix,
@@ -594,8 +592,7 @@ sub _do_send_command {
                 comment_author            => '',
                 hostdowntimes             => '',
                 servicedowntimes          => '',
-            },
-            \$cmd) || die $tt->error();
+        });
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
@@ -610,8 +607,7 @@ sub _do_send_command {
     # check for required fields
     my( $form, @errors );
     eval {
-        $tt->process(
-            'cmd/cmd_typ_' . $cmd_typ . '.tt',
+        $form = Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
             {   c                         => $c,
                 cmd_tt                    => '_get_content.tt',
                 start_time_unix           => $start_time_unix,
@@ -628,8 +624,7 @@ sub _do_send_command {
                 comment_author            => '',
                 hostdowntimes             => '',
                 servicedowntimes          => '',
-            },
-            \$form) || die $tt->error();
+        });
     };
     if($@) {
         $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
