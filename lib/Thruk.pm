@@ -216,7 +216,9 @@ sub _dispatcher {
     ###############################################
     # prepare request
     $c->{'errored'} = 0;
-    $Thruk::Request::c = $c unless defined $Thruk::Request::c;
+    local $Thruk::Request::c  = $c if defined $Thruk::Request::c;
+    $Thruk::Request::c = $c;
+
     Thruk::Action::AddDefaults::begin($c);
     #&timing_breakpoint("_dispatcher begin done");
 
