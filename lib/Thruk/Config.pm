@@ -931,9 +931,11 @@ sub _parse_rows {
             $lastline = $lastline.$1;
             next;
         }
-        $line     = $lastline.$line;
-        $lastline = '';
-        next unless $line ne '';
+        if($lastline) {
+            $line     = $lastline.$line;
+            $lastline = '';
+        }
+        next unless $line;
         return if $until && lc($line) eq $until;
 
         # nested structures
