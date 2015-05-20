@@ -285,6 +285,7 @@ returns the current prefered target
 sub _renew_navigation {
     my($c, $file) = @_;
 
+    $Thruk::Utils::Menu::c          = $c;
     $Thruk::Utils::Menu::navigation = [];
 
     # make a copy of additional menuitems
@@ -428,6 +429,7 @@ sub _renew_navigation {
     # restore additional menuitems
     $Thruk::Utils::Menu::additional_items    = dclone($additional_items);
     $Thruk::Utils::Menu::additional_subitems = dclone($additional_subitems);
+    $Thruk::Utils::Menu::c                   = undef;
 
     return;
 }
