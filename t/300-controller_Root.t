@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 112;
+    plan tests => 120;
 }
 
 BEGIN {
@@ -28,15 +28,14 @@ my $pages = [
     '/thruk/',
     '/thruk/docs/index.html',
     '/thruk/index.html',
-    '/thruk/main.html',
-    '/thruk/side.html',
+   { url => '/thruk/main.html', like => ['Check for updates', 'Thruk Monitoring Webinterface', 'Thruk Developer Team'] },
+   { url => '/thruk/side.html', like => ['Home', 'Documentation', 'Hosts', 'Availability', 'Problems'] },
     '/thruk/startup.html',
 ];
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url' => $url,
-    );
+    my $test = TestUtils::make_test_hash($url, {});
+    TestUtils::test_page(%{$test});
 }
 SKIP: {
     skip 'external tests', 12 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
