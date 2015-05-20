@@ -77,7 +77,7 @@ sub render {
     };
     #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
-    utf8::encode(${$output});
+    utf8::encode(${$output}) if $output;
     return;
 }
 
