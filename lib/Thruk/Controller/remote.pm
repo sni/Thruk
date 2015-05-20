@@ -33,7 +33,8 @@ sub index {
     }
     Thruk::Utils::check_pid_file($c);
 
-    $c->stash->{'text'}     = 'OK';
+    $c->stash->{'navigation'} = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
+    $c->stash->{'text'}       = 'OK';
 
     if(defined $c->req->parameters->{'data'}) {
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->req->parameters->{'data'});
