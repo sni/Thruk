@@ -160,11 +160,17 @@ sub check_initial_start {
     #&timing_breakpoint("livecache check_initial_start");
 
     if($background) {
+        ## no critic
+        $SIG{CHLD} = 'IGNORE';
+        ## use critic
         my $pid = fork();
         if($pid) {
             $config->{'_shadow_naemon_started'} = 1;
         } else {
             Thruk::Utils::External::_do_child_stuff();
+            ## no critic
+            $SIG{CHLD} = 'DEFAULT';
+            ## use critic
             check_shadow_naemon_procs($config, $c, 0, 1);
             exit;
         }
