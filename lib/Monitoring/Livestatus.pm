@@ -6,8 +6,7 @@ use warnings;
 use Data::Dumper qw/Dumper/;
 use Carp qw/carp croak confess/;
 use Digest::MD5 qw(md5_hex);
-use Encode qw(encode);
-use JSON::XS qw();
+use JSON::XS ();
 use Storable qw/dclone/;
 
 use Monitoring::Livestatus::INET qw//;
@@ -1122,7 +1121,8 @@ sub _send_socket_do {
     my($self, $statement) = @_;
     my $sock = $self->_open() or return(491, $self->_get_error(491, $!), $!);
     utf8::decode($statement);
-    print $sock encode('utf-8' => $statement) or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
+    utf8::encode($statement);
+    print $sock $statement or return($self->_socket_error($statement, $sock, 'write to socket failed: '.$!));
     print $sock "\n";
     return $sock;
 }

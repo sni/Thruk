@@ -5,8 +5,7 @@ use warnings;
 use Carp qw/confess croak/;
 use Digest::MD5 qw(md5_hex);
 use Data::Dumper qw/Dumper/;
-use Scalar::Util qw/ looks_like_number /;
-use Encode qw/encode_utf8/;
+use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils ();
 #use Thruk::Timer qw/timing_breakpoint/;
@@ -1644,7 +1643,9 @@ sub _remove_duplicates {
         delete $dat->{'peer_key'};
         my $peer_name = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_name'};
         my $peer_addr = $c->stash->{'pi_detail'}->{$peer_key}->{'peer_addr'};
-        my $md5       = md5_hex( encode_utf8( join( ';', grep(defined, values %{$dat})) ) );
+        my $str       = join( ';', grep(defined, values %{$dat}));
+        utf8::encode($str);
+        my $md5       = md5_hex($str);
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
