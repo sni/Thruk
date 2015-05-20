@@ -2,7 +2,7 @@ package Thruk::Utils::Trends;
 
 use strict;
 use warnings;
-use GD ();
+use GD qw/gdSmallFont gdStyled gdTransparent/;
 use POSIX ();
 use Thruk::Utils::Avail ();
 
