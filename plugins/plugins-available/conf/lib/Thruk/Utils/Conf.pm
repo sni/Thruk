@@ -2,12 +2,12 @@ package Thruk::Utils::Conf;
 
 use strict;
 use warnings;
-use POSIX qw(tzset);
-use Carp;
-use File::Slurp;
+use POSIX ();
+use Carp qw/confess/;
+use File::Slurp qw/read_file/;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
 
 =head1 NAME

@@ -15,7 +15,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
-use POSIX qw(floor);
+use POSIX ();
 use Monitoring::Availability;
 
 ##############################################

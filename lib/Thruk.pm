@@ -50,25 +50,25 @@ use constant {
     ADD_CACHED_DEFAULTS => 2,
 };
 use Carp qw/confess/;
-use POSIX qw(tzset);
+use POSIX ();
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
-use Data::Dumper;
-use Thruk::Context;
-use Thruk::Utils;
-use Thruk::Utils::Auth;
-use Thruk::Utils::External;
-use Thruk::Utils::Livecache;
-use Thruk::Utils::Menu;
-use Thruk::Utils::Status;
+use Data::Dumper qw/Dumper/;
+use Thruk::Context ();
+use Thruk::Utils ();
+use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
+use Thruk::Utils::Livecache ();
+use Thruk::Utils::Menu ();
+use Thruk::Utils::Status ();
 use Thruk::Utils::Cache qw/cache/;
-use Thruk::Action::AddDefaults;
-use Thruk::Backend::Manager;
-use Thruk::Views::ToolkitRenderer;
-use Thruk::Views::ExcelRenderer;
-use Thruk::Views::GDRenderer;
-use Thruk::Views::JSONRenderer;
+use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Views::ToolkitRenderer ();
+use Thruk::Views::ExcelRenderer ();
+use Thruk::Views::GDRenderer ();
+use Thruk::Views::JSONRenderer ();
 
 ###################################################
 $Data::Dumper::Sortkeys = 1;

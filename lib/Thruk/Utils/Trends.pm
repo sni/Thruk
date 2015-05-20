@@ -2,9 +2,9 @@ package Thruk::Utils::Trends;
 
 use strict;
 use warnings;
-use GD;
-use POSIX qw(strftime);
-use Thruk::Utils::Avail;
+use GD ();
+use POSIX ();
+use Thruk::Utils::Avail ();
 
 =head1 NAME
 

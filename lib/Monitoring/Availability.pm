@@ -3,11 +3,11 @@ package Monitoring::Availability;
 use 5.008;
 use strict;
 use warnings;
-use Data::Dumper;
-use Carp;
-use POSIX qw(strftime mktime);
+use Data::Dumper qw/Dumper/;
+use Carp qw/croak/;
+use POSIX ();
 use File::Temp qw/tempfile/;
-use Monitoring::Availability::Logs;
+use Monitoring::Availability::Logs ();
 
 our $VERSION = '0.48';
 

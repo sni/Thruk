@@ -5,7 +5,7 @@ use warnings;
 use Carp qw/confess/;
 use Cwd 'abs_path';
 use File::Slurp qw/read_file/;
-use POSIX qw/uname/;
+use POSIX ();
 use Thruk::Utils::Filter ();
 
 =head1 NAME
