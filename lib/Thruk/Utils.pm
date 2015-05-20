@@ -2059,7 +2059,7 @@ sub get_template_variable {
     $c->stash->{'var'}   = $var;
     my $data;
     eval {
-        $data = Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt');
+        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', undef, \$data);
     };
     if($@) {
         return "" if $noerror;

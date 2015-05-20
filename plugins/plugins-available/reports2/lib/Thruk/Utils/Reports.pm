@@ -174,7 +174,7 @@ sub report_send {
         my $mailtext;
         eval {
             $c->stash->{'start'} = '' unless defined $c->stash->{'start'};
-            $mailtext = Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$report->{'template'});
+            Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$report->{'template'}, undef, \$mailtext);
         };
         if($@) {
             Thruk::Utils::CLI::_error($@);
@@ -451,7 +451,7 @@ sub generate_report {
     eval {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'rendering') if $ENV{'THRUK_JOB_DIR'};
         $c->stash->{'block'} = 'render';
-        $reportdata = Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'});
+        Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$reportdata);
     };
     if($@) {
         return(_report_die($c, $@, $logfile));

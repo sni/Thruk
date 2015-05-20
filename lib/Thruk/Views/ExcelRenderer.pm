@@ -50,7 +50,8 @@ sub render_excel {
 sub render {
     my($c, $template) = @_;
     $c->stats->profile(begin => "render: ".$template);
-    my $worksheets = Thruk::Views::ToolkitRenderer::render($c, $template);
+    my $worksheets;
+    Thruk::Views::ToolkitRenderer::render($c, $template, undef, \$worksheets);
     require IO::String;
     require Excel::Template;
     my $fh = IO::String->new($worksheets);

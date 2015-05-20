@@ -572,9 +572,9 @@ sub _do_send_command {
         return $c->detach('/error/index/12');
     }
 
-    my $cmd = '';
+    my $cmd;
     eval {
-        $cmd = Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
+        Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
             {   c                         => $c,
                 cmd_tt                    => 'cmd_line.tt',
                 start_time_unix           => $start_time_unix,
@@ -592,7 +592,7 @@ sub _do_send_command {
                 comment_author            => '',
                 hostdowntimes             => '',
                 servicedowntimes          => '',
-        });
+        }, \$cmd);
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
@@ -605,9 +605,9 @@ sub _do_send_command {
     return $c->detach('/error/index/10') unless $cmd ne '';
 
     # check for required fields
-    my( $form, @errors );
+    my($form, @errors);
     eval {
-        $form = Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
+        Thruk::Views::ToolkitRenderer::render($c, 'cmd/cmd_typ_' . $cmd_typ . '.tt',
             {   c                         => $c,
                 cmd_tt                    => '_get_content.tt',
                 start_time_unix           => $start_time_unix,
@@ -624,7 +624,7 @@ sub _do_send_command {
                 comment_author            => '',
                 hostdowntimes             => '',
                 servicedowntimes          => '',
-        });
+        }, \$form);
     };
     if($@) {
         $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);

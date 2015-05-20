@@ -14,7 +14,6 @@ use strict;
 use warnings;
 use Carp qw/confess/;
 use Template ();
-use Encode qw/encode_utf8 decode_utf8/;
 
 BEGIN {
     #use Thruk::Timer qw/timing_breakpoint/;
@@ -46,7 +45,7 @@ sub render_tt {
     $c->res->content_type('text/html; charset=utf-8') unless $c->res->content_type();
     $c->res->body($output);
     $c->stats->profile(end => "render_tt: ".$template);
-    return($output);
+    return;
 }
 
 =head2 render
@@ -78,7 +77,8 @@ sub render {
     };
     #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
-    return(encode_utf8($output));
+    utf8::encode(${$output});
+    return;
 }
 
 1;
