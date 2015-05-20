@@ -72,15 +72,10 @@ sub index {
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
 
     if(!$c->config->{'panorama_modules_loaded'}) {
-        #&timing_breakpoint('loading modules');
         load URI::Escape, qw/uri_unescape/;
-        load IO::Socket;
         load Scalar::Util, qw/looks_like_number/;
-        load DateTime;
-        load DateTime::TimeZone;
         load Thruk::Utils::PanoramaCpuStats;
         load Thruk::Utils::Avail;
-        #&timing_breakpoint('loaded modules');
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
@@ -708,6 +703,8 @@ sub _get_timezone_data {
         abbr   => '',
         offset => 0,
     };
+    load DateTime;
+    load DateTime::TimeZone;
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
     for my $name (DateTime::TimeZone->all_names) {
         my $dt = DateTime->new(
@@ -2239,6 +2236,7 @@ sub _get_gearman_stats {
         ($host,$port) = split(/:/mx, $c->req->parameters->{'server'}, 2);
     }
 
+    load IO::Socket;
     my $handle = IO::Socket::INET->new(
         Proto    => "tcp",
         PeerAddr => $host,
