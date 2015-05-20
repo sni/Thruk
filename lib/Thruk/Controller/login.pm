@@ -26,6 +26,7 @@ sub index {
         $c->config->{'login_modules_loaded'} = 1;
     }
 
+    $c->stash->{'navigation'}     = 'off'; # would be useless here, so set it non-empty, otherwise AddDefaults::end would read it again
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'theme'}          = $c->config->{'default_theme'} unless defined $c->stash->{'theme'};
     $c->stash->{'page'}           = 'splashpage';
