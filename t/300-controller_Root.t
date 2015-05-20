@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 120;
+    plan tests => 121;
 }
 
 BEGIN {
@@ -21,7 +21,12 @@ SKIP: {
 }
 my $product = 'thruk';
 if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://[^/]+/(.*)$|) { $product = $1; }
-TestUtils::test_page(url => '/thruk', redirect => 1, location => '/'.$product .'/');
+if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m/naemon/) {
+    # redirect happens during login with cookie auth
+    TestUtils::test_page(url => '/thruk');
+} else {
+    TestUtils::test_page(url => '/thruk', redirect => 1, location => '/'.$product .'/');
+}
 my $res = TestUtils::test_page(url => '/thruk/cgi-bin/blah.cgi', fail => 1, like => 'This page does not exist');
 is($res->{'code'}, 404, 'got page not found');
 

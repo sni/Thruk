@@ -746,8 +746,8 @@ sub _external_request {
         my $product = 'thruk';
         if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} and $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://([^/]+)/(\w+)$|mx) {
             $product = $2;
-            $url =~ s|/$product/|/|gmx;
-            $url =~ s|/thruk/|/|gmx;
+            $url =~ s|^/$product||mx;
+            $url =~ s|^/thruk||mx;
         }
         $url =~ s#//#/#gmx;
         $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
@@ -783,7 +783,7 @@ sub _external_request {
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
         my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, undef, $agent);
            $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, $agent, 0);
-        $req  = _external_request($url, $start_to, $post, $agent, 0);
+        $req  = _external_request($req->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
     }
     return $req;
 }
