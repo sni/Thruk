@@ -147,6 +147,18 @@ sub _build_app {
     #&timing_breakpoint('startup() backends created');
 
     $self->{'routes'} = {
+        '/'                                => 'Thruk::Controller::Root::index',
+        '/index.html'                      => 'Thruk::Controller::Root::index',
+        '/thruk'                           => 'Thruk::Controller::Root::thruk_index',
+        '/thruk/'                          => 'Thruk::Controller::Root::thruk_index',
+        '/thruk/index.html'                => 'Thruk::Controller::Root::thruk_index_html',
+        '/thruk/side.html'                 => 'Thruk::Controller::Root::thruk_side_html',
+        '/thruk/frame.html'                => 'Thruk::Controller::Root::thruk_frame_html',
+        '/thruk/main.html'                 => 'Thruk::Controller::Root::thruk_main_html',
+        '/thruk/changes.html'              => 'Thruk::Controller::Root::thruk_changes_html',
+        '/thruk/docs/'                     => 'Thruk::Controller::Root::thruk_docs',
+        '/thruk/docs/index.html'           => 'Thruk::Controller::Root::thruk_docs',
+        '/thruk/cgi-bin/job.cgi'           => 'Thruk::Controller::Root::job_cgi',
         '/thruk/cgi-bin/avail.cgi'         => 'Thruk::Controller::avail::index',
         '/thruk/cgi-bin/cmd.cgi'           => 'Thruk::Controller::cmd::index',
         '/thruk/cgi-bin/config.cgi'        => 'Thruk::Controller::config::index',
@@ -165,8 +177,6 @@ sub _build_app {
         '/thruk/cgi-bin/test.cgi'          => 'Thruk::Controller::test::index',
         '/thruk/cgi-bin/error.cgi'         => 'Thruk::Controller::error::index',
     };
-    load 'Thruk::Controller::Root';
-    $self->{'routes'} = {%{Thruk::Controller::Root::add_routes()}, %{$self->{'routes'}}};
 
     ###################################################
     # load routes dynamically from plugins

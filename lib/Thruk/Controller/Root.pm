@@ -18,29 +18,6 @@ Root Controller of the Thruk Monitoring Webinterface
 
 ######################################
 
-=head2 add_routes
-
-=cut
-
-sub add_routes {
-    return({
-        '/'                      => \&index,
-        '/index.html'            => \&index,
-        '/thruk'                 => \&thruk_index,
-        '/thruk/'                => \&thruk_index,
-        '/thruk/index.html'      => \&thruk_index_html,
-        '/thruk/side.html'       => \&thruk_side_html,
-        '/thruk/frame.html'      => \&thruk_frame_html,
-        '/thruk/main.html'       => \&thruk_main_html,
-        '/thruk/changes.html'    => \&thruk_changes_html,
-        '/thruk/docs/'           => \&thruk_docs,
-        '/thruk/docs/index.html' => \&thruk_docs,
-        '/thruk/cgi-bin/job.cgi' => \&job_cgi,
-    });
-}
-
-######################################
-
 =head2 index
 
 redirect from /
