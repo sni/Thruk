@@ -94,9 +94,6 @@ sub startup {
         $app = Plack::Middleware::Lint->wrap($app);
     }
 
-    require Plack::Middleware::ContentLength;
-    $app = Plack::Middleware::ContentLength->wrap($app);
-
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
@@ -560,6 +557,17 @@ sub _after_dispatch {
     my($c, $res) = @_;
     $c->stats->profile(begin => "_after_dispatch");
 
+    # set content length
+    my $content_length;
+    my $h = Plack::Util::headers($res->[1]);
+    if (!Plack::Util::status_with_no_entity_body($res->[0]) &&
+        !$h->exists('Content-Length') &&
+        !$h->exists('Transfer-Encoding') &&
+        defined($content_length = Plack::Util::content_length($res->[2])))
+    {
+        $h->push('Content-Length' => $content_length);
+    }
+
     # check if our shadows are still up and running
     if($c->config->{'shadow_naemon_dir'} and $c->stash->{'failed_backends'} and scalar keys %{$c->stash->{'failed_backends'}} > 0) {
         Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 1);
@@ -609,7 +617,7 @@ sub _after_dispatch {
                                 sprintf("% 5.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 $elapsed,
                                 defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '----',
-                                sprintf("% 5.3f kb", (length("@{$res->[2]}")/1024)),
+                                defined $content_length ? sprintf("% 5.3f kb", $content_length/1024) : '----',
                                 $res->[0],
                                 $url,
                     ));

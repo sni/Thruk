@@ -40,7 +40,8 @@ sub render_tt {
     my($c) = @_;
     my $template = $c->stash->{'template'};
     $c->stats->profile(begin => "render_tt: ".$template);
-    my $output = render($c, $template);
+    my $output;
+    render($c, $template, undef, \$output);
     $c->{'rendered'} = 1;
     $c->res->content_type('text/html; charset=utf-8') unless $c->res->content_type();
     $c->res->body($output);
@@ -54,7 +55,7 @@ sub render_tt {
 
 =cut
 sub render {
-    my($c, $template, $stash) = @_;
+    my($c, $template, $stash, $output) = @_;
     my $tt = $c->app->{'tt'};
     confess("no template") unless $template;
     $c->stats->profile(begin => "render: ".$template);
@@ -67,11 +68,10 @@ sub render {
     }
 
     #&timing_breakpoint('render_tt render()');
-    my $output = "";
     $tt->process(
         $template,
         ($stash || $c->stash),
-        \$output,
+        $output,
     ) || do {
         die($tt->error.' on '.$template);
     };
