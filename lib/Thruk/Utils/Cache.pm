@@ -12,8 +12,8 @@ Cache Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
-use Thruk::Utils::IO;
+use Carp qw/confess/;
+use Thruk::Utils::IO ();
 use Storable qw(nstore retrieve);
 use File::Copy qw(move);
 

@@ -22,7 +22,7 @@ use Data::Dumper qw/Dumper/;
 use JSON::XS qw/encode_json/;
 use Scalar::Util qw/weaken/;
 use POSIX qw/strftime/;
-use Thruk::Utils::Filter;
+use Thruk::Utils::Filter ();
 
 ######################################
 

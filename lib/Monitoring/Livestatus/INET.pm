@@ -3,9 +3,9 @@ use parent 'Monitoring::Livestatus';
 
 use strict;
 use warnings;
-use IO::Socket::INET;
+use IO::Socket::INET ();
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
-use Carp;
+use Carp qw/confess croak/;
 
 =head1 NAME
 
@@ -58,7 +58,7 @@ sub _open {
         local $SIG{'ALRM'} = sub { die("connection timeout"); };
         $sock = IO::Socket::INET->new(
                                          PeerAddr => $self->{'peer'},
-                                         Type     => SOCK_STREAM,
+                                         Type     => IO::Socket::INET::SOCK_STREAM,
                                          Timeout  => $self->{'connect_timeout'},
                                          );
         if(!defined $sock || !$sock->connected()) {

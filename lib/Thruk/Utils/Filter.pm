@@ -12,13 +12,13 @@ Filter Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw/confess cluck carp/;
 use Date::Calc qw/Localtime Today/;
 use URI::Escape qw/uri_escape/;
-use JSON::XS;
+use JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
-use HTML::Entities qw//;
+use HTML::Entities ();
 
 ##############################################
 

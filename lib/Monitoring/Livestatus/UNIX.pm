@@ -3,8 +3,8 @@ use parent 'Monitoring::Livestatus';
 
 use strict;
 use warnings;
-use IO::Socket::UNIX;
-use Carp;
+use IO::Socket::UNIX ();
+use Carp qw/confess croak/;
 
 =head1 NAME
 
@@ -66,7 +66,7 @@ sub _open {
         local $SIG{'ALRM'} = sub { die("connection timeout"); };
         $sock = IO::Socket::UNIX->new(
                                         Peer     => $self->{'peer'},
-                                        Type     => SOCK_STREAM,
+                                        Type     => IO::Socket::UNIX::SOCK_STREAM,
                                     );
         if(!defined $sock || !$sock->connected()) {
             my $msg = "failed to connect to $self->{'peer'}: $!";

@@ -9,12 +9,12 @@ BEGIN {
 }
 
 use Carp qw/confess/;
-use Thruk::Backend::Peer qw//;
-use Thruk::Utils::IO qw//;
+use Thruk::Backend::Peer ();
+use Thruk::Utils::IO ();
 use Cwd qw/getcwd/;
 use File::Copy qw/move/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Config;
+use Thruk::Config ();
 
 =head1 NAME
 

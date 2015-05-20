@@ -2,11 +2,11 @@ package Thruk::Backend::Provider::Livestatus;
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
+use Carp qw/confess/;
+use Data::Dumper qw/Dumper/;
 use Storable qw/dclone/;
 #use Thruk::Timer qw/timing_breakpoint/;
-use Monitoring::Livestatus::Class::Lite;
+use Monitoring::Livestatus::Class::Lite ();
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME

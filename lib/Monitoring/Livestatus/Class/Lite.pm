@@ -61,7 +61,7 @@ use warnings;
 use strict;
 use Carp qw/croak confess/;
 use List::Util qw/first/;
-use Monitoring::Livestatus qw//;
+use Monitoring::Livestatus ();
 
 our $VERSION = '0.05';
 our $TRACE   = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;

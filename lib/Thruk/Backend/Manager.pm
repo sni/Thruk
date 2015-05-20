@@ -2,9 +2,9 @@ package Thruk::Backend::Manager;
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw/confess croak/;
 use Digest::MD5 qw(md5_hex);
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/ looks_like_number /;
 use Encode qw/encode_utf8/;
 use Time::HiRes qw/gettimeofday tv_interval/;

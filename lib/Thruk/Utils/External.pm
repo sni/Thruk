@@ -12,12 +12,12 @@ Utilities to run background processes
 
 use strict;
 use warnings;
-use Carp;
-use Data::Dumper;
+use Carp qw/confess/;
+use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw(md5_hex);
-use Time::HiRes;
-use File::Slurp;
-use Storable;
+use Time::HiRes ();
+use File::Slurp qw/read_file/;
+use Storable qw/store retrieve/;
 use POSIX ":sys_wait_h";
 
 ##############################################

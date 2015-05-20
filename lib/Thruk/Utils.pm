@@ -20,7 +20,7 @@ use Encode qw/encode encode_utf8 decode is_utf8/;
 use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Utils::IO qw//;
+use Thruk::Utils::IO ();
 use Digest::MD5 qw(md5_hex);
 
 ##############################################
