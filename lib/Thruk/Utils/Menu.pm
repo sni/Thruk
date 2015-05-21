@@ -446,13 +446,16 @@ returns the current prefered target
 sub _get_menu_target {
     my $c = $Thruk::Request::c;
 
+    return($c->{'_menu_target'} ||= _set_menu_target($c));
+}
+sub _set_menu_target {
+    my($c) = @_;
     return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
     if($c->stash->{'use_frames'}) {
-        return("main");
+        return('main');
     }
-    return("_self");
+    return('_self');
 }
-
 
 ##############################################
 
@@ -464,9 +467,9 @@ returns the link with prefix
 
 =cut
 sub _get_menu_link {
-    my $link = shift;
+    my($link) = @_;
+    return '' unless defined $link;
     my $c = $Thruk::Request::c;
-    return "" unless defined $link;
     my $product = $c->config->{'product_prefix'};
     if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {
         return $c->stash->{'url_prefix'}.$link;
