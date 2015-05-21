@@ -382,7 +382,7 @@ sub test_page {
     SKIP: {
         if($content_type =~ m|text/html| and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
             if($use_html_lint == 0) {
-                skip "no HTML::Lint installed", 2;
+                skip "no HTML::Lint installed", 1;
             }
             $lint->newfile($opts->{'url'});
             # will result in "Parsing of undecoded UTF-8 will give garbage when decoding entities..." otherwise
