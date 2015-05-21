@@ -501,7 +501,7 @@ sub _init_logging {
         log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
         log4perl.appender.Screen.Threshold = DEBUG
         log4perl.appender.Screen.layout    = Log::Log4perl::Layout::PatternLayout
-        log4perl.appender.Screen.layout.ConversionPattern = [%d][%p][%c] %m%n
+        log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p][%c] %m%n
         );
         Log::Log4perl::init(\$log_conf);
         my $logger = Log::Log4perl->get_logger();
