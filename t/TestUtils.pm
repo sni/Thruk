@@ -349,11 +349,11 @@ sub test_page {
 
 
     # memory usage
-    #SKIP: {
-    #    skip "skipped memory check, set TEST_AUTHOR_MEMORY to enable", 1 unless defined $ENV{'TEST_AUTHOR_MEMORY'};
+    SKIP: {
+        skip "skipped memory check", 1 if $ENV{'TEST_SKIP_MEMORY'};
         my $rsize = Thruk::Backend::Pool::get_memory_usage($$);
         ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
-    #}
+    }
 
     # html valitidy
     if(!defined $opts->{'skip_doctype'} or $opts->{'skip_doctype'} == 0) {
