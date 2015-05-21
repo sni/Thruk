@@ -1826,8 +1826,9 @@ twice per request.
 =cut
 
 sub reset_failed_backends {
-    my $self = shift;
-    my $c    = shift || $Thruk::Request::c;
+    my($self, $c) = @_;
+    $c = $Thruk::Request::c unless $c;
+    confess("no c") unless $c;
     $c->stash->{'failed_backends'} = {};
     return;
 }

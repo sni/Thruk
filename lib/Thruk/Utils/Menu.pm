@@ -41,6 +41,7 @@ sub read_navigation {
         $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';
     }
 
+    local $Thruk::Request::c = $c;
     _renew_navigation($c, $file);
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");

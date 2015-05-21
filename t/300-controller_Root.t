@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 111;
+    plan tests => 112;
 }
 
 BEGIN {
@@ -47,6 +47,9 @@ for my $url (@{$pages}) {
     my $test = TestUtils::make_test_hash($url, {});
     TestUtils::test_page(%{$test});
 }
+
+is($Thruk::Request::c, undef, "Request object is now empty");
+
 SKIP: {
     skip 'external tests', 12 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     # test works local only because we modify the config here

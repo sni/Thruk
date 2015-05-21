@@ -502,7 +502,7 @@ sub add_defaults {
 
     for my $x (1..$retrys) {
         # reset failed states, otherwise retry would be useless
-        $c->{'db'}->reset_failed_backends();
+        $c->{'db'}->reset_failed_backends($c);
 
         eval {
             $last_program_restart = set_processinfo($c, $cached_user_data, $safe, $cached_data);
