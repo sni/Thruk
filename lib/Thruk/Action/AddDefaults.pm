@@ -24,6 +24,21 @@ use Scalar::Util qw/weaken/;
 use POSIX ();
 use Thruk::Utils::Filter ();
 
+our @stash_config_keys = qw/
+    url_prefix product_prefix title_prefix use_pager start_page documentation_link
+    use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
+    datetime_format datetime_format_today datetime_format_long datetime_format_log
+    use_new_search show_notification_number strict_passive_mode hide_passive_icon
+    show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
+    priorities show_modified_attributes downtime_duration expire_ack_duration
+    show_backends_in_table host_action_icon service_action_icon cookie_path
+    use_feature_trends show_error_reports skip_js_errors perf_bar_mode
+    bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
+    status_color_background show_logout_button use_feature_recurring_downtime
+    use_service_description force_sticky_ack force_send_notification force_persistent_ack
+    force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
+/;
+
 ######################################
 
 =head2 begin
@@ -685,23 +700,11 @@ sub add_cached_defaults {
 =cut
 sub set_configs_stash {
     my($c) = @_;
+    my $config = $c->config;
+    my $stash  = $c->stash;
     # make some configs available in stash
-    for my $key (qw/url_prefix product_prefix title_prefix use_pager start_page documentation_link
-                  use_feature_statusmap use_feature_statuswrl use_feature_histogram use_feature_configtool
-                  datetime_format datetime_format_today datetime_format_long datetime_format_log
-                  use_new_search show_notification_number strict_passive_mode hide_passive_icon
-                  show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
-                  priorities show_modified_attributes downtime_duration expire_ack_duration
-                  show_backends_in_table host_action_icon service_action_icon cookie_path
-                  use_feature_trends show_error_reports skip_js_errors perf_bar_mode
-                  bug_email_rcpt home_link first_day_of_week sitepanel perf_bar_pnp_popup
-                  status_color_background show_logout_button use_feature_recurring_downtime
-                  use_service_description force_sticky_ack force_send_notification force_persistent_ack
-                  force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
-                /) {
-        confess("$key not defined in config,\n".Dumper($c->config)) unless defined $c->config->{$key};
-        $c->stash->{$key} = $c->config->{$key};
-        Thruk::Utils::decode_any($c->stash->{$key}) if ref $c->stash->{$key} eq '';
+    for my $key (@stash_config_keys) {
+        $stash->{$key} = $config->{$key};
     }
     return;
 }

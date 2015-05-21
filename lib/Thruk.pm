@@ -120,6 +120,10 @@ sub _build_app {
     }
     $self->{'config'} = $config;
 
+    for my $key (@Thruk::Action::AddDefaults::stash_config_keys) {
+        confess("$key not defined in config,\n".Dumper($config)) unless defined $config->{$key};
+    }
+
     _init_cache($self->{'config'});
     #&timing_breakpoint('startup() cache created');
 
