@@ -16,7 +16,7 @@ use lib 'lib';
 use strict;
 use Data::Dumper;
 use Test::More;
-use URI::Escape;
+use URI::Escape qw/uri_unescape/;
 use Encode qw/decode_utf8/;
 use File::Slurp;
 use HTTP::Request::Common qw(POST);
@@ -780,10 +780,11 @@ sub _external_request {
     if($req->is_redirect and $req->{'_headers'}->{'location'} =~ m/\/(thruk|naemon)\/cgi\-bin\/login\.cgi\?(.*)$/mxo and defined $ENV{'THRUK_TEST_AUTH'}) {
         die("login failed: ".Dumper($req)) unless $retry;
         my $product = $1;
+        my $referer = uri_unescape($2);
         my($user, $pass) = split(/:/mx, $ENV{'THRUK_TEST_AUTH'}, 2);
-        my $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, undef, $agent);
-           $r = _external_request('/'.$product.'/cgi-bin/login.cgi', undef, { password => $pass, login => $user, submit => 'login' }, $agent, 0);
-        $req  = _external_request($req->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
+        my $r = _external_request($req->{'_headers'}->{'location'}, undef, undef, $agent);
+           $r = _external_request($req->{'_headers'}->{'location'}, undef, { password => $pass, login => $user, submit => 'login', referer => '/'.$referer }, $agent, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, 0);
     }
     return $req;
 }
