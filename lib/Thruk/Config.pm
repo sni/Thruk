@@ -3,7 +3,7 @@ package Thruk::Config;
 use strict;
 use warnings;
 use Carp qw/confess/;
-use Cwd 'abs_path';
+use Cwd ();
 use File::Slurp qw/read_file/;
 use POSIX ();
 use Thruk::Utils::Filter ();
@@ -535,14 +535,26 @@ sub get_git_name {
     my $project_root = $INC{'Thruk/Config.pm'};
     $project_root =~ s/\/Config\.pm$//gmx;
     return '' unless -d $project_root.'/../../.git';
+    my($tag, $hash, $branch);
+    my $dir = Cwd::getcwd;
+    chdir($project_root.'/../../');
 
     # directly on git tag?
-    my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
-    return '' if $tag;
+    $tag = `git describe --tag --exact-match 2>&1`;
+    my $rc = $?;
+    if($tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
+    if($rc != 0) { $tag = ''; }
+    if($tag) {
+        chdir($dir);
+        return '';
+    }
 
-    chomp(my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep '^*'`);
-    $branch =~ s/^\*\s+//gmx;
-    chomp(my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`);
+    chomp($branch = `git branch --no-color 2>/dev/null`);
+    if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
+    if(!$hash) {
+        chomp($hash = `git log -1 --no-color --pretty=format:%h 2> /dev/null`);
+    }
+    chdir($dir);
     if($branch eq 'master') {
         return $hash;
     }
@@ -591,7 +603,7 @@ sub home {
     my($class) = @_;
     (my $file = "$class.pm") =~ s{::}{/}gmx;
     if ( my $inc_entry = $INC{$file} ) {
-        $inc_entry = abs_path($inc_entry);
+        $inc_entry = Cwd::abs_path($inc_entry);
         $inc_entry =~ s/\Q\/$file\E$//mx;
         $inc_entry =~ s/\/b?lib//gmx;
         return $inc_entry;
