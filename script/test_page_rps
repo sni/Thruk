@@ -113,12 +113,11 @@ sub test_tag {
 
     my $t0 = [gettimeofday];
     while(`lsof -i:$BASEPORT | grep -c LISTEN` != 1) {
-        sleep(0.1);
-        `ps -p $pid >/dev/null 2>&1`;
-        die("failed to start!\n") unless $? == 0;
+        sleep(0.05);
+        -d '/proc/'.$pid || die("failed to start!\n");
     }
     my $elapsed = tv_interval ( $t0 );
-    printf(" %.2fs  | ", $elapsed);
+    printf("% 5.2fs  | ", $elapsed);
 
     # warm up
     `ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
