@@ -11,8 +11,6 @@ BEGIN {
 use Carp qw/confess/;
 use Thruk::Backend::Peer ();
 use Thruk::Utils::IO ();
-use Cwd qw/getcwd/;
-use File::Copy qw/move/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Config ();
 
@@ -123,7 +121,6 @@ sub init_backend_thread_pool {
             }
         }
     }
-    #&timing_breakpoint('configs gathered');
 
     if($num_peers > 0) {
         ## no critic
@@ -230,7 +227,8 @@ sub do_on_peer {
                 my $inc;
                 my $code = $arg->[$x+1];
                 if(ref($code) eq 'HASH') {
-                    for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : getcwd().'/plugins/plugins-available/')) {
+                    require Cwd;
+                    for my $path ('/', (defined $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}.'/share/thruk/plugins/plugins-available/' : Cwd::getcwd().'/plugins/plugins-available/')) {
                         if(-e $path.'/'.$code->{'inc'}) {
                             $inc  = $path.'/'.$code->{'inc'};
                             last;
@@ -275,7 +273,8 @@ sub do_on_peer {
                     $commands    =~ s/^COMMAND\s+//gmx;
                     print $fh $commands,"\n";
                     Thruk::Utils::IO::close($fh, $filename);
-                    move($tmpfile, $filename);
+                    require File::Copy;
+                    File::Copy::move($tmpfile, $filename);
                 }
             }
             if(defined $data && !defined $size) {
