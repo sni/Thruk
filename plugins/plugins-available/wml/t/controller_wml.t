@@ -6,7 +6,7 @@ BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local test only'   if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
-    plan tests => 37;
+    plan tests => 34;
 
     # enable plugin
     `cd plugins/plugins-enabled && ln -s ../plugins-available/wml .`;

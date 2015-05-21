@@ -14,7 +14,7 @@ plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 64;
+    plan tests => 59;
 } else {
     plan skip_all => 'pure shinken backend required'
 }

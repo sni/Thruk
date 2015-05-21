@@ -6,7 +6,7 @@ BEGIN {
     eval "use Test::Cmd";
     plan skip_all => 'Test::Cmd required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 67;
+    plan tests => 63;
 
     use lib('t');
     require TestUtils;

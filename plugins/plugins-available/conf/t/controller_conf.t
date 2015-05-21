@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    my $tests = 1411;
+    my $tests = 1324;
     $tests    = $tests - 12 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }

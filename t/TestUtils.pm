@@ -384,7 +384,6 @@ sub test_page {
             if($use_html_lint == 0) {
                 skip "no HTML::Lint installed", 2;
             }
-            isa_ok( $lint, "HTML::Lint" );
             $lint->newfile($opts->{'url'});
             # will result in "Parsing of undecoded UTF-8 will give garbage when decoding entities..." otherwise
             my $content = decode_utf8($return->{'content'});

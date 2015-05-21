@@ -13,7 +13,7 @@ BEGIN {
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 51;
+    plan tests => 47;
 } else {
     plan skip_all => 'pure shinken backend required'
 }

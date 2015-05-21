@@ -8,7 +8,7 @@ BEGIN {
     plan skip_all => 'Devel::Cycle required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'local tests only'  if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 29;
+    plan tests => 27;
 }
 
 BEGIN {
