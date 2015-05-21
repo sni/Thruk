@@ -45,16 +45,19 @@ eval {
 };
 
 use Thruk;
-my $app = Plack::Test->create(Thruk->startup);
+our $placktest;
 
 #########################
 sub request {
     my($url) = @_;
     my($req, $res);
+    if(!$placktest) {
+        $placktest = Plack::Test->create(Thruk->startup)
+    }
     if(ref $url eq "") {
-        $res = $app->request(GET $url);
+        $res = $placktest->request(GET $url);
     } else {
-        $res = $app->request($url);
+        $res = $placktest->request($url);
     }
     return($res);
 }

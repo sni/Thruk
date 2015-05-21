@@ -21,8 +21,8 @@ our $VERSION = '1.88';
 # create connection pool
 # has to be done before the binmode
 # or even earlier to save memory
-use Thruk::Backend::Pool;
 BEGIN {
+    use Thruk::Backend::Pool ();
     Thruk::Backend::Pool::init_backend_thread_pool();
 }
 
@@ -74,6 +74,7 @@ use Thruk::Views::JSONRenderer ();
 $Data::Dumper::Sortkeys = 1;
 our $config;
 our $COUNT = 0;
+our $thruk;
 
 ###################################################
 
@@ -196,16 +197,17 @@ sub _build_app {
 
     #&timing_breakpoint('start done');
 
-    return(sub { return($self->_dispatcher(@_)) });
+    $thruk = $self;
+    return(\&{_dispatcher});
 }
 
 ###################################################
 sub _dispatcher {
-    my($self, $env) = @_;
+    my($env) = @_;
 
     $Thruk::COUNT++;
     #&timing_breakpoint("_dispatcher: ".$env->{PATH_INFO});
-    my $c = Thruk::Context->new($self, $env);
+    my $c = Thruk::Context->new($thruk, $env);
     $c->stats->profile(begin => "_dispatcher: ".$c->req->url);
 
     if(Thruk->verbose) {
@@ -228,13 +230,13 @@ sub _dispatcher {
         eval {
             my $path_info = $c->req->path_info;
             my $rc;
-            if($self->{'routes'}->{$path_info}) {
-                my $route = $self->{'routes'}->{$path_info};
+            if($thruk->{'routes'}->{$path_info}) {
+                my $route = $thruk->{'routes'}->{$path_info};
                 if(ref $route eq '') {
                     my($class) = $route =~ m|^(.*)::.*?$|mx;
                     load $class;
-                    $self->{'routes'}->{$path_info} = \&{$route};
-                    $route = $self->{'routes'}->{$path_info};
+                    $thruk->{'routes'}->{$path_info} = \&{$route};
+                    $route = $thruk->{'routes'}->{$path_info};
                 }
                 #&timing_breakpoint("_dispatcher route");
                 $rc = &{$route}($c);
