@@ -109,41 +109,41 @@
         [% SET peer_key      = s.peer_key %]
         [% SET program_start = pi_detail.$peer_key.program_start %]
 
-        [% info = BLOCK %]
-            <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Full Service Details</a>
-            <table border=0 class="extdetails">
-            <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
-            [% IF s.state != 0 %]
-            <tr><th class="dataVar">Current Attempt:</th><td class="dataVal">[% s.current_attempt %]/[% s.max_check_attempts %]&nbsp;&nbsp;([% IF s.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td></tr>
-            <tr><th class="dataVar">Last Check Time:</th><td class="dataVal">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td></tr>
-            <tr><th class="dataVar">Next Scheduled Check:</th><td class="dataVal">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]N/A[% END %][% IF s.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]</td></tr>
-            <tr><th class="dataVar">In Scheduled Downtime?</th><td class="dataVal">[% IF s.scheduled_downtime_depth > 0 %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
-            <tr><th class="dataVar">Acknowledged?</th><td class="dataVal">[% IF s.acknowledged %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
-            [% END %]
-            <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
-            [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
-            [% IF escape_html_tags %]
-                [% escape_html(s.plugin_output) %]<br>
-                [% escape_html(nl2br(s.long_plugin_output)) %]
-            [% ELSE %]
-              [% s.plugin_output %]<br>
-              [% nl2br(s.long_plugin_output) %]
-            [% END %]
-            </td></tr>
-            </table>
-        [% END %]
+[% info = BLOCK %]
+  <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Full Service Details</a>
+  <table border=0 class="extdetails">
+  <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
+  [% IF s.state != 0 %]
+  <tr><th class="dataVar">Current Attempt:</th><td class="dataVal">[% s.current_attempt %]/[% s.max_check_attempts %]&nbsp;&nbsp;([% IF s.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td></tr>
+  <tr><th class="dataVar">Last Check Time:</th><td class="dataVal">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td></tr>
+  <tr><th class="dataVar">Next Scheduled Check:</th><td class="dataVal">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]N/A[% END %][% IF s.is_executing > 0 %]<img src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]</td></tr>
+  <tr><th class="dataVar">In Scheduled Downtime?</th><td class="dataVal">[% IF s.scheduled_downtime_depth > 0 %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
+  <tr><th class="dataVar">Acknowledged?</th><td class="dataVal">[% IF s.acknowledged %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
+  [% END %]
+  <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
+  [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
+  [% IF escape_html_tags %]
+      [% escape_html(s.plugin_output) %]<br>
+      [% escape_html(nl2br(s.long_plugin_output)) %]
+  [% ELSE %]
+    [% s.plugin_output %]<br>
+    [% nl2br(s.long_plugin_output) %]
+  [% END %]
+  </td></tr>
+  </table>
+[% END %]
 
-        [% content = BLOCK %]
-          [% IF s.acknowledged %]
-            <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
-            [% svcbg = icon_bg_class %]
-          [% ELSIF s.scheduled_downtime_depth > 0 %]
-            <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
-            [% svcbg = icon_bg_class %]
-          [% ELSE %]
-          <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
-          [% END %]
-        [% END %]
+[% content = BLOCK %]
+  [% IF s.acknowledged %]
+    <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
+    [% svcbg = icon_bg_class %]
+  [% ELSIF s.scheduled_downtime_depth > 0 %]
+    <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
+    [% svcbg = icon_bg_class %]
+  [% ELSE %]
+  <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
+  [% END %]
+[% END %]
         <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(info.replace("\n", "")) %]'>[% content %]</td>
     [% ELSE %]
     <td class='[% svcbg %]' align="center">-</td>
