@@ -88,12 +88,6 @@ sub startup {
     my($class) = @_;
     my $app = $class->_build_app();
 
-    # middleware is in reverse order because it wraps each other
-    if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
-        require Plack::Middleware::Lint;
-        $app = Plack::Middleware::Lint->wrap($app);
-    }
-
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
@@ -124,7 +118,6 @@ sub _build_app {
         $config = Thruk::Config::get_config();
     }
     $self->{'config'} = $config;
-    $self->_init_logging();
 
     _init_cache($self->{'config'});
     #&timing_breakpoint('startup() cache created');
@@ -318,7 +311,7 @@ sub obj_db_model {
 
 =cut
 sub log {
-    return($_[0]->{'log'});
+    return($_[0]->{'_log'} ||= $_[0]->_init_logging());
 }
 
 ###################################################
@@ -480,7 +473,7 @@ sub _set_ssi {
 # Logging
 sub _init_logging {
     my($self) = @_;
-    my $log4perl_conf;
+    my($log4perl_conf, $logger);
     if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' && $ENV{'THRUK_SRC'} ne 'SCRIPTS')) {
         if(defined $self->config->{'log4perl_conf'} && ! -s $self->config->{'log4perl_conf'} ) {
             die("\n\n*****\nfailed to load log4perl config: ".$self->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
@@ -490,8 +483,8 @@ sub _init_logging {
     if(defined $log4perl_conf and -s $log4perl_conf) {
         require Log::Log4perl;
         Log::Log4perl::init($log4perl_conf);
-        my $logger = Log::Log4perl::get_logger();
-        $self->{'log'} = $logger;
+        $logger = Log::Log4perl::get_logger();
+        $self->{'_log'} = $logger;
         $self->config->{'log4perl_conf_in_use'} = $log4perl_conf;
     }
     else {
@@ -504,17 +497,17 @@ sub _init_logging {
         log4perl.appender.Screen.layout.ConversionPattern = [%d{ABSOLUTE}][%p][%c] %m%n
         );
         Log::Log4perl::init(\$log_conf);
-        my $logger = Log::Log4perl->get_logger();
-        $self->{'log'} = $logger;
+        $logger = Log::Log4perl->get_logger();
+        $self->{'_log'} = $logger;
         if(Thruk->verbose) {
-            $self->log->level('DEBUG');
+            $logger->level('DEBUG');
+            $logger->debug("logging initialized");
         }
         else {
-            $self->log->level('INFO');
+            $logger->level('INFO');
         }
-        $self->log->debug("logging initialized");
     }
-    return;
+    return($logger);
 }
 
 ###################################################

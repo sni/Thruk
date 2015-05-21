@@ -96,7 +96,7 @@ return log object
 
 =cut
 sub log {
-    return($_[0]->{'app'}->{'log'});
+    return($_[0]->app->log);
 }
 
 =head2 detach
