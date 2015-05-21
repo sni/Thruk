@@ -879,14 +879,15 @@ sub _list {
 
 #################################################
 # verify js syntax
+my $errors_js = 0;
 sub verify_js {
     my($file) = @_;
     return if $file =~ m/jit-yc.js/gmx;
     return if $file =~ m/jquery.mobile.router/gmx;
     my $content = read_file($file);
     my $matches = _replace_with_marker($content);
-    return unless scalar $matches > 0;
-    _check_marker($file, $content);
+    return unless $matches;
+    _check_marker($file, $content) if $errors_js;
     return;
 }
 
@@ -895,7 +896,7 @@ sub verify_js {
 sub verify_html_js {
     my($content) = @_;
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
-    _check_marker(undef, $content);
+    _check_marker(undef, $content) if $errors_js;
     return;
 }
 
@@ -905,7 +906,7 @@ sub verify_tt {
     my($file) = @_;
     my $content = read_file($file);
     $content =~ s/(<script.*?<\/script>)/&_extract_js($1)/misge;
-    _check_marker($file, $content);
+    _check_marker($file, $content) if $errors_js;
     return;
 }
 
@@ -924,18 +925,22 @@ sub _replace_with_marker {
 
     # trailing commas
     my @matches = $_[0]  =~ s/(\,\s*[\)|\}|\]])/JS_ERROR_MARKER1:$1/sgmxi;
+    @matches = grep {!/^\s*$/} @matches;
     $errors    += scalar @matches;
 
     # insecure for loops which do not work in IE8
     @matches = $_[0]  =~ s/(for\s*\(.*\s+in\s+.*\))/JS_ERROR_MARKER2:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
     # for(var key in... is ok
     @matches = grep {!/var\s+key/} @matches;
     $errors    += scalar @matches;
 
     # jQuery().attr('checked', true) must be .prop now
     @matches = $_[0]  =~ s/(\.attr\s*\(.*checked)/JS_ERROR_MARKER3:$1/gmxi;
+    @matches = grep {!/^\s*$/} @matches;
     $errors    += scalar @matches;
 
+    $errors_js += $errors;
     return $errors;
 }
 
@@ -943,8 +948,10 @@ sub _replace_with_marker {
 sub _check_marker {
     my($file, $content) = @_;
     my @lines = split/\n/mx, $content;
-    my $x = 1;
+    my $x = 0;
     for my $line (@lines) {
+        $x++;
+        next unless $line =~ m/JS_ERROR_MARKER/mx;
         if($line =~ m/JS_ERROR_MARKER1:/mx) {
             my $orig = $line;
             $orig   .= "\n".$lines[$x+1] if defined $lines[$x+1];
@@ -965,8 +972,8 @@ sub _check_marker {
             fail('found jQuery.attr(checked) instead of .prop() in '.($file || 'content').' line: '.$x);
             diag($orig);
         }
-        $x++;
     }
+    $errors_js = 0;
 }
 
 #################################################
