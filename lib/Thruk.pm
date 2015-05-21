@@ -222,8 +222,8 @@ sub _dispatcher {
     ###############################################
     # prepare request
     $c->{'errored'} = 0;
-    local $Thruk::Request::c  = $c if defined $Thruk::Request::c;
-    $Thruk::Request::c = $c;
+    local $Thruk::Request::c = $c if !$ENV{'THRUK_KEEP_CONTEXT'};
+          $Thruk::Request::c = $c if  $ENV{'THRUK_KEEP_CONTEXT'};
 
     Thruk::Action::AddDefaults::begin($c);
     #&timing_breakpoint("_dispatcher begin done");
