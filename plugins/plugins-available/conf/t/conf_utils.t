@@ -354,7 +354,7 @@ $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/10' });
 $objects->init();
 $parsedfile = $objects->{'files'}->[0];
 $obj = $parsedfile->{'objects'}->[0];
-$objects->clone_refs($obj, $obj->{'conf'}->{'host_name'}, "cloned host");
+$objects->clone_refs($obj, $obj, $obj->{'conf'}->{'host_name'}, "cloned host");
 $tmp = $objects->get_objects_by_name('hostgroup', 'group3');
 isa_ok($tmp->[0], 'Monitoring::Config::Object::Hostgroup');
 is_deeply($tmp->[0]->{'conf'}->{'members'}, ['hostname1', 'cloned host'], "cloned host is now member of group");
