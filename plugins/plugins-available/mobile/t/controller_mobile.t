@@ -6,7 +6,7 @@ use JSON::XS qw/decode_json/;
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     my $tests = 258;
-    $tests = $tests - 35 if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    $tests = $tests - 32 if $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan tests => $tests;
 }
 

@@ -16,7 +16,7 @@ BEGIN { use_ok 'Thruk::Controller::Root' }
 
 #####################################################################
 SKIP: {
-    skip 'external tests', 10 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    skip 'external tests', 9 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     TestUtils::test_page(url => '/', redirect => 1, location => '/thruk/');
 }
 my $product = 'thruk';
@@ -51,7 +51,7 @@ for my $url (@{$pages}) {
 is($Thruk::Request::c, undef, "Request object is now empty");
 
 SKIP: {
-    skip 'external tests', 12 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    skip 'external tests', 11 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     # test works local only because we modify the config here
     my($res, $c) = ctx_request('/thruk/side.html');
 
