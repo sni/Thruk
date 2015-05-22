@@ -155,3 +155,9 @@ quicktest:
 	    t/0*.t \
 	    t/9*.t
 
+timedtest:
+	for file in $(TEST_FILES); do \
+		printf "%-40s" $$file; \
+		time=$$(TEST_AUTHOR=1 PERL_DL_NONLAZY=1 /usr/bin/time -f %e perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" $$file 2>&1 | tail -n 1); \
+		printf "% 10ss\n" $$time; \
+	done
