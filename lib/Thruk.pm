@@ -201,7 +201,7 @@ sub _build_app {
 
     #&timing_breakpoint('start done');
 
-    $thruk = $self;
+    $thruk = $self unless $thruk;
     return(\&{_dispatcher});
 }
 
