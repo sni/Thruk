@@ -15,7 +15,7 @@ use warnings;
 use Carp qw/confess/;
 use Fcntl qw/:mode :flock/;
 use JSON::XS ();
-use POSIX ();
+use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
@@ -258,7 +258,7 @@ sub cmd {
         $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-        while(POSIX::waitpid($pid, POSIX::WNOHANG) == 0) {
+        while(POSIX::waitpid($pid, WNOHANG) == 0) {
             push @lines, <$rdr>;
         }
         $rc = $?;

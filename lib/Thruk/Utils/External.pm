@@ -18,7 +18,7 @@ use Digest::MD5 qw(md5_hex);
 use Time::HiRes ();
 use File::Slurp qw/read_file/;
 use Storable qw/store retrieve/;
-use POSIX ();
+use POSIX ":sys_wait_h";
 
 ##############################################
 
@@ -263,13 +263,13 @@ sub get_status {
     confess("got no id") unless $id;
 
     # reap pending zombies
-    POSIX::waitpid(-1, POSIX::WNOHANG);
+    POSIX::waitpid(-1, WNOHANG);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
 
     # reap pending zombies
-    waitpid(-1, POSIX::WNOHANG);
+    waitpid(-1, WNOHANG);
 
     if( -f $dir."/user" ) {
         my $user = read_file($dir."/user");
