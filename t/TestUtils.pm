@@ -349,6 +349,7 @@ sub test_page {
     # memory usage
     SKIP: {
         skip "skipped memory check", 1 if $ENV{'TEST_SKIP_MEMORY'};
+        require Thruk::Backend::Pool;
         my $rsize = Thruk::Backend::Pool::get_memory_usage($$);
         ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
     }
