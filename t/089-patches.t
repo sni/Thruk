@@ -11,6 +11,10 @@ alarm(120);
 # create a tmp directory
 mkdir('tmppatches') or die("cannot create tmp folder: $!");
 
+END {
+    `rm -rf tmppatches`;
+}
+
 my $rsync = 'rsync -av --exclude=".git" --exclude="tmppatches/" --exclude="tmp" --exclude="blib" --exclude="var" --exclude="themes" --exclude="plugins" --exclude="logs" --exclude="docs" --exclude="debian" . tmppatches/.';
 `$rsync`;
 is($?, 0, 'rsync ok: '.$rsync);
