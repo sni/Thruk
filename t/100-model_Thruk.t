@@ -6,7 +6,7 @@ use Log::Log4perl qw(:easy);
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 37;
+    plan tests => 38;
 }
 
 BEGIN {
@@ -18,6 +18,7 @@ BEGIN {
 
 ################################################################################
 # initialize backend manager
+use_ok("Thruk::Backend::Manager");
 my $b = Thruk::Backend::Manager->new();
 isa_ok($b, 'Thruk::Backend::Manager');
 

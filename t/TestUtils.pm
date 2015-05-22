@@ -13,43 +13,41 @@ BEGIN {
 
 ###################################################
 use lib 'lib';
+use warnings;
 use strict;
 use Data::Dumper;
 use Test::More;
 use URI::Escape qw/uri_unescape/;
-use Encode qw/decode_utf8/;
-use File::Slurp;
-use HTTP::Request::Common qw(POST);
-use HTTP::Response;
+use File::Slurp qw/read_file/;
+use HTTP::Request::Common qw(GET POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
-use File::Temp qw/ tempfile /;
+use File::Temp qw/tempfile/;
 use HTML::Entities qw//;
-use Carp;
-use Thruk::Utils;
-use Thruk::Utils::External;
+use Carp qw/confess/;
 use Plack::Test;
-use HTTP::Request::Common;
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT    = qw(request ctx_request);
 our @EXPORT_OK = qw(request ctx_request);
 
-my $use_html_lint = 0;
+my $use_html_lint;
 my $lint;
-eval {
-    require HTML::Lint;
-    $use_html_lint = 1;
-    $lint          = new HTML::Lint;
-};
 
 use Thruk;
+use Thruk::Config;
+Thruk::Config::get_config(); # adds plugins to INC which is required for many tests
 our $placktest;
 
 #########################
 sub request {
     my($url) = @_;
+    if(!defined $Thruk::Backend::Pool::peers) {
+        require Thruk::Backend::Pool;
+        Thruk::Backend::Pool::init_backend_thread_pool();
+    }
+
     my($req, $res);
     if(!$placktest) {
         $placktest = Plack::Test->create(Thruk->startup)
@@ -381,12 +379,22 @@ sub test_page {
 
     SKIP: {
         if($content_type =~ m|text/html| and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
+            if(!defined $use_html_lint) {
+                # load lint on first use
+                $use_html_lint = 0;
+                eval {
+                    require HTML::Lint;
+                    $use_html_lint = 1;
+                    $lint          = new HTML::Lint;
+                };
+            }
             if($use_html_lint == 0) {
                 skip "no HTML::Lint installed", 1;
             }
             $lint->newfile($opts->{'url'});
             # will result in "Parsing of undecoded UTF-8 will give garbage when decoding entities..." otherwise
-            my $content = decode_utf8($return->{'content'});
+            my $content = $return->{'content'};
+            utf8::decode($content);
             $lint->parse($content);
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
@@ -555,6 +563,7 @@ sub get_c {
 #########################
 sub get_user {
     my $c = get_c();
+    require Thruk::Utils;
     my ($uid, $groups) = Thruk::Utils::get_user($c);
     my $user           = getpwuid($uid);
     return $user;
@@ -571,6 +580,7 @@ sub wait_for_job {
         return;
     }
     local $SIG{ALRM} = sub { die("timeout while waiting for job: ".$jobdir) };
+    require Thruk::Utils::External;
     alarm(120);
     eval {
         while(Thruk::Utils::External::_is_running($jobdir)) {

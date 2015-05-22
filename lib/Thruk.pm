@@ -22,8 +22,10 @@ our $VERSION = '1.88';
 # has to be done before the binmode
 # or even earlier to save memory
 BEGIN {
-    use Thruk::Backend::Pool ();
-    Thruk::Backend::Pool::init_backend_thread_pool();
+    if(!$ENV{'THRUK_SRC'} || $ENV{'THRUK_SRC'} ne 'TEST') {
+        require Thruk::Backend::Pool;
+        Thruk::Backend::Pool::init_backend_thread_pool();
+    }
 }
 
 ###################################################
@@ -50,25 +52,9 @@ use constant {
     ADD_CACHED_DEFAULTS => 2,
 };
 use Carp qw/confess/;
-use POSIX ();
-use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
 use Module::Load qw/load/;
 use Data::Dumper qw/Dumper/;
-use Thruk::Context ();
-use Thruk::Utils ();
-use Thruk::Utils::Auth ();
-use Thruk::Utils::External ();
-use Thruk::Utils::Livecache ();
-use Thruk::Utils::Menu ();
-use Thruk::Utils::Status ();
-use Thruk::Utils::Cache qw/cache/;
-use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Views::ToolkitRenderer ();
-use Thruk::Views::ExcelRenderer ();
-use Thruk::Views::GDRenderer ();
-use Thruk::Views::JSONRenderer ();
 
 ###################################################
 $Data::Dumper::Sortkeys = 1;
@@ -87,6 +73,20 @@ returns the psgi code ref
 =cut
 sub startup {
     my($class) = @_;
+
+    require Thruk::Context;
+    require Thruk::Utils;
+    require Thruk::Utils::IO;
+    require Thruk::Utils::Auth;
+    require Thruk::Utils::External;
+    require Thruk::Utils::Livecache;
+    require Thruk::Utils::Menu;
+    require Thruk::Utils::Status;
+    require Thruk::Action::AddDefaults;
+    require Thruk::Backend::Manager;
+    require Thruk::Views::ToolkitRenderer;
+    require Thruk::Views::JSONRenderer;
+
     my $app = $class->_build_app();
 
     if($ENV{'THRUK_SRC'} eq 'DebugServer' || $ENV{'THRUK_SRC'} eq 'TEST') {
@@ -125,7 +125,6 @@ sub _build_app {
     }
 
     _init_cache($self->{'config'});
-    #&timing_breakpoint('startup() cache created');
 
     ###################################################
     # load and parse cgi.cfg into $c->config
@@ -292,7 +291,10 @@ sub _dispatcher {
 
 =cut
 sub config {
-    $config = Thruk::Config::get_config() unless $config;
+    unless($config) {
+        require Thruk::Config;
+        $config = Thruk::Config::get_config();
+    }
     return($config);
 }
 
@@ -352,8 +354,9 @@ sub debug {
 # init cache
 sub _init_cache {
     my($config) = @_;
+    load Thruk::Utils::Cache, qw/cache/;
     Thruk::Utils::IO::mkdir($config->{'tmp_path'});
-    return __PACKAGE__->cache($config->{'tmp_path'}.'/thruk.cache');
+    return Thruk::Utils::Cache->cache($config->{'tmp_path'}.'/thruk.cache');
 }
 
 ###################################################
@@ -421,6 +424,7 @@ sub _create_secret_file {
         my $var_path   = $self->config->{'var_path'} or die("no var path!");
         my $secretfile = $var_path.'/secret.key';
         unless(-s $secretfile) {
+            load Digest::MD5, qw(md5_hex);
             my $digest = md5_hex(rand(1000).time());
             chomp($digest);
             open(my $fh, '>', $secretfile) or warn("cannot write to $secretfile: $!");
@@ -448,6 +452,7 @@ sub _set_timezone {
         ## no critic
         $ENV{'TZ'} = $timezone;
         ## use critic
+        require POSIX;
         POSIX::tzset();
     }
     return;

@@ -1256,6 +1256,7 @@ sub savexls {
     $c->stash->{'res_ctype'}  = 'application/x-msexcel';
 
     my $template = $c->stash->{'template'};
+    require Thruk::Views::ExcelRenderer;
     my $output = Thruk::Views::ExcelRenderer::render($c, $template);
     if($c->config->{'no_external_job_forks'}) {
         #my($fh, $filename)...

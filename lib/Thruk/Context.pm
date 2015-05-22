@@ -132,6 +132,7 @@ detach to excel controller
 =cut
 sub render_excel {
     my($c) = @_;
+    require Thruk::Views::ExcelRenderer;
     return(Thruk::Views::ExcelRenderer::render_excel($c));
 }
 
@@ -142,6 +143,7 @@ detach to gd controller
 =cut
 sub render_gd {
     my($c) = @_;
+    require Thruk::Views::GDRenderer;
     return(Thruk::Views::GDRenderer::render_gd($c));
 }
 

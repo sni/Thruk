@@ -179,7 +179,6 @@ package Thruk::naglint;
 use strict;
 use warnings;
 use Getopt::Long;
-use Pod::Usage;
 use Thruk::Config;
 use Thruk::Utils::Scripts;
 use Monitoring::Config;
