@@ -268,6 +268,27 @@ sub job_cgi {
 
 ######################################
 
+=head2 parts_cgi
+
+page: /thruk/cgi-bin/parts.cgi
+
+=cut
+
+sub parts_cgi {
+    my($c) = @_;
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    my $part = $c->req->parameters->{'part'};
+    return $c->detach('/error/index/25') unless $part;
+    if($part eq '_header_prefs') {
+        $c->stash->{'template'} = '_header_prefs.tt';
+    } else {
+        return $c->detach('/error/index/25') unless $part;
+    }
+    return;
+}
+
+######################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2009-2014, <sven@nierlein.org>

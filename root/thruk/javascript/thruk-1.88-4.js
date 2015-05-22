@@ -300,6 +300,28 @@ function close_and_remove_event(evt) {
     }
 }
 
+/* toggle a element by id and load content from remote */
+function toggleElementRemote(id, part, bodyclose) {
+    var elements = jQuery('#'+id);
+    if(!elements[0]) {
+        if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElementRemote(): " + id); }
+        return false;
+    }
+    resetRefresh();
+    var el = elements[0];
+    /* fetched already, just toggle */
+    if(el.innerHTML) {
+        toggleElement(id, undefined, bodyclose);
+        return;
+    }
+    /* add loading image and fetch content */
+    el.innerHTML = "<img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'>";
+    showElement(id, undefined, bodyclose);
+    jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part, {}, function(text, status, req) {
+        showElement(id, undefined, bodyclose);
+    })
+}
+
 /* toggle a element by id */
 function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   var pane = document.getElementById(id);
@@ -412,10 +434,14 @@ function setRefreshRate(rate) {
   curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
-    obj.innerHTML = "This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'>";
+    if(obj) {
+        obj.innerHTML = "This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'>";
+    }
   }
   else {
-    obj.innerHTML = "Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'>";
+    if(obj) {
+        obj.innerHTML = "Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'>";
+    }
     if(rate == 0) {
       var has_auto_reload_fn = false;
       try {

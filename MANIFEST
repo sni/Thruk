@@ -1341,6 +1341,7 @@ templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
 templates/_header_initial_states.tt
+templates/_header_prefs.tt
 templates/_header_sites.tt
 templates/_header_sites_collapsed.tt
 templates/_header_sites_panel.tt

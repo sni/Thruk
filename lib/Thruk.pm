@@ -155,6 +155,7 @@ sub _build_app {
         '/thruk/changes.html'              => 'Thruk::Controller::Root::thruk_changes_html',
         '/thruk/docs/'                     => 'Thruk::Controller::Root::thruk_docs',
         '/thruk/docs/index.html'           => 'Thruk::Controller::Root::thruk_docs',
+        '/thruk/cgi-bin/parts.cgi'         => 'Thruk::Controller::Root::parts_cgi',
         '/thruk/cgi-bin/job.cgi'           => 'Thruk::Controller::Root::job_cgi',
         '/thruk/cgi-bin/avail.cgi'         => 'Thruk::Controller::avail::index',
         '/thruk/cgi-bin/cmd.cgi'           => 'Thruk::Controller::cmd::index',
