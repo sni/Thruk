@@ -1,6 +1,5 @@
 ﻿<script type="text/javascript">
 <!--
-  [%+ PROCESS _common_js_bugs.tt +%]
   var url_prefix             = '[% url_prefix %]';
   var product_prefix         = '[% product_prefix %]';
   var cookie_path            = '[% cookie_path %]';
@@ -26,7 +25,7 @@
 [% ELSE %]
   [% FOREACH jsfiles = all_in_one_javascript %]
     <script type="text/javascript" src="[% url_prefix %]javascript/[% jsfiles %]"></script>
-  [% END %]
+  [%+ END %]
 [% END +%]
 [% IF has_jquery_ui %]
     <script type="text/javascript" src="[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js"></script>
@@ -34,6 +33,7 @@
 <script type="text/javascript">
 <!--
     jQuery.noConflict();
+    [%+ PROCESS _common_js_bugs.tt +%]
 
     [% FOREACH name = fix_cookies %]
       [% FOREACH path = get_cookie_remove_paths(c) %]
@@ -42,12 +42,6 @@
         [% END %]
       [% END %]
     [%+ END +%]
-
-    var saved_hash = readCookie('thruk_preserve_hash');
-    if(saved_hash != undefined) {
-        set_hash(saved_hash);
-        cookieRemove('thruk_preserve_hash');
-    }
 
     [%+ IF disable_backspace +%]
     jQuery(document).on("keydown", function (e) {

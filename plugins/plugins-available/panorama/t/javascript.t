@@ -54,6 +54,7 @@ XMLHttpRequest = function(){ return({
     send: function(){}
 })};
 thruk_debug_js = 1;
+thruk_onerror  = function() {};
 ", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');
 ok($jsfiles[0], $jsfiles[0]);

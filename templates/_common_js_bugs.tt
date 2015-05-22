@@ -1,36 +1,11 @@
 ﻿[%+ IF show_error_reports +%]
-var version_info   = '[% fullversion(c) %]';
-var released       = '[% c.config.released %]';
-var thruk_errors   = [];
-var bug_email_rcpt = "[% bug_email_rcpt %]";
-var error_count    = 0;
-window.onerror = function(msg, url, line, col, error) {
-  error_count++;
-  if(error_count > 5) {
-    debug("too many errors, not logging any more...");
-    window.onerror = undefined;
-  }
-  try {
-    thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
-    // hide errors from saved pages
-    if(window.location.protocol != 'http:' && window.location.protocol != 'https:') { return false; }
-    // hide errors in line 0
-    if(line == 0) { return false; }
-    // hide errors from plugins and addons
-    if(url.match(/^chrome:/)) { return false; }
-    // skip some errors
-    [%+ FOREACH skip = skip_js_errors.list %]
-    if(msg.match(/[% skip %]/)) { return false; }
-    [% END +%]
-    var text = getErrorText("[% debug_details.replace('\n', '\\n') %]\n", error);
-    [%+ IF show_error_reports == "server" || show_error_reports == "both" %]
-    sendJSError("[% url_prefix %]cgi-bin/remote.cgi?log", text);
-    [% END +%]
-    [%+ IF show_error_reports == "1" || show_error_reports == "both" %]
-    showBugReport('bug_report', text);
-    [% END +%]
-  }
-  catch(e) { debug(e); }
-  return false;
-};
+var version_info        = '[% fullversion(c) %]';
+var released            = '[% c.config.released %]';
+var thruk_errors        = [];
+var bug_email_rcpt      = "[% bug_email_rcpt %]";
+var error_count         = 0;
+var skip_js_errors      = [% json_encode(skip_js_errors.list) %];
+var show_error_reports  = "[% show_error_reports %]";
+var thruk_debug_details = "[% debug_details.replace('\n', '\\n') %]";
+window.onerror          = thruk_onerror;
 [%+ END +%]

@@ -84,7 +84,45 @@ function init_page() {
         scrollToPos = scroll[2];
     }
 
+    var saved_hash = readCookie('thruk_preserve_hash');
+    if(saved_hash != undefined) {
+        set_hash(saved_hash);
+        cookieRemove('thruk_preserve_hash');
+    }
+
     cleanUnderscoreUrl();
+}
+
+function thruk_onerror(msg, url, line, col, error) {
+  if(error_count > 5) {
+    debug("too many errors, not logging any more...");
+    window.onerror = undefined;
+  }
+  try {
+    thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
+    // hide errors from saved pages
+    if(window.location.protocol != 'http:' && window.location.protocol != 'https:') { return false; }
+    // hide errors in line 0
+    if(line == 0) { return false; }
+    // hide errors from plugins and addons
+    if(url.match(/^chrome:/)) { return false; }
+    // skip some errors
+    var skip = false;
+    jQuery.each(skip_js_errors, function(i, e) {
+        if(msg.match(e)) { skip = true; return false; }
+    });
+    if(skip) { return; }
+  error_count++;
+    var text = getErrorText(thruk_debug_details, error);
+    if(show_error_reports == "server" || show_error_reports == "both") {
+        sendJSError(url_prefix+"cgi-bin/remote.cgi?log", text);
+    }
+    if(show_error_reports == "1" || show_error_reports == "both") {
+        showBugReport('bug_report', text);
+    }
+  }
+  catch(e) { debug(e); }
+  return false;
 }
 
 /* remove ugly ?_=... from url */
@@ -1437,7 +1475,9 @@ function getErrorText(details, error) {
         var stack = [];
         var f = arguments.callee.caller;
         while (f) {
-            stack.push(f.name);
+            if(f.name != 'thruk_onerror') {
+                stack.push(f.name);
+            }
             f = f.caller;
         }
         text = text + stack.join("\n");
@@ -1488,6 +1528,7 @@ function getErrorText(details, error) {
             }
         }
     } catch(err) {}
+    text += "\n";
     return(text);
 }
 
