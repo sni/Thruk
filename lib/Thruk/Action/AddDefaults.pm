@@ -442,6 +442,7 @@ sub add_defaults {
         # return here for static content, no backend needed
         if(   $c->req->path_info =~ m|$product_prefix/\w+\.html|mx
            or $c->req->path_info =~ m|$product_prefix\/\w+\.html|mx
+           or $c->req->path_info =~ m|$product_prefix\/$|mx
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/conf\.cgi|mx
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/remote\.cgi|mx
            or $c->req->path_info =~ m|$product_prefix\/cgi\-bin\/login\.cgi|mx
