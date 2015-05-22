@@ -157,7 +157,12 @@ quicktest:
 
 timedtest:
 	for file in $(TEST_FILES); do \
-		printf "%-40s" $$file; \
-		time=$$(TEST_AUTHOR=1 PERL_DL_NONLAZY=1 /usr/bin/time -f %e perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" $$file 2>&1 | tail -n 1); \
-		printf "% 10ss\n" $$time; \
+		printf "%-60s" $$file; \
+		output=$$(TEST_AUTHOR=1 PERL_DL_NONLAZY=1 /usr/bin/time -f %e perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" $$file 2>&1); \
+		if [ $$? != 0 ]; then \
+			printf "% 8s \n" "FAILED"; \
+		else \
+			time=$$(echo "$$output" | tail -n1); \
+			printf "% 8ss\n" $$time; \
+		fi; \
 	done
