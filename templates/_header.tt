@@ -27,18 +27,17 @@
       var datetime_format_long    = '[% datetime_format_long %]';
       [% END +%]
       [% PROCESS _header_initial_states.tt %]
-      /* create clone */
-      var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);
+      var current_backend_states  = [% initial_backend_states %];
       var enable_shinken_features = [% enable_shinken_features %];
       [% IF enable_shinken_features +%]
       var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
       [% END +%]
 
       [% IF original_url %]
-      var original_url = '[% original_url %]';
-      original_url     = original_url.replace(/&amp;/g, '&');
-      if (history.replaceState) {
-        history.replaceState({}, "", original_url);
+      var history_url = '[% original_url %]';
+      history_url     = history_url.replace(/&amp;/g, '&');
+      if(history.replaceState) {
+        history.replaceState({}, "", history_url);
       }
       [% END %]
 

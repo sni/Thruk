@@ -739,35 +739,54 @@ sub _set_possible_backends {
 
     my %backend_detail;
     my @new_possible_backends;
+    my $initial_backend_states = {};
+    my $initial_backends       = {};
 
     for my $back (@possible_backends) {
         if(defined $disabled_backends->{$back} && $disabled_backends->{$back} == 4) {
             $c->{'db'}->disable_backend($back);
+            next;
         }
-        if(!defined $disabled_backends->{$back} || $disabled_backends->{$back} != 4) {
-            my $peer = $c->{'db'}->get_peer_by_key($back);
-            $backend_detail{$back} = {
-                'name'       => $peer->{'name'},
-                'addr'       => $peer->{'addr'},
-                'type'       => $peer->{'type'},
-                'disabled'   => $disabled_backends->{$back} || 0,
-                'running'    => 0,
-                'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
-            };
-            if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
-                $backend_detail{$back}->{'running'} = 1;
-            }
-            # set combined state
-            $backend_detail{$back}->{'state'} = 1; # down
-            if($backend_detail{$back}->{'running'}) { $backend_detail{$back}->{'state'} = 0; }       # up
-            if($backend_detail{$back}->{'disabled'} == 2) { $backend_detail{$back}->{'state'} = 2; } # hidden
-            if($backend_detail{$back}->{'disabled'} == 3) { $backend_detail{$back}->{'state'} = 3; } # unused
-            push @new_possible_backends, $back;
+        my $peer = $c->{'db'}->get_peer_by_key($back);
+        $backend_detail{$back} = {
+            'name'       => $peer->{'name'},
+            'addr'       => $peer->{'addr'},
+            'type'       => $peer->{'type'},
+            'disabled'   => $disabled_backends->{$back} || 0,
+            'running'    => 0,
+            'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
+        };
+        if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
+            $backend_detail{$back}->{'running'} = 1;
+        }
+        # set combined state
+        $backend_detail{$back}->{'state'} = 1; # down
+        if($backend_detail{$back}->{'running'})       { $backend_detail{$back}->{'state'} = 0; } # up
+        if($backend_detail{$back}->{'disabled'} == 2) { $backend_detail{$back}->{'state'} = 2; } # hidden
+        if($backend_detail{$back}->{'disabled'} == 3) { $backend_detail{$back}->{'state'} = 3; } # unused
+        push @new_possible_backends, $back;
+
+        # create hashes used in javascript
+        $initial_backend_states->{$back}->{'state'} = $backend_detail{$back}->{'state'};
+        $initial_backends->{$back} = {
+            key              => $back,
+            name             => $peer->{'name'},
+            state            => $backend_detail{$back}->{'state'},
+            version          => '',
+            data_src_version => '',
+            program_start    => '',
+        };
+        if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}) {
+            $initial_backends->{$back}->{'version'}          = $c->stash->{'pi_detail'}->{$back}->{'program_version'};
+            $initial_backends->{$back}->{'data_src_version'} = $c->stash->{'pi_detail'}->{$back}->{'data_source_version'};
+            $initial_backends->{$back}->{'program_start'}    = $c->stash->{'pi_detail'}->{$back}->{'program_start'};
         }
     }
 
-    $c->stash->{'backends'}       = \@new_possible_backends;
-    $c->stash->{'backend_detail'} = \%backend_detail;
+    $c->stash->{'backends'}               = \@new_possible_backends;
+    $c->stash->{'backend_detail'}         = \%backend_detail;
+    $c->stash->{'initial_backends'}       = encode_json($initial_backends);
+    $c->stash->{'initial_backend_states'} = encode_json($initial_backend_states);
 
     return;
 }
