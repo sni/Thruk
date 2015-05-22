@@ -977,7 +977,7 @@ sub _process_objects_page {
             if(defined $c->req->parameters->{'save_and_reload'}) {
                 return if _apply_config_changes($c);
             }
-            return if $rc;
+            return if !defined $rc;
             $c->stash->{cloned} = $c->req->parameters->{'cloned'} || 0;
         }
 
