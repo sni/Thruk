@@ -237,7 +237,7 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
-  cmd($command)
+  cmd($c, $command [, $stdin])
 
 run command and return exit code and output
 
@@ -247,7 +247,7 @@ array like ['/bin/prog', 'arg1', 'arg2']
 =cut
 
 sub cmd {
-    my($c, $cmd) = @_;
+    my($c, $cmd, $stdin) = @_;
 
     local $SIG{CHLD}='';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'} if $c;
@@ -258,6 +258,10 @@ sub cmd {
         $c->log->debug('running cmd: '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        if($stdin) {
+            print $wtr $stdin,"\n";
+            CORE::close($wtr);
+        }
         while(POSIX::waitpid($pid, WNOHANG) == 0) {
             push @lines, <$rdr>;
         }
@@ -265,6 +269,7 @@ sub cmd {
         push @lines, <$rdr>;
         chomp($output = join('', @lines) || '');
     } else {
+        confess("stdin not supported for string commands") if $stdin;
         #&timing_breakpoint('IO::cmd: '.$cmd);
         $c->log->debug( "running cmd: ". $cmd ) if $c;
         $output = `$cmd 2>&1`;

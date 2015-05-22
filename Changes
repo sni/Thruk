@@ -1,9 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
-          - changed to json storage format everywhere
+          - changed internal storage format to json everywhere
           - improved memory usage
           - improved startup time
+          - improved page rendering
+          - users can change their htpasswd passwords
           - fix redirect without trailing slash on login
 
 1.88-4   Wed Apr 22 16:16:09 CEST 2015

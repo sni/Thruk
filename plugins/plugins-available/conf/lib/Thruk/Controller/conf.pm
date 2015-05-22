@@ -50,9 +50,10 @@ sub add_routes {
 =head2 index
 
 =cut
-sub index { # Safe Defaults required for changing backends
-    my ( $c ) = @_;
+sub index {
+    my($c) = @_;
 
+    # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
 
     if(!$c->config->{'conf_modules_loaded'}) {
@@ -70,9 +71,15 @@ sub index { # Safe Defaults required for changing backends
         $c->config->{'conf_modules_loaded'} = 1;
     }
 
+    my $subcat = $c->req->parameters->{'sub'}    || '';
+    my $action = $c->req->parameters->{'action'} || 'show';
+
     # check permissions
-    unless( $c->check_user_roles( "authorized_for_configuration_information")
-        and $c->check_user_roles( "authorized_for_system_commands")) {
+    if($action eq 'user_password') {
+        # ok
+    }
+    elsif( !$c->check_user_roles("authorized_for_configuration_information")
+        || !$c->check_user_roles("authorized_for_system_commands")) {
         if(    !defined $c->{'db'}
             || !defined $c->{'db'}->{'backends'}
             || ref $c->{'db'}->{'backends'} ne 'ARRAY'
@@ -110,9 +117,6 @@ sub index { # Safe Defaults required for changing backends
         Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
     }
 
-    my $subcat = $c->req->parameters->{'sub'} || '';
-    my $action = $c->req->parameters->{'action'}  || 'show';
-
     if(exists $c->req->parameters->{'edit'} and defined $c->req->parameters->{'host'}) {
         $subcat = 'objects';
     }
@@ -128,7 +132,10 @@ sub index { # Safe Defaults required for changing backends
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
 
-    if($action eq 'cgi_contacts') {
+    if($action eq 'user_password') {
+        return _process_user_password_page($c);
+    }
+    elsif($action eq 'cgi_contacts') {
         return _process_cgiusers_page($c);
     }
     elsif($action eq 'json') {
@@ -1273,6 +1280,75 @@ sub _process_tools_page {
 }
 
 ##########################################################
+# create the users password page
+sub _process_user_password_page {
+    my($c) = @_;
+
+    my $referer = $c->req->parameters->{'referer'} || $c->stash->{'url_prefix'}.'main.html';
+    if($c->config->{'disable_user_password_change'}) {
+        Thruk::Utils::set_message($c, 'fail_message', "Changing passwords is disabled.");
+        return $c->redirect_to($referer);
+    }
+
+    my $htpw_file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    if(!$htpw_file || !-w $htpw_file) {
+        Thruk::Utils::set_message($c, 'fail_message', "Changing passwords is disabled.");
+        return $c->redirect_to($referer);
+    }
+
+    my $binary = _get_htpasswd();
+    if(!$binary) {
+        Thruk::Utils::set_message($c, 'fail_message', 'could not find htpasswd or htpasswd2, cannot update passwords');
+        return $c->redirect_to($referer);
+    }
+    my $help        = `$binary --help 2>&1`;
+    my $has_minus_v = $help =~ m|\s+\-v\s+|gmx;
+
+    my $user     = $c->user->get('username');
+    my $htpasswd = Thruk::Utils::Conf::read_htpasswd($htpw_file);
+    if(!defined $htpasswd->{$user}) {
+        Thruk::Utils::set_message($c, 'fail_message', "Your password cannot be changed.");
+        return $c->redirect_to($referer);
+    }
+
+    # change password?
+    if($c->req->parameters->{'save'}) {
+        return unless Thruk::Utils::check_csrf($c);
+
+        my $old        = $c->req->parameters->{'data.old'}        || '';
+        my $pass1      = $c->req->parameters->{'data.password'}   || '';
+        my $pass2      = $c->req->parameters->{'data.password2'}  || '';
+        my $min_length = $c->config->{'user_password_min_length'} || 5;
+        if($has_minus_v && !$old) {
+            Thruk::Utils::set_message($c, 'fail_message', "Current password missing");
+        }
+        elsif($pass1 eq '' || $pass2 eq '') {
+            Thruk::Utils::set_message($c, 'fail_message', "New password cannot be empty");
+        }
+        elsif(length($pass1) < $min_length) {
+            Thruk::Utils::set_message($c, 'fail_message', "New password must have at least ".$min_length." characters.");
+        }
+        elsif($pass1 ne '' && $pass1 eq $pass2) {
+            my $err = _htpasswd_password($c, $user, $pass1, $old);
+            if($err) {
+                $c->log->error("changing password for ".$user." failed: ".$err);
+                Thruk::Utils::set_message($c, 'fail_message', "Password change failed.");
+            } else {
+                $c->log->info("user changed password for ".$user);
+                Thruk::Utils::set_message($c, 'success_message', "Password changed successfully");
+            }
+        }
+        return $c->redirect_to('conf.cgi?action=user_password');
+    }
+
+    $c->stash->{'show_old_pass'} = $has_minus_v ? 1 : 0;
+    $c->stash->{'subtitle'}      = "Change Password";
+    $c->stash->{'template'}      = 'conf_user_password.tt';
+
+    return 1;
+}
+
+##########################################################
 # get list of all tools
 sub _get_tools {
     my ($c) = @_;
@@ -1310,20 +1386,13 @@ sub _update_password {
     my $user = $c->req->parameters->{'data.username'};
     my $send = $c->req->parameters->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
-        # htpasswd is usually somewhere in sbin
-        local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
-        my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
-        return('could not find htpasswd or htpasswd2 in '.$ENV{'PATH'}.', cannot update passwords') unless $htpasswd;
-
         # remove password?
         if($send eq 'remove password') {
             return unless Thruk::Utils::check_csrf($c);
-            my $cmd = [ $htpasswd, '-D', $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}, $user ];
-            if(_cmd($c, $cmd)) {
-                $c->log->info("removed password for ".$user);
-                return;
-            }
-            return( 'failed to remove password, check the logfile!' );
+            my $err = _htpasswd_password($c, $user, undef);
+            return $err if $err;
+            $c->log->info("admin removed password for ".$user);
+            return;
         }
 
         # change password?
@@ -1332,25 +1401,75 @@ sub _update_password {
         if($pass1 ne '') {
             return unless Thruk::Utils::check_csrf($c);
             if($pass1 eq $pass2) {
-                my $cmd = [$htpasswd];
-                push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
-                push @{$cmd}, '-b';
-                push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
-                push @{$cmd}, $user;
-                push @{$cmd}, $pass1;
-                if(_cmd($c, $cmd)) {
-                    $c->log->info("changed password for ".$user);
-                    return;
-                }
-                return( 'failed to update password, check the logfile!' );
+                my $err = _htpasswd_password($c, $user, $pass1);
+                return $err if $err;
+                $c->log->info("admin changed password for ".$user);
+                return;
             } else {
-                return( 'Passwords do not match' );
+                return('Passwords do not match');
             }
         }
     }
     return;
 }
 
+##########################################################
+# store changes to a file
+sub _htpasswd_password {
+    my($c, $user, $password, $oldpassword) = @_;
+
+    my $htpasswd = _get_htpasswd();
+    return('could not find htpasswd or htpasswd2, cannot update passwords') unless $htpasswd;
+
+    if(!defined $password) {
+        my $cmd = [ $htpasswd, '-D', $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}, $user ];
+        if(_cmd($c, $cmd)) {
+            return;
+        }
+        return( 'failed to remove password, check the logfile!' );
+    }
+
+    # check if htpasswd support -i switch
+    my $help = `$htpasswd --help 2>&1`;
+    my $has_minus_i = $help =~ m|\s+\-i\s+|gmx;
+    my $has_minus_v = $help =~ m|\s+\-v\s+|gmx;
+
+    # check old password first?
+    if($has_minus_v && $oldpassword) {
+        my $cmd = [$htpasswd];
+        push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+        push @{$cmd}, '-i' if  $has_minus_i;
+        push @{$cmd}, '-b' if !$has_minus_i;
+        push @{$cmd}, '-v';
+        push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+        push @{$cmd}, $user;
+        push @{$cmd}, $oldpassword if !$has_minus_i;
+        if(_cmd($c, $cmd, $has_minus_i ? $oldpassword : undef)) {
+            return('old password did not match');
+        }
+    }
+
+    my $cmd = [$htpasswd];
+    push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    push @{$cmd}, '-i' if $has_minus_i;
+    push @{$cmd}, '-b' if !$has_minus_i;
+    push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    push @{$cmd}, $user;
+    push @{$cmd}, $password if !$has_minus_i;
+    if(_cmd($c, $cmd, $has_minus_i ? $password : undef)) {
+        return;
+    }
+    return('failed to update password, check the logfile!');
+}
+
+##########################################################
+# returns htpasswd path
+sub _get_htpasswd {
+    # htpasswd is usually somewhere in sbin
+    local $ENV{'PATH'} = ($ENV{'PATH'} || '').':/usr/sbin:/sbin';
+    my $htpasswd = Thruk::Utils::which('htpasswd2') || Thruk::Utils::which('htpasswd');
+    return($htpasswd);
+}
 
 ##########################################################
 # store changes to a file
@@ -1381,9 +1500,9 @@ sub _store_changes {
 ##########################################################
 # execute cmd
 sub _cmd {
-    my ( $c, $cmd ) = @_;
+    my($c, $cmd, $stdin) = @_;
 
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, $stdin);
     $c->stash->{'output'} = $output;
     if($rc != 0) {
         return 0;

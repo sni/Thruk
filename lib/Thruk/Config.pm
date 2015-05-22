@@ -433,6 +433,8 @@ sub set_default_config {
         'perf_bar_pnp_popup'                => 1,
         'status_color_background'           => 0,
         'apache_status'                     => {},
+        'disable_user_password_change'      => 0,
+        'user_password_min_length'          => 5,
     };
     $defaults->{'thruk_bin'}   = 'script/thruk' if -f 'script/thruk';
     $defaults->{'cookie_path'} = $config->{'url_prefix'};

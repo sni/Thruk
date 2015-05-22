@@ -275,6 +275,7 @@ plugins/plugins-available/conf/templates/conf_objects_tools.tt
 plugins/plugins-available/conf/templates/conf_objects_tree.tt
 plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
+plugins/plugins-available/conf/templates/conf_user_password.tt
 plugins/plugins-available/dashboard/description.txt
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardHTTP.pm
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm

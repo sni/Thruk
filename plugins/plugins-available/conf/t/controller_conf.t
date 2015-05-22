@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    my $tests = 1324;
+    my $tests = 1335;
     $tests    = $tests - 11 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }
@@ -73,6 +73,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=thruk',
     '/thruk/cgi-bin/conf.cgi?sub=users',
     '/thruk/cgi-bin/conf.cgi?sub=plugins',
+    '/thruk/cgi-bin/conf.cgi?sub=user_password',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
     { url => '/thruk/cgi-bin/conf.cgi?sub=objects', fail_message_ok => 1 },
     '/thruk/cgi-bin/conf.cgi?edit&host='.$host,

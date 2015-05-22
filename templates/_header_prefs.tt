@@ -17,7 +17,7 @@
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(full_uri(c)) %]', '[% theme %]')">
+                <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">
               </td>
             </tr>
             [% IF show_sounds %]
@@ -26,7 +26,7 @@
               <td>
                 [% IF has_cgi_sounds %]
                 <img src="[% url_prefix %]themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
+                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
                 <img src="[% url_prefix %]themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
@@ -38,7 +38,7 @@
               <th>Favicon:</th>
               <td>
                 <img src="[% url_prefix %]themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter('[% escape_html(full_uri(c)) %]', '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
+                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
                 <script type="text/javascript">
                 <!--
                     try {
@@ -70,7 +70,16 @@
               <th>Report:</th>
               <td>
                 <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% c.config.use_feature_reports %]?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
+                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% c.config.use_feature_reports %]?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(original_uri ? original_uri : referer); return false;">
+              </td>
+            </tr>
+            [% END %]
+            [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
+            <tr>
+              <th>Change Password:</th>
+              <td>
+                <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="Change User Password" onClick="window.location='conf.cgi?action=user_password&referer='+referer; return false;">
               </td>
             </tr>
             [% END %]

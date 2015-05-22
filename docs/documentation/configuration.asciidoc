@@ -205,6 +205,17 @@ ex.:
   allowed_frame_links = https://wiki.my-company.com
 
 
+=== max_process_memory
+
+Maximum memory usage (in MB) at which a
+Thruk process will exit after finishing its request.
+Only affects the fcgid daemon.
+
+ex.:
+
+  max_process_memory=1000
+
+
 
 
 
@@ -288,15 +299,30 @@ ex.:
 
 
 
-=== max_process_memory
+=== disable_user_password_change
 
-Maximum memory usage (in MB) after which a
-Thruk process will exit after finishing its request.
-Only affects the fcgid daemon.
+Disable the possibility for a user to change his password.
+Only works with htpasswd passwords. To make this work
+you have to set a `htpasswd` entry in the
+link:configuration.html#component-thruk-plugin-configtool[Config Tool] section.
 
 ex.:
 
-  max_process_memory=1000
+  disable_user_password_change = 1
+
+
+
+=== user_password_min_length
+
+Sets the minimum lenght a password must have for users changing their passwords.
+Admins still can change the password any way they want in the config tool. This
+just affects the user password reset.
+
+ex.:
+
+  user_password_min_length = 5
+
+
 
 
 

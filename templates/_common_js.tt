@@ -17,6 +17,9 @@
   var user_token             = '[% get_user_token(c) %]';
   var remote_user            = '[% remote_user %]';
   var omd_site               = '[% omd_site %]';
+  var referer                = '[% uri_with(c, '_' => 'undef' ) | uri %]';
+  var full_uri               = '[% escape_html(full_uri(c)) %]';
+  var original_uri           = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
