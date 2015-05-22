@@ -1138,17 +1138,17 @@ sub rename_dependencies {
 
 =head2 clone_refs
 
-    clone_refs($obj, $cloned_name, $newname)
+    clone_refs($orig, $obj, $cloned_name, $newname)
 
 clone all incoming references of object
 
 =cut
 sub clone_refs {
-    my($self, $obj, $cloned_name, $new_name) = @_;
+    my($self, $orig, $obj, $cloned_name, $new_name) = @_;
 
     # clone incoming references
     my $clonedtype = $obj->get_type();
-    my($incoming, $outgoing) = $self->gather_references($obj);
+    my($incoming, $outgoing) = $self->gather_references($orig);
     if($incoming) {
         for my $type (keys %{$incoming}) {
             for my $name (keys %{$incoming->{$type}}) {

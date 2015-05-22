@@ -969,7 +969,7 @@ sub _process_objects_page {
         elsif($c->stash->{action} eq 'store') {
             return unless Thruk::Utils::check_csrf($c);
             my $rc = _object_save($c, $obj);
-            if($rc && defined $c->req->parameters->{'cloned'}) {
+            if(!defined $rc && defined $c->req->parameters->{'cloned'}) {
                 if(!$obj->is_template()) {
                     _clone_refs($c, $obj, $c->req->parameters->{'cloned'});
                 }
@@ -1756,7 +1756,7 @@ sub _object_save {
     # just display the normal edit page if save failed
     if($obj->get_id() eq 'new') {
         $c->stash->{action} = '';
-        return;
+        return 1;
     }
 
     $c->log->info(sprintf("[config][%s][%s] %s %s '%s'",
@@ -1773,7 +1773,7 @@ sub _object_save {
     } else {
         if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
-            return; # return, otherwise details would not be displayed
+            return 1; # return, otherwise details would not be displayed
         } else {
             # does the object have a name?
             if(!defined $c->stash->{'data_name'} || $c->stash->{'data_name'} eq '') {
@@ -1792,7 +1792,7 @@ sub _object_save {
         }
     }
 
-    return;
+    return 1;
 }
 
 ##########################################################
@@ -1860,7 +1860,7 @@ sub _clone_refs {
         return;
     }
 
-    $c->{'obj_db'}->clone_refs($obj, $cloned_name, $new_name);
+    $c->{'obj_db'}->clone_refs($orig, $obj, $cloned_name, $new_name);
 
     return;
 }
