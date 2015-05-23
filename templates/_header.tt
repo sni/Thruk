@@ -10,50 +10,6 @@
     <!-- stylesheets -->
     [%+ PROCESS _common_css.tt %]
 
-    <!-- javascript -->
-    [% PROCESS _common_js.tt %]
-    [% FOREACH j = js.list %]
-      <script type="text/javascript" src="[% url_prefix _ j %]"></script>
-    [% END %]
-    <script type="text/javascript">
-    <!--
-      var ajax_search_enabled     = '[% use_ajax_search %]';
-      var backend_chooser         = '[% backend_chooser %]';
-      [% IF refresh_rate +%]
-      var refresh_rate            = [% refresh_rate %];
-      [% END +%]
-      [% IF auto_reload_fn +%]
-      var auto_reload_fn          = function(cb) { return([% auto_reload_fn %](cb)) };
-      var datetime_format_long    = '[% datetime_format_long %]';
-      [% END +%]
-      [% PROCESS _header_initial_states.tt %]
-      var current_backend_states  = [% initial_backend_states %];
-      var enable_shinken_features = [% enable_shinken_features %];
-      [% IF enable_shinken_features +%]
-      var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
-      [% END +%]
-
-      [% IF original_url %]
-      var history_url = '[% original_url %]';
-      history_url     = history_url.replace(/&amp;/g, '&');
-      if(history.replaceState) {
-        history.replaceState({}, "", history_url);
-      }
-      [% END %]
-
-      init_page();
-
-      [%+ IF use_frames && use_dynamic_titles %]
-      if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
-        try {
-          window.parent.document.title = '[% title_prefix %][% title %]';
-        } catch(e) { debug(e) }
-      }
-      [% END +%]
-
-    -->
-    </script>
-
     [% IF show_nav_button && use_frames %]
     <style type='text/css'>
       body {
@@ -66,7 +22,7 @@
     [% IF extra_header %][% extra_header %][% END %]
   </head>
 
-  <body class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]' onLoad="bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %])">
+  <body class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %][% IF iframed %] iframed[% END %]' id='[% page %]'>
   [% ssi_header %]
   <div style="display:none;" id="search-results"></div>
 
