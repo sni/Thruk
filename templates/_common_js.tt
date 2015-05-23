@@ -37,15 +37,6 @@
 <!--
     jQuery.noConflict();
     [%+ PROCESS _common_js_bugs.tt +%]
-
-    [% FOREACH name = fix_cookies %]
-      [% FOREACH path = get_cookie_remove_paths(c) %]
-        [% IF path != cookie_path %]
-          cookieRemove("[% name %]", "[% path %]");
-        [% END %]
-      [% END %]
-    [%+ END +%]
-
     [%+ IF disable_backspace +%]
     jQuery(document).on("keydown", function (e) {
         if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {

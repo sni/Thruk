@@ -962,36 +962,6 @@ sub split_perfdata {
 
 ########################################
 
-=head2 get_cookie_remove_paths
-
-  get_cookie_remove_paths($c)
-
-return paths used to remove old/abandoned cookie paths
-
-=cut
-sub get_cookie_remove_paths {
-    my($c) = @_;
-    my $prefix  = $c->stash->{'url_prefix'};
-    $prefix     =~ s|/$||gmx;
-    my $product = $c->stash->{'product_prefix'};
-    $product    =~ s|/$||gmx;
-    my $paths   = [
-        '/',
-        $prefix,
-        $prefix.'/',
-        $prefix.'/thruk',
-        $prefix.'/thruk/',
-        $product,
-        $product.'/',
-        $product.'/thruk',
-        $product.'/thruk/',
-    ];
-    return($paths);
-}
-
-
-########################################
-
 =head2 get_user_token
 
   get_user_token($c)
