@@ -23,7 +23,6 @@ use HTTP::Request::Common qw(GET POST);
 use HTTP::Cookies::Netscape;
 use LWP::UserAgent;
 use File::Temp qw/tempfile/;
-use HTML::Entities qw//;
 use Carp qw/confess/;
 use Plack::Test;
 
@@ -847,7 +846,6 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }
     if($page =~ m/<pre\s+id="error">(.*)$/mx) {
-        $error = HTML::Entities::decode($1);
         $error =~ s|</pre>$||gmx;
         BAIL_OUT($0.': '.$req->code.' '.$msg.' - '.$error);
     }

@@ -60,15 +60,24 @@ Set peer for live tests.
 use warnings;
 use strict;
 use Carp qw/croak confess/;
-use List::Util qw/first/;
 use Monitoring::Livestatus ();
 
 our $VERSION = '0.05';
-our $TRACE   = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;
 
 our $compining_prefix = '';
 our $filter_mode      = '';
 our $filter_cache     = {};
+my $operators         = {
+    'and'       => '_cond_compining',
+    'or'        => '_cond_compining',
+    'groupby'   => '_cond_op_groupby',
+    'sum'       => '_cond_op_simple',
+    'min'       => '_cond_op_simple',
+    'max'       => '_cond_op_simple',
+    'avg'       => '_cond_op_simple',
+    'std'       => '_cond_op_simple',
+    'isa'       => '_cond_op_isa',
+};
 
 ################################################################################
 
@@ -302,7 +311,7 @@ sub statement {
 
     unshift @statements, sprintf("GET %s", $self->{'_table'});
 
-    printf STDERR "EXEC: %s\n", join("\nEXEC: ",@statements) if $TRACE >= 1;
+    printf STDERR "EXEC: %s\n", join("\nEXEC: ",@statements) if $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'};
 
     my $statement = join("\n",@statements);
 
@@ -337,13 +346,11 @@ sub _apply_filter {
 ################################################################################
 sub _recurse_cond {
     my($cond, $combining_count) = @_;
-    $combining_count = $combining_count || 0;
-    print STDERR "#IN _recurse_cond $cond $combining_count\n" if $TRACE > 9;
-    my $method = &_METHOD_FOR_refkind('_cond', $cond);
-    my($child_combining_count, @statment) = &{\&{$method}}($cond,$combining_count);
+    $combining_count = 0 unless defined $combining_count;
+    my $method = '_cond_'.&_refkind($cond);
+    my($child_combining_count, @statement) = &{\&{$method}}($cond,$combining_count);
     $combining_count = $child_combining_count;
-    print STDERR "#OUT _recurse_cond $cond $combining_count ( $method )\n" if $TRACE > 9;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
@@ -353,49 +360,44 @@ sub _cond_UNDEF { return ( () ); }
 sub _cond_ARRAYREF {
     my($conds, $combining_count) = @_;
     $combining_count = $combining_count || 0;
-    print STDERR "#IN _cond_ARRAYREF $conds $combining_count\n" if $TRACE > 9;
-    my @statment = ();
+    my @statement = ();
 
     my @cp_conds = @{ $conds }; # work with a copy
-    while ( my $cond = shift @cp_conds ){
-        my ( $child_combining_count, @child_statment ) = &_dispatch_refkind($cond, {
+    while(my $cond = shift @cp_conds) {
+        my($child_combining_count, @child_statement) = &_dispatch_refkind($cond, {
             ARRAYREF  => sub { &_recurse_cond($cond, $combining_count) },
             HASHREF   => sub { &_recurse_cond($cond, $combining_count) },
             UNDEF     => sub { croak "not supported : UNDEF in arrayref" },
             SCALAR    => sub { &_recurse_cond( { $cond => shift(@cp_conds) } , $combining_count ) },
         });
-        push @statment, @child_statment;
+        push @statement, @child_statement;
         $combining_count = $child_combining_count;
     }
-    print STDERR "#OUT _cond_ARRAYREF $conds $combining_count\n" if $TRACE > 9 ;
-    return ( $combining_count, @statment );
+    return($combining_count, @statement);
 }
 
 ################################################################################
 sub _cond_HASHREF {
     my($cond, $combining_count) = @_;
-    $combining_count          = $combining_count || 0;
-    print STDERR "#IN _cond_HASHREF $cond $combining_count\n" if $TRACE > 9 ;
-    my @all_statment          = ();
+    $combining_count          = 0 unless $combining_count;
     my $child_combining_count = 0;
-    my @child_statment        = ();
+    my @all_statement;
+    my @child_statement;
 
-    for my $key (keys %{ $cond }){
-        my $value = $cond->{$key};
-        if(index($key, '-') == 0){
+    while(my($key, $value) = each %{$cond}) {
+        if(substr($key,0,1) eq '-'){
             # Child key for combining filters ( -and / -or )
-            ( $child_combining_count, @child_statment ) = &_cond_op_in_hash($key, $value, $combining_count);
+            ($child_combining_count, @child_statement) = &_cond_op_in_hash($key, $value, $combining_count);
             $combining_count = $child_combining_count;
         } else {
-            my $method = &_METHOD_FOR_refkind("_cond_hashpair",$value);
-            ($child_combining_count, @child_statment) = &{\&{$method}}($key, $value, undef ,$combining_count);
+            my $method = '_cond_hashpair_'.&_refkind($value);
+            ($child_combining_count, @child_statement) = &{\&{$method}}($key, $value, undef ,$combining_count);
             $combining_count = $child_combining_count;
         }
 
-        push @all_statment, @child_statment;
+        push @all_statement, @child_statement;
     }
-    print STDERR "#OUT _cond_HASHREF $cond $combining_count\n" if $TRACE > 9;
-    return ( $combining_count, @all_statment );
+    return($combining_count, @all_statement);
 }
 
 ################################################################################
@@ -405,24 +407,24 @@ sub _cond_hashpair_UNDEF {
     $combining_count = 0 unless $combining_count;
     $key      = '' unless $key;
     $operator = '=' unless $operator;
-    print STDERR "# _cond_hashpair_UNDEF\n" if $TRACE > 9 ;
 
-    my @statment = (sprintf("%s: %s %s",$filter_mode,$key,$operator));
+    my @statement = (sprintf("%s: %s %s",$filter_mode,$key,$operator));
     $combining_count++;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
 sub _cond_hashpair_SCALAR {
-    my $key = shift || '';
-    my $value = shift;
-    my $operator = shift || '=';
-    print STDERR "# _cond_hashpair_SCALAR\n" if $TRACE > 9 ;
-
-    my $combining_count = shift || 0;
-    my @statment = (sprintf("%s: %s %s %s",$filter_mode,$key,$operator,$value));
+    my($key, $value, $operator, $combining_count) = @_;
+    $combining_count = 0 unless $combining_count;
+    my @statement = (sprintf("%s: %s %s %s",
+                                $filter_mode,
+                                ($key || '') ,
+                                ($operator || '='),
+                                $value),
+    );
     $combining_count++;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
@@ -431,15 +433,13 @@ sub _cond_hashpair_ARRAYREF {
     my $values = shift || [];
     my $operator = shift || '=';
     my $combining_count = shift || 0;
-    print STDERR "#IN _cond_hashpair_ARRAYREF $combining_count\n" if $TRACE > 9;
 
-    my @statment = ();
+    my @statement = ();
     foreach my $value ( @{ $values }){
-        push @statment, sprintf("%s: %s %s %s",$filter_mode,$key,$operator,$value);
+        push @statement, sprintf("%s: %s %s %s",$filter_mode,$key,$operator,$value);
         $combining_count++;
     }
-    print STDERR "#OUT _cond_hashpair_ARRAYREF $combining_count\n" if $TRACE > 9;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
@@ -450,16 +450,15 @@ sub _cond_hashpair_HASHREF {
     $values          = {} unless $values;
     $combining_count = 0 unless $combining_count;
 
-    print STDERR "#IN Abstract::_cond_hashpair_HASHREF $combining_count\n" if $TRACE > 9;
-    my @statment = ();
+    my @statement = ();
 
     foreach my $child_key ( keys %{ $values } ){
         my $child_value = $values->{ $child_key };
 
         if ( $child_key =~ /^-/mxo ){
-            my ( $child_combining_count, @child_statment ) = &_cond_op_in_hash($child_key, { $key => $child_value } , 0);
+            my ( $child_combining_count, @child_statement ) = &_cond_op_in_hash($child_key, { $key => $child_value } , 0);
             $combining_count += $child_combining_count;
-            push @statment, @child_statment;
+            push @statement, @child_statement;
         } elsif ( $child_key =~ /^[!<>=~]/mxo ){
             # Child key is a operator like:
             # =     equality
@@ -470,57 +469,31 @@ sub _cond_hashpair_HASHREF {
             # >     greater than
             # <=    less or equal
             # >=    greater or equal
-            my $method = &_METHOD_FOR_refkind("_cond_hashpair",$child_value);
-            my($child_combining_count, @child_statment) = &{\&{$method}}($key, $child_value,$child_key);
+            my $method = '_cond_hashpair_'.&_refkind($child_value);
+            my($child_combining_count, @child_statement) = &{\&{$method}}($key, $child_value,$child_key);
             $combining_count += $child_combining_count;
-            push @statment, @child_statment;
+            push @statement, @child_statement;
         } else {
-            my $method = &_METHOD_FOR_refkind("_cond_hashpair",$child_value);
-            my ( $child_combining_count, @child_statment ) = &{\&{$method}}($key, $child_value);
+            my $method = '_cond_hashpair_'.&_refkind($child_value);
+            my ( $child_combining_count, @child_statement ) = &{\&{$method}}($key, $child_value);
             $combining_count += $child_combining_count;
-            push @statment, @child_statment;
+            push @statement, @child_statement;
         }
     }
-    print STDERR "#OUT Abstract::_cond_hashpair_HASHREF $combining_count\n" if $TRACE > 9;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
 sub _cond_op_in_hash {
-    my $operator        = shift;
-    my $value           = shift;
-    my $combining_count = shift;
-    print STDERR "#IN  _cond_op_in_hash $operator $value $combining_count\n" if $TRACE > 9;
+    my($operator, $value, $combining_count) = @_;
 
-    if ( defined $operator and $operator =~ /^-/mxo ){
-        $operator =~ s/^-//mxo; # remove -
-        $operator =~ s/^\s+|\s+$//gmxo; # remove leading/trailing space
-        $operator = 'GroupBy' if ( $operator eq 'Groupby' );
+    if ($operator && substr($operator,0,1) eq '-'){
+        $operator = substr($operator, 1); # remove -
+        $operator =~ s/\s+$//gmxo;        # remove trailing space
     }
 
-    my $operators = [{
-        regexp   => qr/(and|or)/mix,
-        handler => '_cond_compining',
-    }, {
-        regexp  => qr/(groupby)/mix,
-        handler => '_cond_op_groupby',
-    }, {
-        regexp  => qr/(sum|min|max|avg|std)/mix,
-        handler => '_cond_op_simple',
-    }, {
-        regexp  => qr/(isa)/mix,
-        handler => '_cond_op_isa',
-    }];
-    my $operator_config = first { $operator =~ $_->{'regexp'} } @{ $operators };
-    my $operator_handler = $operator_config->{handler};
-    if ( not ref $operator_handler ){
-        return &{\&{$operator_handler}}($operator,$value,$combining_count);
-    }elsif ( ref $operator_handler eq 'CODE' ) {
-        return $operator_handler->($operator,$value,$combining_count);
-    }
-
-    print STDERR "#OUT _cond_op_in_hash $operator $value $combining_count\n" if $TRACE > 9;
-    return ( 0, () );
+    my $operator_handler = $operators->{lc $operator};
+    return &{\&{$operator_handler}}($operator,$value,$combining_count);
 }
 
 ################################################################################
@@ -528,40 +501,31 @@ sub _cond_compining {
     my $combining = shift;
     my $value = shift;
     my $combining_count = shift || 0;
-    print STDERR "#IN _cond_compining $combining $combining_count\n" if $TRACE > 9;
     $combining_count++;
-    my @statment = ();
+    my @statement = ();
 
-    if ( defined $combining and $combining =~ /^-/mxo ){
-        $combining =~ s/^-//mxo; # remove -
-        $combining =~ s/^\s+|\s+$//gmxo; # remove leading/trailing space
-        $combining = ucfirst( $combining );
+    if ($combining && substr($combining,0,1) eq '-'){
+        $combining = substr($combining, 1); # remove -
+        $combining =~ s/\s+$//gmxo;         # remove trailing space
     }
-    my ( $child_combining_count, @child_statment )= &_recurse_cond($value, 0 );
-    push @statment, @child_statment;
-    if ( defined $combining and $child_combining_count > 1) {
-        push @statment, sprintf("%s%s: %d",
+    my($child_combining_count, @child_statement) = &_recurse_cond($value, 0);
+    push @statement, @child_statement;
+    if(defined $combining and $child_combining_count > 1) {
+        push @statement, sprintf("%s%s: %d",
             $compining_prefix,
             ucfirst( $combining ),
             $child_combining_count,
         );
     }
-    print STDERR "#OUT _cond_compining $combining $combining_count \n" if $TRACE > 9;
-    return ( $combining_count, @statment );
+    return ( $combining_count, @statement );
 }
 
 ################################################################################
 sub _refkind {
-  my($data) = @_;
-  if(!defined $data) {
-    return('UNDEF');
-  }
-  my $ref = ref $data;
-  if(!$ref) {
-    return('SCALAR');
-  }
-
-  return(uc($ref).'REF');
+  my $ref = ref $_[0];
+  return(uc($ref).'REF') if $ref;
+  return('UNDEF') if !defined $_[0];
+  return('SCALAR');
 }
 
 ################################################################################
@@ -576,76 +540,39 @@ sub _dispatch_refkind {
 }
 
 ################################################################################
-sub _METHOD_FOR_refkind {
-    my($prefix, $value) = @_;
-    $prefix    = '' unless defined $prefix;
-    my $type   = &_refkind($value);
-    my $method = sprintf("%s_%s",$prefix,$type);
-    return $method;
-}
-
-################################################################################
 sub _cond_op_groupby {
-    my $operator = shift;
-    my $value = shift;
-    my $combining_count = shift || 0;
-
-    print STDERR "#IN  _cond_op_groupby $operator $value $combining_count\n" if $TRACE > 9;
-
-    my ( @child_statment ) = &_dispatch_refkind($value, {
-        SCALAR  => sub {
-            return ( sprintf("%s%s: %s", $compining_prefix, 'GroupBy', $value) );
-        },
-    });
-    print STDERR "#OUT _cond_op_groupby $operator $value $combining_count\n" if $TRACE > 9;
-    return ( $combining_count, @child_statment );
+    #my($operator, $value, $combining_count) = @_;
+    $_[2] = 0 unless defined $_[2];
+    return(++$_[2], (sprintf("%s%s: %s", $compining_prefix, 'GroupBy', $_[1])));
 }
 
 ################################################################################
 sub _cond_op_simple {
-    my $operator = shift;
-    my $value = shift;
-    my $combining_count = shift || 0;
-    my @child_statment = ();
-
-    print STDERR "#IN  _cond_op_simple $operator $value $combining_count\n" if $TRACE > 9;
-
-    ( $combining_count,@child_statment ) = &_dispatch_refkind($value, {
-        SCALAR  => sub {
-            return (++$combining_count, sprintf("%s: %s %s",$compining_prefix,$operator,$value) );
-        },
-    });
-
-    print STDERR "#OUT _cond_op_simple $operator $value $combining_count\n" if $TRACE > 9;
-    return ( $combining_count, @child_statment );
+    my($operator, $value, $combining_count) = @_;
+    $combining_count = 0 unless defined $combining_count;
+    return(++$combining_count, (sprintf("%s: %s %s",$compining_prefix,$operator,$value)));
 }
 
 ################################################################################
 sub _cond_op_isa {
-    my $operator = shift;
-    my $value    = shift;
-    my $combining_count = shift || 0;
-    my $as_name;
-    print STDERR "#IN  _cond_op_isa $operator $value $combining_count\n" if $TRACE > 9;
+    #my($operator, $value, $combining_count) = @_;
+    my(undef, $value, $combining_count) = @_;
+    $combining_count = 0 unless defined $combining_count;
 
-    my ( $child_combining_count, @statment ) = &_dispatch_refkind($value, {
-        HASHREF  => sub {
-            my @keys = keys %{$value};
-            if ( scalar @keys != 1 ){
-                die "Isa operator doesn't support more then one key.";
-            }
-            $as_name = shift @keys;
-            my @values = values(%{$value});
-            return &_recurse_cond(shift( @values ), 0 );
-        },
-    });
+    my @keys = keys %{$value};
+    if(scalar @keys != 1) {
+        die "Isa operator doesn't support more then one key.";
+    }
+    my $as_name = shift @keys;
+    my @values  = values(%{$value});
+    my($child_combining_count, @statement) = &_recurse_cond(shift( @values ), 0);
+
     $combining_count += $child_combining_count;
 
     # append alias to last operator
-    $statment[-1] .= " as ".$as_name;
+    $statement[-1] .= " as ".$as_name;
 
-    #print STDERR "#OUT _cond_op_isa $operator $value $combining_count isa key: " . $self->{_isa_key} . "\n" if $TRACE > 9;
-    return ( $combining_count, @statment );
+    return($combining_count, @statement);
 }
 
 ################################################################################

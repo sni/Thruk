@@ -4,15 +4,6 @@
 [% PROCESS _sounds.tt %]
 [% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
-[% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
-<!--
-  var dfl_Hash = new Object({[% FOREACH h = data %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
--->
-</script>
-[% END %]
-
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
 [% UNLESS minimal %]
@@ -117,5 +108,14 @@
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
     [% END %]
+
+[% UNLESS authorized_for_read_only %]
+<script type="text/javascript">
+<!--
+  var dfl_Hash = [% get_cmd_submit_hash(data, 'hst') %];
+  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
+-->
+</script>
+[% END %]
 
 [% PROCESS _footer.tt %]

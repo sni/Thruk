@@ -1262,7 +1262,7 @@ sub extract_keys_from_stats_statement {
     my(@header, $new_statement);
 
     for my $line (split/\n/mx, $statement) {
-        if($line !~ m/^Stats/mxo) { # faster shortcut for non-stats lines
+        if(substr($line, 0, 5) ne 'Stats') { # faster shortcut for non-stats lines
             $new_statement .= $line."\n";
             next;
         }

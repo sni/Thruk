@@ -22,6 +22,7 @@ use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils::IO ();
 use Digest::MD5 qw(md5_hex);
+use POSIX ();
 
 ##############################################
 =head1 METHODS
@@ -66,14 +67,8 @@ return date from timestamp in given format
 =cut
 sub format_date {
     my($timestamp, $format) = @_;
-    our($tpd);
-    if(!defined $tpd) {
-        require Template::Plugin::Date;
-        Template::Plugin::Date->import();
-        $tpd = Template::Plugin::Date->new();
-    }
     confess("no format") unless defined $format;
-    my $date = $tpd->format($timestamp, $format);
+    my $date = POSIX::strftime($format, localtime($timestamp));
     return decode("utf-8", $date);
 }
 

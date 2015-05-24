@@ -105,6 +105,7 @@ our %config = ('name'                   => 'Thruk',
                                           'get_custom_vars'     => \&Thruk::Utils::get_custom_vars,
                                           'validate_json'       => \&Thruk::Utils::Filter::validate_json,
                                           'get_action_menu'     => \&Thruk::Utils::Filter::get_action_menu,
+                                          'get_cmd_submit_hash' => \&Thruk::Utils::Filter::get_cmd_submit_hash,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

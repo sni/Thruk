@@ -18,7 +18,7 @@ use URI::Escape qw/uri_escape/;
 use JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
-use HTML::Entities ();
+use HTML::Escape ();
 
 ##############################################
 
@@ -167,8 +167,12 @@ formats a time definition into date format
 =cut
 sub date_format {
     my($c, $timestamp, $format) = @_;
-    return "" unless defined $timestamp;
+    return '' unless defined $timestamp;
     confess("no c") unless defined $c;
+
+    if($format) {
+        return(Thruk::Utils::format_date($timestamp, $format));
+    }
 
     # get today
     my @today;
@@ -177,9 +181,9 @@ sub date_format {
     }
     else {
         @today = Today();
+        $c->stash->{'today'} = \@today;
     }
     my($t_year,$t_month,$t_day) = @today;
-    $c->stash->{'today'} = \@today;
 
     my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
@@ -190,16 +194,12 @@ sub date_format {
         return "err:$timestamp";
     }
 
-    if(defined $format) {
-        return(Thruk::Utils::format_date($timestamp, $format));
-    }
-
     if($t_year == $year and $t_month == $month and $t_day == $day) {
-        confess("no datetime_format_today") unless $c->stash->{'datetime_format_today'};
+        #confess("no datetime_format_today") unless $c->stash->{'datetime_format_today'};
         return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format_today'}));
     }
 
-    confess("no datetime_format") unless $c->stash->{'datetime_format'};
+    #confess("no datetime_format") unless $c->stash->{'datetime_format'};
     return(Thruk::Utils::format_date($timestamp, $c->stash->{'datetime_format'}));
 }
 
@@ -218,7 +218,7 @@ sub uri {
     carp("no c") unless defined $c;
     my $uri = $c->req->url();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri    = escape_ampersand($uri);
+    $uri    = &escape_ampersand($uri);
     return $uri;
 }
 
@@ -242,7 +242,7 @@ sub full_uri {
     my $url_prefix = $c->stash->{'url_prefix'};
     $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
     if($amps) {
-        $uri = escape_ampersand($uri);
+        $uri = &escape_ampersand($uri);
     }
     return $uri;
 }
@@ -286,9 +286,7 @@ sub short_uri {
             $filter->{$key} = $data->{$key};
         }
     }
-    my $uri = uri_with($c, $filter);
-    $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    return $uri;
+    return(uri_with($c, $filter));
 }
 
 
@@ -344,7 +342,7 @@ sub uri_with {
     $uri->query_form(@new_param);
     $uri = $uri->as_string;
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri = escape_ampersand($uri);
+    $uri = &escape_ampersand($uri);
     # make relative url
     $uri =~ s|^/[^?]+/||mx;
     return $uri;
@@ -361,7 +359,7 @@ wrapper for escape_html for compatibility reasons
 
 =cut
 sub html_escape {
-    return escape_html(@_);
+    return HTML::Escape::escape_html(@_);
 }
 
 
@@ -375,7 +373,7 @@ returns an escaped string
 
 =cut
 sub escape_html {
-    return HTML::Entities::encode($_[0]);
+    return HTML::Escape::escape_html(@_);
 }
 
 
@@ -531,8 +529,8 @@ used to escape html tags so it can be used as javascript string
 
 =cut
 sub escape_js {
-    my $text = shift;
-    $text = HTML::Entities::encode($text);
+    my($text) = @_;
+    $text = escape_html($text);
     $text =~ s/&amp;quot;/&quot;/gmx;
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
@@ -550,7 +548,7 @@ used to escape backslashes
 
 =cut
 sub escape_bslash {
-    my $text = shift;
+    my($text) = @_;
     $text =~ s/\\/\\\\/gmx;
     return $text;
 }
@@ -566,14 +564,15 @@ returns an escaped string for xml output
 
 =cut
 sub escape_xml {
-    my $text = shift;
-
-    my $return = HTML::Entities::encode($text, '<>&');
-    $return =~ s/\\n\Z//mx;
-    $return =~ s/\\n/\n/gmx;
-    $return =~ tr/\x80-\xFF//d;
-    $return =~ s/\p{Cc}//gmx;
-    return $return;
+    my($text) = @_;
+    $text =~ s/&/&amp;/mx;
+    $text =~ s/</&lt;/mx;
+    $text =~ s/>/&gt;/mx;
+    $text =~ s/\\n\Z//mx;
+    $text =~ s/\\n/\n/gmx;
+    $text =~ tr/\x80-\xFF//d;
+    $text =~ s/\p{Cc}//gmx;
+    return $text;
 }
 
 ########################################
@@ -990,6 +989,37 @@ sub get_user_token {
     $store->set('token', $tokens);
     $c->stash->{'user_token'} = $tokens->{$c->stash->{'remote_user'}}->{'token'};
     return $c->stash->{'user_token'};
+}
+
+########################################
+
+=head2 get_cmd_submit_hash
+
+  get_cmd_submit_hash($data)
+
+create hash used in service/host details page
+
+=cut
+sub get_cmd_submit_hash {
+    my($data, $type) = @_;
+    my $hash = {};
+    my $x = 0;
+    if($type eq 'svc') {
+        for my $d (@{$data}) {
+            $hash->{'r'.$x} = $d->{'host_name'}.';'.$d->{'description'}.';'.$d->{'peer_key'};
+            $x++;
+        }
+    }
+    elsif($type eq 'hst') {
+        for my $d (@{$data}) {
+            $hash->{'r'.$x} = $d->{'name'}.';;'.$d->{'peer_key'};
+            $x++;
+        }
+    }
+    else {
+        confess("no such type: $type");
+    }
+    return(JSON::XS::encode_json($hash));
 }
 
 ########################################
