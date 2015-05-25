@@ -53,7 +53,9 @@ Ext.onReady(function() {
         if(evt.target.tagName == "rect") { return; } /* skip canvas elements and only popup on actual paths */
         var img = Ext.getCmp(el.id);
         if(!img || !img.el || !img.el.dom) { return; }
-        if(img.panel) { img = img.panel; el = img.el.dom }
+        try {
+            if(img.panel) { img = img.panel; el = img.el.dom }
+        } catch(e) {return;} // errors with img.el not defined sometimes
         if(TP.iconTip.last_id && TP.iconTip.last_id == el.id) { return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */

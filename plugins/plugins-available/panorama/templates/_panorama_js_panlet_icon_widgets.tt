@@ -140,6 +140,7 @@
                         TP.removeLabel = {};
                     }
                     TP.removeLabel[This.id] = This.labelEl;
+                    This.labelEl = undefined;
                 }
             } else {
                 /* remove window from panels window ids */
@@ -291,6 +292,12 @@
     /* render label for this widget */
     setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
+        if(!this.el || !this.el.dom)  { return; }
+        if(!this.el.dom.style.zIndex) {
+            var tab  = Ext.getCmp(panel.panel_id);
+            tab.scheduleApplyZindex();
+            return;
+        }
         if(TP.removeLabel && TP.removeLabel[this.id]) {
             /* remove later to avoid flickering during redraw */
             window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
@@ -302,8 +309,6 @@
         }
         if(cfg == undefined)          { cfg = this.xdata.label; }
         if(cfg == undefined)          { return; }
-        if(!this.el || !this.el.dom)  { return; }
-        if(!this.el.dom.style.zIndex) { return; }
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
         this.el.dom.title = '';
@@ -425,6 +430,7 @@
                         panel.addDDListener(This);
                         if(!panel.locked) {
                             This.el.on('mouseover', function(evt,t,a) {
+                                if(!panel.el) { return; }
                                 if(!panel.el.dom.style.outline.match("orange") && !This.el.dom.style.outline.match("orange")) {
                                     This.el.dom.style.outline = "1px dashed grey";
                                     if(panel.iconType != "text") {
@@ -436,7 +442,7 @@
                                 if(This.el.dom.style.outline.match("grey")) {
                                     This.el.dom.style.outline = "";
                                 }
-                                if(panel.el.dom.style.outline.match("grey")) {
+                                if(panel.el && panel.el.dom && panel.el.dom.style.outline.match("grey")) {
                                     panel.el.dom.style.outline = "";
                                 }
                             });

@@ -106,11 +106,11 @@ function thruk_onerror(msg, url, line, col, error) {
     if(url.match(/^chrome:/)) { return false; }
     // skip some errors
     var skip = false;
-    jQuery.each(skip_js_errors, function(i, e) {
-        if(msg.match(e)) { skip = true; return false; }
-    });
+    for(var nr = 0; nr < skip_js_errors.length; nr++) {
+        if(msg.match(skip_js_errors[nr])) { skip = true; }
+    }
     if(skip) { return; }
-  error_count++;
+    error_count++;
     var text = getErrorText(thruk_debug_details, error);
     if(show_error_reports == "server" || show_error_reports == "both") {
         sendJSError(url_prefix+"cgi-bin/remote.cgi?log", text);

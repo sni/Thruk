@@ -349,6 +349,16 @@
         }
     },
 
+    /* schedule apply zindex */
+    scheduleApplyZindex: function() {
+        var tab = this;
+        window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_applyZindex']);
+        TP.timeouts['timeout_' + tab.id + '_applyZindex'] = window.setTimeout(function() {
+            tab.applyZindex();
+            TP.updateAllIcons(tab);
+        }, 100);
+    },
+
     /* order icons by z-index */
     applyZindex: function() {
         var tabpan    = Ext.getCmp('tabpan');
