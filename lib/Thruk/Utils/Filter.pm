@@ -565,10 +565,10 @@ returns an escaped string for xml output
 =cut
 sub escape_xml {
     my($text) = @_;
-    $text =~ s/&/&amp;/mx;
-    $text =~ s/</&lt;/mx;
-    $text =~ s/>/&gt;/mx;
-    $text =~ s/\\n\Z//mx;
+    $text =~ s/&/&amp;/gmx;
+    $text =~ s/</&lt;/gmx;
+    $text =~ s/>/&gt;/gmx;
+    $text =~ s/\\n\Z//gmx;
     $text =~ s/\\n/\n/gmx;
     $text =~ tr/\x80-\xFF//d;
     $text =~ s/\p{Cc}//gmx;
@@ -1002,6 +1002,7 @@ create hash used in service/host details page
 =cut
 sub get_cmd_submit_hash {
     my($data, $type) = @_;
+    return('{}') unless $data;
     my $hash = {};
     my $x = 0;
     if($type eq 'svc') {
