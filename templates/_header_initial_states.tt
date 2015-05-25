@@ -1,4 +1,3 @@
 ﻿var initial_backends = [% initial_backends %];
 var backend_keys     = [% json_encode(backends) %];
-var current_backend_states = {}; // create clone
-for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
+var current_backend_states;

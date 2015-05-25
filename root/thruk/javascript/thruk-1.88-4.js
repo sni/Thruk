@@ -859,6 +859,10 @@ function toggleBackend(backend, state, skip_update) {
     return;
   }
 
+  if(initial_backends == undefined) {
+    for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
+  }
+
   initial_state = initial_backends[backend]['state'];
   var newClass  = undefined;
   if((jQuery(button).hasClass("button_peerDIS") && state == -1) || state == 1) {
