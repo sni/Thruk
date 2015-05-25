@@ -1,6 +1,6 @@
 ﻿[%+ UNLESS all_in_one_css %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
-<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />
+[% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
 [% END %]
 [% IF theme != 'Thruk' || thruk_debug %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css' />
