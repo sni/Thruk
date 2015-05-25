@@ -798,6 +798,7 @@ sub update_site_panel_hashes {
     my $backends         = $c->stash->{'backends'};
     my $backend_detail   = $c->stash->{'backend_detail'};
 
+    return unless $backends;
     return if scalar @{$backends} <= 1;
 
     # create hashes used in javascript
