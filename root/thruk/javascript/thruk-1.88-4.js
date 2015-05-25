@@ -719,25 +719,27 @@ function create_site_panel_popup_panel() {
     panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
     panel += '  <tr>';
     jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
-    panel += '      <th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
-    panel += '          <a href="#" class="sites_subsection" onclick="toggleSection(\'Default/'+subsection+'\'); return false;" title="'+subsection+'">'+subsection+'</a>';
-    panel += '      </th>';
+        if(section.subsections[subsection].total == 0) { return; }
+        panel += '<th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
+        panel += '  <a href="#" class="sites_subsection" onclick="toggleSection(\'Default/'+subsection+'\'); return false;" title="'+subsection+'">'+subsection+'</a>';
+        panel += '</th>';
     });
     panel += '  </tr>';
     panel += '  <tr>';
     jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
-        panel += '      <td valign="top" class="site_panel '+(i==0 ? "" : "notfirst")+'" align="center">';
-        panel += '      <table cellpadding=0 cellspacing=0 border=0><tr>';
-        panel += '      <td valign="top">';
+        if(section.subsections[subsection].total == 0) { return; }
+        panel += '<td valign="top" class="site_panel '+(i==0 ? "" : "notfirst")+'" align="center">';
+        panel += '<table cellpadding=0 cellspacing=0 border=0><tr>';
+        panel += '<td valign="top">';
         var count = 0;
         jQuery(section.subsections[subsection].sites).each(function(i, pd) {
             panel += get_site_panel_backend_button(pd, true, "clear: both;", "toggleBackend('"+pd+"')", 'Default', subsection);
             count++;
             if(count > 15) { count = 0; panel += '</td><td valign="top">'; }
         });
-        panel += '      </td>';
-        panel += '      </tr></table>';
-        panel += '      </td>';
+        panel += '</td>';
+        panel += '</tr></table>';
+        panel += '</td>';
     });
     panel += '  </tr>';
     panel += '</table>';
@@ -762,6 +764,7 @@ function create_site_panel_popup_collapsed() {
         panel += '    <td>';
         jQuery(keys(section.subsections).sort()).each(function(i, subsectionname) {
             var subsection = section.subsections[subsectionname];
+            if(subsection.total == 0) { return; }
             var cls = 'button_peerDIS';
             if(section.total == subsection.up) { cls = 'button_peerUP'; }
             if(section.total == subsection.down) { cls = 'button_peerDOWN'; }
@@ -791,6 +794,7 @@ function create_site_panel_popup_panel_section_details() {
         var section = sites.sections[sectionname];
         jQuery(keys(section.subsections).sort()).each(function(j, subsectionname) {
             var subsection = section.subsections[subsectionname];
+            if(subsection.total == 0) { return; }
             panel += '<tr style="display:none;" id="sites_'+sectionname+'_'+subsectionname+'">';
             panel += '  <td>';
             panel += '    <br>';
@@ -859,7 +863,8 @@ function toggleBackend(backend, state, skip_update) {
     return;
   }
 
-  if(initial_backends == undefined) {
+  if(current_backend_states == undefined) {
+    current_backend_states = {};
     for(var key in initial_backends) { current_backend_states[key] = initial_backends[key]['state']; }
   }
 
@@ -974,8 +979,10 @@ function toggleAllSections(reverse) {
         if(state == 0) { state = 1; } else { state = 0; }
     }
     jQuery('TABLE.site_panel DIV.backend INPUT').each(function(i, b) {
-        var id = b.id.replace(/^button_/, '');
-        toggleBackend(id, state, true);
+        if(b.id.match(/^button_/)) {
+            var id = b.id.replace(/^button_/, '');
+            toggleBackend(id, state, true);
+        }
     });
     jQuery('INPUT.btn_sites').each(function(i, b) {
         jQuery(b).removeClass("button_peerDIS button_peerDOWN button_peerUP button_peerWARN button_peerUPDIS button_peerDOWNDIS");
