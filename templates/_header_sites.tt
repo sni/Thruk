@@ -1,5 +1,5 @@
 ﻿<table border=0 cellpadding=0 cellspacing=0><tr><td>
-[% IF !hide_backends_chooser %]
+[% IF !hide_backends_chooser && sites != "" %]
 <script type="text/javascript">
 <!--
 var sites = [% sites %];
