@@ -59,24 +59,22 @@ window.addEventListener('load', function(evt) {
 
 /* do initial things */
 function init_page() {
-    jQuery(document).ready(function() {
-        jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
-            jQuery(this).prev('input').val('').focus();
-        }));
+    jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+        jQuery(this).prev('input').val('').focus();
+    }));
 
-        // init some buttons
-        if(has_jquery_ui) {
-            jQuery('BUTTON.thruk_button').button();
-            jQuery('A.thruk_button').button();
-            jQuery('INPUT.thruk_button').button();
+    // init some buttons
+    if(has_jquery_ui) {
+        jQuery('BUTTON.thruk_button').button();
+        jQuery('A.thruk_button').button();
+        jQuery('INPUT.thruk_button').button();
 
-            jQuery('.thruk_button_refresh').button({
-                icons: {primary: 'ui-refresh-button'}
-            });
+        jQuery('.thruk_button_refresh').button({
+            icons: {primary: 'ui-refresh-button'}
+        });
 
-            jQuery('.thruk_radioset').buttonset();
-        }
-    });
+        jQuery('.thruk_radioset').buttonset();
+    }
 
     var newUrl = window.location.href;
     var scroll = newUrl.match(/(\?|\&)scrollTo=(\d+)/);
@@ -155,6 +153,7 @@ function bodyOnLoad(refresh) {
             setRefreshRate(refresh);
         }
     }
+    init_page();
 }
 
 /* save scroll value */
@@ -631,9 +630,195 @@ function button_out(button)
    button.style.borderColor = "";
 }
 
+function get_site_panel_backend_button(id, with_id, styles, onclick, section, subsection) {
+    if(!initial_backends[id]['cls']) { return(""); }
+    var btn = '<input type="button"';
+    if(with_id) {
+        btn += " id='button_"+id+"'";
+    }
+    section    = section.replace(/[^\w]/, '_');
+    subsection = subsection.replace(/[^\w]/, '_');
+    btn += ' class="button_peer'+initial_backends[id]['cls']+' backend_'+id+' section_'+section+' subsection_'+section+'_'+subsection+'"';
+    btn += ' value="'+initial_backends[id]['name']+'"';
+    btn += ' title="'+initial_backends[id]['last_error']+'"';
+    btn += ' onMouseOver="button_over(this)"';
+    btn += ' onMouseOut="button_out(this)"';
+    if(initial_backends[id]['disabled'] == 5) {
+        btn += ' disabled'
+    } else {
+        btn += ' onClick="'+onclick+'">';
+    }
+
+    return("<div class='backend' style='"+styles+"'>"+btn+"<\/div>");
+}
+
+/* create sites header */
+function dw(txt) {document.write(txt);}
+function print_site_panel_header() {
+    if(show_sitepanel == 'list') {
+        for(var nr = 0; nr < backend_keys.length; nr++) {
+          dw(get_site_panel_backend_button(backend_keys[nr], true, "", "toggleBackend('"+backend_keys[nr]+"')", '', ''));
+        }
+    }
+    else if(show_sitepanel == 'panel' || show_sitepanel == 'collapsed') {
+        if(keys(sites.sections).length == 0) {
+            return;
+        }
+        if(backend_chooser == 'switch' && param_backend) {
+          dw("<div class='backend'><input type='button' class='button_peerUP' value='"+initial_backends[param_backend].name+"' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'>\</div>");
+          if(sites.disabled > 0) {
+            dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+ sites.disabled+" more' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+          }
+        } else {
+          dw("<div class='backend'><input type='button' class='"+(sites.up > 0 ? "button_peerUP" : "button_peerDIS")+"' value='"+sites.up+" up' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+          dw("<div class='backend'><input type='button' class='button_peerDIS' value='"+sites.disabled+" disabled' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+          dw("<div class='backend'><input type='button' class='"+(sites.down > 0 ? "button_peerDOWN" : "button_peerDIS")+"' value='"+sites.down+" down' onMouseOver='button_over(this)' onMouseOut='button_out(this)' onClick='toggleSitePanel()'></div>");
+        }
+        dw('<div id="site_panel" style="display: none;"><\/div>');
+    }
+}
+
+/* create sites popup */
+function create_site_panel_popup() {
+    var panel = ''
+        +'<div class="shadow"><div class="shadowcontent">'
+        +'<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">'
+        +'  <tr>'
+        +'    <th align="center">'
+        +'      <table border=0 cellpadding=0 cellspacing=0 width="100%" style="padding-bottom: 10px;">'
+        +'        <tr>';
+    if(backend_chooser != 'switch') {
+        panel += '      <td width="20"></td>';
+        panel += '      <td width="70"></td>';
+    }
+    panel += '          <td style="padding-right: 20px;">Choose your sites</td>';
+    if(backend_chooser != 'switch') {
+        panel += '      <td align="right" width="70" class="clickable" onclick="toggleAllSections(true);">check all</td>';
+        panel += '      <td align="left" width="20"><input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();"></td>';
+    }
+    panel += '        </tr>';
+    panel += '      </table>';
+    panel += '    </th>';
+    panel += '  </tr>';
+    panel += '</table>';
+
+    if(show_sitepanel == "panel") {
+        panel += create_site_panel_popup_panel();
+    }
+    else if(show_sitepanel == "collapsed") {
+        panel += create_site_panel_popup_collapsed();
+    }
+
+    panel += '<\/div><\/div>';
+    document.getElementById('site_panel').innerHTML = panel;
+}
+
+function create_site_panel_popup_panel() {
+    var section = sites.sections.Default;
+    panel  = '<div class="site_panel_sections" style="overflow: auto;">';
+    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
+    panel += '  <tr>';
+    jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
+    panel += '      <th class="site_panel '+(i==0 ? '' : "notfirst")+'">';
+    panel += '          <a href="#" class="sites_subsection" onclick="toggleSection(\'Default/'+subsection+'\'); return false;" title="'+subsection+'">'+subsection+'</a>';
+    panel += '      </th>';
+    });
+    panel += '  </tr>';
+    panel += '  <tr>';
+    jQuery(keys(section.subsections).sort()).each(function(i, subsection) {
+        panel += '      <td valign="top" class="site_panel '+(i==0 ? "" : "notfirst")+'" align="center">';
+        panel += '      <table cellpadding=0 cellspacing=0 border=0><tr>';
+        panel += '      <td valign="top">';
+        var count = 0;
+        jQuery(section.subsections[subsection].sites).each(function(i, pd) {
+            panel += get_site_panel_backend_button(pd, true, "clear: both;", "toggleBackend('"+pd+"')", 'Default', subsection);
+            count++;
+            if(count > 15) { count = 0; panel += '</td><td valign="top">'; }
+        });
+        panel += '      </td>';
+        panel += '      </tr></table>';
+        panel += '      </td>';
+    });
+    panel += '  </tr>';
+    panel += '</table>';
+    panel += '<\/div>';
+    return(panel);
+}
+
+function create_site_panel_popup_collapsed() {
+    panel  = '<div class="site_panel_sections" style="overflow: auto;">';
+    panel += '<table class="site_panel" cellspacing=0 cellpadding=0 width="100%">';
+    var sections_num = keys(sites.sections).length;
+    jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
+        var section = sites.sections[sectionname];
+        if(keys(section.subsections).length > 1) {
+            panel += '  <tr>';
+            panel += '    <th align="left">';
+            panel += '      <a href="#" onclick="toggleAllSubSection(\''+sectionname+'\'); return false;" title="'+sectionname+'" class="sites_subsection">'+sectionname+'</a>';
+            panel += '    </th>';
+            panel += '  </tr>';
+        }
+        panel += '  <tr>';
+        panel += '    <td>';
+        jQuery(keys(section.subsections).sort()).each(function(i, subsectionname) {
+            var subsection = section.subsections[subsectionname];
+            var cls = 'button_peerDIS';
+            if(section.total == subsection.up) { cls = 'button_peerUP'; }
+            if(section.total == subsection.down) { cls = 'button_peerDOWN'; }
+            if(section.total == subsection.disabled) { cls = 'button_peerDIS'; }
+            if(section.up  > 0 && subsection.down > 0) { cls = 'button_peerWARN'; }
+            if(section.up  > 0 && subsection.disabled > 0 && subsection.down == 0) { cls = 'button_peerUPDIS'; }
+            if(section.up == 0 && subsection.disabled > 0 && subsection.down > 0) { cls = 'button_peerDOWNDIS'; }
+            panel += '<div class="backend"><input id="btn_sites_'+sectionname+'_'+subsectionname+'" type="button" class="'+cls+' btn_sites btn_sites_'+sectionname+'" value="'+subsectionname+'" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleSubSection(\'sites_'+sectionname+'_'+subsectionname+'\')"></div>';
+        });
+        panel += '    </td>';
+        panel += '  </tr>';
+        if(i < sections_num - 1) {
+            panel += '  <tr>';
+            panel += '    <td><hr class="sites_collapsed"></td>';
+            panel += '  </tr>';
+        }
+    });
+    panel += create_site_panel_popup_panel_section_details();
+    panel += '</table>';
+    panel += '<\/div>';
+    return(panel);
+}
+
+function create_site_panel_popup_panel_section_details() {
+    panel = '';
+    jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
+        var section = sites.sections[sectionname];
+        jQuery(keys(section.subsections).sort()).each(function(j, subsectionname) {
+            var subsection = section.subsections[subsectionname];
+            panel += '<tr style="display:none;" id="sites_'+sectionname+'_'+subsectionname+'">';
+            panel += '  <td>';
+            panel += '    <br>';
+            panel += '    <hr class="sites_collapsed last">';
+            panel += '    <table><tr><td>';
+            panel += '      <input type="checkbox" id="all_section_'+sectionname+'_'+subsectionname+'" value="" name="all_section_'+sectionname+'_'+subsectionname+'" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\');" style="cursor: pointer;">';
+            panel += '    </td><td style="vertical-align: middle;">';
+            panel += '      <a href="#" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\'); return false;"><b>';
+            if(j > 1) { panel += sectionname+' -&gt; '; }
+            panel += '      '+subsectionname+'</b></a>:';
+            panel += '    </td></tr></table>';
+            jQuery(subsection.sites.sort()).each(function(k, site_id) {
+                panel += get_site_panel_backend_button(site_id, true, '', 'toggleBackend(\''+site_id+'\')', sectionname, subsectionname);
+            });
+            panel += '</td>';
+            panel += '</tr>';
+        });
+    });
+    return(panel);
+}
+
+
 /* toggle site panel */
 /* $%&$&% site panel position depends on the button height */
 function toggleSitePanel() {
+    if(!document.getElementById('site_panel').innerHTML) {
+        create_site_panel_popup();
+    }
     var enabled = toggleElement('site_panel', undefined, true, 'DIV#site_panel DIV.shadowcontent', toggleSitePanel);
     var divs = jQuery('DIV.backend');
     var panel = document.getElementById('site_panel');
@@ -674,13 +859,10 @@ function toggleBackend(backend, state, skip_update) {
     return;
   }
 
-  initial_state = initial_backend_states[backend];
+  initial_state = initial_backends[backend]['state'];
   var newClass  = undefined;
-  if(jQuery(button).hasClass("button_peerDIS") || state == 1) {
-    if(initial_state == 3 || state == 0) {
-      newClass = "button_peerHID";
-    }
-    else if(initial_state == 1) {
+  if((jQuery(button).hasClass("button_peerDIS") && state == -1) || state == 1) {
+    if(initial_state == 1) {
       newClass = "button_peerDOWN";
     }
     else {
@@ -738,7 +920,7 @@ function toggleSubSection(subsection) {
 function toggleSection(section) {
     section = section.replace(/[^\w]+/g, '_');
     var first_state = undefined;
-    jQuery('INPUT[type=button].section_'+section).each(function(i, b) {
+    jQuery('INPUT[type=button].subsection_'+section).each(function(i, b) {
         var id = b.id.replace(/^button_/, '');
         if(first_state == undefined) {
             if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
@@ -804,25 +986,25 @@ function toggleAllSections(reverse) {
 
 /* update all site panel checkboxes */
 function updateSitePanelCheckBox() {
-    var subsections = [];
+    var sections = [];
     jQuery('A.sites_subsection').each(function(i, b) {
-        subsections.push(b.title);
+        sections.push(b.title);
     });
-    if(subsections.length == 0) {
-        subsections = ['Default'];
+    if(sections.length == 0) {
+        sections = ['Default'];
     }
 
     /* count totals */
-    var total = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
-    jQuery(subsections).each(function(i, subsection) {
-        total['subsections'][subsection] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
-        jQuery('INPUT.btn_sites_'+subsection).each(function(i, b) {
-            var section = b.value;
+    var total = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
+    jQuery(sections).each(function(i, section) {
+        total['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
+        jQuery('INPUT.btn_sites_'+section).each(function(i, b) {
+            var subsection = b.value;
             total = count_site_section_totals(total, section, subsection);
         });
-        if(jQuery('INPUT.btn_sites_'+subsection).length == 0) {
-            total['subsections']['Default'] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'sections': {} };
-            total = count_site_section_totals(total, subsection, 'Default');
+        if(jQuery('INPUT.btn_sites_'+section).length == 0) {
+            total['sections']['Default'] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0, 'subsections': {} };
+            total = count_site_section_totals(total, section, 'Default');
         }
     });
     /* check all button */
@@ -837,62 +1019,62 @@ function updateSitePanelCheckBox() {
 function count_site_section_totals(total, section, subsection) {
     var cls_subsection = subsection.replace(/[^\w]/g, '_');
     var cls_section    = section.replace(/[^\w]/g, '_');
-    total['subsections'][subsection]['sections'][section] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
-    jQuery('INPUT.section_'+cls_subsection+'_'+cls_section).each(function(i, b) {
+    total['sections'][section]['subsections'][subsection] = { 'total': 0, 'disabled': 0, 'up': 0, 'down': 0 };
+    jQuery('INPUT.subsection_'+cls_section+'_'+cls_subsection).each(function(i, b) {
         if(jQuery(b).hasClass('button_peerDIS') || jQuery(b).hasClass('button_peerHID')) {
-            total['subsections'][subsection]['sections'][section]['disabled']++;
-            total['subsections'][subsection]['disabled']++;
+            total['sections'][section]['subsections'][subsection]['disabled']++;
+            total['sections'][section]['disabled']++;
             total['disabled']++;
         }
         else if(jQuery(b).hasClass('button_peerUP')) {
-            total['subsections'][subsection]['sections'][section]['up']++;
-            total['subsections'][subsection]['up']++;
+            total['sections'][section]['subsections'][subsection]['up']++;
+            total['sections'][section]['up']++;
             total['up']++;
         }
         else if(jQuery(b).hasClass('button_peerDOWN')) {
-            total['subsections'][subsection]['sections'][section]['down']++;
-            total['subsections'][subsection]['down']++;
+            total['sections'][section]['subsections'][subsection]['down']++;
+            total['sections'][section]['down']++;
             total['down']++;
         } else {
-            if(thruk_debug_js) { alert("ERROR: no known class found in subsection: " + subsection + ', section: ' + section + ', site: ' + b.title ); }
+            if(thruk_debug_js) { alert("ERROR: no known class found in section: " + section + ', subsection: ' + subsection + ', site: ' + b.title ); }
         }
-        total['subsections'][subsection]['sections'][section]['total']++;
-        total['subsections'][subsection]['total']++;
+        total['sections'][section]['subsections'][subsection]['total']++;
+        total['sections'][section]['total']++;
         total['total']++;
     });
 
     /* set section button */
-    jQuery('#btn_sites_' + cls_subsection + '_' + cls_section)
+    jQuery('#btn_sites_' + cls_section + '_' + cls_subsection)
             .removeClass("button_peerDIS")
             .removeClass("button_peerDOWN")
             .removeClass("button_peerUP")
             .removeClass("button_peerWARN")
             .removeClass("button_peerUPDIS")
             .removeClass("button_peerDOWNDIS");
-    if(total['subsections'][subsection]['sections'][section]['disabled'] == total['subsections'][subsection]['sections'][section]['total']) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDIS');
+    if(total['sections'][section]['subsections'][subsection]['disabled'] == total['sections'][section]['subsections'][subsection]['total']) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDIS');
     }
-    else if(total['subsections'][subsection]['sections'][section]['up'] == total['subsections'][subsection]['sections'][section]['total']) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerUP');
+    else if(total['sections'][section]['subsections'][subsection]['up'] == total['sections'][section]['subsections'][subsection]['total']) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerUP');
     }
-    else if(total['subsections'][subsection]['sections'][section]['down'] == total['subsections'][subsection]['sections'][section]['total']) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDOWN');
+    else if(total['sections'][section]['subsections'][subsection]['down'] == total['sections'][section]['subsections'][subsection]['total']) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDOWN');
     }
-    else if(total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] > 0) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerWARN');
+    else if(total['sections'][section]['subsections'][subsection]['down'] > 0 && total['sections'][section]['subsections'][subsection]['up'] > 0) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerWARN');
     }
-    else if(total['subsections'][subsection]['sections'][section]['up'] > 0 && total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] == 0) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerUPDIS');
+    else if(total['sections'][section]['subsections'][subsection]['up'] > 0 && total['sections'][section]['subsections'][subsection]['disabled'] > 0 && total['sections'][section]['subsections'][subsection]['down'] == 0) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerUPDIS');
     }
-    else if(total['subsections'][subsection]['sections'][section]['disabled'] > 0 && total['subsections'][subsection]['sections'][section]['down'] > 0 && total['subsections'][subsection]['sections'][section]['up'] == 0) {
-        jQuery('#btn_sites_' + cls_subsection + '_' + cls_section).addClass('button_peerDOWNDIS');
+    else if(total['sections'][section]['subsections'][subsection]['disabled'] > 0 && total['sections'][section]['subsections'][subsection]['down'] > 0 && total['sections'][section]['subsections'][subsection]['up'] == 0) {
+        jQuery('#btn_sites_' + cls_section + '_' + cls_subsection).addClass('button_peerDOWNDIS');
     }
 
     /* set section checkbox */
-    if(total['subsections'][subsection]['sections'][section]['disabled'] > 0) {
-        jQuery('#all_section_' + cls_subsection + '_' + cls_section).prop('checked', false);
+    if(total['sections'][section]['subsections'][subsection]['disabled'] > 0) {
+        jQuery('#all_section_' + cls_section + '_' + cls_subsection).prop('checked', false);
     } else {
-        jQuery('#all_section_' + cls_subsection + '_' + cls_section).prop('checked', true);
+        jQuery('#all_section_' + cls_section + '_' + cls_subsection).prop('checked', true);
     }
     return total;
 }

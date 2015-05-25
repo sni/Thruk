@@ -1,5 +1,19 @@
 ﻿<script type="text/javascript">
 <!--
+  var ajax_search_enabled     = '[% use_ajax_search %]';
+  var backend_chooser         = '[% backend_chooser %]';
+  [% IF refresh_rate +%]
+  var refresh_rate            = [% refresh_rate %];
+  [% END +%]
+  [% IF auto_reload_fn +%]
+  var auto_reload_fn          = function(cb) { return([% auto_reload_fn %](cb)) };
+  var datetime_format_long    = '[% datetime_format_long %]';
+  [% END +%]
+  [% PROCESS _header_initial_states.tt %]
+  var enable_shinken_features = [% enable_shinken_features %];
+  [% IF enable_shinken_features +%]
+  var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
+  [% END +%]
   var url_prefix             = '[% url_prefix %]';
   var product_prefix         = '[% product_prefix %]';
   var cookie_path            = '[% cookie_path %]';
@@ -20,29 +34,41 @@
   var referer                = '[% uri_with(c, '_' => 'undef' ) | uri %]';
   var full_uri               = '[% escape_html(full_uri(c)) %]';
   var original_uri           = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
+  var show_sitepanel         = '[% show_sitepanel %]';
+  var param_backend          = '[% param_backend %]';
+  var backend_chooser        = '[% backend_chooser %]';
+
+  jQuery.noConflict();
+
+  [%+ PROCESS _common_js_bugs.tt +%]
+
+  [%+ IF disable_backspace +%]
+  jQuery(document).on("keydown", function (e) {
+    if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
+      e.preventDefault();
+    }
+  });
+  [%+ END +%]
+
+  [% IF original_url %]
+  var history_url = '[% original_url %]';
+  history_url     = history_url.replace(/&amp;/g, '&');
+  if(history.replaceState) {
+    history.replaceState({}, "", history_url);
+  }
+  [% END %]
+
+  [%+ IF use_frames && use_dynamic_titles %]
+  if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
+    try {
+      window.parent.document.title = '[% title_prefix %][% title %]';
+    } catch(e) { debug(e) }
+  }
+  [% END +%]
+
+  jQuery(document).ready(function() {
+    bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %]);
+  });
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
-[%+ UNLESS thruk_debug %]
-<script type="text/javascript" src="[% url_prefix %]javascript/all_in_one-[% version %]-[% filebranch %].js"></script>
-[% ELSE %]
-  [% FOREACH jsfiles = all_in_one_javascript %]
-    <script type="text/javascript" src="[% url_prefix %]javascript/[% jsfiles %]"></script>
-  [%+ END %]
-[% END +%]
-[% IF has_jquery_ui %]
-    <script type="text/javascript" src="[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js"></script>
-[% END +%]
-<script type="text/javascript">
-<!--
-    jQuery.noConflict();
-    [%+ PROCESS _common_js_bugs.tt +%]
-    [%+ IF disable_backspace +%]
-    jQuery(document).on("keydown", function (e) {
-        if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
-            e.preventDefault();
-        }
-    });
-    [%+ END +%]
--->
-</script>

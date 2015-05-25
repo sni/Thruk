@@ -39,6 +39,18 @@ our @stash_config_keys = qw/
     force_persistent_comments use_bookmark_titles use_dynamic_titles use_feature_bp
 /;
 
+use constant {
+    REACHABLE        => 0,
+    UNREACHABLE      => 1,
+    HIDDEN_USER      => 2,
+    HIDDEN_PARAM     => 3,
+    DISABLED_AUTH    => 4,
+
+    DISABLED_CONF    => 5,
+    HIDDEN_CONF      => 6,
+    UP_CONF          => 7,
+};
+
 ######################################
 
 =head2 begin
@@ -717,16 +729,16 @@ sub set_configs_stash {
   _set_possible_backends($c, $disabled_backends)
 
   possible values are:
-    0 = reachable
-    1 = unreachable
-    2 = hidden by user
-    3 = hidden by backend param
-    4 = disabled by missing group auth
+    0 = reachable                           REACHABLE
+    1 = unreachable                         UNREACHABLE
+    2 = hidden by user                      HIDDEN_USER
+    3 = hidden by backend param             HIDDEN_PARAM
+    4 = disabled by missing group auth      DISABLED_AUTH
 
    override by the config tool
-    5 = disabled (overide by config tool)
-    6 = hidden   (overide by config tool)
-    7 = up       (overide by config tool)
+    5 = disabled (overide by config tool)   DISABLED_CONF
+    6 = hidden   (overide by config tool)   HIDDEN_CONF
+    7 = up       (overide by config tool)   UP_CONF
 
 =cut
 sub _set_possible_backends {
@@ -739,11 +751,9 @@ sub _set_possible_backends {
 
     my %backend_detail;
     my @new_possible_backends;
-    my $initial_backend_states = {};
-    my $initial_backends       = {};
 
     for my $back (@possible_backends) {
-        if(defined $disabled_backends->{$back} && $disabled_backends->{$back} == 4) {
+        if(defined $disabled_backends->{$back} && $disabled_backends->{$back} == DISABLED_AUTH) {
             $c->{'db'}->disable_backend($back);
             next;
         }
@@ -752,7 +762,7 @@ sub _set_possible_backends {
             'name'       => $peer->{'name'},
             'addr'       => $peer->{'addr'},
             'type'       => $peer->{'type'},
-            'disabled'   => $disabled_backends->{$back} || 0,
+            'disabled'   => $disabled_backends->{$back} || REACHABLE,
             'running'    => 0,
             'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
         };
@@ -760,18 +770,43 @@ sub _set_possible_backends {
             $backend_detail{$back}->{'running'} = 1;
         }
         # set combined state
-        $backend_detail{$back}->{'state'} = 1; # down
-        if($backend_detail{$back}->{'running'})       { $backend_detail{$back}->{'state'} = 0; } # up
-        if($backend_detail{$back}->{'disabled'} == 2) { $backend_detail{$back}->{'state'} = 2; } # hidden
-        if($backend_detail{$back}->{'disabled'} == 3) { $backend_detail{$back}->{'state'} = 3; } # unused
+        $backend_detail{$back}->{'state'} = UNREACHABLE; # down
+        if($backend_detail{$back}->{'running'})                  { $backend_detail{$back}->{'state'} = REACHABLE;    } # up
+        if($backend_detail{$back}->{'disabled'} == HIDDEN_USER)  { $backend_detail{$back}->{'state'} = HIDDEN_USER;  } # hidden
+        if($backend_detail{$back}->{'disabled'} == HIDDEN_PARAM) { $backend_detail{$back}->{'state'} = HIDDEN_PARAM; } # unused
         push @new_possible_backends, $back;
+    }
 
-        # create hashes used in javascript
-        $initial_backend_states->{$back}->{'state'} = $backend_detail{$back}->{'state'};
+    $c->stash->{'backends'}         = \@new_possible_backends;
+    $c->stash->{'backend_detail'}   = \%backend_detail;
+
+    update_site_panel_hashes($c) unless $c->stash->{'hide_backends_chooser'};
+    return;
+}
+
+########################################
+
+=head2 update_site_panel_hashes
+
+  update_site_panel_hashes($c)
+
+=cut
+sub update_site_panel_hashes {
+    my($c) = @_;
+
+    my $initial_backends = {};
+    my $backends         = $c->stash->{'backends'};
+    my $backend_detail   = $c->stash->{'backend_detail'};
+
+    return if scalar @{$backends} <= 1;
+
+    # create hashes used in javascript
+    for my $back (@{$backends}) {
+        my $peer = $c->{'db'}->get_peer_by_key($back);
         $initial_backends->{$back} = {
             key              => $back,
-            name             => $peer->{'name'},
-            state            => $backend_detail{$back}->{'state'},
+            name             => $peer->{'name'} || 'unknown',
+            state            => $backend_detail->{$back}->{'state'},
             version          => '',
             data_src_version => '',
             program_start    => '',
@@ -783,10 +818,75 @@ sub _set_possible_backends {
         }
     }
 
-    $c->stash->{'backends'}               = \@new_possible_backends;
-    $c->stash->{'backend_detail'}         = \%backend_detail;
-    $c->stash->{'initial_backends'}       = encode_json($initial_backends);
-    $c->stash->{'initial_backend_states'} = encode_json($initial_backend_states);
+    # create sections and subsection for site panel
+    my $sites = {
+        up       => 0,
+        disabled => 0,
+        down     => 0,
+        sections => {},
+        total    => 0,
+    };
+    for my $section (sort keys %{$c->{'db'}->{'sections'}}) {
+        if(!defined $sites->{'sections'}->{$section}) {
+            $sites->{'sections'}->{$section} = { 'up' => 0, 'disabled' => 0, 'down' => 0, 'total' => 0, subsections => {} };
+        }
+        for my $subsection (sort keys %{$c->{'db'}->{'sections'}->{$section}}) {
+            if(!defined $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}) {
+                $sites->{'sections'}->{$section}->{'subsections'}->{$subsection} = { 'up' => 0, 'disabled' => 0, 'down' => 0, 'total' => 0, sites => [] };
+            }
+            for my $bname (sort keys %{$c->{'db'}->{'sections'}->{$section}->{$subsection}}) {
+                for my $p (@{$c->{'db'}->{'sections'}->{$section}->{$subsection}->{$bname}}) {
+                    my $pd = $p->{'key'};
+                    next if(!$backend_detail->{$pd} || $backend_detail->{$pd}->{'disabled'} == DISABLED_CONF);
+                    my $class = 'DOWN';
+                    $class = 'UP'   if $backend_detail->{$pd}->{'running'};
+                    $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
+                    $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
+                    $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
+                    $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
+                    $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
+                    $class = 'UP'   if $backend_detail->{$pd}->{'disabled'} == UP_CONF;
+                    $backend_detail->{$pd}->{'class'} = $class;
+                    my $total_key = lc $class;
+                    if($class eq 'DIS' || $class eq 'HID') {
+                        $total_key = 'disabled';
+                    }
+                    $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{$total_key}++;
+                    $sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{'total'}++;
+                    $sites->{'sections'}->{$section}->{'total'}++;
+                    $sites->{'sections'}->{$section}->{$total_key}++;
+                    $sites->{$total_key}++;
+                    $sites->{'total'}++;
+                    push @{$sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{'sites'}}, $pd;
+                    $initial_backends->{$pd}->{'cls'} = $class;
+                    my $last_error = $initial_backends->{$pd}->{'name'}.': OK';
+                    if($c->stash->{'failed_backends'}->{$pd}) {
+                        $last_error = $c->stash->{'failed_backends'}->{$pd};
+                    }
+                    if($backend_detail->{$pd}->{'last_error'}) {
+                        $last_error = $backend_detail->{$pd}->{'last_error'};
+                    }
+                    $initial_backends->{$pd}->{'last_error'} = $last_error;
+                }
+            }
+        }
+    }
+
+    my $show_sitepanel = 'list';
+       if($c->stash->{'sitepanel'} eq 'list')      { $show_sitepanel = 'list'; }
+    elsif($c->stash->{'sitepanel'} eq 'compact')   { $show_sitepanel = 'panel'; }
+    elsif($c->stash->{'sitepanel'} eq 'collapsed') { $show_sitepanel = 'collapsed'; }
+    elsif($c->stash->{'sitepanel'} eq 'off')       { $show_sitepanel = 'off'; }
+    elsif($c->stash->{'sitepanel'} eq 'auto') {
+        if(scalar keys %{$sites->{'sections'}} > 1 || scalar @{$backends} >= 50) { $show_sitepanel = 'collapsed'; }
+        elsif(($sites->{sections}->{'Default'}->{'subsections'} && scalar keys %{$sites->{sections}->{'Default'}->{'subsections'}} > 1) || scalar @{$backends} >= 10) { $show_sitepanel = 'panel'; }
+        elsif(scalar @{$backends} == 1) { $show_sitepanel = 'off'; }
+        else { $show_sitepanel = 'list'; }
+    }
+
+    $c->stash->{'initial_backends'} = encode_json($initial_backends);
+    $c->stash->{'show_sitepanel'}   = $show_sitepanel;
+    $c->stash->{'sites'}            = encode_json($sites);
 
     return;
 }
@@ -826,8 +926,8 @@ sub _any_backend_enabled {
     my ($c) = @_;
     for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
         return 1 if(
-             $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0
-          or $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 5);
+             $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == REACHABLE
+          or $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == DISABLED_CONF);
 
     }
     return;
@@ -987,7 +1087,7 @@ sub _set_enabled_backends {
         $c->log->debug('_set_enabled_backends() by args');
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
-            $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
+            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
         if(ref $backends eq '') {
             my @tmp = split(/\s*,\s*/mx, $backends);
@@ -1012,7 +1112,7 @@ sub _set_enabled_backends {
         $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'}));
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
-            $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
+            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER; # set all hidden
         }
         for my $b (split(/,/mx, $ENV{'THRUK_BACKENDS'})) {
             $disabled_backends->{$b} = 0;
@@ -1025,7 +1125,7 @@ sub _set_enabled_backends {
         $c->log->debug('_set_enabled_backends() by param');
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
-            $disabled_backends->{$peer->{'key'}} = 2;  # set all hidden
+            $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
         }
         for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
             $disabled_backends->{$b} = 0;
@@ -1058,7 +1158,7 @@ sub _set_enabled_backends {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             if(defined $peer->{'groups'}) {
                 $has_groups = 1;
-                $disabled_backends->{$peer->{'key'}} = 4;  # completly hidden
+                $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
             }
         }
         $c->{'db'}->disable_backends($disabled_backends);

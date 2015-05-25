@@ -197,12 +197,11 @@ page: /thruk/main.html
 sub thruk_main_html {
     my( $c ) = @_;
 
+    $c->stash->{'hide_backends_chooser'}   = 1;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
-
     $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}                    = 'splashpage';
     $c->stash->{'template'}                = 'main.tt';
-    $c->stash->{'hide_backends_chooser'}   = 1;
     $c->stash->{'no_auto_reload'}          = 1;
 
     return 1;
@@ -218,11 +217,11 @@ page: /thruk/changes.html
 
 sub thruk_changes_html {
     my( $c ) = @_;
+    $c->stash->{'hide_backends_chooser'} = 1;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
     $c->stash->{infoBoxTitle}            = 'Change Log';
     $c->stash->{'title'}                 = 'Change Log';
     $c->stash->{'no_auto_reload'}        = 1;
-    $c->stash->{'hide_backends_chooser'} = 1;
     $c->stash->{'template'}              = 'changes.tt';
     $c->stash->{page}                    = 'splashpage';
 
@@ -239,12 +238,11 @@ page: /thruk/docs/
 
 sub thruk_docs  {
     my( $c ) = @_;
+    $c->stash->{'hide_backends_chooser'} = 1;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
-
     $c->stash->{infoBoxTitle}            = 'Documentation';
     $c->stash->{'title'}                 = 'Documentation';
     $c->stash->{'no_auto_reload'}        = 1;
-    $c->stash->{'hide_backends_chooser'} = 1;
     $c->stash->{'template'}              = 'docs.tt';
     $c->stash->{'extrabodyclass'}        = 'docs';
     $c->stash->{'page'}                  = 'splashpage';

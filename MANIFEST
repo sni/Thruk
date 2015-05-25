@@ -1331,6 +1331,7 @@ templates/_comments_table.tt
 templates/_common_css.tt
 templates/_common_js.tt
 templates/_common_js_bugs.tt
+templates/_common_js_files.tt
 templates/_cron_edit.tt
 templates/_disclaimer.tt
 templates/_downtimes_recurring_table.tt
@@ -1344,8 +1345,6 @@ templates/_header.tt
 templates/_header_initial_states.tt
 templates/_header_prefs.tt
 templates/_header_sites.tt
-templates/_header_sites_collapsed.tt
-templates/_header_sites_panel.tt
 templates/_help.tt
 templates/_host_command_box.tt
 templates/_host_command_box_full.tt

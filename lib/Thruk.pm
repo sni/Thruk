@@ -47,6 +47,7 @@ BEGIN {
     ## use critic
 }
 use constant {
+    # backend states
     ADD_DEFAULTS        => 0,
     ADD_SAFE_DEFAULTS   => 1,
     ADD_CACHED_DEFAULTS => 2,
@@ -626,12 +627,12 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d   mem: % 7s MB % 6s MB   dur: %.2fs %8s   size:% 12s   stat: %d   url: %s",
+        $c->log->info(sprintf("Req: %03d   mem: % 7s MB % 6s MB   dur: %.3fs %9s   size:% 12s   stat: %d   url: %s",
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("% 5.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
                                 $elapsed,
-                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.2fs)', $c->stash->{'total_backend_waited'}) : '----',
+                                defined $c->stash->{'total_backend_waited'} ? sprintf('(%.3fs)', $c->stash->{'total_backend_waited'}) : '----',
                                 defined $content_length ? sprintf("%.3f kb", $content_length/1024) : '----',
                                 $res->[0],
                                 $url,

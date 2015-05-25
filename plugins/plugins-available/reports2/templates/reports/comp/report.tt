@@ -5,15 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>[% r.name %]</title>
   [% PROCESS 'reports/style/css.tt' %]
-  [% thruk_debug_orig=thruk_debug %][%# seems to break jquery  #%]
-  [% PROCESS _common_js.tt show_error_reports=0 thruk_debug=1 %]
-  [% thruk_debug=thruk_debug_orig %]
-  <script type="text/javascript">
-  <!--
-  [%+ PROCESS _header_initial_states.tt +%]
-  $=jQuery;
-  -->
-  </script>
+  [% PROCESS _common_js_files.tt show_error_reports=0 %]
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/flot-d7c58b5/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
   <!--[if IE]><script language='javascript' type='text/javascript' src='[% url_prefix %]javascript/excanvas.js'></script><![endif]-->
@@ -21,6 +13,12 @@
   <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/reports2/reports_render.js"></script>
 </head>
 <body>
+[% PROCESS _common_js.tt %]
+<script type="text/javascript">
+<!--
+$=jQuery;
+-->
+</script>
 [% content %]
 <script type="text/javascript">
 <!--

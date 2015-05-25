@@ -838,9 +838,9 @@ sub get_backends_with_obj_config {
         my $min_key_size = 0;
         if(defined $peer->{'configtool'}->{remote} and $peer->{'configtool'}->{remote} == 1) { $min_key_size = 1; }
         if(scalar keys %{$peer->{'configtool'}} > $min_key_size) {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = Thruk::Action::AddDefaults::HIDDEN_CONF;
         } else {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = Thruk::Action::AddDefaults::DISABLED_CONF;
         }
     }
 
@@ -883,13 +883,16 @@ sub get_backends_with_obj_config {
         $c->stash->{'param_backend'} = $firstpeer;
     }
     if($c->stash->{'param_backend'} and defined $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}) {
-        $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} = 7;
+        $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} = Thruk::Action::AddDefaults::UP_CONF;
     }
 
     # save value in the cookie, so later pages will show the same selected backend
     $c->cookie('thruk_conf' => $c->stash->{'param_backend'}, { path  => $c->stash->{'cookie_path'} });
 
     $c->stash->{'backend_chooser'} = 'switch';
+
+    Thruk::Action::AddDefaults::update_site_panel_hashes($c);
+
     return $backends;
 }
 

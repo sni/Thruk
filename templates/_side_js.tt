@@ -52,7 +52,7 @@
             }
         }
         catch(e) {
-            debug(e);
+            //debug(e);
             // probably permission errors. ex. error message from proxy which results in cross-domain permission errors
             if(is_reloading) {
                 load_errors++;
