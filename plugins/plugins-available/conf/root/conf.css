@@ -91,7 +91,7 @@ UL.obj_browse LI {
   text-align: left;
   clear: both;
   display: inline-block;
-  width: 420px;
+  width: 100%;
 }
 
 UL.obj_browse LI:hover {
@@ -104,10 +104,10 @@ UL.obj_browse LI IMG {
 }
 
 DIV.obj_browse_name {
-  width: 250px;
+  width: 500px;
   white-space: nowrap;
   overflow: hidden;
-  max-width: 50%;
+  max-width: 60%;
   float: left;
 }
 

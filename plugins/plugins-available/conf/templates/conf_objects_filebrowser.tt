@@ -4,7 +4,7 @@
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="path" value="/" id="path">
 <input type="hidden" name="token" value="[% get_user_token(c) %]">
-<table border="0" class='data conftoolobj' width="500">
+<table border="0" class='data conftoolobj'>
   <tr>
     <th class='data'>Filesystem</th>
   </tr>
