@@ -646,8 +646,7 @@ sub _do_send_command {
         }
     }
 
-    my $backends      = $c->req->parameters->{'backend'};
-    my $backends_list = ref $backends eq 'ARRAY' ? $backends : [ $backends ];
+    my($backends_list) = $c->{'db'}->select_backends('send_command');
     for my $cmd_line ( split /\n/mx, $cmd ) {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
         my $joined_backends = join(',', @{$backends_list});

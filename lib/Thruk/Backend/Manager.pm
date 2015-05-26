@@ -1257,7 +1257,7 @@ select backends we want to run functions on
 =cut
 
 sub select_backends {
-    my( $self, $function, $arg) = @_;
+    my($self, $function, $arg) = @_;
     my $c = $Thruk::Request::c;
 
     # do we have to send the query to all backends or just a few?
