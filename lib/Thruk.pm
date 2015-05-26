@@ -627,7 +627,8 @@ sub _after_dispatch {
         $url     =~ s/^cgi\-bin\///mxo;
         if(length($url) > 80) { $url = substr($url, 0, 80).'...' }
         if(!$url) { $url = $c->req->url; }
-        $c->log->info(sprintf("Req: %03d   mem: % 7s MB % 6s MB   dur: %.3fs %9s   size:% 12s   stat: %d   url: %s",
+        $c->log->info(sprintf("[%d] Req: %03d   mem: % 7s MB % 6s MB   dur: %.3fs %9s   size:% 12s   stat: %d   url: %s",
+                                $$,
                                 $Thruk::COUNT,
                                 $c->stash->{'memory_end'},
                                 sprintf("% 5.2f", ($c->stash->{'memory_end'}-$c->stash->{'memory_begin'})),
