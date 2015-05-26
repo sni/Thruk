@@ -1,6 +1,6 @@
-From 2f16b308d4ee18fa1e1aa979505edbefac16c394 Mon Sep 17 00:00:00 2001
+From 19ee1999f78d588c1d5dc02004d246068bf9997e Mon Sep 17 00:00:00 2001
 From: Sven Nierlein <sven@nierlein.de>
-Date: Thu, 26 Feb 2015 17:58:04 +0100
+Date: Tue, 26 May 2015 10:57:07 +0200
 Subject: [PATCH] naemon branding
 
 Signed-off-by: Sven Nierlein <sven@nierlein.de>
@@ -30,7 +30,7 @@ index ab70bb9..fd01626 100644
        [% IF has_proc_info %]
        [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
 diff --git a/templates/login.tt b/templates/login.tt
-index d726b1a..b85d28a 100644
+index 5ed2f17..a40d9ac 100644
 --- a/templates/login.tt
 +++ b/templates/login.tt
 @@ -18,13 +18,13 @@
@@ -82,12 +82,12 @@ index 0810b28..821f8f2 100644
        <div class="checkforupdates">
          <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
 diff --git a/templates/side.tt b/templates/side.tt
-index d3f6543..5f0c6ab 100644
+index 568fb61..93b71ce 100644
 --- a/templates/side.tt
 +++ b/templates/side.tt
-@@ -27,7 +27,7 @@
-   </head>
+@@ -23,7 +23,7 @@
    <body class='navbar'>
+   [% PROCESS _common_js.tt bodyonload=0 %]
  [% END %]
 -    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 +    <a href="http://www.naemon.org" target="_blank"><img src="[% url_prefix %]images/logo_naemon_small.png" border="0" alt="Naemon" title="Naemon" width="158" height="40" class="nav_small_logo" /></a>
