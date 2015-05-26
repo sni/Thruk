@@ -269,7 +269,7 @@ sub redirect_to {
     $c->res->body('This item has moved');
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
-    return;
+    return 1;
 }
 
 =head2 url_with

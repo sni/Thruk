@@ -207,7 +207,7 @@ for my $url (@{$other_json}) {
 # create new host
 my $r = TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/conf.cgi',
-    'post'    => { 'sub' => 'objects', 'type' => 'host', 'data.id' => 'new', 'action' => 'store', 'data.file', => '%2Ftest.cfg', 'obj.host_name' => 'test', 'obj.alias' => 'test', 'obj.address' => 'test', 'obj.use' => 'generic-host', 'conf_comment' => '' },
+    'post'    => { 'sub' => 'objects', 'type' => 'host', 'data.id' => 'new', 'action' => 'store', 'data.file', => '/test.cfg', 'obj.host_name' => 'test', 'obj.alias' => 'test', 'obj.address' => 'test', 'obj.use' => 'generic-host', 'conf_comment' => '' },
     'like'    => [ 'Host:\s+test'],
     'follow'  => 1,
 );
