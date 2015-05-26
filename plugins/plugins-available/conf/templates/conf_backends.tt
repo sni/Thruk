@@ -17,7 +17,7 @@ Note: some options are not accessible here for security reasons.
     <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
   </tr>
   [% x = 0 %]
-  [% FOREACH b = sites %]
+  [% FOREACH b = conf_sites %]
   [% x = x + 1 %]
   [% PROCESS _conf_backends_backend.tt %]
   [% END %]
@@ -146,7 +146,7 @@ Note: some options are not accessible here for security reasons.
   }
 
   [% x = 0 %]
-  [% FOREACH b = sites %]
+  [% FOREACH b = conf_sites %]
   [% x = x + 1 +%]
   var sel = document.getElementById('sel_type[% x %]');
   check_backends_config(sel);

@@ -914,9 +914,9 @@ sub _process_backends_page {
         $b->{'section'}     = '' unless defined $b->{'section'};
         $b->{'type'}        = lc($b->{'type'});
     }
-    $c->stash->{'sites'}    = $backends;
-    $c->stash->{'subtitle'} = "Thruk Backends Manager";
-    $c->stash->{'template'} = 'conf_backends.tt';
+    $c->stash->{'conf_sites'} = $backends;
+    $c->stash->{'subtitle'}   = "Thruk Backends Manager";
+    $c->stash->{'template'}   = 'conf_backends.tt';
 
     return 1;
 }
