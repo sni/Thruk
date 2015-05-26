@@ -292,8 +292,14 @@ sub _renew_navigation {
     # make a copy of additional menuitems
     # otherwise, items added from a menu_local.conf would be added once
     # per loading a page
-    my $additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
-    my $additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    our $orig_additional_items;
+    our $orig_additional_subitems;
+    if(!defined $orig_additional_items) {
+        $orig_additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
+        $orig_additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    }
+    $Thruk::Utils::Menu::additional_items    = dclone($orig_additional_items);
+    $Thruk::Utils::Menu::additional_subitems = dclone($orig_additional_subitems);
     $Thruk::Utils::Menu::removed_items = {};
 
     ## no critic
@@ -425,12 +431,10 @@ sub _renew_navigation {
         }
     }
 
-    $c->stash->{'navigation'}  = $new_nav;
+    $c->stash->{'navigation'} = $new_nav;
 
-    # restore additional menuitems
-    $Thruk::Utils::Menu::additional_items    = dclone($additional_items);
-    $Thruk::Utils::Menu::additional_subitems = dclone($additional_subitems);
-    $Thruk::Utils::Menu::c                   = undef;
+    # cleanup
+    $Thruk::Utils::Menu::c = undef;
 
     return;
 }

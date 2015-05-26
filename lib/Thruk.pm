@@ -598,7 +598,7 @@ sub _after_dispatch {
         unless($@) {
             my $counter = 0;
             Devel::Cycle::find_cycle($c, sub {
-                my $path    = shift;
+                my($path) = @_;
                 $counter++;
                 $c->log->error("found leaks:") if $counter == 1;
                 $c->log->error("Cycle ($counter):");
