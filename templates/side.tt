@@ -21,6 +21,7 @@
     <![endif]-->
   </head>
   <body class='navbar'>
+  [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
     <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 

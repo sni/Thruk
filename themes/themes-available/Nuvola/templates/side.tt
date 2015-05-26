@@ -4,7 +4,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>[% title_prefix %][% title %]</title>
-    [% PROCESS _common_js.tt %]
     [% UNLESS all_in_one_css %]
     <link href="[% url_prefix %]themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     [% END %]
@@ -19,9 +18,11 @@
     }
     -->
     </style>
+    [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
   </head>
   <body class='navbar' onload="preloadImages();">
+  [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
 [% PROCESS _side_js.tt %]
 <div class="tree">
