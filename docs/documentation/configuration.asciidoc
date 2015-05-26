@@ -1616,7 +1616,7 @@ ex.:
     hostmenu    = .*;$             # matches all hosts only
     servicemenu = .*;.+$           # matches all services on all hosts
     specialmenu = ^Host;Service$   # matches an exact service on one host only
-    cpu_menu    = .*;^CPU          # matches all services starting with 'CPU'
+    cpu_menu    = .*;CPU           # matches all services starting with 'CPU'
     hostmenu    = ^Host            # matches all hosts starting with 'Host'
     demomenu    = ^Demo;           # matches all services on the 'Demo' host
     demomenu    = ^Test;           # a menu name can be used multiple times
