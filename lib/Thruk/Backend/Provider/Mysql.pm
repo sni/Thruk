@@ -599,29 +599,10 @@ sub _get_filter {
     }
     $filter = " WHERE ".$filter if $filter;
 
-    # message filter have to go into a having clause
-    my($contact,$system,$strict);
-    if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
-        if($filter =~ s/^\ WHERE\ \((time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
-            my $timef = $1;
-            my $having = $filter;
-            $filter = 'WHERE ('.$timef.')';
-            # time filter are the only filter
-            if($having eq ')') {
-                $having = '';
-            } else {
-                $having =~ s/^\ AND\ //mx;
-                $having =~ s/\)$//mx;
-                $filter = $filter.' HAVING ('.$having.')';
-            }
-        } else {
-            $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
-        }
-    }
-
     # authentication filter hack
     # hosts, services and system_information
     # ((current_service_contacts IN ('test_contact') AND service_description != '') OR current_host_contacts IN ('test_contact') OR (service_description = '' AND host_name = ''))
+    my($contact,$system,$strict);
     if($filter =~ s/\(\(current_service_contacts\ IN\ \('(.*?)'\)\ AND\ service_description\ !=\ ''\)\ OR\ current_host_contacts\ IN\ \('(.*?)'\)\ OR\ \(service_description\ =\ ''\ AND\ host_name\ =\ ''\)\)//mx) {
         $contact = $1;
         $system  = 1;
@@ -643,6 +624,25 @@ sub _get_filter {
         $contact = $1;
     }
 
+    # message filter have to go into a having clause
+    $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
+    if($filter and $filter =~ m/message\ (NOT\ LIKE|NOT\ RLIKE|RLIKE|=|LIKE|!=)\ /mx) {
+        if($filter =~ s/^\ WHERE\ \((time\ >=\ \d+\ AND\ time\ <=\ \d+)//mx) {
+            my $timef = $1;
+            my $having = $filter;
+            $filter = 'WHERE ('.$timef.')';
+            # time filter are the only filter
+            if($having eq ')') {
+                $having = '';
+            } else {
+                $having =~ s/^\ AND\ //mx;
+                $having =~ s/\)$//mx;
+                $filter = $filter.' HAVING ('.$having.')';
+            }
+        } else {
+            $filter =~ s/message\ RLIKE\ '/p1.output\ RLIKE\ '/gmx;
+        }
+    }
     $filter =~ s/\ AND\ \)/)/gmx;
     $filter =~ s/\(\ AND\ \(/((/gmx;
     $filter =~ s/AND\s+AND/AND/gmx;

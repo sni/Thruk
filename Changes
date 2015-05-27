@@ -7,6 +7,7 @@ next:
           - improved page rendering
           - users can change their htpasswd passwords
           - fix redirect without trailing slash on login
+          - fix event log filter for unprivileged contacts (#406)
 
 1.88-4   Wed Apr 22 16:16:09 CEST 2015
           - Config Tool:

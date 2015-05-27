@@ -259,7 +259,7 @@ test_filter(
             }
           ]
     ],
-    " WHERE ((time >= 1361892706 AND time <= 1362497506 AND type = 'HOST ALERT'))",
+    " WHERE (time >= 1361892706 AND time <= 1362497506 AND type = 'HOST ALERT')",
     'test_contact'
 );
 #####################################################################
