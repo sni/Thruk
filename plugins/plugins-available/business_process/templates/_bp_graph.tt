@@ -52,36 +52,9 @@
 </div>
 </div>
 <script type="text/javascript">
-    var nodes = [
-        [% FOREACH n IN bp.nodes %]
-        { id:           '[% n.id %]',
-          label:        '[% n.label %]',
-          host:         '[% n.host %]',
-          service:      '[% n.service %]',
-          hostgroup:    '[% n.hostgroup %]',
-          servicegroup: '[% n.servicegroup %]',
-          template:     '[% n.template %]',
-          create_obj:   [% IF n.create_obj %]true[% ELSE %]false[% END %],
-          create_obj_ok:[% IF n.create_obj_ok %]true[% ELSE %]false[% END %],
-          status:       '[% n.status %]',
-          status_text:  [% json_encode([n.status_text]) %][0],
-          short_desc:   '[% escape_quotes(n.short_desc) %]',
-          last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
-          duration:     '[% IF n.last_state_change %][% duration(date.now - n.last_state_change) %][% END %]',
-          acknowledged: '[% n.acknowledged %]',
-          scheduled_downtime_depth: '[% n.scheduled_downtime_depth %]',
-          depends:      [[% FOREACH d IN n.depends %]['[% d.id %]', '[% d.label %]'][% UNLESS loop.last %],[% END %][% END %]],
-          func:         '[% n.function %]',
-          func_args:    [% json_encode(n.function_args) %],
-          contacts:     [% json_encode(n.contacts) %],
-          contactgroups: [% json_encode(n.contactgroups) %],
-          notification_period: '[% n.notification_period %]',
-          width:        120,
-          height:        40
-        }[% UNLESS loop.last %],[% END +%]
-        [%+ END %]
-    ];
-
+    var node_width  = 120,
+        node_height =  40;
+    var nodes = [% bp.get_json_nodes(c) %];
     [% edges = [];
       FOREACH n IN bp.nodes;
         FOREACH d IN n.depends;

@@ -2051,6 +2051,39 @@ function updateExcelPermanentLink() {
     jQuery(inp).val(jQuery('#excelexportlink')[0].href + (data ? '?' + data : ''));
 }
 
+/* compare two objects and print diff
+ * returns true if they differ and false if they are equal
+ */
+function obj_diff(o1, o2, prefix) {
+    if(prefix == undefined) { prefix = ""; }
+    if(typeof(o1) != typeof(o2)) {
+        debug("type is different: a" + prefix + " "+typeof(o1)+"       b" + prefix + " "+typeof(o2));
+        return(true);
+    }
+    else if(is_array(o1)) {
+        for(var nr=0; nr<o1.length; nr++) {
+            if(obj_diff(o1[nr], o2[nr], prefix+"["+nr+"]")) {
+                return(true);
+            }
+        }
+    }
+    else if(typeof(o1) == 'object') {
+        for(var key in o1) {
+            if(obj_diff(o1[key], o2[key], prefix+"["+key+"]")) {
+                return(true);
+            }
+        }
+    } else if(typeof(o1) == 'string' || typeof(o1) == 'number' || typeof(o1) == 'boolean') {
+        if(o1 != o2) {
+            debug("value is different: a" + prefix + " "+o1+"       b" + prefix + " "+o2);
+            return(true);
+        }
+    } else {
+        debug("don't know how to compare: "+typeof(o1)+" at a"+prefix);
+    }
+    return(false);
+}
+
 /*******************************************************************************
 *        db        ,ad8888ba, 888888888888 88   ,ad8888ba,   888b      88
 *       d88b      d8"'    `"8b     88      88  d8"'    `"8b  8888b     88

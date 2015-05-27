@@ -276,6 +276,45 @@ sub get_node {
 
 ##########################################################
 
+=head2 get_json_nodes
+
+return nodes as json array
+
+=cut
+sub get_json_nodes {
+    my($self, $c) = @_;
+    my $list = [];
+    for my $n (@{$self->{'nodes'}}) {
+        push @{$list}, {
+          id                        => $n->{'id'},
+          label                     => $n->{'label'},
+          host                      => $n->{'host'},
+          service                   => $n->{'service'},
+          hostgroup                 => $n->{'hostgroup'},
+          servicegroup              => $n->{'servicegroup'},
+          template                  => $n->{'template'},
+          create_obj                => $n->{'create_obj'} ? JSON::XS::true : JSON::XS::false,
+          create_obj_ok             => $n->{'create_obj_ok'} ? JSON::XS::true : JSON::XS::false,
+          status                    => $n->{'status'},
+          status_text               => $n->{'status_text'},
+          short_desc                => $n->{'short_desc'},
+          last_check                => $n->{'last_check'} ? Thruk::Utils::Filter::date_format($c, $n->{'last_check'}) : 'never',
+          duration                  => $n->{'last_state_change'} ? Thruk::Utils::Filter::duration(time() - $n->{'last_state_change'}) : '',
+          acknowledged              => $n->{'acknowledged'}."",
+          scheduled_downtime_depth  => $n->{'scheduled_downtime_depth'}."",
+          depends                   => $n->depends_list,
+          func                      => $n->{'function'},
+          func_args                 => $n->{'function_args'},
+          contacts                  => $n->{'contacts'},
+          contactgroups             => $n->{'contactgroups'},
+          notification_period       => $n->{'notification_period'},
+        }
+    }
+    return(Thruk::Utils::Filter::json_encode($list));
+}
+
+##########################################################
+
 =head2 add_node
 
 add new node to business process

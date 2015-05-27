@@ -8,6 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - users can change their htpasswd passwords
           - fix redirect without trailing slash on login
           - fix event log filter for unprivileged contacts (#406)
+          - fix using backslashes in business process object names (#485)
 
           Incompatible Changes:
           - custom thruk plugins have to be adopted to thruk 2, see migration

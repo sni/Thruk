@@ -173,6 +173,21 @@ sub resolve_depends {
     return;
 }
 
+##########################################################
+
+=head2 depends_list
+
+return data which needs to be statefully stored
+
+=cut
+sub depends_list {
+    my($self) = @_;
+    my $list = [];
+    for my $d (@{$self->{'depends'}}) {
+        push @{$list}, [$d->{'id'}, $d->{'label'}];
+    }
+    return($list);
+}
 
 ##########################################################
 

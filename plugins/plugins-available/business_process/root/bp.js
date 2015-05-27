@@ -936,7 +936,7 @@ function bp_render(containerId, nodes, edges) {
     bp_zoom(1);
     var g = new dagre.Digraph();
     jQuery.each(nodes, function(nr, n) {
-        g.addNode(n.id, { label: n.label, width: n.width, height: n.height });
+        g.addNode(n.id, { label: n.label, width: node_width, height: node_height });
     });
     jQuery.each(edges, function(nr, e) {
         g.addEdge(null, e.sourceId, e.targetId);
