@@ -3,6 +3,7 @@ package Thruk::Backend::Peer;
 use strict;
 use warnings;
 use Carp;
+use Scalar::Util qw/weaken/;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Backend::Provider::Livestatus;
 
@@ -41,7 +42,7 @@ create new peer
 =cut
 
 sub new {
-    my( $class, $config, $logcache, $existing_keys, $product_prefix, $use_shadow_naemon ) = @_;
+    my($class, $config, $logcache, $existing_keys, $product_prefix, $use_shadow_naemon) = @_;
     my $self = {
         'config'        => $config,
         'existing_keys' => $existing_keys,
@@ -165,6 +166,8 @@ sub _initialise_peer {
     if($self->{'backend_debug'} and Thruk->debug) {
         $self->{'class'}->set_verbose(1);
     }
+    $self->{'class'}->{'_peer'} = $self;
+    weaken($self->{'class'}->{'_peer'});
 
     # state hosts
     my $addr              = $self->{'addr'};
@@ -192,20 +195,11 @@ sub _initialise_peer {
 
     # log cache?
     if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
-        if($logcache =~ m/^mysql/mxi) {
-            if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
-                require Thruk::Backend::Provider::Mysql;
-                Thruk::Backend::Provider::Mysql->import;
-                $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
-            }
-            $self->{'logcache'} = Thruk::Backend::Provider::Mysql->new({
-                                                    peer     => $logcache,
-                                                    peer_key => $self->{'key'},
-                                                });
-        } else {
+        if($logcache !~ m/^mysql/mxi) {
             die("no or unknown type in logcache connection: ".$logcache);
+        } else {
+            $self->{'logcache'} = $logcache;
         }
-        $self->{'class'}->{'logcache'} = $self->{'logcache'};
     }
 
     # livestatus booster
@@ -233,6 +227,34 @@ sub _initialise_peer {
         $self->{'cacheproxy'}->{'naemon_optimizations'} = 1;
     }
 
+    return;
+}
+
+##########################################################
+
+=head2 logcache
+
+  logcache()
+
+return logcache and create it on demand
+
+=cut
+sub logcache {
+    my($self) = @_;
+    return($self->{'_logcache'}) if $self->{'_logcache'};
+    if($self->{'logcache'}) {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+        }
+        $self->{'_logcache'} = Thruk::Backend::Provider::Mysql->new({
+                                                peer     => $self->{'logcache'},
+                                                peer_key => $self->{'key'},
+                                            });
+        $self->{'class'}->{'logcache'} = $self->{'_logcache'};
+        return($self->{'_logcache'});
+    }
     return;
 }
 

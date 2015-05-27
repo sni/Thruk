@@ -722,6 +722,11 @@ sub logcache_stats {
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
     my(@stats);
     if($type eq 'mysql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+        }
         @stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
     } else {
         die("unknown type: ".$type);
@@ -731,7 +736,7 @@ sub logcache_stats {
     if($with_dates) {
         for my $key (keys %{$stats}) {
             my $peer  = $self->get_peer_by_key($key);
-            my($start, $end) = @{$peer->{'logcache'}->_get_logs_start_end()};
+            my($start, $end) = @{$peer->logcache->_get_logs_start_end()};
             $stats->{$key}->{'start'} = $start;
             $stats->{$key}->{'end'}   = $end;
         }
@@ -833,7 +838,7 @@ sub close_logcache_connections {
     # clean up connections
     for my $key (@{$c->stash->{'backends'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
-        $peer->{'logcache'}->_disconnect() if $peer->{'logcache'};
+        $peer->logcache->_disconnect() if $peer->{'_logcache'};
     }
     return;
 }

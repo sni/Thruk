@@ -846,8 +846,8 @@ sub _log_stats {
     my @result;
     for my $key (@{$c->stash->{'backends'}}) {
         my $peer = $c->{'db'}->get_peer_by_key($key);
-        $peer->{'logcache'}->reconnect();
-        my $dbh  = $peer->{'logcache'}->_dbh();
+        $peer->logcache->reconnect();
+        my $dbh  = $peer->logcache->_dbh();
         my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS LIKE '".$key."%'", 'Name');
         next unless defined $res->{$key.'_log'};
         my $index_size = $res->{$key.'_log'}->{'Index_length'} + $res->{$key.'_plugin_output'}->{'Index_length'};
@@ -891,8 +891,8 @@ sub _log_removeunused {
     }
     return "no logcache configured?" unless(defined $peer and defined $peer->{'logcache'});
 
-    $peer->{'logcache'}->reconnect();
-    my $dbh  = $peer->{'logcache'}->_dbh();
+    $peer->logcache->reconnect();
+    my $dbh  = $peer->logcache->_dbh();
     my $res  = $dbh->selectall_hashref("SHOW TABLE STATUS", 'Name');
 
     # gather backend ids
@@ -975,21 +975,21 @@ sub _import_logs {
         #&timing_breakpoint('_import_logs '.$key);
         $c->stats->profile(begin => "$key");
         $backend_count++;
-        $peer->{'logcache'}->reconnect();
-        my $dbh = $peer->{'logcache'}->_dbh;
+        $peer->logcache->reconnect();
+        my $dbh = $peer->logcache->_dbh;
 
         print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
         # backends maybe down, we still want to continue updates
         eval {
             if($mode eq 'update' or $mode eq 'import' or $mode eq 'clean') {
-                $log_count += $peer->{'logcache'}->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
+                $log_count += $peer->logcache->_update_logcache($c, $mode, $peer, $dbh, $prefix, $verbose, $blocksize, $files, $forcestart);
             }
             elsif($mode eq 'authupdate') {
-                $log_count += $peer->{'logcache'}->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
+                $log_count += $peer->logcache->_update_logcache_auth($c, $peer, $dbh, $prefix, $verbose);
             }
             elsif($mode eq 'optimize') {
-                $log_count += $peer->{'logcache'}->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
+                $log_count += $peer->logcache->_update_logcache_optimize($c, $peer, $dbh, $prefix, $verbose, $options);
             } else {
                 print "ERROR: unknown mode: ".$mode."\n" if $@ and $verbose;
             }
@@ -1463,7 +1463,7 @@ sub _import_peer_logfiles {
     if($mode eq 'update') {
         $c->stats->profile(begin => "get last mysql timestamp");
         # get last timestamp from Mysql
-        ($mstart, $mend) = @{$peer->{'logcache'}->_get_logs_start_end(collection => $prefix)};
+        ($mstart, $mend) = @{$peer->logcache->_get_logs_start_end(collection => $prefix)};
         if(defined $mend) {
             print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
             push @{$filter}, {time => { '>=' => $mend }};

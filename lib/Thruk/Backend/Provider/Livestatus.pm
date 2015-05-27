@@ -57,8 +57,8 @@ recreate database connection
 =cut
 sub reconnect {
     my($self) = @_;
-    if(defined $self->{'logcache'}) {
-        $self->{'logcache'}->reconnect();
+    if(defined $self->{'_peer'}->{'logcache'}) {
+        $self->{'_peer'}->logcache->reconnect();
     }
     return;
 }
@@ -671,9 +671,9 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
-    if(defined $self->{'logcache'} && !defined $options{'nocache'}) {
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
-        return $self->{'logcache'}->get_logs(%options);
+        return $self->{'_peer'}->logcache->get_logs(%options);
     }
     unless(defined $options{'columns'}) {
         $options{'columns'} = [qw/
@@ -1261,10 +1261,10 @@ renew logcache
 =cut
 sub renew_logcache {
     my($self, $c) = @_;
-    return unless defined $self->{'logcache'};
+    return unless defined $self->{'_peer'}->{'logcache'};
     # renew cache?
     if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
-        $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
         $self->{'lastcacheupdate'} = time();
     }
     return;

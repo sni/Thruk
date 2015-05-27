@@ -188,11 +188,11 @@ renew logcache
 =cut
 sub renew_logcache {
     my($self, $c) = @_;
-    return unless defined $self->{'logcache'};
+    return unless defined $self->{'_peer'}->{'logcache'};
     # renew cache?
     if(!defined $self->{'lastcacheupdate'} || $self->{'lastcacheupdate'} < time()-5) {
         $self->{'lastcacheupdate'} = time();
-        $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
+        $self->{'_peer'}->logcache->_import_logs($c, 'update', 0, $self->peer_key());
     }
     return;
 }
@@ -477,9 +477,9 @@ returns logfile entries
 sub get_logs {
     my($self, @options) = @_;
     my %options = @options;
-    if(defined $self->{'logcache'} && !defined $options{'nocache'}) {
+    if(defined $self->{'_peer'}->{'logcache'} && !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
-        return $self->{'logcache'}->get_logs(%options);
+        return $self->{'_peer'}->logcache->get_logs(%options);
     }
 
     my $use_file = 0;
