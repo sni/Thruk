@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.00     NOT YET RELEASED
           - changed internal storage format to json everywhere
           - improved memory usage
           - improved startup time
@@ -8,6 +8,11 @@ next:
           - users can change their htpasswd passwords
           - fix redirect without trailing slash on login
           - fix event log filter for unprivileged contacts (#406)
+
+          Incompatible Changes:
+          - custom thruk plugins have to be adopted to thruk 2, see migration
+            help document: http://thruk.org/documentation/thruk_2_0_migration_guide.html
+          - enable frame mode by default
 
 1.88-4   Wed Apr 22 16:16:09 CEST 2015
           - Config Tool:
