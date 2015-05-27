@@ -224,6 +224,7 @@ sub thruk_changes_html {
     $c->stash->{'no_auto_reload'}        = 1;
     $c->stash->{'template'}              = 'changes.tt';
     $c->stash->{page}                    = 'splashpage';
+    $c->stash->{no_tt_trim}              = 1;
 
     return 1;
 }

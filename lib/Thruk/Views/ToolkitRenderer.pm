@@ -78,7 +78,7 @@ sub render {
     #&timing_breakpoint('render_tt processed');
     $c->stats->profile(end => "render: ".$template);
     if($output) {
-        ${$output} =~ s/^\s+//sgmxo;
+        ${$output} =~ s/^\s+//sgmxo unless $c->stash->{no_tt_trim};
         utf8::encode(${$output});
     }
     return;
