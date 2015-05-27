@@ -101,6 +101,8 @@ sub switch_tag {
         exit;
     }
     `git log -1 2>&1`; # result in wrong startup times otherwise
+    `git describe --tag --exact-match 2>&1`; # result in wrong startup times otherwise
+    `git branch --no-color 2>&1`; # result in wrong startup times otherwise
     `rm -rf tmp/ttc_*`;
 }
 
