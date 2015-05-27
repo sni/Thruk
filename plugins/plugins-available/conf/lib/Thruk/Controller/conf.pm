@@ -720,7 +720,7 @@ sub _process_plugins_page {
             die("unknown pic: ".$pic);
         }
         my $path = $plugin_available_dir.'/'.$pic.'/preview.png';
-        $c->res->headers->content_type('images/png');
+        $c->res->headers->content_type('image/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
             $c->stash->{'text'} = read_file($path);
