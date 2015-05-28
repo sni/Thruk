@@ -1508,6 +1508,11 @@ sub _get_results_xs_pool {
                 if($tmp->[0] =~ m/^Stats/mxo) {
                     ($tmp->[0],$tmp->[1]) = Monitoring::Livestatus::extract_keys_from_stats_statement($tmp->[0]);
                 }
+                if($tmp->[2] && $tmp->[2]->{'header'}) {
+                    for my $key ( keys %{$tmp->[2]->{'header'}}) {
+                        $tmp->[0] .= $key.': '.$tmp->[2]->{'header'}->{$key}."\n";
+                    }
+                }
             }
         }
 

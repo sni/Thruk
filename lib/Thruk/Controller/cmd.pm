@@ -396,6 +396,7 @@ sub _redirect_or_success {
     for my $b (@{$backends}) {
         my $v = $c->stash->{'pi_detail'}->{$b}->{'data_source_version'};
         next unless defined $v;
+        next if $v =~ m/\-naemon$/mx;
         next unless $v =~ m/^Livestatus\s(.*)$/mx;
         my $v_num = $1;
         if(!Thruk::Utils::version_compare($v_num, '1.1.3')) {
