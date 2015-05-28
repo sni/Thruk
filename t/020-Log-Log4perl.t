@@ -14,7 +14,8 @@ BEGIN {
         my $rc = $?>>8;
         plan skip_all => 'there is a log4perl.conf already, cannot test' if $rc != 0;
     }
-    $ENV{'THRUK_SRC'} = 'TEST';
+    $ENV{'THRUK_SRC'}     = 'TEST';
+    $ENV{'THRUK_VERBOSE'} = 1;
 }
 
 plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
