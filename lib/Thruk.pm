@@ -512,14 +512,15 @@ sub _init_logging {
         Log::Log4perl::init(\$log_conf);
         $logger = Log::Log4perl->get_logger();
         $self->{'_log'} = $logger;
-        if(Thruk->verbose) {
-            $logger->level('DEBUG');
-            $logger->debug("logging initialized");
-        }
-        else {
-            $logger->level('INFO');
-        }
     }
+    if(Thruk->verbose) {
+        $logger->level('DEBUG');
+        $logger->debug("logging initialized");
+    }
+    else {
+        $logger->level('INFO');
+    }
+    $logger->level('ERROR') if $ENV{'THRUK_QUIET'};
     return($logger);
 }
 

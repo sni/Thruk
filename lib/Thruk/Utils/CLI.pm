@@ -69,6 +69,7 @@ sub new {
     $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
+    $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
     ## use critic
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
@@ -369,7 +370,7 @@ sub _run {
     # with output
     if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
-        print STDOUT $result->{'output'};
+        print STDOUT $result->{'output'} unless $self->{'opt'}->{'quiet'};
     } else {
         binmode STDERR;
         print STDERR $result->{'output'};
