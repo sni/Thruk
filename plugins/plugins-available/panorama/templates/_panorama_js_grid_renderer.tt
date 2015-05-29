@@ -153,6 +153,12 @@ TP.render_duration = function(v, td, item) {
     }
 }
 
+/* render peer name */
+TP.render_peer_name = function(v, td, item) {
+    var peer_key = item.data.peer_key;
+    return(initial_backends[peer_key].name);
+}
+
 /* render current attempt */
 TP.render_attempt = function(v, td, item) {
     var ret = item.data.current_attempt + '/' + item.data.max_check_attempts;

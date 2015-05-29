@@ -1360,7 +1360,7 @@ sub _task_hosts {
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
             { 'header' => 'Duration',               width => 100, dataIndex => 'last_state_change', align => 'center', renderer => 'TP.render_duration' },
             { 'header' => 'Attempt',                width => 60,  dataIndex => 'current_attempt',   align => 'center', renderer => 'TP.render_attempt' },
-            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',         align => 'center', },
+            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',         align => 'center', renderer => 'TP.render_peer_name' },
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
@@ -1434,7 +1434,7 @@ sub _task_services {
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
             { 'header' => 'Duration',               width => 100, dataIndex => 'last_state_change', align => 'center', renderer => 'TP.render_duration' },
             { 'header' => 'Attempt',                width => 60,  dataIndex => 'current_attempt',   align => 'center', renderer => 'TP.render_attempt' },
-            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',         align => 'center', },
+            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',         align => 'center', renderer => 'TP.render_peer_name' },
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
