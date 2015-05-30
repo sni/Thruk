@@ -160,6 +160,11 @@ sub clean_session_files {
     my($config) = @_;
     die("no config") unless $config;
     my $sdir    = $config->{'var_path'}.'/sessions';
+    my $cookie_auth_session_timeout = $config->{'cookie_auth_session_timeout'};
+    if($cookie_auth_session_timeout <= 0) {
+        # clean old unused sessions after one year, even if they don't expire
+        $cookie_auth_session_timeout = 365 * 86400;
+    }
     my $timeout = time() - $config->{'cookie_auth_session_timeout'};
     Thruk::Utils::IO::mkdir($sdir);
     opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
