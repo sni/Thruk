@@ -341,6 +341,7 @@ sub _process_json_page {
     my $filter    = $c->req->parameters->{'filter'};
     my $use_long  = $c->req->parameters->{'long'};
     if(defined $filter) {
+        $json       = [];
         my $types   = {};
         my $objects = $c->{'obj_db'}->get_objects_by_type($type,$filter);
         for my $subtype (keys %{$objects}) {
