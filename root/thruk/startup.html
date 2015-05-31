@@ -23,7 +23,7 @@
                 url: 'cgi-bin/remote.cgi?startup',
                 type: 'POST',
                 success: function(data, textStatus, jqXHR) {
-                    if(data == undefined || (data != 'startup done' && data != 'OK')) {
+                    if(data == undefined || (!data.match('^startup done') && !data.match('^OK'))) {
                         jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
                         return false;
                     }
