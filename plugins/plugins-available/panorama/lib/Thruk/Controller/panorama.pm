@@ -649,6 +649,7 @@ sub _get_wms_provider {
     my $list     = $c->config->{'Thruk::Plugin::Panorama'}->{'wms_provider'};
     if(ref $list eq "") { $list = [$list] }
     for my $entry (@{$list}) {
+        next unless $entry;
         my($name, $data) = split(/\s*=\s*/mx, $entry, 2);
         $name =~ s/^\s*//gmx;
         $name =~ s/\s*$//gmx;
