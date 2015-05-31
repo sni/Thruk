@@ -373,7 +373,7 @@ var TP = {
             buttonAlign: 'center',
             items: [{
                 html: 'Thruk Panorama Dashboard<br><br>'
-                     +'Copyright 2009-2014 Sven Nierlein, sven@consol.de<br>'
+                     +'Copyright 2009-present Sven Nierlein, sven@consol.de<br>'
                      +'License: GPL v3<br>'
                      +'Version: [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.extra_version %] <font size="-3">([% c.config.extra_version %])<\/font>[% END %]'
             }],

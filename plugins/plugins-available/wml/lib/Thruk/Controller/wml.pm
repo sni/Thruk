@@ -67,7 +67,7 @@ sub index {
 
 Franky Van Liedekerke, 2012
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

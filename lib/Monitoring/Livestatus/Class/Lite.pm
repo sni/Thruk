@@ -586,13 +586,13 @@ __END__
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 Robert Bohne, C<< <rbo at cpan.org> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

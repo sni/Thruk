@@ -51,7 +51,7 @@ sub get_service_stats_dashboard {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =cut
 

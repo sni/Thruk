@@ -1514,9 +1514,11 @@ see the Livestatus page: http://mathias-kettner.de/checkmk_livestatus.html
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009-2014, <sven@nierlein.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 COPYRIGHT AND LICENSE
+
+Copyright (C) by Sven Nierlein
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
