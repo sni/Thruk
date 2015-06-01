@@ -85,15 +85,15 @@
 
             [% UNLESS readonly %]
             if(!this.locked) {
-                var pos = this.getPosition();
-                this.xdata.layout.x = pos[0];
-                this.xdata.layout.y = pos[1];
                 if(this.iconType != 'text' && this.xdata.general[this.iconType] == '' && this.firstRun != false) {
                     this.firstRun = true;
                     TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
+                        var pos = This.getPosition();
+                        This.xdata.layout.x = pos[0];
+                        This.xdata.layout.y = pos[1];
                         TP.iconShowEditDialog(This);
-                    }, 10);
+                    }, 50);
                 }
             }
             [% END %]
