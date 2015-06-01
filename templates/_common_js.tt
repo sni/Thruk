@@ -1,45 +1,43 @@
 ﻿<script type="text/javascript">
 <!--
-  var ajax_search_enabled     = '[% use_ajax_search %]';
-  var backend_chooser         = '[% backend_chooser %]';
+  jQuery.noConflict();
+  [% PROCESS _header_initial_states.tt %]
+  var ajax_search_enabled = '[% use_ajax_search %]';
+  var backend_chooser     = '[% backend_chooser %]';
   [% IF refresh_rate +%]
-  var refresh_rate            = [% refresh_rate %];
+  var refresh_rate        = [% refresh_rate %];
   [% END +%]
   [% IF auto_reload_fn +%]
-  var auto_reload_fn          = function(cb) { return([% auto_reload_fn %](cb)) };
-  var datetime_format_long    = '[% datetime_format_long %]';
+  var auto_reload_fn      = function(cb) { return([% auto_reload_fn %](cb)) };
+  var datetime_format_long = '[% datetime_format_long %]';
   [% END +%]
-  [% PROCESS _header_initial_states.tt %]
   var enable_shinken_features = [% enable_shinken_features %];
   [% IF enable_shinken_features +%]
-  var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
+  var priorities          = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
   [% END +%]
-  var url_prefix             = '[% url_prefix %]';
-  var product_prefix         = '[% product_prefix %]';
-  var cookie_path            = '[% cookie_path %]';
-  var theme                  = '[% theme %]';
-  var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
-  var fav_counter            = [% IF fav_counter +%]true[% ELSE %]false[% END %];
-  var perf_bar_mode          = '[% perf_bar_mode %]';
-  var perf_bar_pnp_popup     = '[% perf_bar_pnp_popup %]';
-  var internetExplorer       = false;
-  var has_jquery_ui          = [% has_jquery_ui %];
-  var jquery_ui_url          = '[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
-  var jquery_ui_css          = '[% url_prefix %]javascript/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
-  var thruk_debug_js         = [% IF thruk_debug %]1[% ELSE %]0[% END %];
-  var minimal                = [% IF minimal %]true[% ELSE %]false[% END %];
-  var user_token             = '[% get_user_token(c) %]';
-  var remote_user            = '[% remote_user %]';
-  var omd_site               = '[% omd_site %]';
-  var referer                = '[% uri_with(c, '_' => 'undef' ) | uri %]';
-  var full_uri               = '[% escape_html(full_uri(c)) %]';
-  var original_uri           = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
-  var show_sitepanel         = '[% show_sitepanel %]';
-  var param_backend          = '[% param_backend %]';
-  var backend_chooser        = '[% backend_chooser %]';
-
-  jQuery.noConflict();
-
+  var url_prefix          = '[% url_prefix %]';
+  var product_prefix      = '[% product_prefix %]';
+  var cookie_path         = '[% cookie_path %]';
+  var theme               = '[% theme %]';
+  var has_expire_acks     = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
+  var fav_counter         = [% IF fav_counter +%]true[% ELSE %]false[% END %];
+  var perf_bar_mode       = '[% perf_bar_mode %]';
+  var perf_bar_pnp_popup  = '[% perf_bar_pnp_popup %]';
+  var internetExplorer    = false;
+  var has_jquery_ui       = [% has_jquery_ui %];
+  var jquery_ui_url       = '[% url_prefix %]javascript/jquery-ui/js/jquery-ui-[% jquery_ui %].custom.min.js';
+  var jquery_ui_css       = '[% url_prefix %]javascript/jquery-ui/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
+  var thruk_debug_js      = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+  var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
+  var user_token          = '[% get_user_token(c) %]';
+  var remote_user         = '[% remote_user %]';
+  var omd_site            = '[% omd_site %]';
+  var referer             = '[% uri_with(c, '_' => 'undef' ) | uri %]';
+  var full_uri            = '[% escape_html(full_uri(c)) %]';
+  var original_uri        = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
+  var show_sitepanel      = '[% show_sitepanel %]';
+  var param_backend       = '[% param_backend %]';
+  var backend_chooser     = '[% backend_chooser %]';
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]
