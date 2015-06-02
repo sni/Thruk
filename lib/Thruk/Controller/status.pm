@@ -345,9 +345,6 @@ sub _process_details_page {
     my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
 
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
-
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption'} || 1;
@@ -445,9 +442,6 @@ sub _process_hostdetails_page {
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
-
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -918,9 +912,6 @@ sub _process_combined_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) if $view_mode eq 'html';
-
     # services
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
@@ -1004,9 +995,6 @@ sub _process_perfmap_page {
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( undef, $servicefilter, undef ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
-
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;

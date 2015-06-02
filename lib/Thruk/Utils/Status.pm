@@ -1536,54 +1536,6 @@ sub set_custom_title {
     return;
 }
 
-
-##############################################
-
-=head2 set_comments_and_downtimes
-
-  set_comments_and_downtimes($c)
-
-set comments / downtimes by host
-
-=cut
-sub set_comments_and_downtimes {
-    my($c) = @_;
-
-    # add comments and downtimes
-    my $comments  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
-    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
-    my $downtimes_by_host         = {};
-    my $downtimes_by_host_service = {};
-    if($downtimes) {
-        for my $downtime ( @{$downtimes} ) {
-            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
-                push @{ $downtimes_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
-            }
-            else {
-                push @{ $downtimes_by_host->{ $downtime->{'host_name'} } }, $downtime;
-            }
-        }
-    }
-    $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
-    $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
-    my $comments_by_host         = {};
-    my $comments_by_host_service = {};
-    if($comments) {
-        for my $comment ( @{$comments} ) {
-            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
-                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
-            }
-            else {
-                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
-            }
-        }
-    }
-    $c->stash->{'comments_by_host'}         = $comments_by_host;
-    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
-
-    return;
-}
-
 ##############################################
 
 =head2 add_view
@@ -1884,18 +1836,15 @@ sub set_favicon_counter {
 
 =head2 get_service_matrix
 
-  get_service_matrix($c)
+  get_service_matrix($c, [$hostfilter], [$servicefilter])
 
 get matrix of services usable by a minemap
 
 =cut
 sub get_service_matrix {
-    my( $c, $hostfilter, $servicefilter, $skip_comments ) = @_;
+    my( $c, $hostfilter, $servicefilter) = @_;
 
     $c->stats->profile(begin => "Status::get_service_matrix()");
-
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c) unless $skip_comments;
 
     my $uniq_hosts = {};
 

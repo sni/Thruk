@@ -38,6 +38,7 @@
   var show_sitepanel      = '[% show_sitepanel %]';
   var param_backend       = '[% param_backend %]';
   var backend_chooser     = '[% backend_chooser %]';
+  var info_popup_options  = [[% c.config.info_popup_options %]];
   [% PROCESS _common_js_bugs.tt %]
 
   [% IF disable_backspace %]

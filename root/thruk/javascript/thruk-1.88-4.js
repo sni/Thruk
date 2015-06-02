@@ -45,9 +45,9 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 var debug = function(str) {}
 window.addEventListener('load', function(evt) {
     if(thruk_debug_js != undefined && thruk_debug_js) {
-        if(typeof window.console !== "object" && window.console.debug) {
+        if(typeof window.console === "object" && window.console.debug) {
             /* overwrite debug function, so caller information is not replaced */
-            debug = window.console.debug;
+            debug = window.console.debug.bind(console);
         }
     }
 }, false);
@@ -2077,6 +2077,35 @@ function obj_diff(o1, o2, prefix) {
         debug("don't know how to compare: "+typeof(o1)+" at a"+prefix);
     }
     return(false);
+}
+
+/* callback to show popup with host comments */
+function host_comments_popup(host_name, peer_key) {
+    generic_downtimes_popup(host_name+' Comments', url_prefix+'cgi-bin/parts.cgi?part=_host_comments&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
+}
+
+/* callback to show popup with host downtimes */
+function host_downtimes_popup(host_name, peer_key) {
+    generic_downtimes_popup(host_name+' Downtimes', url_prefix+'cgi-bin/parts.cgi?part=_host_downtimes&host='+encodeURIComponent(host_name)+"&backend="+peer_key);
+}
+
+/* callback to show popup with service comments */
+function service_comments_popup(host_name, service, peer_key) {
+    generic_downtimes_popup(host_name+' - '+service+' Comments', url_prefix+'cgi-bin/parts.cgi?part=_service_comments&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
+}
+
+/* callback to show popup with service downtimes */
+function service_downtimes_popup(host_name, service, peer_key) {
+    generic_downtimes_popup(host_name+' - '+service+' Downtimes', url_prefix+'cgi-bin/parts.cgi?part=_service_downtimes&host='+encodeURIComponent(host_name)+'&service='+encodeURIComponent(service)+"&backend="+peer_key);
+}
+
+/* callback to show popup host/service downtimes */
+function generic_downtimes_popup(title, url) {
+    var content = "<div id='comments_downtimes_popup'><img src='"+url_prefix + 'themes/' + theme + '/images/loading-icon.gif'+"'><\/div>";
+    var options = [content, CAPTION, title,WIDTH,600];
+    options = options.concat(info_popup_options);
+    overlib.apply(this, options);
+    jQuery('#comments_downtimes_popup').load(url);
 }
 
 /*******************************************************************************

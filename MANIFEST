@@ -1264,6 +1264,7 @@ t/300-controller_extinfo.t
 t/300-controller_history.t
 t/300-controller_notifications.t
 t/300-controller_outages.t
+t/300-controller_parts.t
 t/300-controller_remote.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
@@ -1357,6 +1358,8 @@ templates/_message.tt
 templates/_notifications_log_line.tt
 templates/_overdiv.tt
 templates/_pager.tt
+templates/_parts_comments.tt
+templates/_parts_downtimes.tt
 templates/_perfdata_human.tt
 templates/_pnp_graph.tt
 templates/_progressbar.tt

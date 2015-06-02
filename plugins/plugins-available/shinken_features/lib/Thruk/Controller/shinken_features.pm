@@ -154,9 +154,6 @@ sub _process_outagespbimp {
         }
     }
 
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
-
     # sort by criticity
     my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
     my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
@@ -188,9 +185,6 @@ sub _process_bothtypes_page {
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
-
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;

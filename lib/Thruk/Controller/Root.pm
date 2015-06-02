@@ -280,6 +280,32 @@ sub parts_cgi {
     return $c->detach('/error/index/25') unless $part;
     if($part eq '_header_prefs') {
         $c->stash->{'template'} = '_header_prefs.tt';
+    }
+    elsif($part eq '_host_comments') {
+        my $host = $c->req->parameters->{'host'};
+        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'type'}      = 'host';
+        $c->stash->{'template'}  = '_parts_comments.tt';
+    }
+    elsif($part eq '_host_downtimes') {
+        my $host = $c->req->parameters->{'host'};
+        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => '' } ] );
+        $c->stash->{'type'}      = 'host';
+        $c->stash->{'template'}  = '_parts_downtimes.tt';
+    }
+    elsif($part eq '_service_comments') {
+        my $host = $c->req->parameters->{'host'};
+        my $svc  = $c->req->parameters->{'service'};
+        $c->stash->{'comments'}  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'type'}      = 'service';
+        $c->stash->{'template'}  = '_parts_comments.tt';
+    }
+    elsif($part eq '_service_downtimes') {
+        my $host = $c->req->parameters->{'host'};
+        my $svc  = $c->req->parameters->{'service'};
+        $c->stash->{'downtimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { host_name => $host, service_description => $svc } ] );
+        $c->stash->{'type'}      = 'service';
+        $c->stash->{'template'}  = '_parts_downtimes.tt';
     } else {
         return $c->detach('/error/index/25') unless $part;
     }
