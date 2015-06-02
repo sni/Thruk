@@ -16,10 +16,10 @@ sub new {
 }
 
 sub profile {
-    my $self = shift;
+    my($self, @arg) = @_;
     return unless $self->{'enabled'};
     my $t0 = [gettimeofday];
-    push @{$self->{'profile'}}, [$t0, \@_, [caller]];
+    push @{$self->{'profile'}}, [$t0, \@arg, [caller]];
     return;
 }
 sub enable {
