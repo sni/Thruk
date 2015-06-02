@@ -1897,17 +1897,17 @@ sub read_data_file {
 
 =head2 write_data_file
 
-  write_data_file($filename, $data)
+  write_data_file($filename, $data, [$changed_only])
 
 write data to datafile
 
 =cut
 
 sub write_data_file {
-    my($filename, $data) = @_;
+    my($filename, $data, $changed_only) = @_;
 
     # store new data files in json format
-    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1));
+    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1, $changed_only));
 }
 
 ##############################################

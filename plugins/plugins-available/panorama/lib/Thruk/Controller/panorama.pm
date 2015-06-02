@@ -2531,8 +2531,8 @@ sub _save_dashboard {
         }
     }
 
-    Thruk::Utils::write_data_file($file, $dashboard);
-    Thruk::Utils::write_data_file($file.'.runtime', $runtime);
+    Thruk::Utils::write_data_file($file, $dashboard, 1);
+    Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
     Thruk::Utils::backup_data_file($file, 'a', 5, 600);
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;

@@ -17,6 +17,7 @@ use Fcntl qw/:mode :flock/;
 use JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
+use File::Slurp qw/read_file/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
@@ -159,23 +160,31 @@ sub ensure_permissions {
 
 =head2 json_lock_store
 
-  json_lock_store($file, $data, [$pretty])
+  json_lock_store($file, $data, [$pretty], [$changed_only])
 
 stores data json encoded
 
 =cut
 
 sub json_lock_store {
-    my($file, $data, $pretty) = @_;
+    my($file, $data, $pretty, $changed_only) = @_;
 
     my $json = JSON::XS->new->utf8;
     $json = $json->pretty if $pretty;
+
+    my $write_out;
+    if($changed_only && -f $file) {
+        $json = $json->canonical; # keys will be randomly ordered otherwise
+        $write_out = $json->encode($data);
+        my $old = read_file($file);
+        return 1 if $old eq $write_out;
+    }
 
     open(my $fh, '>', $file) or die('cannot write file '.$file.': '.$!);
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
-    print $fh $json->encode($data);
+    print $fh ($write_out || $json->encode($data));
     Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);
     alarm(0);
     return 1;
