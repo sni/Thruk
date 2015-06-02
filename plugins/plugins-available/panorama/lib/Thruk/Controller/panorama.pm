@@ -2537,7 +2537,7 @@ sub _save_dashboard {
 
     # preserve some settings
     if($existing) {
-        $dashboard->{'user'}   = $existing->{'user'} || $c->stash->{'remote_user'};
+        $dashboard->{'user'} = $existing->{'user'} || $c->stash->{'remote_user'};
     }
 
     if($extra_settings) {
@@ -2552,6 +2552,10 @@ sub _save_dashboard {
     delete $dashboard->{'locked'};
     delete $dashboard->{'tab'}->{'xdata'}->{'owner'};
     delete $dashboard->{'tab'}->{'xdata'}->{''};
+    delete $dashboard->{'tab'}->{'readonly'};
+    delete $dashboard->{'tab'}->{'user'};
+    delete $dashboard->{'tab'}->{'ts'};
+    delete $dashboard->{'tab'}->{'public'};
 
     # save runtime data in extra file
     my $runtime = _extract_runtime_data($dashboard);
