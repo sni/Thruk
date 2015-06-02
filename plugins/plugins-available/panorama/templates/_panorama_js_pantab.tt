@@ -222,6 +222,48 @@
         }
         return state;
     },
+    saveIconsStates: function() {
+        var tab = this;
+        if(tab.readonly == 1) { return; }
+        window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_saveIconsStates']);
+        TP.timeouts['timeout_' + tab.id + '_saveIconsStates'] = window.setTimeout(function() {
+            tab.saveIconsStatesDo();
+        }, 500);
+    },
+    saveIconsStatesDo: function() {
+        var tab       = this;
+        var panels    = TP.getAllPanel(tab);
+        var allStates = {};
+        var found     = 0;
+        for(var nr=0; nr<panels.length; nr++) {
+            var panel = panels[nr];
+            if(panel.xdata && panel.xdata.state != undefined) {
+                allStates[panel.id] = { state: panel.xdata.state };
+                found++;
+            }
+        }
+        if(found) {
+            Ext.Ajax.request({
+                url:     'panorama.cgi?task=dashboard_save_states',
+                method:  'POST',
+                params:  {
+                    nr:     tab.id,
+                    states: Ext.JSON.encode(allStates)
+                },
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~saving dashboard states failed");
+                        } else {
+                            TP.Msg.msg("fail_message~~saving dashboard states failed: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        TP.getResponse(undefined, response);
+                    }
+                }
+            });
+        }
+    },
     fixMapIcons: function() {
         if(!this.map) { return; }
         var This = this;

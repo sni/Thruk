@@ -892,12 +892,19 @@ Ext.define('TP.IconWidget', {
             panel.xdata.state = newStatus;
             if(panel.el && (oldState != 4 && oldState != undefined)) { // not when initial state was pending
                 TP.timeouts['timeout_' + panel.id + '_flicker'] = window.setTimeout(Ext.bind(TP.flickerImg, panel, [panel.el.id]), 200);
+                panel.saveIconsStates();
             }
         }
         if(panel.xdata.map) {
             panel.moveToMapLonLat(undefined, false);
         }
         panel.setIconLabel();
+    },
+
+    /* save state of icons back to servers runtime file */
+    saveIconsStates: function() {
+        var tab = Ext.getCmp(this.panel_id);
+        tab.saveIconsStates();
     },
 
     /* update shapes and stuff */

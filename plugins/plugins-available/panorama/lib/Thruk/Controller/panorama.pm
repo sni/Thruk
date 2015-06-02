@@ -121,6 +121,9 @@ sub index {
         if($task eq 'availability') {
             return(_task_availability($c));
         }
+        elsif($task eq 'dashboard_save_states') {
+            return(_task_dashboard_save_states($c));
+        }
         elsif($task eq 'dashboard_data') {
             return(_task_dashboard_data($c));
         }
@@ -1955,6 +1958,37 @@ sub _task_service_detail {
 }
 
 ##########################################################
+sub _task_dashboard_save_states {
+    my($c) = @_;
+    my $nr   = $c->req->parameters->{'nr'} || die('no number supplied');
+    $nr      =~ s/^tabpan-tab_//gmx;
+    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
+
+    my $dashboard = _load_dashboard($c, $nr);
+    return unless _is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
+
+    my $runtime = _extract_runtime_data($dashboard);
+    my $states;
+    eval {
+        $states = decode_json($c->req->parameters->{'states'});
+    };
+    if($@) {
+        $c->log->warn('_task_dashboard_save_states failed: '.$@);
+        return;
+    }
+    for my $id (keys $runtime) {
+        for my $key (@runtime_keys) {
+            $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
+        }
+    }
+    Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
+
+    my $json = { 'status' => 'ok' };
+    _add_misc_details($c, undef, $json);
+    return $c->render(json => $json);
+}
+
+##########################################################
 sub _task_dashboard_data {
     my($c) = @_;
     my $nr = $c->req->parameters->{'nr'} || die('no number supplied');
@@ -2520,16 +2554,7 @@ sub _save_dashboard {
     delete $dashboard->{'tab'}->{'xdata'}->{''};
 
     # save runtime data in extra file
-    my $runtime = {};
-    for my $tab (keys %{$dashboard}) {
-        next unless ref $dashboard->{$tab} eq 'HASH';
-        delete $dashboard->{$tab}->{""};
-        for my $key (@runtime_keys) {
-            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
-                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
-            }
-        }
-    }
+    my $runtime = _extract_runtime_data($dashboard);
 
     Thruk::Utils::write_data_file($file, $dashboard, 1);
     Thruk::Utils::write_data_file($file.'.runtime', $runtime, 1);
@@ -2707,6 +2732,22 @@ sub _set_preload_images {
         push @{$c->stash->{preload_img}}, $i;
     }
     return;
+}
+
+##########################################################
+sub _extract_runtime_data {
+    my($dashboard) = @_;
+    my $runtime = {};
+    for my $tab (keys %{$dashboard}) {
+        next unless ref $dashboard->{$tab} eq 'HASH';
+        delete $dashboard->{$tab}->{""};
+        for my $key (@runtime_keys) {
+            if(defined $dashboard->{$tab}->{'xdata'} && defined $dashboard->{$tab}->{'xdata'}->{$key}) {
+                $runtime->{$tab}->{$key} = delete $dashboard->{$tab}->{'xdata'}->{$key};
+            }
+        }
+    }
+    return($runtime);
 }
 
 ##########################################################
