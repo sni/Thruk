@@ -27,8 +27,14 @@
       [% FOREACH js = all_in_one_javascript_panorama %]
         <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
       [% END %]
+      [% FOREACH js = get_static_panorama_files(c.config) %]
+        <script type="text/javascript" charset="UTF-8" src="[% url_prefix %][% js %]"></script>
+      [% END %]
     [% ELSE %]
       <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/all_in_one-[% version %]-[% filebranch %]_panorama.js"></script>
+    [% END %]
+    [% IF thruk_debug %]
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]plugins/panorama/js/panorama_js_track_timers.js"></script>
     [% END %]
 </head>
 <body onunload="TP.unload()">

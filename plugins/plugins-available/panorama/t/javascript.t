@@ -70,6 +70,8 @@ my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debu
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 
+#################################################
+# read 3rd party js files
 my $config = Thruk::config();
 for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}) {
     if($file =~ m/^plugins\//mx) {
@@ -81,13 +83,35 @@ for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_p
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
 }
+
 #################################################
+# extract global vars
 my $tst = TestUtils::test_page(
+    'url'           => '/thruk/cgi-bin/panorama.cgi',
+    'like'          => 'thruk_version.*=',
+);
+$tst->{'content'} =~ m|<\!\-\-(.*?)\-\->|smx;
+my($fh, $filename) = tempfile();
+print $fh $1;
+close($fh);
+js_eval_ok($filename) && unlink($filename);
+
+#################################################
+# read static js files
+use_ok('Thruk::Utils::Panorama');
+for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
+    $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
+    ok($file, $file);
+    js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
+}
+#################################################
+# add dynamic js
+$tst = TestUtils::test_page(
     'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
     'like'          => 'BLANK_IMAGE_URL',
     'content_type'  => 'text/javascript; charset=UTF-8',
 );
-my($fh, $filename) = tempfile();
+($fh, $filename) = tempfile();
 print $fh $tst->{'content'};
 close($fh);
 js_eval_ok($filename) && unlink($filename);

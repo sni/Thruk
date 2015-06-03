@@ -1,10 +1,6 @@
-﻿[% IF test_mode %][% PROCESS _panorama_js_globals.tt %][% END %]
-[%+ PROCESS _common_js_bugs.tt +%]
-var thruk_debug_window_handler = function() {};
-[% IF thruk_debug %]
-[%+ PROCESS _panorama_js_track_timers.tt +%]
-[% END %]
+﻿[%+ PROCESS _common_js_bugs.tt +%]
 
+Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
 Ext.namespace("TP");
 [%+ IF state +%]
 var ExtState      = [% state %];
@@ -16,44 +12,19 @@ var ExtStateSplit = true;
 var default_dashboard = [% default_dashboard %];
 var initial_shapes = [% json_encode(shapes) %];
 
-[%+ PROCESS _panorama_js_functions.tt +%]
-[%+ PROCESS _panorama_js_menu_add.tt +%]
-[%+ PROCESS _panorama_js_state_provider.tt +%]
-[%+ PROCESS _panorama_js_tab_reorder.tt +%]
-[%+ PROCESS _panorama_js_elements.tt +%]
-[%+ PROCESS _panorama_js_utils_base64.tt +%]
-[%+ PROCESS _panorama_js_slider.tt +%]
-[%+ PROCESS _panorama_js_form_filter.tt +%]
-[%+ PROCESS _panorama_js_grid_renderer.tt +%]
-[%+ PROCESS _panorama_js_settings_tab.tt +%]
 [%+ PROCESS _panorama_js_settings_dashboards.tt +%]
-[%+ PROCESS _panorama_js_tabbar.tt +%]
 [%+ PROCESS _panorama_js_pantab.tt +%]
-[%+ PROCESS _panorama_js_panlet.tt +%]
-[%+ PROCESS _panorama_js_panlet_url.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_hosts.tt +%]
-[%+ PROCESS _panorama_js_panlet_grid_services.tt +%]
-[%+ PROCESS _panorama_js_panlet_chart.tt +%]
-[%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
-[%+ PROCESS _panorama_js_panlet_piechart.tt +%]
-[%+ PROCESS _panorama_js_panlet_piechart_stats.tt +%]
-[%+ PROCESS _panorama_js_panlet_pnp.tt +%]
 [%+ PROCESS _panorama_js_panlet_host.tt +%]
-[%+ PROCESS _panorama_js_panlet_service.tt +%]
-[%+ PROCESS _panorama_js_panlet_url_bp.tt +%]
-[%+ PROCESS _panorama_js_panlet_url_nagvis.tt +%]
-[%+ PROCESS _panorama_js_panlet_icon_tooltip.tt +%]
-[%+ PROCESS _panorama_js_panlet_icon_widgets_settings.tt +%]
-[%+ PROCESS _panorama_js_panlet_icon_widgets.tt +%]
-[%+ PROCESS _panorama_js_panlet_clock.tt +%]
 
 Ext.onReady(function() {
+    /* create state provider */
+    TP.cp = new Ext.state.HttpProvider({
+        url: 'panorama.cgi?state'
+    });
+    Ext.state.Manager.setProvider(TP.cp);
+
     TP.unloading = false;
-    var state = cp.readValues();
+    var state = TP.cp.readValues();
     for(var key in ExtState) {
         if(key.search(/panlet_/) != -1) {
             TP.num_panels++;

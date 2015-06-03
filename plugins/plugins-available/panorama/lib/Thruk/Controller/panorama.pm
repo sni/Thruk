@@ -76,8 +76,12 @@ sub index {
         load Scalar::Util, qw/looks_like_number/;
         load Thruk::Utils::PanoramaCpuStats;
         load Thruk::Utils::Avail;
+        load Thruk::Utils::Panorama;
         $c->config->{'panorama_modules_loaded'} = 1;
     }
+
+    # add some functions
+    $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
 
     $c->stash->{'skip_navigation'} = 1;
     $c->stash->{'no_totals'}       = 1;
@@ -345,11 +349,17 @@ sub _js {
         $c->stash->{default_dashboard} = encode_json(\@defaults);
     }
 
+    my $action_menu_actions = [];
+    if($c->config->{'action_menu_actions'}) {
+        for my $name (keys %{$c->config->{'action_menu_actions'}}) {
+            push @{$action_menu_actions}, $name;
+        }
+    }
+    $c->stash->{action_menu_actions}   = $action_menu_actions;
 
     $c->stash->{shape_data}   = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
-    $c->stash->{test_mode}    = $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0;
 
     unless($only_data) {
         $c->res->headers->content_type('text/javascript; charset=UTF-8');

@@ -13,6 +13,7 @@ BEGIN {
 use warnings;
 use strict;
 use lib 'lib';
+use lib 'plugins/plugins-available/panorama/lib';
 use Thruk::Config;
 
 my($dos2unix, $yuicompr);
@@ -64,7 +65,8 @@ if(-e 'themes/themes-available/Thruk/stylesheets/all_in_one_noframes-'.$version.
 
 my @panorama_files;
 $newest = 0;
-for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}) {
+require Thruk::Utils::Panorama;
+for my $file (@{$config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript_panorama'}}, @{Thruk::Utils::Panorama::get_static_panorama_files({plugin_path => 'plugins/'})}) {
     my @s;
     if($file =~ m/^plugins\//mx) {
         my $tmp = $file;
@@ -142,7 +144,7 @@ unlink('tmp.css');
 # try to minify js
 my $jsfiles = [
     'root/thruk/javascript/all_in_one-'.$version.'.js',
-    $all_in_one_panorama,
+#    $all_in_one_panorama,
 ];
 for my $file (@{$jsfiles}) {
     my $cmd = $yuicompr.' -o compressed.js '.$file.' && mv compressed.js '.$file;
