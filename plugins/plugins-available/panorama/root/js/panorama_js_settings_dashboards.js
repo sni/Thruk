@@ -1,4 +1,4 @@
-﻿/* show dashboard managment window */
+/* show dashboard managment window */
 Ext.define('TP.DashboardManagementWindow', {
     extend:      'Ext.window.Window',
     autoShow:     true,
@@ -68,10 +68,8 @@ Ext.define('TP.DashboardManagementWindow', {
                 url:        'panorama.cgi?task=dashboard_list&list=my',
                 loadMask:    true,
                 target:      this
-            })
-            [%+ UNLESS readonly +%]
-            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
-            [%+ END +%]
+            }),
+            plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
         this.items.get(0).add(this.grid_my);
 
@@ -87,33 +85,29 @@ Ext.define('TP.DashboardManagementWindow', {
                 url:        'panorama.cgi?task=dashboard_list&list=public',
                 loadMask:    true,
                 target:      this
-            })
-            [%+ UNLESS readonly +%]
-            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
-            [%+ END +%]
+            }),
+            plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
         });
         this.items.get(0).add(this.grid_public);
 
         /* All Dasboards, Admins only */
-        [% IF is_admin %]
-        this.grid_all = Ext.create('Ext.grid.Panel', {
-            tabConfig: {
-                title:   'All',
-                tooltip: 'All Dashboards'
-            },
-            columns:     [],
-            listeners:   listeners,
-            loader:      Ext.create('TP.GridLoader', {
-                url:        'panorama.cgi?task=dashboard_list&list=all',
-                loadMask:    true,
-                target:      this
-            })
-            [%+ UNLESS readonly +%]
-            ,plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
-            [%+ END +%]
-        });
-        this.items.get(0).add(this.grid_all);
-        [% END %]
+        if(thruk_is_admin) {
+            this.grid_all = Ext.create('Ext.grid.Panel', {
+                tabConfig: {
+                    title:   'All',
+                    tooltip: 'All Dashboards'
+                },
+                columns:     [],
+                listeners:   listeners,
+                loader:      Ext.create('TP.GridLoader', {
+                    url:        'panorama.cgi?task=dashboard_list&list=all',
+                    loadMask:    true,
+                    target:      this
+                }),
+                plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
+            });
+            this.items.get(0).add(this.grid_all);
+        }
 
         /* import / export */
         var tabpan = Ext.getCmp('tabpan');

@@ -12,10 +12,6 @@ var ExtStateSplit = true;
 var default_dashboard = [% default_dashboard %];
 var initial_shapes = [% json_encode(shapes) %];
 
-[%+ PROCESS _panorama_js_settings_dashboards.tt +%]
-[%+ PROCESS _panorama_js_pantab.tt +%]
-[%+ PROCESS _panorama_js_panlet_host.tt +%]
-
 Ext.onReady(function() {
     /* create state provider */
     TP.cp = new Ext.state.HttpProvider({
@@ -41,7 +37,7 @@ Ext.onReady(function() {
     Ext.QuickTips.init();
 
     /* main viewport */
-    [% IF one_tab_only %]
+    if(one_tab_only) {
         TP.viewport = new Ext.Viewport({
             id:       'tabpan',
             layout:   'border',
@@ -57,11 +53,11 @@ Ext.onReady(function() {
             },
             setActiveTab: function() {}
         });
-        TP.add_pantab([% one_tab_only %], undefined, undefined, function(id) {
+        TP.add_pantab(one_tab_only, undefined, undefined, function(id) {
             TP.initialized = true;
             if(TP.initMask) { TP.initMask.destroy(); delete TP.initMask; }
         });
-    [% ELSE %]
+    } else {
         TP.viewport = new Ext.Viewport({
             id:       'viewport',
             layout:   'border',
@@ -73,11 +69,11 @@ Ext.onReady(function() {
         Ext.getCmp('debug_tab').show();
         [% END %]
 
-        [% IF readonly || dashboard_ignore_changes %]
-        var icon = Ext.query('SPAN.new-tab')[0];
-        icon.parentNode.parentNode.parentNode.style.display = 'none';
-        [% END %]
-    [% END %]
+        if(readonly || dashboard_ignore_changes) {
+            var icon = Ext.query('SPAN.new-tab')[0];
+            icon.parentNode.parentNode.parentNode.style.display = 'none';
+        }
+    }
 
     /* make sure initialized is set to true */
     TP.timeouts['timeout_set_initialized'] = window.setTimeout("TP.initialized = true;", 60000);

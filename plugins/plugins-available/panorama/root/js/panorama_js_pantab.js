@@ -1,16 +1,12 @@
-﻿Ext.define('TP.Pantab', {
+Ext.define('TP.Pantab', {
     extend: 'Ext.panel.Panel',
 
-    [% UNLESS (readonly || dashboard_ignore_changes) %]
-    tooltip:     'double click to open settings',
-    closable:    true,
-    bodyCls:     'pantabbody',
-    [% ELSE %]
-    closable:    false,
-    [% END %]
+    tooltip:     (readonly || dashboard_ignore_changes) ? undefined : 'double click to open settings',
+    closable:    (readonly || dashboard_ignore_changes) ? false : true,
+    bodyCls:     (readonly || dashboard_ignore_changes) ? undefined : 'pantabbody',
     stateful:    true,
     stateEvents: ['add', 'titlechange'],
-    locked:      [% IF c.req.parameters.exists('unlocked') %]false[% ELSE %]true[% END %], // lock it by default
+    locked:      start_unlocked, // lock it by default
     initComponent: function() {
         if(this.xdata == undefined) {
             this.xdata = {};
@@ -792,9 +788,8 @@
         tab.disableMapControlsTemp();
         var pos = [evt.getX(), evt.getY()];
         var nr = tab.id.replace(/^tabpan-tab_/, '');
-        Ext.create('Ext.menu.Menu', {
-            margin: '0 0 10 0',
-            items: [{
+
+        var menu_items = [{
                 text:   'Refresh',
                 icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
@@ -816,111 +811,115 @@
                 handler: function() { BigScreen.exit(); },
                 hidden:  !BigScreen.element
             }, {
-[% IF one_tab_only %]
                 text:       'Open Tab Mode',
                 icon:       url_prefix+'plugins/panorama/images/application_put.png',
                 href:       'panorama.cgi#'+nr,
-                tooltip:    'open this dashboard in tab mode'
-[% ELSE %]
+                tooltip:    'open this dashboard in tab mode',
+                hidden:     !one_tab_only
+            }, {
                 text:       'Direct Link',
                 icon:       url_prefix+'plugins/panorama/images/application_put.png',
                 href:       'panorama.cgi?map='+tab.xdata.title,
                 hrefTarget: '_blank',
-                tooltip:    'open this dashboard only (new window)'
-[% END %]
+                tooltip:    'open this dashboard only (new window)',
+                hidden:    !!one_tab_only
             }, {
                 text:   'Debug Information',
                 icon:   url_prefix+'plugins/panorama/images/information.png',
-                handler: thruk_debug_window_handler,
-                hidden:  [% IF !thruk_debug || c.config.demo_mode %]true[% ELSE %]false[% END %]
-            }, '-'
-            [% UNLESS readonly %]
-            , {
-                text:   'New',
-                icon:   url_prefix+'plugins/panorama/images/cog_add.png',
-                hideOnClick: false,
-                menu:    TP.addPanletsMenu({open: 'right'}),
-                disabled: tab.xdata.locked,
-                hidden:  hidePasteAndNew
-            }, {
-                text:   'Paste',
-                icon:   url_prefix+'plugins/panorama/images/page_paste.png',
-                handler: function() {
-                    var tb = Ext.getCmp('tabpan').getActiveTab();
-                    if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
-                        // workaround for not existing gradient after copy&paste
-                        if(TP.clipboard.state.xdata.appearance.piegradient) {
-                            TP.clipboard.state.xdata.appearance.piegradient = Number(TP.clipboard.state.xdata.appearance.piegradient) + 0.001;
-                        }
-                        if(TP.clipboard.state.xdata.appearance.shapegradient) {
-                            TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
-                        }
-                    }
-                    pos[0] = pos[0] - 8;
-                    pos[1] = pos[1] - 8;
-                    TP.add_panlet_handler(evt, evt.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
-                },
-                disabled: (tab.xdata.locked || TP.clipboard == undefined),
-                hidden:  hidePasteAndNew
-            }, '-', {
-                text:    'Set Map Center',
-                icon:    url_prefix+'plugins/panorama/images/flag_blue.png',
-                handler:  function() {
-                    var data = tab.map.map.getCenter();
-                    tab.xdata.map = {
-                        lon:    data.lon,
-                        lat:    data.lat,
-                        zoom:   tab.map.map.getZoom()
-                    };
-                    tab.saveState();
-                    TP.Msg.msg("success_message~~new map center set successfully.");
-                },
-                disabled: tab.xdata.locked,     // disable if locked
-                hidden:   tab.map == undefined  // only show on maps
-            }, {
-                text:   'Dashboard Settings',
-                icon:   url_prefix+'plugins/panorama/images/cog.png',
-                handler: function() { TP.tabSettingsWindow() },
-                hidden:  tab.xdata.locked       // only show when not locked
-            }, {
-                text:   'Restore',
-                icon:   url_prefix+'plugins/panorama/images/book_previous.png',
-                id:     'manualmenu',
-                menu: [{
-                    text:    'Create Restorepoint',
-                    icon:    url_prefix+'plugins/panorama/images/disk.png',
-                    handler: function() { TP.createRestorePoint(tab, "m") }
-                }, '-', {
-                    text:       'Autosave',
+                handler: function() { thruk_debug_window_handler() },
+                hidden:  (!thruk_debug_js || thruk_demo_mode)
+        }];
+        if(!readonly) {
+            menu_items = menu_items.concat([
+                 '-', {
+                    text:   'New',
+                    icon:   url_prefix+'plugins/panorama/images/cog_add.png',
                     hideOnClick: false,
-                    id:         'autosavemenu',
-                    icon:       url_prefix+'plugins/panorama/images/shield.png',
-                    menu:        [],
-                    listeners: {
-                        afterrender: function(item, eOpts) {
-                            TP.setRestorePointsMenuItems(tab);
-                        }
-                    }
+                    menu:    TP.addPanletsMenu({open: 'right'}),
+                    disabled: tab.xdata.locked,
+                    hidden:  hidePasteAndNew
                 }, {
-                    text:    'Loading...',
-                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
-                    disabled: true,
-                    id:      'restorepointsloading'
-                }],
-                hidden:  tab.xdata.locked       // only show when not locked
-            }, {
-                text:   'Unlock Dashboard',
-                icon:   url_prefix+'plugins/panorama/images/lock_open.png',
-                handler: function() { TP.createRestorePoint(tab, "a"); tab.setLock(false); },
-                hidden:  !tab.xdata.locked      // only show when locked
-            }, {
-                text:   'Lock Dashboard',
-                icon:   url_prefix+'plugins/panorama/images/lock.png',
-                handler: function() { tab.setLock(true); },
-                hidden:  tab.xdata.locked       // only show when not locked
-            }
-            [% END %]
-            ],
+                    text:   'Paste',
+                    icon:   url_prefix+'plugins/panorama/images/page_paste.png',
+                    handler: function() {
+                        var tb = Ext.getCmp('tabpan').getActiveTab();
+                        if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
+                            // workaround for not existing gradient after copy&paste
+                            if(TP.clipboard.state.xdata.appearance.piegradient) {
+                                TP.clipboard.state.xdata.appearance.piegradient = Number(TP.clipboard.state.xdata.appearance.piegradient) + 0.001;
+                            }
+                            if(TP.clipboard.state.xdata.appearance.shapegradient) {
+                                TP.clipboard.state.xdata.appearance.shapegradient = Number(TP.clipboard.state.xdata.appearance.shapegradient) + 0.001;
+                            }
+                        }
+                        pos[0] = pos[0] - 8;
+                        pos[1] = pos[1] - 8;
+                        TP.add_panlet_handler(evt, evt.target, [tb, TP.clone(TP.clipboard), undefined, undefined, pos]);
+                    },
+                    disabled: (tab.xdata.locked || TP.clipboard == undefined),
+                    hidden:  hidePasteAndNew
+                }, '-', {
+                    text:    'Set Map Center',
+                    icon:    url_prefix+'plugins/panorama/images/flag_blue.png',
+                    handler:  function() {
+                        var data = tab.map.map.getCenter();
+                        tab.xdata.map = {
+                            lon:    data.lon,
+                            lat:    data.lat,
+                            zoom:   tab.map.map.getZoom()
+                        };
+                        tab.saveState();
+                        TP.Msg.msg("success_message~~new map center set successfully.");
+                    },
+                    disabled: tab.xdata.locked,     // disable if locked
+                    hidden:   tab.map == undefined  // only show on maps
+                }, {
+                    text:   'Dashboard Settings',
+                    icon:   url_prefix+'plugins/panorama/images/cog.png',
+                    handler: function() { TP.tabSettingsWindow() },
+                    hidden:  tab.xdata.locked       // only show when not locked
+                }, {
+                    text:   'Restore',
+                    icon:   url_prefix+'plugins/panorama/images/book_previous.png',
+                    id:     'manualmenu',
+                    menu: [{
+                        text:    'Create Restorepoint',
+                        icon:    url_prefix+'plugins/panorama/images/disk.png',
+                        handler: function() { TP.createRestorePoint(tab, "m") }
+                    }, '-', {
+                        text:       'Autosave',
+                        hideOnClick: false,
+                        id:         'autosavemenu',
+                        icon:       url_prefix+'plugins/panorama/images/shield.png',
+                        menu:        [],
+                        listeners: {
+                            afterrender: function(item, eOpts) {
+                                TP.setRestorePointsMenuItems(tab);
+                            }
+                        }
+                    }, {
+                        text:    'Loading...',
+                        icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
+                        disabled: true,
+                        id:      'restorepointsloading'
+                    }],
+                    hidden:  tab.xdata.locked       // only show when not locked
+                }, {
+                    text:   'Unlock Dashboard',
+                    icon:   url_prefix+'plugins/panorama/images/lock_open.png',
+                    handler: function() { TP.createRestorePoint(tab, "a"); tab.setLock(false); },
+                    hidden:  !tab.xdata.locked      // only show when locked
+                }, {
+                    text:   'Lock Dashboard',
+                    icon:   url_prefix+'plugins/panorama/images/lock.png',
+                    handler: function() { tab.setLock(true); },
+                    hidden:  tab.xdata.locked       // only show when not locked
+            }]);
+        }
+
+        Ext.create('Ext.menu.Menu', {
+            margin: '0 0 10 0',
+            items:   menu_items,
             listeners: {
                 beforehide: function(menu, eOpts) {
                     menu.destroy();

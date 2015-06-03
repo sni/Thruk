@@ -1,4 +1,4 @@
-﻿/* Add new downtime menu item */
+/* Add new downtime menu item */
 TP.host_downtime_menu = function() {
     var fields = [{
             fieldLabel: 'Comment',
@@ -15,7 +15,7 @@ TP.host_downtime_menu = function() {
             xtype:      'datetimefield',
             name:       'end_time'
         }, {
-            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+            xtype: 'hidden', name: 'com_author',  value: remote_user
         }, {
             xtype: 'hidden', name: 'fixed',       value: '1'
     }];
@@ -43,7 +43,7 @@ TP.host_ack_menu = function() {
             xtype:      'checkbox',
             name:       'persistent'
         }, {
-            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+            xtype: 'hidden', name: 'com_author',  value: remote_user
     }];
     var defaults = {
         labelWidth: 140
@@ -356,11 +356,11 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                 form.setValues({
                     host:               xdata.host,
                     service:            xdata.service,
-                    end_time:           new Date(new Date().getTime()+ [% downtime_duration %]*1000),
+                    end_time:           new Date(new Date().getTime()+ downtime_duration *1000),
                     start_time:         new Date(),
-                    sticky_ack:         [% IF c.config.cmd_defaults.sticky_ack %]true[% ELSE %]false[% END %],
-                    send_notification:  [% IF c.config.cmd_defaults.send_notification %]true[% ELSE %]false[% END %],
-                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %],
+                    sticky_ack:         cmd_sticky_ack,
+                    send_notification:  cmd_send_notification,
+                    persistent:         cmd_persistent,
                     token:              user_token
                 });
                 panel.menusnr = panel.menusnr + 1;

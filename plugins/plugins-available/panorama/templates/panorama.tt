@@ -43,10 +43,10 @@
 
 function preloader() {
     if(document.images) {
+        var img_url = url_prefix+'plugins/panorama/images/';
         /* no var here, otherwise browser would clean the preloaded images from cache */
 [%+ FOREACH i = preload_img %]
-        img[% loop.index %] = new Image();
-        img[% loop.index %].src = url_prefix+"plugins/panorama/images/[% i %]";
+        img[% loop.index %] = new Image(); img[% loop.index %].src = img_url+"[% i %]";
 [%+ END %]
     }
 }

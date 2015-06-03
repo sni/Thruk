@@ -845,6 +845,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_hosts.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_logs.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_server.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_grid_services.js
+plugins/plugins-available/panorama/root/js/panorama_js_panlet_host.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_tooltip.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widgets.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_widgets_settings.js
@@ -855,6 +856,8 @@ plugins/plugins-available/panorama/root/js/panorama_js_panlet_service.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_bp.js
 plugins/plugins-available/panorama/root/js/panorama_js_panlet_url_nagvis.js
+plugins/plugins-available/panorama/root/js/panorama_js_pantab.js
+plugins/plugins-available/panorama/root/js/panorama_js_settings_dashboards.js
 plugins/plugins-available/panorama/root/js/panorama_js_settings_tab.js
 plugins/plugins-available/panorama/root/js/panorama_js_slider.js
 plugins/plugins-available/panorama/root/js/panorama_js_state_provider.js
@@ -914,9 +917,6 @@ plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/t/javascript_pattern.t
 plugins/plugins-available/panorama/templates/_panorama_js_globals.tt
-plugins/plugins-available/panorama/templates/_panorama_js_panlet_host.tt
-plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
-plugins/plugins-available/panorama/templates/_panorama_js_settings_dashboards.tt
 plugins/plugins-available/panorama/templates/panorama.tt
 plugins/plugins-available/panorama/templates/panorama_js.tt
 plugins/plugins-available/reports2/description.txt
