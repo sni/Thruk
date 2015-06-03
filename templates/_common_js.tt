@@ -69,6 +69,7 @@
     bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %]);
   });
   [% END %]
+  init_page();
 -->
 </script>
 <!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
