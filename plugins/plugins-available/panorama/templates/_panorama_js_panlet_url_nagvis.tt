@@ -13,7 +13,7 @@
         panel.xdata.selector = '';
         panel.xdata.keepcss  = true;
         panel.xdata.graph    = '';
-        panel.xdata.base_url = '[% default_nagvis_base_url %]';
+        panel.xdata.base_url = default_nagvis_base_url;
         panel.reloadOnSiteChanges = false;
         panel.last_url       = '';
         panel.graphs_loaded  = 0;

@@ -1,5 +1,4 @@
-﻿[% USE date %]
-Ext.define('TP.TabBar', {
+﻿Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
     plugins: [
         new Ext.ux.TabReorderer({
@@ -33,7 +32,7 @@ Ext.define('TP.TabBar', {
             listeners: { afterrender: function(This, eOpts) { This.hide(); } }
         }, {
             xtype:    'label',
-            text:     '[% date_format(c, date.now, "%H:%M") %]',
+            text:     server_time.strftime("%H:%M"),
             id:       'server_time',
             tooltip:  'server time',
             style:    'margin-top: 3px',
@@ -60,7 +59,7 @@ Ext.define('TP.TabBar', {
             closable:  false,
             tooltip:  'user menu',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
-            html:     '[% remote_user %]&nbsp;&nbsp;&nbsp;',
+            html:      remote_user+'&nbsp;&nbsp;&nbsp;',
             menu: {
                 listeners: {
                     afterrender: function(menu, eOpts) {
@@ -76,43 +75,40 @@ Ext.define('TP.TabBar', {
                 },
                 items: [{
                         text: 'About',
-                        icon: '[% url_prefix %]plugins/panorama/images/information.png',
+                        icon: url_prefix+'plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
                     },
-                    [%+ UNLESS readonly +%]
                     {
                         text: 'Settings',
-                        icon: '[% url_prefix %]plugins/panorama/images/cog.png',
-                        handler: function() { TP.tabSettingsWindow() }
+                        icon: url_prefix+'plugins/panorama/images/cog.png',
+                        handler: function() { TP.tabSettingsWindow() },
+                        hidden: readonly
                     }, {
                         text: 'Dashboard Managment',
-                        icon: '[% url_prefix %]plugins/panorama/images/new_tab.gif',
-                        handler: function() { TP.dashboardsWindow() }
+                        icon: url_prefix+'plugins/panorama/images/new_tab.gif',
+                        handler: function() { TP.dashboardsWindow() },
+                        hidden: readonly
                     },
-                    [%+ END +%]
                     /* Exit */
                     '-',
-                    [% IF cookie_auth %]
                     {
                         text:   'Logout',
-                        icon:   '[% url_prefix %]plugins/panorama/images/door_in.png',
+                        icon:   url_prefix+'plugins/panorama/images/door_in.png',
                         handler: function() {
                             window.location = 'login.cgi?logout';
-                        }
+                        },
+                        hidden: !cookie_auth
                     },
-                    [% END %]
                     {
                         text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]plugins/panorama/images/exit.png',
+                        icon:   url_prefix+'plugins/panorama/images/exit.png',
                         handler: function() {
                             window.location = '../';
                         }
                     }
                 ]
             }
-        }
-        [% UNLESS readonly %]
-        , {
+        }, {
             title:    'add new panel and widgets',
             closable: false,
             minWidth: 70,
@@ -121,10 +117,9 @@ Ext.define('TP.TabBar', {
             tooltip:  'add panlets',
             arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
             html:     'add&nbsp;&nbsp;',
-            menu:      TP.addPanletsMenu({open: 'left'})
-        }
-        [% END %]
-        ]
+            menu:      TP.addPanletsMenu({open: 'left'}),
+            hidden:    readonly
+        }]
     },
     initComponent: function() {
         this.callParent();
@@ -146,32 +141,32 @@ Ext.define('TP.TabBar', {
                 margin: '0 0 10 0',
                 items: [{
                     text:   'New Dashboard',
-                    icon:   '[% url_prefix %]plugins/panorama/images/add.png',
+                    icon:   url_prefix+'plugins/panorama/images/add.png',
                     handler: function() { TP.log('[global] adding new dashboard from menu'); TP.add_pantab('new') }
                 }, {
                     text:   'New Geo Map',
-                    icon:   '[% url_prefix %]plugins/panorama/images/map.png',
+                    icon:   url_prefix+'plugins/panorama/images/map.png',
                     handler: function() { TP.log('[global] adding new geo map from menu'); TP.add_pantab('new', undefined, undefined, undefined, {map: {}}) }
                 }, '-', {
                     text:   'Dashboard Managment',
-                    icon:   '[% url_prefix %]plugins/panorama/images/new_tab.gif',
+                    icon:   url_prefix+'plugins/panorama/images/new_tab.gif',
                     handler: function() { TP.dashboardsWindow() }
                 }, '-', {
                     text: 'My Dashboards',
-                    icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                    icon: url_prefix+'plugins/panorama/images/user_suit.png',
                     hideOnClick: false,
                     menu: [{
                         text:    'Loading...',
-                        icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                        icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
                         disabled: true
                     }]
                 }, {
                     text: 'Public Dashboards',
-                    icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                    icon: url_prefix+'plugins/panorama/images/world.png',
                     hideOnClick: false,
                     menu: [{
                         text:    'Loading...',
-                        icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                        icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
                         disabled: true
                     }]
                 }],
@@ -395,7 +390,7 @@ TP.load_dashboard_menu_items = function(menu, url, handler, all) {
                         found++;
                         menu.add({text:    data[x].name,
                                   val:     data[x].id,
-                                  icon:   '[% url_prefix %]plugins/panorama/images/table_go.png',
+                                  icon:   url_prefix+'plugins/panorama/images/table_go.png',
                                   handler: function() { TP.log('[global] adding dashboard from menu: '+this.val); handler(this.val); }
                                 }
                         );

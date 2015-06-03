@@ -27,11 +27,11 @@ TP.iconsetsStore = Ext.create('Ext.data.Store', {
 TP.iconTypesStore = Ext.create('Ext.data.Store', {
     fields: ['name', 'value', 'icon'],
     autoLoad: false,
-    data : [{value:'TP.HostStatusIcon',         name:'Host',          icon:'[% url_prefix %]plugins/panorama/images/server.png'},
-            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:'[% url_prefix %]plugins/panorama/images/server_link.png'},
-            {value:'TP.ServiceStatusIcon',      name:'Service',       icon:'[% url_prefix %]plugins/panorama/images/computer.png'},
-            {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:'[% url_prefix %]plugins/panorama/images/computer_link.png'},
-            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:'[% url_prefix %]plugins/panorama/images/page_find.png'}
+    data : [{value:'TP.HostStatusIcon',         name:'Host',          icon:url_prefix+'plugins/panorama/images/server.png'},
+            {value:'TP.HostgroupStatusIcon',    name:'Hostgroup',     icon:url_prefix+'plugins/panorama/images/server_link.png'},
+            {value:'TP.ServiceStatusIcon',      name:'Service',       icon:url_prefix+'plugins/panorama/images/computer.png'},
+            {value:'TP.ServicegroupStatusIcon', name:'Service Group', icon:url_prefix+'plugins/panorama/images/computer_link.png'},
+            {value:'TP.FilterStatusIcon',       name:'Custom Filter', icon:url_prefix+'plugins/panorama/images/page_find.png'}
     ]
 });
 
@@ -510,7 +510,7 @@ TP.iconShowEditDialog = function(panel) {
                             { xtype: 'numberunit', name: 'shapewidth', unit: 'px', width: 65, value: panel.xdata.appearance.shapewidth },
                             { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'shapeheight', unit: 'px', width: 65, value: panel.xdata.appearance.shapeheight, id: 'shapeheightfield' },
-                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
+                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'shapetogglelocked',
                                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({shapelocked: state ? '1' : '' }); renderUpdate(); }
                             },
                             { xtype: 'hidden', name: 'shapelocked' }
@@ -644,7 +644,7 @@ TP.iconShowEditDialog = function(panel) {
                         store:         ['both', 'left', 'right', 'none'],
                         listConfig : {
                             getInnerTpl: function(displayField) {
-                                return '<div class="x-combo-list-item"><img src="[% url_prefix %]plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
+                                return '<div class="x-combo-list-item"><img src="'+url_prefix+'plugins/panorama/images/connector_type_{field1}.png" height=16 width=77 style="vertical-align:top; margin-right: 3px;"> {field1}<\/div>';
                             }
                         }
                     }]
@@ -851,7 +851,7 @@ TP.iconShowEditDialog = function(panel) {
                             { xtype: 'numberunit', name: 'piewidth', unit: 'px', width: 65, value: panel.xdata.appearance.piewidth },
                             { xtype: 'label', text: 'Height:', style: 'margin-left: 10px; margin-right: 2px;' },
                             { xtype: 'numberunit', name: 'pieheight', unit: 'px', width: 65, value: panel.xdata.appearance.pieheight, id: 'pieheightfield' },
-                            { xtype: 'button', width: 22, icon: '[% url_prefix %]plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
+                            { xtype: 'button', width: 22, icon: url_prefix+'plugins/panorama/images/link.png', enableToggle: true, style: 'margin-left: 2px; margin-top: -6px;', id: 'pietogglelocked',
                                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({pielocked: state ? '1' : '' }); renderUpdate(); }
                             },
                             { xtype: 'hidden', name: 'pielocked' }
@@ -1133,41 +1133,41 @@ TP.iconShowEditDialog = function(panel) {
                     items:      [{
                         xtype:      'button',
                         text:       'Choose',
-                        icon:       '[% url_prefix %]plugins/panorama/images/world.png',
+                        icon:       url_prefix+'plugins/panorama/images/world.png',
                         menu:       {
                             items: [{
                                 text: 'My Dashboards',
-                                icon: '[% url_prefix %]plugins/panorama/images/user_suit.png',
+                                icon: url_prefix+'plugins/panorama/images/user_suit.png',
                                 menu: [{
                                     text:    'Loading...',
-                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
                                     disabled: true
                                 }]
                             }, {
                                 text: 'Public Dashboards',
-                                icon: '[% url_prefix %]plugins/panorama/images/world.png',
+                                icon: url_prefix+'plugins/panorama/images/world.png',
                                 menu: [{
                                     text:    'Loading...',
-                                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
                                     disabled: true
                                 }]
                             }, {
                                 text:    'Show Details',
-                                icon:    '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                                icon:    url_prefix+'plugins/panorama/images/application_view_columns.png',
                                 handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://show_details'}) }
                             }, {
                                 text:    'Refresh',
-                                icon:    '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                                icon:    url_prefix+'plugins/panorama/images/arrow_refresh.png',
                                 handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'dashboard://refresh'}) }
                             }, {
                                 text: 'Server Actions',
-                                icon: '[% url_prefix %]plugins/panorama/images/lightning_go.png',
+                                icon: url_prefix+'plugins/panorama/images/lightning_go.png',
                                 menu: [
                                 [% IF c.config.exists('action_menu_actions') %]
                                 [% FOREACH action = c.config.action_menu_actions.keys.sort %]
                                 {
                                     text:    '[% action %]',
-                                    icon:    '[% url_prefix %]plugins/panorama/images/cog.png',
+                                    icon:    url_prefix+'plugins/panorama/images/cog.png',
                                     handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'server://[% action %]/'}) }
                                 }[% UNLESS loop.last %],[% END %]
                                 [% END %]
@@ -1222,7 +1222,7 @@ TP.iconShowEditDialog = function(panel) {
                         listeners:   { change: labelUpdate }
                     }, {
                         xtype:        'button',
-                        icon:         '[% url_prefix %]plugins/panorama/images/lightning_go.png',
+                        icon:         url_prefix+'plugins/panorama/images/lightning_go.png',
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
                         tooltip:       'open label editor wizard',
                         handler:       function(btn) {
@@ -1263,7 +1263,7 @@ TP.iconShowEditDialog = function(panel) {
                         xtype:        'button',
                         enableToggle:  true,
                         name:         'fontitalic',
-                        icon:         '[% url_prefix %]plugins/panorama/images/text_italic.png',
+                        icon:         url_prefix+'plugins/panorama/images/text_italic.png',
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
                         toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
                         listeners: {
@@ -1277,7 +1277,7 @@ TP.iconShowEditDialog = function(panel) {
                         xtype:        'button',
                         enableToggle:  true,
                         name:         'fontbold',
-                        icon:         '[% url_prefix %]plugins/panorama/images/text_bold.png',
+                        icon:         url_prefix+'plugins/panorama/images/text_bold.png',
                         margins:      {top: 0, right: 0, bottom: 0, left: 3},
                         toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontbold: state ? '1' : ''}); },
                         listeners: {

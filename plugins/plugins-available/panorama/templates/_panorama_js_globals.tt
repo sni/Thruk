@@ -1,15 +1,23 @@
 ﻿[% USE date %]
-var server_time    = new Date([% date.now * 1000 %]);
-var client_time    = new Date();
-var delta_time     = client_time.getTime() - server_time.getTime();
-var url_prefix     = '[% url_prefix %]';
-var product_prefix = '[% product_prefix %]';
-var perf_bar_mode  = '[% perf_bar_mode %]';
-var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
-var theme          = '[% theme %]';
-var cookie_path    = '[% cookie_path %]';
-var base           = '[% url_prefix %]plugins/panorama';
-var user_token     = '[% get_user_token(c) %]';
-var fav_counter    = false;
+var server_time     = new Date([% date.now * 1000 %]);
+var client_time     = new Date();
+var delta_time      = client_time.getTime() - server_time.getTime();
+var url_prefix      = '[% url_prefix %]';
+var product_prefix  = '[% product_prefix %]';
+var perf_bar_mode   = '[% perf_bar_mode %]';
+var thruk_debug_js  = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+var theme           = '[% theme %]';
+var remote_user     = '[% remote_user %]';
+var cookie_path     = '[% cookie_path %]';
+var cookie_auth     = [% IF cookie_auth %]true[% ELSE %]false[% END %];
+var base            = url_prefix+'plugins/panorama';
+var user_token      = '[% get_user_token(c) %]';
+var fav_counter     = false;
+var readonly        = [% IF readonly %]true[% ELSE %]false[% END %];
+var one_tab_only    = [% IF one_tab_only %]true[% ELSE %]false[% END %];
+var use_feature_bp  = [% IF use_feature_bp %]true[% ELSE %]false[% END %];
+Ext.BLANK_IMAGE_URL = url_prefix+'plugins/panorama/images/s.gif';
+var dashboard_ignore_changes = [% IF dashboard_ignore_changes %]true[% ELSE %]false[% END %];
+var default_nagvis_base_url  = '[% default_nagvis_base_url %]';
 
 [%+ PROCESS _header_initial_states.tt +%]

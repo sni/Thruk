@@ -149,7 +149,7 @@ thruk_debug_window_handler = function() {
                 dock: 'bottom',
                 items: [{
                     xtype:  'button',
-                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     text:   'Refresh',
                     handler: function(This) { This.up('panel').items.getAt(0).store.loadRawData(getTimerStoreData(), false) }
                 }, {
@@ -224,7 +224,7 @@ thruk_debug_window_handler = function() {
                 dock: 'bottom',
                 items: [{
                     xtype:  'button',
-                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     text:   'Refresh',
                     handler: function(This) { This.up('panel').items.getAt(0).store.loadRawData(getIntervalStoreData(), false) }
                 }, {
@@ -296,7 +296,7 @@ thruk_debug_window_handler = function() {
                 dock: 'bottom',
                 items: [{
                     xtype:  'button',
-                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     text:   'Refresh',
                     handler: function(This) { This.up('panel').items.getAt(0).store.loadRawData(getComponentsStoreData(), false) }
                 }, {

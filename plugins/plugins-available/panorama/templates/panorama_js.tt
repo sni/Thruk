@@ -1,5 +1,4 @@
-﻿Ext.BLANK_IMAGE_URL        = '[% url_prefix %]plugins/panorama/images/s.gif';
-
+﻿[% IF test_mode %][% PROCESS _panorama_js_globals.tt %][% END %]
 [%+ PROCESS _common_js_bugs.tt +%]
 var thruk_debug_window_handler = function() {};
 [% IF thruk_debug %]

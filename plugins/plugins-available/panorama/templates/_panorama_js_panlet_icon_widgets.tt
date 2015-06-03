@@ -585,7 +585,7 @@
                 margin: '0 0 10 0',
                 items: [{
                     text:   'Refresh',
-                    icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                    icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                     handler: function() {
                         TP.updateAllIcons(Ext.getCmp(This.panel_id), This.id, undefined, el)
                         el.mask(el.getSize().width > 50 ? "refreshing" : undefined);
@@ -593,7 +593,7 @@
                     hidden:  This.xdata.state == undefined ? true : false
                 }, {
                     text:       'Show Details',
-                    icon:       '[% url_prefix %]plugins/panorama/images/application_view_columns.png',
+                    icon:       url_prefix+'plugins/panorama/images/application_view_columns.png',
                     href:       'status.cgi',
                     hrefTarget: '_blank',
                     listeners: {
@@ -604,26 +604,26 @@
                 [% UNLESS readonly %]
                 , {
                     text:   'Settings',
-                    icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                    icon:   url_prefix+'plugins/panorama/images/cog.png',
                     handler: function() { TP.iconShowEditDialog(This) },
                     disabled: This.locked
                 }, '-', {
                     text:   'Copy',
-                    icon:   '[% url_prefix %]plugins/panorama/images/page_copy.png',
+                    icon:   url_prefix+'plugins/panorama/images/page_copy.png',
                     handler: function() { TP.clipboard = {type:This.xdata.cls, state:TP.clone_panel_config(This)} }
                 }, {
                     text:   'Paste',
-                    icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
+                    icon:   url_prefix+'plugins/panorama/images/page_paste.png',
                     handler: function() { TP.add_panlet_delayed(TP.clone(TP.clipboard), -8, -8) },
                     disabled: (This.locked || TP.clipboard == undefined)
                 }, {
                     text:   'Clone',
-                    icon:   '[% url_prefix %]plugins/panorama/images/page_lightning.png',
+                    icon:   url_prefix+'plugins/panorama/images/page_lightning.png',
                     handler: function() { TP.add_panlet_delayed(TP.clone({type:This.xdata.cls, state:TP.clone_panel_config(This)}), -8, -8) },
                     disabled: This.locked
                 }, '-', {
                     text:   'Remove',
-                    icon:   '[% url_prefix %]plugins/panorama/images/delete.png',
+                    icon:   url_prefix+'plugins/panorama/images/delete.png',
                     disabled: This.locked,
                     handler: function(me, eOpts) {
                         var menu = me.parentMenu;
@@ -656,7 +656,7 @@
                     hidden: !This.locked      // only show when locked
                 }, {
                     text:   'Unlock Dashboard',
-                    icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                    icon:   url_prefix+'plugins/panorama/images/lock_open.png',
                     handler: function() { var tab = Ext.getCmp(This.panel_id); TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                     hidden: !This.locked      // only show when locked
                 }
@@ -1732,8 +1732,8 @@ Ext.define('TP.HostStatusIcon', {
         var statename = TP.text_host_status(this.xdata.state);
         details.push([ 'Current Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
                                         +' (for ' + TP.render_duration('', '', {data:this.host})+')<br>'
-                                        +(this.acknowledged ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                        +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                        +(this.acknowledged ?' (<img src='+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                        +(this.downtime     ?' (<img src='+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         details.push([ 'Status Information', this.host.plugin_output]);
         details.push([ 'Last Check', this.host.last_check ? TP.date_format(this.host.last_check) : 'never']);
@@ -1904,8 +1904,8 @@ Ext.define('TP.HostgroupStatusIcon', {
         }
         var statename = TP.text_service_status(this.xdata.state);
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
-                                            +(this.acknowledged ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                            +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                            +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                            +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         if(this.xdata.general.incl_hst) {
             details.push([ 'Hosts', TP.get_summarized_hoststatus(this.hostgroup.hosts)]);
@@ -1961,8 +1961,8 @@ Ext.define('TP.ServiceStatusIcon', {
         var statename = TP.text_service_status(this.xdata.state);
         details.push([ 'Current Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
                                             +' (for ' + TP.render_duration('', '', {data:this.service})+')'
-                                            +(this.acknowledged ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                            +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                            +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                            +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         details.push([ 'Status Information', this.service.plugin_output]);
         details.push([ 'Last Check', this.service.last_check ? TP.date_format(this.service.last_check) : 'never']);
@@ -2045,8 +2045,8 @@ Ext.define('TP.ServicegroupStatusIcon', {
         }
         var statename = TP.text_service_status(this.xdata.state);
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
-                                            +(this.acknowledged ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                            +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                            +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                            +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         details.push([ 'Services', TP.get_summarized_servicestatus(this.servicegroup.services)]);
         var link = TP.getIconDetailsLink(panel, true);
@@ -2140,8 +2140,8 @@ Ext.define('TP.FilterStatusIcon', {
             statename = TP.text_service_status(this.xdata.state);
         }
         details.push([ 'Summarized Status', '<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div>'
-                                            +(this.acknowledged ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
-                                            +(this.downtime     ?' (<img src="[% url_prefix %]plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
+                                            +(this.acknowledged ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':'')
+                                            +(this.downtime     ?' (<img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom"> in downtime)':'')
                      ]);
         if(this.xdata.general.incl_hst) {
             details.push([ 'Hosts', TP.get_summarized_hoststatus(this.results.hosts)]);
@@ -2388,7 +2388,7 @@ TP.iconClickHandlerDo = function(id) {
             token:     user_token
         };
         Ext.Ajax.request({
-            url:    '[% url_prefix %]cgi-bin/panorama.cgi?task=serveraction',
+            url:    url_prefix+'cgi-bin/panorama.cgi?task=serveraction',
             params:  params,
             method: 'POST',
             callback: function(options, success, response) {
@@ -2471,7 +2471,7 @@ TP.getIconDetailsLink = function(panel, relativeUrl) {
         return(base+"?"+Ext.Object.toQueryString(options));
     }
     [%+ IF use_frames +%]
-        return("[% url_prefix %]#cgi-bin/"+base+"?"+Ext.Object.toQueryString(options));
+        return(url_prefix+"#cgi-bin/"+base+"?"+Ext.Object.toQueryString(options));
     [% ELSE %]
         return(base+"?"+Ext.Object.toQueryString(options));
     [% END %]

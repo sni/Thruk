@@ -62,7 +62,7 @@ TP.service_downtime_menu = function() {
             xtype:      'datetimefield',
             name:       'end_time'
         }, {
-            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+            xtype: 'hidden', name: 'com_author',  value: remote_user
         }, {
             xtype: 'hidden', name: 'fixed',       value: '1'
     }];
@@ -90,7 +90,7 @@ TP.service_ack_menu = function() {
             xtype:      'checkbox',
             name:       'persistent'
         }, {
-            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+            xtype: 'hidden', name: 'com_author',  value: remote_user
     }];
     var defaults = {
         labelWidth: 140

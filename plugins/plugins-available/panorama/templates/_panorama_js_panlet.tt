@@ -31,17 +31,17 @@
             return;
         }
         this.locked = tab.xdata.locked;
-        [% IF readonly %]
-        this.locked = true;
-        [% END %]
+        if(readonly) {
+            this.locked = true;
+        }
         this.redraw     = false;
         this.animations = 0;
 
         this.semilocked = false;
-        [% IF dashboard_ignore_changes %]
-        this.locked = true;
-        this.semilocked = true;
-        [% END %]
+        if(dashboard_ignore_changes) {
+            this.locked     = true;
+            this.semilocked = true;
+        }
 
         if(this.locked && !this.semilocked) {
             this.resizable = false;
@@ -126,9 +126,9 @@
         var state = this.callParent(arguments);
         state.title = this.title;
         state.xdata = this.xdata;
-        [% IF one_tab_only %]
-        state.pos[1] += 25;
-        [% END %]
+        if(one_tab_only) {
+            state.pos[1] += 25;
+        }
         return state;
     },
     applyState: function(state) {

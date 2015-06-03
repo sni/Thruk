@@ -559,7 +559,7 @@
                 enabled: true,
                 disableCaching: false,
                 paths: {
-                    GeoExt: "[% url_prefix %]plugins/panorama/geoext2-2.0.2/src/GeoExt"
+                    GeoExt: url_prefix+"plugins/panorama/geoext2-2.0.2/src/GeoExt"
                 }
             });
             var attribution = wmsData[2];
@@ -568,9 +568,9 @@
                 attribution =  { "attribution": "&copy; "+url+"<br>Data &copy; OpenStreetMap <a href='http://www.openstreetmap.org/copyright/en' target='_blank'>contributors<a>" };
             }
             tab.mapEl.lastWMSProvider = xdata.wms_provider;
-            OpenLayers.ImgPath               = '[% url_prefix %]plugins/panorama/openlayer/images/';
+            OpenLayers.ImgPath               = url_prefix +'plugins/panorama/openlayer/images/';
             OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
-            var map   = new OpenLayers.Map('map', { controls: [], theme: '[% url_prefix %]plugins/panorama/openlayer/theme/default/style.css' });
+            var map   = new OpenLayers.Map('map', { controls: [], theme: url_prefix+'plugins/panorama/openlayer/theme/default/style.css' });
             var layer = new OpenLayers.Layer.WMS(xdata.wms_provider, wmsData[0], wmsData[1], attribution);
             map.addLayer(layer);
             map.addControl(new OpenLayers.Control.Navigation());
@@ -658,7 +658,7 @@
             tab.bgDragEl.dom.style.height   = "500%";
             tab.bgDragEl.dom.style.top      = "0px";
             tab.bgDragEl.dom.style.left     = "0px";
-            tab.bgDragEl.dom.src = "[% url_prefix %]plugins/panorama/images/s.gif";
+            tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
         }
         tab.disableMapControls();
 
@@ -793,11 +793,11 @@
             margin: '0 0 10 0',
             items: [{
                 text:   'Refresh',
-                icon:   '[% url_prefix %]plugins/panorama/images/arrow_refresh.png',
+                icon:   url_prefix+'plugins/panorama/images/arrow_refresh.png',
                 handler: function() { TP.refreshAllSitePanel(tab) }
             }, '-', {
                 text:   'Fullscreen',
-                icon:   '[% url_prefix %]plugins/panorama/images/picture_empty.png',
+                icon:   url_prefix+'plugins/panorama/images/picture_empty.png',
                 handler: function() {
                     var element = Ext.getBody().dom;
                     try {
@@ -809,39 +809,39 @@
                 hidden:  !!BigScreen.element
             }, {
                 text:   'Exit Fullscreen',
-                icon:   '[% url_prefix %]plugins/panorama/images/pictures.png',
+                icon:   url_prefix+'plugins/panorama/images/pictures.png',
                 handler: function() { BigScreen.exit(); },
                 hidden:  !BigScreen.element
             }, {
 [% IF one_tab_only %]
                 text:       'Open Tab Mode',
-                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                icon:       url_prefix+'plugins/panorama/images/application_put.png',
                 href:       'panorama.cgi#'+nr,
                 tooltip:    'open this dashboard in tab mode'
 [% ELSE %]
                 text:       'Direct Link',
-                icon:       '[% url_prefix %]plugins/panorama/images/application_put.png',
+                icon:       url_prefix+'plugins/panorama/images/application_put.png',
                 href:       'panorama.cgi?map='+tab.xdata.title,
                 hrefTarget: '_blank',
                 tooltip:    'open this dashboard only (new window)'
 [% END %]
             }, {
                 text:   'Debug Information',
-                icon:   '[% url_prefix %]plugins/panorama/images/information.png',
+                icon:   url_prefix+'plugins/panorama/images/information.png',
                 handler: thruk_debug_window_handler,
                 hidden:  [% IF !thruk_debug || c.config.demo_mode %]true[% ELSE %]false[% END %]
             }, '-'
             [% UNLESS readonly %]
             , {
                 text:   'New',
-                icon:   '[% url_prefix %]plugins/panorama/images/cog_add.png',
+                icon:   url_prefix+'plugins/panorama/images/cog_add.png',
                 hideOnClick: false,
                 menu:    TP.addPanletsMenu({open: 'right'}),
                 disabled: tab.xdata.locked,
                 hidden:  hidePasteAndNew
             }, {
                 text:   'Paste',
-                icon:   '[% url_prefix %]plugins/panorama/images/page_paste.png',
+                icon:   url_prefix+'plugins/panorama/images/page_paste.png',
                 handler: function() {
                     var tb = Ext.getCmp('tabpan').getActiveTab();
                     if(TP.clipboard.state && TP.clipboard.state.xdata && TP.clipboard.state.xdata.appearance) {
@@ -861,7 +861,7 @@
                 hidden:  hidePasteAndNew
             }, '-', {
                 text:    'Set Map Center',
-                icon:    '[% url_prefix %]plugins/panorama/images/flag_blue.png',
+                icon:    url_prefix+'plugins/panorama/images/flag_blue.png',
                 handler:  function() {
                     var data = tab.map.map.getCenter();
                     tab.xdata.map = {
@@ -876,22 +876,22 @@
                 hidden:   tab.map == undefined  // only show on maps
             }, {
                 text:   'Dashboard Settings',
-                icon:   '[% url_prefix %]plugins/panorama/images/cog.png',
+                icon:   url_prefix+'plugins/panorama/images/cog.png',
                 handler: function() { TP.tabSettingsWindow() },
                 hidden:  tab.xdata.locked       // only show when not locked
             }, {
                 text:   'Restore',
-                icon:   '[% url_prefix %]plugins/panorama/images/book_previous.png',
+                icon:   url_prefix+'plugins/panorama/images/book_previous.png',
                 id:     'manualmenu',
                 menu: [{
                     text:    'Create Restorepoint',
-                    icon:    '[% url_prefix %]plugins/panorama/images/disk.png',
+                    icon:    url_prefix+'plugins/panorama/images/disk.png',
                     handler: function() { TP.createRestorePoint(tab, "m") }
                 }, '-', {
                     text:       'Autosave',
                     hideOnClick: false,
                     id:         'autosavemenu',
-                    icon:       '[% url_prefix %]plugins/panorama/images/shield.png',
+                    icon:       url_prefix+'plugins/panorama/images/shield.png',
                     menu:        [],
                     listeners: {
                         afterrender: function(item, eOpts) {
@@ -900,19 +900,19 @@
                     }
                 }, {
                     text:    'Loading...',
-                    icon:    '[% url_prefix %]plugins/panorama/images/loading-icon.gif',
+                    icon:    url_prefix+'plugins/panorama/images/loading-icon.gif',
                     disabled: true,
                     id:      'restorepointsloading'
                 }],
                 hidden:  tab.xdata.locked       // only show when not locked
             }, {
                 text:   'Unlock Dashboard',
-                icon:   '[% url_prefix %]plugins/panorama/images/lock_open.png',
+                icon:   url_prefix+'plugins/panorama/images/lock_open.png',
                 handler: function() { TP.createRestorePoint(tab, "a"); tab.setLock(false); },
                 hidden:  !tab.xdata.locked      // only show when locked
             }, {
                 text:   'Lock Dashboard',
-                icon:   '[% url_prefix %]plugins/panorama/images/lock.png',
+                icon:   url_prefix+'plugins/panorama/images/lock.png',
                 handler: function() { tab.setLock(true); },
                 hidden:  tab.xdata.locked       // only show when not locked
             }
@@ -941,8 +941,8 @@
     }
 });
 
-[% UNLESS readonly %]
 Ext.onReady(function() {
+    if(readonly) { return; }
     /* lasso for element selection */
     Ext.getBody().on("mouseup", function(evt) {
         if(TP.lassoEl) {
@@ -982,7 +982,6 @@ Ext.onReady(function() {
     });
 });
 
-[% END %]
 /* handles dragging a lasso around icon elements to move them together */
 TP.lassoDragHandler = function(evt) {
     evt.preventDefault();
@@ -1136,7 +1135,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                     autosavemenu.menu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.a[x].num),
                               val:     data.a[x].num,
                               style:  'text-align: right;',
-                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              icon:   url_prefix+'plugins/panorama/images/clock_go.png',
                               handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "a"); }
                             }
                     );
@@ -1148,7 +1147,7 @@ TP.setRestorePointsMenuItems = function(tab) {
                     manualmenu.add({text:    strftime("%a %b %e %Y, %H:%M:%S", data.m[x].num),
                               val:     data.m[x].num,
                               style:  'text-align: right;',
-                              icon:   '[% url_prefix %]plugins/panorama/images/clock_go.png',
+                              icon:   url_prefix+'plugins/panorama/images/clock_go.png',
                               handler: function() { TP.log('[global] restoring dashboard to: '+this.val); TP.restoreDashboard(tab.id, this.val, "m"); }
                             }
                     );

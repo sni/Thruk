@@ -106,7 +106,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         var panel     = this.items.getAt(0);
         TP.log('['+panel.id+'] loaded');
         var statename = this.type == 'host' ? TP.render_host_status(d.state, {}, data) : TP.render_service_status(d.state, {}, data) ;
-        panel.getComponent('current_status').update('<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
+        panel.getComponent('current_status').update('<div class="extinfostate '+statename.toUpperCase()+'">'+statename.toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
         panel.getComponent('status_information').update(d.plugin_output+'<br>'+d.long_plugin_output);
         panel.getComponent('perf_data').update(d.perf_data);
         panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
@@ -126,7 +126,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
         } else {
             var d = downtimes[0];
             var panelId = panel.id;
-            panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(d.start_time)+' - '+TP.date_format(d.end_time)+'<a href="" title="remove downtime" onclick="TP.deleteDowntime(\''+d.id+'\', \''+panel.id+'\', \''+this.type+'\'); return false;"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove downtime"><\/a>)');
+            panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(d.start_time)+' - '+TP.date_format(d.end_time)+'<a href="" title="remove downtime" onclick="TP.deleteDowntime(\''+d.id+'\', \''+panel.id+'\', \''+this.type+'\'); return false;"><img src="'+url_prefix+'plugins/panorama/images/remove.png" alt="remove downtime"><\/a>)');
         }
         panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'<\/div>');
         panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');
@@ -139,7 +139,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
                 toolbar.insert(1, new Ext.button.Button({
                     itemId: 'noack',
                     text:   'Remove Ack.',
-                    icon:   '[% url_prefix %]plugins/panorama/images/btn_ack_remove.png',
+                    icon:   url_prefix+'plugins/panorama/images/btn_ack_remove.png',
                     menu:    this.type == 'host' ? TP.host_ack_remove_menu() : TP.service_ack_remove_menu()
                 }));
             }
@@ -149,7 +149,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
                 toolbar.insert(1, new Ext.button.Button({
                     itemId:  'ack',
                     text:    'Acknowledge',
-                    icon:    '[% url_prefix %]plugins/panorama/images/btn_ack.png',
+                    icon:    url_prefix+'plugins/panorama/images/btn_ack.png',
                     menu:     this.type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu(),
                     disabled: d.state == 0 ? true : false
                 }));
@@ -218,19 +218,19 @@ TP.ExtinfoPanel = function(type) {
                     /* Add New Downtime */
                     itemId: 'downtime',
                     text:   'Add Downtime',
-                    icon:   '[% url_prefix %]plugins/panorama/images/btn_downtime.png',
+                    icon:   url_prefix+'plugins/panorama/images/btn_downtime.png',
                     menu:    type == 'host' ? TP.host_downtime_menu() : TP.service_downtime_menu()
                 }, {
                     /* Acknowledge */
                     itemId: 'ack',
                     text:   'Acknowledge',
-                    icon:   '[% url_prefix %]plugins/panorama/images/btn_ack.png',
+                    icon:   url_prefix+'plugins/panorama/images/btn_ack.png',
                     menu:    type == 'host' ? TP.host_ack_menu() : TP.service_ack_menu()
                 }, {
                     /* Reschedule */
                     itemId: 'reschedule',
                     text:   'Reschedule',
-                    icon:   '[% url_prefix %]plugins/panorama/images/btn_delay.png',
+                    icon:   url_prefix+'plugins/panorama/images/btn_delay.png',
                     menu:    type == 'host' ? TP.host_reschedule_menu() : TP.service_reschedule_menu()
             }]
         }]

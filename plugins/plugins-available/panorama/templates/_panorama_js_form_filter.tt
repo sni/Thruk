@@ -16,7 +16,7 @@
     }, {
         xtype:     'button',
         text:      'Change Filter',
-        icon:      '[% url_prefix %]plugins/panorama/images/image_edit.png',
+        icon:      url_prefix+'plugins/panorama/images/image_edit.png',
         handler:   function(This, eOpts) { TP.filterWindow(this.up().ftype, This.up().items.getAt(0), This.up().panel); }
     }],
 
@@ -238,7 +238,7 @@ Ext.define('TP.formFilterSelect', {
         maxWidth:   14,
         flex:       1,
         margin:     '5 0 0 0',
-        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
+        html:       '<div align="center" class="clickable"><img src="'+url_prefix+'plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
         listeners:  {
             afterrender: function(This, eOpts) { This.body.on('click', function() {
                 var row = This.up('panel');
@@ -347,7 +347,7 @@ Ext.define('TP.formFilterPanel', {
             width:      '100%',
             height:     6,
             style:      'margin-top: 0px',
-            html:       '<div align="right" class="clickable"><img src="[% url_prefix %]plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
+            html:       '<div align="right" class="clickable"><img src="'+url_prefix+'plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
             listeners:  {
                 afterrender: function(This, eOpts) { This.body.on('click', function() {
                     var win = This.up('form').up('window');
@@ -417,7 +417,7 @@ Ext.define('TP.formFilterPanel', {
         }, {
             xtype:      'panel',
             border:     false,
-            html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]plugins/panorama/images/down.png" alt="add new and filter" style="vertical-align: middle"> and<\/div><\/div>',
+            html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="'+url_prefix+'plugins/panorama/images/down.png" alt="add new and filter" style="vertical-align: middle"> and<\/div><\/div>',
             listeners:  {
                 afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
                     var form = This.up('form');
@@ -536,7 +536,7 @@ TP.filterWindow = function(ftype, base_el, panel) {
         xtype:      'panel',
         border:     false,
         height:     '100%',
-        html:       '<div align="center" class="clickable" style="width: 25px; margin-top: 60px;"><img src="[% url_prefix %]plugins/panorama/images/right.png" alt="add new or filter" style="vertical-align: middle"><br>or<\/div>',
+        html:       '<div align="center" class="clickable" style="width: 25px; margin-top: 60px;"><img src="'+url_prefix+'plugins/panorama/images/right.png" alt="add new or filter" style="vertical-align: middle"><br>or<\/div>',
         listeners:  {
             afterrender: function(This, eOpts) {
                 Ext.get(This.body.dom.firstChild).on('click', function() {

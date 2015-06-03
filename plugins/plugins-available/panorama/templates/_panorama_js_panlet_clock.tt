@@ -183,7 +183,7 @@ Ext.define('TP.PanletClock', {
                 xtype:        'button',
                 enableToggle:  true,
                 name:         'fontitalic',
-                icon:         '[% url_prefix %]plugins/panorama/images/text_italic.png',
+                icon:         url_prefix+'plugins/panorama/images/text_italic.png',
                 margins:      {top: 0, right: 0, bottom: 0, left: 3},
                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontitalic: state ? '1' : '' }); },
                 listeners: {
@@ -197,7 +197,7 @@ Ext.define('TP.PanletClock', {
                 xtype:        'button',
                 enableToggle:  true,
                 name:         'fontbold',
-                icon:         '[% url_prefix %]plugins/panorama/images/text_bold.png',
+                icon:         url_prefix+'plugins/panorama/images/text_bold.png',
                 margins:      {top: 0, right: 0, bottom: 0, left: 3},
                 toggleHandler: function(btn, state) { this.up('form').getForm().setValues({fontbold: state ? '1' : ''}); },
                 listeners: {

@@ -42,7 +42,7 @@ function preloader() {
         /* no var here, otherwise browser would clean the preloaded images from cache */
 [%+ FOREACH i = preload_img %]
         img[% loop.index %] = new Image();
-        img[% loop.index %].src = "[% url_prefix %]plugins/panorama/images/[% i %]";
+        img[% loop.index %].src = url_prefix+"plugins/panorama/images/[% i %]";
 [%+ END %]
     }
 }

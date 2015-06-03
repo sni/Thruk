@@ -94,11 +94,9 @@ sub index {
     if($c->check_user_roles('authorized_for_system_commands') && $c->check_user_roles('authorized_for_configuration_information')) {
         $c->stash->{'is_admin'} = 1;
     }
-    $c->stash->{one_tab_only} = '';
-
+    $c->stash->{one_tab_only}           = '';
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
-
-    $c->stash->{'extjs_version'} = "4.1.1";
+    $c->stash->{'extjs_version'}        = "4.1.1";
 
     $c->{'panorama_var'} = $c->config->{'var_path'}.'/panorama';
     Thruk::Utils::IO::mkdir_r($c->{'panorama_var'});
@@ -351,6 +349,7 @@ sub _js {
     $c->stash->{shape_data}   = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
+    $c->stash->{test_mode}    = $ENV{'THRUK_SRC'} eq 'TEST' ? 1 : 0;
 
     unless($only_data) {
         $c->res->headers->content_type('text/javascript; charset=UTF-8');
