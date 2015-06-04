@@ -1985,7 +1985,7 @@ sub _task_dashboard_save_states {
         $c->log->warn('_task_dashboard_save_states failed: '.$@);
         return;
     }
-    for my $id (keys $runtime) {
+    for my $id (keys %{$runtime}) {
         for my $key (@runtime_keys) {
             $runtime->{$id}->{$key} = $states->{$id}->{$key} if defined $states->{$id}->{$key};
         }
