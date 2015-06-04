@@ -48,7 +48,7 @@ Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
 
 %description
 Thruk is a multibackend monitoring webinterface which currently
-supports Nagios, Icinga and Shinken as backend using the Livestatus
+supports Naemon, Nagios, Icinga and Shinken as backend using the Livestatus
 API. It is designed to be a 'dropin' replacement and covers almost
 all of the original features plus adds additional enhancements for
 large installations.
@@ -213,6 +213,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/thruk
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk.conf
+%config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk_cookie_auth_vhost.conf
 %config(noreplace) %{_sysconfdir}/thruk/plugins
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
@@ -231,6 +232,7 @@ exit 0
 %{_datadir}/thruk/LICENSE
 %{_datadir}/thruk/menu.conf
 %{_datadir}/thruk/dist.ini
+%{_datadir}/thruk/thruk_cookie_auth.include
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
 %{_libdir}/thruk/perl5
 %doc %{_mandir}/man3/nagexp.3

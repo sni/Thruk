@@ -1,5 +1,5 @@
---- a/thruk.conf	2014-07-07 11:49:48.417646848 +0200
-+++ b/thruk.conf	2014-07-07 12:19:54.545645878 +0200
+--- a/thruk.conf	2015-06-04 15:52:10.465669542 +0200
++++ b/thruk.conf	2015-06-04 15:53:21.081145740 +0200
 @@ -2,7 +2,7 @@
    AddHandler fcgid-script .sh
    IPCCommTimeout 120
@@ -27,25 +27,9 @@
      Options FollowSymLinks
      allow from all
      # required for apache 2.4
-@@ -29,31 +29,21 @@
+@@ -29,21 +29,21 @@
      </IfModule>
    </Directory>
- 
--  # redirect to a startup page when there is no pidfile yet
--  RewriteEngine On
--  RewriteCond %{REQUEST_METHOD} GET
--  RewriteCond %{REQUEST_URI} !^/thruk/startup.html
--  RewriteCond %{REQUEST_URI} !^/thruk/side.html
--  RewriteCond %{REQUEST_URI} !^/thruk/.*\.(css|png|js)
--  RewriteCond %{REQUEST_URI} ^/thruk
--  RewriteCond /var/cache/thruk/thruk.pid !-f
--  RewriteRule ^(.*)$ /thruk/startup.html?$1 [R=302,L,NE,QSA]
-+  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
-+  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
-+  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh@HTMLURL@/$1
-+  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
-+  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
-+  Alias @HTMLURL@ @DATADIR@/root/thruk
  
 -  Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html
 -  Alias /thruk/startup.html /usr/share/thruk/root/thruk/startup.html
@@ -53,7 +37,13 @@
 -  AliasMatch ^/thruk/plugins/(.*?)/(.*)$  /etc/thruk/plugins/plugins-enabled/$1/root/$2
 -  Alias /thruk/themes/  /etc/thruk/themes/themes-enabled/
 -  Alias /thruk /usr/share/thruk/root/thruk
--
++  Alias @HTMLURL@/documentation.html @DATADIR@/root/thruk/documentation.html
++  Alias @HTMLURL@/startup.html @DATADIR@/root/thruk/startup.html
++  AliasMatch ^@HTMLURL@/(.*\.cgi|.*\.html)  @DATADIR@/fcgid_env.sh@HTMLURL@/$1
++  AliasMatch ^@HTMLURL@/plugins/(.*?)/(.*)$  @SYSCONFDIR@/plugins/plugins-enabled/$1/root/$2
++  Alias @HTMLURL@/themes/  @SYSCONFDIR@/themes/themes-enabled/
++  Alias @HTMLURL@ @DATADIR@/root/thruk
+ 
 -  <Location /thruk/>
 +  <Location @HTMLURL@/>
      Options ExecCGI FollowSymLinks
@@ -69,7 +59,7 @@
      Order Deny,Allow
      Allow from all
      Satisfy any
-@@ -62,7 +52,7 @@
+@@ -52,7 +52,7 @@
  
  # use compressed output if available
  <IfModule mod_deflate.c>

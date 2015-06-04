@@ -10,9 +10,6 @@ RewriteCond %{REQUEST_URI}           ^@HTMLURL@
 RewriteCond @TMPDIR@/thruk.pid       !-f
 RewriteRule ^(.*)$                   @HTMLURL@/startup.html?$1 [R=302,L,NE,QSA]
 
-# redirect /thruk to new url, as the pkgs conflict anyway, this help migrating...
-RewriteRule ^/thruk(.*)$             @HTMLURL@$1 [R=302,L]
-
 # cookie based authentication
 RewriteEngine On
 RewriteMap  thruk_users              prg:@DATADIR@/thruk_auth
