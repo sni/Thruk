@@ -16,9 +16,13 @@ BEGIN {
     use_ok 'Thruk::Controller::restricted';
 }
 
+SKIP: {
+    skip "check does not work with cookie auth already enabled", 7 if $ENV{'THRUK_TEST_AUTH'};
+    TestUtils::test_page(url => '/thruk/cgi-bin/restricted.cgi', like => ['OK:']);
+}
+
 my $pages = [
     { url => '/thruk/cgi-bin/login.cgi',      like => ['Thruk Monitoring Webinterface', 'loginbutton' ] },
-    { url => '/thruk/cgi-bin/restricted.cgi', like => ['OK:'] },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi?test=blah', 'redirect' => 1, location => 'tac.cgi\?test=blah', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi?test=blah&test2=blub', 'redirect' => 1, location => 'tac.cgi\?test=blah&test2=blub', like => 'This item has moved' },
