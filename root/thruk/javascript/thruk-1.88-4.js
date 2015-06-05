@@ -748,7 +748,7 @@ function create_site_panel_popup_collapsed() {
     var sections_num = keys(sites.sections).length;
     jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
         var section = sites.sections[sectionname];
-        if(keys(section.subsections).length > 1) {
+        if(sections_num > 1) {
             panel += '  <tr>';
             panel += '    <th align="left">';
             panel += '      <a href="#" onclick="toggleAllSubSection(\''+sectionname+'\'); return false;" title="'+sectionname+'" class="sites_subsection">'+sectionname+'</a>';
@@ -785,6 +785,7 @@ function create_site_panel_popup_collapsed() {
 
 function create_site_panel_popup_panel_section_details() {
     panel = '';
+    var sections_num = keys(sites.sections).length;
     jQuery(keys(sites.sections).sort()).each(function(i, sectionname) {
         var section = sites.sections[sectionname];
         jQuery(keys(section.subsections).sort()).each(function(j, subsectionname) {
@@ -798,7 +799,7 @@ function create_site_panel_popup_panel_section_details() {
             panel += '      <input type="checkbox" id="all_section_'+sectionname+'_'+subsectionname+'" value="" name="all_section_'+sectionname+'_'+subsectionname+'" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\');" style="cursor: pointer;">';
             panel += '    </td><td style="vertical-align: middle;">';
             panel += '      <a href="#" onclick="toggleSection(\''+sectionname+'/'+subsectionname+'\'); return false;"><b>';
-            if(j > 1) { panel += sectionname+' -&gt; '; }
+            if(sections_num > 1) { panel += sectionname+' -&gt; '; }
             panel += '      '+subsectionname+'</b></a>:';
             panel += '    </td></tr></table>';
             jQuery(subsection.sites.sort()).each(function(k, site_id) {
