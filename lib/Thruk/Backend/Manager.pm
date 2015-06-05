@@ -1513,6 +1513,10 @@ sub _get_results_xs_pool {
                         $tmp->[0] .= $key.': '.$tmp->[2]->{'header'}->{$key}."\n";
                     }
                 }
+                if($opt && ref $opt eq 'HASH' && $opt->{'limit'}) {
+                    chomp($tmp->[0]);
+                    $tmp->[0] .= "\nLimit: ".$opt->{'limit'}."\n";
+                }
             }
         }
 
@@ -1570,7 +1574,6 @@ sub _get_results_xs_pool {
                    && ref $sorted->{'res'}->[$x]->{'result'} eq 'ARRAY'
                    && $function ne 'get_processinfo'
                 ) {
-                #if($function eq 'get_services' || $function eq 'get_hosts') {
                     # optimized postprocessing
                     if(!defined $post_process) {
                         $post_process = {
