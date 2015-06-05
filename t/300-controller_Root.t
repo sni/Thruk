@@ -21,7 +21,7 @@ SKIP: {
 }
 my $product = 'thruk';
 if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://[^/]+/(.*)$|) { $product = $1; }
-if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m/naemon/) {
+if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
     # redirect happens during login with cookie auth
     TestUtils::test_page(url => '/thruk');
 } else {
