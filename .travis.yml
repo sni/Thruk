@@ -37,7 +37,7 @@ install:
   - touch .author
 
 script:
-  - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
+  - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
 notifications:
   email:
     - sven@nierlein.de
