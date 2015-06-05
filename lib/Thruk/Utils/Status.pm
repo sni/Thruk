@@ -478,7 +478,7 @@ sub fill_totals_box {
           )
       ) {
         # set host status from service query
-        my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        my $services = $c->{'db'}->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $service_stats = {
             'pending'                => 0,
             'ok'                     => 0,
@@ -539,12 +539,10 @@ sub fill_totals_box {
             }
         }
     } else {
-        $host_stats    = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        $host_stats    = $c->{'db'}->get_host_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
         $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
     }
-    $c->stash->{'host_stats'} = $host_stats;
-
-    # services status box
+    $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
 
     # set audio file to play
