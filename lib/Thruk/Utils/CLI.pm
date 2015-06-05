@@ -1256,7 +1256,7 @@ sub _cmd_configtool {
     my $res        = undef;
     my $last_error = undef;
 
-    $c->stash->{'param_backend'}                 = $peerkey;
+    $c->stash->{'param_backend'}     = $peerkey;
     $c->req->parameters->{'backend'} = $peerkey;
 
     require Thruk::Utils::Conf;

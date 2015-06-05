@@ -473,6 +473,7 @@ gets the authorized_for_read_only role and group based roles
 sub get_dynamic_roles {
     my($c, $username, $user) = @_;
 
+    $user = Thruk::Authentication::User->new($c, $username) if $username;
     $user = $c->user unless defined $user;
 
     # is the contact allowed to send commands?
@@ -539,7 +540,7 @@ sub get_dynamic_roles {
         my $role = $possible_roles->{$key};
         if(defined $c->config->{'cgi_cfg'}->{$key}) {
             my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key};
-            for my $contactgroup (keys %{contactgroups}) {
+            for my $contactgroup (keys %contactgroups) {
                 if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
                     $roles_by_group->{$role} = [] unless defined $roles_by_group->{$role};
                     push @{$roles_by_group->{$role}}, $contactgroup;

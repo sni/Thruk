@@ -263,7 +263,7 @@ sub calculate_availability {
             ]);
         }
         $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
-        die('no such service: '.($service||'')."\n".Dumper($servicefilter)) unless scalar @{$all_services} > 0;
+        die('no such service: '.($service||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ])) unless scalar @{$all_services} > 0;
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
@@ -329,7 +329,7 @@ sub calculate_availability {
         }
 
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
-        die('no such host: '.($host||'')."\n".Dumper($hostfilter)) unless scalar @{$host_data} > 0;
+        die('no such host: '.($host||'')."\n".Dumper([ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ])) unless scalar @{$host_data} > 0;
         if($initialassumedhoststate == -1) {
             for my $host (@{$host_data}) {
                 $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};

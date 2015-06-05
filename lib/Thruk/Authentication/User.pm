@@ -28,15 +28,16 @@ create a new C<Thruk::Authentication::User> object.
 =cut
 
 sub new {
-    my($class, $c) = @_;
+    my($class, $c, $username) = @_;
     my $self = {};
     bless $self, $class;
 
-    my $username;
     my $env = $c->env;
 
     # authenticated by ssl
-    if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
+    if(defined $username) {
+    }
+    elsif(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1
         and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
             $username = $env->{'SSL_CLIENT_S_DN_CN'};
     }

@@ -321,9 +321,8 @@ generate a new report
 =cut
 sub generate_report {
     my($c, $nr, $options) = @_;
-    $Thruk::Utils::PDF::attachment    = '';
-    $Thruk::Utils::PDF::ctype         = 'html2pdf';
-
+    $Thruk::Utils::PDF::attachment     = '';
+    $Thruk::Utils::PDF::ctype          = 'html2pdf';
     $c->stash->{'tmp_files_to_delete'} = [];
     set_waiting($c, $nr, 0);
 
