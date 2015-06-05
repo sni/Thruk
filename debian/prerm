@@ -9,7 +9,7 @@ case "$1" in
   remove|deconfigure)
     /usr/bin/thruk -a uninstallcron --local || echo "ERROR: removing cron failed, please remove www-data cron manually"
     invoke-rc.d thruk stop || true
-    rm -rf /usr/share/thruk/root/thruk/plugins /etc/apache2/conf-enabled/thruk.conf
+    rm -rf /usr/share/thruk/root/thruk/plugins /etc/apache2/conf-enabled/thruk.conf /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf
   ;;
 
   upgrade|failed-upgrade)

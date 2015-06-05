@@ -55,6 +55,7 @@ case "$1" in
             fi
             set -e
             [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
+            [ -f /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf ] || /usr/sbin/a2enconf thruk_cookie_auth_vhost
         fi
 
         # set permissions
