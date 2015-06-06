@@ -42,13 +42,13 @@ create new peer
 =cut
 
 sub new {
-    my($class, $config, $logcache, $existing_keys, $product_prefix, $use_shadow_naemon) = @_;
+    my($class, $config, $thruk_config, $existing_keys, $use_shadow_naemon) = @_;
     my $self = {
         'config'        => $config,
         'existing_keys' => $existing_keys,
     };
     bless $self, $class;
-    $self->_initialise_peer( $config, $logcache, $product_prefix, $use_shadow_naemon );
+    $self->_initialise_peer($config, $thruk_config, $use_shadow_naemon);
     return $self;
 }
 
@@ -89,7 +89,7 @@ return a new backend class
 =cut
 
 sub _create_backend {
-    my($self, $config, $peerconfig, $product_prefix) = @_;
+    my($self, $config, $peerconfig, $product_prefix, $thruk_config) = @_;
 
     my $name    = $config->{'name'};
     my $type    = lc $config->{'type'};
@@ -122,14 +122,17 @@ sub _create_backend {
     # disable keepalive for now, it does not work and causes lots of problems
     $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
 
-    my $obj = $class->new( $options, $peerconfig, $config, $product_prefix );
+    my $obj = $class->new($options, $peerconfig, $config, $product_prefix, $thruk_config);
     return $obj;
 }
 
 
 ##########################################################
 sub _initialise_peer {
-    my($self, $config, $logcache, $product_prefix, $use_shadow_naemon) = @_;
+    my($self, $config, $thruk_config, $use_shadow_naemon) = @_;
+
+    my $logcache       = $thruk_config->{'logcache'};
+    my $product_prefix = $thruk_config->{'product_prefix'};
 
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
@@ -143,7 +146,7 @@ sub _initialise_peer {
     $self->{'section'}       = $config->{'section'} || 'Default';
     $self->{'enabled'}       = 1;
     $config->{'configtool'}  = {} unless defined $config->{'configtool'};
-    $self->{'class'}         = $self->_create_backend($config, $self->{'config'}, $product_prefix);
+    $self->{'class'}         = $self->_create_backend($config, $self->{'config'}, $product_prefix, $thruk_config);
     $self->{'configtool'}    = $config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;

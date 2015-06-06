@@ -128,7 +128,7 @@ get/set ssl_opts
 sub ssl_opts {
     my($self, %ssl_opts) = @_;
     if(%ssl_opts) {
-        $self->{'ssl_opts'} = \%ssl_opts;
+        $self->{'ssl_opts'} = {%ssl_opts, %{$self->{'ssl_opts'}}};
     }
     return $self->{'ssl_opts'};
 }
@@ -232,6 +232,7 @@ sub _get_cmd_line {
         '--proto',           '-all,'.join(',', @{$self->{'protocols_allowed'}}),
         '--dump-header',     '-',
         '--silent',
+        '--show-error',
     ];
     if($self->{'credentials'}) {
         push @{$cmd}, '--user', $self->{'credentials'}->[2].':'.$self->{'credentials'}->[3];
@@ -252,10 +253,13 @@ sub _request {
     my $prog = shift @{$cmd};
     my($rc, $pid, $wtr, $rdr);
     $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-    waitpid( $pid, 0 );
+    waitpid($pid, 0);
     $rc = $?;
     my $output = '';
     while(my $line = <$rdr>) { $output .= $line; }
+    if($output !~ m|^HTTP/|mx) {
+        die($output);
+    }
     my $r = HTTP::Response->parse($output);
     $r->{'_request'}->{'_uri'} = $url;
     return($r);

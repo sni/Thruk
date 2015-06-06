@@ -26,7 +26,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $options, $peerconfig, $config, $product_prefix ) = @_;
+    my($class, $options, $peerconfig, $config, $product_prefix, $thruk_config) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
@@ -45,6 +45,7 @@ sub new {
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
         'min_backend_version'  => 1.63,
+        'verify_hostname'      => $thruk_config->{'ssl_verify_hostnames'},
     };
     bless $self, $class;
 
@@ -110,9 +111,12 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
+    my $verify_hostname = 1;
+    $verify_hostname = $self->{'verify_hostname'} if defined $self->{'verify_hostname'};
     if(!$self->{'modules_loaded'}) {
         if(!defined $ENV{'THRUK_CURL'} || $ENV{'THRUK_CURL'} == 0) {
             if(defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} and $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} == 0 and $self->{'addr'} =~ m/^https:/mx) {
+                $verify_hostname = 0;
                 eval {
                     # required for new IO::Socket::SSL versions
                     load IO::Socket::SSL;
@@ -137,6 +141,7 @@ sub reconnect {
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->agent('Thruk');
+    $self->{'ua'}->ssl_opts(verify_hostname => $verify_hostname);
     if($self->{'proxy'}) {
         # http just works
         $self->{'ua'}->proxy('http', $self->{'proxy'});

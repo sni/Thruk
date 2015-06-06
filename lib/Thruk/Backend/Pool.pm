@@ -128,7 +128,7 @@ sub init_backend_thread_pool {
         ## use critic
         my  $peer_keys   = {};
         for my $peer_config (@{$peer_configs}) {
-            my $peer = Thruk::Backend::Peer->new($peer_config, $config->{'logcache'}, $peer_keys, $config->{'product_prefix'}, $use_shadow_naemon);
+            my $peer = Thruk::Backend::Peer->new($peer_config, $config, $peer_keys, $use_shadow_naemon);
             $peer_keys->{$peer->{'key'}} = 1;
             $peers->{$peer->{'key'}}     = $peer;
             push @{$peer_order}, $peer->{'key'};
