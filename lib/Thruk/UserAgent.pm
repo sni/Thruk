@@ -13,8 +13,8 @@ UserAgent wrapper for Thruk
 use strict;
 use warnings;
 use Carp;
-use IPC::Open3;
 use HTTP::Response;
+use Thruk::Utils::IO;
 
 ##############################################
 =head1 METHODS
@@ -249,15 +249,8 @@ sub _get_cmd_line {
 ##############################################
 sub _request {
     my($self, $url, $cmd) = @_;
-    push @{$cmd}, $url;
-    my $prog = shift @{$cmd};
-    my($rc, $pid, $wtr, $rdr);
-    $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
-    waitpid($pid, 0);
-    $rc = $?;
-    my $output = '';
-    while(my $line = <$rdr>) { $output .= $line; }
-    if($output !~ m|^HTTP/|mx) {
+    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    if(!$rc || $output !~ m|^HTTP/|mx) {
         die($output);
     }
     my $r = HTTP::Response->parse($output);

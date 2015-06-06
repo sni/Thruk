@@ -258,7 +258,8 @@ array like ['/bin/prog', 'arg1', 'arg2']
 sub cmd {
     my($c, $cmd, $stdin) = @_;
 
-    local $SIG{CHLD}='';
+    local $SIG{CHLD} = '';
+    local $SIG{PIPE} = 'DEFAULT';
     local $ENV{REMOTE_USER}=$c->stash->{'remote_user'} if $c;
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
