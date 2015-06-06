@@ -2,7 +2,7 @@
 [% IF !hide_backends_chooser && sites != "" %]
 <script type="text/javascript">
 <!--
-var sites = [% sites %];
+var sites = [% json_encode(sites) %];
 print_site_panel_header();
 -->
 </script>

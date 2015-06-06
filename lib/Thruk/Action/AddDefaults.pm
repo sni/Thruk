@@ -885,9 +885,9 @@ sub update_site_panel_hashes {
         else { $show_sitepanel = 'list'; }
     }
 
-    $c->stash->{'initial_backends'} = encode_json($initial_backends);
+    $c->stash->{'initial_backends'} = $initial_backends;
     $c->stash->{'show_sitepanel'}   = $show_sitepanel;
-    $c->stash->{'sites'}            = encode_json($sites);
+    $c->stash->{'sites'}            = $sites;
 
     return;
 }
