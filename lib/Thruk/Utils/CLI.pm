@@ -942,8 +942,17 @@ sub _cmd_downtimetask {
     require URI::Escape;
     require Thruk::Utils::RecurringDowntimes;
 
+    my $total_retries = 5;
+    my $retries;
+
     # do auth stuff
-    Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+    for($retries = 0; $retries < $total_retries; $retries++) {
+        sleep(10) if $retries > 0;
+        eval {
+            Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+        };
+        last unless $@;
+    }
 
     $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
@@ -974,33 +983,62 @@ sub _cmd_downtimetask {
     $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
     $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
 
+    my $done = {hosts => {}, groups => {}};
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
     my $errors = 0;
-    if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
-        my $hosts = $downtime->{'host'};
-        for my $hst (@{$hosts}) {
-            $downtime->{'host'} = $hst;
-            $errors++ if !_set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+    for($retries = 0; $retries < $total_retries; $retries++) {
+        sleep(10) if $retries > 0;
+        if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
+            my $hosts = $downtime->{'host'};
+            for my $hst (@{$hosts}) {
+                next if $done->{'hosts'}->{$hst};
+                $downtime->{'host'} = $hst;
+                my $rc;
+                eval {
+                    $rc = _set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                };
+                if($rc && !$@) {
+                    $errors-- if defined $done->{'hosts'}->{$hst};
+                    $done->{'hosts'}->{$hst} = 1;
+                } else {
+                    $errors++ unless defined $done->{'hosts'}->{$hst};
+                    $done->{'hosts'}->{$hst} = 0;
+                }
+            }
+            $downtime->{'host'} = $hosts;
         }
-        $downtime->{'host'} = $hosts;
-    }
-    elsif($downtime->{'target'} eq 'hostgroup' or $downtime->{'target'} eq 'servicegroup') {
-        my $grps = $downtime->{$downtime->{'target'}};
-        for my $grp (@{$grps}) {
-            $downtime->{$downtime->{'target'}} = $grp;
-            $errors++ if !_set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+        elsif($downtime->{'target'} eq 'hostgroup' or $downtime->{'target'} eq 'servicegroup') {
+            my $grps = $downtime->{$downtime->{'target'}};
+            for my $grp (@{$grps}) {
+                next if $done->{'groups'}->{$grp};
+                $downtime->{$downtime->{'target'}} = $grp;
+                my $rc;
+                eval {
+                    $rc = _set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                };
+                if($rc && !$@) {
+                    $errors-- if defined $done->{'groups'}->{$grp};
+                    $done->{'groups'}->{$grp} = 1;
+                } else {
+                    $errors++ unless defined $done->{'groups'}->{$grp};
+                    $done->{'groups'}->{$grp} = 0;
+                }
+            }
+            $downtime->{$downtime->{'target'}} = $grps;
         }
-        $downtime->{$downtime->{'target'}} = $grps;
+        last unless $errors;
     }
 
-    return("failed\n", 1) if $errors; # error is already printed
+    return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
 
     if($downtime->{'service'}) {
         $output = 'scheduled'.$flexible.' downtime for service \''.encode_utf8($downtime->{'service'}).'\' on host: \''.encode_utf8(join(', ', @{$downtime->{'host'}})).'\'';
     } else {
         $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.encode_utf8(join(', ', @{$downtime->{$downtime->{'target'}}})).'\'';
     }
-    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
+    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")";
+    $output .= " (after $retries retries)\n" if $retries;
+    $output .= "\n";
 
     $c->stats->profile(end => "_cmd_downtimetask()");
     return($output, 0);

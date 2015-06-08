@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - improved startup time
           - improved page rendering
           - users can change their htpasswd passwords
+          - retry setting recurring downtimes in case of errors
           - fix redirect without trailing slash on login
           - fix event log filter for unprivileged contacts (#406)
           - fix shadownaemon using the livestatus wait feature
