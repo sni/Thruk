@@ -206,20 +206,27 @@ sub save_bp_objects {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'move '.$filename.' to '.$file.' failed: '.$! });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
+        my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+        if(!$result_backend && $Thruk::Backend::Pool::peers && scalar keys %{$Thruk::Backend::Pool::peers}) {
+            my $peer_key = [keys %{$Thruk::Backend::Pool::peers}]->[0];
+            $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
+        }
         # and reload
         my $time = time();
         my $pkey;
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
+        my $reloaded = 0;
         if($cmd) {
             local $SIG{CHLD}='';
             local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
             my $out = `$cmd 2>&1`;
             ($rc, $msg) = ($?, $out);
+            $reloaded = 1;
         }
-        elsif($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
+        elsif($result_backend) {
             # restart by livestatus
-            my $peer = $c->{'db'}->get_peer_by_key($c->config->{'Thruk::Plugin::BP'}->{'result_backend'});
-            die("no backend found by name ".$c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) unless $peer;
+            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
+            die("no backend found by name ".$result_backend) unless $peer;
             $pkey = $peer->peer_key();
             my $options = {
                 'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
@@ -227,8 +234,9 @@ sub save_bp_objects {
             };
             $c->{'db'}->send_command( %{$options} );
             ($rc, $msg) = (0, 'business process saved and core restarted');
+            $reloaded = 1;
         }
-        Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if $rc == 0;
+        Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if ($rc == 0 && $reloaded);
     } else {
         # discard file
         unlink($filename);
