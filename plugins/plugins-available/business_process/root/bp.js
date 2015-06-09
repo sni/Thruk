@@ -1073,13 +1073,18 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     return;
 }
 
-function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2) {
+function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2, recursion_level) {
     var w = x2 - x1;
     var h = y2 - y1;
+    if(recursion_level == undefined) { recursion_level = 0; }
     if(w != 0 && h != 0) {
+        if(recursion_level > 10) {
+            if(thruk_debug_js) { alert("ERROR: deep recursion "+x1+"/"+y1+" "+x2+"/"+y2); }
+            return;
+        }
         // need two lines
-        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2);
-        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2);
+        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2, recursion_level+1);
+        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2, recursion_level+1);
         return;
     }
     if(w < 0) { x1 = x2; w = -w +2; }
