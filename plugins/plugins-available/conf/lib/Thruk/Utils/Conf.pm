@@ -897,8 +897,6 @@ sub get_backends_with_obj_config {
 
     $c->stash->{'backend_chooser'} = 'switch';
 
-    Thruk::Action::AddDefaults::update_site_panel_hashes($c);
-
     return $backends;
 }
 

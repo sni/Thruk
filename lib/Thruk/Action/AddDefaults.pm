@@ -282,6 +282,8 @@ sub end {
 
     $c->stats->profile(begin => "Root end");
 
+    update_site_panel_hashes($c) unless $c->stash->{'hide_backends_chooser'};
+
     if(!defined $c->stash->{'navigation'} || $c->stash->{'navigation'} eq '') {
         Thruk::Utils::Menu::read_navigation($c) unless $c->stash->{'skip_navigation'};
     }
@@ -780,7 +782,6 @@ sub _set_possible_backends {
     $c->stash->{'backends'}         = \@new_possible_backends;
     $c->stash->{'backend_detail'}   = \%backend_detail;
 
-    update_site_panel_hashes($c) unless $c->stash->{'hide_backends_chooser'};
     return;
 }
 
@@ -846,7 +847,7 @@ sub update_site_panel_hashes {
                     $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
                     $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Utils::list($c->stash->{'param_backend'})});
                     $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
-                    $class = 'UP'   if $backend_detail->{$pd}->{'disabled'} == UP_CONF;
+                    $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
                     $backend_detail->{$pd}->{'class'} = $class;
                     my $total_key = lc $class;
                     if($class eq 'DIS' || $class eq 'HID') {

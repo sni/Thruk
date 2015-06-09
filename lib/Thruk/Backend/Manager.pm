@@ -41,7 +41,6 @@ sub new {
         'backends'            => [],
         'backend_debug'       => 0,
         'sections'            => {},
-        'failed_backends'     => {},
         'by_key'              => {},
         'by_name'             => {},
         'last_program_starts' => {},
