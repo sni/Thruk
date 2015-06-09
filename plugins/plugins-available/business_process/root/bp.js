@@ -704,7 +704,7 @@ function bp_initialize_children_tab(node) {
             var val = d[0];
             selected_nodes.push(val);
             selected_nodes_h[val] = 1;
-            options.push(new Option(val, d[1]));
+            options.push(new Option(d[1], val));
         });
     }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, false);
@@ -723,7 +723,7 @@ function bp_initialize_children_tab(node) {
         if(first_node && val == 'node1') { return true; } // skip first/master node
         available_nodes.push(val);
         available_nodes_h[val] = 1;
-        options.push(new Option(val, n.label));
+        options.push(new Option(n.label, val));
         return true;
     });
     set_select_options('bp_'+bp_id+"_available_nodes", options, false);

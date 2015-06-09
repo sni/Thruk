@@ -39,7 +39,7 @@
       [% IF rb == b %]
         selected_backends.push('[% b %]');
         selected_backends_h['[% b %]'] = 1;
-        options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
+        options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
       [% END %]
     [% END %]
   [% END %]
@@ -62,7 +62,7 @@
     [% IF found == 0 %]
       available_backends.push('[% b %]');
       available_backends_h['[% b %]'] = 1;
-      options.push(new Option('[% b %]', '[% backend_detail.$b.name %]'));
+      options.push(new Option('[% backend_detail.$b.name %]', '[% b %]'));
     [% END %]
   [% END %]
 

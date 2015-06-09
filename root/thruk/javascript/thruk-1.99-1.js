@@ -1184,7 +1184,7 @@ function data_select_move(from, to, skip_sort) {
             elements.push(nr);
             var option = from_sel.options[nr];
             if(originalOptions[to] != undefined) {
-                originalOptions[to].push(new Option(option.value, option.text));
+                originalOptions[to].push(new Option(option.text, option.value));
             }
             if(originalOptions[from] != undefined) {
                 jQuery.each(originalOptions[from], function(i, o) {
@@ -1270,7 +1270,7 @@ function reset_original_options(id) {
     var select  = document.getElementById(id);
     originalOptions[id] = [];
     jQuery.each(select.options, function(i, option) {
-        originalOptions[id].push(new Option(option.value, option.text));
+        originalOptions[id].push(new Option(option.text, option.value));
     });
 }
 
