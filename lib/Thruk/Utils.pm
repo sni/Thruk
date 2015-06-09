@@ -1734,8 +1734,17 @@ restart fcgi process and redirects to given page
 sub restart_later {
     my($c, $redirect) = @_;
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        my $pid = $$;
-        system("sleep 1 && kill -HUP $pid &");
+        my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
+        if(-f $pidfile) {
+            my $pids = [split(/\s/mx, read_file($pidfile))];
+            for my $pid (@{$pids}) {
+                next unless($pid and $pid =~ m/^\d+$/mx);
+                system("sleep 1 && kill -HUP $pid &");
+            }
+        } else {
+            my $pid = $$;
+            system("sleep 1 && kill -HUP $pid &");
+        }
         Thruk::Utils::append_message($c, ' Thruk has been restarted.');
         return $c->redirect_to($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
     } else {
