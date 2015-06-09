@@ -313,6 +313,7 @@ function toggleElementRemote(id, part, bodyclose) {
     showElement(id, undefined, bodyclose);
     jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part, {}, function(text, status, req) {
         showElement(id, undefined, bodyclose);
+        resetRefresh();
     })
 }
 
@@ -471,6 +472,8 @@ function resetRefresh() {
   window.clearTimeout(refreshTimer);
   if( typeof refresh_rate == "number" ) {
     setRefreshRate(refresh_rate);
+  } else {
+    stopRefresh();
   }
 }
 

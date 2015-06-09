@@ -87,11 +87,7 @@
               <th>Page Refresh:</th>
               <td nowrap>
               <img src="[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png" alt="refresh page" width=16 height=16 style="vertical-align:top;">
-              [% IF refresh_rate %]
-              <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
-              [% ELSE %]
-              <span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>
-              [% END %]
+              <span id="refresh_rate"></span>
               </td>
             </tr>
           </table>
