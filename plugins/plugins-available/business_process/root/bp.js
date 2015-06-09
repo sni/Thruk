@@ -1074,7 +1074,8 @@ function bp_plump(containerId, sourceId, targetId, edge) {
 }
 
 function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2) {
-    var w = x2 - x1, h = y2 - y1;
+    var w = x2 - x1;
+    var h = y2 - y1;
     if(w != 0 && h != 0) {
         // need two lines
         bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2);
