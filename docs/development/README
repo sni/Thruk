@@ -24,10 +24,6 @@ just use figlet for that:
 the following environment variables are used within Thruk:
 
 
-==== HTTP_RESULT
-temporary storage of http result used in cli tool.
-
-
 ==== NO_DISABLED_PLUGINS_TEST
 Can be set to skip tests of disabled plugins.
 
@@ -57,6 +53,11 @@ certain cases.
 Suppress logging of errors.
 
 
+==== THRUK_AUTHOR
+Put Thruk into author mode which enables strict templates checking and
+disables all template caches.
+
+
 ==== THRUK_BACKENDS
 Override currently used backends. Comma seperated list.
 
@@ -72,6 +73,8 @@ Specify location of config files.
 ==== THRUK_DEBUG
 Set debug level.
 
+==== THRUK_DEMO_MODE
+Put Thruk into demo mode which forbids any config saves.
 
 ==== THRUK_GROUP_ID
 Contains thruks primary group id.

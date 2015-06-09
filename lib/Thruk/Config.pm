@@ -221,8 +221,8 @@ our %config = ('name'                   => 'Thruk',
 );
 # set TT strict mode only for authors
 $config{'thruk_debug'} = 0;
-$config{'demo_mode'}   = -f $project_root."/.demo_mode" ? 1 : 0;
-if(-f $project_root."/.author") {
+$config{'demo_mode'}   = (-f $project_root."/.demo_mode" || $ENV{'THRUK_DEMO_MODE'}) ? 1 : 0;
+if(-f $project_root."/.author" || $ENV{'THRUK_AUTHOR'}) {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
     $config{'View::TT'}->{'STAT_TTL'}   = 5 unless($config{'demo_mode'} or $ENV{'THRUK_SRC'} eq 'TEST');
