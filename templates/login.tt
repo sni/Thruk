@@ -8,6 +8,7 @@
     [% PROCESS _common_js_files.tt %]
   </head>
   <body class='[% page %] loginpage' id='[% page %]' onload="javascript:document.getElementById('loginuser').focus();">
+  [% PROCESS _common_js.tt %]
   [% ssi_header %]
   <!-- Produced by Thruk (http://www.thruk.org).
        Copyright (c) 2009-present Thruk Developer Team.
@@ -64,6 +65,9 @@
         ref = ref.replace(/^\/+/, '/');
         ref = ref.replace(/^\?/, '/');
         ref = ref.replace(/^\/(expired|invalid|problem)\&/,  '$1&/');
+        ref = ref.replace(/_=\d+/, '');
+        ref = ref.replace(/\?$/, '');
+        ref = ref.replace(/\#side.html$/, '');
         return(ref);
     }
 
