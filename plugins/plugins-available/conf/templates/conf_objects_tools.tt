@@ -24,7 +24,7 @@
             [% link = "conf.cgi?sub=objects&amp;tools=" _ tool _ "&amp;cleanup=1&amp;ident=all"; button(link, toolobj.fixlink _ " all", 'conf_cleanup_button') %]
         </div>
       [% END %]
-    <table class="conf_tool_results">
+    <table class="conf_tool_results hoverTable">
       <tr>
         <th>Type</th>
         <th>Name</th>

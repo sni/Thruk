@@ -384,6 +384,11 @@ body.summary table.data {
   background-color: white;
 }
 
+/* simple table row hover */
+.hoverTable tr:not(:first-child):hover {
+  background-color: #DBDBDB;
+}
+
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
   cursor: pointer;
