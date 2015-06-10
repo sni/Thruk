@@ -2192,7 +2192,7 @@ sub _file_history_commit {
 ##########################################################
 sub _get_git_logs {
     my($c, $dir) = @_;
-    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%s')."\x1e' -- .";
+    my $cmd = "cd '".$dir."' && git log --pretty='format:".join("\x1f", '%h', '%an', '%ae', '%at', '%s')."\x1e'";
     my $out = `$cmd`;
     my $logs = [];
     my $last;
