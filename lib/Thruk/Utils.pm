@@ -1818,7 +1818,10 @@ sub wait_after_reload {
         }
         sleep(1);
     }
-    if(!$done) {
+    if($done) {
+        # clean up cached groups which may have changed
+        $c->cache->clear();
+    } else {
         $c->log->error('waiting for core reload failed');
     }
     return;

@@ -147,6 +147,7 @@ clear complete cache
 sub clear {
     my($self) = @_;
     unlink($self->{'_cachefile'});
+    $_[0] = Thruk::Utils::Cache->new($self->{'_cachefile'});
     return;
 }
 
