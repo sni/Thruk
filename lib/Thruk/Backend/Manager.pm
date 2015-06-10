@@ -1713,7 +1713,7 @@ sub _page_data {
     my $totalsize           = shift;
 
     # set some defaults
-    my $pager = {};
+    my $pager = { current_page => 1, total_entries => 0 };
     $c->stash->{'pager'} = $pager;
     $c->stash->{'pages'} = 0;
     $c->stash->{'data'}  = $data;
