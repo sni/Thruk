@@ -1797,8 +1797,10 @@ sub _page_data {
         $page = $pages;
     }
 
-    if($page < 0)      { $page = 1; }
-    if($page > $pages) { $page = $pages; }
+    if(!defined $page)      { $page = 1; }
+    if($page !~ m|^\d+$|mx) { $page = 1; }
+    if($page < 0)           { $page = 1; }
+    if($page > $pages)      { $page = $pages; }
 
     $c->stash->{'current_page'} = $page;
     $pager->{'current_page'}    = $page;
