@@ -39,15 +39,21 @@ To get more verbose log output, you have to create a `.thruk` file in the
 home directory of the Thruk user (usually the webserver user) or in case of
 OMD in the site folder.
 
+The following locations will work:
+
+ - ~/.thruk
+ - /etc/sysconfig/thruk
+ - /etc/default/thruk
+
 Then put in the following settings inside:
 
 to increase the loglevel:
 
-  THRUK_VERBOSE=1
+  export THRUK_VERBOSE=1
 
 to track all requests with their cpu and memory usage:
 
-  THRUK_PERFORMANCE_DEBUG=1
+  export THRUK_PERFORMANCE_DEBUG=1
 
 
 NOTE: You might have to adjust the loglevel threshold (see above). Also some log output will end up in the apache errorlog.
