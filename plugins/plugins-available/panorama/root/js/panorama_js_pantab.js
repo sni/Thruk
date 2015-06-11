@@ -220,7 +220,7 @@ Ext.define('TP.Pantab', {
     },
     saveIconsStates: function() {
         var tab = this;
-        if(tab.readonly == 1) { return; }
+        if(tab.readonly) { return; }
         window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_saveIconsStates']);
         TP.timeouts['timeout_' + tab.id + '_saveIconsStates'] = window.setTimeout(function() {
             tab.saveIconsStatesDo();
@@ -369,7 +369,7 @@ Ext.define('TP.Pantab', {
         if(xdata == undefined) {
             xdata = This.xdata;
         }
-        if(This.readonly == 1) {
+        if(This.readonly) {
             This.locked = true;
         }
         xdata.locked = This.locked;
@@ -829,7 +829,7 @@ Ext.define('TP.Pantab', {
                 handler: function() { thruk_debug_window_handler() },
                 hidden:  (!thruk_debug_js || thruk_demo_mode)
         }];
-        if(!readonly) {
+        if(!readonly && !tab.readonly) {
             menu_items = menu_items.concat([
                  '-', {
                     text:   'New',
