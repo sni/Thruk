@@ -1214,7 +1214,7 @@ sub _convert_to_pdf {
     # write out result
     open(my $fh, '>', $htmlfile);
     binmode $fh;
-    print $fh encode_utf8($reportdata);
+    print $fh $reportdata;
     Thruk::Utils::IO::close($fh, $htmlfile);
 
     if($htmlonly) {
