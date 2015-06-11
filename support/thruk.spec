@@ -27,8 +27,8 @@ BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Requires(pre): shadow-utils
-Requires:      perl logrotate gd wget
-BuildRequires: perl(ExtUtils::MakeMaker)
+Requires:      perl logrotate gd wget libthruk
+BuildRequires: libthruk
 # https://fedoraproject.org/wiki/Packaging:DistTag
 # http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
 # sles specific requirements
@@ -234,7 +234,6 @@ exit 0
 %{_datadir}/thruk/dist.ini
 %{_datadir}/thruk/thruk_cookie_auth.include
 %attr(0755,root,root) %{_datadir}/thruk/fcgid_env.sh
-%{_libdir}/thruk/perl5
 %doc %{_mandir}/man3/nagexp.3
 %doc %{_mandir}/man3/naglint.3
 %doc %{_mandir}/man3/thruk.3

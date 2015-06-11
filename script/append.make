@@ -110,9 +110,6 @@ local_install: local_patches
 	# rc script
 	[ -z "${INITDIR}" ] || { mkdir -p ${DESTDIR}${INITDIR} && cp -p support/thruk.init ${DESTDIR}${INITDIR}/thruk; }
 	############################################################################
-	# embedded thruk libs - handled in seperate package for naemon
-	[ ! -d local-lib ] || { mkdir -p ${DESTDIR}${LIBDIR} && cp -rp local-lib ${DESTDIR}${LIBDIR}/perl5; }
-	############################################################################
 	# httpd config
 	[ -z "${HTTPDCONF}" ] || { mkdir -p ${DESTDIR}${HTTPDCONF} && cp -p support/apache_fcgid.conf ${DESTDIR}${HTTPDCONF}/thruk.conf; }
 	[ -z "${HTTPDCONF}" ] || cp -p blib/replace/thruk_cookie_auth_vhost.conf ${DESTDIR}${HTTPDCONF}/thruk_cookie_auth_vhost.conf
