@@ -183,8 +183,11 @@ sub _build_app {
         if($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
             my $plugin = $1;
             $plugin =~ s|/|::|gmx;
-            load $plugin;
-            $plugin->add_routes($self, $self->{'routes'});
+            eval {
+                load $plugin;
+                $plugin->add_routes($self, $self->{'routes'});
+            };
+            $self->log->error("disabled broken plugin $plugin: ".$@) if $@;
         } else {
             die("unknown plugin folder format: $plugin_dir");
         }
