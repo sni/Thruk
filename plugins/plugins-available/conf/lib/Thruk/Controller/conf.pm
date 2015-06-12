@@ -64,7 +64,7 @@ sub index {
         load File::Copy;
         load JSON::XS;
         load Storable, qw/dclone/;
-        load Data::Dumper;
+        load Data::Dumper, qw/Dumper/;
         load File::Slurp, qw/read_file/;
         load Encode, qw(decode_utf8 encode_utf8);
         load Digest::MD5, qw(md5_hex);
