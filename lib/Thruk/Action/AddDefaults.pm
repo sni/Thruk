@@ -861,7 +861,7 @@ sub update_site_panel_hashes {
                     $sites->{'total'}++;
                     push @{$sites->{'sections'}->{$section}->{'subsections'}->{$subsection}->{'sites'}}, $pd;
                     $initial_backends->{$pd}->{'cls'} = $class;
-                    my $last_error = $initial_backends->{$pd}->{'name'}.': OK';
+                    my $last_error = ($initial_backends->{$pd}->{'name'} || '').': OK';
                     if($c->stash->{'failed_backends'}->{$pd}) {
                         $last_error = $c->stash->{'failed_backends'}->{$pd};
                     }
