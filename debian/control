@@ -10,10 +10,39 @@ Vcs-Git: git://github.com/sni/Thruk.git
 
 Package: thruk
 Architecture: any
-Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends}, libthruk, apache2 | nginx-full, libapache2-mod-fcgid | nginx-full, cron, logrotate, xvfb, libxrender1
+Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends}, thruk-base (= ${source:Version})
+Recommends: thruk-plugin-reporting (= ${source:Version})
 Description: Monitoring Webinterface for Nagios/Icinga and Shinken
  Thruk is a multibackend monitoring webinterface which currently
  supports Nagios, Icinga and Shinken as backend using the Livestatus
  API. It is designed to be a 'dropin' replacement and covers almost
  all of the original features plus adds additional enhancements for
- large installations.
+ large installations. This is the metapackage for complete Thruk setup.
+
+Package: thruk-base
+Architecture: any
+Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
+         libthruk,
+         apache2 | nginx-full,
+         libapache2-mod-fcgid | nginx-full,
+         cron, logrotate
+Provides: thruk
+Replaces: thruk (<< 1.99~2015-06-12)
+Breaks: thruk (<< 1.99~2015-06-12)
+Description: Monitoring Webinterface for Nagios/Icinga and Shinken
+ Thruk is a multibackend monitoring webinterface which currently
+ supports Nagios, Icinga and Shinken as backend using the Livestatus
+ API. It is designed to be a 'dropin' replacement and covers almost
+ all of the original features plus adds additional enhancements for
+ large installations. This package contains the Thruk gui base files.
+
+
+
+Package: thruk-plugin-reporting
+Architecture: any
+Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
+         xvfb, libxrender1,
+         thruk-base (= ${source:Version})
+Description: This package contains the reporting addon for thruk useful for sla
+ and event reporting.
+

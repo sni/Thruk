@@ -27,24 +27,9 @@ BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Requires(pre): shadow-utils
-Requires:      perl logrotate gd wget libthruk
 BuildRequires: libthruk
-# https://fedoraproject.org/wiki/Packaging:DistTag
-# http://stackoverflow.com/questions/5135502/rpmbuild-dist-not-defined-on-centos-5-5
-# sles specific requirements
-%if %{defined suse_version}
-Requires: apache2 apache2-mod_fcgid cron xorg-x11-server-extra
-%else
-# >rhel6 specific requirements
-%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
-BuildRequires: perl(File::Copy::Recursive)
-Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext cronie dejavu-fonts-common
-%else
-# rhel5 specific requirements (centos support no el5 tag)
-BuildRequires: perl(File::Copy::Recursive)
-Requires: httpd mod_fcgid xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
-%endif
-%endif
+Requires:      thruk-base = %{version}-%{release}
+Requires:      thruk-plugin-reporting = %{version}-%{release}
 
 %description
 Thruk is a multibackend monitoring webinterface which currently
@@ -58,6 +43,51 @@ large installations.
 
 # disable creating useless empty debug packages
 %global debug_package %{nil}
+
+%package base
+Summary:     Thruk Gui Base Files
+Group:       Applications/System
+Requires:    libthruk
+Requires(preun): libthruk
+Requires(post): libthruk
+Requires:    perl logrotate gd wget
+AutoReqProv: no
+%if %{defined suse_version}
+Requires:    apache2 apache2-mod_fcgid cron
+%else
+# >rhel6 specific requirements
+%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+Requires: httpd mod_fcgid cronie
+%else
+# rhel5 specific requirements (centos support no el5 tag)
+Requires: httpd mod_fcgid
+%endif
+%endif
+
+%description base
+This package contains the base files for thruk.
+
+
+%package plugin-reporting
+Summary:     Thruk Gui Reporting Addon
+Group:       Applications/System
+Requires:    %{name}-base = %{version}-%{release}
+%if %{defined suse_version}
+Requires: xorg-x11-server-extra
+%else
+%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+# >rhel6
+Requires: xorg-x11-server-Xvfb libXext dejavu-fonts-common
+%else
+# rhel5 (there is no el5 rpm macro)
+Requires: xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
+%endif
+%endif
+AutoReqProv: no
+
+%description plugin-reporting
+This package contains the reporting addon for thruk useful for sla
+and event reporting.
 
 %prep
 %setup -q -n %{fullname}
@@ -89,11 +119,12 @@ large installations.
     COMMAND_OPTS="" \
     INIT_OPTS=""
 mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
+rm %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled/reports2
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%pre
+%pre base
 # save themes, plugins and ssi so we don't reenable them on every update
 rm -rf /tmp/thruk_update
 if [ -d /etc/thruk/themes/themes-enabled/. ]; then
@@ -110,7 +141,7 @@ if [ -d /etc/thruk/ssi/. ]; then
 fi
 exit 0
 
-%post
+%post base
 chkconfig --add thruk
 mkdir -p /var/cache/thruk/reports /var/log/thruk /etc/thruk/bp /var/lib/thruk
 touch /var/log/thruk/thruk.log
@@ -123,13 +154,7 @@ a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-if [ -x /usr/sbin/systemctl ]; then
-    /usr/sbin/systemctl restart httpd
-elif [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl restart httpd
-else
-    /etc/init.d/httpd restart || /etc/init.d/httpd start
-fi
+service httpd condrestart
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   echo "******************************************";
   echo "Thruk will not work when SELinux is enabled";
@@ -144,7 +169,7 @@ echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usual
 exit 0
 
 
-%posttrans
+%posttrans base
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
   rm -f /etc/thruk/themes/themes-enabled/*
@@ -161,7 +186,7 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
 fi
 rm -rf /tmp/thruk_update
 
-%preun
+%preun base
 set -x
 if [ $1 = 0 ]; then
     # last version will be deinstalled
@@ -171,13 +196,21 @@ fi
 chkconfig --del thruk 2>/dev/null
 exit 0
 
-%postun
+%postun base
 set -x
 case "$*" in
   0)
     # POSTUN
     rm -rf %{_localstatedir}/cache/thruk
     rm -rf %{_datadir}/thruk/root/thruk/plugins
+    rmdir /etc/thruk/plugins/plugins-available 2>/dev/null
+    rmdir /etc/thruk/plugins/plugins-enabled 2>/dev/null
+    rmdir /etc/thruk/plugins 2>/dev/null
+    rmdir /etc/thruk/bp 2>/dev/null
+    rmdir /etc/thruk 2>/dev/null
+    rmdir /usr/share/thruk/plugins/plugins-available 2>/dev/null
+    rmdir /usr/share/thruk/plugins 2>/dev/null
+    rmdir /usr/share/thruk 2>/dev/null
     %{insserv_cleanup}
     rmdir /usr/share/thruk/script \
           /usr/share/thruk \
@@ -197,7 +230,44 @@ case "$*" in
 esac
 exit 0
 
+%post plugin-reporting
+rm -f /etc/thruk/plugins/plugins-enabled/reports2
+ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
+/etc/init.d/thruk condrestart &>/dev/null || :
+exit 0
+
+%preun plugin-reporting
+if [ -e /etc/thruk/plugins/plugins-enabled/reports2 ]; then
+    rm -f /etc/thruk/plugins/plugins-enabled/reports2
+    /etc/init.d/thruk condrestart &>/dev/null || :
+fi
+exit 0
+
+%postun plugin-reporting
+case "$*" in
+  0)
+    # POSTUN
+    # try to clean some empty folders
+    rmdir /etc/thruk/plugins/plugins-available 2>/dev/null
+    rmdir /etc/thruk/plugins/plugins-enabled 2>/dev/null
+    rmdir /etc/thruk/plugins 2>/dev/null
+    rmdir /etc/thruk 2>/dev/null
+    rmdir /usr/share/thruk/plugins/plugins-available 2>/dev/null
+    rmdir /usr/share/thruk/plugins 2>/dev/null
+    rmdir /usr/share/thruk/script 2>/dev/null
+    rmdir /usr/share/thruk 2>/dev/null
+    ;;
+  1)
+    # POSTUPDATE
+    ;;
+  *) echo case "$*" not handled in postun
+esac
+exit 0
+
+
 %files
+
+%files base
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/thruk
 %attr(0755,root,root) %{_bindir}/naglint
@@ -214,7 +284,31 @@ exit 0
 %config(noreplace) %{_sysconfdir}/logrotate.d/thruk
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk.conf
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk_cookie_auth_vhost.conf
-%config(noreplace) %{_sysconfdir}/thruk/plugins
+%{_datadir}/%{name}/plugins/plugins-available/business_process
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/business_process
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/business_process
+%{_datadir}/%{name}/plugins/plugins-available/conf
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/conf
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/conf
+%{_datadir}/%{name}/plugins/plugins-available/dashboard
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/dashboard
+%{_datadir}/%{name}/plugins/plugins-available/minemap
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/minemap
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/minemap
+%{_datadir}/%{name}/plugins/plugins-available/mobile
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/mobile
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/mobile
+%{_datadir}/%{name}/plugins/plugins-available/panorama
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/panorama
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/panorama
+%{_datadir}/%{name}/plugins/plugins-available/shinken_features
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/shinken_features
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/shinken_features
+%{_datadir}/%{name}/plugins/plugins-available/statusmap
+%config %{_sysconfdir}/%{name}/plugins/plugins-enabled/statusmap
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/statusmap
+%{_datadir}/%{name}/plugins/plugins-available/wml
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/wml
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/
@@ -222,11 +316,9 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/thruk_auth
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk_fastcgi.pl
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi
-%attr(0755,root,root) %{_datadir}/thruk/script/wkhtmltopdf
 %{_datadir}/thruk/root
 %{_datadir}/thruk/templates
 %{_datadir}/thruk/themes
-%{_datadir}/thruk/plugins
 %{_datadir}/thruk/lib
 %{_datadir}/thruk/Changes
 %{_datadir}/thruk/LICENSE
@@ -241,7 +333,17 @@ exit 0
 %docdir %{_defaultdocdir}
 
 
+%files plugin-reporting
+%{_sysconfdir}/thruk/plugins/plugins-available/reports2
+%{_datadir}/thruk/plugins/plugins-available/reports2
+%{_datadir}/thruk/script/wkhtmltopdf
+
+
+
 %changelog
+* Fri Jun 12 2015 Sven Nierlein <sven@consol.de> - 2.00
+- split into several subpackages
+
 * Sat Dec 07 2013 Sven Nierlein <sven@consol.de> - 1.82
 - changed to default installation routine
 

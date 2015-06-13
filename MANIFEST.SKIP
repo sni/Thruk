@@ -51,12 +51,12 @@ plugins/plugins-available/conf/tmon.out
 thruk_.*.changes
 thruk_.*.deb
 thruk_.*.dsc
-debian/thruk/.*
-debian/thruk.substvars
+debian/thruk.*/.*
+debian/thruk.*.substvars
+debian/files
+debian/thruk.*.debhelper.log
 build-stamp
 configure-stamp
-debian/files
-debian/thruk.debhelper.log
 my_templates/
 panorama_default_view
 themes/themes-available/.*/images/logos/.*server.png

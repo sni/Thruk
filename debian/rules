@@ -3,9 +3,7 @@
 
 export DH_VERBOSE=1
 DESTDIR=$(CURDIR)/debian/tmp/
-PERLARCH=$(shell perl -e 'use Config; print $$Config{archname}')
 PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
-
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
 
 override_dh_auto_configure:
@@ -25,6 +23,8 @@ override_dh_auto_configure:
 		--with-thruk-libs="/usr/lib/thruk/perl5" \
 		--with-httpd-conf="$(HTTPDCONF)" \
 		--with-htmlurl="/thruk"
+	echo $(HTTPDCONF)/thruk.conf                   >> debian/thruk-base.install
+	echo $(HTTPDCONF)/thruk_cookie_auth_vhost.conf >> debian/thruk-base.install
 
 override_dh_gencontrol:
 	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
