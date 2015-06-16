@@ -17,10 +17,14 @@
 
   <script type="text/javascript">
   <!--
-  jQuery('INPUT.conf_button').button();
-  jQuery('BUTTON.conf_button').button();
-  jQuery('.radioset').buttonset();
-  init_tree_buttons();
+  jQuery(document).ready(function() {
+    jQuery('INPUT.conf_button').button();
+    jQuery('BUTTON.conf_button').button();
+    jQuery('.radioset').buttonset();
+    if(typeof(init_tree_buttons) == "function") {
+        init_tree_buttons();
+    }
+  });
   -->
   </script>
 
