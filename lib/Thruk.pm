@@ -142,6 +142,16 @@ sub _build_app {
     ###################################################
     # create backends
     $self->{'db'} = Thruk::Backend::Manager->new();
+    if(Thruk->trace && $Thruk::Backend::Pool::peers) {
+        for my $key (@{$Thruk::Backend::Pool::peer_order}) {
+            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'};
+            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'};
+            next unless $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'}->{'backend_obj'};
+            my $peer_cls = $Thruk::Backend::Pool::peers->{$key}->{'class'}->{'live'}->{'backend_obj'};
+            $peer_cls->{'logger'} = $self->log;
+            $peer_cls->verbose(1);
+        }
+    }
     #&timing_breakpoint('startup() backends created');
 
     $self->{'routes'} = {
@@ -350,6 +360,20 @@ sub verbose {
 =cut
 sub debug {
     if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
+        return(1);
+    }
+    return(0);
+}
+
+###################################################
+
+=head2 trace
+
+    make trace accessible via Thruk->trace
+
+=cut
+sub trace {
+    if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 4) {
         return(1);
     }
     return(0);

@@ -20,8 +20,13 @@ if(grep {/^\-r/} @ARGV) {
 if(!grep {/^\-p/} @ARGV) {
     push @ARGV, '-p', '3000';
 }
-# use -vvv for most verbose mode for backwards compatibility
-if(grep {/^\-vvv/} @ARGV) {
+# use -vvvv for trace mode
+if(grep {/^\-vvvv/} @ARGV) {
+    @ARGV = grep {!/^\-vvvv/} @ARGV;
+    $ENV{'THRUK_VERBOSE'} = 4;
+}
+# use -vvv for super verbose mode for backwards compatibility
+elsif(grep {/^\-vvv/} @ARGV) {
     @ARGV = grep {!/^\-vvv/} @ARGV;
     $ENV{'THRUK_VERBOSE'} = 3;
 }

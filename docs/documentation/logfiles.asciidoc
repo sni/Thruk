@@ -47,7 +47,7 @@ The following locations will work:
 
 Then put in the following settings inside:
 
-to increase the loglevel:
+to increase the loglevel: (valid loglevels are 0-4 with 4 being most verbose)
 
   export THRUK_VERBOSE=1
 

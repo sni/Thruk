@@ -1124,6 +1124,8 @@ sub _do_on_peers {
     my %arg = %{$arg_hash};
     $arg = $arg_array;
 
+    $c->log->debug('livestatus: '.$function.': '.join(', ', @{$get_results_for}));
+
     # send query to selected backends
     my $selected_backends = scalar @{$get_results_for};
     $c->stash->{'num_selected_backends'} = $selected_backends;
@@ -1320,17 +1322,17 @@ sub select_backends {
     my $get_results_for = [];
     for my $peer ( @{ $self->get_peers() } ) {
         if($c->stash->{'failed_backends'}->{$peer->{'key'}}) {
-            #$c->log->debug("skipped peer (down): ".$peer->{'name'});
+            $c->log->debug("skipped peer (down): ".$peer->{'name'}) if Thruk->trace;
             next;
         }
         if(defined $backends) {
             unless(defined $backends->{$peer->{'key'}}) {
-                #$c->log->debug("skipped peer (undef): ".$peer->{'name'});
+                $c->log->debug("skipped peer (undef): ".$peer->{'name'}) if Thruk->trace;
                 next;
             }
         }
         elsif($peer->{'enabled'} != 1) {
-            #$c->log->debug("skipped peer (disabled): ".$peer->{'name'});
+            $c->log->debug("skipped peer (disabled): ".$peer->{'name'}) if Thruk->trace;
             next;
         }
         push @{$get_results_for}, $peer->{'key'};
