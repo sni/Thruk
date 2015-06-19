@@ -162,7 +162,7 @@ sub index {
         _process_backends_page($c);
     }
     elsif($subcat eq 'objects') {
-        $c->stash->{'obj_model_changed'} = 1;
+        $c->stash->{'obj_model_changed'} = 0;
         _process_objects_page($c);
         Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
         $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
@@ -1102,7 +1102,6 @@ sub _process_objects_page {
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    $c->stash->{'obj_model_changed'} = 0 unless $c->req->parameters->{'refreshdata'};
     $c->stash->{'referer'}           = $c->req->parameters->{'referer'} || '';
     $c->{'obj_db'}->_reset_errors(1);
     return 1;
@@ -1206,10 +1205,14 @@ sub _apply_config_changes {
     if($c->req->parameters->{'discard'}) {
         return unless Thruk::Utils::check_csrf($c);
         $c->{'obj_db'}->discard_changes();
+        $c->stash->{'obj_model_changed'} = 1;
+        $c->log->info(sprintf("[config][%s][%s] discarded stashed changes",
+                                $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                $c->stash->{'remote_user'},
+        )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->redirect_to('conf.cgi?sub=objects&apply=yes');
     }
-    $c->stash->{'obj_model_changed'} = 0 unless ($c->req->parameters->{'refreshdata'} || $c->req->parameters->{'discard'});
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
@@ -1887,6 +1890,7 @@ sub _object_save {
                                 $obj->get_type(),
                                 $c->stash->{'data_name'},
     )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+    $c->stash->{'obj_model_changed'} = 1;
 
     # only save or continue to raw edit?
     if(defined $c->req->parameters->{'send'} and $c->req->parameters->{'send'} eq 'raw edit') {
@@ -1937,6 +1941,7 @@ sub _object_move {
                                     $obj->get_name(),
                                     $file->{'path'},
         )) unless $ENV{'THRUK_TEST_CONF_NO_LOG'};
+        $c->stash->{'obj_model_changed'} = 1;
 
         return $c->redirect_to('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
@@ -2353,7 +2358,6 @@ sub _config_check {
     }
     _nice_check_output($c);
 
-    $c->stash->{'obj_model_changed'} = 0 unless $c->req->parameters->{'refreshdata'};
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     return;
@@ -2402,7 +2406,6 @@ sub _config_reload {
     # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
 
-    $c->stash->{'obj_model_changed'} = 0 unless $c->req->parameters->{'refreshdata'};
     return;
 }
 

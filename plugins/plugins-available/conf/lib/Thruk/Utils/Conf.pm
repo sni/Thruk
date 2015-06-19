@@ -79,7 +79,6 @@ sub set_object_model {
                                                forward => $c->req->url,
                                               });
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
-            $c->stash->{'obj_model_changed'} = 0 unless $c->req->parameters->{'refreshdata'};
             if($c->config->{'no_external_job_forks'} == 1 && !$no_recursion) {
                 # should be parsed now
                 return set_object_model($c, 1);
