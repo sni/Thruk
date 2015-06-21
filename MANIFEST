@@ -1028,8 +1028,6 @@ README
 root/favicon.ico
 root/index.html
 root/robots.txt
-root/thruk/images/logo_naemon_small.png
-root/thruk/images/naemon_logo.png
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
@@ -1199,12 +1197,6 @@ support/0004-thruk_data_scripts.patch
 support/0005-thruk_auth.patch
 support/0006-logrotate.patch
 support/0007-fcgish.patch
-support/0030-naemon.patch
-support/0031-naemon-init.patch
-support/0032-naemon-httpd.patch
-support/0034-naemon-branding.patch
-support/0035-naemon-cgicfg.patch
-support/0036-naemon-htpasswd.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd

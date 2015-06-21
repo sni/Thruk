@@ -37,8 +37,6 @@ local_patches:
 	sed -i blib/replace/* -e 's+log4perl.conf.example+log4perl.conf+g'
 
 local_install: local_patches
-	# breaks naemon travis tests
-	#@if [ "x${DESTDIR}" = "x" ]; then echo "*** no DESTDIR set ***"; exit 1; fi
 	mkdir -p ${DESTDIR}${TMPDIR}
 	mkdir -p ${DESTDIR}${LOCALSTATEDIR}
 	############################################################################
@@ -129,22 +127,6 @@ local_install: local_patches
 	############################################################################
 	# examples
 	cp -p examples/bp_functions.pm ${DESTDIR}${SYSCONFDIR}/bp/
-
-naemon-patch:
-	[ -z "${INITDIR}" ] || { cd ${DESTDIR}${INITDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0031-naemon-init.patch; }
-	[ -z "${INITDIR}" ] || find ${DESTDIR}${INITDIR}/ -name \*.orig -delete
-	[ -z "${HTTPDCONF}" ] || { cd ${DESTDIR}${HTTPDCONF}/  && patch -p1 < $(shell pwd)/blib/replace/0032-naemon-httpd.patch; }
-	[ -z "${HTTPDCONF}" ] || find ${DESTDIR}${HTTPDCONF}/ -name \*.orig -delete
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0030-naemon.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0035-naemon-cgicfg.patch
-	cd ${DESTDIR}${SYSCONFDIR}/ && patch -p1 < $(shell pwd)/blib/replace/0036-naemon-htpasswd.patch
-	cd ${DESTDIR}${DATADIR}/    && patch -p1 < $(shell pwd)/blib/replace/0034-naemon-branding.patch
-	find ${DESTDIR}${SYSCONFDIR}/ -name \*.orig -delete
-	find ${DESTDIR}${BINDIR}/ -name \*.orig -delete
-	mkdir -p ${DESTDIR}${SYSCONFDIR}/conf.d/
-	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_templates.cfg ] || cp -p support/thruk_templates.cfg ${DESTDIR}${SYSCONFDIR}/conf.d/
-	[ -f ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg ] ||  echo " " >> ${DESTDIR}${SYSCONFDIR}/conf.d/thruk_bp_generated.cfg
-	rm -f ${DESTDIR}${DATADIR}/root/index.html
 
 quicktest:
 	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
