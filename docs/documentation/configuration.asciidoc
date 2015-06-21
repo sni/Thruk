@@ -5,11 +5,79 @@ title: Configuration
 
 == Config Files
 
-Configuration is managed mainly in these configuration files.
+Base configuration is managed in these configuration files (in the order in
+which they are read):
 
 -------
   * thruk.conf          # shipped default Thruk config
+  * thruk_local.d/*     # local override drop dir
   * thruk_local.conf    # local override of Thruks settings
+-------
+
+WARNING: All configuration options described in this file should go into the
+thruk_local.conf or into separate files below thruk_local.d/
+
+
+=== Config file merge order
+
+Single key/value settings are overriden in the order above. Nested key/value
+pairs like Backends are merged.
+
+ex.:
+
+  thruk.conf:
+  use_frames = 0
+
+  thruk_local.conf:
+  use_frames = 1
+
+results in use_frames = 1
+
+nested values:
+
+  thruk.conf:
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 1
+  </initial_menu_state>
+
+  thruk_local.conf:
+  <initial_menu_state>
+    Current_Status = 0
+    Bookmarks      = 1
+  </initial_menu_state>
+
+results in
+
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 0
+    Bookmarks      = 1
+  </initial_menu_state>
+
+
+
+=== thruk.conf
+
+The thruk.conf contains the shipped defaults. You should not edit this
+file directly. Overwrite your settings in your thruk_local.conf /
+thruk_local.d/ instead.
+
+=== thruk_local.d
+{% include new_since.ad version="2.00" %}
+Local settings drop directory. All files in here override settings from the
+thruk.conf file.
+
+=== thruk_local.conf
+
+The thruk_local.conf should contain all settings which are locally overriden.
+Keep the default settings in the thruk.conf and only put local overrides in
+either the thruk_local.conf or into conf file below thruk_local.d/.
+
+
+=== Other config files
+
+-------
   * cgi.cfg             # Naemon/Nagios cgi.cfg
   * log4perl.conf       # Logging configuration
   * menu.conf           # Thruks default side navigation
@@ -17,25 +85,19 @@ Configuration is managed mainly in these configuration files.
 -------
 
 
-WARNING: All configuration options described in this file should go into the thruk_local.conf
-
-=== thruk.conf
-
-The thruk.conf contains the shipped defaults. You should not edit this
-file directly. Overwrite your settings in your thruk_local.conf
-instead.
-
-
-=== thruk_local.conf
-
-The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
-The idea is, that the thruk.conf is provided with the packaged defaults and the
-thruk_local.conf is to override these settings where needed.
-
-
 === cgi config
 
 link:cgi-cfg.html[This cgi.cfg is described here].
+
+
+=== menu config
+
+link:menu.html[Menu customization is described here].
+
+
+=== log4perl config
+
+link:logfiles.html[Logfiles are described here].
 
 
 

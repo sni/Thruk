@@ -33,6 +33,7 @@ case "$1" in
         rm -rf /var/lib/thruk
         rm -rf /var/log/thruk
         rm -rf /etc/thruk/bp
+        rm -rf /etc/thruk/thruk_local.d
     ;;
 
     failed-upgrade|abort-install|abort-upgrade|disappear)

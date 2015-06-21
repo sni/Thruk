@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 2.00     NOT YET RELEASED
+          - add local settings config drop dir support via thruk_local.d/
           - changed internal storage format to json everywhere
           - improved memory usage
           - improved startup time

@@ -10,7 +10,7 @@ BEGIN {
 
 if(grep {/^\-r/} @ARGV) {
     @ARGV = grep {!/^\-r/} @ARGV;
-    my @watch = qw/lib script thruk_local.conf thruk.conf/;
+    my @watch = qw/lib script thruk_local.conf thruk.conf thruk_local.d/;
     for my $plugin (glob('plugins/plugins-enabled/*/lib')) {
         push @watch, $plugin;
     }
