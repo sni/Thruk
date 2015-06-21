@@ -252,7 +252,7 @@ sub get_config {
             next unless defined $path;
             push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
-                push @files, glob($path.'/thruk_local.d/*');
+                push @files, sort glob($path.'/thruk_local.d/*');
             }
             push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
             last if scalar @files > 0;
