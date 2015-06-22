@@ -550,7 +550,7 @@ sub get_git_name {
     # directly on git tag?
     $tag = `git describe --tag --exact-match 2>&1`;
     my $rc = $?;
-    if($tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
+    if($tag && $tag =~ m/\Qno tag exactly matches '\E([^']+)'/mx) { $hash = substr($1,0,7); }
     if($rc != 0) { $tag = ''; }
     if($tag) {
         chdir($dir);
