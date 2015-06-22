@@ -70,6 +70,16 @@ case "$1" in
         chmod 755 /usr/share/thruk/fcgid_env.sh
         chmod 755 /usr/bin/thruk
 
+        # activate cookie in existing default virtual hosts
+        set +e
+        ls -1 /etc/apache2/sites-available/default* | \
+        while read file; do
+            if ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
+                sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file
+            fi
+        done
+        set -e
+
         # reload new apache config
         if which invoke-rc.d >/dev/null 2>&1; then
             invoke-rc.d apache2 reload || true
