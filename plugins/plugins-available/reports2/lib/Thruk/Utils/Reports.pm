@@ -199,7 +199,7 @@ sub report_send {
             }
         }
         my $bcc  = '';
-        my $from = $report->{'from'}    || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'};
+        my $from = $report->{'from'} || $mailheader->{'from'} || $c->config->{'Thruk::Plugin::Reports2'}->{'report_from_email'};
         if(!$to) {
             $to      = $report->{'to'}      || $mailheader->{'to'};
             $cc      = $report->{'cc'}      || $mailheader->{'cc'};
@@ -229,7 +229,15 @@ sub report_send {
                      Data     => encode_utf8($mailbody),
         );
 
-        if($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
+        # url reports as html
+        if(defined $report->{'params'}->{'pdf'} && $report->{'params'}->{'pdf'} eq 'no') {
+            $msg->attach(Type    => 'text/html',
+                     Path        => $c->config->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.html',
+                     Filename    => $report->{'var'}->{'attachment'},
+                     Disposition => 'attachment',
+            );
+        }
+        elsif($report->{'var'}->{'attachment'} && (!$report->{'var'}->{'ctype'} || $report->{'var'}->{'ctype'} ne 'html2pdf')) {
             $msg->attach(Type    => $report->{'var'}->{'ctype'},
                      Path        => $attachment,
                      Filename    => $report->{'var'}->{'attachment'},
