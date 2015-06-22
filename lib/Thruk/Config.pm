@@ -5,6 +5,7 @@ use warnings;
 use Carp qw/confess/;
 use Cwd ();
 use File::Slurp qw/read_file/;
+use Data::Dumper qw/Dumper/;
 use POSIX ();
 use Thruk::Utils::Filter ();
 
@@ -267,6 +268,7 @@ sub get_config {
         }
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
+                if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                 $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
             } else {
                 $config{$key} = $configs{$file}->{$key};
