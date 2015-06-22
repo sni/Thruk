@@ -1272,6 +1272,7 @@ t/300-controller_tac.t
 t/300-controller_test.t
 t/300-controller_trends.t
 t/400-recurring_downtime.t
+t/700-naemon.t
 t/800-firefox-js.t
 t/900-javascript_syntax.t
 t/900-javascript_utils.t
