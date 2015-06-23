@@ -21,15 +21,15 @@ SKIP: {
 }
 my $product = 'thruk';
 if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} && $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} =~ m|https?://[^/]+/(.*)$|) { $product = $1; }
-if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
-    # redirect happens during login with cookie auth
-    TestUtils::test_page(url => '/thruk');
-} else {
+#if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
+#    # redirect happens during login with cookie auth
+#    TestUtils::test_page(url => '/thruk');
+#} else {
     SKIP: {
         skip 'its one test less with redirects', 1;
     }
     TestUtils::test_page(url => '/thruk', redirect => 1, location => '/'.$product .'/');
-}
+#}
 my $res = TestUtils::test_page(url => '/thruk/cgi-bin/blah.cgi', fail => 1, like => 'This page does not exist');
 is($res->{'code'}, 404, 'got page not found');
 
