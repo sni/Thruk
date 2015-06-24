@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: extra
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7), libthruk
+Build-Depends: debhelper (>= 7), libmodule-install-perl, libthruk
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
@@ -23,8 +23,8 @@ Package: thruk-base
 Architecture: any
 Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
          libthruk,
-         apache2 | nginx-full,
-         libapache2-mod-fcgid | nginx-full,
+         apache2 | httpd-cgi,
+         libapache2-mod-fcgid | httpd-cgi,
          cron, logrotate
 Provides: thruk
 Replaces: thruk (<< 1.99~2015-06-12)
@@ -45,4 +45,3 @@ Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
          thruk-base (= ${source:Version})
 Description: This package contains the reporting addon for thruk useful for sla
  and event reporting.
-
