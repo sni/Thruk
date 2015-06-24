@@ -18,6 +18,53 @@ set -e
 # the debian-policy package
 
 
+setup_apache2() {
+  echo "Configuring apache2 vhost ..."
+
+  # enable modules we need
+  a2enmod alias
+  a2enmod fcgid
+  a2enmod auth_basic
+  a2enmod rewrite
+
+  # enable thruk itself
+  if [ -x '/usr/sbin/a2enconf' ]; then
+      # clean up old conf.d mess
+      set +e
+      if [ -e /etc/apache2/conf.d/thruk.conf -a -e /etc/apache2/conf-available/thruk.conf.dpkg-new -a -h /etc/apache2/conf-available/thruk.conf ]; then
+          diff /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf.dpkg-new >/dev/null && {
+              rm -f /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf
+              rmdir /etc/apache2/conf.d 2>/dev/null
+              mv /etc/apache2/conf-available/thruk.conf.dpkg-new /etc/apache2/conf-available/thruk.conf
+          }
+      fi
+      set -e
+      [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
+      [ -f /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf ] || /usr/sbin/a2enconf thruk_cookie_auth_vhost
+  fi
+
+  # activate cookie in existing default virtual hosts
+  set +e
+  ls -1 /etc/apache2/sites-available/*default*.conf | \
+  while read file; do
+      if ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
+          sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file
+      fi
+  done
+  set -e
+
+  # reload new apache config
+  if which invoke-rc.d >/dev/null 2>&1; then
+      invoke-rc.d apache2 reload || true
+  else
+      /etc/init.d/apache2 reload || true
+  fi
+
+  echo "Thruk have been configured for http://$(hostname)/thruk/."
+  echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
+}
+
+
 case "$1" in
     configure)
         # restore themes, plugins and ssi
@@ -36,28 +83,6 @@ case "$1" in
         fi
         rm -rf /tmp/thruk_update
 
-        # enable modules we need
-        a2enmod alias
-        a2enmod fcgid
-        a2enmod auth_basic
-        a2enmod rewrite
-
-        # enable thruk itself
-        if [ -x '/usr/sbin/a2enconf' ]; then
-            # clean up old conf.d mess
-            set +e
-            if [ -e /etc/apache2/conf.d/thruk.conf -a -e /etc/apache2/conf-available/thruk.conf.dpkg-new -a -h /etc/apache2/conf-available/thruk.conf ]; then
-                diff /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf.dpkg-new >/dev/null && {
-                    rm -f /etc/apache2/conf.d/thruk.conf /etc/apache2/conf-available/thruk.conf
-                    rmdir /etc/apache2/conf.d 2>/dev/null
-                    mv /etc/apache2/conf-available/thruk.conf.dpkg-new /etc/apache2/conf-available/thruk.conf
-                }
-            fi
-            set -e
-            [ -f /etc/apache2/conf-enabled/thruk.conf ] || /usr/sbin/a2enconf thruk
-            [ -f /etc/apache2/conf-enabled/thruk_cookie_auth_vhost.conf ] || /usr/sbin/a2enconf thruk_cookie_auth_vhost
-        fi
-
         # set permissions
         mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports /etc/thruk/bp /etc/thruk/thruk_local.d
         chown -R www-data: /var/lib/thruk \
@@ -70,22 +95,9 @@ case "$1" in
         chmod 755 /usr/share/thruk/fcgid_env.sh
         chmod 755 /usr/bin/thruk
 
-        # activate cookie in existing default virtual hosts
-        set +e
-        ls -1 /etc/apache2/sites-available/*default*.conf | \
-        while read file; do
-            if ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
-                sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file
-            fi
-        done
-        set -e
-
-        # reload new apache config
-        if which invoke-rc.d >/dev/null 2>&1; then
-            invoke-rc.d apache2 reload || true
-        else
-            /etc/init.d/apache2 reload || true
-        fi
+        # Depending on which webserver is installed, set up the basics
+        # (so far only supports apache2)
+        [ -x /usr/sbin/apache2 ] && setup_apache2
 
         # create empty crontab
         /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
@@ -93,9 +105,6 @@ case "$1" in
         # update cron entries
         rm -f /var/cache/thruk/thruk.cache
         /usr/bin/thruk -a clearcache,installcron --local > /dev/null
-
-        echo "Thruk have been configured for http://$(hostname)/thruk/."
-        echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
