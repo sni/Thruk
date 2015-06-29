@@ -72,7 +72,7 @@ case "$1" in
 
         # activate cookie in existing default virtual hosts
         set +e
-        ls -1 /etc/apache2/sites-available/*default*.conf | \
+        ls -1 /etc/apache2/sites-available/*default* | \
         while read file; do
             if ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
                 sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file
