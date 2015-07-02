@@ -1883,7 +1883,6 @@ ex.:
     thruk                     = .../thruk_local.conf
     cgi.cfg                   = .../cgi.cfg
     htpasswd                  = .../htpasswd
-+
     pre_obj_save_cmd          = .../hook.sh
     post_obj_save_cmd         = .../hook.sh
     git_base_dir              = /etc/naemon/conf.d/custom/
