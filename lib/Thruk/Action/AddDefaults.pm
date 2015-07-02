@@ -1132,7 +1132,7 @@ sub _set_enabled_backends {
 
     ###############################
     # by param
-    elsif(defined $backend) {
+    elsif($num_backends > 1 and defined $backend) {
         $c->log->debug('_set_enabled_backends() by param');
         # reset
         for my $peer (@{$c->{'db'}->get_peers()}) {
