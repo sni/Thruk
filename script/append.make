@@ -1,8 +1,42 @@
 ### THRUK
 
-newversion:
+DAILYVERSION=$(shell ./get_version)
+DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
+
+newversion: versionprecheck
 	test -e .git
-	make NEWVERSION="`./get_version`" version
+	make NEWVERSION="$(DAILYVERSION)" version
+
+dailyversion: newversion
+
+dailydist: cleandist newversion dist resetdaily
+	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
+	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
+		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
+		themes/themes-available/Thruk/stylesheets/all_in_one-$(DAILYVERSIONFILES).css \
+		themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$(DAILYVERSIONFILES).css
+	ls -la *.gz
+
+releasedist: cleandist dist
+	tar zxf Thruk-*.tar.gz
+	rm *.gz
+	mv Thruk-* Thruk-$(DAILYVERSION)
+	tar cf Thruk-$(DAILYVERSION).tar Thruk-*
+	gzip -9 Thruk-$(DAILYVERSION).tar
+	for file in $$(find . -name Thruk-\* -type d); do rm -rf $file; done
+	ls -la *.gz
+
+cleandist:
+	rm -f *.gz
+
+resetdaily:
+	git reset --hard HEAD
+	git checkout .
+	yes n | perl Makefile.PL || yes n | perl Makefile.PL
+
+versionprecheck:
+	[ -e .git ] || { echo "changing versions only works in git clones!"; exit 1; }
+	[ `git status | grep -c 'working directory clean'` -eq 1 ] || { echo "git project is not clean, cannot tag version"; exit 1; }
 
 version:
 	script/thruk_version.sh
