@@ -265,7 +265,7 @@ sub index {
     }
 
     if($c->req->parameters->{'json'} and $c->stash->{'form_errors'}) {
-        my $json = {'success' => 0, errors => $c->stash->{'form_errors'} };
+        my $json = {'success' => ($c->stash->{'form_errors'} && scalar @{$c->stash->{'form_errors'}}) > 0 ? 0 : 1, errors => $c->stash->{'form_errors'} };
         return $c->render(json => $json);
     }
 
