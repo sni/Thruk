@@ -19,6 +19,7 @@ window.setTimeout = function(callback, timeout) {
         } catch(err2) {
             TP.logError("global", "setTimeoutExceptionOrigin", err);
             TP.logError("global", "setTimeoutException", err2);
+            throw(err2);
         }
     }, timeout);
     timers[id] = ({id:id,  setAt: new Date(),  timeout: timeout, callback: callback, caller: window.setTimeout.caller});
