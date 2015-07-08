@@ -33,8 +33,11 @@ my $project_root = home('Thruk::Config');
 my $branch       = '';
 my $gitbranch    = get_git_name($project_root);
 my $filebranch   = $branch || 1;
-$branch          = $gitbranch if($gitbranch ne '' and $branch eq '');
-$branch          = $branch.'~'.$gitbranch if($gitbranch ne '' and $branch ne '');
+if($branch) {
+    $branch = $branch.'~'.$gitbranch if $gitbranch ne '';
+} else {
+    $branch = $gitbranch if $gitbranch;
+}
 confess('got no project_root') unless $project_root;
 ## no critic
 $ENV{'THRUK_SRC'} = 'UNKNOWN' unless defined $ENV{'THRUK_SRC'};
