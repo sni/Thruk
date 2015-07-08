@@ -312,6 +312,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
     fields.push({ xtype: 'hidden', name: 'cmd_typ', value: cmd_typ });
     fields.push({ xtype: 'hidden', name: 'cmd_mod', value: '2' });
     fields.push({ xtype: 'hidden', name: 'token',   value: '' });
+    /* this is a Ext.menu.Menu */
     return {
         plain:      true,
         letItClose: false,
@@ -344,6 +345,10 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                     return true;
                 }
                 return false;
+            },
+            show: function(This) {
+                /* keynav breaks writing spaces */
+                This.keyNav.disable();
             },
             beforeshow: function(This, eOpts) {
                 /* don't show more than one menu */

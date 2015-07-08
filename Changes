@@ -13,6 +13,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fix shadownaemon using the livestatus wait feature
           - Panorama View:
             - fix missing Sitename in services/host widgets
+            - fix using spaces in command comments (#495)
           - Business Process:
             - fix using backslashes in business process object names (#485)
 
