@@ -99,7 +99,7 @@ Ext.define('TP.PanletNagvis', {
 
         panel.refreshHandler = function() {
             if(panel.xdata.graph && panel.xdata.base_url) {
-                var newUrl = panel.xdata.base_url+'/index.php?mod=Map&act=view&show='+panel.xdata.graph;
+                var newUrl = panel.xdata.base_url+'/index.php?mod=Map&act=view&show='+panel.xdata.graph+'&enableHeader=0&enableHover=0&enableContext=0';
                 if(panel.xdata.url != newUrl) {
                     panel.xdata.url = newUrl;
                     panel.saveState();
