@@ -361,6 +361,12 @@ sub _js {
     $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
 
+    # default geo map center
+    $c->stash->{default_map_zoom} = $c->config->{'Thruk::Plugin::Panorama'}->{'geo_map_default_zoom'} || 5;
+    my($lon,$lat) = split(/\s*,\s*/mx, ($c->config->{'Thruk::Plugin::Panorama'}->{'geo_map_default_center'} || '13.74,47.77'));
+    $c->stash->{default_map_lon} = $lon;
+    $c->stash->{default_map_lat} = $lat;
+
     unless($only_data) {
         $c->res->headers->content_type('text/javascript; charset=UTF-8');
         $c->stash->{template} = 'panorama_js.tt';
