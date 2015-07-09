@@ -582,8 +582,8 @@ Ext.define('TP.Pantab', {
                 map:      map,
                 width:    size.width,
                 height:   size.height,
-                center:  '13.74,47.77',
-                zoom:     5,
+                center:   ''+default_map_lon+','+default_map_lat,
+                zoom:     default_map_zoom,
                 stateful: true,
                 style:    "position: absolute; top: 0px; left: 0px;",
                 listeners: {

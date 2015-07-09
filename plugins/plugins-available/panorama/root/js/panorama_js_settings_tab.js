@@ -411,6 +411,14 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                     Ext.getCmp('wms_choose').setRawValue(values.wms_provider);
                 }
             }
+            if(values.mapzoom == undefined || values.mapzoom == "") {
+                values.maplon  = default_map_lon;
+                values.maplat  = default_map_lat;
+                values.mapzoom = default_map_zoom;
+                Ext.getCmp('maplon').setRawValue(values.maplon);
+                Ext.getCmp('maplat').setRawValue(values.maplat);
+                Ext.getCmp('mapzoom').setRawValue(values.mapzoom);
+            }
         } else {
             Ext.getCmp('background_choose').show();
             Ext.getCmp('background_offset_choose').show();
@@ -490,11 +498,13 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             {
                 xtype:      'textfield',
                 name:       'maplon',
+                id:         'maplon',
                 width:       120,
                 value:       tab.xdata.map != undefined ? tab.xdata.map.lon : ''
             }, {
                 xtype:      'textfield',
                 name:       'maplat',
+                id:         'maplat',
                 width:       120,
                 value:       tab.xdata.map != undefined ? tab.xdata.map.lat : ''
             },
@@ -502,6 +512,7 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
             {
                 xtype:      'textfield',
                 name:       'mapzoom',
+                id:         'mapzoom',
                 width:       40,
                 value:       tab.xdata.map != undefined ? tab.xdata.map.zoom : ''
             }]
@@ -783,7 +794,6 @@ TP.tabSettingsWindowDo = function(mask, nr, closeAfterEdit) {
                         }
                         delete values['refresh_txt'];
                         delete values['map_choose'];
-debug(values);
                         Ext.apply(tab.xdata, values);
 
                         var s_form  = Ext.getCmp('soundForm').getForm();

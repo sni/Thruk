@@ -40,5 +40,8 @@ var thruk_wms_provider       = [% json_encode(wms_provider) %];
 var thruk_shape_data         = [% json_encode(shape_data) %];
 var thruk_iconset_data       = [% json_encode(iconset_data) %];
 var action_menu_actions      = [% json_encode(action_menu_actions) %];
+var default_map_zoom         = 5;
+var default_map_lon          = 13.74;
+var default_map_lat          = 47.77;
 
 [%+ PROCESS _header_initial_states.tt +%]
