@@ -65,7 +65,7 @@ feature     ('mysql_support',
 feature     ('performance_tweaking',
   -default                                        => 0,
   'HTML::Escape'                                  => 0,     # required by Thruk::Utils::Filter
-  'Thruk::Utils::XS'                              => 0,     # required by Thruk::Backend::Manager
+#  'Thruk::Utils::XS'                              => 0,     # required by Thruk::Backend::Manager
 );
 
 # requirements test requirements
