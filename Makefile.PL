@@ -22,7 +22,7 @@ requires 'HTTP::Request'                          => 0;     # required by Thruk:
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::UserAgent
 requires 'Net::HTTP'                              => 6.02;  # required for HTTP connections. Version required due to timeout bug
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
-requires 'HTML::Escape'                           => 0;     # required by Thruk::Utils::Filter
+requires 'HTML::Entities'                         => 0;     # required by Thruk::Utils::Filter
 requires 'Socket'                                 => 0;     # required by Monitoring::Livestatus
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
@@ -59,6 +59,13 @@ feature     ('mysql_support',
   -default                                        => 0,
   'DBI'                                           => 0,     # required by Thruk::Backend::Provider::Mysql
   'DBD::mysql'                                    => 0,     # required by Thruk::Backend::Provider::Mysql
+);
+
+# performance tweaking modules
+feature     ('performance_tweaking',
+  -default                                        => 0,
+  'HTML::Escape'                                  => 0,     # required by Thruk::Utils::Filter
+  'Thruk::Utils::XS'                              => 0,     # required by Thruk::Backend::Manager
 );
 
 # requirements test requirements

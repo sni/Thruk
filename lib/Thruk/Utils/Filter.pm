@@ -18,7 +18,27 @@ use URI::Escape qw/uri_escape/;
 use JSON::XS ();
 use Encode qw/decode_utf8/;
 use Digest::MD5 qw(md5_hex);
-use HTML::Escape ();
+
+##############################################
+# use faster HTML::Escape if available
+eval {
+    require HTML::Escape;
+    *html_escape = sub {
+        return HTML::Escape::escape_html(@_);
+    };
+};
+if($@) {
+    eval {
+        require HTML::Entities;
+        *html_escape = sub {
+            return HTML::Entities::encode_entities(@_);
+        };
+    };
+}
+if($@) {
+    die("either HTML::Escape or HTML::Entities required: ".$!);
+}
+*escape_html = *html_escape;
 
 ##############################################
 
@@ -358,10 +378,6 @@ sub uri_with {
 wrapper for escape_html for compatibility reasons
 
 =cut
-sub html_escape {
-    return HTML::Escape::escape_html(@_);
-}
-
 
 ########################################
 
@@ -372,10 +388,6 @@ sub html_escape {
 returns an escaped string
 
 =cut
-sub escape_html {
-    return HTML::Escape::escape_html(@_);
-}
-
 
 ########################################
 
