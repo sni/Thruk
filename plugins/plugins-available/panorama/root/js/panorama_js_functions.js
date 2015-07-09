@@ -301,6 +301,10 @@ var TP = {
         } else {
             panel.refreshHandler();
         }
+        /* ensure the panel gets where it should be */
+        window.setTimeout(function() {
+            panel.setPosition(config.conf.pos[0], config.conf.pos[1]);
+        }, 200);
     },
 
     /* add panel, but let the user choose position */
