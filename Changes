@@ -17,6 +17,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fix using spaces in command comments (#495)
           - Business Process:
             - fix using backslashes in business process object names (#485)
+          - Reporting:
+            - add new options to better use indexes and skip updating logcache (#464, Zirafarafa)
 
           Incompatible Changes:
           - custom thruk plugins have to be adopted to thruk 2, see migration
