@@ -211,6 +211,26 @@ ex.:
   report_max_objects = 1000
 
 
+=== report_include_class2
+Include messages with class = 2 (program messages) in reports.
+Setting this to 0 allows the MySQL backend to use indexes efficiently
+
+ex.:
+
+  report_include_class2 = 1
+
+
+=== report_update_logcache
+Should thruk update the logcache databases before running reports?
+Setting this to 0 reduces the time taken to run reports but the most
+recent data is not necessarily available.  If you use this option
+you should probably create a cron to run "thruk -a logcacheupdate"
+
+ex.:
+
+  report_update_logcache = 1
+
+
 === start_page
 
 This link is used as startpage and points usually to the main.html
