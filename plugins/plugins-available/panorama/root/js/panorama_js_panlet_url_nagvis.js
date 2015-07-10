@@ -47,7 +47,9 @@ Ext.define('TP.PanletNagvis', {
                     graph_combo_error_label.setValue('');
                     graph_combo.enable();
                 } else {
-                    success = false;
+                    graph_combo_error_label.setActiveError('');
+                    graph_combo_error_label.setValue('loading graphs failed, no maps found. Is this a nagvis url?');
+                    panel.graphs_loaded = 0;
                 }
             }
             if(!success) {
@@ -99,7 +101,7 @@ Ext.define('TP.PanletNagvis', {
 
         panel.refreshHandler = function() {
             if(panel.xdata.graph && panel.xdata.base_url) {
-                var newUrl = panel.xdata.base_url+'/index.php?mod=Map&act=view&show='+panel.xdata.graph+'&enableHeader=0&enableHover=0&enableContext=0';
+                var newUrl = panel.xdata.base_url+'/index.php?mod=Map&act=view&show='+panel.xdata.graph+'&header_menu=0&hover_menu=0&context_menu=0';
                 if(panel.xdata.url != newUrl) {
                     panel.xdata.url = newUrl;
                     panel.saveState();
