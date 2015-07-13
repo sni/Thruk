@@ -265,6 +265,7 @@ sub get_config {
 
     my %configs = %{_load_any(\@files)};
     my %config  = %Thruk::Config::config;
+    my $first_backend_from_thruk_locals = 0;
     for my $file (@files) {
         if($ENV{'THRUK_VERBOSE'} && $ENV{'THRUK_VERBOSE'} >= 2) {
             print STDERR "reading config file: ".$file."\n";
@@ -272,7 +273,16 @@ sub get_config {
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
                 if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
-                $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
+                if($key eq 'Thruk::Backend') {
+                    # merge all backends from thruk_locals
+                    if(!$first_backend_from_thruk_locals and $file =~ m|thruk_local\.|mx) {
+                        $config{$key}->{'peer'} = [];
+                        $first_backend_from_thruk_locals = 1;
+                    }
+                    $config{$key}->{'peer'} = [ @{list($config{$key}->{'peer'})}, @{list($configs{$file}->{$key}->{'peer'})} ];
+                } else {
+                    $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
+                }
             } else {
                 $config{$key} = $configs{$file}->{$key};
             }
