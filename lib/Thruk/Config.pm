@@ -275,7 +275,7 @@ sub get_config {
                 if(ref $configs{$file}->{$key} ne 'HASH') { confess("tried to merge into hash: ".Dumper($file, $key, $configs{$file}->{$key})); }
                 if($key eq 'Thruk::Backend') {
                     # merge all backends from thruk_locals
-                    if(!$first_backend_from_thruk_locals and $file =~ m|thruk_local\.|mx) {
+                    if(!$first_backend_from_thruk_locals && $file =~ m|thruk_local\.|mx) {
                         $config{$key}->{'peer'} = [];
                         $first_backend_from_thruk_locals = 1;
                     }
