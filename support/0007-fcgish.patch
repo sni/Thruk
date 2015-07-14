@@ -1,17 +1,13 @@
---- a/fcgid_env.sh	2013-12-03 23:11:49.748092221 +0100
-+++ b/fcgid_env.sh	2013-12-03 23:12:52.971099121 +0100
-@@ -1,7 +1,7 @@
- #!/bin/bash
- 
- # set thruk environment
--export THRUK_CONFIG="/etc/thruk"
-+export THRUK_CONFIG="@SYSCONFDIR@"
- 
- # load extra environment variables
- if [ -f /etc/sysconfig/thruk ]; then
-@@ -13,4 +13,4 @@
- [ -e ~/.thruk ] && . ~/.thruk
- 
- # execute fastcgi server
--exec /usr/share/thruk/script/thruk_fastcgi.pl
-+exec @DATADIR@/script/thruk_fastcgi.pl
+--- a/fcgid_env.sh	2015-07-14 13:37:54.576056301 +0200
++++ b/fcgid_env.sh	2015-07-14 13:51:32.933883093 +0200
+@@ -10,8 +10,8 @@
+   [ -e $OMD_ROOT/.profile ] && . $OMD_ROOT/.profile
+   [ -e $OMD_ROOT/.thruk   ] && . $OMD_ROOT/.thruk
+ else
+-  export THRUK_CONFIG="/etc/thruk"
+-  THRUK_FCGI_BIN="/usr/share/thruk/script/thruk_fastcgi.pl"
++  export THRUK_CONFIG="@SYSCONFDIR@"
++  THRUK_FCGI_BIN="@DATADIR@/script/thruk_fastcgi.pl"
+   [ -e /etc/sysconfig/thruk ] && . /etc/sysconfig/thruk
+   [ -e /etc/default/thruk ]   && . /etc/default/thruk
+   [ -e ~/.thruk ]             && . ~/.thruk
