@@ -18,12 +18,6 @@ dailydist: cleandist newversion dist resetdaily
 	ls -la *.gz
 
 releasedist: cleandist dist
-	tar zxf Thruk-*.tar.gz
-	rm *.gz
-	mv Thruk-* Thruk-$(DAILYVERSION)
-	tar cf Thruk-$(DAILYVERSION).tar Thruk-*
-	gzip -9 Thruk-$(DAILYVERSION).tar
-	for file in $$(find . -name Thruk-\* -type d); do rm -rf $file; done
 	ls -la *.gz
 
 cleandist:

@@ -9,7 +9,7 @@
 %endif
 
 Name:          thruk
-Version:       1.99
+Version:       2.00
 Release: 1
 License:       GPLv2+
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
@@ -27,7 +27,7 @@ BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Requires(pre): shadow-utils
-BuildRequires: libthruk
+BuildRequires: libthruk >= 2.00
 Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
 
@@ -47,7 +47,7 @@ large installations.
 %package base
 Summary:     Thruk Gui Base Files
 Group:       Applications/System
-Requires:    libthruk
+Requires:    libthruk >= 2.00
 Requires(preun): libthruk
 Requires(post): libthruk
 Requires:    perl logrotate gd wget

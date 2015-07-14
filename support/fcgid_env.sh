@@ -6,7 +6,7 @@ THRUK_MAX_FCGI_PROCS=20
 
 if [ "x$OMD_ROOT" != "x" ]; then
   export THRUK_CONFIG="$OMD_ROOT/etc/thruk"
-  THRUK_FCGI_BIN="/share/thruk/script/thruk_fastcgi.pl"
+  THRUK_FCGI_BIN="$OMD_ROOT/share/thruk/script/thruk_fastcgi.pl"
   [ -e $OMD_ROOT/.profile ] && . $OMD_ROOT/.profile
   [ -e $OMD_ROOT/.thruk   ] && . $OMD_ROOT/.thruk
 else

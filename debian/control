@@ -2,7 +2,7 @@ Source: thruk
 Section: net
 Priority: extra
 Maintainer: Sven Nierlein <sven.nierlein@consol.de>
-Build-Depends: debhelper (>= 7), libthruk
+Build-Depends: debhelper (>= 7), libthruk (>=2.00)
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/Thruk/issues
@@ -22,13 +22,13 @@ Description: Monitoring Webinterface for Nagios/Icinga and Shinken
 Package: thruk-base
 Architecture: any
 Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
-         libthruk,
+         libthruk (>=2.00),
          apache2 | nginx-full,
          libapache2-mod-fcgid | nginx-full,
          cron, logrotate
 Provides: thruk
-Replaces: thruk (<< 1.99~2015-06-12)
-Breaks: thruk (<< 1.99~2015-06-12)
+Replaces: thruk (<< 2.00)
+Breaks: thruk (<< 2.00)
 Description: Monitoring Webinterface for Nagios/Icinga and Shinken
  Thruk is a multibackend monitoring webinterface which currently
  supports Nagios, Icinga and Shinken as backend using the Livestatus
