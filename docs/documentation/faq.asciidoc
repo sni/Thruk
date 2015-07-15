@@ -296,6 +296,18 @@ changes active).
 Read more about SELinux on http://wiki.centos.org/HowTos/SELinux
 
 
+If there is no error in either apache or thruk logs, try to manually run the
+fcgi script with your webserver user (usually something like `www-data` or
+`apache`)
+
++
+  su - www-data -c "/usr/share/thruk/fcgid_env.sh"
+  STDIN is not a socket: specify a listen location at /usr/lib/thruk/perl5/Plack/Handler/FCGI.pm line 57.
++
+
+If you see the error above, eveything is ok. Otherwise you should see the real
+error now.
+
 
 === possible csrf, no or invalid token
 
