@@ -8,7 +8,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    my $tests = 1343;
+    my $tests = 1342;
     $tests    = $tests - 11 if $ENV{'THRUK_TEST_NO_RELOADS'};
     plan tests => $tests;
 }
@@ -99,7 +99,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree_objects&type=command',
     '/thruk/cgi-bin/conf.cgi?sub=backends',
     { url => '/thruk/cgi-bin/conf.cgi', post => { 'sub' => 'thruk', 'action' => 'store'}, 'startup_to_url' => '/thruk/cgi-bin/conf.cgi?sub=thruk', 'follow' => 1 },
-    '/thruk/cgi-bin/conf.cgi?sub=objects&action=history',
+    { url => '/thruk/cgi-bin/conf.cgi?sub=objects&action=history', unlike => [ 'ARRAY', 'HASH' ] },
     {url => '/thruk/cgi-bin/conf.cgi?sub=plugins&action=preview&pic=minemap', like => 'PNG', 'content_type' => 'image/png'},
 ];
 
