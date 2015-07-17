@@ -1,0 +1,48 @@
+﻿[%
+  locale_name          = 'danish';      # language name should be in english
+  reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
+  reportDateFormat     = '%d %b %Y';
+  weekAbbr             = 'U';
+  monthNames           = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+  dayNames             = ['Ma','Ti','On','To','Fr','Lø','Sø'];
+  translations         = {
+# keep those personal names
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Hostgruppe:',
+    'Servicegroup:'                         => 'Servicegruppe:',
+    'Event Report'                          => 'Hændelsesrapport',
+    'SLA Report'                            => 'SLA rapport',
+    'Business Process:'                     => 'Foretningsprocess:',
+    'Report Timeperiod:'                    => 'Tidsrum:',
+    'Legend'                                => 'Forklaring',
+    'Host Alert'                            => 'Host alarm',
+    'Service Alert'                         => 'Service alarm',
+    'Totals'                                => 'Antal',
+    'Events'                                => 'Hændelser',
+    'no events during this timeperiod.'     => 'ingen hændelser i dette tidsrum.',
+    'SLA Overview Graph'                    => 'SLA oversigt',
+    'Availability'                          => 'Tilgængelighed',
+    'Service: %s on %s'                     => 'Service: %s på %s',
+    'Average Availability'                  => 'Gennemsnits tilgængelighed',
+    'Total Uptime'                          => 'Totel oppetid',
+    'Total Downtime'                        => 'Total nedetid',
+    'no outages during this timeperiod'     => 'Ingen udfald i dette tidsrum',
+    'Worst Outages'                         => 'De længeste udfald',
+    'Latest Outages'                        => 'De nyeste udfald',
+    'Outages'                               => 'Udfald',
+    'Report:'                               => 'Rapport:',
+    'Description:'                          => 'Beskrivelse:',
+    'Your report is attached.'              => 'Din rapport er vedhæftet.',
+    'Out of Scope'                          => 'Uden for området',
+  }
+%]

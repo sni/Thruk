@@ -976,6 +976,7 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
+plugins/plugins-available/reports2/templates/reports/locale/dk.tt
 plugins/plugins-available/reports2/templates/reports/locale/de.tt
 plugins/plugins-available/reports2/templates/reports/locale/en.tt
 plugins/plugins-available/reports2/templates/reports/locale/es.tt
