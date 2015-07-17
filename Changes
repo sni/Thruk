@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Reports:
+            - add danish localization
+
+
 2.00     Mon Jul 13 22:49:52 CEST 2015
           - add local settings config drop dir support via thruk_local.d/
           - changed internal storage format to json everywhere
