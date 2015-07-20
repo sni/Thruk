@@ -197,7 +197,8 @@ sub _build_app {
                 load $plugin;
                 $plugin->add_routes($self, $self->{'routes'});
             };
-            $self->log->error("disabled broken plugin $plugin: ".$@) if $@;
+            my $err = $@;
+            $self->log->error("disabled broken plugin $plugin: ".$err) if $err;
         } else {
             die("unknown plugin folder format: $plugin_dir");
         }
