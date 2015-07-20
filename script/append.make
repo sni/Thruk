@@ -9,7 +9,11 @@ newversion: versionprecheck
 
 dailyversion: newversion
 
-dailydist: cleandist newversion dist resetdaily
+dailydist: cleandist
+	# run in own make process, otherwise VERSION variable would not be updated
+	$(MAKE) newversion
+	$(MAKE) dist
+	$(MAKE) resetdaily
 	mv Thruk-*.tar.gz Thruk-$$(echo "$(DAILYVERSION)" | tr ' ' '~').tar.gz
 	rm -f plugins/plugins-available/panorama/root/all_in_one-$(DAILYVERSIONFILES)_panorama.js \
 		root/thruk/javascript/all_in_one-$(DAILYVERSIONFILES).js \
