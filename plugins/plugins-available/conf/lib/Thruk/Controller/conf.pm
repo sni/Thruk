@@ -2082,6 +2082,13 @@ sub _file_save {
         } else {
             Thruk::Utils::set_message( $c, 'success_message', 'File '.$c->stash->{'file_name'}.' changed successfully' );
         }
+    }
+    elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
+        Thruk::Utils::set_message( $c, 'success_message', 'File '.$filename.' changed successfully' );
+        Thruk::Utils::IO::write($filename, $content);
+        if(defined $c->req->parameters->{'backlink'}) {
+            return $c->redirect_to($c->req->parameters->{'backlink'});
+        }
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
     }
@@ -2108,6 +2115,20 @@ sub _file_editor {
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
         $c->stash->{'file_content'}  = decode_utf8($file->get_new_file_content());
         $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
+    }
+    elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
+        $file = Monitoring::Config::File->new($filename, [], $c->{'obj_db'}->{'coretype'}, 1);
+        $c->stash->{'file'}          = $file;
+        $c->stash->{'file_link'}     = $filename;
+        $c->stash->{'file_name'}     = $filename;
+        $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
+        $c->stash->{'file_content'}  = '';
+        if(-f $filename) {
+            my $content                  = read_file($filename);
+            $c->stash->{'file_content'}  = decode_utf8($content);
+        }
+        $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
+        $c->stash->{'subtitle'}      = "";
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
     }
@@ -2473,6 +2494,22 @@ sub _gather_references {
     return({incoming => $incoming, outgoing => $outgoing});
 }
 
+##########################################################
+sub _is_extra_file {
+    my($filename, $edit_files) = @_;
+    $edit_files = Thruk::Utils::list($edit_files);
+    for my $file (@{$edit_files}) {
+        # direct match
+        if($file eq $filename) {
+            return 1;
+        }
+        # pattern is a directory and the file is below that folder
+        elsif($filename =~ m|^\Q$file\E/|mx && -d $file) {
+            return 1;
+        }
+    }
+    return 0;
+}
 ##########################################################
 
 =head1 AUTHOR

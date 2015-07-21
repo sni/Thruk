@@ -1906,6 +1906,7 @@ ex.:
     pre_obj_save_cmd          = .../hook.sh
     post_obj_save_cmd         = .../hook.sh
     git_base_dir              = /etc/naemon/conf.d/custom/
+    edit_files                = some/extra/files/to.edit
   </Component>
 
 
@@ -1940,6 +1941,11 @@ directory which is used to display the history. Should point to a
 directory which is part of a git repository. This config setting is
 only used for the history support in the configuration tool. The
 'git_base_dir' may be overriden by an per backend value.
+
+=== edit_files
+Specify some extra files which can then be edited by the Thruk configtool
+text editor. Can be used multiple times. When used with a directory, all
+files below can be edited.
 
 
 
