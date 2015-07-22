@@ -56,6 +56,7 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 is_loading_[% progressbarid %] = false;
+                last_time_[% progressbarid %]++;
             }
         });
 
