@@ -1861,7 +1861,7 @@ sub _task_userdata_sounds {
     my($c) = @_;
     my $folder = $c->stash->{'usercontent_folder'}.'/sounds/';
     my $sounds = [];
-    for my $file (glob("$folder/*.mp3 $folder/*/*.mp3")) {
+    for my $file (glob("$folder/*.ogg $folder/*/*.ogg $folder/*.mp3 $folder/*/*.mp3")) {
         my $path = $file;
         $path    =~ s/^\Q$folder\E//gmx;
         my $name = $path;
