@@ -976,8 +976,8 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_graph.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
-plugins/plugins-available/reports2/templates/reports/locale/dk.tt
 plugins/plugins-available/reports2/templates/reports/locale/de.tt
+plugins/plugins-available/reports2/templates/reports/locale/dk.tt
 plugins/plugins-available/reports2/templates/reports/locale/en.tt
 plugins/plugins-available/reports2/templates/reports/locale/es.tt
 plugins/plugins-available/reports2/templates/reports/locale/fr.tt
@@ -1162,6 +1162,10 @@ root/thruk/usercontent/shapes/star5.js
 root/thruk/usercontent/shapes/star6.js
 root/thruk/usercontent/shapes/triangle.js
 root/thruk/usercontent/sounds/critical.mp3
+root/thruk/usercontent/sounds/ogg/critical.ogg
+root/thruk/usercontent/sounds/ogg/ok.ogg
+root/thruk/usercontent/sounds/ogg/unknown.ogg
+root/thruk/usercontent/sounds/ogg/warning.ogg
 root/thruk/usercontent/sounds/ok.mp3
 root/thruk/usercontent/sounds/unknown.mp3
 root/thruk/usercontent/sounds/warning.mp3
