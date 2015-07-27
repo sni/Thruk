@@ -2141,7 +2141,8 @@ This folder should point to the 'check_result_path' of your core.
 
 === result_backend
 As alternative to the spool_dir, a livestatus connection can be used
-to send results to the core.
+to send results to the core. Set the name or key of the backend with
+this option.
 
 === objects_save_file
 Save objects to this file. Content will be overwritten.
