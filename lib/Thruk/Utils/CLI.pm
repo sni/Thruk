@@ -995,7 +995,7 @@ sub _cmd_downtimetask {
                 $downtime->{'host'} = $hst;
                 my $rc;
                 eval {
-                    $rc = _set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'hosts'}->{$hst};
@@ -1014,7 +1014,7 @@ sub _cmd_downtimetask {
                 $downtime->{$downtime->{'target'}} = $grp;
                 my $rc;
                 eval {
-                    $rc = _set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'groups'}->{$grp};
@@ -1045,7 +1045,30 @@ sub _cmd_downtimetask {
 }
 
 ##############################################
-sub _set_downtime {
+
+=head2 set_downtime
+
+    set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes)
+
+set downtime.
+
+    downtime is a hash like this:
+    {
+        author  => 'downtime author'
+        host    => 'host name'
+        service => 'optional service name'
+        comment => 'downtime comment'
+        fixed   => 1
+    }
+
+    cmd_typ is:
+         55 -> hosts
+         56 -> services
+         84 -> hostgroups
+        122 -> servicegroups
+
+=cut
+sub set_downtime {
     my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
 
     # convert to normal url request
@@ -1053,7 +1076,7 @@ sub _set_downtime {
     my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
                       $cmd_typ,
                       URI::Escape::uri_escape_utf8($downtime->{'comment'}),
-                      '(cron)',
+                      URI::Escape::uri_escape_utf8(defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)'),
                       URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
                       URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
