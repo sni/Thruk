@@ -1089,6 +1089,7 @@ sub set_downtime {
                       (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
                       (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
                      );
+    local $ENV{'THRUK_SRC'} = 'CLI';
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
     my @res = request_url($c, $url);
