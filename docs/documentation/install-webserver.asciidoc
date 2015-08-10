@@ -214,6 +214,38 @@ use this apache example configuration:
 </VirtualHost>
 -------
 
+=== LDAP / AD authentication. 
+
+Use the following snipped sample if you want to authenticate users against LDAP or Active Directory. This works as well with the newer 2.x cookie based authentication. 
+
+In this sample, Apache will lookup the legacy htpasswd file first and then the ldap server for a matching user. This is useful if you want to maintan the legacy thrukadmin as a full-access admin or as a fallback if ldap is not accessible anymore. 
+
+Make sure your backend's contact definitions exists, matches with the ldap username and is assigned to a host/service/whatever - otherwise the user will not see anything. 
+
+
+/etc/apache2/conf-available/thruk.conf
+-------
+  #...
+  <Location /thruk/>
+        Options ExecCGI FollowSymLinks
+        AuthName "Thruk Monitoring"
+        AuthType Basic
+
+        #leagacy file authentication first, then ldap
+        AuthBasicProvider file ldap
+
+        #legacy file (or set it to /dev/null
+        AuthUserFile /etc/thruk/htpasswd
+
+        #ldap
+        AuthLDAPBindDN "CN=thruk-ldap,OU=serviceaccounts,OU=bla,DC=site,DC=org,DC=com"
+        AuthLDAPBindPassword "xxx"
+        AuthLDAPURL "ldap://site.org.com/OU=bla,DC=site,DC=org,DC=com?sAMAccountName?sub?(objectClass=*)"
+        require valid-user
+  </Location>
+   #...
+-------
+
 
 == Lighthttpd
 
