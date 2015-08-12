@@ -261,16 +261,16 @@ sub get_objects_conf {
             '_THRUK_NODE_ID' => $self->{'id'},
         };
         for my $key (qw/notification_period/) {
-            next unless $bp->{$key};
-            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $bp->{$key};
+            next unless $self->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $self->{$key};
         }
         for my $key (qw/contacts/) {
-            next unless $bp->{$key};
-            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = join(',', @{$bp->{$key}});
+            next unless $self->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = join(',', @{$self->{$key}});
         }
         for my $key (qw/contactgroups/) {
-            next unless $bp->{$key};
-            $obj->{'hosts'}->{$bp->{'name'}}->{'contact_groups'} = join(',', @{$bp->{$key}});
+            next unless $self->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{'contact_groups'} = join(',', @{$self->{$key}});
         }
     }
 
