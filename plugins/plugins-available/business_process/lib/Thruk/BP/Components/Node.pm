@@ -264,9 +264,13 @@ sub get_objects_conf {
             next unless $bp->{$key};
             $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $bp->{$key};
         }
-        for my $key (qw/contacts contactgroups/) {
+        for my $key (qw/contacts/) {
             next unless $bp->{$key};
             $obj->{'hosts'}->{$bp->{'name'}}->{$key} = join(',', @{$bp->{$key}});
+        }
+        for my $key (qw/contactgroups/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{'contact_groups'} = join(',', @{$bp->{$key}});
         }
     }
 
@@ -282,10 +286,15 @@ sub get_objects_conf {
         next unless $self->{$key};
         $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = $self->{$key};
     }
-    for my $key (qw/contacts contactgroups/) {
+    for my $key (qw/contacts/) {
         next unless $self->{$key};
         next unless scalar @{$self->{$key}} > 0;
         $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = join(',', @{$self->{$key}});
+    }
+    for my $key (qw/contactgroups/) {
+        next unless $self->{$key};
+        next unless scalar @{$self->{$key}} > 0;
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{'contact_groups'} = join(',', @{$self->{$key}});
     }
 
     return($obj);
