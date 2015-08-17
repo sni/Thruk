@@ -247,23 +247,27 @@ sub uri {
 
 =head2 full_uri
 
-  full_uri($c)
+  full_uri($c, $return_full_url)
 
-returns a correct uri
+returns uri to current page.
+
+    $return_full_url   -> return http://host/thruk/... instead of /thruk/...
 
 =cut
 sub full_uri {
-    my $c    = shift;
-    my $amps = shift || 0;
+    my $c        = shift;
+    my $full     = shift || 0;
     carp("no c") unless defined $c;
-    my $uri = ''.$c->url_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
+    my $uri = ''.uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}, 1);
 
     # uri always contains /thruk/, so replace it with our product prefix
     my $url_prefix = $c->stash->{'url_prefix'};
-    $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
-    if($amps) {
-        $uri = &escape_ampersand($uri);
+    if($full) {
+        $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
+    } else {
+        $uri =~ s|(https?://[^/]+)/thruk/|$url_prefix|gmx;
     }
+    $uri = &escape_ampersand($uri);
     return $uri;
 }
 
@@ -334,13 +338,13 @@ sub clean_referer {
 
 =head2 uri_with
 
-  uri_with($c, $data)
+  uri_with($c, $data, $keep_absolute)
 
-returns a correct uri
+returns a relative uri to current page
 
 =cut
 sub uri_with {
-    my($c, $data) = @_;
+    my($c, $data, $keep_absolute) = @_;
     my $uri = $c->req->uri;
     my @old_param = $uri->query_form();
     my @new_param;
@@ -361,10 +365,12 @@ sub uri_with {
     }
     $uri->query_form(@new_param);
     $uri = $uri->as_string;
-    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri = &escape_ampersand($uri);
-    # make relative url
-    $uri =~ s|^/[^?]+/||mx;
+    unless($keep_absolute) {
+        $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
+        $uri = &escape_ampersand($uri);
+        # make relative url
+        $uri =~ s|^/[^?]+/||mx;
+    }
     return $uri;
 }
 

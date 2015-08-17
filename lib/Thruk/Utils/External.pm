@@ -639,7 +639,7 @@ sub _init_external {
 
     $c->stash->{job_id}       = $id;
     $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
-    $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c, 1);
+    $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c);
 
     return($id, $dir);
 }

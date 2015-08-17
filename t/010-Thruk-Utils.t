@@ -224,7 +224,7 @@ $uri = Thruk::Utils::Filter::uri_with($c, {});
 is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'uri_with with existing params');
 
 $uri = Thruk::Utils::Filter::full_uri($c);
-is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
+is($uri, '/thruk/main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'full_uri with existing params');
 
 $uri = Thruk::Utils::Filter::short_uri($c);
 is($uri, 'main.html?a=1&amp;b=2&amp;c=3&amp;a=4', 'short_uri with existing params');

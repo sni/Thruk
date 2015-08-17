@@ -79,7 +79,7 @@
               <th>Change Password:</th>
               <td>
                 <img src="[% url_prefix %]themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Change User Password" onClick="window.location='conf.cgi?action=user_password&referer='+referer; return false;">
+                <input type="button" name="submit" value="Change User Password" onClick="window.location='[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer='+full_uri; return false;">
               </td>
             </tr>
             [% END %]

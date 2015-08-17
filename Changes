@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix user password link when invoked from main page
           - Reports:
             - add danish localization
           - Config Tool:
