@@ -7,7 +7,6 @@ debian/control
 debian/copyright
 debian/rules
 debian/thruk-base.install
-debian/thruk-base.logrotate
 debian/thruk-base.manpages
 debian/thruk-base.postinst
 debian/thruk-base.postrm

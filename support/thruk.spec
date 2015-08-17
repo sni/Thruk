@@ -120,6 +120,10 @@ and event reporting.
     INIT_OPTS=""
 mkdir -p %{buildroot}%{_localstatedir}/lib/thruk
 rm %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled/reports2
+# enable su logrotate directive if required
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7 || 0%{?sles_version} >= 12
+    sed -i -e 's/^.*#su/    su/' %{buildroot}/%{_sysconfdir}/logrotate.d/thruk-base
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}

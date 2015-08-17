@@ -2,12 +2,14 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix user password link when invoked from main page
+          - fix logrotate missing su directive on logrotate > 3.8 (#471)
+          - fix duplicate installed logrotate file (#511)
           - Reports:
             - add danish localization
           - Config Tool:
             - add generic text editor
           - Panorama View:
-            - fix corrupted tab export
+            - fix corrupted tab export (#507)
 
 
 2.00     Mon Jul 13 22:49:52 CEST 2015
