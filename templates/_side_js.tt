@@ -61,10 +61,12 @@
         }
 
         if(load_errors > 0 && (load_errors == 3 || load_errors%10 == 0)) {
-            debug("trying to reload");
-            frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
-            debug(frameloc);
-            top.frames['main'].location.replace(frameloc);
+            if(top.frames['main']) {
+                debug("trying to reload");
+                frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
+                debug(frameloc);
+                top.frames['main'].location.replace(frameloc);
+            }
         }
     }
 
