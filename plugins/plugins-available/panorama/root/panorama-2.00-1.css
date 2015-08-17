@@ -606,3 +606,7 @@ SPAN.avail_result_error {
 .lockButton.locked {
     background-image: url(images/lock.png);
 }
+
+.monospaced textarea {
+    font-family: monospace;
+}

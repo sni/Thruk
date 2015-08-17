@@ -47,11 +47,12 @@ TP.getExportTab = function(options) {
             text:  'Export Active Tab',
             handler: function() {
                 TP.modalWindows.push(Ext.MessageBox.show({
+                    cls:        'monospaced',
                     title:      'Current Tab Export',
                     multiline:  true,
                     width:      600,
                     msg:        'Copy this string and use it for later import:',
-                    value:      '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(TP.cp.lastdata[options.tab.id]).match(/.{1,65}/g).join("\n")+"\n# End Export",
+                    value:      '# Thruk Panorama Dashboard Export: '+options.tab.title+'\n'+encode64(Ext.JSON.encode(TP.cp.lastdata[options.tab.id])).match(/.{1,65}/g).join("\n")+"\n# End Export",
                     buttons:    Ext.MessageBox.OK,
                     icon:       Ext.MessageBox.INFO
                 }));
@@ -66,6 +67,7 @@ TP.getExportTab = function(options) {
             text: 'Export All Open Tabs',
             handler: function() {
                 TP.modalWindows.push(Ext.MessageBox.show({
+                    cls:        'monospaced',
                     title:      'All Tabs Export',
                     multiline:  true,
                     width:      600,

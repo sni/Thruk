@@ -6,6 +6,8 @@ next:
             - add danish localization
           - Config Tool:
             - add generic text editor
+          - Panorama View:
+            - fix corrupted tab export
 
 
 2.00     Mon Jul 13 22:49:52 CEST 2015
