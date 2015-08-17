@@ -135,7 +135,10 @@ TP.iconShowEditDialog = function(panel) {
 
                     TP.timeouts['timeout_' + key + '_show_settings'] = window.setTimeout(function() {
                         TP.iconSettingsWindow.skipRestore = true;
-                        TP.cp.state[key].xdata.cls = newValue;
+                        /* does not exist when changing a newly placed icon */
+                        if(TP.cp.state[key]) {
+                            TP.cp.state[key].xdata.cls = newValue;
+                        }
                         panel = TP.add_panlet({id:key, skip_state:true, tb:tab, autoshow:true, state:conf, type:newValue}, false);
                         panel.xdata = conf.xdata;
                         panel.classChanged = newValue;
