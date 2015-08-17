@@ -83,15 +83,17 @@ Ext.define('TP.SmallWidget', {
             TP.log('['+this.id+'] rendered');
             This.addClickEventhandler(This.el);
 
-            if(!readonly && !this.locked) {
-                if(this.iconType != 'text' && this.xdata.general[this.iconType] == '' && this.firstRun != false) {
-                    this.firstRun = true;
-                    TP.timeouts['timeout_' + this.id + '_show_settings'] = window.setTimeout(function() {
+            if(!readonly && !This.locked) {
+                if(This.xdata.general[This.iconType] == '' && This.firstRun != false) {
+                    This.firstRun = true;
+                    TP.timeouts['timeout_' + This.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
                         var pos = This.getPosition();
                         This.xdata.layout.x = pos[0];
                         This.xdata.layout.y = pos[1];
-                        TP.iconShowEditDialog(This);
+                        if(This.iconType != 'text') {
+                            TP.iconShowEditDialog(This);
+                        }
                     }, 50);
                 }
             }

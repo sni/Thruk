@@ -9,6 +9,7 @@ next:
           - Config Tool:
             - add generic text editor
           - Panorama View:
+            - fix initial text label position (#506)
             - fix corrupted tab export (#507)
 
 
