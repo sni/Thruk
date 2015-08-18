@@ -13,7 +13,7 @@ is($config->{'Thruk::Backend'}->{'peer'}->{'configtool'}->{'obj_readonly'}, '^(?
 
 eval "use Config::General";
 if(!$@) {
-    for my $file (qw|thruk.conf thruk_local.conf cgi.cfg support/naglint.conf.example|) {
+    for my $file (qw|thruk.conf thruk_local.conf cgi.cfg support/naglint.conf.example t/data/test_hash_comments.cfg|) {
         next unless -f $file;
         my %general_conf = Config::General::ParseConfig(-ConfigFile => $file,
                                                         -UTF8       => 1,

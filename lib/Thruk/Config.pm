@@ -959,9 +959,10 @@ sub _parse_rows {
     my($file, $rows, $conf, $until) = @_;
     my $lastline = '';
     while(my $line = shift @{$rows}) {
-        $line =~ s|\#.*$||gmxo;
+        $line =~ s|(?<!\\)\#.*$||gmxo;
         $line =~ s|^\s+||gmxo;
         $line =~ s|\s+$||gmxo;
+        $line =~ s|\\\#|#|gmxo;
 
         # concatenate by trailing backslash
         if(substr($line, -1, 1) eq '\\' && $line =~ m/^\s*(.*)\s*\\$/mxo) {

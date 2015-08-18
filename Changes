@@ -4,6 +4,7 @@ next:
           - fix user password link when invoked from main page
           - fix logrotate missing su directive on logrotate > 3.8 (#471)
           - fix duplicate installed logrotate file (#511)
+          - fix config file parser on escaped hashes (#505)
           - Reports:
             - add danish localization
           - Config Tool:

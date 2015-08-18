@@ -1320,6 +1320,7 @@ t/data/remove_duplicates/test.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
 t/data/test_c_style.conf
+t/data/test_hash_comments.cfg
 t/data/userfiles/encoding_broken
 t/data/userfiles/encoding_iso
 t/data/userfiles/encoding_ok
