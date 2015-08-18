@@ -1203,3 +1203,8 @@ DIV.pnpSelector {
   right: 2px;
   top: 22px;
 }
+
+.black_white {
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+}
