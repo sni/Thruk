@@ -293,7 +293,7 @@ exit 0
 %attr(0755,%{apacheuser},%{apachegroup}) %dir /var/log/thruk/
 %config(noreplace) %{_sysconfdir}/thruk/naglint.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
-%config(noreplace) %{_sysconfdir}/logrotate.d/thruk
+%config(noreplace) %{_sysconfdir}/logrotate.d/thruk-base
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk.conf
 %config(noreplace) %{_sysconfdir}/%{apachedir}/conf.d/thruk_cookie_auth_vhost.conf
 %{_datadir}/%{name}/plugins/plugins-available/business_process

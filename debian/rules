@@ -5,6 +5,7 @@ export DH_VERBOSE=1
 DESTDIR=$(CURDIR)/debian/tmp/
 PERLVER=$(shell perl -e 'use Config; print $$Config{version}')
 HTTPDCONF=$(shell if [ -d "/etc/apache2/conf-available" ]; then echo "/etc/apache2/conf-available"; else echo "/etc/apache2/conf.d"; fi )
+SHELL=bash
 DIST := $(shell lsb_release -i | awk '{print tolower($$3)}')
 RELEASE := $(shell lsb_release -r | awk '{print $$2}')
 
@@ -33,11 +34,11 @@ override_dh_auto_install:
 	# enable su logrotate directive if required
 	if [[ ${DIST} == debian ]] ; then \
 		if [[ $$(echo "${RELEASE}>=7" | bc -l) -eq 1 || ${RELEASE} == testing || ${RELEASE} == unstable ]] ; then \
-			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base
+			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
 		fi ; \
 	elif [[ ${DIST} == ubuntu ]] ; then \
 		if [[ $$(echo "${RELEASE}>=13.04" | bc -l) -eq 1 ]] ; then \
-			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base
+			sed -i -e 's/^.*#su/    su/' debian/tmp/etc/logrotate.d/thruk-base; \
 		fi ; \
 	fi
 
