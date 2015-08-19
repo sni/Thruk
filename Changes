@@ -9,6 +9,7 @@ next:
             - add danish localization
           - Config Tool:
             - add generic text editor
+            - fix problem when cloning commands
           - Panorama View:
             - fix initial text label position (#506)
             - fix corrupted tab export (#507)

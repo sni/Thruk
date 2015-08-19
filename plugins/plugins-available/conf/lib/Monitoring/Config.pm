@@ -1157,7 +1157,7 @@ sub clone_refs {
                 next if $ref->{'file'}->{'readonly'};
                 for my $attr (keys %{$ref->{'conf'}}) {
                     if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
-                        if(grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
+                        if(ref $ref->{'conf'}->{$attr} eq 'ARRAY' && grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
                             push @{$ref->{'conf'}->{$attr}}, $new_name;
                             $self->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
                         }
