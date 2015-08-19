@@ -2075,6 +2075,7 @@ sub _check_orphaned_objects {
         next if $type eq 'servicedependency';
         for my $name (keys %{$all_objects->{$type}}) {
             my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
+            next if !defined $obj;
             next if defined $obj->{'conf'}->{'members'};
             next if $type eq 'host';
             push @errors, { ident     => $obj->get_id(),
