@@ -145,9 +145,7 @@ sub begin {
         $menu_states->{$key} = $val;
     }
     if( defined $c->cookie('thruk_side') ) {
-        my $cookie_val = $c->cookie('thruk_side')->{'value'};
-        if(ref $cookie_val ne 'ARRAY') { $cookie_val = [$cookie_val]; }
-        for my $state (@{$cookie_val}) {
+        for my $state (@{$c->cookies('thruk_side')->{'value'}}) {
             my($k,$v) = split(/=/mx,$state,2);
             $k = lc $k;
             $k =~ s/\ /_/gmx;
