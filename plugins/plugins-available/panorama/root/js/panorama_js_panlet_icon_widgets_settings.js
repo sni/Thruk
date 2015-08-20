@@ -1733,7 +1733,7 @@ TP.openLabelEditorWindow = function(panel) {
                                     el.onclick   = function(i) {
                                         var cur = Ext.getCmp('label_textfield_edit').getValue();
                                         var val = Ext.htmlDecode(el.innerHTML);
-                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
+                                        if(!val.match(/\{\{.*?\}\}/) && (val.match(/^perfdata\./) || val.match(/^perfdata\[/) || val.match(/^totals\./) || val.match(/^avail\./) || val.match(/^[a-z_]+$/))) { val = '{{'+val+'}}'; }
                                         if(val.match(/<br>/)) { val += "\n"; }
                                         Ext.getCmp('label_textfield_edit').setValue(cur+val);
                                         Ext.getCmp('label_textfield_edit').up('form').body.dom.scrollTop=0;
