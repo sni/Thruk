@@ -155,7 +155,8 @@ The second option is on most pages adding 'title=your title here' to
 the url will set a custom title
 
 
-==== How can I enable form based authentication
+=== How can I enable form based authentication
+{% include note.ad text="activated by default since v2.0" %}
 In order to use the form or cookie based authentication like demo.thruk.org does,
 you have to do two small changes in your apache configuration.
 Get https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
@@ -163,6 +164,30 @@ and put everything except the RewriteLock into the virtualhost of your choice.
 The RewriteLock must be outside any virtualhost. After that, restart the apache.
 
 
+=== How can I disable cookie authentication
+Starting with v2.0 cookie (form based) authentication is enabled by default. In
+case you want to disable it again and switch back to standard basic
+authentication, you just need to comment the includes in your apache
+configuration.
+
+On Debian and Ubuntu open all files matching:
+
+    /etc/apache2/sites-enabled/*default*
+    /etc/apache2/conf-available/thruk_cookie_auth_vhost.conf
+
+On SLES systems open:
+
+    /etc/apache2/conf.d/thruk_cookie_auth_vhost.conf
+
+On Centos/RHEL systems open:
+
+    /etc/httpd/conf.d/thruk_cookie_auth_vhost.conf
+
+then comment the line with:
+
+    Include /usr/share/thruk/thruk_cookie_auth.include
+
+After that, restart the apache.
 
 == Installation
 
