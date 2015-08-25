@@ -957,6 +957,15 @@ sub split_perfdata {
         if($val =~ m/^(\-?[\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
             ($var, $unit, $warn, $crit, $min, $max) = ($1, $2, $3, $4, $5, $6);
         }
+        elsif($val =~ m/^U;/mxi) {
+            $var  = 'Unknown';
+            $unit = '';
+            $warn = '';
+            $crit = '';
+            $min  = '';
+            $max  = '';
+        }
+
         if($key =~ m/^(.*)::(.*?)$/mx) {
             $last_parent = $1;
             $key = $2;

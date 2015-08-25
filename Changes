@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - parse performance data with U(nknown) values
           - fix user password link when invoked from main page
           - fix logrotate missing su directive on logrotate > 3.8 (#471)
           - fix duplicate installed logrotate file (#511)
