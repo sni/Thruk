@@ -76,15 +76,18 @@
           [% job_time = end_time - r.var.start_time %]
           [% IF r.var.exists('job_data') %]
                 [% PROCESS _progressbar.tt
-                            job_percent=r.var.job_data.percent
-                            job_time=job_time
-                            job_id=r.var.job
-                            progressbarid="progressbar" _ r.nr
-                            lineheight=19
-                            width=160
-                            height=20
-                            percent_per_second=0
-                            show_message=1
+                            pb_options = {
+                                percent             => r.var.job_data.percent,
+                                time                => job_time,
+                                job_id              => r.var.job,
+                                id                  => "progressbar" _ r.nr,
+                                lineheight          =>  19,
+                                width               => 160,
+                                height              =>  20,
+                                percent_per_second  =>  0,
+                                show_message        =>  1,
+                                hide_cancel_btn     =>  1,
+                            }
                 %]
           [% ELSE %]
             [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]

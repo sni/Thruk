@@ -19,15 +19,17 @@
     [% IF job_id %]
     [% IF job_message %][% job_message %][% ELSE %]please stand by while your job is being processed...[% END %]<br>
     [% PROCESS _progressbar.tt
-                    job_percent=job_percent
-                    job_time=job_time
-                    job_id=job_id
-                    progressbarid="progressbar"
-                    lineheight=24
-                    width=400
-                    height=24
-                    percent_per_second=1
-                    show_message=0
+                    pb_options = {
+                        percent             => job_percent,
+                        time                => job_time,
+                        job_id              => job_id,
+                        id                  => "progressbar",
+                        lineheight          =>  24,
+                        width               => 400,
+                        height              =>  24,
+                        percent_per_second  =>   1,
+                        show_message        =>   0,
+                    }
     %]
     [% END %]
 
