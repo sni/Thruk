@@ -405,9 +405,9 @@ sub get_result {
     my $stash;
     $stash = retrieve($dir."/stash") if -f $dir."/stash";
 
-    my $rc;
+    my $rc = -1;
     $rc = read_file($dir."/rc") if -f $dir."/rc";
-    chomp($rc) if defined $rc;
+    chomp($rc);
 
     my $profile;
     $profile = read_file($dir."/profile.log") if -f $dir."/profile.log";
