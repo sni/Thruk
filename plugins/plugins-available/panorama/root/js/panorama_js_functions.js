@@ -229,6 +229,7 @@ var TP = {
         var testPanlet = Ext.getCmp(config.id);
         if(testPanlet) {
             if(config.conf.autoShow) {
+                testPanlet.hide();
                 testPanlet.show();
             }
             return;
@@ -335,6 +336,8 @@ var TP = {
             panel.redrawOnly = true;
             panel.destroy();
             panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
+            panel.hide(); // workaround for not removed labels on text elements
+            panel.show();
             TP.updateAllIcons(Ext.getCmp(panel.panel_id));
         }, 50);
     },
