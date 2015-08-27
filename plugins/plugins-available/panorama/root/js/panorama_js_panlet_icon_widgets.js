@@ -132,8 +132,8 @@ Ext.define('TP.SmallWidget', {
             if(this.labelEl) { this.labelEl.hide(); }
         },
         destroy: function( This, eOpts ) {
-            TP.log('['+this.id+'] remove icon');
             if(this.redrawOnly) {
+                TP.log('['+this.id+'] redrawing icon');
                 if(This.labelEl) {
                     /* remove later to avoid flickering during redraw */
                     if(TP.removeLabel == undefined) {
@@ -143,6 +143,7 @@ Ext.define('TP.SmallWidget', {
                     This.labelEl = undefined;
                 }
             } else {
+                TP.log('['+this.id+'] remove icon');
                 /* remove window from panels window ids */
                 TP.removeWindowFromPanels(this.id);
                 /* clear state information */
@@ -299,7 +300,7 @@ Ext.define('TP.SmallWidget', {
             tab.scheduleApplyZindex();
             return;
         }
-        if(TP.removeLabel && TP.removeLabel[this.id]) {
+        if(TP.removeLabel && TP.removeLabel[panel.id]) {
             /* remove later to avoid flickering during redraw */
             window.clearTimeout(TP.timeouts['remove_label_'+panel.id]);
             TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
