@@ -1885,7 +1885,8 @@ sub read_data_file {
     }
 
     # REMOVE AFTER: 01.01.2018
-    my $cont = Thruk::Utils::IO::untaint(read_file($filename));
+    my $cont = read_file($filename);
+    $cont = Thruk::Utils::IO::untaint($cont);
 
     # ensure right encoding
     decode_any($cont);
