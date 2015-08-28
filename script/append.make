@@ -22,6 +22,14 @@ dailydist: cleandist
 	ls -la *.gz
 
 releasedist: cleandist dist
+	git describe --tag --exact-match
+	if [ "$(VERSION)" != "$(DAILYVERSION)" ]; then \
+	    tar zxf Thruk-$(VERSION).tar.gz; \
+	    mv Thruk-$(VERSION) Thruk-$(DAILYVERSION); \
+	    tar cfz Thruk-$(DAILYVERSION).tar.gz Thruk-$(DAILYVERSION); \
+	    rm -f Thruk-$(VERSION).tar.gz; \
+	    rm -rf Thruk-$(DAILYVERSION); \
+	fi
 	ls -la *.gz
 
 cleandist:
