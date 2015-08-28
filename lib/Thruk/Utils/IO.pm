@@ -296,6 +296,22 @@ sub cmd {
     return($rc, $output);
 }
 
+########################################
+
+=head2 untaint
+
+  untaint($var)
+
+return untainted variable
+
+=cut
+
+sub untaint {
+    my($v) = @_;
+    if($v =~ /\A(.*)\z/msx) { $v = $1; }
+    return($v);
+}
+
 ##############################################
 
 1;

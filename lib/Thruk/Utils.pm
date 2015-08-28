@@ -1414,22 +1414,6 @@ sub list {
 
 ########################################
 
-=head2 untaint
-
-  untaint($var)
-
-return untainted variable
-
-=cut
-
-sub untaint {
-    my($v) = @_;
-    if($v =~ /\A(.*)\z/msx) { $v = $1; }
-    return($v);
-}
-
-########################################
-
 =head2 translate_host_status
 
   translate_host_status($status)
@@ -1901,7 +1885,7 @@ sub read_data_file {
     }
 
     # REMOVE AFTER: 01.01.2018
-    my $cont = untaint(read_file($filename));
+    my $cont = Thruk::Utils::IO::untaint(read_file($filename));
 
     # ensure right encoding
     decode_any($cont);

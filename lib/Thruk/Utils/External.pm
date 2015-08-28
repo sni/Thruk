@@ -665,7 +665,7 @@ sub _is_running {
 
     return 0 unless -s $dir."/pid";
 
-    my $pid = Thruk::Utils::untaint(read_file($dir."/pid"));
+    my $pid = Thruk::Utils::IO::untaint(read_file($dir."/pid"));
     if(kill(0, $pid) > 0) {
         return 1;
     }
