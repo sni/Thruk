@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.00-2   Fri Aug 28 16:19:25 CEST 2015
           - add cancel button to all external jobs
           - parse performance data with U(nknown) values
           - fix user password link when invoked from main page
