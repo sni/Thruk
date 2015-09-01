@@ -1258,6 +1258,7 @@ sub _process_tools_page {
         $c->stash->{'toolobj'} = $tools->{$tool};
         if($c->req->parameters->{'cleanup'} && $c->req->parameters->{'ident'}) {
             $tools->{$tool}->cleanup($c, $c->req->parameters->{'ident'}, $ignores->{$tool});
+            $c->stash->{'obj_model_changed'} = 1;
             if($c->req->parameters->{'ident'} eq 'all') {
                 return $c->redirect_to('conf.cgi?sub=objects&tools='.$tool);
             }
