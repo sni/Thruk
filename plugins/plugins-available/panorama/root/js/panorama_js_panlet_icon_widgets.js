@@ -98,7 +98,7 @@ Ext.define('TP.SmallWidget', {
                 }
             }
             This.applyRotation(This.xdata.layout.rotation, This.xdata);
-            This.applyZindex(This.xdata.layout.zindex, This.xdata);
+            This.applyZindex(This.xdata.layout.zindex);
             This.applyScale(This.xdata.layout.scale, This.xdata);
             if(!This.locked) {
                 This.el.on('mouseover', function(evt,t,a) {
@@ -217,9 +217,9 @@ Ext.define('TP.SmallWidget', {
             this.applyRotation(0, xdata);
         }
         if(xdata.layout.zindex) {
-            this.applyZindex(Number(xdata.layout.zindex), xdata);
+            this.applyZindex(Number(xdata.layout.zindex));
         } else {
-            this.applyZindex(0, xdata);
+            this.applyZindex(0);
         }
         this.applyScale(Number(xdata.layout.scale), xdata);
 
@@ -252,14 +252,11 @@ Ext.define('TP.SmallWidget', {
         this.animate(animated);
     },
     /* apply z-index */
-    applyZindex: function(value, xdata) {
+    applyZindex: function(value) {
         var This = this;
         This.effectiveZindex = value;
         var tab = Ext.getCmp(This.panel_id);
-        window.clearTimeout(TP.timeouts['applyZindex_'+tab.id]);
-        TP.timeouts['applyZindex_'+tab.id] = window.setTimeout(function() {
-            tab.applyZindex();
-        }, 250);
+        tab.scheduleApplyZindex();
     },
     /* rotates this thing */
     applyRotation: function(value, xdata) {
