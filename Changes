@@ -5,6 +5,7 @@ next:
             - make text label size configurable
             - fix label zIndex positioning
             - fix label position not being saved
+            - fix label removed when hitting cancel in settings window
           - Config Tool:
             - fix tools changes not beeing saved
 

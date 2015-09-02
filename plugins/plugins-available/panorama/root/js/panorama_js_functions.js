@@ -274,6 +274,7 @@ var TP = {
         if(!config.skip_state) {
             tb.window_ids.push(win.id);
             tb.saveState();
+            win.firstRun = false;
         }
         // update initial panlet counter
         var tmp = Ext.dom.Query.select('.x-mask-loading DIV');
@@ -297,6 +298,7 @@ var TP = {
         }
         tb.getEl().dom.style.cursor = '';
         var panel = TP.add_panlet(config);
+        panel.firstRun = true;
         if(panel.iconType) {
             TP.updateAllIcons(tb, panel.id);
         } else {
@@ -333,11 +335,13 @@ var TP = {
     redraw_panlet: function(panel, tab) {
         window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_redraw']);
         TP.timeouts['timeout_' + panel.id + '_redraw'] = window.setTimeout(function() {
+            var firstRun = panel.firstRun;
             panel.redrawOnly = true;
             panel.destroy();
             panel = TP.add_panlet({id:panel.id, skip_state:true, tb:tab, autoshow:true}, false);
             panel.hide(); // workaround for not removed labels on text elements
             panel.show();
+            panel.firstRun = firstRun;
             TP.updateAllIcons(Ext.getCmp(panel.panel_id));
         }, 50);
     },

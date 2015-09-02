@@ -84,7 +84,7 @@ Ext.define('TP.SmallWidget', {
             This.addClickEventhandler(This.el);
 
             if(!readonly && !This.locked) {
-                if(This.xdata.general[This.iconType] == '' && This.firstRun != false) {
+                if((This.xdata.general[This.iconType] == '' && This.firstRun != false && This.iconType != "text") || This.firstRun == true) {
                     This.firstRun = true;
                     TP.timeouts['timeout_' + This.id + '_show_settings'] = window.setTimeout(function() {
                         // show dialog delayed, so the panel has a position already
