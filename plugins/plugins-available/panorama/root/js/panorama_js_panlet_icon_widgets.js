@@ -411,10 +411,15 @@ Ext.define('TP.SmallWidget', {
                         if(y != undefined) { This.oldY = y; }
                         if(diffX != 0 || diffY != 0) {
                             var pos = panel.getPosition();
-                            panel.setRawPosition(pos[0]+diffX, pos[1]+diffY);
+                            var newX = pos[0]+diffX;
+                            var newY = pos[1]+diffY;
+                            panel.setRawPosition(newX, newY);
                             // update settings window
                             if(TP.iconSettingsWindow) {
-                                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:pos[0]+diffX, y:pos[1]+diffY});
+                                TP.iconSettingsWindow.items.getAt(0).items.getAt(1).down('form').getForm().setValues({x:newX, y:newY});
+                            } else if(panel.iconType == "text" && !panel.readonly) {
+                                panel.xdata.layout.x = newX;
+                                panel.xdata.layout.y = newY;
                             }
                         }
                     },

@@ -4,6 +4,7 @@ next:
           - Panorama View:
             - make text label size configurable
             - fix label zIndex positioning
+            - fix label position not being saved
           - Config Tool:
             - fix tools changes not beeing saved
 
