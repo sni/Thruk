@@ -265,6 +265,24 @@ TP.iconShowEditDialog = function(panel) {
                     listeners:   { change: function(This) { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.applyScale(This.value, xdata); } },
                     disabled:     (panel.hasScale || panel.xdata.appearance.type == 'icon') ? false : true,
                     hidden:        panel.iconType == 'text' ? true : false
+                }, {
+                    fieldLabel: 'Size',
+                    xtype:      'fieldcontainer',
+                    layout:     'table',
+                    hidden:      panel.iconType == 'text' ? false : true,
+                    items: [{ xtype: 'label', text:  'width:', style: 'margin-left: 0; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'width', width: 55, value: panel.xdata.layout.width, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    labelUpdate();
+                                }
+                            }},
+                            { xtype: 'label', text:  'height:', style: 'margin-left: 10px; margin-right: 2px;' },
+                            { xtype: 'numberfield', name:  'height', width: 55, value: panel.xdata.layout.height, listeners: {
+                                change: function(This, newValue, oldValue, eOpts) {
+                                    labelUpdate();
+                                }
+                            }}
+                        ]
                 }]
             }]
         }]
@@ -1195,7 +1213,7 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Label Settings Tab */
-    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}, true); };
+    var labelUpdate = function() { var xdata = TP.get_icon_form_xdata(settingsWindow); panel.setIconLabel(xdata.label || {}, true, xdata.layout || {}); };
     var labelTab = {
         title: 'Label',
         type:  'panel',
