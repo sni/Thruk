@@ -326,11 +326,21 @@ sub get_memory_usage {
     my($pid) = @_;
     $pid = $$ unless defined $pid;
     my $page_size_in_kb = 4;
-    sysopen(my $fh, "/proc/$pid/statm", 0) or die $!;
-    sysread($fh, my $line, 255) or die $!;
-    CORE::close($fh);
-    my(undef, $rss) = split(/\s+/mx, $line,  3);
-    return(sprintf("%.2f", ($rss*$page_size_in_kb)/1024));
+    if(sysopen(my $fh, "/proc/$pid/statm", 0)) {
+        sysread($fh, my $line, 255) or die $!;
+        CORE::close($fh);
+        my(undef, $rss) = split(/\s+/mx, $line,  3);
+        return(sprintf("%.2f", ($rss*$page_size_in_kb)/1024));
+    }
+    my $rsize;
+    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
+    while(my $line = <$ph>) {
+        if($line =~ m/(\d+)/mx) {
+            $rsize = sprintf("%.2f", $1/1024);
+        }
+    }
+    CORE::close($ph);
+    return($rsize);
 }
 
 ########################################
