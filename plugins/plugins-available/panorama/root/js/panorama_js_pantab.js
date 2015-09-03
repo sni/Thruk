@@ -396,7 +396,6 @@ Ext.define('TP.Pantab', {
         window.clearTimeout(TP.timeouts['timeout_' + tab.id + '_applyZindex']);
         TP.timeouts['timeout_' + tab.id + '_applyZindex'] = window.setTimeout(function() {
             tab.applyZindex();
-            TP.updateAllIcons(tab);
         }, 100);
     },
 

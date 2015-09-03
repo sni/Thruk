@@ -897,6 +897,8 @@ Ext.define('TP.IconWidget', {
             this.updateRender(xdata);
         }
         this.lastType = xdata.appearance.type;
+        var tab   = Ext.getCmp(this.panel_id);
+        tab.scheduleApplyZindex();
     },
     refreshHandler: function(newStatus) {
         var tab   = Ext.getCmp(this.panel_id);

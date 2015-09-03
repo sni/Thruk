@@ -1204,6 +1204,7 @@ var TP = {
                     }
                 }
                 TP.checkSoundAlerts(tab);
+                tab.scheduleApplyZindex();
             }
         });
     },
