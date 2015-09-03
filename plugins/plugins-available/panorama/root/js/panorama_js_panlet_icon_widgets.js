@@ -288,10 +288,9 @@ Ext.define('TP.SmallWidget', {
     },
 
     /* render label for this widget */
-    setIconLabel: function(cfg, force_perfdata, layoutCfg) {
+    setIconLabel: function(cfg, force_perfdata) {
         var panel = this;
         if(cfg       == undefined) { cfg       = this.xdata.label; }
-        if(layoutCfg == undefined) { layoutCfg = this.xdata.layout; }
         if(!this.el || !this.el.dom)  { return; }
         if(!this.el.dom.style.zIndex && cfg && cfg.labeltext) {
             var tab  = Ext.getCmp(panel.panel_id);
@@ -304,7 +303,7 @@ Ext.define('TP.SmallWidget', {
             TP.timeouts['remove_label_'+panel.id] = window.setTimeout(function() {
                 TP.removeLabel[panel.id].destroy();
                 delete TP.removeLabel[panel.id];
-                panel.setIconLabel(cfg, force_perfdata, layoutCfg);
+                panel.setIconLabel(cfg, force_perfdata);
             }, 100);
         }
         if(cfg == undefined) { return; }
@@ -489,6 +488,17 @@ Ext.define('TP.SmallWidget', {
             el.style.border = "";
         }
 
+        if(cfg.width == undefined || cfg.width == '') {
+            el.style.width = '';
+        } else {
+            el.style.width = cfg.width+"px";
+        }
+        if(cfg.height == undefined || cfg.height == '') {
+            el.style.height = '';
+        } else {
+            el.style.height = cfg.height+"px";
+        }
+
         el.style.fontSize = fontsize+'px';
         var size          = this.labelEl.getSize();
         if(size.width == 0) { return; }
@@ -525,21 +535,14 @@ Ext.define('TP.SmallWidget', {
             top  = top + offsetx + (elHeight/2) - (size.height/2);
             left = left + (elWidth / 2) - (size.width / 2) - offsety;
         }
+        if(cfg.position == 'top-left') {
+            top  = top + offsetx;
+            left = left + offsety;
+        }
         el.style.left = left+"px";
         el.style.top  = top+"px";
         this.labelEl.oldX = left;
         this.labelEl.oldY = top;
-
-        if(layoutCfg.width == undefined) {
-            el.style.width = "";
-        } else {
-            el.style.width = layoutCfg.width+"px";
-        }
-        if(layoutCfg.height == undefined) {
-            el.style.height = "";
-        } else {
-            el.style.height = layoutCfg.height+"px";
-        }
     },
 
     /* add dbl click and context menu events */
@@ -2237,6 +2240,7 @@ Ext.define('TP.TextLabelWidget', {
         this.callParent();
         var panel = this;
         panel.xdata.label.labeltext = 'Label';
+        panel.xdata.label.position  = 'top-left';
     },
     getGeneralItems: function() { return; },
     refreshHandler: function()  { return; }
