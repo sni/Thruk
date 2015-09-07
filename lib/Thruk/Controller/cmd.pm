@@ -702,7 +702,14 @@ sub _bulk_send {
                                 );
             $c->log->info($logstr) unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
         }
-        $c->{'db'}->send_command( %{$options} ) unless $testmode;
+        if(!$testmode) {
+            $c->{'db'}->send_command( %{$options} );
+            my $cached_proc = $c->cache->get->{'global'} || {};
+            for my $key (split(/,/mx, $backends)) {
+                delete $cached_proc->{'processinfo'}->{$key};
+            }
+            $c->cache->set('global', $cached_proc);
+        }
     }
 
     return 1;

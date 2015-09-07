@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - clear process info cache after sending commands
           - Panorama View:
             - make text label background size configurable
             - fix label zIndex positioning
