@@ -511,7 +511,7 @@ sub _task_status {
     my $servicefilter = [];
     for my $host (keys %{$types->{'services'}}) {
         for my $svc (keys %{$types->{'services'}->{$host}}) {
-            push @{$servicefilter}, { host_name => $host, description => $svc};
+            push @{$servicefilter}, { '-and' => { host_name => $host, description => $svc}};
         }
     }
     $servicefilter = Thruk::Utils::combine_filter('-or', $servicefilter);
