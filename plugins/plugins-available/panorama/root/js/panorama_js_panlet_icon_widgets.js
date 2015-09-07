@@ -419,6 +419,7 @@ Ext.define('TP.SmallWidget', {
                             } else if(panel.iconType == "text" && !panel.readonly) {
                                 panel.xdata.layout.x = newX;
                                 panel.xdata.layout.y = newY;
+                                panel.saveState();
                             }
                         }
                     },
