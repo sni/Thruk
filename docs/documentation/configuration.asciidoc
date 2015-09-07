@@ -1963,6 +1963,7 @@ ex.:
     full_reload_interval   = 10800
     geo_map_default_center = 13.74,47.77
     geo_map_default_zoom   = 5
+    extra_fonts            = CompanyFont1, CompanyFont2
   </Component>
 
 
@@ -2000,6 +2001,11 @@ Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Serv
     ...
     wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}"]
   </Component>
+
+=== extra_fonts
+Comma separated list of additional fonts which will be listed in the text label
+drop down selection.
+
 
 
 == Component Thruk::Plugin::Reports2

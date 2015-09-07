@@ -466,7 +466,7 @@ Ext.define('Ext.ux.FontPickerCombo', {
     alias:      'widget.fontcbo',
     triggerTip: 'Please select a font.',
     queryMode:  'local',
-    store:    [ 'inherit', 'Arial', 'Comic Sans MS', 'Georgia', 'Helvetica', 'Lucida Console', 'Lucida Grande', 'Tahoma', 'Times', 'Times New Roman', 'Trebuchet MS', 'Verdana', 'caption', 'cursive', 'fantasy', 'icon', 'menu', 'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption'],
+    store:       available_fonts,
     listConfig : {
         getInnerTpl: function(displayField) {
             return '<div class="x-combo-list-item" style="font-family:{'+displayField+'}">{'+displayField+'}<\/div>';

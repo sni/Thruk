@@ -360,6 +360,7 @@ sub _js {
     $c->stash->{shape_data}   = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
+    $c->stash->{fonts}        = _get_available_fonts($c);
 
     # default geo map center
     $c->stash->{default_map_zoom} = $c->config->{'Thruk::Plugin::Panorama'}->{'geo_map_default_zoom'} || 5;
@@ -2767,6 +2768,25 @@ sub _extract_runtime_data {
         }
     }
     return($runtime);
+}
+
+##########################################################
+sub _get_available_fonts {
+    my($c) = @_;
+    my $fonts = [ 'Arial', 'Comic Sans MS', 'Georgia', 'Helvetica', 'Lucida Console',
+                  'Lucida Grande', 'Tahoma', 'Times', 'Times New Roman', 'Trebuchet MS',
+                  'Verdana', 'caption', 'cursive', 'fantasy', 'icon', 'menu',
+                  'message-box', 'monospace', 'sans-serif', 'serif', 'small-caption',
+    ];
+    if($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'}) {
+        for my $font (@{Thruk::Utils::list($c->config->{'Thruk::Plugin::Panorama'}->{'extra_fonts'})}) {
+            my @extra = split/\s*,\s*/mx, $font;
+            push @{$fonts}, @extra;
+        }
+        @{$fonts} = sort(@{$fonts});
+    }
+    unshift @{$fonts}, 'inherit';
+    return($fonts);
 }
 
 ##########################################################

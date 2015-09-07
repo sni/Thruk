@@ -4,6 +4,7 @@ next:
           - clear process info cache after sending commands
           - Panorama View:
             - make text label background size configurable
+            - add extra_fonts option to extend the list of available fonts
             - fix label zIndex positioning
             - fix label position not being saved
             - fix label removed when hitting cancel in settings window
