@@ -1190,14 +1190,15 @@ sub _get_query_size {
 
     # only if paging is enabled
     return unless defined $options->{'pager'};
-    return unless defined $options->{'sort'};
-    return unless ref $options->{'sort'} eq 'HASH';
-    return unless defined $options->{'sort'}->{'ASC'};
-    if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
-        return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
-        return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
-    } else {
-        return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+    if(defined $options->{'sort'}) {
+        return unless ref $options->{'sort'} eq 'HASH';
+        return unless defined $options->{'sort'}->{'ASC'};
+        if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
+            return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
+            return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+        } else {
+            return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+        }
     }
 
     my $entries = $options->{'pager'}->{'entries'};
