@@ -265,7 +265,7 @@ sub _process_raw_request {
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     my $limit = $c->req->parameters->{'limit'} || 0;
 
@@ -345,7 +345,7 @@ sub _process_details_page {
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, $servicefilter, undef) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -444,7 +444,7 @@ sub _process_hostdetails_page {
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( $hostfilter, undef, undef ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -517,7 +517,7 @@ sub _process_overview_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     die("no substyle!") unless defined $c->stash->{substyle};
 
@@ -657,7 +657,7 @@ sub _process_grid_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     my($host_data, $services_data) = _fill_host_services_hashes($c,
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
@@ -764,7 +764,7 @@ sub _process_summary_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     # get all host/service groups
     my $groups;
@@ -912,7 +912,7 @@ sub _process_combined_page {
     # which host to display?
     my( $hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
     my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
@@ -998,7 +998,7 @@ sub _process_perfmap_page {
     # which host to display?
     #my( $hostfilter, $servicefilter, $groupfilter )...
     my( undef, $servicefilter, undef ) = Thruk::Utils::Status::do_filter($c);
-    return if $c->stash->{'has_error'};
+    return 1 if $c->stash->{'has_error'};
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
