@@ -101,17 +101,17 @@ sub index {
     # raw data request?
     $c->stash->{'output_format'} = $c->req->parameters->{'format'} || 'html';
     if( $c->stash->{'output_format'} ne 'html' ) {
-        _process_raw_request($c);
+        return unless _process_raw_request($c);
         return 1;
     }
 
     # normal pages
     elsif ( $style eq 'detail' ) {
         $c->stash->{substyle} = 'service';
-        _process_details_page($c);
+        return unless _process_details_page($c);
     }
     elsif ( $style eq 'hostdetail' ) {
-        _process_hostdetails_page($c);
+        return unless _process_hostdetails_page($c);
     }
     elsif ( $style =~ m/overview$/mx ) {
         $style = 'overview';
@@ -155,6 +155,7 @@ sub _process_raw_request {
             my $type = $c->req->parameters->{'type'};
             my $data;
             if($type eq 'contact') {
+                return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
                 my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => { '~~' => $filter } ] );
                 if(ref($contacts) eq 'ARRAY') {
                     for my $contact (@{$contacts}) {
@@ -189,6 +190,7 @@ sub _process_raw_request {
                 $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ] );
             }
             elsif($type eq 'custom variable') {
+                return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
                 # get available custom variables
                 $data        = [];
                 my $vars     = {};
@@ -403,6 +405,7 @@ sub _process_details_page {
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
+        return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
@@ -485,6 +488,7 @@ sub _process_hostdetails_page {
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
+        return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
         # remove unwanted colums
         if($columns) {
             for my $h (@{$hosts}) {

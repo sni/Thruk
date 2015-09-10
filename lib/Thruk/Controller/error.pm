@@ -198,6 +198,11 @@ sub index {
             'dscr' => 'If you believe this is an error, check your configuration and your logfiles.',
             'code' => 404, # not found
         },
+        '26'  => {
+            'mess' => 'It appears as though you do not have permission to view this information...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+            'code' => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
