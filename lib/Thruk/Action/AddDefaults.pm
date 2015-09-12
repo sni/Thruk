@@ -580,6 +580,7 @@ sub add_defaults {
         if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
             my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';
+            $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga2';
         }
     }
 
