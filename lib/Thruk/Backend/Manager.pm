@@ -1103,9 +1103,9 @@ sub _set_service_macros {
 
   _do_on_peers($function, $options)
 
-returns a result for a sub called for all peers
+returns a result for a function called for all peers
 
-  $function is the name of the sub called on our peers
+  $function is the name of the function called on our peers
   $options is a hash:
   {
     backend => []     # array of backends where this sub should be called
