@@ -769,6 +769,7 @@ sub action_icon {
     my($obj, $fallback, $prefix) = @_;
     $prefix = '' unless defined $prefix;
     my $x = 0;
+    return $fallback unless ref $obj->{$prefix.'custom_variable_names'} eq 'ARRAY';
     for my $var (@{$obj->{$prefix.'custom_variable_names'}}) {
         return $obj->{$prefix.'custom_variable_values'}->[$x] if $var eq 'ACTION_ICON';
         $x++;

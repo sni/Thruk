@@ -905,7 +905,8 @@ sub get_custom_vars {
 
     if(   defined $data
       and defined $data->{$prefix.'custom_variable_names'}
-      and defined $data->{$prefix.'custom_variable_values'})
+      and defined $data->{$prefix.'custom_variable_values'}
+      and ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
     {
         # merge custom variables into a hash
         @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};

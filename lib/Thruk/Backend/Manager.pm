@@ -1243,6 +1243,25 @@ sub _do_on_peers {
         }
     }
 
+    # strict templates require icinga2 undef values to be replaced
+    if($c->config->{'View::TT'}->{'STRICT'}) {
+        my $replace = 0;
+        for my $key (@{$get_results_for}) {
+            if($c->stash->{'pi_detail'}->{$key}->{'data_source_version'} && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/Livestatus\ r2\./mx) {
+                $replace = 1;
+                last;
+            }
+        }
+        # replace undef values
+        if($replace) {
+            for my $row (@{$data}) {
+                for my $key (keys %{$row}) {
+                    $row->{$key} = '' unless defined $row->{$key};
+                }
+            }
+        }
+    }
+
     $data = $self->_set_result_defaults($function, $data);
 
     #&timing_breakpoint('_get_result complete: '.$function);
