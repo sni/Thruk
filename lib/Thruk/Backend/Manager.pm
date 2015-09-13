@@ -1048,9 +1048,11 @@ sub _set_host_macros {
 
     # host user macros
     my $x = 0;
-    for my $key (@{$host->{$prefix.'custom_variable_names'}}) {
-        $macros->{'$_HOST'.$key.'$'}  = $host->{$prefix.'custom_variable_values'}->[$x];
-        $x++;
+    if(ref $host->{$prefix.'custom_variable_names'} eq 'ARRAY') {
+        for my $key (@{$host->{$prefix.'custom_variable_names'}}) {
+            $macros->{'$_HOST'.$key.'$'}  = $host->{$prefix.'custom_variable_values'}->[$x];
+            $x++;
+        }
     }
 
     return $macros;
@@ -1090,9 +1092,11 @@ sub _set_service_macros {
 
     # service user macros...
     my $x = 0;
-    for my $key (@{$service->{'custom_variable_names'}}) {
-        $macros->{'$_SERVICE'.$key.'$'} = $service->{'custom_variable_values'}->[$x];
-        $x++;
+    if(ref $service->{'custom_variable_names'} eq 'ARRAY') {
+        for my $key (@{$service->{'custom_variable_names'}}) {
+            $macros->{'$_SERVICE'.$key.'$'} = $service->{'custom_variable_values'}->[$x];
+            $x++;
+        }
     }
 
     return $macros;
