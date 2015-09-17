@@ -975,6 +975,7 @@ sub set_custom_vars {
 
     return unless defined $data;
     return unless defined $data->{$prefix.'custom_variable_names'};
+    return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
     return unless defined $c->config->{$search};
 
     my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
@@ -1293,6 +1294,31 @@ sub get_pnp_url {
 
 ########################################
 
+=head2 get_histou_url
+
+  get_histou_url($c, $object)
+
+return histou url for object (host/service)
+
+=cut
+
+sub get_histou_url {
+    my($c, $obj, $force) = @_;
+
+    return '' unless $c->config->{'shown_inline_pnp'} || $force;
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        next unless defined $obj->{$type};
+        if($obj->{$type} =~ m|histou\.js\?|mx) {
+            return($obj->{$type});
+        }
+    }
+
+    return '';
+}
+
+########################################
+
 =head2 get_graph_url
 
   get_graph_url($c, $object)
@@ -1360,6 +1386,15 @@ sub get_action_url {
         }
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
+        return($action_url);
+    }
+    elsif($action_url =~ m/\/histou\.js\?/mx) {
+        $action_url =~ s/&amp;/&/gmx;
+        $action_url =~ s/&/&amp;/gmx;
+        my $popup_url = $action_url;
+        $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $popup_url .= '&amp;panelId=2';
+        $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
 

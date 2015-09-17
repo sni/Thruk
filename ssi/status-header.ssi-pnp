@@ -2,7 +2,23 @@
 <script type="text/javascript">
 jQuery(document).ready(function() {
   try {
-    jQuery('a.tips').cluetip({ajaxCache: false, dropShadow: false, showTitle: false });
+    jQuery('a.tips').cluetip({ajaxCache: false, dropShadow: false, showTitle: false, sticky: false });
   } catch(e) {}
+
+  jQuery("a.histou_tips").hover(
+    function(e){
+      this.r = this.rel;
+      jQuery("body").append("<div id='tooltip'><iframe src='"+ this.r +"' width='600' height='200' frameBorder='0' scrolling='no'></iframe></div>");
+      jQuery("#tooltip")
+        .css("position","absolute")
+        .css("z-index","15")
+        .css("top",(e.pageY - 10) + "px")
+        .css("left",(e.pageX + 5) + "px")
+        .fadeIn("fast");
+      },
+    function(){
+      jQuery("#tooltip").remove();
+    }
+  );
 });
 </script>

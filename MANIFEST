@@ -1351,6 +1351,7 @@ templates/_header_initial_states.tt
 templates/_header_prefs.tt
 templates/_header_sites.tt
 templates/_help.tt
+templates/_histou_graph.tt
 templates/_host_command_box.tt
 templates/_host_command_box_full.tt
 templates/_host_status_details_box.tt

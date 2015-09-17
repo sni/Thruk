@@ -5434,6 +5434,60 @@ function move_png_img(factor) {
     return set_png_img(start, end);
 }
 
+function set_histou_img(start, end, id, source) {
+    if(start  == undefined) { start  = histou_start; }
+    if(end    == undefined) { end    = histou_end; }
+    var newUrl = histou_frame_url + "&from=" + (start*1000) + "&to=" + (end*1000);
+
+    jQuery('#pnpwaitimg').css('display', 'block');
+
+    jQuery('#histou_iframe').load(function() {
+      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'absolute'});
+    })
+    .error(function(err) {
+      jQuery('#pnpwaitimg').css({'display': 'none', 'position': 'inherit'});
+    });
+
+    jQuery('#histou_iframe').attr('src', newUrl);
+
+    // set style of buttons
+    if(id) {
+        id=id.replace(/^#/g, '');
+        for(x=1;x<=5;x++) {
+            obj = document.getElementById("histou_th"+x);
+            styleElements(obj, "original", 1);
+        }
+        obj = document.getElementById(id);
+        styleElements(obj, "commentEven pnpSelected", 1);
+    } else {
+        // get id from hash
+        id = get_hash();
+    }
+
+    if(id) {
+        // replace history otherwise we have to press back twice
+        set_hash(id + "/" + start + "/" + end + "/" + source);
+    }
+
+    // reset reload timer for page
+    resetRefresh();
+
+    return false;
+}
+
+function move_histou_img(factor) {
+    var urlArgs = new Object(toQueryParams(jQuery('#histou_iframe').attr('src')));
+
+    start = urlArgs["start"];
+    end   = urlArgs["end"];
+    diff  = end - start;
+
+    start = parseInt(diff * factor) + parseInt(start);
+    end   = parseInt(diff * factor) + parseInt(end);
+
+    return set_histou_img(start, end);
+}
+
 /* initialize all buttons */
 function init_buttons() {
     jQuery('BUTTON.button').button();

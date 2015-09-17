@@ -408,6 +408,12 @@
           [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
+        [% ELSIF histou_url %]
+        <tr>
+          <td colspan="2" align="center">
+          [% PROCESS _histou_graph.tt hst=host.name svc="" %]
+          </td>
+        </tr>
         [% ELSE %]
         [% graph_url = get_graph_url(c, host, 1)%]
         [% IF graph_url %]

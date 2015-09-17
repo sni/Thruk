@@ -480,6 +480,9 @@ sub _process_host_page {
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
 
+    # grafana graph?
+    $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $host);
+
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $host);
 
@@ -608,6 +611,9 @@ sub _process_service_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
+
+    # grafana graph?
+    $c->stash->{'histou_url'} = Thruk::Utils::get_histou_url($c, $service);
 
     # other graphs?
     $c->stash->{'graph_url'} = Thruk::Utils::get_graph_url($c, $service);
