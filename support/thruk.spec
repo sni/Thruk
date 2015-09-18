@@ -55,12 +55,21 @@ AutoReqProv: no
 %if %{defined suse_version}
 Requires:    apache2 apache2-mod_fcgid cron
 %else
-# >rhel6 specific requirements
-%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
+# rhel specific requirements
+# >=rhel7
+%if 0%{?el7}%{?fc20}%{?fc21}%{?fc22}
+BuildRequires: perl-ExtUtils-Install
+Requires: httpd mod_fcgid cronie
+%else
+# rhel6 specific requirements
+%if 0%{?el6}
+BuildRequires: perl-ExtUtils-MakeMaker
 Requires: httpd mod_fcgid cronie
 %else
 # rhel5 specific requirements (centos support no el5 tag)
+BuildRequires: perl-ExtUtils-MakeMaker
 Requires: httpd mod_fcgid
+%endif
 %endif
 %endif
 
