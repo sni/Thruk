@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - show eventhandler name on extinfo page if available
           - limit json exports to accounts with configuration information role
           - clear process info cache after sending commands
           - Panorama View:

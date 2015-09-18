@@ -255,7 +255,7 @@ sub get_hosts {
             accept_passive_checks acknowledged action_url action_url_expanded
             active_checks_enabled address alias check_command check_freshness check_interval
             check_options check_period check_type checks_enabled childs comments current_attempt
-            current_notification_number event_handler_enabled execution_time
+            current_notification_number event_handler event_handler_enabled execution_time
             custom_variable_names custom_variable_values
             first_notification_delay flap_detection_enabled groups has_been_checked
             high_flap_threshold icon_image icon_image_alt icon_image_expanded

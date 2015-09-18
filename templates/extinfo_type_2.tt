@@ -365,9 +365,16 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Event Handler:</td>
-                            <td class='dataVal'>
-                              [% IF service.event_handler_enabled %]
-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                            <td class='dataVal' style="width:500px">
+                              [% IF !service.event_handler %]
+                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;UNUSED&nbsp;&nbsp;</div>
+                              [% ELSIF service.event_handler_enabled %]
+                              <div class='eventhandlersENABLED' style="float: left; margin-right: 5px;">&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                                [% IF   show_full_commandline == 2 ||
+                                      ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
+                                %]
+                                <div>([% service.event_handler %])</div>
+                                [% END %]
                               [% ELSE %]
                               <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
                               [% END %]
