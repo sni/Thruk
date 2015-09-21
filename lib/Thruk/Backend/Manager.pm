@@ -1258,9 +1258,11 @@ sub _do_on_peers {
         }
         # replace undef values
         if($replace) {
-            for my $row (@{$data}) {
-                for my $key (keys %{$row}) {
-                    $row->{$key} = '' unless defined $row->{$key};
+            if(ref $data eq 'ARRAY') {
+                for my $row (@{$data}) {
+                    for my $key (keys %{$row}) {
+                        $row->{$key} = '' unless defined $row->{$key};
+                    }
                 }
             }
         }
