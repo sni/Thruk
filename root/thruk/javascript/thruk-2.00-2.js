@@ -5478,12 +5478,12 @@ function set_histou_img(start, end, id, source) {
 function move_histou_img(factor) {
     var urlArgs = new Object(toQueryParams(jQuery('#histou_iframe').attr('src')));
 
-    start = urlArgs["start"];
-    end   = urlArgs["end"];
+    start = urlArgs["from"];
+    end   = urlArgs["to"];
     diff  = end - start;
 
-    start = parseInt(diff * factor) + parseInt(start);
-    end   = parseInt(diff * factor) + parseInt(end);
+    start = (parseInt(diff * factor) + parseInt(start)) / 1000;
+    end   = (parseInt(diff * factor) + parseInt(end))   / 1000;
 
     return set_histou_img(start, end);
 }
