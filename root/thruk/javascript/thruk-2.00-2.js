@@ -50,6 +50,10 @@ window.addEventListener('load', function(evt) {
             debug = window.console.debug.bind(console);
         }
     }
+    try {
+        top.frames['side'].is_reloading = false;
+    }
+    catch(err) { debug(err); }
 }, false);
 
 /* do initial things */
