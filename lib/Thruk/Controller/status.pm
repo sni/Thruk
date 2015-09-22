@@ -405,7 +405,6 @@ sub _process_details_page {
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
-        return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
         # remove unwanted colums
         if($columns) {
             for my $s (@{$services}) {
@@ -414,6 +413,13 @@ sub _process_details_page {
                 delete $s->{'peer_key'}                unless $keep_peer_key;
                 delete $s->{'last_state_change_order'} unless $keep_last_state;
                 delete $s->{'state_order'}             unless $keep_state_order;
+            }
+        }
+        if(!$c->check_user_roles("authorized_for_configuration_information")) {
+            # remove custom macro colums which could contain confidential informations
+            for my $s (@{$services}) {
+                delete $s->{'custom_variable_names'};
+                delete $s->{'custom_variable_values'};
             }
         }
         return $c->render(json => $services);
@@ -488,7 +494,6 @@ sub _process_hostdetails_page {
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
-        return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
         # remove unwanted colums
         if($columns) {
             for my $h (@{$hosts}) {
@@ -496,6 +501,13 @@ sub _process_hostdetails_page {
                 delete $h->{'peer_name'}               unless $keep_peer_name;
                 delete $h->{'peer_key'}                unless $keep_peer_key;
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
+            }
+        }
+        if(!$c->check_user_roles("authorized_for_configuration_information")) {
+            # remove custom macro colums which could contain confidential informations
+            for my $h (@{$hosts}) {
+                delete $h->{'custom_variable_names'};
+                delete $h->{'custom_variable_values'};
             }
         }
         return $c->render(json => $hosts);
