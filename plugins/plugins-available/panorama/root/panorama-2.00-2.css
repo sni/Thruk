@@ -389,6 +389,31 @@ DIV.x-window-default.gearopen {
   padding: 4px;
 }
 
+DIV.autohideheader .x-grid-body {
+    border-width: 0;
+}
+
+DIV.autohideheader .x-grid-with-row-lines .x-grid-cell {
+    border-width: 0;
+}
+DIV.autohideheader.autohideheaderover .x-grid-with-row-lines .x-grid-cell {
+    border-width: inherit;
+}
+
+DIV.autohideheader .x-grid-header-ct, DIV.autohideheader .x-toolbar {
+    opacity: 0;
+}
+DIV.autohideheader.autohideheaderover .x-grid-header-ct, DIV.autohideheader.autohideheaderover .x-toolbar {
+    opacity: inherit;
+}
+
+DIV.autohideheader .x-grid-row .x-grid-cell, DIV.autohideheader .x-grid-row-alt .x-grid-cell {
+    background-color: transparent;
+}
+DIV.autohideheader.autohideheaderover .x-grid-row .x-grid-cell, DIV.autohideheader.autohideheaderover .x-grid-row-alt .x-grid-cell {
+    background-color: inherit;
+}
+
 DIV.autohideheader.autohideheaderover .x-window-header-default-top {
    border-width: 0;
 }

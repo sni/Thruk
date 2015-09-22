@@ -7,6 +7,7 @@ next:
           - Panorama View:
             - make text label background size configurable
             - add extra_fonts option to extend the list of available fonts
+            - add show border option for services and hosts panel
             - fix label zIndex positioning
             - fix label position not being saved
             - fix label removed when hitting cancel in settings window

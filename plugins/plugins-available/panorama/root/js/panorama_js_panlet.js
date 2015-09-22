@@ -297,7 +297,7 @@ Ext.define('TP.Panlet', {
     },
     showHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
+        if(global.xdata.autohideheader || this.xdata.showborder == false) {
             var style = this.header.getEl().dom.style;
             if(style.width == '' || style.width != this.getEl().dom.style.width) {
                 // not yet rendered
@@ -319,7 +319,7 @@ Ext.define('TP.Panlet', {
     },
     hideHeader: function(global) {
         if(global == undefined) { global = Ext.getCmp(this.panel_id); }
-        if((this.alwaysBorderless || global.xdata.autohideheader || this.xdata.showborder == false) && this.gearitem == undefined) {
+        if((global.xdata.autohideheader || this.xdata.showborder == false) && this.gearitem == undefined) {
             var style = this.header.getEl().dom.style;
             style.display  = 'none';
             style.opacity  = '';
@@ -333,7 +333,7 @@ Ext.define('TP.Panlet', {
     },
     applyBorderAndBackground: function() {
         this.overCls = 'autohideheaderover';
-        if((this.alwaysBorderless || this.xdata.showborder == false) && this.gearitem == undefined) {
+        if((this.xdata.showborder == false) && this.gearitem == undefined) {
             this.cls     = 'autohideheader';
             this.bodyCls = 'autohideheader';
             this.shadow  = false;
@@ -365,7 +365,7 @@ Ext.define('TP.Panlet', {
             }
         }
         var global = Ext.getCmp(this.panel_id);
-        if(global.xdata.autohideheader || this.alwaysBorderless || this.xdata.showborder == false) {
+        if(global.xdata.autohideheader || this.xdata.showborder == false) {
             if(this.header) {
                 this.header.hide();
             }
@@ -436,7 +436,7 @@ Ext.define('TP.PanletGearItem', {
             var panel = this.up('window');
             var tab   = Ext.getCmp(panel.panel_id);
             // settings panel is somehow hidden below header
-            if(tab.xdata.autohideheader || panel.alwaysBorderless || panel.xdata.showborder == false) {
+            if(tab.xdata.autohideheader || panel.xdata.showborder == false) {
                 This.body.dom.style.marginTop = '17px';
             } else {
                 This.body.dom.style.marginTop = '';

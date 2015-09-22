@@ -6,17 +6,23 @@ Ext.define('TP.PanletGridServices', {
     height: 200,
     //maximizable: true, // does not work stateful
     has_search_button: 'service',
-    grid_sort: false,
+    grid_sort:          false,
     hideSettingsForm: ['url'],
     reloadOnSiteChanges: true,
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=services';
+        this.xdata.showborder = true;
     },
     setGearItems: function() {
         var panel = this;
         this.callParent();
         TP.addFormFilter(this, this.has_search_button);
+        this.addGearItems({
+            fieldLabel: 'Show Border',
+            xtype:      'checkbox',
+            name:       'showborder'
+        });
     }
 });
 
