@@ -26,10 +26,12 @@ Group:         Applications/Monitoring
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
-Requires(pre): shadow-utils
 BuildRequires: libthruk >= 2.00
 Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
+%if 0%{?suse_version} < 1315
+Requires(pre): shadow-utils
+%endif
 
 %description
 Thruk is a multibackend monitoring webinterface which currently
@@ -82,7 +84,11 @@ Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
 %if %{defined suse_version}
+%if 0%{?suse_version} >= 1315
+Requires: xorg-x11-server
+%else
 Requires: xorg-x11-server-extra
+%endif
 %else
 %if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
 # >rhel6
@@ -172,7 +178,11 @@ a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic
 a2enmod rewrite
+%if 0%{?suse_version} < 1315
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
+%else
+systemctl restart apache2.service
+%endif
 %else
 service httpd condrestart
 if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then

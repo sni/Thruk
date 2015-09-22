@@ -15,7 +15,14 @@ RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]
 RewriteRule ^/loginok/([^/]+)/(.*)$  /$2 [NS,PT,L,E=REMOTE_USER:$1]
 
 <LocationMatch ^/thruk(?!/cgi-bin/restricted.cgi)>
-    Order allow,deny
-    Allow from all
-    Satisfy any
+    # apache 2.2
+    <IfModule !mod_authz_core.c>
+      Order allow,deny
+      Allow from all
+      Satisfy any
+    </IfModule>
+    # apache 2.4
+    <IfModule mod_authz_core.c>
+      Require all granted
+    </IfModule>
 </LocationMatch>
