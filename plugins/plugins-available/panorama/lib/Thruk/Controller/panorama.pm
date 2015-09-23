@@ -1846,6 +1846,7 @@ sub _task_userdata_iconsets {
             $type =~ s/\.(png|gif|jpg)$//gmx;
             $fileset->{$type} = $pic;
         }
+        $fileset->{'ok'} = '' unless $fileset->{'ok'};
         push @{$folders}, { name => $name, 'sample' => "../usercontent/images/status/".$name."/".$fileset->{'ok'}, value => $name, fileset => $fileset };
     }
     $folders = Thruk::Backend::Manager::_sort({}, $folders, 'name');
