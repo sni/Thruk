@@ -1648,6 +1648,7 @@ function do_table_search() {
 /* show bug report icon */
 function showBugReport(id, text) {
     var link = document.getElementById('bug_report-btnEl');
+    var raw  = text;
     if(link) {
         text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n" + text;
         link.href="mailto:"+bug_email_rcpt+"?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
@@ -1656,13 +1657,35 @@ function showBugReport(id, text) {
     var obj = document.getElementById(id);
     try {
         Ext.getCmp(id).show();
+        Ext.getCmp(id).el.dom.ondblclick    = function() { return showErrorTextPopup(raw) };
+        Ext.getCmp(id).el.dom.oncontextmenu = function() { return showErrorTextPopup(raw) };
     }
     catch(err) {
         if(obj) {
             obj.style.display    = '';
             obj.style.visibility = 'visible';
+            obj.ondblclick       = function() { return showErrorTextPopup(raw) };
+            obj.oncontextmenu    = function() { return showErrorTextPopup(raw) };
         }
     }
+}
+
+/* show popup with the current error text */
+function showErrorTextPopup(text) {
+    text      = "<pre style='text-align:left;'>"+text+"<\/pre>";
+    var title = "Error Report";
+    if(window.overlib != undefined) {
+        try {
+            var options = [text,CAPTION,title,WIDTH,900];
+            options     = options.concat(info_popup_options);
+            overlib.apply(this, options);
+        }
+        catch(e) {}
+    }
+    if (window.Ext != undefined) {
+        Ext.Msg.alert(title, text);
+    }
+    return(false);
 }
 
 /* create error text for bug reports */
