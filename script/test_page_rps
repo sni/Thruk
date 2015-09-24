@@ -2,6 +2,8 @@
 
 use warnings;
 use strict;
+use JSON::XS;
+use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 #################################################
@@ -18,12 +20,17 @@ my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
 cleanup();
 my $author = -f '.author' ? 1 : 0;
 unlink('.author');
+my $results_file = '.rps_results';
+my $results = {};
+if(-f $results_file) {
+    $results = JSON::XS::decode_json(read_file($results_file));
+}
 
 #################################################
 # run tests
-print("+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
-print("| Branch        | Startup | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  |\n");
-print("+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
+print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | Status CGI      | JSON CGI        | Business P. CGI | Memory                | Load  |\n");
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
 chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
 $branch =~ s|^\*\s+||mx;
 my $tags = [];
@@ -59,7 +66,7 @@ for my $tag (@{$tags}) {
     }
     test_tag($tag);
 }
-print "+---------------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n";
+print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+\n");
 cleanup();
 exit;
 
@@ -68,7 +75,19 @@ exit;
 # SUBS
 #################################################
 sub cleanup {
-  `ps -efl | grep thruk_server | grep -v grep | awk '{ print \$4 }' | xargs -r kill >/dev/null 2>&1`;
+    `ps -efl | grep thruk_server | grep -v grep | awk '{ print \$4 }' | xargs -r kill >/dev/null 2>&1`;
+    _safe_results();
+}
+
+#################################################
+sub _safe_results {
+    return unless $results;
+    if(scalar keys %{$results}) {
+        open(my $fh, '>', $results_file) or die("couldn't write results $results_file: $!");
+        print $fh JSON::XS::encode_json($results);
+        close($fh);
+    }
+    return;
 }
 
 #################################################
@@ -89,6 +108,9 @@ sub test_page {
     } else {
         printf("%6s #/sec    | ", $page);
     }
+    our $cur_pages;
+    $cur_pages->{$name} = $page;
+    return;
 }
 
 #################################################
@@ -110,8 +132,13 @@ sub switch_tag {
 sub test_tag {
     my($tag) = @_;
     our $currenttag = $tag;
-    printf("| %-13s | ", $tag);
+    printf("| %-11s | ", substr($tag,0,11));
     switch_tag($tag);
+
+    my $time = time();
+    if($tag =~ /^v/mx) {
+        chomp($time = `git log -1 --format=%ct $tag`);
+    }
 
     # warmup, start twice to get more accurate startup times
     my $pid = _start_server();
@@ -119,13 +146,22 @@ sub test_tag {
     sleep(3);
 
     my $t0 = [gettimeofday];
-    $pid = _start_server();
-    my $elapsed = tv_interval ( $t0 );
+    $pid   = _start_server();
+    my $elapsed = tv_interval($t0);
     printf("% 5.2fs  | ", $elapsed);
+
+    # time for first request
+    my $t1 = [gettimeofday];
+    `ab -c 1 -n 1 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
+    my $rc = $?;
+    my $first_req = tv_interval($t0);
+    printf("% 6.2fs | ", ($rc == 0 ? $first_req : 'Err'));
+
 
     # warm up
     `ab -c $CONCURRENCY -n 10 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
 
+    our $cur_pages = {};
     test_page('main',   "$BASEURL/changes.html");
     test_page('tac',    "$BASEURL/cgi-bin/tac.cgi");
     test_page('status', "$BASEURL/cgi-bin/status.cgi");
@@ -137,6 +173,18 @@ sub test_tag {
 
     kill('TERM', $pid);
     printf(" %3d MB (max. %4dMB) | %5s |\n", $mem/1000, $max/1000, $load);
+    $results->{$time} = {
+        time        => $time,
+        tag         => $tag,
+        startup     => $elapsed,
+        first_req   => $first_req,
+        load        => $load,
+        mem         => $mem,
+        max_mem     => $max,
+        pages       => $cur_pages,
+    };
+    _safe_results();
+    return;
 }
 
 #################################################

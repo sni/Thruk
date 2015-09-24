@@ -51,3 +51,4 @@ bp/*.tbp.edit
 bp/*.tbp-*
 root/tests/
 script/append.make.options
+.rps_results
