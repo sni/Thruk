@@ -112,13 +112,14 @@ sub test_tag {
     our $currenttag = $tag;
     printf("| %-13s | ", $tag);
     switch_tag($tag);
-    chomp(my $pid = `./script/thruk_server.pl >/dev/null 2>&1 & echo \$!`);
+
+    # warmup, start twice to get more accurate startup times
+    my $pid = _start_server();
+    kill('TERM', $pid);
+    sleep(3);
 
     my $t0 = [gettimeofday];
-    while(`lsof -i:$BASEPORT | grep -c LISTEN` != 1) {
-        sleep(0.05);
-        -d '/proc/'.$pid || die("failed to start!\n");
-    }
+    $pid = _start_server();
     my $elapsed = tv_interval ( $t0 );
     printf("% 5.2fs  | ", $elapsed);
 
@@ -136,4 +137,14 @@ sub test_tag {
 
     kill('TERM', $pid);
     printf(" %3d MB (max. %4dMB) | %5s |\n", $mem/1000, $max/1000, $load);
+}
+
+#################################################
+sub _start_server {
+    chomp(my $pid = `./script/thruk_server.pl >/dev/null 2>&1 & echo \$!`);
+    while(`lsof -i:$BASEPORT | grep -c LISTEN` != 1) {
+        sleep(0.05);
+        -d '/proc/'.$pid || die("failed to start!\n");
+    }
+    return($pid);
 }
