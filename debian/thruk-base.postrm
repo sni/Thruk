@@ -18,11 +18,19 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+# deactivate cookie in existing default virtual hosts
+cleanup_apache() {
+  ls -1 /etc/apache2/sites-available/*default* | \
+    while read file; do
+      sed -i -e '/Include \/usr\/share\/thruk\/thruk_cookie_auth.include/d' $file
+    done
+}
 
 case "$1" in
     remove)
         rm -rf /var/cache/thruk
-    ;;
+        [ -x /usr/sbin/apache2 ] && cleanup_apache
+   ;;
     upgrade)
         rm -rf /var/cache/thruk/*
         mkdir -p /var/cache/thruk/reports
