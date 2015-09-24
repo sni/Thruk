@@ -809,8 +809,19 @@ function create_site_panel_popup_panel_section_details() {
             if(sections_num > 1) { panel += sectionname+' -&gt; '; }
             panel += '      '+subsectionname+'</b></a>:';
             panel += '    </td></tr></table>';
+            /* sort by name, not by id */
+            var site_names = {};
             jQuery(subsection.sites.sort()).each(function(k, site_id) {
-                panel += get_site_panel_backend_button(site_id, true, '', 'toggleBackend(\''+site_id+'\')', sectionname, subsectionname);
+                var site_name = initial_backends[site_id]['name'].toLowerCase();
+                if(site_names[site_name] == undefined) {
+                    site_names[site_name] = [];
+                }
+                site_names[site_name].push(site_id);
+            });
+            jQuery(keys(site_names).sort()).each(function(k, site_name) {
+                jQuery(site_names[site_name]).each(function(l, site_id) {
+                    panel += get_site_panel_backend_button(site_id, true, '', 'toggleBackend(\''+site_id+'\')', sectionname, subsectionname);
+                });
             });
             panel += '</td>';
             panel += '</tr>';
