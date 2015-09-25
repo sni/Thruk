@@ -8,7 +8,7 @@ use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 #################################################
 # settings
-my $NUM         = 50;
+my $NUM         = 14;
 my $REQUESTS    = $ENV{REQUESTS}    || 100;
 my $CONCURRENCY = $ENV{CONCURRENCY} || 5;
 my $DELAY       = $ENV{DELAY}       || 2;
@@ -58,6 +58,7 @@ elsif($ARGV[0] && $ARGV[0] eq 'all') {
         next if $one_per_day->{$day};
         push @{$tags}, $hash;
         $one_per_day->{$day} = 1;
+        last if scalar @{$tags} >= $NUM;
     }
 } else {
     $tags = \@ARGV;
