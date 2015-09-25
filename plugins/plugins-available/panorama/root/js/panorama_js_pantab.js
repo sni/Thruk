@@ -434,7 +434,7 @@ Ext.define('TP.Pantab', {
             /* update label zIndex */
             for(var nr=0; nr<this.window_ids.length; nr++) {
                 var panel = Ext.getCmp(this.window_ids[nr]);
-                if(panel.labelEl && panel.labelEl.el && panel.labelEl.el.dom) {
+                if(panel && panel.labelEl && panel.labelEl.el && panel.labelEl.el.dom) {
                     panel.labelEl.el.dom.style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
                 }
             }
