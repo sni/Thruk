@@ -8,7 +8,7 @@ use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 #################################################
 # settings
-my $NUM         = 10;
+my $NUM         = 50;
 my $REQUESTS    = $ENV{REQUESTS}    || 100;
 my $CONCURRENCY = $ENV{CONCURRENCY} || 5;
 my $DELAY       = $ENV{DELAY}       || 2;
@@ -45,9 +45,13 @@ if(scalar @ARGV == 0) {
     unshift @{$tags}, $branch;
 }
 elsif($ARGV[0] && $ARGV[0] eq 'all') {
+    my $one_per_day = {};
     for my $line (split/\n/m, `git log --format="%ct %h"`) {
         my($ts, $hash) = split/\s+/mx, $line;
+        my $day = POSIX::strftime( "%d%m%Y", localtime($ts));
+        next if $one_per_day->{$day};
         push @{$tags}, $hash;
+        $one_per_day->{$day} = 1;
     }
 } else {
     $tags = \@ARGV;
