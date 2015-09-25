@@ -24,7 +24,7 @@ my $results = {};
 if(-f $results_file) {
     $results = JSON::XS::decode_json(read_file($results_file));
 }
-if($ARGV[0] eq '-c') {
+if($ARGV[0] && $ARGV[0] eq '-c') {
     # write results file only (will be done on exit)
     exit;
 }
@@ -160,11 +160,16 @@ sub test_tag {
 
     # time for first request(s)
     my $t1 = [gettimeofday];
-    `wget -O - "$BASEURL/index.html" >/dev/null 2>&1`;
-    `wget -O - "$BASEURL/side.html" >/dev/null 2>&1`;
-    `wget -O - "$BASEURL/main.html" >/dev/null 2>&1`;
-    `wget -O - "$BASEURL/cgi-bin/tac.cgi" >/dev/null 2>&1`;
-    my $rc = $?;
+    my $rc = 0;
+    for my $url (
+        "$BASEURL/index.html",
+        "$BASEURL/side.html",
+        "$BASEURL/main.html",
+        "$BASEURL/cgi-bin/tac.cgi",
+    ) {
+        `wget -O - "$url" >/dev/null 2>&1`;
+        $rc += $?;
+    }
     my $first_req = tv_interval($t0);
     printf("% 6.2fs | ", ($rc == 0 ? $first_req : 'Err'));
 
