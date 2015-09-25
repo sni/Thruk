@@ -52,4 +52,4 @@ bp/*.tbp-*
 root/tests/
 script/append.make.options
 .rps_results
-test_results/
+rpsresults.html

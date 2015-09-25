@@ -18,13 +18,18 @@ my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
 #################################################
 # prepare
 cleanup();
-my $author = -f '.author' ? 1 : 0;
-unlink('.author');
+my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
 my $results = {};
 if(-f $results_file) {
     $results = JSON::XS::decode_json(read_file($results_file));
 }
+if($ARGV[0] eq '-c') {
+    # write results file only (will be done on exit)
+    exit;
+}
+my $author = -f '.author' ? 1 : 0;
+unlink('.author');
 
 #################################################
 # run tests
@@ -45,9 +50,10 @@ if(scalar @ARGV == 0) {
 #################################################
 END {
     cleanup();
-    switch_tag($branch);
+    switch_tag($branch) if $branch;
     `touch .author` if $author;
-    print "\n";
+    print "\n" if $branch;
+    _create_results_file();
 }
 $SIG{'INT'}  = sub {
     cleanup();
@@ -137,8 +143,10 @@ sub test_tag {
 
     my $time = time();
     if($tag =~ /^v/mx) {
-        chomp($time = `git log -1 --format=%ct $tag`);
+        chomp($time = `git log -1 --format=%ct`);
     }
+    chomp(my $hash = `git log -1 --format=%h`);
+    chomp(my $msg  = `git log -1 --format=%s`);
 
     # warmup, start twice to get more accurate startup times
     my $pid = _start_server();
@@ -150,9 +158,12 @@ sub test_tag {
     my $elapsed = tv_interval($t0);
     printf("% 5.2fs  | ", $elapsed);
 
-    # time for first request
+    # time for first request(s)
     my $t1 = [gettimeofday];
-    `ab -c 1 -n 1 "$BASEURL/cgi-bin/tac.cgi" > /dev/null 2>&1`;
+    `wget -O - "$BASEURL/index.html" >/dev/null 2>&1`;
+    `wget -O - "$BASEURL/side.html" >/dev/null 2>&1`;
+    `wget -O - "$BASEURL/main.html" >/dev/null 2>&1`;
+    `wget -O - "$BASEURL/cgi-bin/tac.cgi" >/dev/null 2>&1`;
     my $rc = $?;
     my $first_req = tv_interval($t0);
     printf("% 6.2fs | ", ($rc == 0 ? $first_req : 'Err'));
@@ -176,6 +187,8 @@ sub test_tag {
     $results->{$time} = {
         time        => $time,
         tag         => $tag,
+        msg         => $msg,
+        hash        => $hash,
         startup     => $elapsed,
         first_req   => $first_req,
         load        => $load,
@@ -196,3 +209,275 @@ sub _start_server {
     }
     return($pid);
 }
+
+#################################################
+sub _create_results_file {
+    our $template;
+    if(!defined $template) {
+        $template = join("", <DATA>);
+    }
+    my $copy = $template;
+    my $res  = JSON::XS::encode_json($results);
+    $res    =~ s/},/},\n/gmx;
+    $copy =~ s/\#\#\#DATA\#\#\#/$res/g;
+    open(my $fh, '>', $result_html) or die("cannot write $result_html: $!");
+    print $fh $copy;
+    close($fh);
+    print $result_html." written\n";
+    return;
+}
+
+__DATA__
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Thruk Development Performance Monitoring</title>
+  <script language="javascript" type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.selection.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.crosshair.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.stack.js"></script>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.fillbetween.js"></script>
+  <style>
+#tooltip {
+    position: absolute;
+    display: none;
+    border: 1px solid #fdd;
+    padding: 2px;
+    background-color: #fee;
+    opacity: 0.80;
+    z-index: 100;
+}
+table.tooltip {
+    border-collapse: collapse;
+}
+table.tooltip .var {
+    font-weight: bold;
+    border-left: 1px solid grey;
+    padding-left: 5px;
+}
+table.tooltip .val {
+    text-align: right;
+    font-weight: bold;
+}
+table.tooltip .date {
+    padding-right: 5px;
+}
+  </style>
+</head>
+<body>
+<div id='tooltip'></div>
+<div id="graph_startup" style="width: 1100px; height: 300px;"></div>
+<div id="graph_mem"     style="width: 1100px; height: 300px;"></div>
+<div id="graph_pages"   style="width: 1100px; height: 300px;"></div>
+
+<script type="text/javascript">
+<!--
+
+// data
+var data = ###DATA###;
+
+var plots   = {};
+var commits = {};
+var graph_options = {
+    legend: {
+        show: true,
+        position: "ne"
+    },
+    xaxis: {
+        mode: "time",
+        tickLength: 5
+    },
+    series: {
+        lines:  { show: true },
+        points: { show: true }
+    },
+    selection: {
+        mode: "x"
+    },
+    grid: {
+        hoverable: true,
+        markings: []
+    },
+    crosshair: {
+        mode: "x"
+    }
+};
+var dataSets = getData();
+
+$(function() {
+    plots['startup'] = $.plot("#graph_startup", dataSets['startup'], graph_options);
+    plots['mem']     = $.plot("#graph_mem",     dataSets['memory'],  graph_options);
+    redrawMarkings();
+
+    jQuery.each(['graph_startup', 'graph_mem'], function(i, graph) {
+        $("#"+graph).bind("plotselected", function (event, ranges) {
+            // do the zooming
+            setAllData(ranges.xaxis.from, ranges.xaxis.to);
+            jQuery.each(plots, function(k, plot) {
+                plot.setupGrid();
+                plot.draw();
+                plot.clearSelection();
+            });
+            redrawMarkings();
+        });
+
+        $("#"+graph).bind("plothover", function (event, pos, item) {
+            if (item) {
+                var date = new Date(item.datapoint[0]).toLocaleString();
+                var tooltip = "<table class='tooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
+                tooltip += "<tr><td class='date' colspan=2>"+commits[item.datapoint[0]].msg+"</td></tr>";
+                tooltip += "<td class='var'>Load:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][2]['data'][item.dataIndex][1])+"</td></tr>";
+
+                tooltip += "<td class='var'>Memory:</td>";
+                tooltip += "<td class='val'>"+(dataSets['memory'][0]['data'][item.dataIndex][1].toFixed(0))+" - "+(dataSets['memory'][1]['data'][item.dataIndex][1].toFixed(0))+"MB</td></tr>";
+                tooltip += "</table>";
+
+                jQuery("#tooltip").html(tooltip)
+                                  .css({top: item.pageY+5, left: item.pageX+5})
+                                  .fadeIn(200);
+
+            } else {
+                $("#tooltip").hide();
+            }
+            jQuery.each(plots, function(k, plot) {
+                plot.setCrosshair(pos);
+            });
+        });
+        /* set selection for other plots too */
+        jQuery("#"+graph).bind("plotselecting", function (event, ranges) {
+            if(ranges == null) { return; }
+            jQuery.each(plots, function(name, plot) {
+                plot.setSelection(ranges, true);
+            });
+        });
+        /* reset zoom on rightclick */
+        jQuery("#"+graph).bind("contextmenu", function (event, pos, item) {
+            event.preventDefault();
+            jQuery.each(plots, function(name, plot) {
+                zoomOut(plot);
+            });
+            redrawMarkings();
+        });
+    });
+});
+
+function redrawMarkings() {
+    jQuery(".marking").remove();
+    jQuery.each(plots, function(name, plot) {
+        var div = $("#graph_"+name);
+        jQuery.each(graph_options.grid.markings, function(i, m) {
+            var o = plot.pointOffset({ x: m.xaxis.from, y: 0});
+            div.append("<div class='marking' style='position:absolute;left:" + (o.left + 4) + "px;top:" + (10) + "px;color:#666;font-size:smaller'>"+m.name+"</div>");
+        });
+    });
+}
+
+function zoomOut(plot) {
+    setAllData();
+    plot.setupGrid();
+    plot.draw();
+}
+
+function setAllData(from, to) {
+    dataSets = getData(from, to);
+    plots['startup'].setData(dataSets['startup']);
+    plots['mem'].setData(dataSets['memory']);
+}
+
+function getData(from, to) {
+    var startup_data = {
+        label: "startup time",
+        stack: true,
+        color: '#347d98',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        data: []
+    };
+    var firstreq_data = {
+        label: "first request",
+        stack: true,
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        data: []
+    };
+    var load_data = {
+        label: "load",
+        color: '#f8a346',
+        lines: {
+            show: true,
+            lineWidth: 2,
+        },
+        data: []
+    };
+    var mem_data = {
+        id:    "memory",
+        label: "memory",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var memmax_data = {
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2,
+            fill: 0.2
+        },
+        fillBetween: "memory",
+        data: []
+    };
+
+    var markings = [];
+
+    jQuery.each(Object.keys(data).sort(), function(i, t) {
+        var d = data[t];
+        var jstime = Number(t)*1000;
+        if(from != undefined && (from > jstime || to < jstime)) { return; }
+        startup_data['data'].push([jstime, Number(d.startup)]);
+        firstreq_data['data'].push([jstime, Number(d.first_req)]);
+        load_data['data'].push([jstime, Number(d.load)]);
+        mem_data['data'].push([jstime, Number(d.mem)/1024]);
+        memmax_data['data'].push([jstime, Number(d.max_mem)/1024]);
+        if(d.tag.match(/^v/)) {
+            markings.push({
+                color: "#000",
+                lineWidth: 1,
+                xaxis: {
+                    from: jstime,
+                    to: jstime
+                },
+                name: d.tag
+            });
+        }
+        commits[jstime] = {
+            tag: d.tag,
+            msg: d.msg
+        };
+    });
+    var dataSets = {
+        startup: [startup_data, firstreq_data, load_data],
+        memory:  [mem_data, memmax_data]
+    };
+    graph_options.grid.markings = markings;
+    return(dataSets);
+}
+
+-->
+</script>
+
+</body>
+</html>
