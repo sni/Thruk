@@ -21,7 +21,10 @@ Ext.define('TP.PanletNagvis', {
         panel.loader = {};
 
         panel.updateGraphsCallback = function(options, success, response) {
-            var graph_combo_error_label = TP.getFormField(panel.gearitem.down('form'), 'grapherror');
+            var graph_combo_error_label;
+            if(panel.gearitem && panel.gearitem.down('form')) {
+                graph_combo_error_label = TP.getFormField(panel.gearitem.down('form'), 'grapherror');
+            }
             if(success) {
                 var data  = TP.getResponse(panel, response, true);
                 var matches = response.responseText.match(/<a href="[^"]*?mod=Map&act=view&show=[^"]*?".*?>([^<]+)<\/a>/g);
@@ -43,24 +46,30 @@ Ext.define('TP.PanletNagvis', {
                         graph_combo.store.loadRawData(newdata[key], true);
                     }
                     graph_combo.setValue(panel.xdata.graph);
-                    graph_combo_error_label.unsetActiveError();
-                    graph_combo_error_label.setValue('');
+                    if(graph_combo_error_label) {
+                        graph_combo_error_label.unsetActiveError();
+                        graph_combo_error_label.setValue('');
+                    }
                     graph_combo.enable();
                 } else {
-                    graph_combo_error_label.setActiveError('');
-                    graph_combo_error_label.setValue('loading graphs failed, no maps found. Is this a nagvis url?');
+                    if(graph_combo_error_label) {
+                        graph_combo_error_label.setActiveError('');
+                        graph_combo_error_label.setValue('loading graphs failed, no maps found. Is this a nagvis url?');
+                    }
                     panel.graphs_loaded = 0;
                 }
             }
             if(!success) {
                 panel.graphs_loaded = 0;
-                graph_combo_error_label.setActiveError('');
-                if(response.status == 404) {
-                    graph_combo_error_label.setValue('loading graphs failed, no nagvis found under this url: ' + response.status + ' - ' + response.statusText);
-                } else if(response.status) {
-                    graph_combo_error_label.setValue('loading graphs failed: ' + response.status + ' - ' + response.statusText);
-                } else {
-                    graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication problems.');
+                if(graph_combo_error_label) {
+                    graph_combo_error_label.setActiveError('');
+                    if(response.status == 404) {
+                        graph_combo_error_label.setValue('loading graphs failed, no nagvis found under this url: ' + response.status + ' - ' + response.statusText);
+                    } else if(response.status) {
+                        graph_combo_error_label.setValue('loading graphs failed: ' + response.status + ' - ' + response.statusText);
+                    } else {
+                        graph_combo_error_label.setValue('loading graphs failed, possible errors are wrong url or authentication problems.');
+                    }
                 }
             }
         }
@@ -75,8 +84,13 @@ Ext.define('TP.PanletNagvis', {
             var graph_combo             = TP.getFormField(panel.gearitem.down('form'), 'graph');
             graph_combo.setRawValue('loading maps...');
             graph_combo.disable();
-            var graph_combo_error_label = TP.getFormField(panel.gearitem.down('form'), 'grapherror');
-            graph_combo_error_label.unsetActiveError();
+            var graph_combo_error_label;
+            if(panel.gearitem && panel.gearitem.down('form')) {
+                graph_combo_error_label = TP.getFormField(panel.gearitem.down('form'), 'grapherror');
+            }
+            if(graph_combo_error_label) {
+                graph_combo_error_label.unsetActiveError();
+            }
             var now    = new Date();
             var url    = panel.xdata.base_url+'/server/core/ajax_handler.php?mod=Multisite&act=getMaps&_ajaxid='+Math.floor(now.getTime()/1000);
             Ext.Ajax.cors                = true;
@@ -89,8 +103,10 @@ Ext.define('TP.PanletNagvis', {
                     callback: panel.updateGraphsCallback
                 });
             } catch(e) {
-                graph_combo_error_label.setActiveError('');
-                graph_combo_error_label.setValue('loading graphs failed: ' + e);
+                if(graph_combo_error_label) {
+                    graph_combo_error_label.setActiveError('');
+                    graph_combo_error_label.setValue('loading graphs failed: ' + e);
+                }
             }
         };
 
