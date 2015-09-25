@@ -13,6 +13,7 @@ next:
             - fix label removed when hitting cancel in settings window
           - Config Tool:
             - fix tools changes not beeing saved
+            - fix stripping last option when rewriting commands (#518)
 
 2.00-2   Fri Aug 28 16:19:25 CEST 2015
           - add cancel button to all external jobs

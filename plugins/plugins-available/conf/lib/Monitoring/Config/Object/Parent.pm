@@ -827,6 +827,7 @@ sub _break_long_command {
             if(index($chunk, '>') == 0) { $chunk = '  '.$chunk; }
             $line .= sprintf "%-33s %s", '', $chunk;
             $arg   = 0;
+            push @text, $line if $x == $size - 1; # make sure last option is not left behind
         } else {
             $line    .= $chunk;
             my $si    = index($chunk, "'");
@@ -848,7 +849,7 @@ sub _break_long_command {
                 }
             }
 
-            $arg   = 1;
+            $arg = 1;
             push @text, $line;
             $line = '';
         }
