@@ -254,13 +254,21 @@ __DATA__
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.stack.js"></script>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.fillbetween.js"></script>
   <style>
+A {
+  border-bottom: 1px dotted black;
+  color: black;
+  text-decoration: none;
+}
+A:hover {
+  border-bottom: 1px solid black;
+}
 #tooltip {
     position: absolute;
     display: none;
-    border: 1px solid #fdd;
+    border: 1px solid #666666;
     padding: 2px;
-    background-color: #fee;
-    opacity: 0.80;
+    background-color: #d6e5e4;
+    opacity: 0.9;
     z-index: 100;
 }
 table.tooltip {
@@ -268,12 +276,14 @@ table.tooltip {
 }
 table.tooltip .var {
     font-weight: bold;
-    border-left: 1px solid grey;
     padding-left: 5px;
+    border-top: 1px solid grey;
 }
 table.tooltip .val {
     text-align: right;
     font-weight: bold;
+    border-left: 1px solid grey;
+    border-top: 1px solid grey;
 }
 table.tooltip .date {
     padding-right: 5px;
@@ -319,7 +329,7 @@ var graph_options = {
     }
 };
 var dataSets = getData();
-
+var fadeOutTimer;
 $(function() {
     plots['startup'] = $.plot("#graph_startup", dataSets['startup'], graph_options);
     plots['mem']     = $.plot("#graph_mem",     dataSets['memory'],  graph_options);
@@ -341,20 +351,30 @@ $(function() {
             if (item) {
                 var date = new Date(item.datapoint[0]).toLocaleString();
                 var tooltip = "<table class='tooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
-                tooltip += "<tr><td class='date' colspan=2>"+commits[item.datapoint[0]].msg+"</td></tr>";
+                tooltip += "<tr><td class='date' colspan=2><a href='https://github.com/sni/Thruk/commit/"+commits[item.datapoint[0]].hash+"' target='_blank'>"+commits[item.datapoint[0]].msg+"</td></tr>";
                 tooltip += "<td class='var'>Load:</td>";
                 tooltip += "<td class='val'>"+(dataSets['startup'][2]['data'][item.dataIndex][1])+"</td></tr>";
 
                 tooltip += "<td class='var'>Memory:</td>";
                 tooltip += "<td class='val'>"+(dataSets['memory'][0]['data'][item.dataIndex][1].toFixed(0))+" - "+(dataSets['memory'][1]['data'][item.dataIndex][1].toFixed(0))+"MB</td></tr>";
+
+                tooltip += "<td class='var'>Startup:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][0]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
+
+                tooltip += "<td class='var'>First Request:</td>";
+                tooltip += "<td class='val'>"+(dataSets['startup'][1]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
                 tooltip += "</table>";
 
+                window.clearTimeout(fadeOutTimer);
                 jQuery("#tooltip").html(tooltip)
                                   .css({top: item.pageY+5, left: item.pageX+5})
-                                  .fadeIn(200);
+                                  .fadeIn(300);
 
             } else {
-                $("#tooltip").hide();
+                window.clearTimeout(fadeOutTimer);
+                fadeOutTimer = window.setTimeout(function() {
+                    $("#tooltip").fadeOut(600);
+                }, 1000);
             }
             jQuery.each(plots, function(k, plot) {
                 plot.setCrosshair(pos);
@@ -375,6 +395,15 @@ $(function() {
             });
             redrawMarkings();
         });
+    });
+    jQuery("#tooltip").mouseover(function() {
+        window.clearTimeout(fadeOutTimer);
+    });
+    jQuery("#tooltip").mouseout(function() {
+        window.clearTimeout(fadeOutTimer);
+        fadeOutTimer = window.setTimeout(function() {
+            $("#tooltip").fadeOut(600);
+        }, 1000);
     });
 });
 
@@ -477,8 +506,9 @@ function getData(from, to) {
             });
         }
         commits[jstime] = {
-            tag: d.tag,
-            msg: d.msg
+            tag:  d.tag,
+            msg:  d.msg,
+            hash: d.hash
         };
     });
     var dataSets = {
