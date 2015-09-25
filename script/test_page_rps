@@ -28,6 +28,12 @@ if($ARGV[0] && $ARGV[0] eq '-c') {
     # write results file only (will be done on exit)
     exit;
 }
+my $only_newer = 0;
+if($ARGV[0] && $ARGV[0] eq '-n') {
+    # only newer/untested tags
+    shift @ARGV;
+    $only_newer = 1;
+}
 my $author = -f '.author' ? 1 : 0;
 unlink('.author');
 
@@ -155,6 +161,11 @@ sub test_tag {
     chomp(my $time = `git log -1 --format=%ct`);
     chomp(my $hash = `git log -1 --format=%h`);
     chomp(my $msg  = `git log -1 --format=%s`);
+
+    if($only_newer && defined $results->{$time}) {
+        print(" skipped |\n");
+        return;
+    }
 
     # warmup, start twice to get more accurate startup times
     my $pid = _start_server();
