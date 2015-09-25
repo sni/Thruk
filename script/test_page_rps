@@ -328,9 +328,11 @@ var graph_options = {
         mode: "time",
         tickLength: 5
     },
+    yaxis: {
+        min: 0
+    },
     series: {
         lines:  { show: true },
-        points: { show: true }
     },
     selection: {
         mode: "x"
