@@ -71,5 +71,5 @@ root/tests/
 script/append.make.options
 ^bp/.*\.pm
 t/testurls.txt
-.rps_results'
+.rps_results
 rpsresults.html
