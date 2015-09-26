@@ -38,9 +38,13 @@ cleanup();
 my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
 my $results = {};
-if(-f $results_file) {
+if(-s $results_file) {
     $results = JSON::XS::decode_json(read_file($results_file));
 }
+
+# clean non-existing git hashes
+_clean_old_git_hashes();
+
 if($options->{'write_file'}) {
     # write results file only (will be done on exit)
     exit;
@@ -115,7 +119,7 @@ sub _safe_results {
     return unless $results;
     if(scalar keys %{$results}) {
         open(my $fh, '>', $results_file) or die("couldn't write results $results_file: $!");
-        print $fh JSON::XS::encode_json($results);
+        print $fh JSON::XS->new->canonical(1)->encode($results);
         close($fh);
     }
     return;
@@ -172,7 +176,7 @@ sub test_tag {
     chomp(my $msg  = `git log -1 --format=%s`);
 
     if($options->{'update_only'} && defined $results->{$time}) {
-        print(" skipped |\n");
+        print("skipped |\n");
         return;
     }
 
@@ -263,6 +267,26 @@ sub _create_results_file {
     print $result_html." written\n" unless $skip_print;
     return;
 }
+
+#################################################
+sub _clean_old_git_hashes {
+    return unless scalar keys %{$results} > 0;
+    my $hashes = {};
+    for my $line (split/\n/m, `git log --format="%ct %h"`) {
+        my($ts, $hash) = split/\s+/mx, $line;
+        $hashes->{$hash} = 1;
+    }
+    for my $ts (keys %{$results}) {
+        my $d = $results->{$ts};
+        if(!$hashes->{$d->{'hash'}}) {
+            print "cleaned old hash: ".$d->{'hash'}."\n";
+            delete $results->{$ts};
+        }
+    }
+    return;
+}
+
+#################################################
 
 __DATA__
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
