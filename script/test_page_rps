@@ -364,13 +364,7 @@ $(function() {
     jQuery.each(['graph_startup', 'graph_mem'], function(i, graph) {
         $("#"+graph).bind("plotselected", function (event, ranges) {
             // do the zooming
-            setAllData(ranges.xaxis.from, ranges.xaxis.to);
-            jQuery.each(plots, function(k, plot) {
-                plot.setupGrid();
-                plot.draw();
-                plot.clearSelection();
-            });
-            redrawMarkings();
+            zoomIn(ranges.xaxis.from, ranges.xaxis.to);
         });
 
         $("#"+graph).bind("plothover", function (event, pos, item) {
@@ -431,6 +425,11 @@ $(function() {
             $("#tooltip").fadeOut(600);
         }, 1000);
     });
+
+    if(window.location.hash) {
+        var range = window.location.hash.replace(/^#/, '').split(',');
+        zoomIn(Number(range[0]), Number(range[1]));
+    }
 });
 
 function redrawMarkings() {
@@ -444,6 +443,17 @@ function redrawMarkings() {
     });
 }
 
+function zoomIn(from, to) {
+    setAllData(from, to);
+    jQuery.each(plots, function(k, plot) {
+        plot.setupGrid();
+        plot.draw();
+        plot.clearSelection();
+    });
+    redrawMarkings();
+}
+
+
 function zoomOut(plot) {
     setAllData();
     plot.setupGrid();
@@ -451,6 +461,11 @@ function zoomOut(plot) {
 }
 
 function setAllData(from, to) {
+    if(from != undefined) {
+      window.location.hash = '#'+from+','+to;
+    } else {
+      window.location.hash = '';
+    }
     dataSets = getData(from, to);
     plots['startup'].setData(dataSets['startup']);
     plots['mem'].setData(dataSets['memory']);
