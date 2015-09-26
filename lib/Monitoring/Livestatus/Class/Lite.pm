@@ -375,14 +375,20 @@ sub _cond_ARRAYREF {
     $combining_count = $combining_count || 0;
     my @statement = ();
 
-    my @cp_conds = @{ $conds }; # work with a copy
-    while(my $cond = shift @cp_conds) {
-        my($child_combining_count, @child_statement) = &_dispatch_refkind($cond, {
-            ARRAYREF  => sub { &_recurse_cond($cond, $combining_count) },
-            HASHREF   => sub { &_recurse_cond($cond, $combining_count) },
-            UNDEF     => sub { croak "not supported : UNDEF in arrayref" },
-            SCALAR    => sub { &_recurse_cond( { $cond => shift(@cp_conds) } , $combining_count ) },
-        });
+    my $num = scalar @{$conds};
+    for(my $x = 0; $x < $num; $x++) {
+        my $cond = $conds->[$x];
+        next unless defined $cond;
+        my $type = &_refkind($cond);
+        my($child_combining_count, @child_statement);
+        if($type eq 'ARRAYREF' or $type eq 'HASHREF') {
+            ($child_combining_count, @child_statement) = &_recurse_cond($cond, $combining_count);
+        }
+        elsif($type eq 'SCALAR') {
+            ($child_combining_count, @child_statement) = &_recurse_cond( { $cond => ($conds->[++$x]) } , $combining_count );
+        } else {
+            croak("not supported: $type");
+        }
         push @statement, @child_statement;
         $combining_count = $child_combining_count;
     }
@@ -465,10 +471,10 @@ sub _cond_hashpair_HASHREF {
 
     my @statement = ();
 
-    foreach my $child_key ( keys %{ $values } ){
+    for my $child_key (keys %{$values}) {
         my $child_value = $values->{ $child_key };
 
-        if ( $child_key =~ /^-/mxo ){
+        if ( substr($child_key,0,1) eq '-') {
             my ( $child_combining_count, @child_statement ) = &_cond_op_in_hash($child_key, { $key => $child_value } , 0);
             $combining_count += $child_combining_count;
             push @statement, @child_statement;
@@ -536,20 +542,9 @@ sub _cond_compining {
 ################################################################################
 sub _refkind {
   my $ref = ref $_[0];
-  return(uc($ref).'REF') if $ref;
+  return($ref.'REF') if $ref;
   return('UNDEF') if !defined $_[0];
   return('SCALAR');
-}
-
-################################################################################
-sub _dispatch_refkind {
-    my($value, $dispatch_table) = @_;
-
-    my $type    = &_refkind($value);
-    my $coderef = $dispatch_table->{$type} ||
-        die(sprintf("No coderef for %s ( %s ) found!",$value, $type));
-
-    return $coderef->();
 }
 
 ################################################################################
