@@ -271,6 +271,8 @@ __DATA__
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Thruk Development Performance Monitoring</title>
   <script language="javascript" type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.selection.js"></script>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.js"></script>
@@ -278,6 +280,9 @@ __DATA__
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.stack.js"></script>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.fillbetween.js"></script>
   <style>
+BODY {
+  padding-top: 70px;
+}
 A {
   border-bottom: 1px dotted black;
   color: black;
@@ -295,26 +300,40 @@ A:hover {
     opacity: 0.9;
     z-index: 100;
 }
-table.tooltip {
+table.thruktooltip {
     border-collapse: collapse;
 }
-table.tooltip .var {
+table.thruktooltip .var {
     font-weight: bold;
     padding-left: 5px;
     border-top: 1px solid grey;
 }
-table.tooltip .val {
+table.thruktooltip .val {
     text-align: right;
     font-weight: bold;
     border-left: 1px solid grey;
     border-top: 1px solid grey;
 }
-table.tooltip .date {
+table.thruktooltip .date {
     padding-right: 5px;
 }
   </style>
 </head>
 <body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#" onclick="zoomIn(); return false;">Thruk Performance Charts</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#" onclick="zoomIn(Date.now()-(31*86400*1000), Date.now()); return false;">Last Month</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 <div id='tooltip'></div>
 <div id="graph_startup" style="width: 1100px; height: 300px;"></div>
 <div id="graph_mem"     style="width: 1100px; height: 300px;"></div>
@@ -370,7 +389,7 @@ $(function() {
         $("#"+graph).bind("plothover", function (event, pos, item) {
             if (item) {
                 var date = new Date(item.datapoint[0]).toLocaleString();
-                var tooltip = "<table class='tooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
+                var tooltip = "<table class='thruktooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
                 tooltip += "<tr><td class='date' colspan=2><a href='https://github.com/sni/Thruk/commit/"+commits[item.datapoint[0]].hash+"' target='_blank'>"+commits[item.datapoint[0]].msg+"</td></tr>";
                 tooltip += "<td class='var'>Load:</td>";
                 tooltip += "<td class='val'>"+(dataSets['startup'][2]['data'][item.dataIndex][1])+"</td></tr>";
@@ -384,7 +403,6 @@ $(function() {
                 tooltip += "<td class='var'>First Request:</td>";
                 tooltip += "<td class='val'>"+(dataSets['startup'][1]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
                 tooltip += "</table>";
-
                 window.clearTimeout(fadeOutTimer);
                 jQuery("#tooltip").html(tooltip)
                                   .css({top: item.pageY+5, left: item.pageX+5})
@@ -403,6 +421,7 @@ $(function() {
         /* set selection for other plots too */
         jQuery("#"+graph).bind("plotselecting", function (event, ranges) {
             if(ranges == null) { return; }
+            $("#tooltip").hide();
             jQuery.each(plots, function(name, plot) {
                 plot.setSelection(ranges, true);
             });
