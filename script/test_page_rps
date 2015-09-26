@@ -5,10 +5,27 @@ use strict;
 use JSON::XS;
 use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
+use Getopt::Long;
 
+my $tags    = [];
+my $options = {
+    number   => 10,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions (
+   "w|write"            => \$options->{'write_file'},
+   "u|update"           => \$options->{'update_only'},
+   "a|all"              => \$options->{'all'},
+   "n|number=i"         => \$options->{'number'},
+   "<>"                 => sub { push @{$tags}, "".shift },
+) or do {
+    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
+    exit(3);
+} ;
 #################################################
 # settings
-my $NUM         = 14;
+my $NUM         = $options->{'number'};
 my $REQUESTS    = $ENV{REQUESTS}    || 100;
 my $CONCURRENCY = $ENV{CONCURRENCY} || 5;
 my $DELAY       = $ENV{DELAY}       || 2;
@@ -24,15 +41,9 @@ my $results = {};
 if(-f $results_file) {
     $results = JSON::XS::decode_json(read_file($results_file));
 }
-if($ARGV[0] && $ARGV[0] eq '-c') {
+if($options->{'write_file'}) {
     # write results file only (will be done on exit)
     exit;
-}
-my $only_newer = 0;
-if($ARGV[0] && $ARGV[0] eq '-n') {
-    # only newer/untested tags
-    shift @ARGV;
-    $only_newer = 1;
 }
 my $author = -f '.author' ? 1 : 0;
 unlink('.author');
@@ -44,13 +55,12 @@ print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | S
 print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
 chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
 $branch =~ s|^\*\s+||mx;
-my $tags = [];
-if(scalar @ARGV == 0) {
+if(scalar @{$tags} == 0) {
     $tags = [reverse split(/\n/, `git tag -l | awk -F- '{ print \$1 }' | sort -u | tail -$NUM`)];
     if($branch ne 'master') { unshift @{$tags}, 'master' }
     unshift @{$tags}, $branch;
 }
-elsif($ARGV[0] && $ARGV[0] eq 'all') {
+elsif($options->{'all'}) {
     my $one_per_day = {};
     for my $line (split/\n/m, `git log --format="%ct %h"`) {
         my($ts, $hash) = split/\s+/mx, $line;
@@ -60,8 +70,6 @@ elsif($ARGV[0] && $ARGV[0] eq 'all') {
         $one_per_day->{$day} = 1;
         last if scalar @{$tags} >= $NUM;
     }
-} else {
-    $tags = \@ARGV;
 }
 
 #################################################
@@ -163,7 +171,7 @@ sub test_tag {
     chomp(my $hash = `git log -1 --format=%h`);
     chomp(my $msg  = `git log -1 --format=%s`);
 
-    if($only_newer && defined $results->{$time}) {
+    if($options->{'update_only'} && defined $results->{$time}) {
         print(" skipped |\n");
         return;
     }
