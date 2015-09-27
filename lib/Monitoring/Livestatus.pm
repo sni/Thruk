@@ -1141,7 +1141,12 @@ sub _read_socket_do {
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
     return($status, $msg, undef) if !defined $content_length;
-    my $json_decoder = JSON::XS->new->utf8->relaxed;
+    our $json_decoder;
+    if($json_decoder) {
+        $json_decoder->incr_reset;
+    } else {
+        $json_decoder = JSON::XS->new->utf8->relaxed;
+    }
     if($content_length > 0) {
         if($status == 200) {
             my $remaining = $content_length;
