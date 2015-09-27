@@ -59,12 +59,8 @@ print("| Branch      | Startup | 1st Req | Static HTML     | Tactical CGI    | S
 print("+-------------+---------+---------+-----------------+-----------------+-----------------+-----------------+-----------------+-----------------------+-------+------+\n");
 chomp(my $branch = `git branch --no-color 2>/dev/null | grep ^\*`);
 $branch =~ s|^\*\s+||mx;
-if(scalar @{$tags} == 0) {
-    $tags = [reverse split(/\n/, `git tag -l | awk -F- '{ print \$1 }' | sort -u | tail -$NUM`)];
-    if($branch ne 'master') { unshift @{$tags}, 'master' }
-    unshift @{$tags}, $branch;
-}
-elsif($options->{'all'}) {
+
+if($options->{'all'}) {
     my $one_per_day = {};
     for my $line (split/\n/m, `git log --format="%ct %h"`) {
         my($ts, $hash) = split/\s+/mx, $line;
@@ -74,6 +70,11 @@ elsif($options->{'all'}) {
         $one_per_day->{$day} = 1;
         last if scalar @{$tags} >= $NUM;
     }
+}
+if(scalar @{$tags} == 0) {
+    $tags = [reverse split(/\n/, `git tag -l | awk -F- '{ print \$1 }' | sort -u | tail -$NUM`)];
+    if($branch ne 'master') { unshift @{$tags}, 'master' }
+    unshift @{$tags}, $branch;
 }
 
 #################################################
