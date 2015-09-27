@@ -131,6 +131,7 @@ plugins/plugins-available/business_process/root/images/testmode_critical.png
 plugins/plugins-available/business_process/root/images/testmode_ok.png
 plugins/plugins-available/business_process/root/images/testmode_unknown.png
 plugins/plugins-available/business_process/root/images/testmode_warning.png
+plugins/plugins-available/business_process/routes
 plugins/plugins-available/business_process/t/bp_cli.t
 plugins/plugins-available/business_process/t/controller_bp.t
 plugins/plugins-available/business_process/t/controller_bp_local.t
@@ -225,6 +226,7 @@ plugins/plugins-available/conf/root/images/wrench.png
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.txt
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
 plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js
+plugins/plugins-available/conf/routes
 plugins/plugins-available/conf/t/conf_utils.t
 plugins/plugins-available/conf/t/conf_utils_api.t
 plugins/plugins-available/conf/t/controller_conf.t
@@ -305,6 +307,7 @@ plugins/plugins-available/dashboard/templates/status_dashboard.tt
 plugins/plugins-available/minemap/description.txt
 plugins/plugins-available/minemap/lib/Thruk/Controller/minemap.pm
 plugins/plugins-available/minemap/preview.png
+plugins/plugins-available/minemap/routes
 plugins/plugins-available/minemap/t/controller_minemap.t
 plugins/plugins-available/minemap/templates/minemap.tt
 plugins/plugins-available/mobile/description.txt
@@ -324,6 +327,7 @@ plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.4.5.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router.min.js
 plugins/plugins-available/mobile/root/mobile-2.00-2.css
 plugins/plugins-available/mobile/root/mobile-2.00-2.js
+plugins/plugins-available/mobile/routes
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
@@ -917,6 +921,7 @@ plugins/plugins-available/panorama/root/panorama-2.00-2.css
 plugins/plugins-available/panorama/root/sprintf.js
 plugins/plugins-available/panorama/root/ux/form/ItemSelector.js
 plugins/plugins-available/panorama/root/ux/form/MultiSelect.js
+plugins/plugins-available/panorama/routes
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/t/javascript_pattern.t
@@ -948,6 +953,7 @@ plugins/plugins-available/reports2/root/flot-d7c58b5/LICENSE.txt
 plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
 plugins/plugins-available/reports2/root/reports_render.js
+plugins/plugins-available/reports2/routes
 plugins/plugins-available/reports2/script/html2pdf.sh
 plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
@@ -998,6 +1004,7 @@ plugins/plugins-available/shinken_features/root/businessview.css
 plugins/plugins-available/shinken_features/root/businessview.js
 plugins/plugins-available/shinken_features/root/images/go-next.png
 plugins/plugins-available/shinken_features/root/images/go-up.png
+plugins/plugins-available/shinken_features/routes
 plugins/plugins-available/shinken_features/t/controller_shinken_features.t
 plugins/plugins-available/shinken_features/templates/shinken_businessview.tt
 plugins/plugins-available/shinken_features/templates/shinken_outagespbimp.tt
@@ -1008,6 +1015,7 @@ plugins/plugins-available/statusmap/preview.png
 plugins/plugins-available/statusmap/root/jit-yc.js
 plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
+plugins/plugins-available/statusmap/routes
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-available/wml/description.txt
@@ -1325,6 +1333,7 @@ t/data/userfiles/encoding_broken
 t/data/userfiles/encoding_iso
 t/data/userfiles/encoding_ok
 t/perlcriticrc
+t/test_request
 t/TestUtils.pm
 t/timed_test.sh
 t/waitmax

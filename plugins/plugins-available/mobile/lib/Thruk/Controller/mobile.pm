@@ -17,25 +17,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/mobile.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/mobile.cgi'} = 'Thruk::Controller::mobile::index';
-
-    # enable mobile features if this plugin is loaded
-    $app->config->{'use_feature_mobile'} = 1;
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut

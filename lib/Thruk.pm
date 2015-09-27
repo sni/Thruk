@@ -190,7 +190,20 @@ sub _build_app {
     ###################################################
     # load routes dynamically from plugins
     for my $plugin_dir (glob($self->{'config'}->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
-        if($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
+        my $route_file = $plugin_dir;
+        $route_file =~ s|/lib/Thruk/Controller/.*\.pm$|/routes|gmx;
+        if(-f $route_file) {
+            my $routes = $self->{'routes'};
+            my $app    = $self;
+            ## no critic
+            eval("#line 1 $route_file\n".read_file($route_file));
+            ## use critic
+            if($@) {
+                $self->log->error("error while loading routes from ".$route_file.": ".$@);
+                confess($@);
+            }
+        }
+        elsif($plugin_dir =~ s|^.*/plugins-enabled/[^/]+/lib/(.*)\.pm||gmx) {
             my $plugin = $1;
             $plugin =~ s|/|::|gmx;
             eval {

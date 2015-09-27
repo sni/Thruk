@@ -17,32 +17,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/bp.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/bp.cgi'} = 'Thruk::Controller::bp::index';
-
-    # add new menu item, but only if user has all of the
-    # requested roles
-    Thruk::Utils::Menu::insert_item('Reports', {
-                                    'href'  => '/thruk/cgi-bin/bp.cgi',
-                                    'name'  => 'Business Process',
-    });
-
-    # enable business process features if this plugin is loaded
-    $app->config->{'use_feature_bp'} = 1;
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut

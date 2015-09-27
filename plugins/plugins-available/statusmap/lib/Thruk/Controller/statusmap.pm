@@ -18,32 +18,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/statusmap.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/statusmap.cgi'} = 'Thruk::Controller::statusmap::index';
-
-    Thruk::Utils::Status::add_view({'group' => 'Status Map',
-                                    'name'  => 'Status Map',
-                                    'value' => 'statusmap',
-                                    'url'   => 'statusmap.cgi',
-    });
-
-
-    # enable statusmap if this plugin is loaded
-    $app->config->{'use_feature_statusmap'} = 1;
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut

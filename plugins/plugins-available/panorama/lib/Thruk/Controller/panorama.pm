@@ -36,32 +36,6 @@ my @runtime_keys = qw/state/;
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/panorama.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/panorama.cgi'} = 'Thruk::Controller::panorama::index';
-
-    # add new menu item
-    Thruk::Utils::Menu::insert_item('General', {
-                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
-                                    'name'  => 'Panorama View',
-                                    target  => '_parent',
-    });
-
-    # enable panorama features if this plugin is loaded
-    $app->config->{'use_feature_panorama'} = 1;
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut

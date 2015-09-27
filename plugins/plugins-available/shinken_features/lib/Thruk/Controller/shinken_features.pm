@@ -19,26 +19,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/shinken_status.cgi
-page: /thruk/cgi-bin/outagespbimp.cgi
-page: /thruk/cgi-bin/businessview.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/shinken_status.cgi'} = 'Thruk::Controller::shinken_features::shinken_status';
-    $routes->{'/thruk/cgi-bin/outagespbimp.cgi'}   = 'Thruk::Controller::shinken_features::outages_pbimp_index';
-    $routes->{'/thruk/cgi-bin/businessview.cgi'}   = 'Thruk::Controller::shinken_features::businessview_index';
-
-    return;
-}
-
-##########################################################
-
 =head2 outages_pbimp_index
 
 outages impacts index page

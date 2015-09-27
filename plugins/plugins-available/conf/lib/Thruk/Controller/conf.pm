@@ -19,34 +19,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/conf.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/conf.cgi'} = 'Thruk::Controller::conf::index';
-
-    # enable config features if this plugin is loaded
-    $app->config->{'use_feature_configtool'} = 1;
-
-    # add new menu item, but only if user has all of the
-    # requested roles
-    Thruk::Utils::Menu::insert_item('System', {
-                                    'href'  => '/thruk/cgi-bin/conf.cgi',
-                                    'name'  => 'Config Tool',
-                                    'roles' => [qw/authorized_for_configuration_information
-                                                   authorized_for_system_commands/],
-    });
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut

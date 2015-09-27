@@ -17,35 +17,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/minemap.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/minemap.cgi'} = 'Thruk::Controller::minemap::index';
-
-    Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
-                                    'href'  => $app->config->{'Thruk::Plugin::Minemap'}->{'default_link'} || $app->config->{'minemap_default_link'} || '/thruk/cgi-bin/minemap.cgi',
-                                    'name'  => 'Mine Map',
-    });
-
-    Thruk::Utils::Status::add_view({'group' => 'Mine Map',
-                                    'name'  => 'Mine Map',
-                                    'value' => 'minemap',
-                                    'url'   => 'minemap.cgi',
-    });
-
-    $app->config->{'has_feature_minemap'} = 1;
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 minemap index page

@@ -18,30 +18,6 @@ Thruk Controller.
 
 ##########################################################
 
-=head2 add_routes
-
-page: /thruk/cgi-bin/reports2.cgi
-
-=cut
-
-sub add_routes {
-    my($self, $app, $routes) = @_;
-
-    $routes->{'/thruk/cgi-bin/reports2.cgi'} = 'Thruk::Controller::reports2::index';
-
-    Thruk::Utils::Menu::insert_item('Reports', {
-                                    'href'  => '/thruk/cgi-bin/reports2.cgi',
-                                    'name'  => 'Reporting',
-    });
-
-    # enable reporting features if this plugin is loaded
-    $app->config->{'use_feature_reports'} = 'reports2.cgi';
-
-    return;
-}
-
-##########################################################
-
 =head2 index
 
 =cut
