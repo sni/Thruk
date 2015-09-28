@@ -56,7 +56,7 @@ LI.bp_menu_seperator.ui-state-disabled A {
 }
 
 DIV.ui-dialog INPUT[type=text] {
-    width: 320px;
+    width: 290px;
 }
 
 .bp_type_desc {
@@ -278,4 +278,3 @@ BODY.iframed DIV.bp_zoom_container {
 #cust_help PRE {
     margin: 0;
 }
-

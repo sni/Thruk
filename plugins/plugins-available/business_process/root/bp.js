@@ -650,13 +650,35 @@ function bp_show_edit_node(id, refreshType) {
         jQuery("INPUT[name=bp_contactgroups]").val(node.contactgroups.join(", "));
         jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
         jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
+
+        if(node.contactgroups.length == 0) {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").show();
+        }
+        if(node.contacts.length == 0) {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").show();
+        }
+        if(!node.event_handler) {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").show();
+        }
+        if(!node.notification_period) {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").show();
+        }
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
         jQuery("INPUT[name=bp_template]").val('');
-        jQuery("INPUT[name=bp_contactgroups]").val('');
-        jQuery("INPUT[name=bp_contacts]").val('');
-        jQuery("INPUT[name=bp_notification_period]").val('');
+        bpRemoveAttribute('contactgroups');
+        bpRemoveAttribute('contacts');
+        bpRemoveAttribute('notification_period');
+        bpRemoveAttribute('event_handler');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
@@ -691,6 +713,16 @@ function bp_show_edit_node(id, refreshType) {
     if($edit_dialog) {
         $edit_dialog.draggable({handle: ".ui-tabs-nav"}).addClass('ui-draggable');
     }
+}
+
+function bpRemoveAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").hide();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
+function bpAddAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
 }
 
 /* initialize childrens tab */

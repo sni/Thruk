@@ -308,6 +308,7 @@ sub get_json_nodes {
           contacts                  => $n->{'contacts'},
           contactgroups             => $n->{'contactgroups'},
           notification_period       => $n->{'notification_period'},
+          event_handler             => $n->{'event_handler'},
         }
     }
     return(Thruk::Utils::Filter::json_encode($list));

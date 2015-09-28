@@ -189,6 +189,14 @@ sub _process_raw_request {
             elsif($type eq 'timeperiod' or $type eq 'timeperiods') {
                 $data = $c->{'db'}->get_timeperiod_names( filter => [ name => { '~~' => $filter } ] );
             }
+            elsif($type eq 'command' or $type eq 'commands') {
+                return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
+                my $commands = $c->{'db'}->get_commands( filter => [ name => { '~~' => $filter } ], columns => ['name'] );
+                $data = [];
+                for my $d (@{$commands}) {
+                    push @{$data}, $d->{'name'};
+                }
+            }
             elsif($type eq 'custom variable') {
                 return $c->detach('/error/index/26') unless $c->check_user_roles("authorized_for_configuration_information");
                 # get available custom variables

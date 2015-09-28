@@ -358,19 +358,43 @@
     <tr class="supports_link">
       <th align="right" valign="top">Contact Groups</th>
       <td align="left">
-        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroups, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })"[% END %]>
+        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contact groups" onclick="bpRemoveAttribute('contactgroups'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top">Contacts</th>
       <td align="left">
-        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contacts, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: true })"[% END %]>
+        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: true })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contacts" onclick="bpRemoveAttribute('contacts'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Eventhandler</th>
+      <td align="left">
+        <input type="text" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove eventhandler" onclick="bpRemoveAttribute('event_handler'); return false;">
       </td>
     </tr>
     <tr class="supports_link">
       <th align="right" valign="top" nowrap>Notification Period</th>
       <td align="left">
         <input type="text" id="bp_notification_period" name="bp_notification_period" placeholder="notification period"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove notification period" onclick="bpRemoveAttribute('notification_period'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Add Extra Options</th>
+      <td align="left">
+        <form>
+          <select>
+            <option disabled>--- add extra option ---</option>
+            <option onclick="bpAddAttribute('contactgroups');" value="contactgroups">Contact Groups</option>
+            <option onclick="bpAddAttribute('contacts');" value="contacts">Contacts</option>
+            <option onclick="bpAddAttribute('event_handler');" value="eventhander">Eventhandler</option>
+            <option onclick="bpAddAttribute('notification_period');" value="notification_period">Notification Period</option>
+          </select>
+        </form>
       </td>
     </tr>
     [% ELSE %]

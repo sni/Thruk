@@ -213,7 +213,7 @@ sub index {
             $node->resolve_depends($bp, $depends);
 
             # save object creating attributes
-            for my $key (qw/host service template notification_period/) {
+            for my $key (qw/host service template notification_period event_handler/) {
                 $node->{$key} = $c->req->parameters->{'bp_'.$key} || '';
             }
             # node array options
