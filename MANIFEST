@@ -1214,6 +1214,7 @@ support/fcgid_env.sh
 support/htpasswd
 support/menu_local.conf
 support/naglint.conf.example
+support/panorama2img
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
