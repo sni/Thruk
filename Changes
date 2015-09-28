@@ -4,6 +4,7 @@ next:
           - show eventhandler name on extinfo page if available
           - limit json exports to accounts with configuration information role
           - clear process info cache after sending commands
+          - fix weekly cron jobs on Tuesdays (Alexandre Anriot, #525)
           - Panorama View:
             - make text label background size configurable
             - add extra_fonts option to extend the list of available fonts
