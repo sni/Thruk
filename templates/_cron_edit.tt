@@ -23,7 +23,7 @@
       on the
       <select name="send_monthday_[% nr %]"[% IF !can_edit %] disabled[% END %]>
         [% FOREACH rep = [ "1st", "2nd", "3rd", "4th", "Last" ]  %]
-          [% FOREACH day = [ "Monday", "Thuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]  %]
+          [% FOREACH day = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]  %]
             [% monthday = rep _ '_' _ day  %]
             <option value="[% monthday %]"[% IF cr.exists('month_day') && cr.month_day == monthday %] selected[% END %]>[% rep +%] [%+ day %]</option>
           [% END %]
