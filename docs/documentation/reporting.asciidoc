@@ -6,6 +6,12 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 
 == SLA Reporting
 
+=== Notice
+
+This plugin is marked as optional due to depedencies.
+
+To install use apt package 'thruk-plugin-reporting' from Consol Labs Repository or install from source
+
 === How it works
 
 SLA Reporting consists of several steps.
