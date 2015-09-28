@@ -6,11 +6,11 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 
 == SLA Reporting
 
-=== Notice
+=== Installation
 
-This plugin is marked as optional due to depedencies.
+This plugin is marked as optional/recommends due to depedencies to xlibs, xvfb and fonts.
 
-To install use apt package 'thruk-plugin-reporting' from Consol Labs Repository or install from source
+To install use the package 'thruk-plugin-reporting' from Consol Labs Repository.
 
 === How it works
 
