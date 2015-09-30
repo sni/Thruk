@@ -767,7 +767,7 @@ var TP = {
                 data = eval("("+response.responseText+")");
             } catch(err) {
                 if(refresh.setType) { refresh.setType('broken') }
-                TP.logError(panlet.id, "responseEvalException", err);
+                TP.logError(panlet ? panlet.id : '??', "responseEvalException", err);
                 return data;
             }
             if(refresh.setType) { refresh.setType('refresh') }
@@ -781,7 +781,7 @@ var TP = {
                             initial_backends[key].state         = data.pi_detail[key]['state'];
                             initial_backends[key].program_start = data.pi_detail[key]['program_start'];
                         } catch(err) {
-                            TP.logError(panlet.id, "initialBackendsException", err);
+                            TP.logError(panlet ? panlet.id : '??', "initialBackendsException", err);
                         }
                     }
                 }
