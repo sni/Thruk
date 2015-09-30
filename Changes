@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available
           - limit json exports to accounts with configuration information role
           - clear process info cache after sending commands

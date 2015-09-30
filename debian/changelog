@@ -1,8 +1,9 @@
-thruk (2.00-2) UNRELEASED; urgency=low
+thruk (2.02) UNRELEASED; urgency=low
 
+  [ Sven Nierlein ]
   * new upstream release
 
- -- Sven Nierlein <sven.nierlein@consol.de>  Fri, 28 Aug 2015 16:19:26 +0200
+ -- Sven Nierlein <sven.nierlein@consol.de>  Wed, 30 Sep 2015 17:40:00 +0200
 
 thruk (1.88-3) UNRELEASED; urgency=low
 
