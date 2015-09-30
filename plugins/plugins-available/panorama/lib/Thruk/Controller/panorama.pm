@@ -2031,10 +2031,17 @@ sub _task_dashboard_data {
 sub _get_dashboard_list {
     my($c, $type) = @_;
 
+    # returns wrong list of public dashboards otherwise
+    my $is_admin;
+    if($type eq 'public') {
+        $is_admin = delete $c->stash->{'is_admin'};
+    }
+
     my $dashboards = [];
     for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $d = _load_dashboard($c, $1);
+            my $nr = $1;
+            my $d  = _load_dashboard($c, $nr);
             if($d) {
                 if($type eq 'all') {
                     # all
@@ -2068,6 +2075,11 @@ sub _get_dashboard_list {
                 };
             }
         }
+    }
+
+    # restore admin flag
+    if($type eq 'public') {
+        $c->stash->{'is_admin'} = $is_admin;
     }
 
     $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
@@ -2605,10 +2617,10 @@ sub _load_dashboard {
 
 ##########################################################
 # returns:
-#     0        no access
-#     1        public dashboard, readonly access
-#     2        private dashboard, readwrite access
-#     3        private dashboard, owner/admin access
+#     0        ACCESS_NONE       - no access
+#     1        ACCESS_READONLY   - public dashboard, readonly access
+#     2        ACCESS_READWRITE  - private dashboard, readwrite access
+#     3        ACCESS_OWNER      - private dashboard, owner/admin access
 sub _is_authorized_for_dashboard {
     my($c, $nr, $dashboard) = @_;
     $nr =~ s/^tabpan-tab_//gmx;
@@ -2631,8 +2643,12 @@ sub _is_authorized_for_dashboard {
         for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
             my $name = (keys %{$group})[0];
             my $lvl  = $group->{$name} eq 'read-write' ? ACCESS_READWRITE : ACCESS_READONLY;
+            if($name eq '*') {
+                $access = $lvl if $lvl > $access;
+                next;
+            }
             for my $test (@{$contactgroups}) {
-                if($name eq '*' || $name eq $test) {
+                if($name eq $test) {
                     $access = $lvl if $lvl > $access;
                 }
             }
