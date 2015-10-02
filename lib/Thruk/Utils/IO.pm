@@ -18,6 +18,7 @@ use JSON::XS ();
 use POSIX ":sys_wait_h";
 use IPC::Open3 qw/open3/;
 use File::Slurp qw/read_file/;
+use File::Copy qw/move/;
 #use Thruk::Timer qw/timing_breakpoint/;
 
 $Thruk::Utils::IO::config = undef;
@@ -180,12 +181,15 @@ sub json_lock_store {
         return 1 if $old eq $write_out;
     }
 
+    my $newfile = $file.'.new';
     open(my $fh, '>', $file) or die('cannot write file '.$file.': '.$!);
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_ex: ".$file); };
     flock($fh, LOCK_EX) or die 'Cannot lock '.$file.': '.$!;
-    print $fh ($write_out || $json->encode($data));
-    Thruk::Utils::IO::close($fh, $file) or die("cannot close file ".$file.": ".$!);
+    open(my $fh2, '>', $newfile) or die('cannot write file '.$newfile.': '.$!);
+    print $fh2 ($write_out || $json->encode($data));
+    Thruk::Utils::IO::close($fh2, $newfile) or die("cannot close file ".$newfile.": ".$!);
+    move($newfile, $file) or die("cannot replace $file with $newfile: $!");
     alarm(0);
     return 1;
 }

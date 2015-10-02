@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - fix problem with removing reports when trying to save files on a full disk.
+
 2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available
           - limit json exports to accounts with configuration information role
