@@ -47,12 +47,13 @@ fi
 
 ################################
 # execute script as $EXECUSER if the user is root
+USER=$(whoami)
 if [ $(id -u) = "0" ];then
   SCRIPT=`readlink -f $0`
   su - $EXECUSER -c "$SCRIPT $*"
   exit $?
 elif [ "$USER" != "$EXECUSER" ];then
-    echo "wrong user, please use either user $EXECUSER or root"
+    echo "wrong user, please use either user $EXECUSER or root, this is $USER."
     failure "$prog start"
     exit 1
 fi
