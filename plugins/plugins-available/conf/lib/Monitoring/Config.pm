@@ -1138,14 +1138,20 @@ sub rename_dependencies {
 
 =head2 clone_refs
 
-    clone_refs($orig, $obj, $cloned_name, $newname)
+    clone_refs($orig, $obj, $cloned_name, $newname, [$clone_refs],  [$test_mode])
 
-clone all incoming references of object
+clone all incoming references of object. In test mode nothing will be changed
+and just the list of clonables will be returned.
+If clone_refs is set, only those ids will be cloned.
 
 =cut
 sub clone_refs {
-    my($self, $orig, $obj, $cloned_name, $new_name) = @_;
+    my($self, $orig, $obj, $cloned_name, $new_name, $clone_refs, $test_mode) = @_;
 
+    my $clone_refs_lookup = {};
+    $clone_refs_lookup = Thruk::Utils::array2hash($clone_refs) if $clone_refs;
+
+    my $clonables = {};
     # clone incoming references
     my $clonedtype = $obj->get_type();
     my($incoming, $outgoing) = $self->gather_references($orig);
@@ -1154,10 +1160,23 @@ sub clone_refs {
             for my $name (keys %{$incoming->{$type}}) {
                 my $ref_id = $incoming->{$type}->{$name};
                 my $ref    = $self->get_object_by_id($ref_id);
-                next if $ref->{'file'}->{'readonly'};
+                if(!$test_mode && $ref->{'file'}->{'readonly'}) {
+                    next;
+                }
                 for my $attr (keys %{$ref->{'conf'}}) {
                     if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
                         if(ref $ref->{'conf'}->{$attr} eq 'ARRAY' && grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
+                            if($test_mode) {
+                                $clonables->{$type}->{$ref_id} = {
+                                    readonly => $ref->{'file'}->{'readonly'} ? 1 : 0,
+                                    name     => $ref->get_name(),
+                                    attr     => $attr,
+                                };
+                                next;
+                            }
+                            if($clone_refs && !$clone_refs_lookup->{$ref_id}) {
+                                next;
+                            }
                             push @{$ref->{'conf'}->{$attr}}, $new_name;
                             $self->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
                         }
@@ -1166,6 +1185,7 @@ sub clone_refs {
             }
         }
     }
+    return $clonables if $test_mode;
     return;
 }
 

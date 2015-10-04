@@ -108,6 +108,9 @@ function init_conf_tool_buttons() {
     jQuery('.conf_cut_button').button({
         icons: {primary: 'ui-cut-button'}
     })
+    jQuery('.conf_next_button').button({
+        icons: {primary: 'ui-r-arrow-button'}
+    })
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}

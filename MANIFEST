@@ -266,6 +266,7 @@ plugins/plugins-available/conf/templates/_conf_wizard_commandline.tt
 plugins/plugins-available/conf/templates/_conf_wizard_list.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_backends.tt
+plugins/plugins-available/conf/templates/conf_choose_clone.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
 plugins/plugins-available/conf/templates/conf_objects.tt

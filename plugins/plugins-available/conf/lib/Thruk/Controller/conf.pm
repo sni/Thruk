@@ -936,7 +936,8 @@ sub _process_objects_page {
     }
 
     # get object from params
-    $c->stash->{cloned} = 0;
+    $c->stash->{cloned}    = 0;
+    $c->stash->{clone_ref} = Thruk::Utils::list($c->req->parameters->{'clone_ref'} || []);
     my $obj = _get_context_object($c);
     if(defined $obj) {
 
@@ -952,7 +953,7 @@ sub _process_objects_page {
             my $rc = _object_save($c, $obj);
             if($rc && defined $c->req->parameters->{'cloned'}) {
                 if(!$obj->is_template()) {
-                    _clone_refs($c, $obj, $c->req->parameters->{'cloned'});
+                    _clone_refs($c, $obj, $c->req->parameters->{'cloned'}, $c->req->parameters->{'clone_ref'});
                 }
             }
             if(defined $c->req->parameters->{'save_and_reload'}) {
@@ -990,6 +991,17 @@ sub _process_objects_page {
         elsif($c->stash->{action} eq 'clone') {
             return unless Thruk::Utils::check_csrf($c);
             $c->stash->{cloned} = $obj->get_id() || 0;
+            # select refs to clone if there are some
+            if(!$obj->is_template() && !$c->req->parameters->{'clone_ref'}) {
+                my $cloned_name = $obj->get_name();
+                my $clonables   = $c->{'obj_db'}->clone_refs($obj, $obj, $cloned_name, $cloned_name."_2", undef, 1);
+                if($clonables && scalar keys %{$clonables} > 0) {
+                    $c->stash->{object}     = $obj;
+                    $c->stash->{clonables}  = $clonables;
+                    $c->stash->{'template'} = 'conf_choose_clone.tt';
+                    return;
+                }
+            }
             $obj = _object_clone($c, $obj);
         }
 
@@ -1944,7 +1956,7 @@ sub _object_clone {
 
 ##########################################################
 sub _clone_refs {
-    my($c, $obj, $cloned_id) = @_;
+    my($c, $obj, $cloned_id, $clone_refs) = @_;
     return unless $cloned_id;
     my $new_name = $obj->get_name();
     my $orig     = $c->{'obj_db'}->get_object_by_id($cloned_id);
@@ -1959,7 +1971,7 @@ sub _clone_refs {
         return;
     }
 
-    $c->{'obj_db'}->clone_refs($orig, $obj, $cloned_name, $new_name);
+    $c->{'obj_db'}->clone_refs($orig, $obj, $cloned_name, $new_name, $clone_refs);
 
     return;
 }
