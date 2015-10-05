@@ -1932,6 +1932,9 @@ sub read_data_file {
     # replace broken escape sequences
     $cont =~ s/\\x\{[\w]{5,}\}/\x{fffd}/gmxi;
 
+    # replace broken JSON::PP::Boolean
+    $cont =~ s/JSON::PP::/JSON::XS::/gmx;
+
     my $VAR1;
     ## no critic
     eval('$VAR1 = '.$cont.';');
