@@ -426,6 +426,8 @@ sub _process_details_page {
         if(!$c->check_user_roles("authorized_for_configuration_information")) {
             # remove custom macro colums which could contain confidential informations
             for my $s (@{$services}) {
+                delete $s->{'host_custom_variable_names'};
+                delete $s->{'host_custom_variable_values'};
                 delete $s->{'custom_variable_names'};
                 delete $s->{'custom_variable_values'};
             }
@@ -995,6 +997,19 @@ sub _process_combined_page {
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
+        if(!$c->check_user_roles("authorized_for_configuration_information")) {
+            # remove custom macro colums which could contain confidential informations
+            for my $h (@{$hosts}) {
+                delete $h->{'custom_variable_names'};
+                delete $h->{'custom_variable_values'};
+            }
+            for my $s (@{$services}) {
+                delete $s->{'host_custom_variable_names'};
+                delete $s->{'host_custom_variable_values'};
+                delete $s->{'custom_variable_names'};
+                delete $s->{'custom_variable_values'};
+            }
+        }
         my $json = {
             'hosts'    => $hosts,
             'services' => $services,
