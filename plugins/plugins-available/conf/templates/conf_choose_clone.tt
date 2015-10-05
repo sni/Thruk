@@ -46,6 +46,7 @@
           <a href="#" onclick="jQuery('input[name=clone_ref]').prop('checked', true); jQuery('input[name=none]').prop('checked', false); jQuery('input[name=all]').prop('checked', true); return false;">all</a>
         </li>
       </ul>
+    </td>
   </tr>
   <tr>
     <td class='dataVar' colspan=2 style="text-align: right; padding-bottom: 5px;">
