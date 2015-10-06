@@ -47,6 +47,13 @@ See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring
 for a detailed description of all parameters.
 
 
+==== Backends / Sites Data
+{% include new_since.ad version="2.04" %}
+Export all site/backend specific data:
+
+Example: /thruk/cgi-bin/extinfo.cgi?type=0&view_mode=json
+
+
 ==== Business Process Data
 
 Example: /thruk/cgi-bin/bp.cgi?view_mode=json&bp=id
