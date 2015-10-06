@@ -677,6 +677,10 @@ sub _process_process_info_page {
     my( $c ) = @_;
 
     return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
+    if($view_mode eq 'json') {
+        return $c->render(json => $c->stash->{'pi_detail'});
+    }
     return 1;
 }
 

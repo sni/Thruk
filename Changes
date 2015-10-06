@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add json export to process info page
           - fix problem with removing reports when trying to save files on a full disk.
           - Config Tool:
             - add reference clone selection page
