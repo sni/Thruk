@@ -118,6 +118,9 @@ sub index {
         elsif($task eq 'dashboard_restore') {
             return(_task_dashboard_restore($c));
         }
+        elsif($task eq 'dashboards_clean') {
+            return(_task_dashboards_clean($c));
+        }
         elsif($task eq 'stats_core_metrics') {
             return(_task_stats_core_metrics($c));
         }
@@ -2163,9 +2166,7 @@ sub _task_dashboard_update {
     if($action && $dashboard && !$dashboard->{'readonly'}) {
         $json = { 'status' => 'ok' };
         if($action eq 'remove') {
-            unlink($dashboard->{'file'});
-            # and also all backups
-            unlink(glob($dashboard->{'file'}.'.*'));
+            _delete_dashboard($c, $nr, $dashboard);
         }
         if($action eq 'update') {
             my $extra_settings = {};
@@ -2185,6 +2186,16 @@ sub _task_dashboard_update {
     }
     _add_misc_details($c, 1, $json);
     return $c->render(json => $json);
+}
+
+##########################################################
+sub _delete_dashboard {
+    my($c, $nr, $dashboard) = @_;
+    $dashboard = _load_dashboard($c, $nr) unless $dashboard;
+    unlink($dashboard->{'file'});
+    # and also all backups
+    unlink(glob($dashboard->{'file'}.'.*'));
+    return;
 }
 
 ##########################################################
@@ -2258,6 +2269,28 @@ sub _task_dashboard_restore {
         copy($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $c->{'panorama_var'}.'/'.$nr.'.tab');
     }
     my $json = {};
+    _add_misc_details($c, 1, $json);
+    return $c->render(json => $json);
+}
+
+##########################################################
+sub _task_dashboards_clean {
+    my($c) = @_;
+
+    die("no admin permissions") unless $c->stash->{'is_admin'};
+    my $json = { num => 0 };
+
+    my $dashboards = _get_dashboard_list($c, 'all');
+    for my $d (@{$dashboards}) {
+        next unless $d->{'objects'} == 0;
+        my $dashboard = _load_dashboard($c, $d->{'nr'});
+        my @stat      = stat($dashboard->{'file'});
+        if(($stat[9] < time() - 86400 && $d->{'name'} eq 'Dashboard') || $stat[9] < time() - (86400 * 14)) {
+            _delete_dashboard($c, $d->{'nr'}, $dashboard);
+            $json->{'num'}++;
+        }
+    }
+
     _add_misc_details($c, 1, $json);
     return $c->render(json => $json);
 }

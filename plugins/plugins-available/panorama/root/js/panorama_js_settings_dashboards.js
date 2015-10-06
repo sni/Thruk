@@ -104,7 +104,39 @@ Ext.define('TP.DashboardManagementWindow', {
                     loadMask:    true,
                     target:      this
                 }),
-                plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })]
+                plugins: readonly ? [] : [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 1 })],
+                bbar:[{
+                    xtype:   'button',
+                    text:    'Cleanup Dashboards',
+                    iconCls: 'clear-btn',
+                    handler: function(This) {
+                        This.setIconCls("wait-btn");
+                        This.mask("loading");
+                        Ext.Ajax.request({
+                            url:      'panorama.cgi?task=dashboards_clean',
+                            method:  'POST',
+                            callback: function(options, success, response) {
+                                This.unmask();
+                                This.setIconCls("clear-btn");
+                                if(!success) {
+                                    if(response.status == 0) {
+                                        TP.Msg.msg("fail_message~~cleaning dashboards failed");
+                                    } else {
+                                        TP.Msg.msg("fail_message~~cleaning dashboards failed: "+response.status+' - '+response.statusText);
+                                    }
+                                } else {
+                                    var data = TP.getResponse(undefined, response);
+                                    if(data.num > 0) {
+                                        TP.Msg.msg("success_message~~cleaned "+data.num+" dashboards successful");
+                                        This.up('panel').loader.load();
+                                    } else {
+                                        TP.Msg.msg("success_message~~all dashboards are cleaned already");
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }]
             });
             this.items.get(0).add(this.grid_all);
         }

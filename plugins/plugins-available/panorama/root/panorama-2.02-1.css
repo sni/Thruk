@@ -78,6 +78,11 @@ DIV.x-tab-top button {
     left: 4px;
     top: 3px;
 }
+.wait-btn {
+    background-image: url("images/loading-icon.gif") !important;
+    left: 4px;
+    top: 3px;
+}
 
 .x-form-itemselector-add {
     background-image: url("images/btn_add.png") !important;

@@ -4,6 +4,8 @@ next:
           - fix problem with removing reports when trying to save files on a full disk.
           - Config Tool:
             - add reference clone selection page
+          - Panorama View:
+            - add clean dashboards button in dashboard management all tab
 
 2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available
