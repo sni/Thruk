@@ -173,16 +173,7 @@ script has the following arguments
       - livecacherestart            restart livecaches for each site sequentially
       - livecachestatus             show livecache status
 
-    Internal Commands
-      - installcron                 update cronjobs for downtimes and reports
-                                    (only needed during package installation)
-      - uninstallcron               remove all thruk cronjobs
-                                    (only needed during package deinstallation)
-      - compile                     compile templates for faster access
-      - bp/bpd(=nr)                 calculate all/specified business process(es)
-      - bpcommit                    write objects for business processes and reloads core
-
-    Testing Commands
+    Data Commands
       - listbackends                list all backends
       - listhosts                   list hostnames
       - listhostgroups              list hostgroupnames
@@ -195,6 +186,16 @@ script has the following arguments
                                      - logfiles
                                      - reports
                                      - recurring_downtimes
+
+    Internal Commands
+      - installcron                 update cronjobs for downtimes and reports
+                                    (only needed during package installation)
+      - uninstallcron               remove all thruk cronjobs
+                                    (only needed during package deinstallation)
+      - compile                     compile templates for faster access
+      - bp/bpd(=nr)                 calculate all/specified business process(es)
+      - bpcommit                    write objects for business processes and reloads core
+
 
 
 =item B<-A> I<authname>, B<--auth>=I<authname>
