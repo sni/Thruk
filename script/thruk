@@ -195,6 +195,7 @@ script has the following arguments
       - compile                     compile templates for faster access
       - bp/bpd(=nr)                 calculate all/specified business process(es)
       - bpcommit                    write objects for business processes and reloads core
+      - clean_dashboards            remove empty dashboards which are older than 1 day
 
 
 

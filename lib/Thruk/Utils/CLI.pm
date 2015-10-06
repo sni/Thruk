@@ -619,6 +619,11 @@ sub _run_command_action {
         ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $opt, $action);
     }
 
+    # dashboard cleanup
+    elsif($action eq 'clean_dashboards') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_panorama($c, $action);
+    }
+
     # cache actions
     elsif($action eq 'dumpcache') {
         $data->{'rc'} = 0;
@@ -933,6 +938,34 @@ sub _cmd_bpd {
 
     $c->stats->profile(end => "_cmd_bpd($action)");
     return($output, 0);
+}
+
+##############################################
+sub _cmd_panorama {
+    my($c, $action) = @_;
+    $c->stats->profile(begin => "_cmd_panorama($action)");
+
+    if(!$c->config->{'use_feature_panorama'}) {
+        return("ERROR - panorama dashboard addon is disabled\n", 1);
+    }
+
+    eval {
+        require Thruk::Utils::Panorama;
+    };
+    if($@) {
+        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
+        return("panorama plugin is disabled.\n", 1);
+    }
+
+    if($action eq 'clean_dashboards') {
+        $c->stash->{'is_admin'} = 1;
+        $c->{'panorama_var'}    = $c->config->{'var_path'}.'/panorama';
+        my $num = Thruk::Utils::Panorama::clean_old_dashboards($c);
+        return("OK - cleaned up $num old dashboards\n", 0);
+    }
+
+    $c->stats->profile(end => "_cmd_panorama($action)");
+    return("unknown panorma command", 1);
 }
 
 ##############################################

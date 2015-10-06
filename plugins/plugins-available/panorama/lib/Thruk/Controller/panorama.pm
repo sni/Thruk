@@ -8,6 +8,7 @@ use File::Slurp qw/read_file/;
 use File::Copy qw/move copy/;
 use Encode qw(decode_utf8);
 use Module::Load qw/load/;
+use Thruk::Utils::Panorama qw/ACCESS_NONE ACCESS_READONLY ACCESS_READWRITE ACCESS_OWNER/;
 
 =head1 NAME
 
@@ -26,12 +27,6 @@ BEGIN {
 }
 
 ##########################################################
-use constant {
-    ACCESS_NONE      => 0,
-    ACCESS_READONLY  => 1,
-    ACCESS_READWRITE => 2,
-    ACCESS_OWNER     => 3,
-};
 my @runtime_keys = qw/state/;
 
 ##########################################################
@@ -50,7 +45,6 @@ sub index {
         load Scalar::Util, qw/looks_like_number/;
         load Thruk::Utils::PanoramaCpuStats;
         load Thruk::Utils::Avail;
-        load Thruk::Utils::Panorama;
         $c->config->{'panorama_modules_loaded'} = 1;
     }
 
@@ -295,7 +289,7 @@ sub _js {
         $c->stash->{state} = '';
         $open_tabs         = $data->{'panorama'}->{dashboards}->{'tabpan'}->{'open_tabs'} unless $open_tabs;
         for my $nr (@{$open_tabs}) {
-            my $dashboard = _load_dashboard($c, $nr);
+            my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
             _merge_dashboard_into_hash($dashboard, $data->{'panorama'}->{dashboards});
             # add shapes data
             for my $key (keys %{$dashboard}) {
@@ -618,7 +612,7 @@ sub _task_serveraction {
     my($c) = @_;
     my($rc, $msg);
     # if there is a dashboard in our parameters, make sure we have proper permissions
-    if($c->req->parameters->{'dashboard'} && _is_authorized_for_dashboard($c, $c->req->parameters->{'dashboard'}) == ACCESS_NONE) {
+    if($c->req->parameters->{'dashboard'} && Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $c->req->parameters->{'dashboard'}) == ACCESS_NONE) {
         ($rc, $msg) = (1, 'no permission for this dashboard');
     } else {
         ($rc, $msg) = Thruk::Utils::Status::serveraction($c);
@@ -1958,8 +1952,8 @@ sub _task_dashboard_save_states {
     $nr      =~ s/^tabpan-tab_//gmx;
     my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
-    my $dashboard = _load_dashboard($c, $nr);
-    return unless _is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
+    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard) >= ACCESS_READWRITE;
 
     my $runtime = _extract_runtime_data($dashboard);
     my $states;
@@ -1991,7 +1985,7 @@ sub _task_dashboard_data {
     my $new_override = 0;
     if($nr eq 'new_or_empty' || $nr eq 'first_or_new') {
         # avoid too many empty dashboards, so return the first existing empty dashboard for this user
-        my $dashboards = _get_dashboard_list($c, 'my');
+        my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'my');
         for my $d (@{$dashboards}) {
             if($nr eq 'first_or_new' || $d->{'objects'} == 0) {
                 $nr = $d->{'nr'};
@@ -2013,7 +2007,7 @@ sub _task_dashboard_data {
         };
         $dashboard = _save_dashboard($c, $dashboard);
     } else {
-        $dashboard = _load_dashboard($c, $nr);
+        $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     }
     my $json;
     if(!$dashboard) {
@@ -2031,72 +2025,13 @@ sub _task_dashboard_data {
 }
 
 ##########################################################
-sub _get_dashboard_list {
-    my($c, $type) = @_;
-
-    # returns wrong list of public dashboards otherwise
-    my $is_admin;
-    if($type eq 'public') {
-        $is_admin = delete $c->stash->{'is_admin'};
-    }
-
-    my $dashboards = [];
-    for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
-        if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $nr = $1;
-            my $d  = _load_dashboard($c, $nr);
-            if($d) {
-                if($type eq 'all') {
-                    # all
-                } elsif($type eq 'public') {
-                    # public
-                    next if $d->{'user'} eq $c->stash->{'remote_user'};
-                } else {
-                    # my
-                    next if $d->{'user'} ne $c->stash->{'remote_user'};
-                }
-                my $groups_rw = [];
-                my $groups_ro = [];
-                for my $group (@{$d->{'tab'}->{'xdata'}->{'groups'}}) {
-                    my $name = (keys %{$group})[0];
-                    if($group->{$name} eq 'read-write') {
-                        push(@{$groups_rw}, $name);
-                    } else {
-                        push(@{$groups_ro}, $name);
-                    }
-                }
-                push @{$dashboards}, {
-                    id          => $d->{'id'},
-                    nr          => $d->{'nr'},
-                    name        => $d->{'tab'}->{'xdata'}->{'title'},
-                    user        => $d->{'user'},
-                    groups_rw   => join(', ', @{$groups_rw}),
-                    groups_ro   => join(', ', @{$groups_ro}),
-                    readonly    => $d->{'readonly'} ? JSON::XS::true : JSON::XS::false,
-                    description => $d->{'description'} || '',
-                    objects     => $d->{'objects'},
-                };
-            }
-        }
-    }
-
-    # restore admin flag
-    if($type eq 'public') {
-        $c->stash->{'is_admin'} = $is_admin;
-    }
-
-    $dashboards = Thruk::Backend::Manager::_sort({}, $dashboards, 'name');
-    return $dashboards;
-}
-
-##########################################################
 sub _get_dashboard_by_name {
     my($c, $name) = @_;
     return unless $name;
 
     for my $file (glob($c->{'panorama_var'}.'/*.tab')) {
         if($file =~ s/^.*\/(\d+)\.tab$//mx) {
-            my $d = _load_dashboard($c, $1);
+            my $d = Thruk::Utils::Panorama::load_dashboard($c, $1);
             if($d) {
                 if(  ($d->{'tab'}->{'xdata'}->{'title'} && $d->{'tab'}->{'xdata'}->{'title'} eq $name)
                    || $d->{'nr'} eq $name) {
@@ -2115,7 +2050,7 @@ sub _task_dashboard_list {
     my $type = $c->req->parameters->{'list'} || 'my';
     return if($type eq 'all' && !$c->stash->{'is_admin'});
 
-    my $dashboards = _get_dashboard_list($c, $type);
+    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, $type);
 
     my $json = {
         columns => [
@@ -2162,7 +2097,7 @@ sub _task_dashboard_update {
     my $json   = { 'status' => 'failed' };
     my $nr     = $c->req->parameters->{'nr'};
     my $action = $c->req->parameters->{'action'};
-    my $dashboard = _load_dashboard($c, $nr);
+    my $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr);
     if($action && $dashboard && !$dashboard->{'readonly'}) {
         $json = { 'status' => 'ok' };
         if($action eq 'remove') {
@@ -2191,7 +2126,7 @@ sub _task_dashboard_update {
 ##########################################################
 sub _delete_dashboard {
     my($c, $nr, $dashboard) = @_;
-    $dashboard = _load_dashboard($c, $nr) unless $dashboard;
+    $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr) unless $dashboard;
     unlink($dashboard->{'file'});
     # and also all backups
     unlink(glob($dashboard->{'file'}.'.*'));
@@ -2203,8 +2138,8 @@ sub _task_dashboard_restore_list {
     my($c) = @_;
 
     my $nr         = $c->req->parameters->{'nr'};
-    my $dashboard  = _load_dashboard($c, $nr);
-    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     my $json;
     if($permission >= ACCESS_READWRITE) {
         my $list = {
@@ -2235,8 +2170,8 @@ sub _task_dashboard_restore_point {
 
     my $nr         = $c->req->parameters->{'nr'};
     my $mode       = $c->req->parameters->{'mode'} || 'm';
-    my $dashboard  = _load_dashboard($c, $nr);
-    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
         $nr =~ s/^tabpan-tab_//gmx;
         my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
@@ -2260,8 +2195,8 @@ sub _task_dashboard_restore {
     my $mode       = $c->req->parameters->{'mode'};
        $nr         =~ s/^tabpan-tab_//gmx;
     my $timestamp  = $c->req->parameters->{'timestamp'};
-    my $dashboard  = _load_dashboard($c, $nr);
-    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
+    my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE) {
         die("no such dashboard") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab';
         die("no such restore point") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
@@ -2278,19 +2213,7 @@ sub _task_dashboards_clean {
     my($c) = @_;
 
     die("no admin permissions") unless $c->stash->{'is_admin'};
-    my $json = { num => 0 };
-
-    my $dashboards = _get_dashboard_list($c, 'all');
-    for my $d (@{$dashboards}) {
-        next unless $d->{'objects'} == 0;
-        my $dashboard = _load_dashboard($c, $d->{'nr'});
-        my @stat      = stat($dashboard->{'file'});
-        if(($stat[9] < time() - 86400 && $d->{'name'} eq 'Dashboard') || $stat[9] < time() - (86400 * 14)) {
-            _delete_dashboard($c, $d->{'nr'}, $dashboard);
-            $json->{'num'}++;
-        }
-    }
-
+    my $json = { num => Thruk::Utils::Panorama::clean_old_dashboards($c) };
     _add_misc_details($c, 1, $json);
     return $c->render(json => $json);
 }
@@ -2558,8 +2481,8 @@ sub _save_dashboard {
     $nr      =~ s/^tabpan-tab_//gmx;
     my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
 
-    my $existing = $nr eq 'new' ? $dashboard : _load_dashboard($c, $nr);
-    return unless _is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
+    my $existing = $nr eq 'new' ? $dashboard : Thruk::Utils::Panorama::load_dashboard($c, $nr);
+    return unless Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $existing) >= ACCESS_READWRITE;
 
     if($nr eq 'new') {
         # find next free number
@@ -2602,94 +2525,6 @@ sub _save_dashboard {
     $dashboard->{'nr'} = $nr;
     $dashboard->{'id'} = 'tabpan-tab_'.$nr;
     return $dashboard;
-}
-
-##########################################################
-sub _load_dashboard {
-    my($c, $nr) = @_;
-    $nr       =~ s/^tabpan-tab_//gmx;
-    my $file  = $c->{'panorama_var'}.'/'.$nr.'.tab';
-    return unless -s $file;
-    my $dashboard  = Thruk::Utils::read_data_file($file);
-    $dashboard->{'objects'} = (scalar keys %{$dashboard}) -2;
-    my $permission = _is_authorized_for_dashboard($c, $nr, $dashboard);
-    return unless $permission >= ACCESS_READONLY;
-    if($permission == ACCESS_READONLY) {
-        $dashboard->{'readonly'} = 1;
-    } else {
-        $dashboard->{'readonly'} = 0;
-    }
-    my @stat = stat($file);
-    $dashboard->{'ts'}   = $stat[9];
-    $dashboard->{'nr'}   = $nr;
-    $dashboard->{'id'}   = 'tabpan-tab_'.$nr;
-    $dashboard->{'file'} = $file;
-    my $public = delete $dashboard->{'public'};
-    $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
-    if($public) {
-        push @{$dashboard->{'tab'}->{'xdata'}->{'groups'}}, { '*' => 'read-only' };
-    }
-
-    # merge runtime data
-    my $runtime = {};
-    if(-e $file.'.runtime') {
-       $runtime = Thruk::Utils::read_data_file($file.'.runtime');
-    }
-    for my $tab (keys %{$runtime}) {
-        next if !defined $dashboard->{$tab};
-        for my $key (keys %{$runtime->{$tab}}) {
-            $dashboard->{$tab}->{'xdata'}->{$key} = $runtime->{$tab}->{$key};
-        }
-    }
-
-    if(!defined $dashboard->{'tab'})            { $dashboard->{'tab'}            = {}; }
-    if(!defined $dashboard->{'tab'}->{'xdata'}) { $dashboard->{'tab'}->{'xdata'} = _get_default_tab_xdata($c) }
-    $dashboard->{'tab'}->{'xdata'}->{'owner'} = $dashboard->{'user'};
-    return $dashboard;
-}
-
-##########################################################
-# returns:
-#     0        ACCESS_NONE       - no access
-#     1        ACCESS_READONLY   - public dashboard, readonly access
-#     2        ACCESS_READWRITE  - private dashboard, readwrite access
-#     3        ACCESS_OWNER      - private dashboard, owner/admin access
-sub _is_authorized_for_dashboard {
-    my($c, $nr, $dashboard) = @_;
-    $nr =~ s/^tabpan-tab_//gmx;
-    my $file = $c->{'panorama_var'}.'/'.$nr.'.tab';
-
-    # super user have permission for all reports
-    return ACCESS_OWNER if $c->stash->{'is_admin'};
-
-    # does that dashboard already exist?
-    if(-s $file) {
-        $dashboard = _load_dashboard($c, $nr) unless $dashboard;
-        if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
-            return ACCESS_READONLY if $c->stash->{'readonly'};
-            return ACCESS_OWNER;
-        }
-        # access from contactgroups
-        my $contactgroups = [keys %{$c->cache->get->{'users'}->{$c->stash->{'remote_user'}}->{'contactgroups'}}];
-        my $access = ACCESS_NONE;
-        $dashboard->{'tab'}->{'xdata'}->{'groups'} = [] unless defined $dashboard->{'tab'}->{'xdata'}->{'groups'};
-        for my $group (@{$dashboard->{'tab'}->{'xdata'}->{'groups'}}) {
-            my $name = (keys %{$group})[0];
-            my $lvl  = $group->{$name} eq 'read-write' ? ACCESS_READWRITE : ACCESS_READONLY;
-            if($name eq '*') {
-                $access = $lvl if $lvl > $access;
-                next;
-            }
-            for my $test (@{$contactgroups}) {
-                if($name eq $test) {
-                    $access = $lvl if $lvl > $access;
-                }
-            }
-        }
-        return $access;
-    }
-    return ACCESS_READONLY if $c->stash->{'readonly'};
-    return ACCESS_OWNER;
 }
 
 ##########################################################
