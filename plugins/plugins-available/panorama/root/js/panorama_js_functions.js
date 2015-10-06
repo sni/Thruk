@@ -1,14 +1,9 @@
 /* send debug output to firebug console */
 var debug = function(str) {}
 if(thruk_debug_js != undefined && thruk_debug_js) {
-    if(window.console != undefined) {
+    if(typeof window.console === "object" && window.console.debug) {
         /* overwrite debug function, so caller information is not replaced */
-        try {
-            debug = console.debug;
-            debug('console debug log enabled');
-        } catch(err) {
-            debug = function(str) {}
-        }
+        debug = window.console.debug.bind(console);
     }
 }
 

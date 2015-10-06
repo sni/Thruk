@@ -43,15 +43,18 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 var debug = function(str) {}
-window.addEventListener('load', function(evt) {
-    if(thruk_debug_js != undefined && thruk_debug_js) {
-        if(typeof window.console === "object" && window.console.debug) {
-            /* overwrite debug function, so caller information is not replaced */
-            debug = window.console.debug.bind(console);
-        }
+if(thruk_debug_js != undefined && thruk_debug_js) {
+    if(typeof window.console === "object" && window.console.debug) {
+        /* overwrite debug function, so caller information is not replaced */
+        debug = window.console.debug.bind(console);
     }
+}
+
+window.addEventListener('load', function(evt) {
     try {
-        top.frames['side'].is_reloading = false;
+        if(top.frames && top.frames['side']) {
+            top.frames['side'].is_reloading = false;
+        }
     }
     catch(err) { debug(err); }
 }, false);
