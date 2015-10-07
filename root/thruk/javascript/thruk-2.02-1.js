@@ -43,7 +43,7 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 var debug = function(str) {}
-if(thruk_debug_js != undefined && thruk_debug_js) {
+if(typeof thruk_debug_js !== 'undefined' && thruk_debug_js != undefined && thruk_debug_js) {
     if(typeof window.console === "object" && window.console.debug) {
         /* overwrite debug function, so caller information is not replaced */
         debug = window.console.debug.bind(console);
