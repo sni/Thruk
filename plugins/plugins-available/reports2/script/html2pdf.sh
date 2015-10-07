@@ -64,7 +64,10 @@ DISPLAY=:$DISP $WKHTMLTOPDF \
         "$INPUT" "$OUTPUT" 2>&1 | \
     grep -v 'QPixmap: Cannot create a QPixmap when no GUI is being used'
 
-[ -e "$OUTPUT" ] || cat $TMPLOG
+if [ ! -e "$OUTPUT" ]; then
+    cat $TMPLOG
+    exit 1;
+fi
 
 # ensure file is not owned by root
 if [ -e "$OUTPUT" -a $UID == 0 ]; then

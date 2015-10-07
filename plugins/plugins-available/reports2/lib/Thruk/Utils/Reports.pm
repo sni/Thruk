@@ -23,6 +23,7 @@ use File::Copy;
 use Encode qw(encode_utf8 decode_utf8 encode);
 use Storable qw/dclone/;
 use File::Temp qw/tempfile/;
+use Cwd qw//;
 
 ##########################################################
 
@@ -1232,15 +1233,20 @@ sub _convert_to_pdf {
 
     my $wkhtmltopdf = $c->config->{'Thruk::Plugin::Reports2'}->{'wkhtmltopdf'} || 'wkhtmltopdf';
     my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/script/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$wkhtmltopdf.'"';
-    `$cmd`;
+    my $out = `$cmd 2>&1`;
 
     # try again to avoid occasionally qt errors
     if(!-e $attachment.'.pdf') {
         my $error = read_file($logfile);
+        if($error eq "") { $error = $out; }
         if($error =~ m/QPainter::begin/mx) {
             `$cmd`;
         }
+        if($error eq "") {
+            $error = "failed to produce a pdf file without any error message.\npwd: ".Cwd::getcwd()."\ncmdline:\n$cmd";
+        }
         if(!-e $attachment.'.pdf') {
+            Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
             die('report failed: '.$error);
         }
     }
