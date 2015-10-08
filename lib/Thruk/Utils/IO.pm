@@ -187,22 +187,19 @@ retrieve json data
 =cut
 
 sub json_lock_retrieve {
+    #smetj;
     my($file) = @_;
 
     my $json = JSON::XS->new->utf8;
-    my $data;
-
-    open(my $fh, '<', $file) or die('cannot read file '.$file.': '.$!);
+    $json->relaxed();
+    local $/=undef;
+    open FILE, $file or die('cannot read file '.$file.': '.$!);
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
-    flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
-    while(my $line = <$fh>) {
-        $json->incr_parse($line);
-    }
-    $data = $json->incr_parse;
-    flock($fh, LOCK_UN) or die 'Cannot unlock '.$file.': '.$!;
+    flock(FILE, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
+    my $data = $json->decode(<FILE>);
+    CORE::close(FILE);
     alarm(0);
-    CORE::close($fh);
     return $data;
 }
 
