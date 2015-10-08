@@ -5,7 +5,7 @@
 
 [% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
   [% IF edit %]
-    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% escape_js(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
+    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value | html %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
     [% IF key == 'command_line' %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
     [% IF key == 'address' %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
   [% ELSE %]
@@ -32,9 +32,9 @@
     <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]" placeholder="command arguments">
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
-        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value %]</a>
+        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value | html %]</a>
     [% ELSE %]
-        [% value %]
+        [% escape_html(value) %]
     [% END %]
   [% END %]
 
@@ -81,7 +81,7 @@
         [% END %]
     [% END %]
   [% ELSE %]
-    [% value %]
+    [% value | html %]
   [% END %]
 
 
@@ -93,7 +93,11 @@
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         [% FOREACH o = value %]
-        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+          [% IF o != "null" %]
+            <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+          [% ELSE %]
+            [% o %]
+          [% END %]
         [% UNLESS loop.last %], [% END %]
         [% END %]
     [% ELSE %]

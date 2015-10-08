@@ -1,0 +1,12 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/mobile.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/mobile.cgi'} = 'Thruk::Controller::mobile::index';
+
+# enable mobile features if this plugin is loaded
+$app->config->{'use_feature_mobile'} = 1;

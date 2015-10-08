@@ -5,12 +5,11 @@
   <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>[% title_prefix %][% title %]</title>
-    [% PROCESS _common_js.tt %]
     [% UNLESS all_in_one_css %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     [% END %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <style type="text/css">
     <!--
     HTML {
@@ -19,9 +18,11 @@
     }
     -->
     </style>
+    [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
   </head>
   <body class='navbar'>
+  [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
     <div id="menu">
 
@@ -45,17 +46,18 @@
         [%+ ELSIF link.search %]
           <li>
           <div id="search_box">
-            <form action="[% url_prefix %]thruk/cgi-bin/status.cgi" method="get" target="[% link.target %]">
+            <form action="[% url_prefix %]cgi-bin/status.cgi" method="get" target="[% link.target %]">
             [% IF use_new_search%]
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
             <input type='hidden' name='s0_type' value='search' />
+            <input type='hidden' name='add_default_service_filter' value='1' />
             <input type='text' name='s0_value' id="s0_value" class="NavBarSearchItem" />
             [% ELSE %]
             <input id="search" name="host" type="text" />
             <input type="hidden" name="navbarsearch" id="NavBarSearchItem" value="1" />
             [% END %]
-            <input src="[% url_prefix %]thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
+            <input src="[% url_prefix %]themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
           </div>
           </li>

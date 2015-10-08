@@ -4,10 +4,17 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="apply" value="commit">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
   <table border="0" class='data conftoolobj'>
     [% PROCESS _conf_objects_menu.tt type="apply" %]
-    <tr><td colspan=10 align="center">
+  </table>
 
+<br><br>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
+<tr>
+<td align="left" valign="top" width="100%" style="padding-left: 20px" class="confPanel">
+
+  <div class="dataTitle">Apply Configuration Changes</div>
     <table>
 
     [% IF parse_errors.size > 0 %]
@@ -16,7 +23,7 @@
         Config Parse Errors
       </td>
       <td class='dataVar'>
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='there are parse errors' title='there are parse errors' width="16" height="16" style="vertical-align: text-top">
+        <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='there are parse errors' title='there are parse errors' width="16" height="16" style="vertical-align: text-top">
       </td>
       <td class='dataVal' style="padding-top: 5px; text-align: left;">
           [% FOREACH err IN parse_errors %]
@@ -33,7 +40,7 @@
       </td>
       <td class='dataVar'>
         [% IF needs_commit %]
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: text-top">
+        <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: text-top">
         [% END %]
       </td>
       <td class='dataVal' style="padding-top: 5px; text-align: center;">
@@ -52,7 +59,7 @@
       </td>
       <td class='dataVar'>
         [% IF needs_commit %]
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: bottom">
+        <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: bottom">
         [% END %]
       </td>
       <td class='dataVal' style="text-align: center;">
@@ -78,7 +85,7 @@
       </td>
       <td class='dataVar'>
         [% IF last_changed %]
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+        <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
         [% END %]
       </td>
       <td class='dataVal' style="text-align: center;">
@@ -97,7 +104,7 @@
       </td>
       <td class='dataVar'>
         [% IF last_changed %]
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+        <img src='[% url_prefix %]themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
         [% END %]
       </td>
       <td class='dataVal' style="text-align: center;">
@@ -123,8 +130,17 @@
     [% END %]
 
     </table>
-    </td></tr>
-  </table>
+
+
+
+</td>
+<td align="left" valign="top" width="100%" style="padding-left: 20px">
+</td>
+<td align="center" valign="top" class="action_menu">
+[% PROCESS _conf_action_menu.tt show_object="" %]
+</td>
+</tr>
+</table>
 </form>
 </div>
 

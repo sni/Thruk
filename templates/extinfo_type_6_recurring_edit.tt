@@ -18,11 +18,11 @@
 <form action="extinfo.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="recurring" value="save">
-<input type="hidden" name="src" value="[% rd.file %]">
+<input type="hidden" name="nr" value="[% rd.file %]">
 <input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
-    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
     <th class="data" nowrap>Recurring Downtime</th>
     <th class='data' style="width:125px;"></th>
   </tr>
@@ -42,18 +42,25 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backend</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <select name="d_backends" id="d_backends" style="min-width: 180px;"[% IF !can_edit %] disabled[% END %]>
+      [% IF backends.size > 10 %]
+        [% PROCESS _backends_select_multi.tt param_name='d_backends' selected_backends=rd.backends can_edit=can_edit onchange="" %]
+      [% ELSIF backends.size > 1 %]
+      [% backends_selected=0 %]
+      [% IF rd.backends.size < backends.size && rd.backends.size > 0 %][% backends_selected=1 %][% END %]
+      <input type="checkbox" id="ext_backends_toggle" name="ext_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleDisabled('d_backends')" style="vertical-align: top;"><span onclick="toggleCheckBox('ext_backends_toggle'); toggleDisabled('d_backends');" class="clickable"> Select Backends:</span><br>
+      <select name="d_backends" id="d_backends" multiple style="min-width: 180px;"[% IF !can_edit || !backends_selected %] disabled[% END %]>
         [% FOREACH b = backends %]
-        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
         [% END %]
       </select>
+      [% END %]
     </td>
   </tr>
   [% END %]
   <tr id="input_host">
     <td class="dataEven" align="center"><b>Host</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="host" name="host" value="[% rd.host.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_service">
@@ -65,13 +72,13 @@
   <tr id="input_hostgroup">
     <td class="dataEven" align="center"><b>Hostgroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="hostgroup" name="hostgroup" value="[% rd.hostgroup.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hostgroups', { url: 'status.cgi?format=search&amp;type=hostgroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
   <tr id="input_servicegroup">
     <td class="dataEven" align="center"><b>Servicegroup</b></td>
     <td class="dataOdd" align="left" colspan=2>
-      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends' })"[% END %][% IF !can_edit %] disabled[% END %]>
+      <input type="text" id="servicegroup" name="servicegroup" value="[% rd.servicegroup.list.join(', ') %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'servicegroups', { url: 'status.cgi?format=search&amp;type=servicegroups', autosubmit:false, backend_select:'d_backends', list: '[ ,]' })"[% END %][% IF !can_edit %] disabled[% END %]>
     </td>
   </tr>
 
@@ -94,7 +101,7 @@
           [% IF can_edit %]
           <tr>
             <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
-                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
+                <input type="image" src="[% url_prefix %]themes/[% theme %]/images/down.png" name="add" alt="add">
                 add more
             </td>
           </tr>
@@ -135,7 +142,7 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.file %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;src=[% rd.file %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      [% IF rd.file %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;nr=[% rd.file %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
       <button class="save_button button" style="width: 160px;"[% IF !can_edit %] disabled[% END %]>Save</button>
     </td>
   </tr>

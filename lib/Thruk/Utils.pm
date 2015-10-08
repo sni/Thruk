@@ -12,17 +12,17 @@ Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use utf8;
-use Carp;
+use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use File::Slurp qw/read_file/;
-use Encode qw/encode encode_utf8 decode/;
-use File::Copy qw/move/;
+use Encode qw/encode encode_utf8 decode is_utf8/;
+use File::Copy qw/move copy/;
 use File::Temp qw/tempfile/;
 use Time::HiRes qw/gettimeofday tv_interval/;
-use Thruk::Utils::IO;
-use Config::General;
+use Thruk::Utils::IO ();
+use Digest::MD5 qw(md5_hex);
+use POSIX ();
 
 ##############################################
 =head1 METHODS
@@ -67,13 +67,8 @@ return date from timestamp in given format
 =cut
 sub format_date {
     my($timestamp, $format) = @_;
-    our($tpd);
-    if(!defined $tpd) {
-        require Template::Plugin::Date;
-        Template::Plugin::Date->import();
-        $tpd = Template::Plugin::Date->new()
-    }
-    my $date = $tpd->format($timestamp, $format);
+    confess("no format") unless defined $format;
+    my $date = POSIX::strftime($format, localtime($timestamp));
     return decode("utf-8", $date);
 }
 
@@ -89,7 +84,11 @@ return number with thousands seperator
 =cut
 sub format_number {
     my($number) = @_;
-    $number =~ s/(\d{1,3}?)(?=(\d{3})+$)/$1,/gmx;
+    for ($number) {
+        /\./mx
+        ? s/(?<=\d)(?=(\d{3})+(?:\.))/,/gmx
+        : s/(?<=\d)(?=(\d{3})+(?!\d))/,/gmx;
+    }
     return $number;
 }
 
@@ -138,8 +137,11 @@ sub format_cronentry {
                     }
                 }
             }
-            if(defined $lastconcated->[0]) {
+            if(defined $lastconcated->[1]) {
                 push @days, $lastconcated->[0].'-'.$lastconcated->[1];
+            }
+            elsif(defined $lastconcated->[0]) {
+                push @days, $lastconcated->[0];
             }
             $cron = sprintf("%s at %02s:%02s", join(', ', @days), $cr->{'hour'}, $cr->{'minute'});
         } else {
@@ -148,6 +150,11 @@ sub format_cronentry {
     }
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("daily at %02s:%02s", $cr->{'hour'}, $cr->{'minute'});
+    }
+    elsif($cr->{'type'} eq 'monthday') {
+        my $month_day = lcfirst $cr->{'month_day'};
+        $month_day =~ s/_/ /gmx;
+        $cron = sprintf("every %s at %02s:%02s", $month_day, $cr->{'hour'}, $cr->{'minute'});
     }
     elsif($cr->{'type'} eq 'cust') {
         my @tst = split/\s+/mx, $cr->{'cust'};
@@ -173,8 +180,7 @@ parse the cgi.cfg and put it into $c->config
 
 =cut
 sub read_cgi_cfg {
-    my $c      = shift;
-    my $config = shift;
+    my($c, $config) = @_;
     if(defined $c) {
         $config = $c->config;
     }
@@ -183,7 +189,7 @@ sub read_cgi_cfg {
 
     # read only if its changed
     my $file = $config->{'cgi.cfg'};
-    if(!defined $file or $file eq '') {
+    if(!defined $file || $file eq '') {
         $config->{'cgi_cfg'} = 'undef';
         if(defined $c) {
             $c->log->error("cgi.cfg not set");
@@ -214,15 +220,14 @@ sub read_cgi_cfg {
 
     my $last_stat = $config->{'cgi_cfg_stat'};
     if(!defined $last_stat
-       or $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
-       or $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
+       || $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
+       || $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
       ) {
         $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
         $c->log->debug("reading $file") if defined $c;
-        $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
+        $config->{'cgi_cfg_stat'}      = \@cgi_cfg_stat;
         $config->{'cgi.cfg_effective'} = $file;
-        my $conf = new Config::General($file);
-        %{$config->{'cgi_cfg'}} = $conf->getall;
+        $config->{'cgi_cfg'}           = Thruk::Config::read_config_file($file);
     }
 
     $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;
@@ -269,13 +274,13 @@ computes a combined status for process infos
 
 =cut
 sub calculate_overall_processinfo {
-    my $pi = shift;
+    my($pi, $selected) = @_;
     my $return = {};
 
     # if no backend is available
     return($return) if ref $pi ne 'HASH';
 
-    for my $peer (keys %{$pi}) {
+    for my $peer (@{$selected}) {
         for my $key (keys %{$pi->{$peer}}) {
             my $value = $pi->{$peer}->{$key};
             if(defined $value and ($value eq "0" or $value eq "1")) {
@@ -406,7 +411,7 @@ sub get_start_end_for_timeperiod {
         }
     }
 
-    if(!defined $start or !defined $end) {
+    if(!defined $start || !defined $end) {
         return(undef, undef);
     }
 
@@ -436,23 +441,23 @@ sub get_start_end_for_timeperiod_from_param {
     confess("no c") unless defined($c);
 
     # get timeperiod
-    my $timeperiod   = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
-    my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
-    my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
-    my $shour        = $c->{'request'}->{'parameters'}->{'shour'}  || 0;
-    my $smin         = $c->{'request'}->{'parameters'}->{'smin'}   || 0;
-    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'}   || 0;
-    my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
-    my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
-    my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
-    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'}  || 0;
-    my $emin         = $c->{'request'}->{'parameters'}->{'emin'}   || 0;
-    my $esec         = $c->{'request'}->{'parameters'}->{'esec'}   || 0;
-    my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
-    my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
+    my $timeperiod   = $c->req->parameters->{'timeperiod'};
+    my $smon         = $c->req->parameters->{'smon'};
+    my $sday         = $c->req->parameters->{'sday'};
+    my $syear        = $c->req->parameters->{'syear'};
+    my $shour        = $c->req->parameters->{'shour'}  || 0;
+    my $smin         = $c->req->parameters->{'smin'}   || 0;
+    my $ssec         = $c->req->parameters->{'ssec'}   || 0;
+    my $emon         = $c->req->parameters->{'emon'};
+    my $eday         = $c->req->parameters->{'eday'};
+    my $eyear        = $c->req->parameters->{'eyear'};
+    my $ehour        = $c->req->parameters->{'ehour'}  || 0;
+    my $emin         = $c->req->parameters->{'emin'}   || 0;
+    my $esec         = $c->req->parameters->{'esec'}   || 0;
+    my $t1           = $c->req->parameters->{'t1'};
+    my $t2           = $c->req->parameters->{'t2'};
 
-    $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
+    $timeperiod = 'last24hours' if(!defined $timeperiod && !defined $t1 && !defined $t2);
     return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 }
 
@@ -468,7 +473,8 @@ gets the authorized_for_read_only role and group based roles
 sub get_dynamic_roles {
     my($c, $username, $user) = @_;
 
-    $user = Catalyst::Authentication::Store::FromCGIConf->find_user( { username => $username }, $c ) unless defined $user;
+    $user = Thruk::Authentication::User->new($c, $username) if $username;
+    $user = $c->user unless defined $user;
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data);
@@ -534,11 +540,11 @@ sub get_dynamic_roles {
         my $role = $possible_roles->{$key};
         if(defined $c->config->{'cgi_cfg'}->{$key}) {
             my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key};
-            for my $contactgroup (keys %{contactgroups}) {
+            for my $contactgroup (keys %contactgroups) {
                 if(defined $groups->{$contactgroup} or $contactgroup eq '*' ) {
                     $roles_by_group->{$role} = [] unless defined $roles_by_group->{$role};
                     push @{$roles_by_group->{$role}}, $contactgroup;
-                    push @{$roles}, $role
+                    push @{$roles}, $role;
                 }
             }
         }
@@ -562,19 +568,21 @@ sets the authorized_for_read_only role and group based roles
 sub set_dynamic_roles {
     my $c = shift;
 
-    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
-    my $username = $c->request->{'user'}->{'username'};
-
+    return unless $c->user_exists;
+    my $username = $c->user->{'username'};
     return unless defined $username;
 
-    my($roles, $can_submit_commands, $alias) = get_dynamic_roles($c, $username, $c->request->{'user'});
+    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
+
+    #my($roles, $can_submit_commands, $alias)...
+    my($roles, undef, $alias) = get_dynamic_roles($c, $username, $c->user);
 
     if(defined $alias) {
-        $c->request->{'user'}->{'alias'} = $alias;
+        $c->user->{'alias'} = $alias;
     }
 
     for my $role (@{$roles}) {
-        push @{$c->request->{'user'}->{'roles'}}, $role;
+        push @{$c->user->{'roles'}}, $role;
     }
 
     $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
@@ -608,13 +616,10 @@ sub set_message {
         $code    = shift;
     }
 
-    $c->res->cookies->{'thruk_message'} = {
-        value => $style.'~~'.$message,
-        path  => $c->stash->{'cookie_path'}
-    };
+    $c->cookie('thruk_message' => $style.'~~'.$message, { path  => $c->stash->{'cookie_path'} });
     $c->stash->{'thruk_message'}         = $style.'~~'.$message;
     $c->stash->{'thruk_message_details'} = $details;
-    $c->response->status($code) if defined $code;
+    $c->res->code($code) if defined $code;
 
     return 1;
 }
@@ -632,7 +637,7 @@ append text to current message
 sub append_message {
     my($c, $txt) = @_;
     if(defined $c->res->cookies->{'thruk_message'}) {
-        $c->res->cookies->{'thruk_message'}->{'value'} .= ' '.$txt
+        $c->res->cookies->{'thruk_message'}->{'value'} .= ' '.$txt;
     }
     if(defined $c->stash->{'thruk_message'}) {
         $c->stash->{'thruk_message'} .= ' '.$txt;
@@ -688,16 +693,16 @@ reads a ssi file or executes it if its executable
 sub read_ssi {
     my $c    = shift;
     my $file = shift;
-    # retun if file is execitabel
+    # retun if file is executable
     if( -x $c->config->{'ssi_path'}."/".$file ){
        open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
-       local $/=undef;
-       my $output = <$ph>;
-       Thruk::Utils::IO::close($ph, undef, 1);
+       my $output = '';
+       while(my $line = <$ph>) { $output .= $line; }
+       CORE::close($ph);
        return $output;
     }
     elsif( -r $c->config->{'ssi_path'}."/".$file ){
-        return read_file($c->config->{'ssi_path'}."/".$file) or carp("cannot open ssi: $!");
+        return(read_file($c->config->{'ssi_path'}."/".$file) || carp("cannot open ssi: $!"));
     }
     $c->log->warn($c->config->{'ssi_path'}."/".$file." is no longer accessible, please restart thruk to initialize ssi information");
     return "";
@@ -735,7 +740,7 @@ sub read_resource_file {
             $lastcomment = '';
         }
     }
-    Thruk::Utils::IO::close($fh, $file, 1);
+    CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     return($macros) unless $with_comments;
     return($macros, $comments);
 }
@@ -752,7 +757,7 @@ compare too version strings and return 1 if v1 >= v2
 =cut
 sub version_compare {
     my($v1,$v2) = @_;
-    confess("version_compare() needs two params, got: ".Dumper(\@_)) unless defined $v2;
+    confess("version_compare() needs two params") unless defined $v2;
 
     # replace non-numerical characters
     $v1 =~ s/[^\d\.]/./gmx;
@@ -790,8 +795,7 @@ sub combine_filter {
     my $operator = shift;
     my $filter   = shift;
 
-    my $return;
-    if(!defined $operator and $operator ne '-or' and $operator ne '-and') {
+    if(!defined $operator && $operator ne '-or' && $operator ne '-and') {
         confess("unknown operator: ".Dumper($operator));
     }
 
@@ -808,8 +812,6 @@ sub combine_filter {
     }
 
     return { $operator => $filter };
-
-    return $return;
 }
 
 
@@ -823,9 +825,7 @@ create a hash by key
 
 =cut
 sub array2hash {
-    my $data = shift;
-    my $key  = shift;
-    my $key2 = shift;
+    my($data, $key, $key2) = @_;
 
     return {} unless defined $data;
     confess("not an array") unless ref $data eq 'ARRAY';
@@ -892,28 +892,54 @@ sub set_paging_steps {
 
 =head2 get_custom_vars
 
-  get_custom_vars($obj)
+  get_custom_vars($c, $obj, [$prefix])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
-    my($data,$prefix) = @_;
+    my($c, $data,$prefix) = @_;
     $prefix = '' unless defined $prefix;
 
-    my $custom_vars = {};
+    my %hash;
 
-    return unless defined $data;
-    return unless defined $data->{$prefix.'custom_variable_names'};
-
-    my $x = 0;
-    while(defined $data->{$prefix.'custom_variable_names'}->[$x]) {
-        my $cust_name  = $data->{$prefix.'custom_variable_names'}->[$x];
-        my $cust_value = $data->{$prefix.'custom_variable_values'}->[$x];
-        $custom_vars->{$cust_name} = $cust_value;
-        $x++;
+    if(   defined $data
+      and defined $data->{$prefix.'custom_variable_names'}
+      and defined $data->{$prefix.'custom_variable_values'}
+      and ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
+    {
+        # merge custom variables into a hash
+        @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
     }
-    return $custom_vars;
+
+    # add action menu from apply rules
+    if($c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+        APPLY:
+        for my $menu (keys %{$c->config->{'action_menu_apply'}}) {
+            for my $pattern (ref $c->config->{'action_menu_apply'}->{$menu} eq 'ARRAY' ? @{$c->config->{'action_menu_apply'}->{$menu}} : ($c->config->{'action_menu_apply'}->{$menu})) {
+                if(!$prefix && $data->{'description'}) {
+                    my $test = $data->{'host_name'}.';'.$data->{'description'};
+                    ## no critic
+                    if($test =~ m/$pattern/) {
+                    ## use critic
+                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        last APPLY;
+                    }
+                }
+                elsif($data->{$prefix.'name'}) {
+                    my $test = $data->{$prefix.'name'}.';';
+                    ## no critic
+                    if($test =~ m/$pattern/) {
+                    ## use critic
+                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        last APPLY;
+                    }
+                }
+            }
+        }
+    }
+
+    return \%hash;
 }
 
 
@@ -927,22 +953,38 @@ set stash value for all allowed custom variables
 
 =cut
 sub set_custom_vars {
-    my($c ,$data, $prefix) = @_;
-    $prefix = '' unless defined $prefix;
+    my $c      = shift;
+    my $args   = shift;
 
-    $c->stash->{'custom_vars'} = [];
+    my $prefix  = $args->{'prefix'} || '';
+    my $search  = $args->{'search'} || 'show_custom_vars';
+    my $dest    = $args->{'dest'}   || 'custom_vars';
+    my $host    = $args->{'host'};
+    my $service = $args->{'service'};
+    my $data;
+
+    if (defined $host and defined $service) {
+        $data = $service;
+    } elsif (defined $host) {
+        $data = $host;
+    } else {
+        return;
+    }
+
+    $c->stash->{$dest} = [];
 
     return unless defined $data;
     return unless defined $data->{$prefix.'custom_variable_names'};
-    return unless defined $c->config->{'show_custom_vars'};
+    return unless ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY';
+    return unless defined $c->config->{$search};
 
-    my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
+    my $vars = ref $c->config->{$search} eq 'ARRAY' ? $c->config->{$search} : [ $c->config->{$search} ];
 
-    my $custom_vars = get_custom_vars($data, $prefix);
+    my $custom_vars = get_custom_vars($c, $data, $prefix);
 
     my $already_added = {};
     for my $test (@{$vars}) {
-        for my $cust_name (%{$custom_vars}) {
+        for my $cust_name (keys %{$custom_vars}) {
             next if defined $already_added->{$cust_name};
             my $cust_value = $custom_vars->{$cust_name};
             my $found      = 0;
@@ -954,11 +996,27 @@ sub set_custom_vars {
                 $v =~ s/\*/.*/gmx;
                 if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
                     $found = 1;
-                    last;
                 }
             }
             if($found) {
-                push @{$c->stash->{'custom_vars'}}, [ $cust_name, $cust_value ];
+                # expand macros in custom vars
+                if (defined $host and defined $service) {
+                        #($cust_value, $rc)...
+                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                            string  => $cust_value,
+                            host    => $host,
+                            service => $service,
+                        });
+                } elsif (defined $host) {
+                        #($cust_value, $rc)...
+                        ($cust_value, undef) = $c->{'db'}->_replace_macros({
+                            string  => $cust_value,
+                            host    => $host,
+                        });
+                }
+
+                # add to dest
+                push @{$c->stash->{$dest}}, [ $cust_name, $cust_value ];
             }
         }
     }
@@ -1018,13 +1076,19 @@ returns user data
 sub get_user_data {
     my($c) = @_;
 
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    return $c->stash->{'user_data_cached'} if $c->stash->{'user_data_cached'};
+
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return {};
     }
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    return {} unless -s $file;
-    return read_data_file($file);
+    if(-s $file) {
+        $c->stash->{'user_data_cached'} = read_data_file($file);
+    } else {
+        $c->stash->{'user_data_cached'} = {};
+    }
+    return $c->stash->{'user_data_cached'};
 }
 
 
@@ -1043,10 +1107,11 @@ sub store_user_data {
 
     # don't store in demo mode
     if($c->config->{'demo_mode'}) {
-        return 1;
+        Thruk::Utils::set_message( $c, 'fail_message', 'saving user settings is disabled in demo mode');
+        return;
     }
 
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(!defined $c->stash->{'remote_user'} || $c->stash->{'remote_user'} eq '?') {
         return 1;
     }
 
@@ -1059,19 +1124,18 @@ sub store_user_data {
         }
     }
 
-    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
-    open(my $fh, '>', $file.'.new') or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
-        return;
-    };
-    print $fh Dumper($data);
-    Thruk::Utils::IO::close($fh, $file.'.new');
-    Thruk::Utils::IO::ensure_permissions('file', $file);
+    # update cached data
+    $c->stash->{'user_data_cached'} = $data;
 
-    move($file.'.new', $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
-        return;
+    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    my $rc;
+    eval {
+        $rc = write_data_file($file, $data);
     };
+    if($@ || !$rc) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: '.$file.' '.$@ );
+        return;
+    }
 
     return 1;
 }
@@ -1109,6 +1173,12 @@ store global user data for section
 sub store_global_user_data {
     my($c, $data) = @_;
 
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'saving global settings disabled in demo mode');
+        return;
+    }
+
     my $dir = $c->config->{'var_path'};
     if(! -d $dir) {
         Thruk::Utils::IO::mkdir($dir) or do {
@@ -1118,20 +1188,14 @@ sub store_global_user_data {
     }
 
     my $file = $c->config->{'var_path'}."/global_user_data";
-    open(my $fh, '>', $file.'.new') or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
-        return;
+    my $rc;
+    eval {
+        $rc = write_data_file($file, $data);
     };
-    CORE::close($fh);
-    write_data_file($file.'.new', $data);
-    Thruk::Utils::IO::ensure_permissions('file', $file.'.new');
-
-    move($file.'.new', $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
+    if($@ || !$rc) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: '.$file.' '.$@ );
         return;
-    };
-    Thruk::Utils::IO::ensure_permissions('file', $file);
-
+    }
     return 1;
 }
 
@@ -1167,29 +1231,39 @@ save excel file by background job
 =cut
 
 sub logs2xls {
-    my $c = shift;
-    $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] . $c->stash->{'file_name'} . q["] ];
-    $c->stash->{'res_ctype'}  = 'application/x-msexcel';
+    my($c) = @_;
     Thruk::Utils::Status::set_selected_columns($c);
     $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
+    savexls($c);
+    return;
+}
 
-    # Excel::Template::Plus pulls in Moose, so load this later
-    require Excel::Template::Plus;
-    Excel::Template::Plus->import();
-    my $template = Excel::Template::Plus->new(
-        engine   => 'TT',
-        template => $c->stash->{'template'},
-        config   => $c->config->{'View::TT'},
-        params   => {},
-    );
-    $template->param(%{ $c->stash });
+########################################
+
+=head2 savexls
+
+  savexls($c)
+
+save excel file by background job
+
+=cut
+
+sub savexls {
+    my($c) = @_;
+    $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] .  $c->stash->{'file_name'} . q["] ];
+    $c->stash->{'res_ctype'}  = 'application/x-msexcel';
+
+    my $template = $c->stash->{'template'};
+    require Thruk::Views::ExcelRenderer;
+    my $output = Thruk::Views::ExcelRenderer::render($c, $template);
     if($c->config->{'no_external_job_forks'}) {
-        my($fh, $filename) = tempfile();
+        #my($fh, $filename)...
+        my(undef, $filename)     = tempfile();
         $c->stash->{'file_name'} = $filename;
         $c->stash->{job_dir}     = '';
         $c->stash->{cleanfile}   = 1;
     }
-    $template->write_file($c->stash->{job_dir}.$c->stash->{'file_name'});
+    Thruk::Utils::IO::write($c->stash->{job_dir}.$c->stash->{'file_name'}, $output);
     return;
 }
 
@@ -1204,16 +1278,39 @@ return pnp url for object (host/service)
 =cut
 
 sub get_pnp_url {
-    my $c     = shift;
-    my $obj   = shift;
-    my $force = shift;
+    my($c, $obj, $force) = @_;
 
     return '' unless $c->config->{'shown_inline_pnp'} || $force;
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         next unless defined $obj->{$type};
-        for my $regex (qw/pnp4nagios pnp/) {
-            return($1.'index.php') if $obj->{$type} =~ m|(^.*?/$regex/)|mx;
+        for my $regex (qw|/pnp[^/]*/|) {
+            return($1.'/index.php') if $obj->{$type} =~ m|(^.*?$regex)|mx;
+        }
+    }
+
+    return '';
+}
+
+########################################
+
+=head2 get_histou_url
+
+  get_histou_url($c, $object)
+
+return histou url for object (host/service)
+
+=cut
+
+sub get_histou_url {
+    my($c, $obj, $force) = @_;
+
+    return '' unless $c->config->{'shown_inline_pnp'} || $force;
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        next unless defined $obj->{$type};
+        if($obj->{$type} =~ m|histou\.js\?|mx) {
+            return($obj->{$type});
         }
     }
 
@@ -1250,11 +1347,11 @@ sub get_graph_url {
 
     if(defined $obj->{'name'}) {
         #host obj
-        return get_action_url(1, 0, $action_url, $obj->{'name'});
+        return get_action_url($c, 1, 0, $action_url, $obj->{'name'});
     }
     elsif(defined $obj->{'host_name'} && defined $obj->{'description'}) {
         #service obj
-        return get_action_url(1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
+        return get_action_url($c, 1, 0, $action_url, $obj->{'host_name'}, $obj->{'description'});
     }
     else {
         #unknown host
@@ -1267,7 +1364,7 @@ sub get_graph_url {
 
 =head2 get_action_url
 
-  get_action_url($escape_fun, $remove_render, $action_url, $host, $svc)
+  get_action_url($c, $escape_fun, $remove_render, $action_url, $host, $svc)
 
 return action_url modified for object (host/service) if we use graphite
 escape_fun is use to escape special char (html or quotes)
@@ -1276,9 +1373,10 @@ remove_render remove /render in action url
 =cut
 
 sub get_action_url {
-    my($escape_fun, $remove_render, $action_url, $host, $svc) = @_;
+    my($c, $escape_fun, $remove_render, $action_url, $host, $svc) = @_;
 
     my $new_action_url = $action_url;
+    my $graph_word = $c->config->{'graph_word'};
 
     # don't escape pnp links, they often contain quotes on purpose
     if($action_url =~ m/\/pnp(|4nagios)\//mx) {
@@ -1286,18 +1384,35 @@ sub get_action_url {
         if($action_url !~ m/theme=/mx) {
             $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
         }
+        $action_url =~ s/&amp;/&/gmx;
+        $action_url =~ s/&/&amp;/gmx;
+        return($action_url);
+    }
+    elsif($action_url =~ m/\/histou\.js\?/mx) {
+        $action_url =~ s/&amp;/&/gmx;
+        $action_url =~ s/&/&amp;/gmx;
+        my $popup_url = $action_url;
+        $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
+        $popup_url .= '&amp;panelId=2';
+        $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
 
-    if ($action_url =~ m|/render/|mx) {
-        my $new_host = $host;
-        $new_host =~ s/[^\w\-]/_/gmx;
-        $new_action_url =~ s/$host/$new_host/gmx;
+    if ($graph_word) {
+        for my $regex (@{list($graph_word)}) {
+            if ($action_url =~ m|$regex|mx){
+                my $new_host = $host;
+                $new_host =~ s/[^\w\-]/_/gmx;
+                $new_action_url =~ s/\Q$host\E/$new_host/gmx;
 
-        if ($svc) {
-            my $new_svc = $svc;
-            $new_svc =~ s/[^\w\-]/_/gmx;
-            $new_action_url =~ s/$svc/$new_svc/gmx;
+                if ($svc) {
+                    my $new_svc = $svc;
+                    $new_svc =~ s/[^\w\-]/_/gmx;
+                    $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
+                }
+
+                last;
+            }
         }
     }
 
@@ -1365,26 +1480,25 @@ let the user choose a mobile page or not
 sub choose_mobile {
     my($c,$url) = @_;
 
-    return unless defined $c->{'request'}->{'headers'}->{'user-agent'};
+    return unless defined $c->req->header('user-agent');
     my $found = 0;
     for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
-        $found++ if $c->{'request'}->{'headers'}->{'user-agent'} =~ m/$agent/mx;
+        $found++ if $c->req->header('user-agent') =~ m/$agent/mx;
     }
     return unless $found;
 
     my $choose_mobile;
-    if(defined $c->request->cookie('thruk_mobile')) {
-        my $cookie = $c->request->cookie('thruk_mobile');
+    if(defined $c->cookie('thruk_mobile')) {
+        my $cookie = $c->cookie('thruk_mobile');
         $choose_mobile = $cookie->value;
         return if $choose_mobile == 0;
     }
 
-    $c->{'canceled'}        = 1;
-    $c->stash->{'title'}    = $c->config->{'name'};
+    $c->stash->{'title'}     = $c->config->{'name'};
     $c->stash->{'template'} = 'mobile_choose.tt';
-    $c->stash->{'redirect'} = $url;
+    $c->stash->{'redirect'}  = $url;
     if(defined $choose_mobile and $choose_mobile == 1) {
-        return $c->response->redirect($c->stash->{'redirect'});
+        return $c->redirect_to($c->stash->{'redirect'});
     }
     return 1;
 }
@@ -1454,7 +1568,7 @@ sub update_cron_file {
             }
             $thruk_started = 0 if $line =~ m/^\#\ END\ OF\ THRUK/mx;
 
-            if($line =~ m/^\#\ (\w+)$/mx) {
+            if($line =~ m/^\#\ ([\w\s]+)$/mx) {
                 $lastsection = $1;
                 next;
             }
@@ -1464,7 +1578,7 @@ sub update_cron_file {
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
         }
-        Thruk::Utils::IO::close($fh, undef, 1);
+        CORE::close($fh) or die("cannot close file ".$c->config->{'cron_file'}.": ".$!);
     }
 
     # write out new file
@@ -1546,6 +1660,28 @@ sub get_cron_time_entry {
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
     }
+    elsif($cr->{'type'} eq 'monthday') {
+        my($t, $d) = split(/_/mx, $cr->{'month_day'}, 2);
+        my $weeks;
+        $weeks = 1 if $t eq '1st';
+        $weeks = 2 if $t eq '2nd';
+        $weeks = 3 if $t eq '3rd';
+        $weeks = 4 if $t eq '4th';
+        $weeks = 1 if $t eq 'Last';
+        my $daycheck = '[ $(date +"\%m") -ne $(date -d "-'.(7*$weeks).'days" +"\%m") ] && ';
+        if($t eq 'Last') {
+            $daycheck = '[ $(date +"\%m") -ne $(date -d "'.(7*$weeks).'days" +"\%m") ] && ';
+        }
+        my $day;
+        $day = 1 if $d eq 'Monday';
+        $day = 2 if $d eq 'Tuesday';
+        $day = 3 if $d eq 'Wednesday';
+        $day = 4 if $d eq 'Thursday';
+        $day = 5 if $d eq 'Friday';
+        $day = 6 if $d eq 'Saturday';
+        $day = 0 if $d eq 'Sunday';
+        $cron = sprintf("% 2s % 2s *  *  % 2s %s", $cr->{'minute'}, $cr->{'hour'}, $day, $daycheck);
+    }
     elsif($cr->{'type'} eq 'cust') {
         my @tst = split/\s+/mx, $cr->{'cust'};
         if(scalar @tst == 5) {
@@ -1573,6 +1709,7 @@ sub set_user {
     $c->stash->{'remote_user'} = $username;
     $c->authenticate({});
     $c->stash->{'remote_user'}= $c->user->get('username');
+    set_dynamic_roles($c);
     return;
 }
 
@@ -1588,12 +1725,14 @@ switch real user and groups
 =cut
 
 sub switch_realuser {
+    ## no critic
     if($< != $>) {
         $< = $> or confess("setuid failed: ".$!);
     }
     if($) != $() {
         $( = $) or confess("setgid failed: ".$!);
     }
+    ## use critic
     return;
 }
 
@@ -1610,7 +1749,7 @@ check and write pid file if none exists
 sub check_pid_file {
     my($c) = @_;
     my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI' and ! -f $pidfile) {
+    if(defined $ENV{'THRUK_SRC'} && $ENV{'THRUK_SRC'} eq 'FastCGI' && ! -f $pidfile) {
         open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
         Thruk::Utils::IO::close($fh, $pidfile);
@@ -1631,13 +1770,22 @@ restart fcgi process and redirects to given page
 sub restart_later {
     my($c, $redirect) = @_;
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        my $pid = $$;
-        system("sleep 1 && kill -HUP $pid &");
-        Thruk::Utils::append_message($c, 'Thruk has been restarted.');
-        return $c->response->redirect($c->stash->{'url_prefix'}.'thruk/startup.html?wait#'.$redirect);
+        my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
+        if(-f $pidfile) {
+            my $pids = [split(/\s/mx, read_file($pidfile))];
+            for my $pid (@{$pids}) {
+                next unless($pid and $pid =~ m/^\d+$/mx);
+                system("sleep 1 && kill -HUP $pid &");
+            }
+        } else {
+            my $pid = $$;
+            system("sleep 1 && kill -HUP $pid &");
+        }
+        Thruk::Utils::append_message($c, ' Thruk has been restarted.');
+        return $c->redirect_to($c->stash->{'url_prefix'}.'startup.html?wait#'.$redirect);
     } else {
-        Thruk::Utils::append_message($c, 'Changes take effect after Restart.');
-        return $c->response->redirect($redirect);
+        Thruk::Utils::append_message($c, ' Changes take effect after Restart.');
+        return $c->redirect_to($redirect);
     }
     return;
 }
@@ -1647,26 +1795,70 @@ sub restart_later {
 
 =head2 wait_after_reload
 
-  wait_after_reload($c)
+  wait_after_reload($c, [$backend], [$timestamp])
 
-wait up to 30 seconds till the core responds
+wait up to 60 seconds till the core responds
 
 =cut
 
 sub wait_after_reload {
-    my($c) = @_;
+    my($c, $pkey, $time) = @_;
+    $pkey = $c->stash->{'param_backend'} unless $pkey;
+    if(!$pkey && !$time) { sleep 5; }
 
     # wait until core responds again
-    for(1..30) {
-        sleep(1);
+    my $start    = time();
+    my $procinfo = {};
+    my $done     = 0;
+    while($start > time() - 60) {
+        $procinfo = {};
         eval {
-            local $SIG{'PIPE'}='IGNORE'; # exits sometimes on reload
+            local $SIG{ALRM}   = sub { die "alarm\n" };
+            local $SIG{'PIPE'} = sub { die "pipe error\n" };
+            alarm(10);
             $c->{'db'}->reset_failed_backends();
-            $c->{'db'}->get_processinfo();
+            $procinfo = $c->{'db'}->get_processinfo(backend => $pkey);
         };
-        if(!$@ and !defined $c->{'stash'}->{'failed_backends'}->{$c->stash->{'param_backend'}}) {
+        alarm(0);
+        if($@) {
+            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$@);
+        }
+        elsif($pkey && $c->stash->{'failed_backends'}->{$pkey}) {
+            $c->log->debug('still waiting for core reload for '.(time()-$start).'s: '.$c->stash->{'failed_backends'}->{$pkey});
+        }
+        elsif($pkey and $time) {
+            # not yet restarted
+            if($procinfo and $procinfo->{$pkey} and $procinfo->{$pkey}->{'program_start'} and $procinfo->{$pkey}->{'program_start'} < $time) {
+                $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
+            } else {
+                $done = 1;
+                last;
+            }
+        }
+        elsif($time) {
+            my $newest_core = 0;
+            if($procinfo) {
+                for my $key (keys %{$procinfo}) {
+                    if($procinfo->{$key}->{'program_start'} > $newest_core) { $newest_core = $procinfo->{$key}->{'program_start'}; }
+                }
+                if($newest_core > $time) {
+                    $done = 1;
+                    last;
+                } else {
+                    $c->log->debug('still waiting for core reload for '.(time()-$start).'s, last restart: '.(scalar localtime($newest_core)));
+                }
+            }
+        } else {
+            $done = 1;
             last;
         }
+        sleep(1);
+    }
+    if($done) {
+        # clean up cached groups which may have changed
+        $c->cache->clear();
+    } else {
+        $c->log->error('waiting for core reload failed');
     }
     return;
 }
@@ -1694,10 +1886,11 @@ sub get_cron_entries_from_param {
             my $cust = $params->{'send_cust_'.$x} || '';
             push @{$cron_entries}, {
                 'type'      => $type,
-                'hour'      => $params->{'send_hour_'.$x},
-                'minute'    => $params->{'send_minute_'.$x},
+                'hour'      => defined $params->{'send_hour_'.$x}     ? $params->{'send_hour_'.$x}     : '',
+                'minute'    => defined $params->{'send_minute_'.$x}   ? $params->{'send_minute_'.$x}   : '',
                 'week_day'  => join(',', @weekdays),
-                'day'       => $params->{'send_day_'.$x},
+                'day'       => defined $params->{'send_day_'.$x}      ? $params->{'send_day_'.$x}      : '',
+                'month_day' => defined $params->{'send_monthday_'.$x} ? $params->{'send_monthday_'.$x} : '',
                 'cust'      => $cust,
             };
         }
@@ -1718,49 +1911,94 @@ return data for datafile
 sub read_data_file {
     my($filename) = @_;
 
+    # just wrap the json writer and keep the rest to read old data files
+    my $res;
+    eval {
+        $res = Thruk::Utils::IO::json_lock_retrieve($filename);
+    };
+    if(!$@ && $res) {
+        return($res);
+    }
+
+    # REMOVE AFTER: 01.01.2018
     my $cont = read_file($filename);
-    if($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
+    $cont = Thruk::Utils::IO::untaint($cont);
 
     # ensure right encoding
-    $cont = decode_any($cont);
+    decode_any($cont);
 
     $cont =~ s/^\$VAR1\ =\ //mx;
 
     # replace broken escape sequences
     $cont =~ s/\\x\{[\w]{5,}\}/\x{fffd}/gmxi;
 
-    my $data;
+    # replace broken JSON::PP::Boolean
+    $cont =~ s/JSON::PP::/JSON::XS::/gmx;
+
+    my $VAR1;
     ## no critic
-    eval('$data = '.$cont.';');
+    eval('$VAR1 = '.$cont.';');
     ## use critic
 
     warn($@) if $@;
 
-    return $data;
+    return $VAR1;
 }
 
 ##############################################
 
 =head2 write_data_file
 
-  write_data_file($filename, $data)
+  write_data_file($filename, $data, [$changed_only])
 
 write data to datafile
 
 =cut
 
 sub write_data_file {
-    my($filename, $data) = @_;
+    my($filename, $data, $changed_only) = @_;
 
-    # make data::dumper save utf-8 directly
-    local $Data::Dumper::Useqq = 1;
+    # store new data files in json format
+    return(Thruk::Utils::IO::json_lock_store($filename, $data, 1, $changed_only));
+}
 
-    my $d = Dumper($data);
-    $d    =~ s/^\$VAR1\ =\ //mx;
-    $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>:encoding(UTF-8)', $filename) or confess('cannot write to '.$filename.": ".$!);
-    print $fh $d;
-    Thruk::Utils::IO::close($fh, $filename);
+##############################################
+
+=head2 backup_data_file
+
+  backup_data_file($filename, $mode, $max_backups, [$save_interval], [$force])
+
+write data to datafile
+
+=cut
+
+sub backup_data_file {
+    my($filename, $mode, $max_backups, $save_interval, $force) = @_;
+
+    my @backups     = sort glob($filename.'.*.'.$mode);
+    @backups        = grep(!/\.runtime$/mx, @backups);
+    my $num         = scalar @backups;
+    my $last_backup = $backups[$num-1];
+    my $now         = time();
+
+    if($save_interval && $last_backup && $last_backup =~ m/\.(\d+)\.\w$/mx) {
+        my $ts = $1;
+        if($save_interval > $now - $ts) {
+            return;
+        }
+    }
+
+    my $old_md5 = $last_backup ? md5_hex(read_file($last_backup)) : '';
+    my $new_md5 = md5_hex(read_file($filename));
+    if($force || $new_md5 ne $old_md5) {
+        copy($filename, $filename.'.'.$now.'.'.$mode);
+
+        # cleanup old backups
+        while($num > $max_backups) {
+            unlink(shift(@backups));
+            $num--;
+        }
+    }
 
     return;
 }
@@ -1774,10 +2012,43 @@ read and decode string from either utf-8 or iso-8859-1
 =cut
 sub decode_any {
     eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
-    if ( $@ ) { # input was not utf8
+    if($@) { # input was not utf8
+        return($_[0]) if $@ =~ m/\QCannot decode string with wide characters\E/mxo; # since Encode.pm 2.53 decode_utf8 no longer noops when utf8 is already on
         $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
     }
     return $_[0];
+}
+
+########################################
+
+=head2 ensure_utf8
+
+    ensure_utf8($str)
+
+makes sure the given string is utf8
+
+=cut
+sub ensure_utf8 {
+    $_[0] = decode_any($_[0]);
+    return($_[0]) if is_utf8($_[0]); # since Encode.pm 2.53 decode_utf8 no longer noops when utf8 is already on
+    return(encode_utf8($_[0]));
+}
+
+########################################
+
+=head2 which
+
+    which($prog)
+
+returns path to program or undef
+
+=cut
+sub which {
+    my($prog) = @_;
+    my $path = `which $prog 2>/dev/null`;
+    return unless $path;
+    chomp($path);
+    return($path);
 }
 
 ########################################
@@ -1824,7 +2095,7 @@ return variable defined from template
 =cut
 
 sub get_template_variable {
-    my($c, $template, $var, $stash) = @_;
+    my($c, $template, $var, $stash, $noerror) = @_;
 
     # more stash variables to set?
     $stash = {} unless defined $stash;
@@ -1836,9 +2107,10 @@ sub get_template_variable {
     $c->stash->{'var'}   = $var;
     my $data;
     eval {
-        $data = $c->view('TT')->render($c, 'get_variable.tt');
+        Thruk::Views::ToolkitRenderer::render($c, 'get_variable.tt', undef, \$data);
     };
     if($@) {
+        return "" if $noerror;
         Thruk::Utils::CLI::_error($@);
         return $c->detach('/error/index/13');
     }
@@ -1848,25 +2120,6 @@ sub get_template_variable {
     eval($data);
     ## use critic
     return $VAR1;
-}
-
-########################################
-
-=head2 format_response_error
-
-  format_response_error($response)
-
-return error from response object
-
-=cut
-
-sub format_response_error {
-    my($response) = @_;
-    if(defined $response) {
-        return $response->code().': '.$response->message();
-    } else {
-        return Dumper($response);
-    }
 }
 
 ##############################################
@@ -1881,18 +2134,24 @@ precompile and load templates into memory
 
 sub precompile_templates {
     my($c) = @_;
+    return if $c->config->{'precompile_templates'} == 2;
     my $t0 = [gettimeofday];
-    my $num      = 0;
-    my @includes = (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'});
+    my @includes;
+    push @includes, @{$c->config->{templates_paths}} if $c->config->{templates_paths};
+    push @includes, $c->config->{'View::TT'}->{'INCLUDE_PATH'} if $c->config->{'View::TT'}->{'INCLUDE_PATH'};
     my $uniq     = {};
     for my $path (@includes) {
+        next unless -d $path;
         my $files = find_files($path, '\.tt$');
         for my $file (@{$files}) {
             $file =~ s|^$path/||gmx;
             $uniq->{$file} = 1;
-            $num++;
         }
     }
+
+    # no backends required
+    $c->{'db'}->disable_backends() if $c->{'db'};
+
     my $stderr_output;
     # First, save away STDERR
     open my $savestderr, ">&STDERR";
@@ -1901,22 +2160,32 @@ sub precompile_templates {
         close STDERR;
         open(STDERR, ">", \$stderr_output);
     };
+    $c->log->error($@) if $@;
 
+    my $num = 0;
     for my $file (keys %{$uniq}) {
+        next if $file eq 'error.tt';
+        next if $file =~ m|^cmd/cmd_typ_|mx;
         eval {
             $c->view("TT")->render($c, $file);
         };
+        $num++;
     }
     # Now close and restore STDERR to original condition.
     eval {
         # breaks on fastcgi server with strange error
         close STDERR;
+        ## no critic
         open STDERR, ">&".$savestderr;
+        ## use critic
     };
+    $c->log->error($@) if $@;
 
-    $c->config->{'precompile_templates'} = 0;
+    $c->config->{'precompile_templates'} = 2;
     my $elapsed = tv_interval ( $t0 );
-    return sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
+    my $result = sprintf("%s templates precompiled in %.2fs\n", $num, $elapsed);
+    $c->log->info($result) if(!defined $ENV{'THRUK_SRC'} || ($ENV{'THRUK_SRC'} ne 'CLI' and $ENV{'THRUK_SRC'} ne 'SCRIPTS'));
+    return $result;
 }
 
 ##########################################################
@@ -1963,27 +2232,6 @@ sub find_files {
 
 ##########################################################
 
-=head2 save_logs_to_tempfile
-
-  save_logs_to_tempfile($logs)
-
-save logfiles to tempfile
-
-=cut
-
-sub save_logs_to_tempfile {
-    my($data) = @_;
-    my($fh, $filename) = tempfile();
-    open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
-    for my $r (@{$data}) {
-        print $fh encode_utf8($r->{'message'}),"\n";
-    }
-    Thruk::Utils::IO::close($fh, $filename);
-    return($filename);
-}
-
-##########################################################
-
 =head2 beautify_diff
 
   beautify_diff($text)
@@ -2006,29 +2254,111 @@ sub beautify_diff {
 
 ##########################################################
 
-=head2 get_memory_usage
+=head2 check_memory_usage
 
-  get_memory_usage([$pid])
+  check_memory_usage($c)
 
-return memory usage of pid or own process if no pid specified
+check if memory limit is above the threshold
 
 =cut
 
-sub get_memory_usage {
-    my($pid) = @_;
-    $pid = $$ unless defined $pid;
-
-    my $rsize;
-    open(my $ph, '-|', "ps -p $pid -o rss") or die("ps failed: $!");
-    while(my $line = <$ph>) {
-        if($line =~ m/(\d+)/mx) {
-            $rsize = sprintf("%.2f", $1/1024);
-        }
+sub check_memory_usage {
+    my($c) = @_;
+    my $mem = Thruk::Backend::Pool::get_memory_usage();
+    $c->log->debug("checking memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+    if($mem > $c->config->{'max_process_memory'}) {
+        $c->log->debug("exiting process due to memory limit: ".$mem.' (limit: '.$c->config->{'max_process_memory'}.')');
+        $c->env->{'psgix.harakiri.commit'} = 1;
+        kill(15, $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
     }
-    CORE::close($ph);
-    return($rsize);
+    return;
 }
 
+##########################################################
+
+=head2 base_folder
+
+    base_folder($c)
+
+return base etc folder
+
+=cut
+sub base_folder {
+    my($c) = @_;
+    if($ENV{'THRUK_CONFIG'}) {
+        return($ENV{'THRUK_CONFIG'});
+    }
+    return($c->config->{'home'});
+}
+
+########################################
+
+=head2 is_post
+
+    is_post($c)
+
+make sure this is a post request
+
+=cut
+sub is_post {
+    my($c) = @_;
+    return(1) if $c->req->method eq 'POST';
+    $c->log->error("insecure request, post method required: ".Dumper($c->req));
+    $c->detach('/error/index/24');
+    return;
+}
+
+########################################
+
+=head2 check_csrf
+
+    check_csrf($c)
+
+ensure valid cross site request forgery token
+
+=cut
+sub check_csrf {
+    my($c) = @_;
+    return 1 if($ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI');
+    return unless is_post($c);
+    for my $addr (@{$c->config->{'csrf_allowed_hosts'}}) {
+        return 1 if $c->req->address eq $addr;
+        if(CORE::index( $addr, '*' ) >= 0) {
+            # convert wildcards into real regexp
+            my $search = $addr;
+            $search =~ s/\.\*/*/gmx;
+            $search =~ s/\*/.*/gmx;
+            return 1 if $c->req->address =~ m/$search/mx;
+        }
+    }
+    my $post_token  = $c->req->parameters->{'token'};
+    my $valid_token = Thruk::Utils::Filter::get_user_token($c);
+    if($valid_token and $post_token and $valid_token eq $post_token) {
+        return(1);
+    }
+    $c->log->error("possible csrf, no or invalid token: ".Dumper($c->req));
+    $c->detach('/error/index/24');
+    return;
+}
+
+
+########################################
+
+=head2 get_plugin_name
+
+    get_plugin_name(__FILE__, __PACKAGE__)
+
+returns the name of the plugin
+
+=cut
+sub get_plugin_name {
+    my($file, $pkg) = @_;
+    $pkg =~ s|::|/|gmx;
+    $pkg .= '.pm';
+    $file =~ s|/lib/\Q$pkg\E$||gmx;
+    $file =~ s|^.*/||gmx;
+    return($file);
+}
 
 ########################################
 sub _initialassumedservicestate_to_state {
@@ -2054,14 +2384,19 @@ sub _parse_date {
         $timestamp = $1;
     }
 
-    # real date?
-    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{12})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+    # real date (YYYY-MM-DD HH:MM:SS)
+    elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
 
-    # real date without seconds?
+    # real date without seconds (YYYY-MM-DD HH:MM)
     elsif($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,0);
+    }
+
+    # US date format (MM-DD-YYYY HH:MM:SS)
+    elsif($string =~ m/(\d{1,2})\-(\d{1,2})\-(\d{2,4})\ (\d{1,2}):(\d{1,2}):(\d{1,2})/mx) {
+        $timestamp = Mktime($3,$1,$2, $4,$5,$6);
     }
 
     # everything else
@@ -2070,7 +2405,7 @@ sub _parse_date {
         require Date::Manip;
         Date::Manip->import(qw/UnixDate/);
         $timestamp = UnixDate($string, '%s');
-        $c->log->debug("not a valid date: ".$string);
+        $c->log->debug("not a valid date: ".$string) if $c;
         if(!defined $timestamp) {
             return;
         }
@@ -2078,34 +2413,15 @@ sub _parse_date {
     return $timestamp;
 }
 
-##########################################################
-# return default recurring downtime
-sub _get_default_recurring_downtime {
-    my($c, $host, $service, $hostgroup, $servicegroup) = @_;
-    my $default_rd = {
-            target       => 'service',
-            host         => $host,
-            service      => $service,
-            servicegroup => $service,
-            hostgroup    => $hostgroup,
-            backends     => $c->{'db'}->peer_key(),
-            schedule     => [],
-            duration     => 120,
-            comment      => 'automatic downtime',
-            childoptions => 0,
-            fixed        => 1,
-            flex_range   => 720,
-    };
-    return($default_rd);
-}
-
 ##############################################
 
 1;
 
+__END__
+
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

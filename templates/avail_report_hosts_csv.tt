@@ -1,54 +1,54 @@
 ﻿HOST_NAME, TIME_UP_SCHEDULED, PERCENT_TIME_UP_SCHEDULED, PERCENT_KNOWN_TIME_UP_SCHEDULED, TIME_UP_UNSCHEDULED, PERCENT_TIME_UP_UNSCHEDULED, PERCENT_KNOWN_TIME_UP_UNSCHEDULED, TOTAL_TIME_UP, PERCENT_TOTAL_TIME_UP, PERCENT_KNOWN_TIME_UP, TIME_DOWN_SCHEDULED, PERCENT_TIME_DOWN_SCHEDULED, PERCENT_KNOWN_TIME_DOWN_SCHEDULED, TIME_DOWN_UNSCHEDULED, PERCENT_TIME_DOWN_UNSCHEDULED, PERCENT_KNOWN_TIME_DOWN_UNSCHEDULED, TOTAL_TIME_DOWN, PERCENT_TOTAL_TIME_DOWN, PERCENT_KNOWN_TIME_DOWN, TIME_UNREACHABLE_SCHEDULED, PERCENT_TIME_UNREACHABLE_SCHEDULED, PERCENT_KNOWN_TIME_UNREACHABLE_SCHEDULED, TIME_UNREACHABLE_UNSCHEDULED, PERCENT_TIME_UNREACHABLE_UNSCHEDULED, PERCENT_KNOWN_TIME_UNREACHABLE_UNSCHEDULED, TOTAL_TIME_UNREACHABLE, PERCENT_TOTAL_TIME_UNREACHABLE, PERCENT_KNOWN_TIME_UNREACHABLE, TIME_UNDETERMINED_NOT_RUNNING, PERCENT_TIME_UNDETERMINED_NOT_RUNNING, TIME_UNDETERMINED_NO_DATA, PERCENT_TIME_UNDETERMINED_NO_DATA, TOTAL_TIME_UNDETERMINED, PERCENT_TOTAL_TIME_UNDETERMINED
 
-[% FOR host IN hosts.keys.sort %]
-[% SET
+[%- FOR host IN hosts.keys.sort -%]
+[%- SET
     total_time_unknown =
           avail_data.hosts.$host.time_indeterminate_nodata
         + avail_data.hosts.$host.time_indeterminate_notrunning
-%]
-[% SET
+-%]
+[%- SET
     total_time =
            avail_data.hosts.$host.time_up
         + avail_data.hosts.$host.time_down
         + avail_data.hosts.$host.time_unreachable
         + avail_data.hosts.$host.time_indeterminate_nodata
         + avail_data.hosts.$host.time_indeterminate_notrunning
-%]
-[% SET
+-%]
+[%- SET
     total_time_known = total_time - total_time_unknown
-%]
+-%]
 "[% host %]",
-[% space %][% avail_data.hosts.$host.scheduled_time_up %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_up %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.scheduled_time_down %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_down %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.scheduled_time_unreachable %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_unreachable %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_indeterminate_notrunning %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.hosts.$host.time_indeterminate_nodata %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% total_time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]
+[%- space %][% avail_data.hosts.$host.scheduled_time_up %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_up - avail_data.hosts.$host.scheduled_time_up) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_up %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_up / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.scheduled_time_down %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_down - avail_data.hosts.$host.scheduled_time_down) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_down %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_down / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.scheduled_time_unreachable %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.scheduled_time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.hosts.$host.time_unreachable - avail_data.hosts.$host.scheduled_time_unreachable) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_unreachable %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_unreachable / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_indeterminate_notrunning %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.hosts.$host.time_indeterminate_nodata %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.hosts.$host.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% total_time_unknown %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]
 [%+ END %]

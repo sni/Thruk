@@ -1,4 +1,5 @@
-﻿[% WRAPPER _conf_frame.tt %]
+﻿[% show_context_help = 1; c.stash.help_topic = 'http://www.thruk.org/documentation.html#_backend_configuration'; %]
+[% WRAPPER _conf_frame.tt %]
 
 <div align="center">
 <form action="conf.cgi" method="POST">
@@ -6,6 +7,7 @@
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="action" value="save">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
 Note: some options are not accessible here for security reasons.
 [% IF readonly %]
 <br><div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
@@ -15,14 +17,14 @@ Note: some options are not accessible here for security reasons.
     <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
   </tr>
   [% x = 0 %]
-  [% FOREACH b = sites %]
+  [% FOREACH b = conf_sites %]
   [% x = x + 1 %]
   [% PROCESS _conf_backends_backend.tt %]
   [% END %]
   <tr class="backend_conf_0_add">
     <td colspan=3 style="text-align:left;">
       <a href="#" onclick="conf_sites_add(); return false;">
-        <img src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
+        <img src="[% url_prefix %]themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
         add new connection
       </a>
     </td>
@@ -37,6 +39,7 @@ Note: some options are not accessible here for security reasons.
 </form>
 </div>
 
+<img src="[% url_prefix %]themes/[% theme %]/images/error.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 <script type="text/javascript">
 <!--
   function conf_sites_add_hide() {
@@ -83,6 +86,7 @@ Note: some options are not accessible here for security reasons.
     }
     img.title = 'checking connection...';
     showElement(img);
+    jQuery('#thruk_message').remove();
 
     jQuery.ajax({
         url:  'conf.cgi',
@@ -93,21 +97,25 @@ Note: some options are not accessible here for security reasons.
                 type:         typ,
                 auth:         auth,
                 proxy:        proxy,
-                remote_name:  remote_name
+                remote_name:  remote_name,
+                token:        user_token
         },
         type: 'POST',
         cache: false,
         success: function(data) {
           if(data.ok == 1) {
-            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/accept.png';
+            img.src   = '[% url_prefix %]themes/[% theme %]/images/accept.png';
             img.title = 'connection test successful';
           } else {
-            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+            img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
             img.title = data.error;
+            thruk_message(1, data.error + ' ('+peer+')');
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+          img.src   = '[% url_prefix %]themes/[% theme %]/images/error.png';
+          img.title = 'connection test unknown';
+          thruk_message(1, 'connection test unknown: - ' + jqXHR.status + ' ' + errorThrown);
         }
     });
   }
@@ -138,7 +146,7 @@ Note: some options are not accessible here for security reasons.
   }
 
   [% x = 0 %]
-  [% FOREACH b = sites %]
+  [% FOREACH b = conf_sites %]
   [% x = x + 1 +%]
   var sel = document.getElementById('sel_type[% x %]');
   check_backends_config(sel);

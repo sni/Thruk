@@ -47,12 +47,13 @@ fi
 
 ################################
 # execute script as $EXECUSER if the user is root
+USER=$(whoami)
 if [ $(id -u) = "0" ];then
   SCRIPT=`readlink -f $0`
   su - $EXECUSER -c "$SCRIPT $*"
   exit $?
 elif [ "$USER" != "$EXECUSER" ];then
-    echo "wrong user, please use either user $EXECUSER or root"
+    echo "wrong user, please use either user $EXECUSER or root, this is $USER."
     failure "$prog start"
     exit 1
 fi
@@ -77,7 +78,7 @@ start() {
     echo -n $"Starting"
     touch ${LOGFILE}
     echo -n "["`date +"%Y-%m-%d %H:%M:%S"`"] " >> ${LOGFILE}
-    cd ${EXECDIR} && PM_MAX_REQUESTS=100 ./script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -M FCGI::ProcManager::MaxRequestsThruk -d >> ${LOGFILE} 2>&1 &
+    cd ${EXECDIR} && PM_MAX_REQUESTS=100 ./script/thruk_server.pl --no-default-middleware -s FCGI -nproc ${PROCS} -l ${SOCKET} --pid ${PID} -D >> ${LOGFILE} 2>&1 &
     for i in 1 2 3 4 5 6 7 8 9 0; do
       if [ -f $PID ]; then break; fi
       echo -n '.' && sleep 1;

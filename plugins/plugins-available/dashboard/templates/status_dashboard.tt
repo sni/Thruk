@@ -18,7 +18,7 @@
 ################################################################
 -->
 [% dashboard_header = BLOCK %]
-<link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/dashboard/thruk/stylesheets/dashboard.css' />
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/dashboard/thruk/stylesheets/dashboard.css' />
 [% END %]
 [% PROCESS _header.tt extra_header => dashboard_header %]
 [% PROCESS _message.tt %]
@@ -65,7 +65,7 @@
         <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom">
           [% IF show_context_help %]
-          <br><a href='[% url_prefix %]thruk/docs/status_overview' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='[% url_prefix %]docs/status_overview' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
@@ -140,12 +140,12 @@
                     <td class='dashboard_group'>
                         <table class='info_dashboard'>
                             <tr>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/recovery.png' border="0" width="20" height="20" alt='OK Services' title='OK Services'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/warning.png' border="0" width="20" height="20" alt='Warning Services' title='Warning Services'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/critical.png' border="0" width="20" height="20" alt='Critical Services' title='Critical Services'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/unknown.png' border="0" width="20" height="20" alt='Unknow Services' title='Unknow Services'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" width="20" height="20" alt='Acknowledged Services' title='Acknowledged Services'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" width="20" height="20" alt='Scheduled Services' title='Scheduled Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/recovery.png' border="0" width="20" height="20" alt='OK Services' title='OK Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/warning.png' border="0" width="20" height="20" alt='Warning Services' title='Warning Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/critical.png' border="0" width="20" height="20" alt='Critical Services' title='Critical Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/unknown.png' border="0" width="20" height="20" alt='Unknow Services' title='Unknow Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/ack.gif' border="0" width="20" height="20" alt='Acknowledged Services' title='Acknowledged Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" width="20" height="20" alt='Scheduled Services' title='Scheduled Services'></td>
                             </tr>
                                 <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=2&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.ok %]</a></td>
                                 <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=4&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.warning %]</a></td>
@@ -156,12 +156,12 @@
                             <tr>
                             </tr>
                             <tr>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ok.png' border="0" width="20" height="20" alt='OK Hosts' title='OK Hosts'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_warning.png' border="0" width="20" height="20" alt='Warning Hosts' title='Warning Hosts'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_error.png' border="0" width="20" height="20" alt='Critical Hosts' title='Critical Hosts'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_unknown.png' border="0" width="20" height="20" alt='Unknow Hosts' title='Unknow Hosts'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ack.png' border="0" width="20" height="20" alt='Acknowledged Hosts' title='Acknowledged Hosts'></td>
-                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_downtime.png' border="0" width="20" height="20" alt='Scheduled Hosts' title='Scheduled Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_ok.png' border="0" width="20" height="20" alt='OK Hosts' title='OK Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_warning.png' border="0" width="20" height="20" alt='Warning Hosts' title='Warning Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_error.png' border="0" width="20" height="20" alt='Critical Hosts' title='Critical Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_unknown.png' border="0" width="20" height="20" alt='Unknow Hosts' title='Unknow Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_ack.png' border="0" width="20" height="20" alt='Acknowledged Hosts' title='Acknowledged Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]plugins/dashboard/thruk/images/server_downtime.png' border="0" width="20" height="20" alt='Scheduled Hosts' title='Scheduled Hosts'></td>
                             </tr>
                             <tr>
                                 <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=2&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.up %]</a></td>

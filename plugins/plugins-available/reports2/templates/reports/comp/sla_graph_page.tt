@@ -1,4 +1,5 @@
-﻿[% available = get_availability_percents() %]
+﻿[% IF !param.exists("max_pnp_sources") %][% param.max_pnp_sources = 1 %][% END %]
+[% available = get_availability_percents() %]
 [% IF available.keys.size < 15 %]
   [% PROCESS 'reports/comp/sla_graph_fixed.tt' data = available %]
   [% PROCESS 'reports/comp/sla_table.tt' %]
@@ -7,9 +8,11 @@
 [% END %]
 [% PROCESS 'reports/comp/sla_total_table.tt' data = available.total %]
 
-[% pnpdata = get_pnp_image(c.request.parameters.host, c.request.parameters.service, start, end, 400, 100) %]
-[% IF pnpdata %]
-<div align="center">
-  <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
-</div>
+[% IF param.max_pnp_sources >= 1 %]
+  [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, 0) %]
+  [% IF pnpdata %]
+  <div align="center">
+    <img src="[% pnpdata %]" class="pnpimage" alt="pnp graph">
+  </div>
+  [% END %]
 [% END %]

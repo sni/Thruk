@@ -16,8 +16,7 @@
   </tr>
   <tr>
     [% FOREACH val = available.values %]
-    [% format = '%0.' _ param.decimals _ 'f' %]
-    [% value  = sprintf(format, val.1) %]
+    [% value = round_decimals(val.1, param.decimals) %]
     <td class="[% IF value < param.sla %]sla_nok[% END %]">[% IF val.1 == -1 %]&nbsp;[% ELSE %][% value %]%[% END %]</td>
     [% END %]
   </tr>

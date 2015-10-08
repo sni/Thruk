@@ -32,6 +32,10 @@ html, body {
     padding:7px;
 }
 
+.tip .tip-icon {
+       float: right;
+}
+
 DIV.hostPENDING, SPAN.hostPENDING {
   font-weight: normal;
   font-size:10px;

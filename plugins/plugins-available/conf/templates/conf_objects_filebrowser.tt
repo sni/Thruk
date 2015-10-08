@@ -3,12 +3,13 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="path" value="/" id="path">
-<table border="0" class='data conftoolobj' width="500">
+<input type="hidden" name="token" value="[% get_user_token(c) %]">
+<table border="0" class='data conftoolobj'>
   <tr>
     <th class='data'>Filesystem</th>
   </tr>
   <tr>
-    <td class="dataVar" style="text-align: center"><input type="text" class="deletable" style="width:95%; margin-top: 5px;" onchange="set_browser_filter(this.value)" onkeyup="set_browser_filter(this.value)" onfocus="set_browser_filter(this.value)"></td>
+    <td class="dataVar" style="text-align: center"><input type="text" class="deletable" onchange="set_browser_filter(this.value)" onkeyup="set_browser_filter(this.value)" onfocus="set_browser_filter(this.value)" placeholder="filter"></td>
   </tr>
   <tr>
     <td class="dataVar" id="filepath"></td>
@@ -19,7 +20,7 @@
   <tr>
     <td align="left">
       <hr>
-      select <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', false); return false;">none</a>
+      select <a href="#" onclick="jQuery('INPUT[name=files]').prop('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').prop('checked', false); return false;">none</a>
       <select name="action" onChange="jQuery('#path').attr('value', location.hash); this.form.submit()">
         <option>--- please select action ---</option>
         <option value="deletefiles">delete selected files</option>
@@ -118,7 +119,7 @@
         html += "<li>";
         html += "<input type='checkbox' name='files' value='"+ path +"' class='obj_browse_box'>";
         html += "<a href='#"+ path +"' onclick='setdir(\""+ path +"\")'>";
-        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/"+icon+"' border='0' alt='folder' title='folder' width='16' height='16'> ";
+        html += "<img src='" + url_prefix + "themes/" + theme + "/images/"+icon+"' border='0' alt='folder' title='folder' width='16' height='16'> ";
         html += "<div class='obj_browse_name'>" + name + "<\/div>";
         html += "<div class='obj_browse_date'>"+ date + "<\/div>";
         html += "<\/a>";
@@ -140,7 +141,7 @@
         html += "<li>";
         html += "<input type='checkbox' name='files' value='"+ path + name +"' class='obj_browse_box'>";
         html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "' class='" + css + "'>";
-        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/" + icon + "' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
+        html += "<img src='" + url_prefix + "themes/" + theme + "/images/" + icon + "' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
         html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div>";
         html += "<div class='obj_browse_date "+ css +"'>"+ date + "<\/div>";
         html += "<\/a>";

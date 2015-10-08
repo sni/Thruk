@@ -1,0 +1,51 @@
+language: perl
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install apt-transport-https
+  - sudo sh -c "echo 'deb https://labs.consol.de/repo/stable/ubuntu precise main' >> /etc/apt/sources.list"
+  - gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7
+  - gpg --armor --export F8C1CA08A57B9ED7 | sudo apt-key add -
+  - sudo apt-get update
+  - sudo apt-get install make build-essential rsync perl-doc tofrodos libcurl4-openssl-dev apache2 libcairo2-dev libperl-dev libmysqlclient-dev libgd2-xpm-dev cpanminus yui-compressor wget
+  - sudo apt-get install libfile-bom-perl libhtml-lint-perl libtest-simple-perl libtest-cmd-perl libtest-pod-perl libmodule-install-perl libgd-gd2-perl libdevel-cycle-perl
+  - sudo apt-get install libtest-pod-coverage-perl libperl-critic-perl libtest-perl-critic-perl libtemplate-perl libdate-calc-perl liblog-log4perl-perl libconfig-general-perl
+  - sudo apt-get install libmime-lite-perl
+  - sudo apt-get install mysql-client mysql-server
+  - sudo apt-get install naemon-core naemon-livestatus
+  - sudo /etc/init.d/naemon restart
+  - perlbrew off
+  - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+  # newer version are broken when using symlinks
+  - cpanm -n http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/ExtUtils-Manifest-1.63.tar.gz
+  - cpanm -n Perl::Critic::Policy::Dynamic::NoIndirect Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData List::Compare Devel::Gladiator PadWalker Perl::Critic::Policy::Modules::ProhibitPOSIXimport
+  - sed -i '/Test::JavaScript/d' ./Makefile.PL
+  - cpanm -q -f --installdeps --notest --no-man-pages .
+  - git config --global user.email "travis@localhost"
+  - git config --global user.name "Travis Testuser"
+  - wget "http://download.thruk.org/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz" -O /tmp/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz
+  - cd /tmp/ && tar zxf wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz && mv wkhtmltopdf-amd64 wkhtmltopdf && cd -
+  - echo 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)' > ~/.thruk
+  # ensure we have a test database in place for tests
+  - mysql -e "create database IF NOT EXISTS test;" -uroot
+  # ensure we have all modules loaded
+  - if [ $(perl Makefile.PL 2>&1 | grep -c missing) -ne 0 ]; then exit 1; fi
+
+install:
+  - ./configure     || exit 1
+  - make            || exit 1
+  - cp t/travis/thruk_local.conf .
+  - sudo chmod 660 /var/cache/naemon/live
+  - sudo gpasswd -a $(id -un) naemon
+  - touch .author
+
+script:
+  - sudo su $(id -un) -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && TEST_TRAVIS=1 TEST_AUTHOR=1 TEST_MYSQL="mysql://root@localhost:3306/test" make test'
+notifications:
+  email:
+    - sven@nierlein.de
+  irc:
+    channels:
+      - "chat.freenode.net#thruk"
+    on_success: change
+    on_failure: always
+    skip_join: true

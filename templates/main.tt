@@ -1,16 +1,17 @@
 ﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
     <div id="mainbrandsplash">
-      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+      <div id="mainlogo"><a href="[% home_link %]" target="_blank"><img class="mainlogo" src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     </div>
     <div id="currentversioninfo">
       <div class="product">Thruk Monitoring Webinterface</div>
-      <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %]<br><font size="-3">OMD [% c.config.omd_version %]</font>[% END %]</div>
+      <div class="version">Version [% version %][% IF branch %]-[% branch %][% END %][% IF c.config.extra_version %]<br><font size="-3">[% c.config.extra_version %]</font>[% END %]</div>
       <div class="releasedate">[% released %]</div>
       <div class="checkforupdates">
-        <a href="http://www.thruk.org/download.html?version=[% version %]" target="_blank">Check for updates</a>
+        <a href="http://www.thruk.org/download.html?version=[% version %][% IF branch %]-[% branch %][% END %]" target="_blank">Check for updates</a>
       </div>
       <div class="whatsnew">
-        <a href="[% url_prefix %]thruk/changes.html">Read what's new in Thruk</a>
+        <a href="[% url_prefix %]changes.html">Read what's new in Thruk</a>
       </div>
     </div>
     <div id="updateversioninfo"></div>

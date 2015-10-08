@@ -1,4 +1,4 @@
-﻿<img src="[% url_prefix %]thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
+﻿<img src="[% url_prefix %]javascript/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png" alt="preloader" height=1 width=1 style="position: absolute; top: -1px;">
 
 <!-- context menu -->
 <ul id="bp_menu" style="display: none; position: absolute;">
@@ -42,29 +42,32 @@
     <tr>
       <th>Live Status</th>
       <th colspan=3 align="center">Aggregation Functions</th>
+      <th>Custom</th>
     </tr>
     <tr>
       <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host / Service" onclick="bp_select_type('status')"></td>
       <td><input type="button" class="bp_type_btn" value="Best" onclick="bp_select_type('best')"></td>
       <td><input type="button" class="bp_type_btn" value="&gt;=" onclick="bp_select_type('at_least')"></td>
       <td><input type="button" class="bp_type_btn" value="=" onclick="bp_select_type('equals')"></td>
+      <td><input type="button" class="bp_type_btn" value="Custom" onclick="bp_select_type('custom')"></td>
     </tr>
     <tr>
       <td style="border-right: 1px dotted grey;" valign="top"><input type="button" class="bp_type_btn" value="Host- / Service- group" onclick="bp_select_type('groupstatus')"></td>
       <td><input type="button" class="bp_type_btn" value="Worst" onclick="bp_select_type('worst')"></td>
       <td><input type="button" class="bp_type_btn" value="&lt;=" onclick="bp_select_type('not_more')"></td>
       <td><input type="button" class="bp_type_btn" value="Dummy" onclick="bp_select_type('fixed')"></td>
+      <td></td>
     </tr>
   </table>
 </div>
 
 
 <div id="edit_dialog_[% bp.id %]" style="display: none;">
-  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;">
+  <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;" style="height: 100%;">
   <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
   <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
 
-  <div>
+  <div style="height: 100%;">
   <ul>
     <li><a href="#tabs-1_[% bp.id %]">Type</a></li>
     <li><a href="#tabs-2_[% bp.id %]">Details</a></li>
@@ -81,18 +84,21 @@
       <tr>
         <th>Live Status</th>
         <th colspan=3 align="center">Aggregation Functions</th>
+        <th>Custom</th>
       </tr>
       <tr>
         <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_status" value="Status" onclick="bp_select_type('status')"/><label for="bp_check_status" class="bp_type_box_label">Host / Service Status</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_best" value="Best" onclick="bp_select_type('best')"/><label for="bp_check_best" class="bp_type_box_label">Best</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_at_least" value="At Least" onclick="bp_select_type('at_least')"/><label for="bp_check_at_least" class="bp_type_box_label">&gt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_equals" value="Equals" onclick="bp_select_type('equals')"/><label for="bp_check_equals" class="bp_type_box_label">=</label></td>
+        <td><input type="checkbox" class="bp_type_box" id="bp_check_custom" value="Custom" onclick="bp_select_type('custom')"/><label for="bp_check_custom" class="bp_type_box_label">Custom</label></td>
       </tr>
       <tr>
         <td style="border-right: 1px dotted grey;" valign="top"><input type="checkbox" class="bp_type_box" id="bp_check_groupstatus" value="Groupstatus" onclick="bp_select_type('groupstatus')"/><label for="bp_check_groupstatus" class="bp_type_box_label">Host- / Service- group</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_worst" value="Worst" onclick="bp_select_type('worst')"/><label for="bp_check_worst" class="bp_type_box_label">Worst</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_not_more" value="Not_More" onclick="bp_select_type('not_more')"/><label for="bp_check_not_more" class="bp_type_box_label">&lt;=</label></td>
         <td><input type="checkbox" class="bp_type_box" id="bp_check_fixed" value="Fixed" onclick="bp_select_type('fixed')"/><label for="bp_check_fixed" class="bp_type_box_label">Dummy</label></td>
+        <td></td>
       </tr>
     </table>
   </div>
@@ -106,7 +112,10 @@
 [% WRAPPER _bp_context_menu_frame.tt
     div_id='bp_select_status'
     function='status'
-    div_help='Uses status from the selected host or service.<br>The hoststatus will be used if the service is left empty.'
+    div_help='Uses status from the selected host or service.<br>'
+           _ 'The hoststatus will be used if the service is left empty.<br>'
+           _ 'Wildcards in service descriptions are possible:<br>'
+           _ 'check_* (worst), w:check_* (worst), b:check_* (best)'
 %]
 <tr>
   <th align="right">Host</th>
@@ -136,7 +145,7 @@
 </tr>
 <tr>
   <th align="right">Group</th>
-  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp', autosubmit:false })"[% END %]></td>
+  <td align="left"><input type="text" value="" id="bp_arg2_groupstatus" name="bp_arg2_groupstatus" placeholder="hostgroup"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, bp_get_type_from_groupstatus, { url: 'status.cgi?format=search&amp;', autosubmit:false })"[% END %]></td>
 </tr>
 <tr>
   <th align="right" nowrap>Hosts Warning</th>
@@ -246,19 +255,34 @@
 </tr>
 [% END %]
 
+<!-- custom type select -->
+[% WRAPPER _bp_context_menu_frame.tt
+    div_id='bp_select_custom'
+    function='custom'
+    div_help='Custom Aggregation Functions. <a href="http://thruk.org/documentation/business-process.html#custom-functions" target="_blank">See online documentation for details.</a>'
+%]
+<tr>
+  <th align="right">Custom Function</th>
+  <td align="left">
+    <select name="bp_arg1_custom" id="bp_arg1_custom" onchange="bp_update_cust_attributes(this)">
+    </select>
+  </td>
+</tr>
+[% END %]
+
   </div>
 
 
   <!-- TAB 3: CHILDREN -->
-  <div id="tabs-3_[% bp.id %]">
-  <table width="100%">
+  <div id="tabs-3_[% bp.id %]" style="height: 85%;">
+  <table width="100%" style="height: 100%;">
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">Change relationships for this node.</td>
     </tr>
     <tr>
-      <td colspan=2 align="center">
-        <table><tr><td class="filter">
-          <table style="width:100%;">
+      <td colspan=2 align="center" style="height: 100%;">
+        <table width="100%" style="height: 100%;"><tr><td class="filter">
+          <table style="width:100%; height: 100%;">
             <tr>
               <td class="attrName"><b>Available</b></td>
               <td>&nbsp;</td>
@@ -266,18 +290,18 @@
             </tr>
             <tr>
               <td class="attrName">
-                <input type="text" class="filter_available" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
+                <input type="text" class="filter_available" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_available_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_available_nodes" name="bp_[% bp.id %]_available_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true)">
                     <option disabled>loading...</option>
                 </select>
               </td>
-              <td align="center" valign="middle">
-                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true); return false;">&gt;&gt;</button><br>
-                <button class="bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
+              <td align="center" valign="middle" style="width: 42px;">
+                <button class="bp_button bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_add" onclick="data_select_move('bp_[% bp.id %]_available_nodes', 'bp_[% bp.id %]_selected_nodes', true); return false;">&gt;&gt;</button><br>
+                <button class="bp_button bp_type_btn bp_type_btn_small" id="bp_[% bp.id %]_remove" onclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes'); return false;">&lt;&lt;</button>
               </td>
-              <td class="attrName">
-                <input type="text" class="filter_selected" style="width:174px; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
-                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:174px; height:130px; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
+              <td class="attrName" style="height: 100%;">
+                <input type="text" class="filter_selected" style="width:100%; border:0; padding:0;" onkeyup="data_filter_select('bp_[% bp.id %]_selected_nodes', this.value)"><br>
+                <select multiple id="bp_[% bp.id %]_selected_nodes" name="bp_[% bp.id %]_selected_nodes" style="width:100%; height:90%; border:0;" ondblclick="data_select_move('bp_[% bp.id %]_selected_nodes', 'bp_[% bp.id %]_available_nodes')">
                     <option disabled>loading...</option>
                 </select>
               </td>
@@ -294,15 +318,23 @@
     <table width="100%">
     <tr>
       <td align="center" class="bp_type_desc" colspan=2>
-        <p>
-          Create a service for this node. The Business Process itself will be<br>
-          exported as a host object. All selected nodes will be exported as<br>
-          service objects. The nodes label will be used as object name.<br>
+        <p style="margin-top: 0px;">
+          Create a service for this node. The Business Process itself will be exported as host object.<br>
+          All selected nodes will be exported as services. The node label will be used as object name.<br>
         </p>
       </td>
     </tr>
     [% IF objects_save_file && objects_templates_file %]
-    <tr>
+    <tr class="no_supports_link">
+      <td align="center" class="bp_type_desc" colspan=2>
+        <p>
+        <span style="color: red;">Status function cannot create links!</span><br>
+          When using the status function, you already have a host or service object.<br>
+          It does not makes sense to create another one.<br>
+        </p>
+      </td>
+    </tr>
+    <tr class="supports_link">
       <th align="right" valign="top">Create Link</th>
       <td align="left">
         <input type="checkbox" name="bp_create_link" id="bp_create_link" value="1" onclick="bp_update_obj_create()" style="float: left;">
@@ -310,17 +342,59 @@
         <span class='create_obj_nok bp_type_desc' style="color: red;">Cannot create link, link with same label already exists.</span>
       </td>
     </tr>
-    <tr class="firstnode">
+    <tr class="firstnode supports_link">
       <th align="right" valign="top">Host Template</th>
       <td align="left">
         <input type="text" value="" id="bp_host_template" name="bp_host_template" placeholder="host template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'host template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
       </td>
     </tr>
-    <tr>
+    <tr class="supports_link">
       <th align="right" valign="top">Service Template</th>
       <td align="left">
         <input type="text" value="" id="bp_template" name="bp_template" placeholder="service template" class="bp_create"[% IF use_ajax_search %] onfocus="this.click()" onclick="ajax_search.init(this, 'service template', { url: 'bp.cgi?action=templates', autosubmit:false })"[% END %]>
-        [% IF use_feature_configtool %]<br><br><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a>[% END %]
+        [% IF use_feature_configtool %]<br><div style="padding-top: 2px;"><a href="conf.cgi?sub=objects&amp;action=editor&amp;file=[% objects_templates_file %]" target="_blank"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Templates' title='Edit Templates' width="16" height="16" style="vertical-align: top;"> Edit Templates</a></div>[% END %]
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top">Contact Groups</th>
+      <td align="left">
+        <input type="text" id="bp_contactgroups" name="bp_contactgroups" placeholder="contactgroup, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contactgroup', { url: 'status.cgi?format=search&amp;type=contactgroup', autosubmit:false, list: '[ ,]' })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contact groups" onclick="bpRemoveAttribute('contactgroups'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top">Contacts</th>
+      <td align="left">
+        <input type="text" id="bp_contacts" name="bp_contacts" placeholder="contact, ..." class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'contact', { url: 'status.cgi?format=search&amp;type=contact', autosubmit:false, list: '[ ,]', striped: true })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove contacts" onclick="bpRemoveAttribute('contacts'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Eventhandler</th>
+      <td align="left">
+        <input type="text" id="bp_event_handler" name="bp_event_handler" placeholder="eventhandler command"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'command', { url: 'status.cgi?format=search&amp;type=command', autosubmit:false })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove eventhandler" onclick="bpRemoveAttribute('event_handler'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Notification Period</th>
+      <td align="left">
+        <input type="text" id="bp_notification_period" name="bp_notification_period" placeholder="notification period"  class="bp_create" value="" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'timeperiod', { url: 'status.cgi?format=search&amp;type=timeperiod', autosubmit:false })"[% END %]>
+        <input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="remove notification period" onclick="bpRemoveAttribute('notification_period'); return false;">
+      </td>
+    </tr>
+    <tr class="supports_link">
+      <th align="right" valign="top" nowrap>Add Extra Options</th>
+      <td align="left">
+        <form>
+          <select>
+            <option disabled>--- add extra option ---</option>
+            <option onclick="bpAddAttribute('contactgroups');" value="contactgroups">Contact Groups</option>
+            <option onclick="bpAddAttribute('contacts');" value="contacts">Contacts</option>
+            <option onclick="bpAddAttribute('event_handler');" value="eventhander">Eventhandler</option>
+            <option onclick="bpAddAttribute('notification_period');" value="notification_period">Notification Period</option>
+          </select>
+        </form>
       </td>
     </tr>
     [% ELSE %]
@@ -363,12 +437,12 @@
           <option value="hard"[% IF bp.state_type == 'hard' %] selected[% END %]>Use Hard States Only</option>
         </select>
       </td>
+    </tr>
     <tr>
       <td align="center" colspan=2 class="bp_type_desc">
           <b>Note:</b> Hostgroup and Servicegroup aggregations will always use Hard and Soft states.<br>
           This is a limitation of the livestatus broker.
       </td>
-    </tr>
     </tr>
     <tr>
       <td colspan=2><hr></td>
@@ -380,8 +454,8 @@
       <td width=120>Direction</td>
       <td align="left">
         <select onchange="bp_redraw_changed('bp_rankDir', this.value)" name="bp_rankDir">
-          <option value="TB">Top-Bottom</option>
-          <option value="LR">Left Right</option>
+          <option value="TB"[% IF bp.rankDir == 'TB' %] selected[% END %]>Top-Bottom</option>
+          <option value="LR"[% IF bp.rankDir == 'LR' %] selected[% END %]>Left Right</option>
         </select>
       </td>
     </tr>

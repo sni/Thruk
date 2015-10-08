@@ -384,6 +384,11 @@ body.summary table.data {
   background-color: white;
 }
 
+/* simple table row hover */
+.hoverTable tr:not(:first-child):hover {
+  background-color: #DBDBDB;
+}
+
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
   cursor: pointer;
@@ -489,6 +494,10 @@ div.thruk_message table {
   padding: 1px 1px 1px 1px;
   margin-bottom: 0px;
   margin-left: 3px;
+}
+
+.alerttext {
+  color: #b94a48;
 }
 
 /* show log filter */
@@ -817,11 +826,12 @@ DIV#progressbar .ui-progressbar-value {
 
 SPAN.deleteicon {
   position: relative;
+  display: inline-block;
 }
 SPAN.deleteicon SPAN {
   position: absolute;
   display: block;
-  top: -1px;
+  top: 4px;
   right: 5px;
   width: 14px;
   height: 14px;
@@ -880,6 +890,18 @@ SPAN.deleteicon INPUT {
 }
 .ui-delete-button {
   background-image: url(../images/delete.gif) !important;
+}
+.ui-refresh-button {
+  background-image: url(../images/arrow_refresh.png) !important;
+}
+.ui-email-button {
+  background-image: url(../images/email_attach.png) !important;
+}
+.ui-waiting-button {
+  background-image: url(../images/loading-icon.gif) !important;
+}
+.ui-error-button {
+  background-image: url(../images/error.png) !important;
 }
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
@@ -987,6 +1009,7 @@ DIV.perf_bar_bg {
     border-right: 1px solid #999999;
     -webkit-border-radius: 3px;
             border-radius: 3px;
+    text-align: left;
 }
 
 IMG.perf_bar {
@@ -1003,12 +1026,14 @@ DIV.perf_bar_warn {
   border: 0;
   border-right: 1px solid #DEDC10;
   position: absolute;
+  z-index: +1;
 }
 
 DIV.perf_bar_crit {
   border: 0;
   border-right: 1px solid #B36969;
   position: absolute;
+  z-index: +1;
 }
 
 TD.toolbar IMG {
@@ -1040,4 +1065,146 @@ hr.sites_collapsed.last {
 /* fix business process menu font*/
 #bp_menu {
     font-size: 11px;
+}
+
+/* fix issue with some themes and left aligned year/month in calendar popup */
+.DynarchCalendar TABLE {
+  margin: auto;
+}
+
+TABLE.perfdata_human {
+  border-collapse:collapse;
+  border-spacing:0;
+  text-align: center;
+}
+TABLE.perfdata_human TH {
+  font-weight: bold;
+}
+TABLE.perfdata_human TH, TABLE.perfdata_human TD {
+  border-bottom: 1px solid #999999;
+  border-left: 1px solid #999999;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+TABLE.perfdata_human TH:first-child, TABLE.perfdata_human TD:first-child {
+  border-left: none;
+}
+TABLE.perfdata_human TR:last-child TD {
+  border-bottom: none;
+}
+
+A.cxhlp {
+  margin-right: 7px;
+}
+
+DIV.alert.floating {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  margin: 0 0 0 -25%;
+  -webkit-box-shadow: 3px 3px 5px 5px #888888;
+  box-shadow: 3px 3px 5px 5px #888888;
+}
+
+.btn_small {
+  height: inherit;
+  width: inherit;
+  white-space: inherit;
+}
+
+TABLE.livestatus_metrics TD.dataVal {
+  text-align: right;
+  padding-left: 6px;
+}
+
+.tab_hidden, .filter_hidden {
+  display: none;
+}
+
+.action_icon {
+  margin: 1px 1px 1px 2px;
+}
+
+IMG.action_icon.clickable.active {
+  border: 1px inset black;
+  margin: 0px 0px 0px 1px;
+}
+
+DIV.action_menu {
+  position: absolute;
+  z-index: 1000;
+}
+
+UL.action_menu {
+  background: #F0F1EE;
+  border: 1px outset #444444;
+  padding: 0px;
+  margin: 0px;
+}
+
+UL.action_menu LI {
+  list-style: none;
+  border: 1px solid #F0F1EE;
+  padding: 0px 3px;
+}
+
+UL.action_menu LI:hover {
+  background: #E5E5E5;
+  border: 1px inset black;
+}
+
+UL.action_menu LI.nohover:hover {
+  background: inherit;
+  border: 1px solid #F0F1EE;
+}
+
+UL.action_menu LI IMG {
+  vertical-align: bottom;
+  padding-right: 3px;
+  border: 0;
+  max-width: 20px;
+  max-height: 20px;
+}
+
+IMG.action_icon {
+  vertical-align: bottom;
+}
+
+IMG.action_icon.clickable {
+  vertical-align: middle;
+  max-width: 20px;
+  max-height: 20px;
+  border: 0px;
+}
+
+UL.action_menu LI.clickable A SPAN.icon {
+  width: 22px;
+  height: 20px;
+  display: inline-block;
+}
+
+UL.action_menu A:hover {
+  text-decoration: none;
+}
+
+UL.action_menu LI.clickable A {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+UL.action_menu LI HR {
+  margin: 2px 8px;
+}
+
+DIV.pnpSelector {
+  display: inline;
+  position: absolute;
+  right: 2px;
+  top: 22px;
+}
+
+.black_white {
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
 }

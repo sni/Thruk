@@ -129,10 +129,12 @@ var bp_context_menu = false;
 var bp_active_node;
 function bp_context_menu_open(evt, node) {
     evt = (evt) ? evt : ((window.event) ? event : null);
+    evt = jQuery.event.fix(evt);
 
     var rightclick;
-    if (evt.which) rightclick = (evt.which == 3);
+    if (evt.which) rightclick = (evt.which == 3);   // IE < 9 does not support e.which
     else if (evt.button) rightclick = (evt.button == 2);
+
     // clicking the wrench icon counts as right click too
     if(evt.target && jQuery(evt.target).hasClass('ui-icon-wrench')) { rightclick = true; }
     if(rightclick && node) {
@@ -153,11 +155,7 @@ function bp_context_menu_open(evt, node) {
         if(h < evt.pageY) {
             jQuery("#bp_menu").css('top', h+'px');
         }
-        if(node.id == 'node1') {
-            jQuery('.firstnode').css('display', '');
-        } else {
-            jQuery('.firstnode').css('display', 'none');
-        }
+        bp_update_firstnode_css();
         // first node cannot be removed
         if(node.id == 'node1' || !editmode) {
             jQuery('#bp_menu_remove_node').addClass('ui-state-disabled');
@@ -286,7 +284,7 @@ function bp_add_new_node() {
     jQuery("#bp_add_new_node").dialog({
         modal: true,
         closeOnEscape: true,
-        width: 365
+        width: 450
     });
     jQuery('.bp_type_btn').button();
     showElement('bp_add_new_node');
@@ -301,7 +299,7 @@ function bp_fill_select_form(data, form) {
         for(var key in data.radio) {
             var d = data.radio[key];
             jQuery('#'+form).find('INPUT[type=radio][name='+key+']').removeAttr("checked");
-            jQuery('#'+form).find('INPUT[type=radio][name='+key+']][value="'+d[0]+'"]').attr("checked","checked");
+            jQuery('#'+form).find('INPUT[type=radio][name='+key+'][value="'+d[0]+'"]').prop("checked","checked");
             jQuery(d[1]).buttonset();
         }
     }
@@ -314,8 +312,8 @@ function bp_fill_select_form(data, form) {
     if(data.select) {
         for(var key in data.select) {
             var d = data.select[key];
-            jQuery("#"+form+" option[text="+d+"]").attr("selected","selected");
-            jQuery("#"+form+" option[value="+d+"]").attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[text="'+d+'"]').attr("selected","selected");
+            jQuery('#'+form).find('SELECT[name='+key+'] option[value="'+d+'"]').attr("selected","selected");
         }
     }
 }
@@ -340,9 +338,9 @@ function bp_input_keys(evt, input) {
 /* generic node type selection */
 function bp_select_type(type) {
     bp_show_edit_node(undefined, false);
-    jQuery('.bp_type_box').attr('checked', false).button("refresh");
-    jQuery('#bp_check_'+type).attr('checked', true).button("refresh");
-    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst'], function(nr, s) {
+    jQuery('.bp_type_box').prop('checked', false).button("refresh");
+    jQuery('#bp_check_'+type).prop('checked', true).button("refresh");
+    jQuery.each(['status', 'groupstatus', 'fixed', 'at_least', 'not_more', 'equals', 'best', 'worst', 'custom'], function(nr, s) {
         hideElement('bp_select_'+s);
     });
     // change details tab
@@ -365,7 +363,9 @@ function bp_select_type(type) {
     else if(type == 'best')        { bp_select_best(node)        }
     else if(type == 'worst')       { bp_select_worst(node)       }
     else if(type == 'equals')      { bp_select_equals(node)      }
+    else if(type == 'custom')      { bp_select_custom(node)      }
     jQuery('#bp_function').val(type);
+    bp_update_status_function();
 }
 
 /* show node type select: status */
@@ -441,6 +441,103 @@ function bp_select_equals(node) {
             text:  { 'bp_arg1_equals': '' }
         });
     }
+}
+
+/* show node type select: custom */
+function bp_select_custom(node) {
+
+    if(node == undefined) {
+        node = bp_get_node(current_edit_node);
+    }
+
+    // function select field
+    var options = [];
+    jQuery(cust_func).each(function(nr, f) {
+        options.push(new Option(f['function'], f['function']));
+    });
+    set_select_options("bp_arg1_custom", options, true);
+
+    if(node && node.func.toLowerCase() == 'custom') {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': node.func_args[0] }
+        });
+    } else {
+        bp_fill_select_form({
+            select:  { 'bp_arg1_custom': '' }
+        });
+    }
+
+    // update help text and attributes
+    bp_update_cust_attributes(document.getElementById('bp_arg1_custom'), node);
+}
+
+/* update custom function help text */
+function bp_update_cust_attributes(select, node) {
+    var selected = jQuery(select).val();
+    var func;
+    jQuery(cust_func).each(function(nr, f) {
+        if(f['function'] == selected) {
+            func = f;
+        }
+    });
+
+    // remove old attributes and help
+    jQuery('#bp_select_custom > tbody > tr').each(function(nr, row) {
+        if(nr >= 3) {
+            jQuery(row).remove();
+        }
+    });
+
+    if(func == undefined) { return; }
+
+    // add new attributes
+    jQuery(func['args']).each(function(x, arg) {
+        var nr = x + 2;
+        var field;
+        var val = '';
+        if(node && node.func_args) {
+            val = node['func_args'][x+1];
+        }
+        if(arg['type'] == 'text') {
+            field = '<input type="text" value="" name="bp_arg'+nr+'_custom" placeholder="'+arg['args']+'"><\/td><\/tr>';
+        }
+        else if(arg['type'] == 'select') {
+            field = '<select name="bp_arg'+nr+'_custom">';
+            jQuery(arg['args']).each(function(x, option) {
+                field += "<option value='"+option+"'>"+option+"<\/option>";
+            });
+            field += '<\/select>';
+        }
+        else if(arg['type'] == 'checkbox') {
+            field = '<div id="bp_radio_'+nr+'">';
+            jQuery(arg['args']).each(function(y, option) {
+                field += '<input type="radio" value="'+option+'" id="bp_custom_'+nr+'_'+y+'" name="bp_arg'+nr+'_custom" /><label for="bp_custom_'+nr+'_'+y+'">'+option+'</label>';
+            });
+            field += "<\/div>";
+        }
+        jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">'+arg['name']+'</th><td align="left">'+field+'<\/td><\/tr>');
+
+        // make buttonset nicer
+        if(arg['type'] == 'checkbox') {
+            jQuery('#bp_radio_'+nr).buttonset();
+        }
+
+        var value = {};
+        value['bp_arg'+nr+'_custom'] = val;
+        if(arg['type'] == 'text') {
+            bp_fill_select_form({ text: value });
+        }
+        else if(arg['type'] == 'select') {
+            bp_fill_select_form({ select: value });
+        }
+        else if(arg['type'] == 'checkbox') {
+            value['bp_arg'+nr+'_custom'] = [val, '#bp_radio_'+nr];
+            bp_fill_select_form({ radio: value });
+        }
+    });
+
+    // add help row
+    jQuery('#bp_select_custom tr:last').after('<tr><th align="right" valign="top">Help</th><td align="left" class="bp_type_desc" id="cust_help"><pre>'+func['help']+'<\/pre><\/td><\/tr>');
 }
 
 /* show node type select: not_more */
@@ -545,14 +642,43 @@ function bp_show_edit_node(id, refreshType) {
     }
 
     // update object creation status
+    jQuery("INPUT[name=bp_host_template]").val(bp_template);
     if(node && node.func.toLowerCase() != 'status') {
         jQuery("INPUT[name=bp_host]").val(node.host);
         jQuery("INPUT[name=bp_service]").val(node.service);
-        jQuery("INPUT[name=bp_service_template]").val(node.template);
+        jQuery("INPUT[name=bp_template]").val(node.template);
+        jQuery("INPUT[name=bp_contactgroups]").val(node.contactgroups.join(", "));
+        jQuery("INPUT[name=bp_contacts]").val(node.contacts.join(", "));
+        jQuery("INPUT[name=bp_notification_period]").val(node.notification_period);
+
+        if(node.contactgroups.length == 0) {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contactgroups]").parents("TR").show();
+        }
+        if(node.contacts.length == 0) {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_contacts]").parents("TR").show();
+        }
+        if(!node.event_handler) {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_event_handler]").parents("TR").show();
+        }
+        if(!node.notification_period) {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").hide();
+        } else {
+            jQuery("INPUT[name=bp_notification_period]").parents("TR").show();
+        }
     } else {
         jQuery("INPUT[name=bp_host]").val('');
         jQuery("INPUT[name=bp_service]").val('');
-        jQuery("INPUT[name=bp_service_template]").val('');
+        jQuery("INPUT[name=bp_template]").val('');
+        bpRemoveAttribute('contactgroups');
+        bpRemoveAttribute('contacts');
+        bpRemoveAttribute('notification_period');
+        bpRemoveAttribute('event_handler');
     }
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
@@ -589,6 +715,16 @@ function bp_show_edit_node(id, refreshType) {
     }
 }
 
+function bpRemoveAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").hide();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
+function bpAddAttribute(attr) {
+    jQuery("INPUT[name=bp_"+attr+"]").parents("TR").show();
+    jQuery("INPUT[name=bp_"+attr+"]").val('');
+}
+
 /* initialize childrens tab */
 bp_list_wizard_initialized = {};
 function bp_initialize_children_tab(node) {
@@ -600,7 +736,7 @@ function bp_initialize_children_tab(node) {
             var val = d[0];
             selected_nodes.push(val);
             selected_nodes_h[val] = 1;
-            options.push(new Option(val, d[1]));
+            options.push(new Option(d[1], val));
         });
     }
     set_select_options('bp_'+bp_id+"_selected_nodes", options, false);
@@ -619,7 +755,7 @@ function bp_initialize_children_tab(node) {
         if(first_node && val == 'node1') { return true; } // skip first/master node
         available_nodes.push(val);
         available_nodes_h[val] = 1;
-        options.push(new Option(val, n.label));
+        options.push(new Option(n.label, val));
         return true;
     });
     set_select_options('bp_'+bp_id+"_available_nodes", options, false);
@@ -692,7 +828,7 @@ function bp_update_status(evt, node) {
     jQuery('#bp_status_duration').html(n.duration);
 
     var funct = n.func + '(';
-    for(var nr in n.func_args) {
+    for(var nr=0; nr<n.func_args.length; nr++) {
         var a = ""+n.func_args[nr];
         if(!a.match(/^(\d+|\d+\.\d+)$/)) { a = "'"+a+"'"; }
         funct += a + ', ';
@@ -737,21 +873,21 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     if(service) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Service Details' title='Goto Service Details' width='16' height='16'><\/a>");
     }
 
     // host specific things...
     else if(host) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+bp_backend+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Host Details' title='Goto Host Details' width='16' height='16'><\/a>");
     }
     // hostgroup link
     else if(n.hostgroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Hostgroup Details' title='Goto Hostgroup Details' width='16' height='16'><\/a>");
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"thruk/themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>");
+        jQuery('.bp_status_extinfo_link').css('display', '').html("<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"'><img src='"+url_prefix+"themes/"+theme+"/images/command.png' border='0' alt='Goto Servicegroup Details' title='Goto Servicegroup Details' width='16' height='16'><\/a>");
     }
 
     return false;
@@ -761,7 +897,29 @@ function bp_update_status(evt, node) {
 function bp_update_obj_create() {
     var checkbox = document.getElementById('bp_create_link');
     if(checkbox) {
-        jQuery("INPUT.bp_create").attr('disabled', !checkbox.checked);
+        jQuery("INPUT.bp_create").prop('disabled', !checkbox.checked);
+    }
+}
+
+/* toggle status function disabled fields */
+function bp_update_status_function() {
+    var type = jQuery('#bp_function').val();
+    if(type == "status" || type == "groupstatus") {
+        jQuery(".no_supports_link").show();
+        jQuery(".supports_link").hide();
+    } else {
+        jQuery(".no_supports_link").hide();
+        jQuery(".supports_link").show();
+    }
+    bp_update_firstnode_css();
+}
+
+/* toggle firstnode class */
+function bp_update_firstnode_css() {
+    if(bp_active_node == 'node1') {
+        jQuery('.firstnode').css('display', '');
+    } else {
+        jQuery('.firstnode').css('display', 'none');
     }
 }
 
@@ -807,10 +965,10 @@ function bp_get_node(id) {
 var bp_graph_layout;
 function bp_render(containerId, nodes, edges) {
     // first reset zoom
-    bp_zoom('inner_'+containerId, 1);
+    bp_zoom(1);
     var g = new dagre.Digraph();
     jQuery.each(nodes, function(nr, n) {
-        g.addNode(n.id, { label: n.label, width: n.width, height: n.height });
+        g.addNode(n.id, { label: n.label, width: node_width, height: node_height });
     });
     jQuery.each(edges, function(nr, e) {
         g.addEdge(null, e.sourceId, e.targetId);
@@ -827,6 +985,7 @@ function bp_render(containerId, nodes, edges) {
     } catch(e) {
         var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
         if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
+        jQuery('.bp_zoom_container').css('height','500px');
         jQuery('#inner_'+containerId).html(msg);
         return;
     }
@@ -845,24 +1004,37 @@ function bp_render(containerId, nodes, edges) {
 
 /* zoom out */
 var last_zoom = 1;
-function bp_zoom_rel(containerId, zoom) {
-    bp_zoom(containerId, last_zoom + zoom);
+function bp_zoom_rel(zoom) {
+    bp_zoom(last_zoom + zoom);
     return false;
 }
 
-function bp_zoom_reset(containerId) {
-    bp_zoom(containerId, original_zoom);
+function bp_zoom_reset() {
+    bp_zoom(original_zoom);
     return false;
 }
 
 /* set zoom level */
-function bp_zoom(containerId, zoom) {
+function bp_zoom(zoom) {
     // round to 0.05
-    zoom = Math.floor(zoom * 20) / 20;
+    zoom = Math.floor((zoom * 20) + 0.05) / 20;
+    if(zoom < 0.1) { zoom = 0.1 }
     last_zoom = zoom;
-    jQuery('#'+containerId).css('zoom', zoom)
-                                 .css('-moz-transform', 'scale('+zoom+')')
-                                 .css('-moz-transform-origin', '0 0');
+    jQuery('#zoom'+bp_id).css('zoom', zoom)
+                           .css('-moz-transform', 'scale('+zoom+')')
+                           .css('-moz-transform-origin', '0 0')
+                           .css('-o-transform', 'scale('+zoom+')')
+                           .css('-o-transform-origin', '0 0')
+                           .css('-webkit-transform', 'scale('+zoom+')')
+                           .css('-webkit-transform-origin', '0 0');
+
+
+    // center align inner container
+    var zcontainer = document.getElementById('zoom'+bp_id);
+    var offset = ((graphW - maxX*zoom) / 2);
+    if(offset < 0) {offset = 0;}
+    zcontainer.style.left = offset+'px';
+    zcontainer.style.position = 'absolute';
 }
 
 /* draw connector between two nodes */
@@ -881,38 +1053,70 @@ function bp_plump(containerId, sourceId, targetId, edge) {
     jQuery(container).append('<div id="'+edge_id+'"><\/div>');
     var edge_container = jQuery('#'+edge_id);
 
-    // draw "line" from top middle of lower node
     var srcX = upos.left + 55;
-    var srcY = upos.top + 15;
+    var srcY = upos.top + 20;
     var tarX = lpos.left + 55;
-    var tarY = lpos.top + 15;
-    if((tarY - srcY) == 70) {
-        // smarter edge placement for normal edges
-        bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY+35);
-        bp_draw_edge(edge_container, edge_id, srcX, srcY+35, tarX, srcY+35);
-        bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
-        return;
-    }
-    //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
-    //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
+    var tarY = lpos.top + 20;
+    if(bp_graph_options.bp_rankDir == 'TB') {
+        // Top -> Bottom Graphs
 
-    var x1 = srcX, y1 = srcY;
-    jQuery.each(edge.points, function(nr, p) {
-        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
-        bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
-        x1 = p.x; y1 = p.y;
-    });
-    bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+        // draw "line" from top middle of lower node
+        if((tarY - srcY) == 70) {
+            // smarter edge placement for normal edges
+            bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX, srcY+35);
+            bp_draw_edge(edge_container, edge_id, srcX, srcY+35, tarX, srcY+35);
+            bp_draw_edge(edge_container, edge_id, tarX, srcY+35, tarX, tarY);
+            return;
+        }
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+srcX+'px; top: '+srcY+'px; width:1px; height: 1px; border: 3px solid green; z-index: 150;"><\/div>');
+        //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+tarX+'px; top: '+tarY+'px; width:1px; height: 1px; border: 3px solid red;   z-index: 150;"><\/div>');
+
+        // complicated layout
+        var x1 = srcX, y1 = srcY;
+        jQuery.each(edge.points, function(nr, p) {
+            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+            bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
+            x1 = p.x; y1 = p.y;
+        });
+        bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+    } else {
+        // Left -> Right Graphs
+
+        // draw "line" from right middle of left node
+        if((tarX - srcX) == 150) {
+            // smarter edge placement for normal edges
+            bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX+75, srcY);
+            bp_draw_edge(edge_container, edge_id, srcX+75, srcY, srcX+75, tarY);
+            bp_draw_edge(edge_container, edge_id, srcX+75, tarY, tarX, tarY);
+            return;
+        }
+
+        // complicated layout
+        bp_draw_edge(edge_container, edge_id, srcX, srcY, srcX+75, srcY);
+        var x1 = srcX+75, y1 = srcY;
+        jQuery.each(edge.points, function(nr, p) {
+            //jQuery(edge_container).append('<div class="bp_vedge" style="left: '+p.x+'px; top: '+p.y+'px; width:1px; height: 1px; border: 3px solid blue; z-index: 100;"><\/div>');
+            bp_draw_edge(edge_container, edge_id, x1, y1, p.x, p.y);
+            x1 = p.x; y1 = p.y;
+        });
+        bp_draw_edge(edge_container, edge_id, x1, y1, tarX, tarY);
+    }
 
     return;
 }
 
-function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2) {
-    var w = x2 - x1, h = y2 - y1;
+function bp_draw_edge(edge_container, edge_id, x1, y1, x2, y2, recursion_level) {
+    var w = x2 - x1;
+    var h = y2 - y1;
+    if(recursion_level == undefined) { recursion_level = 0; }
     if(w != 0 && h != 0) {
+        if(recursion_level > 10) {
+            if(thruk_debug_js) { alert("ERROR: deep recursion "+x1+"/"+y1+" "+x2+"/"+y2); }
+            return;
+        }
         // need two lines
-        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2);
-        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2);
+        bp_draw_edge(edge_container, edge_id, x1, y1, x1, y2, recursion_level+1);
+        bp_draw_edge(edge_container, edge_id, x1, y2, x2, y2, recursion_level+1);
         return;
     }
     if(w < 0) { x1 = x2; w = -w +2; }
@@ -946,16 +1150,16 @@ function bp_no_more_events(evt) {
 }
 
 /* redraw nodes and stuff */
+var maxX = 0, maxY = 0, minY = -1, graphW = 0, graphH = 0;
 function bp_redraw(evt) {
     var containerId;
     try {
         containerId = 'container'+bp_id;
     } catch(e) { return false; }
     if(!bp_graph_layout) { return false; }
-    var inner = document.getElementById('inner_'+containerId);
-    inner.style.left = '0px';
 
-    var maxX = 0, maxY = 0, minY = -1;
+    maxX = 0;
+    maxY = 0;
     bp_graph_layout.eachNode(function(u, value) {
         if(maxX < value.x) { maxX = value.x }
         if(maxY < value.y) { maxY = value.y }
@@ -966,30 +1170,41 @@ function bp_redraw(evt) {
     maxY = maxY + 30;
 
     // adjust size of container
-    var container = document.getElementById(containerId);
+    var container = document.getElementById('bp'+bp_id);
     if(!container) { return false; }
-    var w = jQuery(window).width() - container.parentNode.offsetLeft - 5;
-    var h = jQuery(window).height() - container.parentNode.offsetTop -10;
+    graphW = jQuery(window).width() - container.offsetLeft - 5;
+    graphH = jQuery(window).height() - container.offsetTop -10;
     if(!minimal) {
-        w = w - 315;
+        graphW = graphW - 315;
     }
-    container.style.width  = w+'px';
-    container.style.height = h+'px';
+    container.style.width  = graphW+'px';
+    container.style.height = graphH+'px';
+
+    var zcontainer = document.getElementById('zoom'+bp_id);
+    if(!zcontainer) { return false; }
+    zcontainer.style.width  = graphW+'px';
+    zcontainer.style.height = graphH+'px';
+    zcontainer.style.left   = '0px';
+
+    var icontainer = document.getElementById('container'+bp_id);
+    if(!icontainer) { return false; }
+    zcontainer.style.width  = maxX+'px';
+    zcontainer.style.height = maxY+'px';
 
     // do we need to zoom in?
     var zoomX = 1, zoomY = 1;
-    if(w < maxX) {
-        zoomX = w / maxX;
+    if(graphW < maxX) {
+        zoomX = graphW / maxX;
     }
-    if(h < maxY) {
-        zoomY = h / maxY;
+    if(graphH < maxY) {
+        zoomY = graphH / maxY;
     }
     var zoom = zoomY;
     if(zoomX < zoomY) { zoom = zoomX; }
     if(zoom < 1) {
-        // round to 0.05
-        zoom = Math.floor(zoom * 20) / 20;
-        bp_zoom('inner_'+containerId, zoom);
+        bp_zoom(zoom);
+    } else {
+        bp_zoom(1);
     }
     original_zoom = zoom;
 
@@ -997,11 +1212,6 @@ function bp_redraw(evt) {
         bp_update_status(null, 'node1');
         current_node = 'node1';
     }
-
-    // center align inner container
-    var offset = ((w - maxX*zoom) / 2);
-    if(offset < 0) {offset = 0;}
-    inner.style.left = offset+'px';
 
     return true;
 }

@@ -9,10 +9,12 @@
           [% PROCESS _help.tt topic = "config" %]
         </td>
       </tr>
-    </table><br>
+    </table>
+    <br>
     <br>
     <div align="center" class='reportSelectTitle'>Select Type of Config Data You Wish To View</div>
-    <br><br>
+    <br>
+    <br>
 
     <form method="get" action="config.cgi">
       <div align="center">

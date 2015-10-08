@@ -102,6 +102,15 @@ function init_conf_tool_buttons() {
     jQuery('.conf_delete_button').button({
         icons: {primary: 'ui-delete-button'}
     });
+    jQuery('.conf_cleanup_button').button({
+        icons: {primary: 'ui-wrench-button'}
+    })
+    jQuery('.conf_cut_button').button({
+        icons: {primary: 'ui-cut-button'}
+    })
+    jQuery('.conf_next_button').button({
+        icons: {primary: 'ui-r-arrow-button'}
+    })
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}
@@ -164,7 +173,13 @@ function init_conf_tool_buttons() {
         }
 
         jQuery.ajax({
-            url: 'conf.cgi?action=json&amp;type=dig&host='+host,
+            url: 'conf.cgi',
+            data: {
+                action: 'json',
+                type:   'dig',
+                host:   host,
+                token:  user_token
+            },
             type: 'POST',
             success: function(data) {
                 jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
@@ -203,8 +218,7 @@ function init_conf_tool_command_wizard(id) {
       .dialog({
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
-        width:       'auto',
-        maxWidth:    1024,
+        width:       642,
         position:   'top',
         close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
     });
@@ -272,25 +286,25 @@ function update_command_line(id) {
     document.getElementById(id + 'command_line').innerHTML = "";
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name,
+        url: 'conf.cgi',
         type: 'POST',
+        data: {
+            action: 'json',
+            type:   'commanddetails',
+            command: cmd_name,
+            token:   user_token
+        },
         success: function(data) {
             hideElement(id + 'wait');
             var cmd_line = data[0].cmd_line;
-            var extra_class = "";
-            // if there is only one arg, we can make the input field larger
-            var regex = new RegExp('\\$ARG[0-9]+\\$', 'g');
-            var matches = cmd_line.match(regex);
-            if(matches && matches.length == 1) {
-                extra_class = "single_arg";
-            }
-
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+extra_class+" cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'>");
+                cmd_line = cmd_line.replace(regex, "<\/td><td><input type='text' id='"+id+"arg"+nr+"' class='cmd_line_inp_wzd "+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1&plugin=', append_value_of:'"+id+"inp_command', hideempty:true, list:'[ =\\\']'})\" onkeyup='update_other_inputs(this)'><\/td><td>");
             }
 
-            cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");
+            cmd_line = cmd_line.replace(/\ \-/g, "<\/td><\/tr><\/table><table class='command_line_wzd'><tr><td>-");
+            cmd_line = "<table class='command_line_wzd first'><tr><td>"+cmd_line+"<\/td><\/tr><\/table>"
+            cmd_line = cmd_line.replace(/<td>\s*<\/td>/g, "");
             document.getElementById(id + 'command_line').innerHTML = cmd_line;
 
             // now set the values to avoid escaping
@@ -390,9 +404,9 @@ function init_plugin_help_accordion(id) {
         collapsible: true,
         active:      'none',
         clearStyle:  true,
-        autoHeight:  false,
+        heightStyle: 'content',
         fillSpace:   true,
-        change:      function(event, ui) {
+        activate:    function(event, ui) {
             if(ui.newHeader.size() == 0) {
                 // accordion is closing
                 return;
@@ -446,7 +460,13 @@ function load_plugin_help(id, plugin) {
     last_plugin_help = plugin;
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin,
+        url: 'conf.cgi',
+        data: {
+            action: 'json',
+            type:   'pluginhelp',
+            plugin:  plugin,
+            token:   user_token
+        },
         type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_help');
@@ -480,7 +500,16 @@ function check_plugin_exec(id) {
     showElement(id + 'wait_run');
 
     jQuery.ajax({
-        url: 'conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args,
+        url: 'conf.cgi',
+        data: {
+            action: 'json',
+            type:   'pluginpreview',
+            command: command,
+            host:    host,
+            service: service,
+            args:    args,
+            token:   user_token
+        },
         type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_run');
@@ -498,7 +527,7 @@ function check_plugin_exec(id) {
 function close_accordion() {
     // close the helper accordion
     if($accordion) {
-        $accordion.accordion("activate", false);
+        $accordion.accordion({active: false});
     }
 }
 
@@ -662,4 +691,60 @@ function save_reload_apply(formid) {
         jQuery('button.conf_apply_button')[0].click();
     }
     return false;
+}
+
+function conf_tool_cleanup(btn, link, hide) {
+    if(jQuery(btn).hasClass('done')) {
+        return(false);
+    }
+    jQuery(btn).button({
+        icons: {primary: 'ui-waiting-button'},
+        disabled: true
+    })
+    if(hide) {
+        /* ensure table width is fixed */
+        var table       = jQuery(btn).parents('table')[0];
+        var table_width = table.offsetWidth;
+        if(!table.style.width) {
+            jQuery(table).find('TH').each(function(_, header) {
+                header.style.width = jQuery(header).width()+'px';
+            });
+            table.style.width = jQuery(table).outerWidth()+"px";
+            table.style.tableLayout = "fixed";
+        }
+        /* fade away the table row */
+        jQuery(btn).parentsUntil('TABLE', 'TR').fadeOut(100);
+        var oldText = jQuery('#hiding_entries').html();
+        var hiding  = Number(oldText.match(/\ (\d+)\ /)[1]) + 1;
+        jQuery('#hiding_entries').html("hiding "+hiding+" entries.").show();
+    }
+    jQuery.ajax({
+        url:   link,
+        data:  {},
+        type: 'POST',
+        success: function(data) {
+            jQuery(btn).button({
+                icons:   {primary: 'ui-ok-button'},
+                label:   'done',
+                disabled: false
+            }).addClass('done');
+            if(!hide) {
+                /* hide ignore button */
+                var buttons = jQuery(btn).parentsUntil('TABLE', 'TR').find('BUTTON');
+                if(buttons[0]) {
+                    jQuery(buttons[0]).button('disable');
+                }
+                jQuery('#apply_config_changes_icon').show();
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            jQuery(btn).button({
+                icons:   {primary: 'ui-error-button'},
+                label:   'failed',
+                disabled: false
+            })
+        }
+    });
+
+    return(false);
 }

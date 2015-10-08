@@ -32,7 +32,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Previous Day<br>
-                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
@@ -45,7 +45,7 @@
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 [% IF end < date.now %]
                 Next Day<br>
-                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
                 [% END %]
               </td>
             </tr>
@@ -143,7 +143,7 @@
             [% END %]
           </td>
           <td align='center' class='[% statusclass %]'>[% level %]</td>
-          <td align='center' class='[% class %]'>[% format_date(n.time, datetime_format) %]</td>
+          <td align='center' class='[% class %]' nowrap>[% date_format(c, n.time) %]</td>
           <td class='[% class %]'><a href='config.cgi?type=contacts#[% n.contact_name %]'>[% n.contact_name %]</a></td>
           <td align='center' class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>
           <td class='[% class %] left' style='white-space: normal;'>[% IF escape_html_tags %][% escape_html(n.plugin_output) %][% ELSE %][% n.plugin_output %][% END %]</td>

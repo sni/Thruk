@@ -78,15 +78,18 @@ $Monitoring::Config::Object::Service::Defaults = {
 
 # Only shinken has these...
 $Monitoring::Config::Object::Service::ShinkenSpecific = {
-    'business_impact'              => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' },
+    'business_impact'              => { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => Monitoring::Config::Object::Parent::_business_impact_keys(), cat => 'Extended' },
     'criticity'                    => { type => 'ALIAS', 'name' => 'business_impact' },
     'maintenance_period'           => { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' },
     'poller_tag'                   => { type => 'STRING', cat => 'Extended' },
     'reactionner_tag'              => { type => 'STRING', cat => 'Extended' },
-    'resultmodulations'            => { type => 'STRING', cat => 'Extended' },
-    'business_impact_modulations'  => { type => 'STRING', cat => 'Extended' },
+    'resultmodulations'            => { type => 'STRING', 'link' => 'resultmodulation', cat => 'Extended' },
+    'business_impact_modulations'  => { type => 'STRING', 'link' => 'businessimpactmodulation', cat => 'Extended' },
+    'checkmodulations'             => { type => 'STRING', 'link' => 'checkmodulations', cat => 'Extended' },
     'escalations'                  => { type => 'STRING', 'link' => 'escalation', cat => 'Extended' },
     'icon_set'                     => { type => 'STRING', cat => 'Extended' },
+    'duplicate_foreach'            => { type => 'STRING', cat => 'Extended' },
+    'service_dependencies'         => { type => 'STRING', cat => 'Extended' },
 };
 
 ##########################################################
@@ -153,7 +156,7 @@ sub get_macros {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

@@ -1,6 +1,5 @@
 ﻿[% USE date %]
 [% current_page = current_page(0) %]
-<a name="page[% current_page %]"></a>
 <div class="page cover">
   <table class="page">
     <tr>
@@ -28,12 +27,15 @@
               [% END %]
               </table>
             </div>
+            <div class="description">
+              [% r.desc %]
+            </div>
           </div>
         </div>
       </td>
     </tr>
     <tr>
-      <td class="footer"><span>[% current_page %]</span></td>
+      <td class="footer"><div class="footer">[% current_page %]</div></td>
     </tr>
   </table>
 </div>

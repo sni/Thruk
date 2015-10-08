@@ -5,10 +5,10 @@ use warnings;
 use Digest::MD5 qw(md5_hex);
 use File::Temp qw/tempfile/;
 use File::Copy qw/move/;
-use Thruk::BP::Components::BP;
-
+use File::Slurp qw/read_file/;
 use Carp;
-use Config::General;
+
+use Thruk::BP::Components::BP;
 
 =head1 NAME
 
@@ -26,20 +26,24 @@ Helper for the business process addon
 
 =head2 load_bp_data
 
-    load_bp_data($c, [$num], [$editmode])
+    load_bp_data($c, [$num], [$editmode], [$drafts])
 
 editmode:
     - 0/undef:    no edit mode
     - 1:          only edit mode
 
+drafts:
+    - 0/undef:    skip drafts
+    - 1:          load drafts too
+
 load all or specific business process
 
 =cut
 sub load_bp_data {
-    my($c, $num, $editmode) = @_;
+    my($c, $num, $editmode, $drafts) = @_;
 
     # make sure our folders exist
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
 
@@ -49,10 +53,29 @@ sub load_bp_data {
         return($bps) unless $num =~ m/^\d+$/mx;
         $pattern = $num.'.tbp';
     }
-    my @files = glob($base_folder.'/'.$pattern);
+    my $numbers = {};
+    my @files   = glob($base_folder.'/'.$pattern);
     for my $file (@files) {
         my $bp = Thruk::BP::Components::BP->new($c, $file, undef, $editmode);
-        push @{$bps}, $bp if $bp;
+        if($bp) {
+            push @{$bps}, $bp;
+            $numbers->{$bp->{'id'}} = 1;
+        }
+    }
+    if($drafts) {
+        # load drafts too
+        my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.edit');
+        for my $file (@files) {
+            my $nr = $file;
+            $nr =~ s|^.*/(\d+)\.tbp\.edit$|$1|mx;
+            next if $numbers->{$nr};
+            $file  = $base_folder.'/'.$nr.'.tbp';
+            my $bp = Thruk::BP::Components::BP->new($c, $file, undef, 1);
+            if($bp) {
+                push @{$bps}, $bp;
+                $numbers->{$bp->{'id'}} = 1;
+            }
+        }
     }
 
     # sort by name
@@ -73,7 +96,7 @@ return next free bp file
 sub next_free_bp_file {
     my($c) = @_;
     my $num = 1;
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
     while(-e $base_folder.'/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
@@ -96,7 +119,7 @@ sub make_uniq_label {
 
     # gather names of all BPs and editBPs
     my $names = {};
-    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
+    my @files = glob(base_folder($c).'/*.tbp '.$c->config->{'var_path'}.'/bp/*.tbp.edit');
     for my $file (@files) {
         next if $bp_id and $file =~ m#/$bp_id\.tbp(.edit|)$#mx;
         my $data = Thruk::Utils::IO::json_lock_retrieve($file);
@@ -174,24 +197,46 @@ sub save_bp_objects {
 
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $new_hex = md5_hex($filename);
-    my $old_hex = md5_hex($file);
+    my $new_hex = md5_hex(read_file($filename));
+    my $old_hex = -f $file ? md5_hex(read_file($file)) : '';
 
     # check if something changed
     if($new_hex ne $old_hex) {
         if(!move($filename, $file)) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'move '.$filename.' to '.$file.' failed: '.$! });
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/bp.cgi");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
+        }
+        my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+        if(!$result_backend && $Thruk::Backend::Pool::peer_order && scalar @{$Thruk::Backend::Pool::peer_order}) {
+            my $peer_key = $Thruk::Backend::Pool::peer_order->[0];
+            $result_backend = $c->{'db'}->get_peer_by_key($peer_key)->peer_name;
         }
         # and reload
+        my $time = time();
+        my $pkey;
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
+        my $reloaded = 0;
         if($cmd) {
             local $SIG{CHLD}='';
             local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
             my $out = `$cmd 2>&1`;
             ($rc, $msg) = ($?, $out);
-            Thruk::Utils::wait_after_reload($c);
+            $reloaded = 1;
         }
+        elsif($result_backend) {
+            # restart by livestatus
+            my $peer = $c->{'db'}->get_peer_by_key($result_backend);
+            die("no backend found by name ".$result_backend) unless $peer;
+            $pkey = $peer->peer_key();
+            my $options = {
+                'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
+                'backend' => [ $pkey ],
+            };
+            $c->{'db'}->send_command( %{$options} );
+            ($rc, $msg) = (0, 'business process saved and core restarted');
+            $reloaded = 1;
+        }
+        Thruk::Utils::wait_after_reload($c, $pkey, $time-1) if ($rc == 0 && $reloaded);
     } else {
         # discard file
         unlink($filename);
@@ -235,7 +280,7 @@ remove old edit files
 sub clean_orphaned_edit_files {
     my($c, $threshold) = @_;
     $threshold = 86400 unless defined $threshold;
-    my $base_folder = Thruk::BP::Utils::base_folder($c);
+    my $base_folder = base_folder($c);
     for my $pattern (qw/edit runtime/) {
     my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.'.$pattern);
         for my $file (@files) {
@@ -268,7 +313,7 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    my @files = glob(Thruk::BP::Utils::base_folder($c).'/*.tbp');
+    my @files = glob(base_folder($c).'/*.tbp');
     if(scalar @files > 0) {
         open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
         Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
@@ -284,6 +329,66 @@ sub update_cron_file {
 
     Thruk::Utils::update_cron_file($c, 'business process', $cron_entries);
     return 1;
+}
+
+##########################################################
+
+=head2 get_custom_functions
+
+  get_custom_functions($c)
+
+returns list of custom functions
+
+=cut
+sub get_custom_functions {
+    my($c) = @_;
+
+    # get required files
+    my $functions = [];
+    my @files = glob(base_folder($c).'/*.pm');
+    for my $filename (@files) {
+        next unless -s $filename;
+        my $f = _parse_custom_functions($filename);
+        push @{$functions}, @{$f};
+    }
+    return $functions;
+}
+
+##########################################################
+sub _parse_custom_functions {
+    my($filename) = @_;
+
+    my $functions = [];
+    my $last_help = "";
+    my $last_args = [];
+
+    open(my $fh, '<', $filename);
+    while(my $line = <$fh>) {
+        if($line =~ m/^\s*sub\s+([\w_]+)(\s|\{)/mx) {
+            my $func = $1;
+            $last_help =~ s/^Arguments:\s$//mx;
+            $last_help =~ s/\A\s*//msx;
+            $last_help =~ s/\s*\Z//msx;
+            push @{$functions}, { function => $func, help => $last_help, file => $filename, args => $last_args };
+            $last_help = "";
+            $last_args = [];
+        }
+        elsif($line =~ m/^\s*\#\s*arg\d+:\s*(.*)/mx) {
+            my($name, $type, $args) = split(/\s*;\s*/mx,$1,3);
+            if($type eq 'checkbox' or $type eq 'select') { $args = [split(/\s*;\s*/mx,$args)]; }
+            push @{$last_args}, {name => $name, type => $type, args => $args};
+        }
+        elsif($line =~ m/^\s*\#\ ?(.*?$)/mx) {
+            $last_help .= $1."\n";
+        }
+        elsif($line =~ m/^\s*$/mx) {
+            $last_help = "";
+            $last_args = [];
+        }
+    }
+    CORE::close($fh);
+
+    return $functions;
 }
 
 ##########################################################
@@ -327,12 +432,12 @@ return string with joined args
 sub join_args {
     my($args) = @_;
     my @arg;
-    for my $a (@{$args}) {
-        $a = '' unless defined $a;
-        if($a =~ m/^(\d+|\d+\.\d+)$/mx) {
-            push @arg, $a;
+    for my $e (@{$args}) {
+        $e = '' unless defined $e;
+        if($e =~ m/^(\d+|\d+\.\d+)$/mx) {
+            push @arg, $e;
         } else {
-            push @arg, "'".$a."'";
+            push @arg, "'".$e."'";
         }
     }
     return(join(', ', @arg));
@@ -398,6 +503,7 @@ clean nasty chars from string
 =cut
 sub clean_nasty {
     my($str) = @_;
+    confess("nothing?") unless defined $str;
     $str =~ s#[`~!\$%^&*\|'"<>\?,\(\)=]*##gmxo;
     return($str);
 }
@@ -413,17 +519,14 @@ return base folder of business process files
 =cut
 sub base_folder {
     my($c) = @_;
-    if($ENV{'CATALYST_CONFIG'}) {
-        return($ENV{'CATALYST_CONFIG'}.'/bp');
-    }
-    return($c->config->{'home'}.'/bp');
+    return(Thruk::Utils::base_folder($c).'/bp');
 }
 
 ##########################################################
 
 =head1 AUTHOR
 
-Sven Nierlein, 2013, <sven.nierlein@consol.de>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

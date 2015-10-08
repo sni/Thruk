@@ -5,9 +5,9 @@ use File::Copy qw/copy/;
 use JSON::XS;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 214;
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    plan tests => 280;
 }
 
 BEGIN {
@@ -16,6 +16,7 @@ BEGIN {
     import TestUtils;
 }
 
+TestUtils::set_test_user_token();
 my $bpid = 9999;
 my $c    = TestUtils::get_c();
 
@@ -42,13 +43,14 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=rename_node&bp='.$bpid.'&node=node1&label=Test App Renamed', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=remove_node&bp='.$bpid.'&node=node3', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_fixed=Critical&bp_function=Fixed&bp_label_fixed=addednode', skip_doctype => 1, like => 'OK' },
-    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid, like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'Worst state is CRITICAL: addednode', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&node=node2&bp_arg1_fixed=Warning&bp_arg2_fixed=newnodetest&bp_function=Fixed&bp_label_fixed=newnode&bp_node_id=new', skip_doctype => 1, like => 'OK' },
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid, like => 'newnodetest', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1, like => 'Clone of Test App' },
-    { url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
-    { url => '/thruk/cgi-bin/bp.cgi?bp=9999', like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?bp='.$bpid, like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
 ];
 
 for my $url (@{$pages}) {
@@ -60,24 +62,57 @@ for my $url (@{$pages}) {
 ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
 
 ###########################################################
+# test custom aggregation function
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp')                 or die("copy failed: ".$!);
+copy('t/xt/business_process/data/test_cust_function.pm', './bp/test_cust_function.pm') or die("copy failed: ".$!);
+ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
+$pages = [
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=echofunction&bp_arg2_custom=testtext&bp_arg3_custom=yes&bp_arg4_custom=yes&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'TXETTSET', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid,             like => 'TXETTSET', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1 },
+];
+for my $url (@{$pages}) {
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
+    TestUtils::test_page(%{$test});
+}
+unlink('./bp/test_cust_function.pm');
+ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
+
+###########################################################
+# test unknown custom aggregation function
+copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp') or die("copy failed: ".$!);
+ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
+$pages = [
+    { url => '/thruk/cgi-bin/bp.cgi?action=edit_node&bp='.$bpid.'&bp_node_id=new&node=node1&bp_arg1_custom=unknownfunction&bp_function=Custom&bp_label_custom=custnode', skip_doctype => 1, like => 'OK' },
+    { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid.'&update=1', like => 'no file found for custom function: unknownfunction', skip_doctype => 1 },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1 },
+];
+for my $url (@{$pages}) {
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Business Process'});
+    TestUtils::test_page(%{$test});
+}
+ok(!-f './bp/'.$bpid.'.tbp', 'business process removed');
+
+###########################################################
 # test json some pages
 copy('t/xt/business_process/data/'.$bpid.'.tbp', './bp/'.$bpid.'.tbp') or die("copy failed: ".$!);
 ok(-f './bp/'.$bpid.'.tbp', 'business process exists');
 
 my $json_pages = [
     '/thruk/cgi-bin/bp.cgi?view_mode=json',
-    '/thruk/cgi-bin/bp.cgi?view_mode=json&bp=9999',
+    '/thruk/cgi-bin/bp.cgi?view_mode=json&bp='.$bpid,
 ];
 
 for my $url (@{$json_pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'content_type' => 'application/json; charset=utf-8',
+        'content_type' => 'application/json;charset=UTF-8',
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
-TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=remove&bp='.$bpid, follow => 1);
+TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1);
 
 ###########################################################
 # cleanup

@@ -39,10 +39,23 @@ for x in seq 10; do
     [ -e $XAUTHORITY ] && break;
 done
 
+# wait x-lock
+for x in seq 5; do
+    sleep 1;
+    [ -e /tmp/.X${DISP}-lock ] && break;
+done
+
+if [ ! -e /tmp/.X${DISP}-lock -o ! -e $XAUTHORITY ]; then
+    echo "xvfb failed to start"
+    cat $TMPLOG
+    exit 1
+fi
+
 rm -f $OUTPUT
 DISPLAY=:$DISP $WKHTMLTOPDF \
         --use-xserver \
         -l \
+        $WKHTMLTOPDFOPTIONS \
         $EXTRAOPTIONS \
         --image-quality 100 \
         --disable-smart-shrinking \
@@ -51,7 +64,10 @@ DISPLAY=:$DISP $WKHTMLTOPDF \
         "$INPUT" "$OUTPUT" 2>&1 | \
     grep -v 'QPixmap: Cannot create a QPixmap when no GUI is being used'
 
-[ -e "$OUTPUT" ] || cat $TMPLOG
+if [ ! -e "$OUTPUT" ]; then
+    cat $TMPLOG
+    exit 1;
+fi
 
 # ensure file is not owned by root
 if [ -e "$OUTPUT" -a $UID == 0 ]; then
@@ -61,4 +77,4 @@ if [ -e "$OUTPUT" -a $UID == 0 ]; then
 fi
 
 kill $xpid >/dev/null 2>&1
-rm -f $TMPLOG $XAUTHORITY
+rm -f $TMPLOG $XAUTHORITY /tmp/.X${DISP}-lock

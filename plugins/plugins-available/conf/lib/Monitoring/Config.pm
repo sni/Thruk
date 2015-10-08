@@ -6,9 +6,10 @@ use Carp qw/cluck/;
 use Monitoring::Config::File;
 use Encode qw/decode_utf8/;
 use Data::Dumper;
-use Config::General;
 use Carp;
+use Storable qw/dclone/;
 use Thruk::Utils;
+use Thruk::Config;
 
 =head1 NAME
 
@@ -58,7 +59,7 @@ $Monitoring::Config::save_options = {
                                    '_TYPE',
                                    '_TAGS',
                                    '_APPS',
-                                ]
+                                ],
 };
 $Monitoring::Config::key_sort = undef;
 
@@ -151,11 +152,11 @@ sub init {
         }
     }
 
+    # read rc file, must be read every time, otherwise key_sort is not defined
+    $self->read_rc_file();
+
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
-
-    # read rc file
-    $self->read_rc_file();
 
     delete $self->{'config'}->{'localdir'};
     for my $key (keys %{$config}) {
@@ -168,12 +169,13 @@ sub init {
 
     # set default excludes when defined manual paths
     if(!defined $self->{'config'}->{'obj_exclude'}
-       and !$self->{'config'}->{'core_conf'}) {
+       && !$self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_exclude'} = [
                     '^cgi.cfg$',
                     '^resource.cfg$',
+                    '^naemon.cfg$',
                     '^nagios.cfg$',
-                    '^icinga.cfg$'
+                    '^icinga.cfg$',
         ];
     }
 
@@ -246,7 +248,7 @@ sub commit {
                                         $c->stash->{'remote_user'},
                                         $is_new_file ? 'created' : 'saved',
                                         $file->{'path'},
-            )) if($c and !$ENV{'THRUK_TEST_CONF_NO_LOG'});
+            )) if($c && !$ENV{'THRUK_TEST_CONF_NO_LOG'});
         }
         push @{$files->{'changed'}}, [ $file->{'display'}, decode_utf8("".$file->get_new_file_content()), $file->{'mtime'} ] unless $file->{'deleted'};
     }
@@ -254,7 +256,7 @@ sub commit {
     # remove deleted files from files
     my @new_files;
     for my $f (@{$self->{'files'}}) {
-        if(!$f->{'deleted'} or -f $f->{'path'}) {
+        if(!$f->{'deleted'} || -f $f->{'path'}) {
             push @new_files, $f;
         } else {
             if($c && $f->{'deleted'}) {
@@ -392,7 +394,9 @@ sub get_objects_by_type {
     # scalar filter by name only
     if(defined $filter and ref $filter eq '') {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$filter}) {
-            return $self->{'objects'}->{'byname'}->{$type}->{$filter};
+            my $id  = $self->{'objects'}->{'byname'}->{$type}->{$filter};
+            return $id if ref $id;
+            return({$type.'_name' => { $filter => $id }});
         }
         return;
     }
@@ -546,6 +550,29 @@ sub get_objects_by_name {
 
 ##########################################################
 
+=head2 get_objects_by_path
+
+    get_objects_by_path($path)
+
+Get all objects by path. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
+
+=cut
+sub get_objects_by_path {
+    my($self, $path) = @_;
+
+    my $objects = [];
+    for my $file (@{$self->{'files'}}) {
+        next unless($file->{'path'} =~ m/^\Q$path\E/mx or $file->{'display'} =~ m/^\Q$path\E/mx);
+        for my $obj (@{$file->{'objects'}}) {
+            push @{$objects}, $obj;
+        }
+    }
+    return $objects;
+}
+
+
+##########################################################
+
 =head2 get_templates_by_type
 
     get_templates_by_type($type)
@@ -595,7 +622,7 @@ sub get_template_by_name {
 
     get_object_by_location($path, $linenr)
 
-Get object by location. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
+Get single object by path and line number. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
 
 =cut
 sub get_object_by_location {
@@ -700,6 +727,78 @@ sub get_services_for_host {
 
 ##########################################################
 
+=head2 get_hosts_for_service
+
+    get_hosts_for_service($svcobj)
+
+Get hosts for service. Returns a list of hosts using this service.
+
+=cut
+sub get_hosts_for_service {
+    my($self, $service) = @_;
+
+    $self->{'stats'}->profile(begin => "M::C::get_hosts_for_service()") if defined $self->{'stats'};
+
+    my($svc_conf_keys, $svc_config) = $service->get_computed_config($self);
+
+    my $hosts = {};
+
+    # directly assigned to service
+    if(defined $svc_config->{'host_name'}) {
+        for my $hst_name (@{$svc_config->{'host_name'}}) {
+            my $hsts = $self->get_objects_by_name('host', $hst_name);
+            if(scalar @{$hsts} > 0) {
+                for my $hst (@{$hsts}) {
+                    next if $hst->is_template();
+                    $hosts->{$hst_name} = $hst->get_id();
+                }
+            }
+        }
+    }
+
+    # assigned by hostgroup
+    if(defined $svc_config->{'hostgroup_name'}) {
+        for my $group_name (@{$svc_config->{'hostgroup_name'}}) {
+            my $groups = $self->get_objects_by_name('hostgroup', $group_name);
+            if($groups->[0]) {
+                my $group = $groups->[0];
+                my($grp_conf_keys, $grp_config) = $group->get_computed_config($self);
+                if($grp_config->{'members'}) {
+                    for my $hst_name (@{$grp_config->{'members'}}) {
+                        my $hsts = $self->get_objects_by_name('host', $hst_name);
+                        $hosts->{$hst_name} = $hsts->[0]->get_id() if $hsts->[0];
+                    }
+                }
+                my $refs = $self->get_references($group);
+                if($refs->{'host'}) {
+                    for my $hst_id (keys %{$refs->{'host'}}) {
+                        my $hst = $self->get_object_by_id($hst_id);
+                        if($hst->is_template()) {
+                            # check all refs for this host template too
+                            my $child_refs = $self->get_references($hst);
+                            if($refs->{'host'}) {
+                                for my $hst_id (keys %{$child_refs->{'host'}}) {
+                                    my $hst = $self->get_object_by_id($hst_id);
+                                    $hosts->{$hst->get_name()} = $hst->get_id() if $hst;
+                                }
+                            }
+                        } else {
+                            $hosts->{$hst->get_name()} = $hst->get_id() if $hst;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $self->{'stats'}->profile(end => "M::C::get_hosts_for_service()") if defined $self->{'stats'};
+
+    return $hosts;
+}
+
+
+##########################################################
+
 =head2 update
 
     update()
@@ -787,13 +886,19 @@ sub update_object {
 
     my $file = $obj->{'file'};
 
+    # invalidate all caches, because this object might have been used as template
+    for my $file (@{$self->{'files'}}) {
+        for my $o (@{$file->{'objects'}}) {
+            $o->{'cache'} = {};
+        }
+    }
+
     # delete some references
     $self->delete_object($obj, 0);
 
     # update object
-    $obj->{'conf'}          = $data;
-    $obj->{'cache'}         = {};
-    $obj->{'comments'}      = [ split/\n/mx, $comment ];
+    $obj->{'conf'}     = $data;
+    $obj->{'comments'} = [ split/\n/mx, $comment ];
 
     # unify comments
     for my $com (@{$obj->{'comments'}}) {
@@ -1012,7 +1117,7 @@ sub rename_dependencies {
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                     my($cmd,$arg) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                    if(!defined $arg or $arg eq '') {
+                    if(!defined $arg || $arg eq '') {
                         $obj->{'conf'}->{$key} = $new;
                     } else {
                         $obj->{'conf'}->{$key} = $new.'!'.$arg;
@@ -1027,6 +1132,107 @@ sub rename_dependencies {
     }
 
     return;
+}
+
+##########################################################
+
+=head2 clone_refs
+
+    clone_refs($orig, $obj, $cloned_name, $newname, [$clone_refs],  [$test_mode])
+
+clone all incoming references of object. In test mode nothing will be changed
+and just the list of clonables will be returned.
+If clone_refs is set, only those ids will be cloned.
+
+=cut
+sub clone_refs {
+    my($self, $orig, $obj, $cloned_name, $new_name, $clone_refs, $test_mode) = @_;
+
+    my $clone_refs_lookup = {};
+    $clone_refs_lookup = Thruk::Utils::array2hash($clone_refs) if $clone_refs;
+
+    my $clonables = {};
+    # clone incoming references
+    my $clonedtype = $obj->get_type();
+    my($incoming, $outgoing) = $self->gather_references($orig);
+    if($incoming) {
+        for my $type (keys %{$incoming}) {
+            for my $name (keys %{$incoming->{$type}}) {
+                my $ref_id = $incoming->{$type}->{$name};
+                my $ref    = $self->get_object_by_id($ref_id);
+                if(!$test_mode && $ref->{'file'}->{'readonly'}) {
+                    next;
+                }
+                for my $attr (keys %{$ref->{'conf'}}) {
+                    if(defined $ref->{'default'}->{$attr} && $ref->{'default'}->{$attr}->{'link'} && $ref->{'default'}->{$attr}->{'link'} eq $clonedtype) {
+                        if(ref $ref->{'conf'}->{$attr} eq 'ARRAY' && grep /^\Q$cloned_name\E$/mx, @{$ref->{'conf'}->{$attr}}) {
+                            if($test_mode) {
+                                $clonables->{$type}->{$ref_id} = {
+                                    readonly => $ref->{'file'}->{'readonly'} ? 1 : 0,
+                                    name     => $ref->get_name(),
+                                    attr     => $attr,
+                                };
+                                next;
+                            }
+                            if($clone_refs && !$clone_refs_lookup->{$ref_id}) {
+                                next;
+                            }
+                            push @{$ref->{'conf'}->{$attr}}, $new_name;
+                            $self->update_object($ref, dclone($ref->{'conf'}), join("\n", @{$ref->{'comments'}}));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $clonables if $test_mode;
+    return;
+}
+
+##########################################################
+
+=head2 gather_references
+
+    gather_references($obj)
+
+return incoming and outgoing references
+
+=cut
+sub gather_references {
+    my($self, $obj) = @_;
+
+    # references from other objects
+    my $refs = $self->get_references($obj);
+    my $incoming = {};
+    for my $type (keys %{$refs}) {
+        $incoming->{$type} = {};
+        for my $id (keys %{$refs->{$type}}) {
+            my $obj = $self->get_object_by_id($id);
+            $incoming->{$type}->{$obj->get_name()} = $id;
+        }
+    }
+
+    # references from this to other objects
+    my $outgoing = {};
+    my $resolved = $obj->get_resolved_config($self);
+    for my $attr (keys %{$resolved}) {
+        my $refs = $resolved->{$attr};
+        if(ref $refs eq '') { $refs = [$refs]; }
+        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
+            my $type = $obj->{'default'}->{$attr}->{'link'};
+            for my $r (@{$refs}) {
+                if($type eq 'command') { $r =~ s/\!.*$//mx; }
+                $outgoing->{$type}->{$r} = '';
+            }
+        }
+    }
+    # add used templates
+    if(defined $obj->{'conf'}->{'use'}) {
+        for my $t (@{$obj->{'conf'}->{'use'}}) {
+            $outgoing->{$obj->get_type()}->{$t} = '';
+        }
+    }
+    return($incoming, $outgoing);
 }
 
 ##########################################################
@@ -1087,7 +1293,6 @@ sub get_references {
             }
         }
     }
-
 
     return $list;
 }
@@ -1225,11 +1430,12 @@ sub _set_config {
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
-           and -s $ENV{'OMD_ROOT'}."/version"
-           and !$core_conf
-           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
-           and scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
+           && -s $ENV{'OMD_ROOT'}."/version"
+           && !$core_conf
+           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_dir'}))  == 0
+           && scalar(Thruk::Utils::list($self->{'config'}->{'obj_file'})) == 0) {
             my $newest = $self->_newest_file(
+                                             $ENV{'OMD_ROOT'}.'/tmp/naemon/naemon.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/icinga.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/nagios.cfg',
@@ -1240,6 +1446,9 @@ sub _set_config {
 
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
+        }
+        elsif($core_conf =~ m|/omd/sites/(.*?)/etc/naemon/naemon.cfg|mx) {
+            $core_conf = '/omd/sites/'.$1.'/tmp/naemon/naemon.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg';
@@ -1265,7 +1474,7 @@ sub _update_core_conf {
     my $self      = shift;
     my $core_conf = shift;
 
-    if(!defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
+    if(!defined $self->{'_coreconf'} || $self->{'_coreconf'} ne $core_conf) {
         if($core_conf) {
             $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'relative'});
         } else {
@@ -1312,7 +1521,7 @@ sub _update_core_conf {
             $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
         }
     }
-    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
+    CORE::close($fh) or die("cannot close file ".$self->{'path'}.": ".$!);
 
     return;
 }
@@ -1331,6 +1540,11 @@ sub _set_coretype {
     # try to determine core type from main config
     if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
         $self->{'coretype'} = 'icinga';
+        return;
+    }
+
+    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'naemon_user'}) {
+        $self->{'coretype'} = 'naemon';
         return;
     }
 
@@ -1487,7 +1701,7 @@ sub _get_files_names {
         }
     }
 
-    if(!defined $config->{'obj_dir'} and !defined $config->{'obj_file'}) {
+    if(!defined $config->{'obj_dir'} && !defined $config->{'obj_file'}) {
         push @{$self->{'parse_errors'}}, "you need to configure paths (obj_dir, obj_file)";
     }
 
@@ -1520,7 +1734,7 @@ sub _check_files_changed {
         my $check = $self->_check_file_changed($file);
 
         if($check == 1) {
-            if(!$reload or $file->{'changed'}) {
+            if(!$reload || $file->{'changed'}) {
                 push @newfiles, $file;
                 push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
                 $self->{'needs_index_update'} = 1;
@@ -1528,7 +1742,7 @@ sub _check_files_changed {
             }
         }
         elsif($check == 2) {
-            if($reload or !$file->{'changed'}) {
+            if($reload || !$file->{'changed'}) {
                 $file->{'parsed'} = 0;
                 $file->update_objects();
                 $file->_update_meta_data();
@@ -1571,7 +1785,7 @@ sub _check_file_changed {
        $atime,$mtime,$ctime,$blksize,$blocks)
        = stat($file->{'path'});
 
-    if(!defined $ino or !defined $file->{'inode'}) {
+    if(!defined $ino || !defined $file->{'inode'}) {
         return 1;
     }
     else {
@@ -1741,9 +1955,9 @@ sub _update_obj_in_index {
         $found++;
     }
 
-    if($found or defined $primary) {
+    if($found || defined $primary) {
         # by type
-        if(!defined $obj->{'conf'}->{'register'} or $obj->{'conf'}->{'register'} != 0) {
+        if(!defined $obj->{'conf'}->{'register'} || $obj->{'conf'}->{'register'} != 0) {
             push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
         }
     }
@@ -1780,7 +1994,8 @@ sub _newest_file {
 
 ##########################################################
 sub _check_references {
-    my($self) = @_;
+    my($self, %options) = @_;
+
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
     my @parse_errors;
     $self->_all_object_links_callback(sub {
@@ -1788,12 +2003,41 @@ sub _check_references {
         return if $obj->{'disabled'};
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
-                push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                if($options{'hash'}) {
+                    push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
+                                          id        => $obj->get_id(),
+                                          type      => $obj->get_type(),
+                                          name      => $obj->get_name(),
+                                          obj       => $obj,
+                                          message   => "referenced template '$val' does not exist",
+                                          cleanable => 0,
+                                        };
+                } else {
+                    push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                }
             }
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
+            # 'null' is a special value used to cancel inheritance
+            return if $val eq 'null';
+
             # hostgroups are allowed to have a register 0
-            if($link ne 'hostgroup' or !defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
+            return if ($link eq 'hostgroup' and defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val});
+
+            # shinken defines this command by itself
+            return if ($self->{'coretype'} eq 'shinken' and $val eq 'bp_rule');
+            return if ($self->{'coretype'} eq 'shinken' and $link eq 'command' and $val eq '_internal_host_up');
+
+            if($options{'hash'}) {
+                push @parse_errors, { ident     => $obj->get_id().'/'.$attr.';'.$val,
+                                      id        => $obj->get_id(),
+                                      type      => $obj->get_type(),
+                                      name      => $obj->get_name(),
+                                      obj       => $obj,
+                                      message   => 'referenced '.$link." '".$val."' does not exist",
+                                      cleanable => 0,
+                                    };
+            } else {
                 push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
             }
         }
@@ -1810,7 +2054,7 @@ sub _check_orphaned_objects {
     $self->{'stats'}->profile(begin => "M::C::_check_orphaned_objects()") if defined $self->{'stats'};
     my @errors;
 
-    # get build list of objects
+    # build list of objects
     my $all_templates = {};
     my $all_objects   = {};
     for my $type (keys %{$self->{'objects'}->{'byname'}}) {
@@ -1835,7 +2079,15 @@ sub _check_orphaned_objects {
     });
     for my $type (keys %{$all_templates}) {
         for my $name (keys %{$all_templates->{$type}}) {
-            push @errors, $type." template '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}));
+            my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name});
+            push @errors, { ident     => $obj->get_id(),
+                            id        => $obj->get_id(),
+                            type      => $type,
+                            name      => $obj->get_name(),
+                            obj       => $obj,
+                            message   => "this ".$type." template is not used anywhere",
+                            cleanable => 1,
+                        };
         }
     }
     for my $type (keys %{$all_objects}) {
@@ -1843,8 +2095,17 @@ sub _check_orphaned_objects {
         next if $type eq 'servicedependency';
         for my $name (keys %{$all_objects->{$type}}) {
             my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
+            next if !defined $obj;
             next if defined $obj->{'conf'}->{'members'};
-            push @errors, $type." object '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($obj);
+            next if $type eq 'host';
+            push @errors, { ident     => $obj->get_id(),
+                            id        => $obj->get_id(),
+                            type      => $obj->get_type(),
+                            name      => $obj->get_name(),
+                            obj       => $obj,
+                            message   => "this ".$type." is not used anywhere",
+                            cleanable => 1,
+                        };
         }
     }
 
@@ -1855,6 +2116,17 @@ sub _check_orphaned_objects {
 
 ##########################################################
 # run callback function for every link
+#
+# ex.: _all_object_links_callback(sub {
+#          my($file, $obj, $attr, $link, $val, $args) = @_;
+#          $file  = reference to file object
+#          $obj   = reference to object itself
+#          $attr  = attribute name of link, ex.: use, members, ...
+#          $link  = link type, ex.: host, hostgroup, ...
+#          $val   = value name, ex.: hostgroup_abc, generic-host, ...
+#          $args  = optional arguments of commands
+#      })
+#
 sub _all_object_links_callback {
     my($self, $cb) = @_;
 
@@ -1872,11 +2144,11 @@ sub _all_object_links_callback {
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
                         next if $ref2 eq '';
-                        &$cb($file, $obj, $key, $link, $ref2);
+                        &{$cb}($file, $obj, $key, $link, $ref2);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
-                    &$cb($file, $obj, $key, $link, $obj->{'conf'}->{$key});
+                    &{$cb}($file, $obj, $key, $link, $obj->{'conf'}->{$key});
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
@@ -1889,12 +2161,12 @@ sub _all_object_links_callback {
                         if($obj->{'default'}->{$key}->{'link'} eq 'command') {
                             ($ref2,$args) = split(/!/mx, $ref2, 2);
                         }
-                        &$cb($file, $obj, $key, $link, $ref2, $args);
+                        &{$cb}($file, $obj, $key, $link, $ref2, $args);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                     my($cmd,$args) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                    &$cb($file, $obj, $key, $link, $cmd, $args);
+                    &{$cb}($file, $obj, $key, $link, $cmd, $args);
                 }
             }
         }
@@ -1910,7 +2182,7 @@ sub _resolve_relative_path {
         $file = $basedir.'/'.$file;
         $file =~ s|//|/|gmx;
         my $x = 0;
-        while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ };
+        while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ }
     }
     return $file;
 }
@@ -1919,7 +2191,7 @@ sub _resolve_relative_path {
 ##########################################################
 sub _array_diff {
     my($self, $list1, $list2) = @_;
-    return 0 if(!defined $list1 and !defined $list2);
+    return 0 if(!defined $list1 && !defined $list2);
     return 1 if !defined $list1;
     return 1 if !defined $list2;
 
@@ -1928,7 +2200,7 @@ sub _array_diff {
     return 1 if $nr1 != $nr2;
 
     for my $x (0..$nr1) {
-        next if(!defined $list1->[$x] and !defined $list2->[$x]);
+        next if(!defined $list1->[$x] && !defined $list2->[$x]);
         return 1 if !defined $list1->[$x];
         return 1 if !defined $list2->[$x];
         return 1 if $list1->[$x] ne $list2->[$x];
@@ -1968,7 +2240,7 @@ sub _remote_do {
         Thruk::Utils::set_message( $c, 'fail_message', $text[0] );
         return;
     } else {
-        die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+        die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
         return $res->[2];
     }
 }
@@ -1985,7 +2257,7 @@ sub _remote_do_bg {
                             args     => $args,
                             wait     => 1,
                     });
-    die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+    die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
     return $res->[2];
 }
 
@@ -2018,6 +2290,7 @@ sub remote_file_sync {
     return unless $self->is_remote();
     my $files = {};
     for my $f (@{$self->{'files'}}) {
+        next unless -f $f->{'path'};
         $files->{$f->{'display'}} = {
             'mtime'        => $f->{'mtime'},
             'md5'          => $f->{'md5'},
@@ -2039,14 +2312,14 @@ sub remote_file_sync {
             $dir          =~ s/\/[^\/]+$//mx;
             Thruk::Utils::IO::mkdir_r($dir);
             Thruk::Utils::IO::write($localpath, $f->{'content'}, $f->{'mtime'});
-            $c->{'request'}->{'parameters'}->{'refresh'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
         }
     }
     for my $f (@{$self->{'files'}}) {
         $c->log->debug('checking file: '.$f->{'display'});
         if(!defined $remotefiles->{$f->{'display'}}) {
             $c->log->debug('deleting file: '.$f->{'display'});
-            $c->{'request'}->{'parameters'}->{'refresh'} = 1; # must be set to save changes to tmp obj retention
+            $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
             unlink($f->{'path'});
         } else {
             $c->log->debug('keeping file: '.$f->{'display'});
@@ -2078,7 +2351,7 @@ sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 
@@ -2095,7 +2368,7 @@ sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
     my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
-    $c->{'stash'}->{'output'} = $output;
+    $c->stash->{'output'} = $output;
     return !$rc;
 }
 
@@ -2179,17 +2452,16 @@ sub read_rc_file {
         }
     }
 
-    my %settings;
+    my $settings;
     if($file and -r $file) {
-        my $conf = new Config::General($file);
-        %settings = $conf->getall();
+        $settings = Thruk::Config::read_config_file($file);
         for my $key (qw/object_attribute_key_order object_cust_var_order/) {
-            next unless defined $settings{$key};
-            $settings{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
-            $settings{$key} = [ split/\s+/mx, $settings{$key} ];
+            next unless defined $settings->{$key};
+            $settings->{$key} =~ s/^\s*\[\s*(.*?)\s*\]\s*$/$1/gmx;
+            $settings->{$key} = [ split/\s+/mx, $settings->{$key} ];
         }
     }
-    $self->set_save_config(\%settings);
+    $self->set_save_config($settings);
     return;
 }
 
@@ -2227,8 +2499,10 @@ sub _sort_by_object_keys {
     my($attr_keys, $cust_var_keys) = @_;
 
     return sub {
+        ## no critic
         $a = $Monitoring::Config::Object::Parent::a;
         $b = $Monitoring::Config::Object::Parent::b;
+        ## use critic
         my $order = $attr_keys;
         my $num   = scalar @{$attr_keys} + 5;
 
@@ -2255,7 +2529,7 @@ sub _sort_by_object_keys {
         if(substr($b, 0, 1) eq '_') { return -$result; }
 
         return $result;
-    }
+    };
 }
 
 ##########################################################
@@ -2339,7 +2613,7 @@ sub get_plugin_help {
             $cmd = $cmd." -h 2>/dev/null";
             $help = `$cmd`;
             alarm(0);
-        }
+        };
     }
     return $help;
 }
@@ -2397,7 +2671,7 @@ sub get_plugin_preview {
             $cmd = $cmd." 2>/dev/null";
             $output = `$cmd`;
             alarm(0);
-        }
+        };
     }
     return $output;
 }
@@ -2405,7 +2679,7 @@ sub get_plugin_preview {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

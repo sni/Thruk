@@ -12,8 +12,7 @@ Status Utilities Collection for Thruk
 
 use strict;
 use warnings;
-use Carp;
-use utf8;
+use Carp qw/confess/;
 
 ##############################################
 
@@ -29,27 +28,28 @@ sets some default stash variables
 sub set_default_stash {
     my( $c ) = @_;
 
-    $c->stash->{'hoststatustypes'}      = $c->{'request'}->{'parameters'}->{'hoststatustypes'}    || '';
-    $c->stash->{'hostprops'}            = $c->{'request'}->{'parameters'}->{'hostprops'}          || '';
-    $c->stash->{'servicestatustypes'}   = $c->{'request'}->{'parameters'}->{'servicestatustypes'} || '';
-    $c->stash->{'serviceprops'}         = $c->{'request'}->{'parameters'}->{'serviceprops'}       || '';
-    $c->stash->{'nav'}                  = $c->{'request'}->{'parameters'}->{'nav'}                || '';
-    $c->stash->{'entries'}              = $c->{'request'}->{'parameters'}->{'entries'}            || '';
-    $c->stash->{'sortoption'}           = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
-    $c->stash->{'sortoption_hst'}       = $c->{'request'}->{'parameters'}->{'sortoption_hst'}     || '';
-    $c->stash->{'sortoption_svc'}       = $c->{'request'}->{'parameters'}->{'sortoption_svc'}     || '';
-    $c->stash->{'hidesearch'}           = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
-    $c->stash->{'hostgroup'}            = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
-    $c->stash->{'servicegroup'}         = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
-    $c->stash->{'host'}                 = $c->{'request'}->{'parameters'}->{'host'}               || '';
-    $c->stash->{'service'}              = $c->{'request'}->{'parameters'}->{'service'}            || '';
-    $c->stash->{'data'}                 = '';
+    $c->stash->{'hoststatustypes'}      = $c->req->parameters->{'hoststatustypes'}    || '';
+    $c->stash->{'hostprops'}            = $c->req->parameters->{'hostprops'}          || '';
+    $c->stash->{'servicestatustypes'}   = $c->req->parameters->{'servicestatustypes'} || '';
+    $c->stash->{'serviceprops'}         = $c->req->parameters->{'serviceprops'}       || '';
+    $c->stash->{'nav'}                  = $c->req->parameters->{'nav'}                || '';
+    $c->stash->{'entries'}              = $c->req->parameters->{'entries'}            || '';
+    $c->stash->{'sortoption'}           = $c->req->parameters->{'sortoption'}         || '';
+    $c->stash->{'sortoption_hst'}       = $c->req->parameters->{'sortoption_hst'}     || '';
+    $c->stash->{'sortoption_svc'}       = $c->req->parameters->{'sortoption_svc'}     || '';
+    $c->stash->{'hidesearch'}           = $c->req->parameters->{'hidesearch'}         || 0;
+    $c->stash->{'hostgroup'}            = $c->req->parameters->{'hostgroup'}          || '';
+    $c->stash->{'servicegroup'}         = $c->req->parameters->{'servicegroup'}       || '';
+    $c->stash->{'host'}                 = $c->req->parameters->{'host'}               || '';
+    $c->stash->{'service'}              = $c->req->parameters->{'service'}            || '';
+    $c->stash->{'data'}                = '';
     $c->stash->{'style'}                = '';
     $c->stash->{'has_error'}            = 0;
     $c->stash->{'pager'}                = '';
     $c->stash->{show_substyle_selector} = 1;
     $c->stash->{imgsize}                = 20;
     $c->stash->{'audiofile'}            = '';
+    $c->stash->{'has_service_filter'}   = 0;
 
     return;
 }
@@ -101,17 +101,17 @@ returns search parameter based on request parameters
 sub get_search_from_param {
     my( $c, $prefix, $force ) = @_;
 
-    unless ( $force || exists $c->{'request'}->{'parameters'}->{ $prefix . '_hoststatustypes' } ) {
+    unless ( $force || exists $c->req->parameters->{ $prefix . '_hoststatustypes' } ) {
         return;
     }
 
     # use the type or prop without prefix as global overide
     # ex.: hoststatustypes set from the totals link should override all filter
     my $search = {
-        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $c->{'request'}->{'parameters'}->{ $prefix . '_hoststatustypes' },
-        'hostprops'          => $c->stash->{'hostprops'}          || $c->{'request'}->{'parameters'}->{ $prefix . '_hostprops' },
-        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $c->{'request'}->{'parameters'}->{ $prefix . '_servicestatustypes' },
-        'serviceprops'       => $c->stash->{'serviceprops'}       || $c->{'request'}->{'parameters'}->{ $prefix . '_serviceprops' },
+        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $c->req->parameters->{ $prefix . '_hoststatustypes' },
+        'hostprops'          => $c->stash->{'hostprops'}          || $c->req->parameters->{ $prefix . '_hostprops' },
+        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $c->req->parameters->{ $prefix . '_servicestatustypes' },
+        'serviceprops'       => $c->stash->{'serviceprops'}       || $c->req->parameters->{ $prefix . '_serviceprops' },
     };
 
     # store global searches, these will be added to our search
@@ -122,17 +122,17 @@ sub get_search_from_param {
         'service'      => $c->stash->{'service'},
     };
 
-    if( defined $c->{'request'}->{'parameters'}->{ $prefix . '_type' } ) {
-        if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {
-            for ( my $x = 0; $x < scalar @{ $c->{'request'}->{'parameters'}->{ $prefix . '_type' } }; $x++ ) {
+    if( defined $c->req->parameters->{ $prefix . '_type' } ) {
+        if( ref $c->req->parameters->{ $prefix . '_type' } eq 'ARRAY' ) {
+            for ( my $x = 0; $x < scalar @{ $c->req->parameters->{ $prefix . '_type' } }; $x++ ) {
                 my $text_filter = {
-                    val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' }->[$x] || '',
-                    type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' }->[$x],
-                    value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
-                    op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
+                    val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }->[$x], ''),
+                    type    => _is_defined($c->req->parameters->{ $prefix . '_type' }->[$x],    ''),
+                    value   => _is_defined($c->req->parameters->{ $prefix . '_value' }->[$x],   ''),
+                    op      => _is_defined($c->req->parameters->{ $prefix . '_op' }->[$x],      ''),
                 };
-                if($text_filter->{'type'} eq 'business impact' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
-                    $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
+                if($text_filter->{'type'} eq 'business impact' and defined $c->req->parameters->{ $prefix . '_value_sel' }->[$x]) {
+                    $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel' }->[$x];
                 }
                 push @{ $search->{'text_filter'} }, $text_filter;
                 if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
@@ -140,19 +140,20 @@ sub get_search_from_param {
         }
         else {
             my $text_filter = {
-                val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' } || '',
-                type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' },
-                value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
-                op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
+                val_pre => _is_defined($c->req->parameters->{ $prefix . '_val_pre' }, ''),
+                type    => _is_defined($c->req->parameters->{ $prefix . '_type' },    ''),
+                value   => _is_defined($c->req->parameters->{ $prefix . '_value' },   ''),
+                op      => _is_defined($c->req->parameters->{ $prefix . '_op' },      ''),
             };
-            if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
-                $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
+            if(defined $c->req->parameters->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
+                $text_filter->{'value'} = $c->req->parameters->{ $prefix . '_value_sel'};
             }
             push @{ $search->{'text_filter'} }, $text_filter;
             if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
         }
     }
 
+    # add other filter
     for my $key (keys %{$globals}) {
         if(defined $globals->{$key} and $globals->{$key} ne '') {
             my $text_filter = {
@@ -162,6 +163,17 @@ sub get_search_from_param {
                 op      => '=',
             };
             push @{ $search->{'text_filter'} }, $text_filter;
+        }
+    }
+
+    # put our default filter into the search box
+    if($c->req->parameters->{'add_default_service_filter'}) {
+        my $default_service_text_filter = set_default_filter($c);
+        if($default_service_text_filter) {
+            # not for service searches
+            if(!defined $c->req->parameters->{'s0_value'} || $c->req->parameters->{'s0_value'} !~ m/^se:/mx) {
+                unshift @{ $search->{'text_filter'} }, $default_service_text_filter;
+            }
         }
     }
 
@@ -187,13 +199,16 @@ sub do_filter {
     my $servicegroupfilter;
     my $searches;
 
+    # flag whether there are service only filters or not
+    $c->stash->{'has_service_filter'} = 0;
+
     $prefix = 'dfl_' unless defined $prefix;
 
-    unless ( exists $c->{'request'}->{'parameters'}->{$prefix.'s0_hoststatustypes'}
-          or exists $c->{'request'}->{'parameters'}->{$prefix.'s0_type'}
-          or exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
-          or exists $c->{'request'}->{'parameters'}->{'s0_type'}
-          or exists $c->{'request'}->{'parameters'}->{'complex'} )
+    unless ( exists $c->req->parameters->{$prefix.'s0_hoststatustypes'}
+          or exists $c->req->parameters->{$prefix.'s0_type'}
+          or exists $c->req->parameters->{'s0_hoststatustypes'}
+          or exists $c->req->parameters->{'s0_type'}
+          or exists $c->req->parameters->{'complex'} )
     {
 
         # classic search
@@ -205,8 +220,8 @@ sub do_filter {
     }
     else {
 
-        if(   exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
-           or exists $c->{'request'}->{'parameters'}->{'s0_type'} ) {
+        if(   exists $c->req->parameters->{'s0_hoststatustypes'}
+           or exists $c->req->parameters->{'s0_type'} ) {
             $prefix = '';
         }
 
@@ -225,6 +240,28 @@ sub do_filter {
     return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
 }
 
+##############################################
+
+=head2 reset_filter
+
+  reset_filter($c)
+
+reset filter from c->request->parameters
+
+=cut
+sub reset_filter {
+    my($c) = @_;
+    delete $c->stash->{'host'};
+    delete $c->stash->{'hostgroup'};
+    delete $c->stash->{'servicegroup'};
+    delete $c->stash->{'service'};
+    for my $key (keys %{$c->req->parameters}) {
+        delete $c->req->parameters->{$key} if $key =~ m/^dfl_/mx;
+        delete $c->req->parameters->{$key} if $key =~ m/^svc_/mx;
+        delete $c->req->parameters->{$key} if $key =~ m/^hst_/mx;
+    }
+    return;
+}
 
 ##############################################
 
@@ -240,13 +277,13 @@ sub classic_filter {
 
     # classic search
     my $errors       = 0;
-    my $host         = $c->{'request'}->{'parameters'}->{'host'}         || '';
-    my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+    my $host         = $c->req->parameters->{'host'}         || '';
+    my $hostgroup    = $c->req->parameters->{'hostgroup'}    || '';
+    my $servicegroup = $c->req->parameters->{'servicegroup'} || '';
 
-    $c->stash->{'host'}         = $host         if defined $c->{'stash'};
-    $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->{'stash'};
-    $c->stash->{'servicegroup'} = $servicegroup if defined $c->{'stash'};
+    $c->stash->{'host'}         = $host         if defined $c->stash;
+    $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->stash;
+    $c->stash->{'servicegroup'} = $servicegroup if defined $c->stash;
 
     my @hostfilter;
     my @hostgroupfilter;
@@ -275,7 +312,11 @@ sub classic_filter {
     if ( $servicegroup ne 'all' and $servicegroup ne '' ) {
         push @servicefilter,       [ { 'groups' => { '>=' => $servicegroup } } ];
         push @servicegroupfilter,  [ { 'name' => $servicegroup } ];
+        $c->stash->{'has_service_filter'} = 1;
     }
+
+    # apply default filter
+    my $default_service_text_filter = set_default_filter($c, \@servicefilter);
 
     my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     my $hostgroupfilter    = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
@@ -284,14 +325,14 @@ sub classic_filter {
 
     # fill the host/service totals box
     unless($errors or $c->stash->{'minimal'}) {
-        Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->{'stash'};
+        Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->stash;
     }
 
     # then add some more filter based on get parameter
-    my $hoststatustypes    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
-    my $hostprops          = $c->{'request'}->{'parameters'}->{'hostprops'};
-    my $servicestatustypes = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
-    my $serviceprops       = $c->{'request'}->{'parameters'}->{'serviceprops'};
+    my $hoststatustypes    = $c->req->parameters->{'hoststatustypes'};
+    my $hostprops          = $c->req->parameters->{'hostprops'};
+    my $servicestatustypes = $c->req->parameters->{'servicestatustypes'};
+    my $serviceprops       = $c->req->parameters->{'serviceprops'};
 
     my( $host_statustype_filtername,  $host_prop_filtername,  $service_statustype_filtername,  $service_prop_filtername );
     my( $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue );
@@ -310,6 +351,11 @@ sub classic_filter {
         'service_prop_filtername'       => $service_prop_filtername,
         'text_filter'                   => [],
     };
+
+    # put our default filter into the search box
+    if($default_service_text_filter) {
+        push @{ $search->{'text_filter'} }, $default_service_text_filter;
+    }
 
     if( $host ne '' ) {
         push @{ $search->{'text_filter'} },
@@ -337,10 +383,11 @@ sub classic_filter {
             'value'   => $servicegroup,
             'op'      => '=',
             };
+        $c->stash->{'has_service_filter'} = 1;
     }
 
     if($errors) {
-        $c->stash->{'has_error'} = 1 if defined $c->{'stash'};
+        $c->stash->{'has_error'} = 1 if defined $c->stash;
     }
 
     return ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
@@ -380,7 +427,7 @@ sub do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and (!$c->stash->{'minimal'} or $c->stash->{'play_sounds'}) and ( $prefix eq 'dfl_' or $prefix eq '')) {
+    if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq '')) {
         Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
@@ -420,18 +467,18 @@ fill host and service totals box
 sub fill_totals_box {
     my( $c, $hostfilter, $servicefilter, $force ) = @_;
 
-    return 1 if($c->stash->{'no_totals'} and !$force);
+    return 1 if($c->stash->{'no_totals'} && !$force);
 
     # host status box
     my $host_stats    = {};
     my $service_stats = {};
     if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
-            and ( $c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' )
+            and ( defined $c->stash->{style} and ($c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' ))
           )
       ) {
         # set host status from service query
-        my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        my $services = $c->{'db'}->get_hosts_by_servicequery( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $service_stats = {
             'pending'                => 0,
             'ok'                     => 0,
@@ -452,18 +499,24 @@ sub fill_totals_box {
         };
         my %hosts;
         for my $service (@{$services}) {
-            if($service->{'has_been_checked'} == 1) {
-                $service_stats->{'ok'}++        if $service->{'state'} == 0;
-                $service_stats->{'warning'}++   if $service->{'state'} == 1;
-                $service_stats->{'critical'}++  if $service->{'state'} == 2;
-                $service_stats->{'unknown'}++   if $service->{'state'} == 3;
-
-                $service_stats->{'warning_and_unhandled'}++  if($service->{'state'} == 1 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $service_stats->{'critical_and_unhandled'}++ if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $service_stats->{'unknown_and_unhandled'}++  if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-            }
             if($service->{'has_been_checked'} == 0) {
                 $service_stats->{'pending'}++;
+            } else {
+                if($service->{'state'} == 0) {
+                    $service_stats->{'ok'}++;
+                }
+                elsif($service->{'state'} == 1) {
+                    $service_stats->{'warning'}++;
+                    $service_stats->{'warning_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'state'} == 2) {
+                    $service_stats->{'critical'}++;
+                    $service_stats->{'critical_and_unhandled'}++ if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'state'} == 3) {
+                    $service_stats->{'unknown'}++;
+                    $service_stats->{'unknown_and_unhandled'}++  if($service->{'scheduled_downtime_depth'} == 0 and $service->{'acknowledged'} == 0 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
             }
             next if defined $hosts{$service->{'host_name'}};
             $hosts{$service->{'host_name'}} = 1;
@@ -471,21 +524,25 @@ sub fill_totals_box {
             if($service->{'host_has_been_checked'} == 0) {
                 $host_stats->{'pending'}++;
             } else{
-                $host_stats->{'up'}++          if $service->{'host_state'} == 0;
-                $host_stats->{'down'}++        if $service->{'host_state'} == 1;
-                $host_stats->{'unreachable'}++ if $service->{'host_state'} == 2;
+                if($service->{'host_state'} == 0) {
+                    $host_stats->{'up'}++;
+                }
+                elsif($service->{'host_state'} == 1) {
+                    $host_stats->{'down'}++;
+                    $host_stats->{'down_and_unhandled'}++        if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
+                elsif($service->{'host_state'} == 2) {
+                    $host_stats->{'unreachable'}++;
+                    $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
+                }
 
-                $host_stats->{'down_and_unhandled'}++        if($service->{'host_state'} == 1 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
-                $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_state'} == 2 and $service->{'host_scheduled_downtime_depth'} == 0 and $service->{'host_acknowledged'} == 0);
             }
         }
     } else {
-        $host_stats    = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        $host_stats    = $c->{'db'}->get_host_stats(    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),    $hostfilter    ] );
         $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
     }
-    $c->stash->{'host_stats'} = $host_stats;
-
-    # services status box
+    $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
 
     # set audio file to play
@@ -513,7 +570,7 @@ sub extend_filter {
     push @hostfilter,    $hostfilter    if defined $hostfilter;
     push @servicefilter, $servicefilter if defined $servicefilter;
 
-    $c->stash->{'show_filter_table'} = 0 if defined $c->{'stash'};
+    $c->stash->{'show_filter_table'} = 0 if defined $c->stash;
 
     # host statustype filter (up,down,...)
     my( $host_statustype_filtername, $host_statustype_filter, $host_statustype_filter_service );
@@ -522,7 +579,7 @@ sub extend_filter {
     push @hostfilter,    $host_statustype_filter         if defined $host_statustype_filter;
     push @servicefilter, $host_statustype_filter_service if defined $host_statustype_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $host_statustype_filter and  defined $c->{'stash'};
+    $c->stash->{'show_filter_table'} = 1 if defined $host_statustype_filter and  defined $c->stash;
 
     # host props filter (downtime, acknowledged...)
     my( $host_prop_filtername, $host_prop_filter, $host_prop_filter_service );
@@ -531,23 +588,23 @@ sub extend_filter {
     push @hostfilter,    $host_prop_filter         if defined $host_prop_filter;
     push @servicefilter, $host_prop_filter_service if defined $host_prop_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $host_prop_filter and  defined $c->{'stash'};
+    $c->stash->{'show_filter_table'} = 1 if defined $host_prop_filter and  defined $c->stash;
 
     # service statustype filter (ok,warning,...)
     my( $service_statustype_filtername, $service_statustype_filter_service );
     ( $servicestatustypes, $service_statustype_filtername, $service_statustype_filter_service )
-        = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes);
+        = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes, $c);
     push @servicefilter, $service_statustype_filter_service if defined $service_statustype_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $service_statustype_filter_service and  defined $c->{'stash'};
+    $c->stash->{'show_filter_table'} = 1 if defined $service_statustype_filter_service and  defined $c->stash;
 
     # service props filter (downtime, acknowledged...)
     my( $service_prop_filtername, $service_prop_filter_service );
     ( $serviceprops, $service_prop_filtername, $service_prop_filter_service )
-        = Thruk::Utils::Status::get_service_prop_filter($serviceprops);
+        = Thruk::Utils::Status::get_service_prop_filter($serviceprops, $c);
     push @servicefilter, $service_prop_filter_service if defined $service_prop_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $service_prop_filter_service and  defined $c->{'stash'};
+    $c->stash->{'show_filter_table'} = 1 if defined $service_prop_filter_service and  defined $c->stash;
 
     $hostfilter    = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     $servicefilter = Thruk::Utils::combine_filter( '-and', \@servicefilter );
@@ -637,6 +694,7 @@ sub single_search {
             }
             elsif ( $filter->{'type'} eq 'servicegroup' ) {
                 push @servicegroupfilter, { name => { '!=' => undef } };
+                $c->stash->{'has_service_filter'} = 1;
                 next;
             }
         }
@@ -645,6 +703,7 @@ sub single_search {
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
 
             my $host_search_filter = [ { name               => { $op     => $value } },
+                                       { display_name       => { $op     => $value } },
                                        { alias              => { $op     => $value } },
                                        { address            => { $op     => $value } },
                                        { groups             => { $listop => $value } },
@@ -657,10 +716,12 @@ sub single_search {
 
             # and some for services
             my $service_search_filter = [ { description        => { $op     => $value } },
+                                          { display_name       => { $op     => $value } },
                                           { groups             => { $listop => $value } },
                                           { plugin_output      => { $op     => $value } },
                                           { long_plugin_output => { $op     => $value } },
                                           { host_name          => { $op     => $value } },
+                                          { host_display_name  => { $op     => $value } },
                                           { host_alias         => { $op     => $value } },
                                           { host_address       => { $op     => $value } },
                                           { host_groups        => { $listop => $value } },
@@ -678,21 +739,22 @@ sub single_search {
                 my $searchhost = $value;
                 $searchhost =~ s/\.\*/*/gmx;
                 $searchhost =~ s/\*/.*/gmx;
-                push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost } ] };
-                push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost } ] };
-                push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost } ] };
-                push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost } ] };
+                push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
+                push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
+                push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
+                push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
             }
             else {
-                push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value } ] };
-                push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value } ] };
-                push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value } ] };
-                push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }] };
+                push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
+                push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
+                push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
             }
         }
         elsif ( $filter->{'type'} eq 'service' ) {
-            push @servicefilter,       { description => { $op => $value } };
-            push @servicetotalsfilter, { description => { $op => $value } };
+            push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+            push @servicetotalsfilter, { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
+            $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
             if($op eq '~~' or $op eq '!~~') {
@@ -719,6 +781,7 @@ sub single_search {
                 push @servicetotalsfilter, { groups => { $listop => $value } };
             }
             push @servicegroupfilter,  { name   => { $op     => $value } };
+            $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
             if($op eq '~~' or $op eq '!~~') {
@@ -785,6 +848,12 @@ sub single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
+        elsif ( $filter->{'type'} eq 'plugin output' ) {
+            my $cop = '-or';
+            if($op eq '!=' or $op eq '!~~') { $cop = '-and' }
+            push @hostfilter,    { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @servicefilter, { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+        }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
@@ -804,6 +873,8 @@ sub single_search {
         # Business Impact (criticity) is only available in Shinken
         elsif ( $filter->{'type'} eq 'business impact' || $filter->{'type'} eq 'priority' ) {
             next unless $c->stash->{'enable_shinken_features'};
+            # value has to be numeric, otherwise shinken breaks
+            $value =~ s/[^\d]//gmx; $value = 0 unless $value;
             push @hostfilter,    { criticity => { $op => $value } };
             push @servicefilter, { criticity => { $op => $value } };
         }
@@ -832,27 +903,27 @@ sub single_search {
                 or ($op eq '='  and ($now - $c->stash->{'last_program_restart'}) == $value)
                ) {
                 push @hostfilter,    { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value }
-                                                        ]
+                                                          last_state_change => { $rop => $now - $value },
+                                                        ],
                                               },
-                                              { last_state_change => { '=' => 0 } }
+                                              { last_state_change => { '=' => 0 } },
                                               ],
                                      };
                 push @servicefilter, { -or => [{ -and => [ last_state_change => { '!=' => 0 },
-                                                          last_state_change => { $rop => $now - $value }
-                                                        ]
+                                                          last_state_change => { $rop => $now - $value },
+                                                        ],
                                               },
                                               { last_state_change => { '=' => 0 } },
                                               ],
                                      };
             } else {
                 push @hostfilter,    { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value }
-                                               ]
+                                                 last_state_change => { $rop => $now - $value },
+                                               ],
                                      };
                 push @servicefilter, { -and => [ last_state_change => { '!=' => 0 },
-                                                 last_state_change => { $rop => $now - $value }
-                                               ]
+                                                 last_state_change => { $rop => $now - $value },
+                                               ],
                                      };
             }
         }
@@ -868,8 +939,8 @@ sub single_search {
             if($op eq '!=')  { $cop = '-and' }
             if($op eq '!~~') { $cop = '-and' }
             push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
-                                                  custom_variables => { $op => $pre." ".$value }
-                                          ]
+                                                  custom_variables => { $op => $pre." ".$value },
+                                          ],
                                  };
         }
         else {
@@ -907,7 +978,7 @@ sub get_host_statustype_filter {
     my @hoststatusfilter;
     my @servicestatusfilter;
 
-    $number = 15 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 15;
+    $number = 15 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 15;
     my $hoststatusfiltername = 'All';
     if( $number and $number != 15 ) {
         my @hoststatusfiltername;
@@ -959,7 +1030,7 @@ sub get_host_prop_filter {
     my @host_prop_filter;
     my @host_prop_filter_service;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
+    $number = 0 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 67108863;
     my $host_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @host_prop_filtername;
@@ -1116,14 +1187,15 @@ returns filter for number
 
 =cut
 sub get_service_statustype_filter {
-    my( $number ) = @_;
+    my( $number, $c ) = @_;
 
     my @servicestatusfilter;
     my @servicestatusfiltername;
 
-    $number = 31 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 31;
+    $number = 31 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 31;
     my $servicestatusfiltername = 'All';
     if( $number and $number != 31 ) {
+        $c->stash->{'has_service_filter'} = 1 if $c;
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "n", int($number) ) ) );
 
         if( $bits[0] ) {    # 1 - pending
@@ -1166,14 +1238,15 @@ returns filter for number
 
 =cut
 sub get_service_prop_filter {
-    my( $number ) = @_;
+    my( $number, $c ) = @_;
 
     my @service_prop_filter;
     my @service_prop_filtername;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
+    $number = 0 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 67108863;
     my $service_prop_filtername = 'Any';
     if( $number > 0 ) {
+        $c->stash->{'has_service_filter'} = 1 if $c;
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "N", int($number) ) ) );
 
         if( $bits[0] ) {    # 1 - In Scheduled Downtime
@@ -1354,18 +1427,36 @@ sub get_groups_filter {
 
     return(\@hostfilter, \@servicefilter) if $value eq '';
 
-    my $groups;
-    if($type eq 'hostgroup') {
-        $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ] );
+    my @names;
+    if($c->stash->{'cache_groups_filter'}) {
+        my $cache = $c->stash->{'cache_groups_filter'};
+        if($type eq 'hostgroup') {
+            $cache->{$type} = $c->{'db'}->get_hostgroup_names() unless defined $cache->{$type};
+        }
+        elsif($type eq 'servicegroup') {
+            $cache->{$type} = $c->{'db'}->get_servicegroup_names() unless defined $cache->{$type};
+        }
+        elsif($type eq 'contacts') {
+            $cache->{$type} = $c->{'db'}->get_contact_names() unless defined $cache->{$type};
+        }
+        ## no critic
+        @names = grep(/$value/i, @{$cache->{$type}});
+        ## use critic
+        if(scalar @names == 0) { @names = (''); }
+    } else {
+        my $groups;
+        if($type eq 'hostgroup') {
+            $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        elsif($type eq 'servicegroup') {
+            $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        elsif($type eq 'contacts') {
+            $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ], columns => ['name'] );
+        }
+        @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
+        if(scalar @names == 0) { @names = (''); }
     }
-    elsif($type eq 'servicegroup') {
-        $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { '~~' => $value }} ] );
-    }
-    elsif($type eq 'contacts') {
-        $groups = $c->{'db'}->get_contacts( filter => [ { name => { '~~' => $value }} ] );
-    }
-    my @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
-    if(scalar @names == 0) { @names = (''); }
 
     my $group_op = '!>=';
     if($op eq '=' or $op eq '~~') {
@@ -1402,12 +1493,12 @@ sub set_selected_columns {
 
     for my $prefix ('', 'host_', 'service_') {
         my $columns = {};
-        my $last_col = 30;
-        for my $x (0..30) { $columns->{$x} = 1; }
-        if(defined $c->{'request'}->{'parameters'}->{$prefix.'columns'}) {
+        my $last_col = 50;
+        for my $x (0..50) { $columns->{$x} = 1; }
+        if(defined $c->req->parameters->{$prefix.'columns'}) {
             $last_col = 0;
-            for my $x (0..30) { $columns->{$x} = 0; }
-            my $cols = $c->{'request'}->{'parameters'}->{$prefix.'columns'};
+            for my $x (0..50) { $columns->{$x} = 0; }
+            my $cols = $c->req->parameters->{$prefix.'columns'};
             for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
                 $columns->{$nr} = 1;
                 $last_col++;
@@ -1426,68 +1517,20 @@ sub set_selected_columns {
 
   set_custom_title($c)
 
-set selected columns for the excel export
+sets page title based on http parameters
 
 =cut
 sub set_custom_title {
     my($c) = @_;
     $c->stash->{custom_title} = '';
-    if( exists $c->{'request'}->{'parameters'}->{'title'} ) {
-        my $custom_title          = $c->{'request'}->{'parameters'}->{'title'};
+    if( exists $c->req->parameters->{'title'} ) {
+        my $custom_title          = $c->req->parameters->{'title'};
         if(ref $custom_title eq 'ARRAY') { $custom_title = pop @{$custom_title}; }
         $custom_title             =~ s/\+/\ /gmx;
         $c->stash->{custom_title} = $custom_title;
         $c->stash->{title}        = $custom_title;
         return 1;
     }
-    return;
-}
-
-
-##############################################
-
-=head2 set_comments_and_downtimes
-
-  set_comments_and_downtimes($c)
-
-set comments / downtimes by host
-
-=cut
-sub set_comments_and_downtimes {
-    my($c) = @_;
-
-    # add comments and downtimes
-    my $comments  = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
-    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
-    my $downtimes_by_host;
-    my $downtimes_by_host_service;
-    if($downtimes) {
-        for my $downtime ( @{$downtimes} ) {
-            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
-                push @{ $downtimes_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
-            }
-            else {
-                push @{ $downtimes_by_host->{ $downtime->{'host_name'} } }, $downtime;
-            }
-        }
-    }
-    $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
-    $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
-    my $comments_by_host;
-    my $comments_by_host_service;
-    if($comments) {
-        for my $comment ( @{$comments} ) {
-            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
-                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
-            }
-            else {
-                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
-            }
-        }
-    }
-    $c->stash->{'comments_by_host'}         = $comments_by_host;
-    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
-
     return;
 }
 
@@ -1538,9 +1581,11 @@ sub redirect_view {
     my $style = shift || 'detail';
 
     my $new = 'status.cgi';
-    my $uri = $c->request->uri();
-    $uri =~ m/\/cgi\-bin\/(.*?\.cgi)/mx;
-    my $old = $1 || 'status.cgi';
+    my $uri = $c->req->url();
+    my $old = 'status.cgi';
+    if($uri =~ m/\/cgi\-bin\/(.*?\.cgi)/mx) {
+        $old = $1;
+    }
 
     VIEW_SEARCH:
     for my $groupname (keys %{$c->stash->{'additional_views'}}) {
@@ -1554,7 +1599,7 @@ sub redirect_view {
     return if $old eq $new;
 
     $uri    =~ s/$old/$new/gmx;
-    return $c->response->redirect($uri);
+    return $c->redirect_to($uri);
 }
 
 ##############################################
@@ -1650,7 +1695,8 @@ possible conversions are
 =cut
 sub convert_time_amount {
     my $value = shift;
-    if($value =~ m/^(\d+)(w|d|h|m)/gmx) {
+    if($value =~ m/^(\d+)(y|w|d|h|m)/gmx) {
+        if($2 eq 'y') { return $1 * 86400*365; }# year
         if($2 eq 'w') { return $1 * 604800; }   # weeks
         if($2 eq 'd') { return $1 * 86400; }    # days
         if($2 eq 'h') { return $1 * 3600; }     # hours
@@ -1697,6 +1743,7 @@ sub set_audio_file {
             next if $h->{'acknowledged'} == 1;
             next if $h->{'notifications_enabled'} == 0;
             $worst_host = $h->{'state'} if $worst_host < $h->{'state'};
+            last if $worst_host >= 2;
         }
         if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'host_unreachable_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_unreachable_sound'};
@@ -1712,9 +1759,9 @@ sub set_audio_file {
             next if $s->{'scheduled_downtime_depth'} >= 1;
             next if $s->{'acknowledged'} == 1;
             next if $s->{'notifications_enabled'} == 0;
-            my $state = $s->{'state'} + 1;
-            $state = $state - 3 if $state == 4;
-            $worst_service = $state if $worst_service < $state;
+            next if $s->{'state'} == 4;
+            $worst_service = $s->{'state'} if $worst_service < $s->{'state'};
+            last if $worst_service == 3;
         }
         if($worst_service == 1 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
             $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
@@ -1777,7 +1824,7 @@ sub set_favicon_counter {
     my $totals = {
             'red'    => $total_red,
             'yellow' => $total_yellow,
-            'orange' => $total_orange
+            'orange' => $total_orange,
     };
 
     return $totals;
@@ -1787,28 +1834,27 @@ sub set_favicon_counter {
 
 =head2 get_service_matrix
 
-  get_service_matrix($c)
+  get_service_matrix($c, [$hostfilter], [$servicefilter])
 
 get matrix of services usable by a minemap
 
 =cut
 sub get_service_matrix {
-    my( $c, $hostfilter, $servicefilter ) = @_;
+    my( $c, $hostfilter, $servicefilter) = @_;
 
-    # add comments and downtimes
-    Thruk::Utils::Status::set_comments_and_downtimes($c);
+    $c->stats->profile(begin => "Status::get_service_matrix()");
 
     my $uniq_hosts = {};
 
     if(defined $servicefilter) {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'], AddPeer => 0 );
+        my $hostnames = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
         for my $svc (@{$hostnames}) {
             $uniq_hosts->{$svc->{'host_name'}} = 1;
         }
     } else {
         # fetch hostnames first
-        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'], AddPeer => 0 );
+        my $hostnames = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => ['name'] );
 
         # get pages hosts
         for my $hst (@{$hostnames}) {
@@ -1820,7 +1866,7 @@ sub get_service_matrix {
     Thruk::Backend::Manager::_page_data(undef, $c, \@keys);
     @keys = (); # empty
     my $filter = [];
-    for my $host_name (@{$c->{'stash'}->{'data'}}) {
+    for my $host_name (@{$c->stash->{'data'}}) {
         push @{$filter}, { 'host_name' => $host_name };
     }
     $hostfilter = Thruk::Utils::combine_filter( '-or', $filter );
@@ -1843,15 +1889,122 @@ sub get_service_matrix {
         $matrix->{$svc->{'host_name'}}->{$svc->{'description'}} = $svc;
     }
 
+    $c->stats->profile(end => "Status::get_service_matrix()");
+
     return($uniq_services, $hosts, $matrix);
 }
 
+##############################################
+
+=head2 serveraction
+
+  serveraction($c)
+
+run server action from custom action menu
+
+=cut
+sub serveraction {
+    my( $c ) = @_;
+
+    return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
+
+    my $host    = $c->req->parameters->{'host'};
+    my $service = $c->req->parameters->{'service'};
+    my $link    = $c->req->parameters->{'link'};
+    my $action;
+
+    if($link =~ m/^server:\/\/(.*)$/mx) {
+        $action = $1;
+    } else {
+        return(1, 'not a valid customaction url');
+    }
+
+    my @args = split(/\//mx, $action);
+    $action = shift @args;
+    if(!defined $c->config->{'action_menu_actions'}->{$action}) {
+        return(1, 'customaction '.$action.' is not defined');
+    }
+    my @cmdline = split(/\s+/mx, $c->config->{'action_menu_actions'}->{$action});
+    my $cmd = shift @cmdline;
+    if(!-x $cmd) {
+        return(1, $cmd.' is not executable');
+    }
+
+    # replace macros
+    my $obj;
+    if($host || $service) {
+        my $objs;
+        if($service) {
+            $objs = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $host, description => $service } ] );
+        } else {
+            $objs = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { name => $host } ] );
+        }
+        $obj = $objs->[0];
+        return(1, 'no such object') unless $obj;
+    }
+
+    my $macros = $c->{'db'}->get_macros({host => $obj, service => $service ? $obj : undef, filter_user => 0});
+    $macros->{'$REMOTE_USER$'}    = $c->stash->{'remote_user'};
+    $macros->{'$DASHBOARD_ID$'}   = $c->req->parameters->{'dashboard'} if $c->req->parameters->{'dashboard'};
+    $macros->{'$DASHBOARD_ICON$'} = $c->req->parameters->{'icon'}      if $c->req->parameters->{'icon'};
+    for my $arg (@cmdline, @args) {
+        my $rc;
+        ($arg, $rc) = $c->{'db'}->replace_macros($arg, {}, $macros);
+    }
+
+    my($rc, $output);
+    eval {
+        ($rc, $output) = Thruk::Utils::IO::cmd($c, [$cmd, @cmdline, @args]);
+    };
+    if($@) {
+        return('1', $@);
+    }
+    return($rc, $output);
+}
+
+##############################################
+
+=head2 set_default_filter
+
+  set_default_filter($c, [$servicefilter])
+
+checks if a global default service should be users. Returns textfilter
+and optionally adds that filter to a list of servicefilters.
+
+=cut
+sub set_default_filter {
+    my($c, $servicefilter ) = @_;
+    return unless $c->config->{'default_service_filter'};
+    my $default_service_filter_op  = '~';
+    my $default_service_filter_val = $c->config->{'default_service_filter'};
+    if($default_service_filter_val =~ m/^\!(.*)$/mx) {
+        $default_service_filter_op  = '!~';
+        $default_service_filter_val = $1;
+    }
+    if($servicefilter) {
+        push @{$servicefilter}, [ { 'description' => { $default_service_filter_op.'~' => $default_service_filter_val } } ];
+    }
+    my $default_service_text_filter = {
+            'val_pre' => '',
+            'type'    => 'service',
+            'value'   => $default_service_filter_val,
+            'op'      => $default_service_filter_op,
+    };
+    return($default_service_text_filter);
+}
+
+##############################################
+sub _is_defined {
+    my($a, $b) = @_;
+    return $a if defined $a;
+    return $b;
+}
 
 ##############################################
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

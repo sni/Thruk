@@ -2,10 +2,9 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>[% title_prefix %][% title %]</title>
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <script type="text/javascript">
     <!--
     /* send debug output to firebug console */
@@ -26,7 +25,7 @@
 
     /* save url part in parents hash */
     var nohashchange = 0;
-    function save_url_in_parents_hash(e) {
+    function save_url_in_parents_hash() {
         if(nohashchange == 1) {
           nohashchange = 0;
           return;
@@ -34,17 +33,31 @@
         var oldloc = new String(window.document.location);
         oldloc     = oldloc.replace(/#+.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
-        if(!oldloc.match(/\/thruk\/$/)) {
+        if(!oldloc.match(/\/[% product_prefix %]\/$/)) {
             return;
         }
         var newloc = new String(window.frames['main'].location);
         newloc     = newloc.replace(oldloc, '');
-        newloc     = newloc.replace(/\?_=\d+/, '');
-        newloc     = newloc.replace(/\&_=\d+/, '');
-        newloc     = newloc.replace(/\&reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\?reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\&theme=\w*/, '');
-        newloc     = newloc.replace(/\?theme=\w*/, '');
+        // changes have to be put in the thruk.js too
+        newloc     = newloc.replace(/\?_=\d+/g, '');
+        newloc     = newloc.replace(/\&_=\d+/g, '');
+        newloc     = newloc.replace(/\&reload_nav=\d+/g, '');
+        newloc     = newloc.replace(/\?reload_nav=\d+/g, '');
+        newloc     = newloc.replace(/\&theme=\w*/g, '');
+        newloc     = newloc.replace(/\?theme=\w*/g, '');
+        newloc     = newloc.replace(/nav=\&/g, '');
+        newloc     = newloc.replace(/\&service_columns=\d+/g, '');
+        newloc     = newloc.replace(/\&host_columns=\d+/g, '');
+        newloc     = newloc.replace(/\&bookmarks=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&bookmarksp=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&section=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&update\.x=\d+/g, '');
+        newloc     = newloc.replace(/\&update\.y=\d+/g, '');
+        newloc     = newloc.replace(/\&newname=\&/g, '&');
+        newloc     = newloc.replace(/\&view_mode=html\&/g, '&');
+        newloc     = newloc.replace(/\&all_col=\&/g, '&');
+        newloc     = newloc.replace(/\&bookmark=.*?\&/g, '&');
+        newloc     = newloc.replace(/\&referer=.*?\&/g, '&');
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
@@ -68,11 +81,7 @@
     newurl     = newurl.replace(/^#/, '');
     var oldurl = new String(window.location);
     oldurl     = oldurl.replace(/#.*$/, '');
-    var values = window.location.pathname.split("/");
-    values.pop();
-    var last   = values.pop();
-    if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
-        //debug('go -> '+ newurl);
+    if(window.location.pathname.match(/\/[% product_prefix %]\/$/) && newurl != 'main.html' && newurl != '') {
         if(newurl.match(/^\w+:\/\//)) {
             framesrc = newurl;
         }
@@ -85,6 +94,9 @@
 
     /* we have to change frame location on hash changes caused by history changes */
     window.onhashchange = function(e) {
+      if(e == null || e.newURL == null) {
+        return;
+      }
       if(nohashchange == 0) {
         nohashchange = 1;
         var newurl = e.newURL;
@@ -105,7 +117,7 @@
           <h2>Thruk</h2>
           <p align="center">
             <a href="[% home_link %]">[% home_link %]</a><br />
-            Copyright &copy; 2009-2013 Thruk Developer Team.<br />
+            Copyright &copy; 2009-present Thruk Developer Team.<br />
             Copyright &copy; 2009 Nagios Core Development Team and Community Contributors.<br />
             Copyright &copy; 1999-2009 Ethan Galstad.<br />
           </p>
@@ -116,9 +128,10 @@
       </noframes>
     </frameset>
     [% END +%]
+    framesrc = framesrc.replace(/"/g, '&quot;');
     document.write('<frameset cols="172,*" frameborder="0" framespacing="0" border="0">');
-    document.write('<frame src="[% url_prefix %]thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />');
-    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash(this.name)" />');
+    document.write('<frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" \/>');
+    document.write('<frame src="'+framesrc+'" name="main" frameborder="0" id="main" onload="save_url_in_parents_hash()" \/>');
     [%+ FOR line = index_content.split("\n") %]
     document.write('[% line.replace('/', '\\/') %]');
     [%+ END +%]
@@ -126,7 +139,7 @@
     </script>
   </head>
   <frameset cols="172,*">
-    <frame src="[% url_prefix %]thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />
+    <frame src="[% url_prefix %]side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />
     <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
   [% index_content %]
 </html>

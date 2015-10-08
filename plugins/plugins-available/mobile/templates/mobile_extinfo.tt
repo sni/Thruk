@@ -6,7 +6,7 @@
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
-    <form action="cmd.cgi" method="POST" data-ajax=false onsubmit="jQuery.mobile.loadingMessage='running check'; jQuery.mobile.showPageLoadingMsg(); return true;">
+    <form action="cmd.cgi" method="POST" data-ajax=false onsubmit="jQuery.mobile.loading('show', {text: 'running check', textVisible: true}); return true;">
       <input type="hidden" name="referer" value="" class="[% type %]_referer">
       <input type="hidden" name="quick_command" value="1">
       <input type="hidden" name="selected_[% type %]s" class="selected_[% type %]s" value="">

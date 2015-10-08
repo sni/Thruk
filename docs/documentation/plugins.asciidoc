@@ -1,0 +1,339 @@
+---
+layout: docs
+title: Plugins
+lightbox: true
+---
+
+Plugins
+=======
+
+Thruk is easily extenable with plugins and there are some plugins
+already included. Plugins itself reside in the
+'plugins/plugins-available' directory. Activate a plugin by creating a symlink
+in the 'plugins/plugin-enabled' directory. If you use the packaged Thruk
+version, the plugins folder is directly in your Thruk folder. If you are using
+OMD, the plugins folder is in $OMD_ROOT/etc/thruk/plugins.
+Make sure you restart Thruk / Apache after enabling / disabling
+plugins.
+
+WARNING: With Thruk 2.0 a few minor changes are required for plugins. If you
+have own custom plugins, the link:thruk_2_0_migration_guide.html[Migration Guide] will
+help you getting them to work with Thruk 2.0.
+
+Later versions of Thruk have a plugins manager included in the config
+tool and you can manage your plugins there.
+
+Example of a plugins folder with all except the mobile plugin (which is not
+yet finished) enabled.
+++++
+<pre style="line-height:18px;">
+ plugins
+ ├── plugins-available
+ │   ├── conf
+ │   ├── minemap
+ │   ├── mobile
+ │   ├── shinken_features
+ │   └── statusmap
+ └── plugins-enabled
+     ├── conf             -> ../plugins-available/conf
+     ├── minemap          -> ../plugins-available/minemap
+     ├── shinken_features -> ../plugins-available/shinken_features
+     └── statusmap        -> ../plugins-available/statusmap
+</pre>
+++++
+
+
+Installation
+------------
+Installation of a plugin is easy:
+
+.Installation
+. Unpack the plugin in 'plugins-available' directory.
+. Create a symlink in 'plugins-enabled' which points to the plugin.
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Deactivate
+. Remove the symlink from 'plugins-enabled'
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Uninstall
+. Remove plugin from 'plugins-available'
+
+Since version 1.36 you may use the Plugin Manager from the 'config
+tool' plugin to select your plugins.
+++++
+<a title="plugin manager" rel="lightbox[plugins]" href="plugins/pluginmanager.png"><img src="plugins/pluginmanager.png" alt="config tool " width="30%" height="30%" /></a>
+++++
+
+
+Builtin Plugins
+---------------
+
+
+Business Process
+~~~~~~~~~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Calculates Business Processes
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The Business Process plugin creates, edits and calculates business processes
+which then can be used as hosts and services for further notifications and
+displaying purposes.
+
+++++
+<a title="business process" rel="lightbox[plugins]" href="plugins/bp1.png"><img src="plugins/bp1.png" alt="business process " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+Config Tool
+~~~~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Manage config files directly in Thruk
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The Config Tool plugin allows you to make config changes directly in
+Thruk. Currently it supports editing the cgi.cfg and the thruk.cfg.
+The changes will be active immediately, so there is no need to restart
+Thruk.
+
+++++
+<a title="config tool" rel="lightbox[plugins]" href="plugins/conf1.png"><img src="plugins/conf1.png" alt="config tool " width="30%" height="30%" /></a>
+<a title="config tool" rel="lightbox[plugins]" href="plugins/conf2.png"><img src="plugins/conf2.png" alt="config tool " width="30%" height="30%" /></a>
+<a title="config tool" rel="lightbox[plugins]" href="plugins/conf3.png"><img src="plugins/conf3.png" alt="config tool " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+Mine Map
+~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: The Mine Map gives a quick overview over similar
+              services
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The Mine Map creates a matrix from all combinations of selected hosts
+and services and display a grid of status information. Normal filters
+can be used to reduce the amount of services or show just a single
+host- or servicegroup. The Mine Map is particular useful if you have a
+set of hosts with lots of common services.
+
+
+++++
+<a title="mine map" rel="lightbox[plugins]" href="plugins/mine-map1.png"><img src="plugins/mine-map1.png" alt="mine map " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+Mobile
+~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Webinterface for mobile devices
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The mobile interface is a perfect way to get a quick overview and
+provides an easy way to acknowledge problems. When enabled, you will
+be asked on the startpage and on the host/service details page to use
+the mobile interface (once per session).
+
+++++
+<a title="mobile" rel="lightbox[plugins]" href="plugins/mobile1.png"><img src="plugins/mobile1.png" alt="mobile " width="16%" height="16%" /></a>
+<a title="mobile" rel="lightbox[plugins]" href="plugins/mobile2.png"><img src="plugins/mobile2.png" alt="mobile " width="16%" height="16%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+Panorama
+~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Panorama View Dashboard
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The 'Panorama' plugin is a full customizable dashboard allowing
+you to build your own panorama views. It supports multiple panels
+and sticky windows. link:dashboard.html[Read more]
+
+++++
+<a title="panorama" rel="lightbox[plugins]" href="plugins/panorama1.png"><img src="plugins/panorama1.png" alt="mobile " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+Reports
+~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: SLA Reports
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+SLA reports are a good way to send monthly reports about service level
+contracts. Reports can be either downloaded or send by mail using the
+thruk command line tool. link:reporting.html[Read more]
+
+++++
+<a title="reports" rel="lightbox[plugins]" href="plugins/reports1.png"><img src="plugins/reports1.png" alt="mobile " width="30%" height="30%" /></a>
+<a title="reports" rel="lightbox[plugins]" href="plugins/reports2.png"><img src="plugins/reports2.png" alt="mobile " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+
+Shinken Features
+~~~~~~~~~~~~~~~~
+
+----
+ Author:      Jean Gabes, Sven Nierlein
+ Description: Contains Shinken specific addons like business view and
+              impacts view.
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+This shinken contains all Shinken specific addons to Thruk. Most
+Shinken specific features can only be used if there are only Shinken
+backends active. There is a view for business processes, which can be
+defined in Shinken only and there is a problems view, which show all
+root problems (problems not caused by another problem) order by
+priority.
+
+++++
+<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business1.png"><img src="plugins/shinken-business1.png" alt="statusmap " width="30%" height="30%" /></a>
+<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business2.png"><img src="plugins/shinken-business2.png" alt="statusmap " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+Statusmap
+~~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Display a statusmap for hosts
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The Statusmap plugin replaces the traditional map. It is designed to
+provide usefull information (even in bigger installations) without the
+need of extra configuration. Your hosts can be grouped by ip address,
+domain, hostgroup, servicegroup or parent relation. Therefor it uses
+information which is already specified.
+
+++++
+<a title="statusmap" rel="lightbox[plugins]" href="plugins/statusmap1.png"><img src="plugins/statusmap1.png" alt="statusmap " width="30%" height="30%" /></a>
+<a title="statusmap" rel="lightbox[plugins]" href="plugins/statusmap2.png"><img src="plugins/statusmap2.png" alt="statusmap " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+WML
+~~~
+
+----
+ Author:      Franky Van Liedekerke
+ Description: Minimal replacement for statuswml.cgi
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The wml plugin renders a minimal statuswml.cgi page in order to
+support addons based on fetching status from the wml page. The
+http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Windows-Interfaces/NTray/details[NTray]
+Addon has been successfully tested.
+
+This addon is shipped with Thruk since version 1.26 but not enabled by
+default.
+
+
+
+Additional Plugins
+------------------
+
+
+OMD
+~~~
+
+----
+ Author:      Sven Nierlein
+ Description: OMD Specific Addons
+ Download:    https://github.com/sni/thruk-plugin-omd
+----
+
+The omd plugin saves `top` and `gearman_top` data every minute
+for the last week for debuging purposes. It then draws nice
+usage graphs with a drill down functionality. For every
+point in the last week the complete top data can be fetched,
+sorted and filtered.
+
+++++
+<a title="omd" rel="lightbox[plugins]" href="plugins/omd1.png"><img src="plugins/omd1.png" alt="mobile " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+
+Writing your own plugins
+------------------------
+
+The directory structure of a plugin is similar to a normal perl
+module. The following example has lib, static content, templates and
+tests. But you don't need all of them.
+
+TIP: Let me know if you want to get your plugin listed here.
+
+++++
+<pre style="line-height:18px;">
+  ├── lib
+  │   └── Thruk
+  │       └── Controller
+  ├── root
+  │   └── images
+  ├── t
+  └── templates
+</pre>
+++++
+
+.Structure
+* 'lib' containts all Perl files
+* 'root' contains all static content
+* 't' keep the tests here
+* 'templates' contains all template files for dynamic pages
+
+TIP: Easiest way would be to copy an existing plugin and change it to your
+needs.

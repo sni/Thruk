@@ -144,7 +144,7 @@ sub get_cgi_cfg {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

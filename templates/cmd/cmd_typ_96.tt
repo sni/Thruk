@@ -19,11 +19,11 @@
     [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_CHECK[% ELSE %]SCHEDULE_HOST_CHECK[% END %];[% sprintf("%s;%lu",host_name,start_time_unix) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% start_time %]'> <a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% start_time %]'> <a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 <tr><td class='optBoxItem'>Force Check:</td><td><b><input type='checkbox' name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></b></td></tr>
 
 [% END %]

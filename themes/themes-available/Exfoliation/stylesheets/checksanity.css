@@ -10,8 +10,8 @@
 .Title        { font-size: 12pt; text-align: center; font-weight: bold; }
 .SectionTitle { font-size: 12pt; text-align: center; font-weight: bold; }
 
-.DynamicData  { font-size: 10pt; padding: 2; }
-.StaticData   { font-size: 10pt; padding: 2; }
+.DynamicData  { font-size: 10pt; padding: 2px; }
+.StaticData   { font-size: 10pt; padding: 2px; }
 .TableHeader  { font-size: 10pt; background-color: #d0d0d0; font-weight: bold; }
 
 .Item         { font-size: 10pt; background-color: #f4f2f2; font-weight: bold; }

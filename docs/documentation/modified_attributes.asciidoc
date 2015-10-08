@@ -1,0 +1,33 @@
+---
+layout: docs
+title: Modified Attributes
+lightbox: true
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+== Modified Attributes
+
+Whenever you change a attribute through the web gui or by the command
+file, nagios saves the changed attribute in its retention file
+(Depending on your retention settings). When the attribute has been
+marked as changed, nagios will ignore any changes in the config file
+for this attribute.
+
+.Simple example:
+. notifications are enabled for a particular host
+. someone disables notifications for this host and reenables it later
+  on
+. another guy changes the notifications setting in the config file for
+  this host and wonders why the changes will be ignored
+
+With the modfied attributes filter a list of host and services can be
+created which have modified attributes. And they can be reset by a
+quick command or by a normal host/service command.
+
+Nagios will then use the settings from the config file on the next reload.
+
+++++
+<a title="attributes" rel="lightbox[advanced]" href="advanced/attributes1.png"><img src="advanced/attributes1.png" alt="modified attributes 1" width="30%" height="30%" /></a>
+<a title="attributes" rel="lightbox[advanced]" href="advanced/attributes2.png"><img src="advanced/attributes2.png" alt="modified attributes 2" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++

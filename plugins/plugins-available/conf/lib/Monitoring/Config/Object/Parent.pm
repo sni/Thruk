@@ -74,7 +74,7 @@ sub parse {
                 if($self->{'disabled'}) {
                     push @{$self->{'comments'}}, $attr.' '.$value;
                 } else {
-                    push @{$parse_errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
+                    push @{$parse_errors}, "unknown attribute: $attr for object type ".$self->{'type'}." in ".Thruk::Utils::Conf::_link_obj($self);
                 }
             }
         }
@@ -211,9 +211,9 @@ return the objects template name or undef
 
 =cut
 sub get_template_name {
-    my $self = shift;
+    my($self) = @_;
     # in case there is no name set, use the primary name
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and !defined $self->{'conf'}->{'name'} and defined $self->{'conf'}->{$self->{'primary_key'}}) {
+    if(defined $self->{'conf'}->{'register'} && $self->{'conf'}->{'register'} == 0 && !defined $self->{'conf'}->{'name'} && defined $self->{'conf'}->{$self->{'primary_key'}}) {
         return $self->{'conf'}->{$self->{'primary_key'}};
     }
     return $self->{'conf'}->{'name'};
@@ -391,16 +391,18 @@ sub get_computed_config {
     for my $tname (@{$templates}) {
         my $t = $objects->get_template_by_name($self->{'type'}, $tname);
         if(defined $t) {
-            for my $key (keys %{$t->{'conf'}}) {
-                if( !defined $conf->{$key} ) {
-                    $conf->{$key} = $t->{'conf'}->{$key};
+            my($tconf_keys, $tconf) = $t->get_computed_config($objects);
+            for my $key (keys %{$tconf}) {
+                next if $key eq 'name';
+                if(!defined $conf->{$key}) {
+                    $conf->{$key} = $tconf->{$key};
                 }
-                elsif( defined $self->{'default'}->{$key}
-                      and $self->{'default'}->{$key}->{'type'} eq 'LIST')
+                elsif(defined $self->{'default'}->{$key}
+                         and  $self->{'default'}->{$key}->{'type'} eq 'LIST')
                 {
                     if(substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
-                        my $list           = dclone($t->{'conf'}->{$key});
+                        my $list           = dclone($tconf->{$key});
                         $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
                         @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
                         $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
@@ -468,9 +470,7 @@ return the help for given attribute
 
 =cut
 sub get_help {
-    my $self = shift;
-    my $attr = shift;
-
+    my($self, $attr) = @_;
     return Monitoring::Config::Help::get_config_help($self->{'type'}, $attr);
 }
 
@@ -689,7 +689,7 @@ sub set_uniq_id {
     my $self    = shift;
     my $objects = shift;
 
-    if(!defined $self->{'id'} or $self->{'id'} eq 'new') {
+    if(!defined $self->{'id'} || $self->{'id'} eq 'new') {
         $self->{'id'} = $self->_make_id();
     }
 
@@ -793,7 +793,7 @@ sub _make_id {
 ##########################################################
 sub _count_quotes {
     my($string, $char, $number) = @_;
-    my @chars = split//mx, $_[0];
+    my @chars = split//mx, $string;
     my $size  = scalar @chars - 1;
     for my $x (0..$size) {
         if($chars[$x] eq $char and $chars[$x-1] ne '\\') {
@@ -827,6 +827,7 @@ sub _break_long_command {
             if(index($chunk, '>') == 0) { $chunk = '  '.$chunk; }
             $line .= sprintf "%-33s %s", '', $chunk;
             $arg   = 0;
+            push @text, $line if $x == $size - 1; # make sure last option is not left behind
         } else {
             $line    .= $chunk;
             my $si    = index($chunk, "'");
@@ -848,7 +849,7 @@ sub _break_long_command {
                 }
             }
 
-            $arg   = 1;
+            $arg = 1;
             push @text, $line;
             $line = '';
         }
@@ -857,10 +858,21 @@ sub _break_long_command {
     return \@text;
 }
 
+##########################################################
+sub _business_impact_keys {
+    return [
+        "Business Critical",     # 5
+        "Top Production",        # 4
+        "Production",            # 3
+        "Standard",              # 2
+        "Testing",               # 1
+        "Development",           # 0
+    ];
+}
 
 =head1 AUTHOR
 
-Sven Nierlein, 2011, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

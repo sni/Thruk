@@ -1,38 +1,53 @@
-﻿[% PROCESS _header.tt css="thruk/plugins/reports2/reports.css" js="thruk/plugins/reports2/reports.js" %]
+﻿[% PROCESS _header.tt css="plugins/reports2/reports.css" js="plugins/reports2/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
   <tr>
-    <td align="left" valign="top" width="33%">
+    <td align="left" valign="top" width="20%">
       [% PROCESS _infobox.tt %]
     </td>
-    <td align="center" valign="top" width="33%">
+    <td align="center" valign="top" width="60%">
       <br><br>
       <div align="center" class='dataTitle'>
         Reporting
       </div>
+      [% IF !wkhtmltopdf %]
+      <br><div class="alert"><b>Missing Converter!</b> [% wkhtmltopdf_file %] missing, no pdfs can be generated. <a href="http://www.thruk.org/faq.html#_wkhtmltopdf" target="_blank">please read the FAQ.</a></div>
+      [% END %]
     </td>
-    <td align="right" valign="bottom" width="33%">
+    <td align="right" valign="bottom" width="20%">
       [% PROCESS _help.tt topic = "reports" %]
     </td>
   </tr>
 </table>
 
-[% running = 0 %]
-<div style="margin-left: 10px; display: table;">
-  <div style="text-align: left; float: left; line-height: 29px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</div>
-  <div style="text-align: right; margin-bottom: 3px;"><a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a></div>
+<table border=0 cellpadding=0 cellspacing=0 style="width: 1000px; margin-bottom: 3px;">
+  <tr>
+    <td align="left" style="padding-top: 3px;">[% PROCESS _table_search_field.tt ids=["statusTable"] %]</td>
+    <td align="center">
+      <div class="radioset">
+        <input type="radio" id="view1" name="radio" onclick="reports_view('my')"    ><label for="view1">My</label>
+        <input type="radio" id="view2" name="radio" onclick="reports_view('public')"><label for="view2">Public</label>
+        <input type="radio" id="view3" name="radio" onclick="reports_view('all')"   ><label for="view3">All</label>
+      </div>
+    </td>
+    <td align="right">
+      <a href="reports2.cgi?action=edit&amp;report=new" class="report_button report_edit_button" style="width: 160px;">create new report</a>
+    </td>
+  </tr>
+</table>
 <div id="reports_table">
-<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px;">
+<table border="1" class='status hoverable' id="statusTable" style="max-width: 1000px; width: 1000px;">
   <tr>
     <th class="status" nowrap width="200">Name</th>
     <th class="status" nowrap>Description</th>
     <th class="status" nowrap width="40">Public</th>
+    <th class="status usercol" nowrap width="60">Owner</th>
     <th class="status" nowrap width="40">Mail</th>
     <th class="status" nowrap width="100">Schedule</th>
     <th class="status" nowrap width="150">Last Time Run</th>
-    <th class="status" nowrap width="150">Duration</th>
+    <th class="status" nowrap width="163">Duration</th>
     <th class="status" nowrap width="25">&nbsp;</th>
     <th class="status" nowrap width="25">&nbsp;</th>
     <th class="status" nowrap width="25">&nbsp;</th>
@@ -40,65 +55,88 @@
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
-  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %]">
+  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %][% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
     <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
+    <td class="status [% rowclass %] usercol">[% r.user %]</td>
     <td class="status [% rowclass %]">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]" nowrap>[% IF r.send_types.size == 0 %]never[% ELSE %][% FOREACH st = r.send_types %][% format_cronentry(c, st) %]<br>[% END %][% END %]</td>
     <td class="status [% rowclass %]">
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
-    <td class="status [% rowclass %]">
-      [% IF r.failed %]
+    <td class="status [% rowclass %] report_progessbar">
+      [% IF r.var.exists('is_waiting') && r.var.is_waiting %]
+        queued
+      [% ELSIF r.failed %]
         <span style="color: red;">failed</span>
       [% ELSE %]
         [% IF r.var.start_time %]
           [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
-          [% duration(end_time - r.var.start_time) %]
+          [% job_time = end_time - r.var.start_time %]
+          [% IF r.var.exists('job_data') %]
+                [% PROCESS _progressbar.tt
+                            pb_options = {
+                                percent             => r.var.job_data.percent,
+                                time                => job_time,
+                                job_id              => r.var.job,
+                                id                  => "progressbar" _ r.nr,
+                                lineheight          =>  19,
+                                width               => 160,
+                                height              =>  20,
+                                percent_per_second  =>  0,
+                                show_message        =>  1,
+                                hide_cancel_btn     =>  1,
+                            }
+                %]
+          [% ELSE %]
+            [% IF c.check_user_roles('authorized_for_system_commands') && c.check_user_roles('authorized_for_configuration_information') %]
+              <span onclick="overlib('<div id=\'report_profile\'><center><img src=\'[% url_prefix %]themes/[% theme %]/images/waiting.gif\' alt=\'content is beeing fetched\' title=\'content is beeing fetched\' border=0 height=20 width=20></center><\/div>',CAPTION,'report profile',WIDTH,600,[% c.config.info_popup_options %]); load_overlib_content('report_profile', 'reports2.cgi?report=[% r.nr %]&amp;action=profile', true);">
+              [% duration(job_time, 3) %]
+              </span>
+            [% ELSE %]
+                [% duration(job_time, 3) %]
+            [% END %]
+          [% END %]
         [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">
-      [% IF r.var.is_running != 0 %]
-        [% running = running + 1 %]
-        <a href="#" class="is_running"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
+      [% IF r.var.is_running != 0 || (r.var.exists('is_waiting') && r.var.is_waiting) %]
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=cancel" class="is_running"><img src='[% url_prefix %]themes/[% theme %]/images/stop.png' border="0" alt='Cancel Report' title='Cancel Report' width=16 height=16></a>
       [% ELSE %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]">
       [% IF ! r.readonly %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
       [% END %]
     </td>
     <td class="status [% rowclass %]" nowrap align="left">
       [% IF r.var.file_exists && r.var.is_running == 0 %]
-        [% icon = 'page_white_acrobat.png' %]
-        [% IF    r.var.ctype == 'html2pdf'              %][% icon = 'page_white_acrobat.png' %]
-        [% ELSIF r.var.ctype == 'application/x-msexcel' %][% icon = 'page_white_excel.png' %]
-        [% ELSIF r.var.ctype == 'text/html'             %][% icon = 'page_world.png' %]
-        [% ELSIF r.var.ctype == 'image/png'             %][% icon = 'page_white_picture.png' %]
-        [% ELSIF r.var.ctype != ''                      %][% icon = 'page_white_text.png' %]
-        [% END %]
+        [% PROCESS _reports_icon.tt r=r %]
         [% IF r.var.ctype == 'html2pdf' %]
-          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+        [% ELSE %]
+          <img style="padding-left: 3px;" src='[% url_prefix %]themes/[% theme %]/images/empty.gif' border="0" alt='' width=16 height=16>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;action=email" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]themes/[% theme %]/images/email_attach.png' border="0" alt='Send Report by Mail' title='Send Report by Mail' width=16 height=16></a>
       [% END %]
     </td>
   </tr>
   [% IF r.failed %]
-  <tr>
+  <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% ELSIF r.is_public %] public[% ELSE %] other[% END %]">
     <td class="status [% rowclass %]"></td>
     <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
       [% IF r.exists('long_error') %]
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id='long_error_icon_[% r.nr %]' alt="show long error output" onClick="toggleElement('long_error_[% r.nr %]', 'long_error_icon_[% r.nr %]'); return false;" style="float:right;">
       [% END %]
-      [% r.error | nl2br %]
+      [% escape_html(r.error) | nl2br %]
       [% IF r.exists('long_error') %]
       <div id='long_error_[% r.nr %]' style="display:none;">
-      [% r.long_error | nl2br %]
+      [% escape_html(r.long_error) | nl2br %]
       </div>
       [% END %]
     </td>
@@ -112,18 +150,27 @@
   [% END %]
 </table>
 </div>
-</div>
 
 <script type="text/javascript">
 <!--
-  var update_reports_status_int;
-  init_report_tool_buttons();
-  [% IF running > 0 %]
-  window.clearInterval(update_reports_status_int);
-  update_reports_status_int = window.setInterval("update_reports_status()", 1000);
-  [%+ END +%]
-  [% IF highlight %]
-  jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
-  [%+ END +%]
+  jQuery(document).ready(function() {
+    var typ = get_hash(1);
+    if(typ == undefined) { typ = 'my' }
+    if(typ == "")        { typ = 'my' }
+    reports_view(typ);
+    if(typ == 'my')          { jQuery('#view1').prop('checked', true) }
+    else if(typ == 'public') { jQuery('#view2').prop('checked', true) }
+    else if(typ == 'all')    { jQuery('#view3').prop('checked', true) }
+    else                     { jQuery('#view1').prop('checked', true) }
+    init_report_tool_buttons();
+    [% IF highlight %]
+    jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
+    if(typ == 'my') {
+      // filter again, otherwise the owner cell would be displayed after hilighting
+      reports_view(typ);
+    }
+    [%+ END +%]
+    table_search("table_search_input", ["statusTable"], 1);
+  });
 -->
 </script>

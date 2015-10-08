@@ -1,6 +1,9 @@
 /* create tool tip content */
 function makeHTMLFromData(name, data){
   var html = '';
+  if (data.icon_image != undefined && data.icon_image != "") {
+    html += '<img class="tip-icon" src="'+url_prefix+'themes/'+theme+'/images/logos/'+data.icon_image+'" />';
+  }
   if(data.status != undefined) {
     // real host leaf
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
@@ -179,7 +182,7 @@ function show_tree_map(id_to_show) {
             }
 
             if( node.data.alias != undefined ) {
-              domElement.innerHTML = '<a href="'+ url_prefix +'thruk\/cgi-bin\/extinfo.cgi?type=1&amp;host=' + domElement.innerHTML + '">' + domElement.innerHTML + '<\/a>';
+              domElement.innerHTML = '<a href="'+ url_prefix +'cgi-bin\/extinfo.cgi?type=1&amp;host=' + domElement.innerHTML + '">' + domElement.innerHTML + '<\/a>';
             }
 
             // calculate colour of node

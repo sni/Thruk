@@ -3,34 +3,33 @@ Thruk - Monitoring Webinterface
 
 Thruk is a multibackend monitoring webinterface which currently
 supports Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a 'dropin' replacement and covers almost
-100% of the original features plus adds additional enhancements for
-large installations and increased usability.
+API. It is designed to be a 'dropin' replacement and covers
+the original features plus adds additional enhancements for
+large installations, increased usability and some usefull addons.
 
 
 DOCS
 ----
-all documentation is under docs/
+All documentation is under docs/
 
 
 Main Features / Advantages
 --------------------------
 
-  * multiple backends
-  * faster, no need to parse status.dat for every request
-  * less cpu usage
-  * display live data, no delay between core and gui
-  * independant from monitoring core, can be installed on remote host
-  * clusterable, can be clustered over hosts
-  * change status.cgi filter inline
-  * extended logfile search
-  * better logging, uses log4perl (who submitted which command?)
-  * valid HTML code
-  * no frames ( can be reenabled for better addon integration)
-  * easy to extend with plugins
-  * 100% Perl (using Catalyst Framework)
-  * pagination
-  * multiple themes included
+  * Multiple backends
+  * Faster, no need to parse status.dat for every request
+  * Less CPU usage
+  * Display live data, no delay between core and GUI
+  * Independant from monitoring core, can be installed on remote host
+  * Clusterable, can be clustered over hosts
+  * Change status.cgi filter inline
+  * Extended logfile search
+  * Better logging, uses log4perl (who submitted which command?)
+  * Valid HTML code
+  * No frames (can be reenabled for better addon integration)
+  * Easy to extend with plugins
+  * Pagination
+  * Multiple themes included
   * Excel export for status and logfiles
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
@@ -40,3 +39,4 @@ Main Features / Advantages
   * SLA Reports in PDF format
   * Recurring Downtimes
   * Fully Featured Dashboard
+  * Business Process Addon

@@ -2,13 +2,12 @@ use strict;
 use warnings;
 use Test::More;
 use URI::Escape;
-use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 }
 
 BEGIN {
@@ -18,7 +17,7 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 # get test host / hostgroup
 my $host      = TestUtils::get_test_host_cli($BIN);
@@ -101,11 +100,17 @@ for my $report (@{$test_pdf_reports}) {
         $like = [ '/<html/' ];
     }
 
+    # make sure sla reports contain the graph
+    if($report->{'template'} =~ m/^sla_/mx) {
+        push @{$like}, '/Width 530/';
+        push @{$like}, '/Height 300/';
+    }
+
     # generate report
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local',
         like => $like,
-    }) or BAIL_OUT("failed");
+    }) or BAIL_OUT("report failed in ".$0);
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999',
         like => $like,

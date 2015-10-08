@@ -13,8 +13,7 @@ Menu Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
-use Data::Dumper;
-use File::Slurp;
+use File::Slurp qw/read_file/;
 use Storable qw/dclone/;
 use Thruk::Utils::Filter;
 
@@ -33,17 +32,16 @@ sub read_navigation {
 
     $c->stats->profile(begin => "Utils::Menu::read_navigation()");
 
+    $c->{'stash'} = $c->stash; # required for backwards compatibility on old menu_local.confs
+
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
-    if(defined $ENV{'CATALYST_CONFIG'}) {
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
-        $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
-    }
     if(defined $ENV{'THRUK_CONFIG'}) {
         $file = $ENV{'THRUK_CONFIG'}.'/menu.conf'       if -e $ENV{'THRUK_CONFIG'}.'/menu.conf';
         $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';
     }
 
+    local $Thruk::Request::c = $c;
     _renew_navigation($c, $file);
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");
@@ -192,16 +190,24 @@ sub insert_sub_item {
 
 =head2 remove_item
 
-  remove_item()
+  remove_item($category, $item_name)
+  remove_item($category, $subcategory, $item_name)
+  remove_item($category, $subcategory, $item_name, $hintname)
 
 removes an existing item from an existing category
 
 =cut
 sub remove_item {
-    my($category, $item_name) = @_;
+    my($category, $subcategory, $item_name, $hintname) = @_;
+    if(!defined $item_name) { $item_name = $subcategory; $subcategory = undef; }
 
-    $Thruk::Utils::Menu::removed_items = {} unless defined $Thruk::Utils::Menu::removed_items;
-    $Thruk::Utils::Menu::removed_items->{$category}->{$item_name} = 1;
+    if($hintname) {
+        $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{$hintname} = 1;
+    } elsif($subcategory) {
+        $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{'_ALL_'} = 1;
+    } else {
+        $Thruk::Utils::Menu::removed_items->{$category}->{$item_name}->{'_ALL_'} = 1;
+    }
 
     return 1;
 }
@@ -210,20 +216,22 @@ sub remove_item {
 
 =head2 has_group
 
-  has_group($c, $group)
+  has_group($group)
 
 returns 1 if the current user has this group
 
 =cut
 sub has_group {
-    my($c, $group) = @_;
+    my($group, $tmp) = @_;
+    my $c = $Thruk::Request::c;
+    if(defined $tmp) { $group = $tmp; }  # keep backwards compatible with the old call has_group($c, $group)
 
     my $user  = $c->stash->{'remote_user'};
     if($user) {
         my $contactgroups = $c->cache->get->{'users'}->{$user};
         if($contactgroups and $contactgroups->{'contactgroups'}->{$group}) {
             return 1;
-       }
+        }
     }
     return 0;
 }
@@ -232,15 +240,37 @@ sub has_group {
 
 =head2 has_role
 
-  has_role($c, $role)
+  has_role($role)
 
 returns 1 if the current user has this role
 
 =cut
 sub has_role {
-    my($c, $role) = @_;
+    my($role, $tmp) = @_;
+    my $c = $Thruk::Request::c;
+    if(defined $tmp) { $role = $tmp; } # keep backwards compatible with the old call has_role($c, $role)
 
     return 1 if $c->check_user_roles($role);
+    return 0;
+}
+
+##############################################
+
+=head2 is_user
+
+  is_user($username)
+
+returns 1 if the current user has the given name
+
+=cut
+sub is_user {
+    my($name) = @_;
+    my $c = $Thruk::Request::c;
+
+    my $user  = $c->stash->{'remote_user'} || '';
+    if($user eq $name) {
+        return 1;
+    }
     return 0;
 }
 
@@ -262,8 +292,15 @@ sub _renew_navigation {
     # make a copy of additional menuitems
     # otherwise, items added from a menu_local.conf would be added once
     # per loading a page
-    my $additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
-    my $additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    our $orig_additional_items;
+    our $orig_additional_subitems;
+    if(!defined $orig_additional_items) {
+        $orig_additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
+        $orig_additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    }
+    $Thruk::Utils::Menu::additional_items    = dclone($orig_additional_items);
+    $Thruk::Utils::Menu::additional_subitems = dclone($orig_additional_subitems);
+    $Thruk::Utils::Menu::removed_items = {};
 
     ## no critic
     eval("#line 1 $file\n".read_file($file));
@@ -284,6 +321,7 @@ sub _renew_navigation {
                     name => $item->[0],
                     href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
+                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
                 push @{$user_items}, [ $section, $item ];
             }
         }
@@ -298,6 +336,7 @@ sub _renew_navigation {
                     name => $item->[0],
                     href => $c->stash->{'use_bookmark_titles'} ? _uri_with($item->[1], {title => $item->[0]}) : $item->[1],
                 };
+                $item->{'href'} = Thruk::Utils::Filter::escape_ampersand($item->{'href'});
                 push @{$user_items}, [ $section, $item ];
             }
         }
@@ -355,15 +394,31 @@ sub _renew_navigation {
     }
 
     # remove unwanted items
-    if(defined $Thruk::Utils::Menu::removed_items) {
-        for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
-            my $section = _get_section_by_name($section_name) || next;
-            for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
-                my $new_links = [];
-                for my $link (@{$section->{'links'}}) {
-                    push @{$new_links}, $link unless $link->{'name'} eq $item_name
+    for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
+        my $section = _get_section_by_name($section_name) || next;
+        for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
+            for my $sub_item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}}) {
+                if($sub_item_name eq '_ALL_') {
+                    $section->{'links'} = _remove_item_from_links($section->{'links'}, $item_name);
+                } else {
+                    for my $hintname (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}->{$item_name}->{$sub_item_name}}) {
+                        for my $link (@{$section->{'links'}}) {
+                            if($link->{'name'} eq $item_name) {
+                                if($hintname eq '_ALL_') {
+                                    $link->{'links'} = _remove_item_from_links($link->{'links'}, $sub_item_name);
+                                } else {
+                                    for my $sublink (@{$link->{'links'}}) {
+                                        if($sublink->{'name'} eq $sub_item_name) {
+                                            $sublink->{'links'} = _remove_item_from_links($sublink->{'links'}, $hintname);
+                                            last;
+                                        }
+                                    }
+                                }
+                                last;
+                            }
+                        }
+                    }
                 }
-                $section->{'links'} = $new_links;
             }
         }
     }
@@ -376,11 +431,10 @@ sub _renew_navigation {
         }
     }
 
-    $c->stash->{'navigation'}  = $new_nav;
+    $c->stash->{'navigation'} = $new_nav;
 
-    # restore additional menuitems
-    $Thruk::Utils::Menu::additional_items    = dclone($additional_items);
-    $Thruk::Utils::Menu::additional_subitems = dclone($additional_subitems);
+    # cleanup
+    $Thruk::Utils::Menu::c = undef;
 
     return;
 }
@@ -395,15 +449,18 @@ returns the current prefered target
 
 =cut
 sub _get_menu_target {
-    my $c = $Thruk::Utils::Menu::c;
+    my $c = $Thruk::Request::c;
 
-    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'} and $c->{'stash'}->{'target'} ne '';
-    if($c->{'stash'}->{'use_frames'}) {
-        return("main");
-    }
-    return("_self");
+    return($c->{'_menu_target'} ||= _set_menu_target($c));
 }
-
+sub _set_menu_target {
+    my($c) = @_;
+    return $c->stash->{'target'} if defined $c->stash->{'target'} and $c->stash->{'target'} ne '';
+    if($c->stash->{'use_frames'}) {
+        return('main');
+    }
+    return('_self');
+}
 
 ##############################################
 
@@ -415,10 +472,13 @@ returns the link with prefix
 
 =cut
 sub _get_menu_link {
-    my $link = shift;
-    my $c = $Thruk::Utils::Menu::c;
-    return "" unless defined $link;
-    return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/^\/thruk\//mx;
+    my($link) = @_;
+    return '' unless defined $link;
+    my $c = $Thruk::Request::c;
+    my $product = $c->config->{'product_prefix'};
+    if($link =~ s|^\Q/thruk/\E||mx || $link =~ s|^\Q$product\E/||mx) {
+        return $c->stash->{'url_prefix'}.$link;
+    }
     return $link;
 }
 
@@ -433,8 +493,7 @@ returns a section by name
 
 =cut
 sub _get_section_by_name {
-    my $name   = shift;
-    my $create = shift;
+    my($name, $create) = @_;
 
     for my $section (@{$Thruk::Utils::Menu::navigation}) {
         return $section if $section->{'name'} eq $name;
@@ -495,11 +554,32 @@ sub _uri_with {
     return $uri;
 }
 
+##############################################
+
+=head2 _remove_item_from_links
+
+  _remove_item_from_links($links, $name)
+
+returns links list with items by name removed
+
+=cut
+
+sub _remove_item_from_links {
+    my($links, $name) = @_;
+    my $new_links = [];
+    for my $link (@{$links}) {
+        push @{$new_links}, $link unless $link->{'name'} eq $name;
+    }
+    return($new_links);
+}
+
 1;
+
+__END__
 
 =head1 AUTHOR
 
-Sven Nierlein, 2010, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

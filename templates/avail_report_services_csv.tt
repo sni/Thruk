@@ -1,13 +1,13 @@
 ﻿HOST_NAME, SERVICE_DESCRIPTION, TIME_OK_SCHEDULED, PERCENT_TIME_OK_SCHEDULED, PERCENT_KNOWN_TIME_OK_SCHEDULED, TIME_OK_UNSCHEDULED, PERCENT_TIME_OK_UNSCHEDULED, PERCENT_KNOWN_TIME_OK_UNSCHEDULED, TOTAL_TIME_OK, PERCENT_TOTAL_TIME_OK, PERCENT_KNOWN_TIME_OK, TIME_WARNING_SCHEDULED, PERCENT_TIME_WARNING_SCHEDULED, PERCENT_KNOWN_TIME_WARNING_SCHEDULED, TIME_WARNING_UNSCHEDULED, PERCENT_TIME_WARNING_UNSCHEDULED, PERCENT_KNOWN_TIME_WARNING_UNSCHEDULED, TOTAL_TIME_WARNING, PERCENT_TOTAL_TIME_WARNING, PERCENT_KNOWN_TIME_WARNING,TIME_UNKNOWN_SCHEDULED, PERCENT_TIME_UNKNOWN_SCHEDULED, PERCENT_KNOWN_TIME_UNKNOWN_SCHEDULED, TIME_UNKNOWN_UNSCHEDULED, PERCENT_TIME_UNKNOWN_UNSCHEDULED, PERCENT_KNOWN_TIME_UNKNOWN_UNSCHEDULED, TOTAL_TIME_UNKNOWN, PERCENT_TOTAL_TIME_UNKNOWN, PERCENT_KNOWN_TIME_UNKNOWN, TIME_CRITICAL_SCHEDULED, PERCENT_TIME_CRITICAL_SCHEDULED, PERCENT_KNOWN_TIME_CRITICAL_SCHEDULED, TIME_CRITICAL_UNSCHEDULED, PERCENT_TIME_CRITICAL_UNSCHEDULED, PERCENT_KNOWN_TIME_CRITICAL_UNSCHEDULED, TOTAL_TIME_CRITICAL, PERCENT_TOTAL_TIME_CRITICAL, PERCENT_KNOWN_TIME_CRITICAL, TIME_UNDETERMINED_NOT_RUNNING, PERCENT_TIME_UNDETERMINED_NOT_RUNNING, TIME_UNDETERMINED_NO_DATA, PERCENT_TIME_UNDETERMINED_NO_DATA, TOTAL_TIME_UNDETERMINED, PERCENT_TOTAL_TIME_UNDETERMINED
 
-[% FOR host IN services.keys.sort %]
-[% FOR service IN services.$host.keys.sort %]
-[% SET
+[%- FOR host IN services.keys.sort -%]
+[%- FOR service IN services.$host.keys.sort -%]
+[%- SET
     total_time_unknown =
           avail_data.services.$host.$service.time_indeterminate_nodata
         + avail_data.services.$host.$service.time_indeterminate_notrunning
-%]
-[% SET
+-%]
+[%- SET
     total_time =
            avail_data.services.$host.$service.time_ok
         + avail_data.services.$host.$service.time_warning
@@ -15,53 +15,53 @@
         + avail_data.services.$host.$service.time_critical
         + avail_data.services.$host.$service.time_indeterminate_nodata
         + avail_data.services.$host.$service.time_indeterminate_notrunning
-%]
-[% SET
+-%]
+[%- SET
     total_time_known = total_time - total_time_unknown
-%]
+-%]
 "[% host %]",
-[% space %]"[% service %]",
-[% space %][% avail_data.services.$host.$service.scheduled_time_ok %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_ok %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.scheduled_time_warning %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_warning %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.scheduled_time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.scheduled_time_critical %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_critical %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
-[% space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_indeterminate_notrunning %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% avail_data.services.$host.$service.time_indeterminate_nodata %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %],
-[% space %][% total_time_unknown %],
-[% space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]
+[%- space %]"[% service %]",
+[%- space %][% avail_data.services.$host.$service.scheduled_time_ok %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_ok %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.scheduled_time_warning %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_warning %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.scheduled_time_unknown %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_unknown %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.scheduled_time_critical %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_critical %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_indeterminate_notrunning %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% avail_data.services.$host.$service.time_indeterminate_nodata %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %],
+[%- space %][% total_time_unknown %],
+[%- space %][% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END +%]
 [%+ END %]
 [% END %]

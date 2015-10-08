@@ -1,5 +1,430 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - add json export to process info page
+          - fix problem with removing reports when trying to save files on a full disk.
+          - Config Tool:
+            - add reference clone selection page
+          - Panorama View:
+            - add clean dashboards button in dashboard management all tab
+            - add cli command to clean dashboards
+            - fix grid panels not restoring column width
+
+2.02     Wed Sep 30 17:38:30 CEST 2015
+          - show eventhandler name on extinfo page if available
+          - limit json exports to accounts with configuration information role
+          - clear process info cache after sending commands
+          - fix weekly cron jobs on Tuesdays (Alexandre Anriot, #525)
+          - Panorama View:
+            - make text label background size configurable
+            - add extra_fonts option to extend the list of available fonts
+            - add show border option for services and hosts panel
+            - fix list of public dashboards for admin users
+            - fix label zIndex positioning
+            - fix label position not being saved
+            - fix label removed when hitting cancel in settings window
+          - Config Tool:
+            - fix tools changes not beeing saved
+            - fix stripping last option when rewriting commands (#518)
+          - Business Process:
+            - add eventhandler attribute
+
+2.00-2   Fri Aug 28 16:19:25 CEST 2015
+          - add cancel button to all external jobs
+          - parse performance data with U(nknown) values
+          - fix user password link when invoked from main page
+          - fix logrotate missing su directive on logrotate > 3.8 (#471)
+          - fix duplicate installed logrotate file (#511)
+          - fix config file parser on escaped hashes (#505)
+          - Reports:
+            - add danish localization
+          - Config Tool:
+            - add generic text editor
+            - fix problem when cloning commands
+          - Panorama View:
+            - fix initial text label position (#506)
+            - fix corrupted tab export (#507)
+
+
+2.00     Mon Jul 13 22:49:52 CEST 2015
+          - add local settings config drop dir support via thruk_local.d/
+          - changed internal storage format to json everywhere
+          - improved memory usage
+          - improved startup time
+          - improved page rendering
+          - users can change their htpasswd passwords
+          - retry setting recurring downtimes in case of errors
+          - fix redirect without trailing slash on login
+          - fix event log filter for unprivileged contacts (#406)
+          - fix shadownaemon using the livestatus wait feature
+          - Panorama View:
+            - default geo map center can be changed in config file
+            - fix missing Sitename in services/host widgets
+            - fix using spaces in command comments (#495)
+          - Business Process:
+            - fix using backslashes in business process object names (#485)
+          - Reporting:
+            - add new options to better use indexes and skip updating logcache (#464, Zirafarafa)
+
+          Incompatible Changes:
+          - custom thruk plugins have to be adopted to thruk 2, see migration
+            help document: http://thruk.org/documentation/thruk_2_0_migration_guide.html
+          - enable use_frames mode by default
+          - enable cookie authentication by default
+
+1.88-4   Wed Apr 22 16:16:09 CEST 2015
+          - Config Tool:
+            - fix editing objects
+            - add tools to semi-automatically clean configs from common flaws
+          - Panorama View:
+            - fix scaling and setting offsets for background
+
+1.88-3   Sat Apr 18 11:44:40 CEST 2015
+          - mongodb logcache is now deprecated and will be removed 2016
+          - add pnp graph select option on extinfo pages
+          - fix error on omd updates with recurring downtimes
+          - fix permission problem with service recurring downtimes
+          - Business Process:
+            - fix business process cron entry being remove when updating reports
+          - Reports:
+            - display error message if report cannot be created due to missing hosts/services
+            - fix problem for reports using contacts with authorized by groups
+          - Panorama View:
+            - fix adding new connector items
+            - fix text labels disappearing on unlock
+            - fix ghost items from other dashboards when using geomap
+          - Config Tool:
+            - use maximum size in command line wizard
+            - list references directly on the object page
+            - display files/folders in Objects Browser
+            - objects will be cloned including references now
+            - fix object browser links
+            - fix complaining about 'null' groups in config tool (#442)
+            - fix escaping html tags in command definitions (#444)
+
+1.88-2   Sun Mar 29 19:30:58 CEST 2015
+          - fix problem with busines process objects
+
+1.88     Sat Mar 28 17:57:53 CET 2015
+          - add host and service notes url macros (Andrew Widdersheim)
+          - add host and service duration macro (Andrew Widdersheim)
+          - disable IE8 compatiblity mode introduced in 56c92b1 (Andrew Widdersheim)
+          - add 'expand_user_macros' option (Andrew Widdersheim)
+          - command start/end times round to full minute
+          - search now suggests custom variable names too (#450)
+          - menu:
+            - remove_item can now remove sub links too
+            - add is_user function to test for specific users
+            - fix problem with removing items for specific users only
+          - Panorama View:
+            - add geo map
+            - add undo function
+              - restore point can be created manually
+              - autosave creates restore point every 10minutes and when unlocking a dashboard
+            - add fullscreen mode
+            - add new connector item
+            - add new worldclock widget
+            - make widgets clonable
+            - dashboard are now locked by default
+              - popups will only displayed in locked mode for smoother editing
+              - links are disabled during editing
+            - dashboards are now locked by default
+            - prevent accidentally leaving the page by backspace key
+            - fix showing -1 objects for new dashboards
+            - fix showing empty totals for custom filter icons
+            - fix unclosable host/service popups (#401)
+          - Business Process:
+            - show draft edits in overview
+            - prevent accidentally leaving the page by backspace key
+            - add basic notification options to link tab
+            - bp services do no longer use the generic-service template
+          - Reports:
+            - prevent accidentally leaving the page by backspace key
+          - Config Tool:
+            - prevent accidentally leaving the page by backspace key
+          - Bug Fixes
+            - fix accessing performance data page in author mode
+            - fix accessing reports page in author mode
+            - fix title offset in trends graph
+            - fix highlighting correct backend on multiple backends by url
+
+1.86-4   Thu Feb 12 21:47:53 CET 2015
+          - add action_menu_apply option to apply action menus on the fly
+          - Panorama View:
+            - add group based permissions for dashboards
+            - move multiple icons by selecting them with ctrl click
+            - also move multiple icons by mouse lasso
+          - Bug Fixes
+            - fix using comma separated backend list in CLI tool
+            - fix undefined key_sort in CLI config parser
+
+1.86-3   Thu Jan 29 19:57:35 CET 2015
+          - add option for default service filter
+          - add host/servce connection macros
+          - Bug Fixes
+            - fix icon logo path in statusmap parent view
+            - fixed links to other dashboards in panorama plugin
+            - fix listing all backends with object config when using http backends
+            - fix product prefix in cli url requests
+
+1.86-2   Sun Jan 18 17:45:37 CET 2015
+          - Reporting:
+            - add option for maximum number of concurrent reports
+            - start reports from cron serial instead of all at once
+          - Panorama View:
+            - add server actions as possible link targets
+            - fixed problem when moving rotated shapes
+          - Bug Fixes
+            - fixed macro replacement in action menu links
+            - fixed error in cluetip library by shiping a new version
+            - fixed problem with shadownaemon in non-xs env
+            - fixed error: Can't use string xxx as an ARRAY
+
+1.86     Thu Jan  8 14:10:41 CET 2015
+          - add custom action menu
+          - livestatus performance improvements
+          - updated jquery to 1.11.1
+          - added new configuration setting: max_process_memory
+          - add excel export permanent link (awiddersheim)
+          - increased logcache int size
+          - use grey performance bars on extinfo page
+          - Business Process:
+            - fix zoom on large business objects
+          - Mobile:
+            - updated jquery mobile
+            - respect escape_html_tags setting from cgi.cfg
+            - old themes have been replaced with 2 new ones
+          - Reporting:
+            - support url reports from external urls
+          - Panorama View:
+            - added show details/refresh links to icons
+            - add 'center' position option for labels
+            - changeable icon filter types
+            - fixed memory leak in generic url panel
+            - fixed problem with stopped timers after import
+            - reload every x hours to prevent noncatchable memory leaks
+            - fixed linking public dashboards
+          - Bug Fixes
+            - fixed problem with timeperiods in logcache database
+            - fixed show_custom_vars with wildcards
+            - fixed adding dummy function in business processes
+            - fixed startup page in safari browser
+            - fixed css problem in mobile client
+
+1.84-6   Wed Aug  6 11:24:12 CEST 2014
+          - Panorama View:
+            - support availability results in labels and speedometer
+
+1.84-5   Wed Jul 16 13:30:05 CEST 2014
+          - Reports
+            - added cancel button for running reports
+            - added progres bar for running reports
+          - Panorama View:
+            - added -or filter to all filter panels
+            - added optional min/max values for speedometer
+            - added invert switch for speedometer
+            - background images can now be scaled
+            - background images can have an offset
+            - images and icons can be scaled
+          - Bug Fixes
+            - fixed pnp source not selectable anymore after revisiting panel settings
+            - fixed applying panel source
+            - fixed using multiple panorama custom filter
+
+1.84-4   Mon Jun 23 17:44:32 CEST 2014
+          - added show_error_reports mode 'both' which shows the error indicator but logs to server side
+          - set default show_error_reports mode to 'both' to make error handling easier
+          - support pnp urls with suffix
+          - Panorama View:
+            - added z-index option for icons
+          - Bug Fixes
+            - fixed rendering icons above dashboard settings window
+            - fixed recurring downtimes not beeing saved under some conditions with multiple backends
+            - fixed problem in servicegroup recurring downtimes
+            - fixed half-visible panorama buttons in IE11
+            - fixed panorama shape rotation in IE11
+            - fixed panorama column error in minemap
+            - fixed problem with utf8 characters in passwords
+            - fixed problem with quotes in passwords
+
+1.84-3   Sat May 31 16:10:07 CEST 2014
+          - added csrf_allowed_hosts configuration option
+          - allow unicode characters in performance data units
+          - Panorama View:
+            - iconsets may now contain png, jpg or gif images
+            - added dashboard_ignore_changes configuration option (Franky Van Liedekerke)
+            - reschedule next check when refreshing single icon with host/service
+          - Business Process
+            - added easier host:* status aggregation
+          - Bug Fixes
+            - fixed calculation of computed configuration in config tool
+            - fixed panorama icon size in IE8
+            - fixed problem with group/user specific settings
+            - fixed exclude pattern when using logcache
+            - fixed unicode problem in panorama labels
+            - fixed rotation shapes when switching from icon style
+
+1.84-2   Sat May 17 16:49:45 CEST 2014
+          - Panorama View:
+            - icons snap to raster on drag/drop when shift key is hold
+          - Bug Fixes
+            - fixed removing old sessions with cookie auth
+            - fixed panorama filter containing pipes
+            - fixed panorama not showing usercontent
+            - fixed panorama servicegroup popup details
+            - fixed cookie auth problem when accessing site without trailing slash
+
+1.84     Sat May 10 20:58:24 CEST 2014
+          - support time definitions like 1st monday, last friday for recurring downtimes and reports
+          - support host/hostgroup/servicegroup lists for recurring downtimes
+          - added quick filter to config pages
+          - general design fixes (awiddersheim)
+          - Exfoliation theme fixes (awiddersheim)
+          - fixed number format in performance data (awiddersheim)
+          - config tool improvements for shinken (Mathieu Parent)
+          - added new command "thruk -a selfcheck" to perform some self checks
+          - optionally disable session revalidation in cookie auth
+          - added csrf protection
+          - added sorting of comments/downtimes on host/service pages
+          - added more css classes to status page, hard, sort, attempt, duration...
+          - Business Process
+            - added support for custom functions
+          - Reports
+            - add button to directly send report by email
+            - add maximum sla threshold to hide detail pages
+            - allow multiple pnp graphs in sla reports (lkco)
+          - Panorama View:
+            - cookie state_provider has been removed
+            - background can be change in dashboard settings
+            - panels are not pinnable anymore
+            - tabs are now independant and can be exported and imported seperatly
+            - added icon widgets
+            - added dynamic labels to icon widgets
+            - changed internal storage format
+            - default_view can no longer be a string, its always a file now
+            - fixed panlet cluttering when opening dashboard with smaller screens
+            - fixed state not being saved in some conditions
+          - Bug Fixes
+            - fixed displaying partially active attributes
+            - fixed wait trigger not working all the time
+            - fixed tab rotation in panorama view
+            - fixed loosing filter on reports page
+            - fixed save&reload button from within filesystem browser
+            - fixed demanding system command permissions for enabling accept passive results (awiddersheim)
+            - fixed exclusion when using 'Plugin Output' filter
+            - fixed 'Plugin Output' not showing up as option when adding an and/or filter
+
+1.82-2   Fri Feb 21 17:20:55 CET 2014
+          - redirect to host details page if no services found and no service filter was set
+          - Bug Fixes
+            - fixed missing graphs in reports
+            - fixed js error in panorama url panel
+
+1.82     Thu Feb 13 00:01:36 CET 2014
+          - naemon adjustments
+          - performance improvments on pages not using any backends (reports, bp, conf,...)
+          - removed old reporting plugin
+          - install ssi examples
+          - add plugin_output and long_plugin_output filter (awiddersheim)
+          - CLI
+            - added -a ALL option to send commands to all backends
+          - Logcache
+            - added 'logcacheremoveunused' command to remove old no longer used tables
+          - Panorama
+            - make tabs reorderable
+            - autohiding headers don't change panel size
+            - fixed problem on initializing pie charts
+            - fixed import problem not showing initial panels
+          - Business Process
+            - change service plugin output for first node
+            - add livestatus result transport
+            - added cli command "bpcommit" to save manually create BPs
+            - fixed displaying/using wrong host template
+            - fixed display issue in latest firefox (updated dagre library)
+          - Reports
+            - show out of scope totals
+            - added report description on cover page
+            - support outages pages for multiple host/service reports
+            - fill in defaults for host/service unavailable states when switching report templates
+            - use timeperiods when calculation outage logs
+            - allow service reports over the same service on all hosts
+            - fixed livestatus timestamp for timeperiod transitions
+            - fixed pnp graphs in reports when using remote instances and services containing spaces
+            - fixed problem with daylight saving times
+            - fixed selecting wrong tab on rescheduling report
+            - fixed removing reports from non-existing templates
+          - Config Tool
+            - allow reloading by external commands
+            - fixed parsing lists in host/serviceescalations
+          - Bug Fixes
+            - fixed init script which did not stop/restart are fcgi processes
+            - fixed displaying performance data with negative ranges
+            - fixed duplicate bookmark handling
+            - fixed problem with sound alerts
+
+1.80-3   Sat Dec  7 18:26:15 CET 2013
+          - optional guest account when using cookie authentication
+          - made report_max_objects configurable
+          - Bug Fixes
+            - fixed sorting on keys with space in performance data table
+            - fixed using negative numbers in performance data table
+            - fixed cookie auth on https url when using https backend over proxy
+            - fixed js error on reports page
+            - fixed js error on panorama dashboad: Cannot call method 'getSize' of undefined
+
+1.80-2   Thu Nov 28 12:21:18 CET 2013
+          - Reports
+            - made number of latest/worst outages pages configurable
+          - Business Process
+            - fixed context menu issues with IE
+            - fixed zooming in IE
+          - Bug Fixes
+            - fixed show raw data link in IE
+
+1.80     Mon Nov 25 15:03:55 CET 2013
+          - support csv output in availability reports for every reporttype and not only all hosts/services
+          - support US date format in url querys
+          - added performance data overview (kudos to adagios for the inspiration)
+          - support ranges in performance data bar (awiddersheim)
+          - added xls export for availability reports
+          - show human readable performance data on extinfo page
+          - support standard macros in 'show_custom_vars' (awiddersheim)
+          - Panorama
+            - added experimental IE support
+          - Reports
+            - added filter button to only show my/public/all reports
+            - admins can edit all reports now
+            - fixed permission problem when using groups in cgi.cfg
+          - Config Tool
+            - fixed saving command lines with escaped semicolons
+          - Bug Fixes
+            - corrected default sorting of hosts page
+            - fixed display issue with left aligned calendar popup (awiddersheim)
+
+1.78-3   Sat Nov  2 00:45:00 CET 2013
+          - Business Process
+            - fixed saving graph direction
+            - fixed edge layout for left-right graphs
+            - fixed submiting results in test mode
+          - Panorama
+            - fixed not saving when starting with an empty set
+          - Shinken
+            - fixed livestatus error when using wrong business impact filter
+
+1.78-2   Sun Oct 27 16:41:56 CET 2013
+          - Business Process
+            - openend result spool files permissons
+          - Config Tool
+            - fixed plugin help accordion size
+          - Panorama
+            - fixed nagvis panel displaying load error
+            - fixed using default view with readonly mode
+            - fixed draggable panels in readonly mode
+          - Bug Fixes
+            - fixed cascaded configs for sub components
+            - fixed perfbars with zero values (awiddersheim)
+            - fixed listing recurring downtimes with limited permissions
+
 1.78     Thu Oct 21 22:41:31 CEST 2013
           - added business process addon
           - new --all-inclusive/-i mode for cli html page export which includes all css, js and

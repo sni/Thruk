@@ -4,8 +4,8 @@ use Test::More;
 use File::Slurp;
 
 BEGIN {
-    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-    plan tests => 178;
+    plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    plan tests => 226;
 }
 BEGIN {
     use lib('t');
@@ -18,7 +18,6 @@ use_ok("Thruk::Utils::Reports::Render");
 
 # extract languages
 my $c = TestUtils::get_c();
-$Thruk::Utils::CLI::c = $c;
 my $languages = Thruk::Utils::Reports::get_report_languages($c);
 is(ref $languages, 'HASH', 'got some languages');
 ok(scalar keys %{$languages} > 0, 'got some languages');

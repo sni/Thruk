@@ -33,29 +33,33 @@ return new node
 sub new {
     my ( $class, $data ) = @_;
     my $self = {
-        'id'                => $data->{'id'},
-        'label'             => $data->{'label'},
-        'function'          => '',
-        'function_ref'      => undef,
-        'function_args'     => [],
-        'depends'           => Thruk::Utils::list($data->{'depends'} || []),
-        'parents'           => $data->{'parents'}       || [],
-        'host'              => $data->{'host'}          || '',
-        'service'           => $data->{'service'}       || '',
-        'hostgroup'         => $data->{'hostgroup'}     || '',
-        'servicegroup'      => $data->{'servicegroup'}  || '',
-        'template'          => $data->{'template'}      || '',
-        'create_obj'        => $data->{'create_obj'}    || 0,
-        'create_obj_ok'     => 1,
-        'scheduled_downtime_depth' => 0,
-        'acknowledged'      => 0,
-        'testmode'          => 0,
+        'id'                        => $data->{'id'},
+        'label'                     => $data->{'label'},
+        'function'                  => '',
+        'function_ref'              => undef,
+        'function_args'             => [],
+        'depends'                   => Thruk::Utils::list($data->{'depends'} || []),
+        'parents'                   => $data->{'parents'}       || [],
+        'host'                      => $data->{'host'}          || '',
+        'service'                   => $data->{'service'}       || '',
+        'hostgroup'                 => $data->{'hostgroup'}     || '',
+        'servicegroup'              => $data->{'servicegroup'}  || '',
+        'template'                  => $data->{'template'}      || '',
+        'contacts'                  => $data->{'contacts'}      || [],
+        'contactgroups'             => $data->{'contactgroups'} || [],
+        'notification_period'       => $data->{'notification_period'} || '',
+        'event_handler'             => $data->{'event_handler'} || '',
+        'create_obj'                => $data->{'create_obj'}    || 0,
+        'create_obj_ok'             => 1,
+        'scheduled_downtime_depth'  => 0,
+        'acknowledged'              => 0,
+        'testmode'                  => 0,
 
-        'status'            => defined $data->{'status'} ? $data->{'status'} : 4,
-        'status_text'       => $data->{'status_text'} || '',
-        'short_desc'        => $data->{'short_desc'}  || '',
-        'last_check'        => 0,
-        'last_state_change' => 0,
+        'status'                    => defined $data->{'status'} ? $data->{'status'} : 4,
+        'status_text'               => $data->{'status_text'} || '',
+        'short_desc'                => $data->{'short_desc'}  || '',
+        'last_check'                => 0,
+        'last_state_change'         => 0,
     };
     bless $self, $class;
 
@@ -170,6 +174,21 @@ sub resolve_depends {
     return;
 }
 
+##########################################################
+
+=head2 depends_list
+
+return data which needs to be statefully stored
+
+=cut
+sub depends_list {
+    my($self) = @_;
+    my $list = [];
+    for my $d (@{$self->{'depends'}}) {
+        push @{$list}, [$d->{'id'}, $d->{'label'}];
+    }
+    return($list);
+}
 
 ##########################################################
 
@@ -203,7 +222,7 @@ sub get_save_obj {
     };
 
     # save this keys
-    for my $key (qw/template create_obj/) {
+    for my $key (qw/template create_obj notification_period event_handler contactgroups contacts/) {
         $obj->{$key} = $self->{$key} if $self->{$key};
     }
 
@@ -238,10 +257,22 @@ sub get_objects_conf {
         $obj->{'hosts'}->{$bp->{'name'}} = {
             'host_name'      => $bp->{'name'},
             'alias'          => 'Business Process: '.$self->{'label'},
-            'use'            => $self->{'template'} || 'thruk-bp-template',
+            'use'            => $bp->{'template'} || 'thruk-bp-template',
             '_THRUK_BP_ID'   => $bp->{'id'},
             '_THRUK_NODE_ID' => $self->{'id'},
         };
+        for my $key (qw/notification_period event_handler/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = $bp->{$key};
+        }
+        for my $key (qw/contacts/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{$key} = join(',', @{$bp->{$key}});
+        }
+        for my $key (qw/contactgroups/) {
+            next unless $bp->{$key};
+            $obj->{'hosts'}->{$bp->{'name'}}->{'contact_groups'} = join(',', @{$bp->{$key}});
+        }
     }
 
     $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}} = {
@@ -252,6 +283,20 @@ sub get_objects_conf {
         '_THRUK_BP_ID'        => $bp->{'id'},
         '_THRUK_NODE_ID'      => $self->{'id'},
     };
+    for my $key (qw/notification_period event_handler/) {
+        next unless $self->{$key};
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = $self->{$key};
+    }
+    for my $key (qw/contacts/) {
+        next unless $self->{$key};
+        next unless scalar @{$self->{$key}} > 0;
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{$key} = join(',', @{$self->{$key}});
+    }
+    for my $key (qw/contactgroups/) {
+        next unless $self->{$key};
+        next unless scalar @{$self->{$key}} > 0;
+        $obj->{'services'}->{$bp->{'name'}}->{$self->{'label'}}->{'contact_groups'} = join(',', @{$self->{$key}});
+    }
 
     return($obj);
 }
@@ -279,11 +324,11 @@ sub update_status {
     return unless $self->{'function_ref'};
     my $function = $self->{'function_ref'};
     eval {
-        my($status, $short_desc, $status_text, $extra) = &$function($c,
-                                                                    $bp,
-                                                                    $self,
-                                                                    $self->{'function_args'},
-                                                                    $livedata,
+        my($status, $short_desc, $status_text, $extra) = &{$function}($c,
+                                                                      $bp,
+                                                                      $self,
+                                                                      $self->{'function_args'},
+                                                                      $livedata,
                                                                     );
         $self->set_status($status, ($status_text || $short_desc), $bp, $extra);
         $self->{'short_desc'} = $short_desc;
@@ -292,13 +337,10 @@ sub update_status {
         $self->set_status(3, 'Internal Error: '.$@, $bp);
     }
 
-    # create result if we are linked to an object
-    my $result;
-    if($self->{'create_obj'}) {
-        $result = $self->_result_to_string($bp);
-    }
+    # indicate a new result if we are linked to an object
+    return 1 if $self->{'create_obj'};
 
-    return $result;
+    return;
 }
 
 ##########################################################
@@ -342,7 +384,7 @@ sub set_status {
     # if this node has no parents, use this state for the complete bp
     if($bp and scalar @{$self->{'parents'}} == 0) {
         my $text = $self->{'status_text'};
-        if(scalar @{$self->{'depends'}} > 0) {
+        if(scalar @{$self->{'depends'}} > 0 and $self->{'function'} ne 'custom') {
             my $sum = Thruk::BP::Functions::_get_nodes_grouped_by_state($self, $bp);
             if($sum->{'3'}) {
                 $text = Thruk::BP::Utils::join_labels($sum->{'3'}).' unknown';
@@ -370,7 +412,7 @@ sub _set_function {
         my($fname, $fargs) = $data->{'function'} =~ m|^(\w+)\((.*)\)|mx;
         $fname = lc $fname;
         my $function = \&{'Thruk::BP::Functions::'.$fname};
-        if(!defined &$function) {
+        if(!defined &{$function}) {
             $self->set_status(3, 'Unknown function: '.($fname || $data->{'function'}));
         } else {
             $self->{'function_args'} = Thruk::BP::Utils::clean_function_args($fargs);
@@ -379,9 +421,13 @@ sub _set_function {
         }
     }
     if($self->{'function'} eq 'status') {
-        $self->{'host'}       = $self->{'function_args'}->[0] || '';
-        $self->{'service'}    = $self->{'function_args'}->[1] || '';
-        $self->{'template'}   = '';
+        $self->{'host'}                 = $self->{'function_args'}->[0] || '';
+        $self->{'service'}              = $self->{'function_args'}->[1] || '';
+        $self->{'template'}             = '';
+        $self->{'contacts'}             = [];
+        $self->{'contactgroups'}        = [];
+        $self->{'notification_period'}  = '';
+        $self->{'event_handler'}        = '';
         $self->{'create_obj'} = 0 unless(defined $self->{'id'} and $self->{'id'} eq 'node1');
     }
     if($self->{'function'} eq 'groupstatus') {
@@ -397,30 +443,62 @@ sub _set_function {
 }
 
 ##########################################################
-sub _result_to_string {
+
+=head2 result_to_cmd
+
+    result_to_cmd($bp, [$force_service])
+
+returns command represention of result. Useful for transmitting result by
+livestatus command.
+
+=cut
+sub result_to_cmd {
     my($self, $bp, $force_service) = @_;
-    my $string = "";
     my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
-    my $status    = $self->{'status'};
-    my $output    = '';
+
+    my $cmds = [];
+    my($output, $status, $string) = $self->_get_status($bp, $firstnode);
+
     if($firstnode) {
-        $string .= "### Nagios Host Check Result ###\n";
-        # host status is ok unless there were errors with the bp itself
-        $status = 0;
-        $output = sprintf('OK - business process calculation of %d nodes complete in %.3fs|runtime=%.3fs', scalar @{$bp->{'nodes'}}, $bp->{'time'}, $bp->{'time'});
-    } else {
-        if($status == 4) { $status = 0 };
-        $string .= "### Nagios Service Check Result ###\n";
-        $output = $self->{'status_text'} || $self->{'short_desc'};
+        my $cmd = sprintf("[%d] PROCESS_HOST_CHECK_RESULT;%s;%d;%s",
+                                    time(),
+                                    $bp->{'name'},
+                                    $status,
+                                    $output,
+                        );
+        push @{$cmds}, $cmd;
+
+        # submit result for host & service
+        push @{$cmds}, @{$self->result_to_cmd($bp, 1)};
     }
-    $string .= sprintf "# Time: %s\n",scalar localtime time();
-    $string .= sprintf "host_name=%s\n", $bp->{'name'};
-    if(!$firstnode) {
-        $string .= sprintf "service_description=%s\n", $self->{'label'};
+    else {
+        my $cmd = sprintf("[%d] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s",
+                                    time(),
+                                    $bp->{'name'},
+                                    $self->{'label'},
+                                    $status,
+                                    $output,
+                        );
+        return([$cmd]);
     }
-    # remove trailing newlines and quote the remaining ones
-    $output =~ s/[\r\n]*$//mxo;
-    $output =~ s/\n/\\n/gmxo;
+    return($cmds);
+}
+
+##########################################################
+
+=head2 result_to_string
+
+    result_to_string($bp, [$force_service])
+
+returns string represention of result. Useful for transmitting into a checkresults
+spool folder.
+
+=cut
+sub result_to_string {
+    my($self, $bp, $force_service) = @_;
+    my $firstnode = ($self->{'id'} eq 'node1' && !$force_service) ? 1 : 0;
+
+    my($output, $status, $string) = $self->_get_status($bp, $firstnode);
 
     $string .= sprintf "check_type=%d\n",       1; # passive
     $string .= sprintf "check_options=%d\n",    0; # no options
@@ -435,7 +513,7 @@ sub _result_to_string {
 
     if($firstnode) {
         # submit result for host & service
-        $string .= "\n\n".$self->_result_to_string($bp, 1);
+        $string .= "\n\n".$self->result_to_string($bp, 1);
     }
     return $string;
 }
@@ -458,11 +536,42 @@ sub TO_JSON {
     return $data;
 }
 
+
+##########################################################
+sub _get_status {
+    my($self, $bp, $firstnode) = @_;
+    my $string = "";
+    my $status    = $self->{'status'};
+    my $output    = '';
+    if($firstnode) {
+        $string .= "### Nagios Host Check Result ###\n";
+        # host status is ok unless there were errors with the bp itself
+        $status = 0;
+        $output = sprintf('OK - business process calculation of %d nodes complete in %.3fs|runtime=%.3fs', scalar @{$bp->{'nodes'}}, $bp->{'time'}, $bp->{'time'});
+    } else {
+        if($status == 4) { $status = 0 }
+        $string .= "### Nagios Service Check Result ###\n";
+        $output = $self->{'status_text'} || $self->{'short_desc'};
+        # override status text of first node to be the bps status itself
+        $output = $bp->{'status_text'} if $self->{'id'} eq 'node1';
+    }
+    $string .= sprintf "# Time: %s\n",scalar localtime time();
+    $string .= sprintf "host_name=%s\n", $bp->{'name'};
+    if(!$firstnode) {
+        $string .= sprintf "service_description=%s\n", $self->{'label'};
+    }
+    # remove trailing newlines and quote the remaining ones
+    $output =~ s/[\r\n]*$//mxo;
+    $output =~ s/\n/\\n/gmxo;
+
+    return($output, $status, $string);
+}
+
 ##########################################################
 
 =head1 AUTHOR
 
-Sven Nierlein, 2013, <sven.nierlein@consol.de>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

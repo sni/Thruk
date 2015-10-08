@@ -1,6 +1,7 @@
-﻿[% PROCESS _header.tt css="thruk/plugins/business_process/bp.css"
-                      js=["thruk/plugins/business_process/bp.js",
-                          "thruk/plugins/business_process/dagre-0.3.0/dagre.min.js"
+﻿[% PROCESS _header.tt css="plugins/business_process/bp.css"
+                      js=["plugins/business_process/bp.js",
+                          "plugins/business_process/bp-ie-fixes.js",
+                          "plugins/business_process/dagre-0.4.6/dagre.min.js"
                          ]
 %]
 [% PROCESS _message.tt %]

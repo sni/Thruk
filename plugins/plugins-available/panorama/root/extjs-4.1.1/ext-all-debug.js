@@ -12281,6 +12281,8 @@ Element.override({
                         }
                         value = prop[name];
                         value = (value == null) ? '' : value;
+// THRUK: breaks on IE 8 sometimes
+try {
                         if (hook.set) {
                             hook.set(dom, value, me);
                         } else {
@@ -12289,6 +12291,13 @@ Element.override({
                         if (hook.afterSet) {
                             hook.afterSet(dom, value, me);
                         }
+}
+catch(e) {
+  try { // console may be not available
+    console.log(me.html);
+    console.trace();
+  } catch(e) {}
+}
                     }
                 }
             }
@@ -46208,7 +46217,18 @@ Ext.define('Ext.AbstractComponent', {
         } else {
             me.html = Ext.isObject(htmlOrData) ? Ext.DomHelper.markup(htmlOrData) : htmlOrData;
             if (me.rendered) {
-                me.getTargetEl().update(me.html, loadScripts, cb);
+                // THRUK: breaks on IE 8 otherwise
+                if(Ext.isIE && (
+                        me.html.match('Object')
+                     || me.html.match('<div downtimes=')
+                  )) {
+                    try { // console may be not available
+                        console.log(me.html);
+                        console.trace();
+                    } catch(e) {}
+                } else {
+                    me.getTargetEl().update(me.html, loadScripts, cb);
+                }
             }
         }
 

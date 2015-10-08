@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 }
 
 BEGIN {
@@ -16,17 +15,14 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
-$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
-$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+$BIN    = $BIN.' --remote-url="'.$ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.'"' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 my $cronuser = '';
 $cronuser = ' -u '.$ENV{'THRUK_USER'} if defined $ENV{'THRUK_USER'};
 
 # get test host
-my $test = { cmd  => $BIN.' -a listhosts' };
-TestUtils::test_command($test);
-my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("$0: need test host");
+my $host = TestUtils::get_test_host_cli($BIN);
 
 # show help
 TestUtils::test_command({
@@ -43,7 +39,7 @@ TestUtils::test_command({
     like => ['/Tactical Monitoring Overview/',
              '/Network Outages/',
              '/Monitoring Features/',
-             '/(javascript\/overlib\.js|all_in_one-.\...\.css)/',
+             '/(javascript\/overlib\.js|all_in_one-[\d\-\.]+\.js)/',
             ],
 });
 
@@ -62,7 +58,7 @@ TestUtils::test_command({
 # list backends
 TestUtils::test_command({
     cmd  => $BIN.' -l',
-    like => ['/\s+\*\s*\w{5}\s*\w+/',
+    like => ['/\s+\*\s*\w{5}\s*[^\s]+/',
              '/Def\s+Key\s+Name/'
             ],
 });
@@ -70,7 +66,7 @@ TestUtils::test_command({
 # clearcache
 TestUtils::test_command({
     cmd  => $BIN.' ./script/thruk -a clearcache',
-    like => ['/^$/'],
+    like => ['/^cache cleared$/'],
 });
 
 # dumpcache
@@ -82,7 +78,7 @@ TestUtils::test_command({
 # 2 commands
 TestUtils::test_command({
     cmd  => $BIN.' ./script/thruk -a clearcache,dumpcache',
-    like => ['/^\$VAR1/'],
+    like => ['/^cache cleared\$VAR1/'],
 });
 
 # create recurring downtime
@@ -113,10 +109,10 @@ TestUtils::test_command({
 
 # Excel export
 TestUtils::test_command({
-    cmd  => '/bin/sh -c \''.$BIN.' -A thrukadmin -a "url=status.cgi?view_mode=xls&host=all" > /tmp/allservices.xls\'',
+    cmd  => '/bin/sh -c \''.$BIN.' -A thrukadmin -a "url=status.cgi?view_mode=xls&host='.$host.'" > /tmp/services.xls\'',
 });
 TestUtils::test_command({
-    cmd  => '/usr/bin/file /tmp/allservices.xls',
+    cmd  => '/usr/bin/file /tmp/services.xls',
     like => ['/(Microsoft Office|CDF V2|Composite Document File V2) Document/' ],
 });
 unlink('/tmp/allservices.xls');
@@ -149,6 +145,19 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => $BIN.' -a command "'.$host.'"',
     like    => ['/Expaned Command:/'],
+});
+
+# self check
+TestUtils::test_command({
+    cmd  => $BIN.' -a selfcheck',
+    like => ['/Filesystem:/', '/is writable/', '/Logfiles:/', '/no errors/', '/Recurring Downtimes:/', '/Reports:/', '/no errors in \d+ reports/'],
+    exit => undef,
+});
+
+# panorama cleanup
+TestUtils::test_command({
+    cmd  => $BIN.' -a clean_dashboards',
+    like => ['/OK - cleaned up 0 old dashboards/'],
 });
 
 done_testing();

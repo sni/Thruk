@@ -43,5 +43,6 @@
     'Report:'                               => 'Rapporto:',
     'Description:'                          => 'Descrizione:',
     'Your report is attached.'              => 'Il tuo rapporto è allegato.',
+    'Out of Scope'                          => 'Fuori Ambito',
   }
 %]

@@ -8,6 +8,7 @@
         { 'minimal'  => [ 'Minmal Layout',       'yes_no',      'yes',                    '(html only)' ] },
         { 'nav'      => [ 'Include Navigation',  'yes_no',      'no',                     '(html only)' ] },
         { 'js'       => [ 'Include Javascript',  'yes_no',      'no',                     '(html only)' ] },
+        { 'pdf'      => [ 'Direct PDF',          'yes_no',      'no',                     '(try this option if rendering fails)' ] },
     ];
   %]
 [% END %]

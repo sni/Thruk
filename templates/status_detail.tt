@@ -2,14 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _sounds.tt %]
-[% authorized_for_read_only = 0 %][% IF c.check_user_roles_wrapper('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
-
-[% UNLESS authorized_for_read_only %]
-<script type="text/javascript">
-  var dfl_Hash = new Object({[% FOREACH s = data %]r[% loop.index %]: "[% escape_bslash(s.host_name) %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
-</script>
-[% END %]
+[% authorized_for_read_only = 0 %][% IF c.check_user_roles('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
@@ -103,7 +96,7 @@
         <td valign="top" align="left" width="10%" nowrap></td>
         <td valign="top" align="center" width="80%">
           [% UNLESS authorized_for_read_only %]
-          <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+          <div class="hint">Select hosts / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
               <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');return false;">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
             - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">unselect all</a>
@@ -139,7 +132,14 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
-    [% END %]
     <div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
+    [% END %]
+
+[% UNLESS authorized_for_read_only %]
+<script type="text/javascript">
+  var dfl_Hash = [% get_cmd_submit_hash(data, 'svc') %];
+  hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
+</script>
+[% END %]
 
 [% PROCESS _footer.tt %]

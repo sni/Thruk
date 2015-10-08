@@ -23,7 +23,7 @@
     <td width=150></td>
     <td align="center">
     [% IF !c.config.command_disabled.exists('55') && !c.config.command_disabled.exists('56') %]
-    <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?recurring=add&amp;type=6'>Add recurring downtime</a></div><br>
+    <div class='comment'><img src='[% url_prefix %]themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?recurring=add&amp;type=6'>Add recurring downtime</a></div><br>
     [% END %]
     </td>
     <td width=150 align="right">

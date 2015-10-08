@@ -1,9 +1,11 @@
 ﻿[% USE date %]
-<div id='bp[% bp.id %]'>
-<div style="position: relative;">
-<a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]',  0.05)" class="bp_container_zoom plus">+</a>
-<a href="#" onclick="bp_zoom_rel('inner_container[% bp.id %]', -0.05)" class="bp_container_zoom minus">-</a>
-<div id='container[% bp.id %]' class="bp_container">
+<div style="position: absolute; height: 1px; width: 100%;">
+  <a href="#" onclick="bp_zoom_rel(0.05)" class="bp_container_zoom plus" style="z-index: 5;">+</a>
+  <a href="#" onclick="bp_zoom_rel(-0.05)" class="bp_container_zoom minus" style="z-index: 5;">-</a>
+</div>
+<div style="position: relative; height: 100%; width: 100%; overflow: auto; z-index: 1;">
+<div id='zoom[% bp.id %]'>
+<div id='container[% bp.id %]' class="bp_container" style="height: 100%; width: 100%;">
   <div id='inner_container[% bp.id %]' class="bp_container_inner">
     [% FOREACH n IN bp.nodes %]
     [% statusClass = 'statusUNKNOWN' %]
@@ -27,18 +29,18 @@
         [% END %]
         <div class="bp_node_icons">
           [% IF n.testmode %]
-            <img src="[% url_prefix %]thruk/plugins/business_process/images/lock.png" alt="Status has been locked by testmode" title="Status has been locked by testmode" height="12" width="12">
+            <img src="[% url_prefix %]plugins/business_process/images/lock.png" alt="Status has been locked by testmode" title="Status has been locked by testmode" height="12" width="12">
           [% END %]
           [% IF n.scheduled_downtime_depth > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="12" width="12">
+            <img src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="12" width="12">
           [% END %]
           [% IF n.acknowledged > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="12" width="12">
+            <img src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="12" width="12">
           [% END %]
         </div>
         [% IF editmode && n.create_obj %]
         <div class="bp_node_link_icons">
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/link.png" alt="This node is linked to a host or service object" title="This node is linked to a host or service object" border="0" height="14" width="14">
+            <img src="[% url_prefix %]themes/[% theme %]/images/link.png" alt="This node is linked to a host or service object" title="This node is linked to a host or service object" border="0" height="14" width="14">
         </div>
         [% END %]
     </div>
@@ -50,33 +52,9 @@
 </div>
 </div>
 <script type="text/javascript">
-    var nodes = [
-        [% FOREACH n IN bp.nodes %]
-        { id:           '[% n.id %]',
-          label:        '[% n.label %]',
-          host:         '[% n.host %]',
-          service:      '[% n.service %]',
-          hostgroup:    '[% n.hostgroup %]',
-          servicegroup: '[% n.servicegroup %]',
-          template:     '[% n.template %]',
-          create_obj:   [% IF n.create_obj %]true[% ELSE %]false[% END %],
-          create_obj_ok:[% IF n.create_obj_ok %]true[% ELSE %]false[% END %],
-          status:       '[% n.status %]',
-          status_text:  [% json_encode([n.status_text]) %][0],
-          short_desc:   '[% escape_quotes(n.short_desc) %]',
-          last_check:   '[% IF n.last_check %][% date_format(c, n.last_check) %][% ELSE %]never[% END %]',
-          duration:     '[% IF n.last_state_change %][% duration(date.now - n.last_state_change) %][% END %]',
-          acknowledged: '[% n.acknowledged %]',
-          scheduled_downtime_depth: '[% n.scheduled_downtime_depth %]',
-          depends:      [[% FOREACH d IN n.depends %]['[% d.id %]', '[% d.label %]'][% UNLESS loop.last %],[% END %][% END %]],
-          func:         '[% n.function %]',
-          func_args:    [% json_encode(n.function_args) %],
-          width:        120,
-          height:        40
-        }[% UNLESS loop.last %],[% END +%]
-        [%+ END %]
-    ];
-
+    var node_width  = 120,
+        node_height =  40;
+    var nodes = [% bp.get_json_nodes(c) %];
     [% edges = [];
       FOREACH n IN bp.nodes;
         FOREACH d IN n.depends;
@@ -89,11 +67,13 @@
       [%+ END %]
     ];
 
-    var bp_id      = [% bp.id %];
-    var editmode   = [% editmode %];
-    var testmode   = [% testmode %];
-    var bp_no_menu = [% no_menu %];
-    var testmodes  = [% json_encode(testmodes) %];
+    var bp_id       = [% bp.id %];
+    var bp_template = '[% bp.template %]';
+    var editmode    = [% editmode %];
+    var testmode    = [% testmode %];
+    var bp_no_menu  = [% no_menu %];
+    var testmodes   = [% json_encode(testmodes) %];
+    var cust_func   = [% json_encode(bp_custom_functions) %];
 
     var bp_graph_options = {
         'bp_rankDir': '[% bp.rankDir %]',

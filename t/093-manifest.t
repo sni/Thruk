@@ -1,37 +1,42 @@
 use strict;
 use warnings;
 use Test::More;
-use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+use_ok("ExtUtils::Manifest");
+
 # first do a make distcheck
-open(my $ph, '-|', 'make distcheck 2>&1') or die('make failed: '.$!);
-while(<$ph>) {
-    my $line = $_;
-    chomp($line);
+SKIP: {
+    # https://github.com/Perl-Toolchain-Gang/ExtUtils-Manifest/issues/5
+    skip "distcheck is broken with ExtUtils::Manifest >= 1.66", 1 if $ExtUtils::Manifest::VERSION >= 1.66;
+    open(my $ph, '-|', 'make distcheck 2>&1') or die('make failed: '.$!);
+    while(<$ph>) {
+        my $line = $_;
+        chomp($line);
 
-    if(   $line =~ m/\/bin\/perl/
-       or $line =~ m/: Entering directory/
-       or $line =~ m/: Leaving directory/
-    ) {
-      pass($line);
-      next;
-    }
-
-    if($line =~ m/No such file: (.*)$/) {
-        if( -l $1) {
-          pass("$1 is a symlink");
-        } else {
-          fail("$1 does not exist!");
+        if(   $line =~ m/\/bin\/perl/
+           or $line =~ m/: Entering directory/
+           or $line =~ m/: Leaving directory/
+        ) {
+          pass($line);
+          next;
         }
-        next;
-    }
 
-    fail($line);
-}
-close($ph);
-ok($? == 0, 'make exited with: '.$?);
+        if($line =~ m/No such file: (.*)$/) {
+            if( -l $1) {
+              pass("$1 is a symlink");
+            } else {
+              fail("$1 does not exist!");
+            }
+            next;
+        }
+
+        fail($line);
+    }
+    close($ph);
+    ok($? == 0, 'make exited with: '.$?);
+};
 
 # read our manifest file
 my $manifest = {};
@@ -46,7 +51,7 @@ close($fh);
 ok(scalar keys %{$manifest} >  0, 'read entrys from MANIFEST: '.(scalar keys %{$manifest}));
 
 # verify that all symlinks are in our manifest file
-open($ph, '-|', 'bash -c "find {templates/,root/,plugins/,themes/} -type l" 2>&1') or die('find failed: '.$!);
+open(my $ph, '-|', 'bash -c "find {templates/,root/,plugins/,themes/} -type l" 2>&1') or die('find failed: '.$!);
 while(<$ph>) {
     my $line = $_;
     chomp($line);

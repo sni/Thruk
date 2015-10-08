@@ -2,6 +2,7 @@
   <td>
     <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)"[% IF !can_edit %] disabled[% END %]>
       <option value="month"[% IF cr.type == 'month' %] selected[% END %]>monthly</option>
+      <option value="monthday"[% IF cr.type == 'monthday' %] selected[% END %]>monthly by day</option>
       <option value="week"[% IF cr.type == 'week' %] selected[% END %]>weekly</option>
       <option value="day"[% IF cr.type == 'day' %] selected[% END %]>daily</option>
       <option value="cust"[% IF cr.type == 'cust' %] selected[% END %]>custom</option>
@@ -16,6 +17,17 @@
           <option value="[% day %]"[% IF cr.day == day %] selected[% END %]>[% sprintf("%02s", day) %]</option>
           [% day = day + 1 %]
           [% END %]
+      </select>
+    </div>
+    <div id="div_send_monthday_[% nr %]" style="display: none">
+      on the
+      <select name="send_monthday_[% nr %]"[% IF !can_edit %] disabled[% END %]>
+        [% FOREACH rep = [ "1st", "2nd", "3rd", "4th", "Last" ]  %]
+          [% FOREACH day = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]  %]
+            [% monthday = rep _ '_' _ day  %]
+            <option value="[% monthday %]"[% IF cr.exists('month_day') && cr.month_day == monthday %] selected[% END %]>[% rep +%] [%+ day %]</option>
+          [% END %]
+        [% END %]
       </select>
     </div>
     <div id="div_send_week_[% nr %]" style="display: none">
@@ -74,7 +86,7 @@
       [% END %]
     </select>
   </td>
-  <td class='newfilter' onclick="delete_cron_row(this); return false;">[% IF can_edit %]<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">[% END %]
+  <td class='newfilter' onclick="delete_cron_row(this); return false;">[% IF can_edit %]<input type="image" src="[% url_prefix %]themes/[% theme %]/images/remove.png" name="delete" alt="delete">[% END %]
     <script type="text/javascript">
     <!--
     cron_change_date("send_type_[% nr %]");

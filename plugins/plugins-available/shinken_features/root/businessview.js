@@ -34,7 +34,7 @@ function toggleToc(e) {
 }
 
 function set_initial_toc_states() {
-    for(key in toc_states) {
+    for(var key in toc_states) {
         var elem = jQuery('#'+key)[0];
         if(elem) {
             elem.style.display = toc_states[key];

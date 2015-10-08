@@ -1,23 +1,20 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use Test::More;
-$Data::Dumper::Sortkeys = 1;
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
 
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-use Catalyst::Test 'Thruk';
 
-plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 64;
+    plan tests => 59;
 } else {
     plan skip_all => 'pure shinken backend required'
 }

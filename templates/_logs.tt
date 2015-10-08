@@ -1,4 +1,5 @@
 ﻿[% USE date %]
+[% PROCESS _blocks.tt %]
 
 <table width="100%"><tr>
 <td style="width:10%">&nbsp;</td>
@@ -23,8 +24,8 @@
 <div class='logEntries'>
 
 [% END %]
-[% PROCESS _logs_line.tt %]
-<img align='middle' src='[% url_prefix %]thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
+[% PROCESS _logs_line %]
+<img align='middle' src='[% url_prefix %]themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% escape_html(message) %][% ELSE %][% message %][% END %]<br clear='all'>
 
 [% END %]
 

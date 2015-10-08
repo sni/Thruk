@@ -4,11 +4,11 @@
 
 <div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
 <table><tr><td class="filter">
-  <table style="width:100%;">
+  <table style="width:610px;">
     <tr>
       <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_command" value="" onfocus="this.click(); ajax_search.autoopen=false;" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
+        <input type="text" id="[% id %]_inp_command" value="" [% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
         <input type="hidden" id="[% id %]_inp_args" value="">
       </td>
     </tr>
@@ -17,9 +17,9 @@
       <td>&nbsp;</td>
     </tr>
     <tr>
-      <td colspan=2>
-        <span id="[% id %]_command_line" style="text-align: left;"></span>
-        <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
+      <td colspan=2 style="position: relative;">
+        <span id="[% id %]_command_line" class="cmd_line_wizard_wrapper"></span>
+        <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
       </td>
     </tr>
     [% IF conf_config.show_plugin_syntax_helper %]
@@ -29,7 +29,7 @@
             <h3><a href="#">Plugin Help</a></h3>
             <div style="max-width:1000px;">
                 <span id="[% id %]_plugin_help" style="text-align: left;"></span>
-                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
+                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
             </div>
             <h3><a href="#">Preview</a></h3>
             <div style="max-width:1000px;">
@@ -40,7 +40,7 @@
                 <button id="[% id %]_preview" class="conf_preview_button">preview</button>
                 <br>
                 <span id="[% id %]_plugin_exec_output" style="text-align: left;"></span>
-                <div align="center"><img id="[% id %]_wait_run" style="display:none" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin output is loaded" title="please wait till the plugin output is loaded" border="0" height="20" width="20"></div>
+                <div align="center"><img id="[% id %]_wait_run" style="display:none" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin output is loaded" title="please wait till the plugin output is loaded" border="0" height="20" width="20"></div>
             </div>
         </div>
       </td>

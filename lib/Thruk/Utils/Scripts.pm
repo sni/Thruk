@@ -57,7 +57,7 @@ sub print_error {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2012, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 

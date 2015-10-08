@@ -56,11 +56,15 @@ LI.bp_menu_seperator.ui-state-disabled A {
 }
 
 DIV.ui-dialog INPUT[type=text] {
-    width: 320px;
+    width: 290px;
 }
 
 .bp_type_desc {
     font-size: smaller;
+}
+
+.bp_type_desc A {
+    border-bottom: 1px dotted grey;
 }
 
 .bp_info TH {
@@ -128,8 +132,12 @@ TABLE.minimal .bp_container_zoom {
 
 .bp_container {
     position: relative;
+    overflow: hidden;
+}
+DIV.bp_zoom_container {
     border: 1px solid grey;
-    overflow: auto;
+    overflow: hidden;
+    position: relative;
 }
 TABLE.minimal .bp_container {
     border: 0;
@@ -256,4 +264,17 @@ SPAN.bp_label {
 /* decrease padding of tabs panel */
 .ui-tabs .ui-tabs-panel {
     padding: 5px;
+}
+
+/* additional styles when frames in panorama view */
+BODY.iframed {
+    background: white;
+}
+BODY.iframed DIV.bp_zoom_container {
+    border: 0;
+}
+
+/* custom fields */
+#cust_help PRE {
+    margin: 0;
 }

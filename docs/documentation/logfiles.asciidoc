@@ -1,0 +1,59 @@
+---
+layout: docs
+title: Logfiles
+breadcrumb: [ "advanced.html", "Advanced" ]
+---
+
+
+== Logfiles
+
+Logging configuration takes place in the log4perl.conf. You can do whatever is
+possible in log4perl. Refer to the log4perl manual for detailed
+information:
+http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html
+There is a log4perl.conf.example file shipped with the package.
+
+ex.:
+
+ log4perl.logger=ALL, ErrorLog, DebugLog
+ log4perl.appender.ErrorLog=Log::Dispatch::File
+ log4perl.appender.ErrorLog.filename=/home/thruk/Thruk/logs/error.log
+ log4perl.appender.ErrorLog.mode=append
+ log4perl.appender.ErrorLog.Threshold=ERROR
+ log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
+ log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
+
+
+[TIP]
+.command logging
+=======
+if you want to log all sent commands, just set the loglevel to INFO.
+
+ex.: log4perl.appender.ErrorLog.Threshold=INFO
+=======
+
+
+== Enable Debug Logging
+
+To get more verbose log output, you have to create a `.thruk` file in the
+home directory of the Thruk user (usually the webserver user) or in case of
+OMD in the site folder.
+
+The following locations will work:
+
+ - ~/.thruk
+ - /etc/sysconfig/thruk
+ - /etc/default/thruk
+
+Then put in the following settings inside:
+
+to increase the loglevel: (valid loglevels are 0-4 with 4 being most verbose)
+
+  export THRUK_VERBOSE=1
+
+to track all requests with their cpu and memory usage:
+
+  export THRUK_PERFORMANCE_DEBUG=1
+
+
+NOTE: You might have to adjust the loglevel threshold (see above). Also some log output will end up in the apache errorlog.

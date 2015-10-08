@@ -40,7 +40,7 @@
       [% END %]
       <row>
         [% IF show_backends_in_table %]
-          [% IF columns.13 %]<cell>[% h.peer_name %]</cell>[% END %]
+          [% IF columns.13 %]<cell>[% pi_detail.$peer_key.peer_name %]</cell>[% END %]
         [% END %]
         [% IF columns.1  %]<cell>[% h.name %]</cell>[% END %]
         [% IF columns.2  %]<cell>[% h.address %]</cell>[% END %]

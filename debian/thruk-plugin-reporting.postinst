@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+        rm -f /etc/thruk/plugins/plugins-enabled/reports2
+        ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
+        service thruk condrestart >/dev/null || :
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+
+#DEBHELPER#
+
+exit 0

@@ -34,18 +34,18 @@
     </tr>
   </table>
 
-  [% IF has_obj_conf %]
   <br>
   <table border="0" class='data confTable' style="width:470px">
     <tr>
       <th class='data conftoolheader' colspan=2>Site Configuration</th>
     </tr>
     <tr>
-      <td class='dataVar' nowrap><a href="conf.cgi?sub=objects">Object settings</a></td>
-      <td class='dataVal'>Host, service, timeperiods and notification settings.</td>
+      <td class='dataVar' nowrap>[% IF has_obj_conf %]<a href="conf.cgi?sub=objects">[% END %]Object settings[% IF has_obj_conf %]</a>[% END %]</td>
+      <td class='dataVal'>Host, service, timeperiods and notification settings.
+        [% IF !has_obj_conf %]<br><span class="alerttext">No object configuration enabled, see <a href="http://thruk.org/documentation.html#_component_thruk_backend" target="_blank">documentation</a>.</span>[% END %]
+      </td>
     </tr>
   </table>
-[% END %]
 
 </div>
 

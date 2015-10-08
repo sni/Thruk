@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 88;
+use Test::More tests => 90;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mysql');
@@ -259,7 +259,39 @@ test_filter(
             }
           ]
     ],
-    " WHERE ((time >= 1361892706 AND time <= 1362497506 AND type = 'HOST ALERT'))",
+    " WHERE (time >= 1361892706 AND time <= 1362497506 AND type = 'HOST ALERT')",
+    'test_contact'
+);
+#####################################################################
+test_filter(
+    'contact search',
+    [
+          {
+            '-and' => [ { 'time' => { '>=' => 1432677600 } },
+                        { 'time' => { '<=' => 1432764000 } },
+                        { 'message' => { '~~' => 'test pattern' } }
+                      ]
+          },
+          '-or',
+          [
+            {
+              '-and' => [
+                          'current_service_contacts', { '>=' => 'test_contact' },
+                          'service_description', { '!=' => undef }
+                        ]
+            },
+            {
+              'current_host_contacts' => { '>=' => 'test_contact' }
+            },
+            {
+              '-and' => [
+                          'service_description', undef,
+                          'host_name', undef
+                        ]
+            }
+          ]
+    ],
+    'WHERE (time >= 1432677600 AND time <= 1432764000) HAVING (message RLIKE \'test pattern\')',
     'test_contact'
 );
 #####################################################################

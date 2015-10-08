@@ -1,0 +1,143 @@
+﻿[% USE date %]
+[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+[% PROCESS _sounds.tt %]
+[% PROCESS _blocks.tt %]
+
+[% UNLESS minimal %]
+<table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='[% short_uri(c, 'style' => 'detail') %]'>View Service Status Details</a><br>
+              </td>
+            </tr>
+          </table>
+    </td>
+    <td align="center" valign="top" width="33%">[% PROCESS _host_status_details_box.tt %]</td>
+    <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
+    <td align="right" valign="bottom">
+      [% PROCESS _help.tt topic = "status_detail" %]
+    </td>
+  </tr>
+</table>
+<table border="0" width="100%" cellpadding=0 cellspacing=0>
+  <tr>
+    <td valign="top" align="left" width="33%" nowrap>
+      [% PROCESS _status_filter.tt %]
+    </td>
+    <td valign="top" align="center" width="33%" nowrap>
+      <div align="center" class='statusTitle'>
+        <br>
+        [% IF custom_title != '' %][% custom_title %]
+        [% ELSE %]Performance Data Overview
+        [% END %]
+      </div>
+      [% IF sortoption %]
+      <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+      [% END %]
+      <br>
+      </td>
+    <td valign="bottom" align="right" width="33%"></td>
+  </tr>
+</table>
+[% END %]
+
+[% sortedkeys = perf_keys.keys.sort %]
+
+<div align="center">[% PROCESS _pager.tt %]</div>
+
+<table border="0" width="100%" cellpadding=0 cellspacing=0>
+  <tr>
+    <td valign="top" align="left" width="10%" nowrap></td>
+    <td valign="top" align="center" width="80%"></td>
+    <td valign="bottom" align="right" width="10%" nowrap>
+      [% PROCESS _add_bookmark.tt %]
+      [% PROCESS _show_link.tt %]
+      [% PROCESS _json_export.tt %]
+      [% columns=[ 'Hostname', 'Service' ] %]
+      [% FOREACH key IN sortedkeys %][% columns.push(key) %][% END %]
+      [% PROCESS _excel_export.tt columns=columns %]
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+<table border="0" class='status servicestatus' id="statusTable">
+  <tr>
+    <th class='status' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+    <th class='status' nowrap>Service&nbsp;<a href='[%    short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
+    <th class='status' nowrap>Status&nbsp;<a href='[%     short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
+    [% FOREACH key IN sortedkeys %]
+    <th class='status' nowrap>[% key %]&nbsp;<a href='[%  short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => key) %]'><img src='[% url_prefix %]themes/[% theme %]/images/up.gif' border="0" alt='Sort by [% key %] (ascending)' title='Sort by [% key %] (ascending)'></a><a href='[%   short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => key) %]'><img src='[% url_prefix %]themes/[% theme %]/images/down.gif' border="0" alt='Sort by [% key %] (descending)' title='Sort by [% key %] (descending)'></a></th>
+    [% END %]
+  </tr>
+  [% FOREACH s IN data %]
+    [% SET hostclass = 'statusOdd'  IF loop.even %]
+    [% SET hostclass = 'statusEven' IF loop.odd %]
+    [% IF s.host_state == 1 %]
+      [% hostclass = 'statusHOSTDOWN' %]
+    [% ELSIF s.host_state == 2 %]
+      [% hostclass = 'statusHOSTUNREACHABLE' %]
+    [% END %]
+    [% SET serviceclass = 'statusOdd'  IF loop.even %]
+    [% SET serviceclass = 'statusEven' IF loop.odd %]
+    [% IF s.has_been_checked == 0 %]
+      [% state = 'PENDING' %]
+    [% ELSIF s.state == 0 %]
+      [% state = 'OK' %]
+    [% ELSIF s.state == 1 %]
+      [% state = 'WARNING' %]
+      [% serviceclass = 'statusBGWARNING' %]
+    [% ELSIF s.state == 2 %]
+      [% state = 'CRITICAL' %]
+      [% serviceclass = 'statusBGCRITICAL' %]
+    [% ELSIF s.state == 3 %]
+      [% state = 'UNKNOWN' %]
+      [% serviceclass = 'statusBGUNKNOWN' %]
+    [% END %]
+    <tr>
+      <td class='[% hostclass %]'>
+        <table border="0" width='100%' cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
+            <td align="right">
+              [% SET host_comment_count = 0 %]
+              [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+              [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class='[% serviceclass %]'>
+        <table border="0" width='100%' cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% IF use_service_description %][% s.description %][% ELSE %][% s.display_name %][% END %]</a></td>
+            <td align="right" class='[% serviceclass %]'>
+            [% SET comment_count = s.comments.size %]
+            [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class='status[% state %]'>[% state %]</td>
+      [% IF s.perf.keys.size == 0 %]
+        <td class='[% serviceclass %]' colspan=[% sortedkeys.size %] align="left">[% s.plugin_output %]</td>
+      [% ELSE %]
+        [% FOREACH key IN sortedkeys %]
+        <td class='[% serviceclass %]' style="min-width:60px;">[% IF s.perf.exists(key) %][% s.$key %][% END %]</td>
+        [% END %]
+      [% END %]
+    </tr>
+  [% END %]
+</table>
+</div>
+<div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
+
+<br>
+<div align="center">[% PROCESS _pager.tt %]</div>
+
+[% PROCESS _footer.tt %]

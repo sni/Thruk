@@ -29,6 +29,12 @@
             });
             return false;
         });
+
+        [% IF use_frames %]
+        jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+            jQuery(this).prev('input').val('').focus();
+        }));
+        [% END %]
     });
 
     function check_frame_loaded() {
@@ -46,7 +52,7 @@
             }
         }
         catch(e) {
-            debug(e);
+            //debug(e);
             // probably permission errors. ex. error message from proxy which results in cross-domain permission errors
             if(is_reloading) {
                 load_errors++;
@@ -55,10 +61,12 @@
         }
 
         if(load_errors > 0 && (load_errors == 3 || load_errors%10 == 0)) {
-            debug("trying to reload");
-            frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
-            debug(frameloc);
-            top.frames['main'].location.replace(frameloc);
+            if(top.frames['main']) {
+                debug("trying to reload");
+                frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
+                debug(frameloc);
+                top.frames['main'].location.replace(frameloc);
+            }
         }
     }
 

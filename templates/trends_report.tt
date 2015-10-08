@@ -120,7 +120,7 @@
         Host '[% host %]'
         [% END %]
       </div><br>
-      <img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' width="20" height="20" border="0" alt='[% IF service %]Service[% ELSE %]Host[% END %] State Trends' title='[% IF service %]Service[% ELSE %]Host[% END %] State Trends'><br clear="all">
+      <img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' width="20" height="20" border="0" alt='[% IF service %]Service[% ELSE %]Host[% END %] State Trends' title='[% IF service %]Service[% ELSE %]Host[% END %] State Trends'><br clear="all">
       <div align="center" class='reportRange'>
         [% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]
       </div>

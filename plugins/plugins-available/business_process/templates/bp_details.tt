@@ -8,7 +8,7 @@
   <table border="0" class="optBox" style="position: absolute; right: 30px; top: 55px;">
     <tr>
       <td>
-        [% button('bp.cgi?action=commit&amp;bp=' _ bp.id, 'save', 'bp_save_button') %]
+        [% link='bp.cgi?action=commit&amp;bp=' _ bp.id _ '&amp;token=' _ get_user_token(c); button(link, 'save', 'bp_save_button') %]
       </td>
     </tr>
   </table>
@@ -17,7 +17,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 5px;"[% IF minimal %]class="minimal"[% END %]>
 <tr>
 <td align="center" valign="top" width="100%">
+<div id='bp[% bp.id %]' class="bp_zoom_container">
   [% PROCESS _bp_graph.tt %]
+</div>
 </td>
 
 [% UNLESS minimal %]
@@ -44,8 +46,8 @@
                 <td>
                   <div id="bp_status_status"></div>
                   <div class="bp_status_status_icons">
-                    <img id="bp_status_icon_downtime" src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="16" width="16" style="display: none;">
-                    <img id="bp_status_icon_ack" src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="16" width="16" style="display: none;">
+                    <img id="bp_status_icon_downtime" src="[% url_prefix %]themes/[% theme %]/images/downtime.gif" alt="This Business Process is currently in a period of scheduled downtime" title="This Business Process is currently in a period of scheduled downtime" height="16" width="16" style="display: none;">
+                    <img id="bp_status_icon_ack" src="[% url_prefix %]themes/[% theme %]/images/ack.gif" alt="This problem has been acknowledged" title="This problem has been acknowledged" border="0" height="16" width="16" style="display: none;">
                   </div>
                 </td>
               </tr>
@@ -57,7 +59,7 @@
                 <th>Last Check</th>
                 <td height=26 valign="top">
                   <div id="bp_status_last_check" style="float: left;"></div>
-                  <img id="bp_status_waiting" style="display: none; position: relative; top: -3px; left: 3px;" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This business process is currently updating" title="This business process is currently updating" border="0" height="20" width="20">
+                  <img id="bp_status_waiting" style="display: none; position: relative; top: -3px; left: 3px;" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" alt="This business process is currently updating" title="This business process is currently updating" border="0" height="20" width="20">
                 </td>
               </tr>
               <tr class='data'>
@@ -87,54 +89,54 @@
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='List All Business Processes' title='List All Business Processes' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/arrow_left.png' border="0" alt='List All Business Processes' title='List All Business Processes' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi'>List All Business Processes</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Status' title='Refresh Status' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Status' title='Refresh Status' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='#' onclick="current_node='node1'; bp_refresh('[% bp.id %]', current_node); return false;">Refresh Status</a></td>
               </tr>
               [% IF bp_backend %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/shape_handles.png' border="0" alt='Enable Fullscreen Mode' title='Enable Fullscreen Mode' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/shape_handles.png' border="0" alt='Enable Fullscreen Mode' title='Enable Fullscreen Mode' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;minimal=1'>Enable Fullscreen Mode</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/status2.gif' border="0" alt='Show Status' title='Show Status' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='status.cgi?host=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Status</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='Show Trends' title='Show Trends' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/trends.gif' border="0" alt='Show Trends' title='Show Trends' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='trends.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>Show Trends</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_text.png' border="0" alt='View Availability Report' title='View Availability Report' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/page_white_text.png' border="0" alt='View Availability Report' title='View Availability Report' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='avail.cgi?show_log_entries=&service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>View Availability Report</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View Notifications' title='View Notifications' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/notify.gif' border="0" alt='View Notifications' title='View Notifications' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='notifications.cgi?service=[% bp.name | uri %]&host=[% bp.name | uri %]&timeperiod=last7days&amp;backend=[% bp_backend %]'>View Notifications</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/application_view_list.png' border="0" alt='Show Logfiles' title='Show Logfiles' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='showlog.cgi?host=[% bp.name | uri %]&amp;service=[% bp.name | uri %]&amp;backend=[% bp_backend %]'>Show Logfiles</a></td>
               </tr>
               [% END %]
               [% IF !testmode %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_explore.png' border="0" alt='Business Impact Analysis' title='Business Impact Analysis' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/folder_explore.png' border="0" alt='Business Impact Analysis' title='Business Impact Analysis' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;testmode=1'>Business Impact Analysis</a></td>
               </tr>
               [% END %]
               [% IF allowed_for_edit && ! editmode %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit Business Process' title='Business Process' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Edit Business Process' title='Business Process' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='bp.cgi?action=details&amp;bp=[% bp.id %]&amp;edit=1'>Enable Edit Mode</a></td>
               </tr>
               [% END %]
               [% IF allowed_for_edit && editmode %]
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Cancel Edit Mode' title='Cancel Edit Mode' width="16" height="16" style="vertical-align: top;"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/edit.png' border="0" alt='Cancel Edit Mode' title='Cancel Edit Mode' width="16" height="16" style="vertical-align: top;"></td>
                 <td class='command'><a href='[% IF bp_backend %]bp.cgi?action=details&amp;bp=[% bp.id %][% ELSE %]bp.cgi[% END %]'>Cancel Edit Mode</a></td>
               </tr>
               [% END %]
@@ -158,16 +160,30 @@
           <td>
             <table border="0" cellspacing="0" cellpadding="0" class="confPanel bp_info">
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_copy.png' border="0" alt='Clone this Business Process' title='Clone this Business Process' width="16" height="16"></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/page_copy.png' border="0" alt='Clone this Business Process' title='Clone this Business Process' width="16" height="16"></td>
                 <td class='command'><a href='bp.cgi?action=clone&amp;bp=[% bp.id %]'>Clone this Business Process</a></td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete this Business Process' title='Delete this Business Process' width="20" height="20"></td>
-                <td class='command'><a href='bp.cgi?action=remove&amp;bp=[% bp.id %]' onclick="return confirm('Removed Business Process cannot be restored. Really remove?')">Delete this Business Process</a></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/delete.gif' border="0" alt='Delete this Business Process' title='Delete this Business Process' width="20" height="20"></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='remove'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="confirm('A removed business process cannot be restored. Really remove?') && jQuery(this).closest('FORM').submit(); return false;">Delete this Business Process</a>
+                  </form>
+                </td>
               </tr>
               <tr class='data'>
-                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_swoosh.png' border="0" alt='Discard Changes' title='Discard Changes' width="16" height="16"></td>
-                <td class='command'><a href='bp.cgi?action=revert&amp;bp=[% bp.id %]'>Discard Changes</a></td>
+                <td><img src='[% url_prefix %]themes/[% theme %]/images/page_white_swoosh.png' border="0" alt='Discard Changes' title='Discard Changes' width="16" height="16"></td>
+                <td class='command'>
+                  <form action='bp.cgi' method='POST' style="display: inline;">
+                    <input type='hidden' name='action' value='revert'>
+                    <input type="hidden" name="bp" value="[% bp.id %]">
+                    <input type="hidden" name="token" value="[% get_user_token(c) %]">
+                    <a href='bp.cgi' onClick="confirm('Really discard all changes?') && jQuery(this).closest('FORM').submit(); return false;">Discard Changes</a>
+                  </form>
+                </td>
               </tr>
             </table>
           </td>

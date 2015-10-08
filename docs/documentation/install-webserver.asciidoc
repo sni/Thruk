@@ -1,0 +1,264 @@
+---
+layout: docs
+title: Webserver Integration
+---
+
+= Webserver Integration
+
+[TIP]
+.apache is preconfigured when using packages
+=======
+Apache configuration is not needed if you use OMD or packages. Apache
+is already preconfigured in that case.
+=======
+
+
+== Apache Configuration
+
+
+Integration in the Apache webserver is done by fastcgi.  There are two
+fastcgi modules for Apache at the moment. Choose the one which fits
+best into your environment. If unsure, use <<mod_fcgid,mod_fcgid>>.
+The main difference is, that mod_fcgid starts the fastcgi process upon
+the first request whereas in mod_fastcgi you have to start the fastcgi
+process by yourself.
+
+Do not use the port 3000 thruk server in production, it's only for
+testing and development. It cannot handle authentication and is slower
+than the fastcgi variants.
+
+
+
+=== mod_fcgid
+
+IMPORTANT: Thruk runs with the webserver user in this scenario, make
+sure the webserver user has access to all Thruk files and Perl modules.
+
+.Apache configuration with mod_fcgid
+-------
+LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+<VirtualHost *:80>
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory /home/thruk/Thruk/root/>
+        Options FollowSymLinks
+        AllowOverride All
+        order allow,deny
+        allow from all
+    </Directory>
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    <Location /thruk>
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    </Location>
+
+    <IfModule mod_fcgid.c>
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    </IfModule>
+
+</VirtualHost>
+-------
+
+[TIP]
+.Example
+Another more complicated example can be found on github:
+https://github.com/sni/Thruk/blob/master/support/apache_fcgid.conf[apache_fcgid.conf].
+This file is used for the official Thruk packages.
+
+
+
+=== mod_fastcgi
+
+start your fcgi server:
+
+-------
+    %>./script/thruk_fastcgi.pl -n 5 \
+                -l /tmp/thruk_fastcgi.socket \
+                -p /tmp/thruk_fastcgi.pid
+-------
+
+you may want to copy the init.d script to /etc/init.d and adjust its paths:
+-------
+    %> sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
+    %> vi /etc/init.d/thruk_fastcgi_server
+    %> sudo chown root: /etc/init.d/thruk_fastcgi_server
+-------
+
+Or create a custom init.d script (additional modules required) with:
+-------
+    %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
+-------
+
+
+
+use this apache example configuration:
+
+- replace /home/thruk/Thruk with your installation path
+- replace your-web-host.local with your hostname
+- create a /home/thruk/Thruk/htpasswd.users with htpasswd2
+- make sure the /home/thruk/Thruk/logs/ directory exists
+
+
+.Apache configuration within existing vhost
+-------
+<VirtualHost *:80>
+    # ... existing configuration
+
+    # thruk configuration
+    <Directory /home/thruk/Thruk/root/>
+        order allow,deny
+        allow from all
+        Options FollowSymLinks
+        AllowOverride All
+    </Directory>
+    <Directory /home/thruk/Thruk/plugins/>
+        order allow,deny
+        allow from all
+        Options FollowSymLinks
+        AllowOverride All
+    </Directory>
+
+    Alias /thruk/ /home/thruk/Thruk/root/thruk/
+
+    # authorization
+    <Location "/thruk">
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Order Allow,Deny
+        Allow from all
+        require valid-user
+    </Location>
+
+    # Load fastcgi module unless already loaded
+    LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
+
+    # fastcgi configuration
+    FastCGIExternalServer /tmp/thruk_fastcgi.fcgi -socket /tmp/thruk_fastcgi.socket -idle-timeout 120
+
+    # Load rewrite module unless already loaded
+    LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+
+    # rewrite configuration
+    RewriteEngine On
+    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/thruk(.*)$ /tmp/thruk_fastcgi.fcgi/thruk$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
+
+</VirtualHost>
+-------
+
+
+.Apache configuration with own vhost
+-------
+<VirtualHost *:80>
+    ServerName   thruk.your-host.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory />
+        order deny,allow
+        deny from all
+    </Directory>
+
+    <Directory /home/thruk/Thruk/root/>
+        Options FollowSymLinks
+        AllowOverride All
+        order allow,deny
+        allow from all
+    </Directory>
+    <Directory /home/thruk/Thruk/plugins/>
+        order allow,deny
+        allow from all
+        Options FollowSymLinks
+        AllowOverride All
+    </Directory>
+
+    # authorization
+    <Location "/">
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Order Allow,Deny
+        Allow from all
+        require valid-user
+    </Location>
+
+    # Load fastcgi module unless already loaded
+    LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
+
+    # fastcgi configuration
+    FastCGIExternalServer /tmp/thruk_fastcgi.fcgi -socket /tmp/thruk_fastcgi.socket -idle-timeout 120
+
+    # Load rewrite module unless already loaded
+    LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+
+    # rewrite configuration
+    RewriteEngine On
+    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/(.*)$ /tmp/thruk_fastcgi.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
+</VirtualHost>
+-------
+
+=== LDAP / AD authentication. 
+
+Use the following snipped sample if you want to authenticate users against LDAP or Active Directory. This works as well with the newer 2.x cookie based authentication. 
+
+In this sample, Apache will lookup the legacy htpasswd file first and then the ldap server for a matching user. This is useful if you want to maintan the legacy thrukadmin as a full-access admin or as a fallback if ldap is not accessible anymore. 
+
+Make sure your backend's contact definitions exists, matches with the ldap username and is assigned to a host/service/whatever - otherwise the user will not see anything. 
+
+
+/etc/apache2/conf-available/thruk.conf
+-------
+  #...
+  <Location /thruk/>
+        Options ExecCGI FollowSymLinks
+        AuthName "Thruk Monitoring"
+        AuthType Basic
+
+        #leagacy file authentication first, then ldap
+        AuthBasicProvider file ldap
+
+        #legacy file (or set it to /dev/null
+        AuthUserFile /etc/thruk/htpasswd
+
+        #ldap
+        AuthLDAPBindDN "CN=thruk-ldap,OU=serviceaccounts,OU=bla,DC=site,DC=org,DC=com"
+        AuthLDAPBindPassword "xxx"
+        AuthLDAPURL "ldap://site.org.com/OU=bla,DC=site,DC=org,DC=com?sAMAccountName?sub?(objectClass=*)"
+        require valid-user
+  </Location>
+   #...
+-------
+
+
+== Lighthttpd
+
+[TIP]
+.lighthttpd
+=======
+Francois Ponsard wrote an article on how to integrate Thruk in Lighthttpd:
+http://www.dahwa.fr/dotclear/index.php?post/2011/03/15/Thruk-in-Lighttpd
+=======
+
+
+
+== Nginx
+
+There is no general documentation about Nginx available, but a
+link:ubuntu-nginx.html[howto] for getting Thruk working on Ubuntu.

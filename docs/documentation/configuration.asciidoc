@@ -1,0 +1,2216 @@
+---
+layout: docs
+title: Configuration
+---
+
+== Config Files
+
+Base configuration is managed in these configuration files (in the order in
+which they are read):
+
+-------
+  * thruk.conf          # shipped default Thruk config
+  * thruk_local.d/*     # local override drop dir
+  * thruk_local.conf    # local override of Thruks settings
+-------
+
+WARNING: All configuration options described in this file should go into the
+thruk_local.conf or into separate files below thruk_local.d/
+
+
+=== Config file merge order
+
+Single key/value settings are overriden in the order above. Nested key/value
+pairs like Backends are merged.
+
+ex.:
+
+  thruk.conf:
+  use_frames = 0
+
+  thruk_local.conf:
+  use_frames = 1
+
+results in use_frames = 1
+
+nested values:
+
+  thruk.conf:
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 1
+  </initial_menu_state>
+
+  thruk_local.conf:
+  <initial_menu_state>
+    Current_Status = 0
+    Bookmarks      = 1
+  </initial_menu_state>
+
+results in
+
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 0
+    Bookmarks      = 1
+  </initial_menu_state>
+
+
+
+=== thruk.conf
+
+The thruk.conf contains the shipped defaults. You should not edit this
+file directly. Overwrite your settings in your thruk_local.conf /
+thruk_local.d/ instead.
+
+=== thruk_local.d
+{% include new_since.ad version="2.00" %}
+Local settings drop directory. All files in here override settings from the
+thruk.conf file.
+
+=== thruk_local.conf
+
+The thruk_local.conf should contain all settings which are locally overriden.
+Keep the default settings in the thruk.conf and only put local overrides in
+either the thruk_local.conf or into conf file below thruk_local.d/.
+
+
+=== Other config files
+
+-------
+  * cgi.cfg             # Naemon/Nagios cgi.cfg
+  * log4perl.conf       # Logging configuration
+  * menu.conf           # Thruks default side navigation
+  * menu_local.conf     # local override for the navigation
+-------
+
+
+=== cgi config
+
+link:cgi-cfg.html[This cgi.cfg is described here].
+
+
+=== menu config
+
+link:menu.html[Menu customization is described here].
+
+
+=== log4perl config
+
+link:logfiles.html[Logfiles are described here].
+
+
+
+== General Settings
+
+
+=== title_prefix
+
+set the title prefix for all urls
+this piece of text will be prepended to
+all page titles.
+
+ex.:
+
+  title_prefix = Prod
+
+
+=== use_bookmark_titles
+
+Sets the page title to the name of a bookmark
+if the url matches. Private bookmarks are processed
+first and the name of the first match is used.
+
+ex.:
+
+  use_bookmark_titles = 1
+
+
+=== use_dynamic_titles
+
+Uses more descriptive page titles.
+Bookmark titles take precedence and
+can be overriden by adding the title
+parameter on most pages
+
+ex.:
+
+  use_dynamic_titles = 1
+
+
+=== url_prefix
+
+Changes the usual url path for Thruk. Don't change it unless you plan
+to run multiple Thruk instances on the same webserver. You will have
+to change your fastcgi configuration too.
+
+ex.:
+
+  url_prefix = /
+
+
+=== use_timezone
+
+Changes the timezone from the systems default to this timezone.
+Only set this if you have trouble with displaying the right timestamps.
+
+ex.:
+
+  use_timezone = CET
+
+
+=== mobile_agent
+Specify user agents which will be redirected to the mobile plugin (if
+enabled).
+
+ex.:
+
+  mobile_agent=iPhone,Android,IEMobile
+
+
+=== default_theme
+
+Default theme to use for all users. Must be a valid sub directory in
+the themes folder.
+
+ex.:
+
+  default_theme = Thruk
+
+
+=== first_day_of_week
+Set first day of week. Used in reports.
+ Sunday: 0
+ Monday: 1
+
+ex.:
+
+  first_day_of_week = 0
+
+
+=== report_use_temp_files
+Large reports will use temp files to avoid extreme memory usage.
+With 'report_use_temp_files' you may set the report duration in days
+which will trigger the use of temp files. Default is 14days, so
+for example the 'last31days' report will use temp files, the 'thisweek'
+not. Can be disabled by setting to 0.
+
+ex.:
+
+  report_use_temp_files = 14
+
+
+=== report_max_objects
+Don't create reports with more hosts / services than this number.
+The purpose is to don't wrack the server due to extended memory
+usage. Increase this number if you hit that limit and have plenty
+of memory left.
+
+ex.:
+
+  report_max_objects = 1000
+
+
+=== report_include_class2
+Include messages with class = 2 (program messages) in reports.
+Setting this to 0 allows the MySQL backend to use indexes efficiently
+
+ex.:
+
+  report_include_class2 = 1
+
+
+=== report_update_logcache
+Should thruk update the logcache databases before running reports?
+Setting this to 0 reduces the time taken to run reports but the most
+recent data is not necessarily available.  If you use this option
+you should probably create a cron to run "thruk -a logcacheupdate"
+
+ex.:
+
+  report_update_logcache = 1
+
+
+=== start_page
+
+This link is used as startpage and points usually to the main.html
+with displays version information and general links.
+
+ex.:
+
+  start_page = /thruk/main.html
+
+
+=== home_link
+
+This link is used whenever you click on one of the main logos. By default
+those logos are the Thruk logos and the link will take you to the Thruk homepage.
+Replace this with where you want your home location to be.
+
+ex.:
+
+  home_link = http://www.thruk.org
+
+
+=== documentation_link
+
+This link is used in the side navigation menu as link to the documentation.
+Replace with your documentation location. Set it to a blank value
+if you don't want a documentation link in the menu at all.
+
+ex.:
+
+  documentation_link = /thruk/docs/
+
+
+=== all_problems_link
+
+Customizable link for the 'problems' link in side menu. Can be useful
+to reflect your companies process of error handling.
+
+ex.:
+
+  all_problems_link = /thruk/cgi-bin/status.cgi?...
+
+
+=== allowed_frame_links
+
+List of allowed patterns, where links inside frames can be set to.
+You can link to /thruk/frame.html?link=http://wiki.my-company.com/page/blah
+Your wiki will then be displayed with the Thruk navigation frame.
+Useful for other addons, so they don't have to display a own
+navigation.
+
+ex.:
+
+  allowed_frame_links = http://intranet.my-company.com
+  allowed_frame_links = https://wiki.my-company.com
+
+
+=== max_process_memory
+
+Maximum memory usage (in MB) at which a
+Thruk process will exit after finishing its request.
+Only affects the fcgid daemon.
+
+ex.:
+
+  max_process_memory=1000
+
+
+
+
+
+== Authorization Settings
+
+
+=== can_submit_commands
+Set this if a contact should be allowed to send commands unless defined for the
+contact itself. This is the default value for all contacts unless the user has
+a can_submit_commands setting in your monitoring configuration.
+
+ex.:
+
+  can_submit_commands = 1
+
+
+=== command_disabled
+Use this to disabled specific commands. Can be use multiple times to disabled
+multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
+links to the command page.
+You may use ranges here.
+
+ex.:
+
+  command_disabled = 14
+  command_disabled = 35
+  command_disabled = 17-34,50-65
+
+
+=== make_auth_user_lowercase
+
+Convert authenticated username to lowercase.
+
+ex.:
+
+  make_auth_user_lowercase = 1
+
+
+=== make_auth_user_uppercase
+
+Convert authenticated username to uppercase.
+
+ex.:
+
+  make_auth_user_uppercase = 1
+
+
+=== make_auth_replace_regex
+
+Convert authenticated username by regular expression. The following
+example removes everything after an @ from the authenticated username
+and 'user@domain' becomes just 'user'.
+
+ex.:
+
+  make_auth_replace_regex = s/^(.*?)@.*/$1/gmx
+
+=== use_strict_host_authorization
+
+When set to a true value, every contact will only see the hosts where
+he is contact for plus the services where he is contact for. When
+disabled, a host contact will see all services for this host
+regardless of whether he is a service contact or not.
+
+ex.:
+
+  use_strict_host_authorization = 1
+
+
+=== csrf_allowed_hosts
+
+Allow specific hosts to bypass the csrf protection which
+requires a generated token to submit certain post requests,
+for example to send commands. Use comma seperated list or
+multiple configuration attributes. Wildcards are allowed.
+
+ex.:
+
+  csrf_allowed_hosts=127.0.0.1
+  csrf_allowed_hosts=192.168.*
+
+
+
+=== disable_user_password_change
+
+Disable the possibility for a user to change his password.
+Only works with htpasswd passwords. To make this work
+you have to set a `htpasswd` entry in the
+link:configuration.html#component-thruk-plugin-configtool[Config Tool] section.
+
+ex.:
+
+  disable_user_password_change = 1
+
+
+
+=== user_password_min_length
+
+Sets the minimum lenght a password must have for users changing their passwords.
+Admins still can change the password any way they want in the config tool. This
+just affects the user password reset.
+
+ex.:
+
+  user_password_min_length = 5
+
+
+
+
+
+== Path Settings
+
+=== cgi_cfg
+
+The path to your cgi.cfg. See link:cgi-cfg.html[cgi.cfg] for details.
+
+ex.:
+
+  cgi_cfg = cgi.cfg
+
+
+=== log4perl_conf
+
+The path to your log4perl configuration file.
+
+ex.:
+
+  log4perl_conf = ./log4perl.conf
+
+
+=== plugin_path
+
+Path to your plugins directory. Can be used to specify different
+location for you Thruk plugins. Don't forget to set appropriate apache
+alias or rewrite rules when changing the plugin path. Otherwise the
+static content from plugins is not accessible.
+
+Example redirect rule for apache:
+
++++++
+ AliasMatch /thruk/plugins/(.*?)/(.*)$ YOUR-PLUGIN-DIR/plugins/plugins-enabled/$1/root/$2
++++++
+
+ex.:
+
+  plugin_path = ./plugins
+
+
+=== themes_path
+
+Path to your themes directory. Can be used to specify different
+location for you Thruk themes. Don't forget to set appropriate apache
+alias or rewrite rules when changing the themes path. Otherwise the
+static content from your themes may not accessible.
+
++++++
+ Alias /thruk/themes/ YOUR-THEMES-DIR/themes/themes-enabled/
++++++
+
+ex.:
+
+  themes_path = ./themes
+
+
+=== var_path
+
+Path to the var directory. Thruk stores user specific date here.
+
+ex.:
+
+  var_path = ./var
+
+
+=== tmp_path
+
+Path to a temporary directory. Defaults to /tmp if not set and usually
+this is a good place.
+
+ex.:
+
+  tmp_path = /tmp
+
+
+=== ssi_path
+
+The path to your ssi (server side includes) files. See
+link:ssi.html[Server Side Includes] for details.
+
+ex.:
+
+  ssi_path = ssi/
+
+
+=== user_template_path
+
+Specify a additional directory for user supplied templates. This makes
+it easy to override thruks own templates.
+Template search order is:
+
+ * users template path
+ * themes template path
+ * plugins template path
+ * thruks template path
+
+ex.:
+
+  user_template_path = ./my_templates
+
+
+=== logo_path_prefix
+
+Changes the path to your logo images. Default is
+$url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
+therefor relative to the current selected theme. You could set a fixed
+path here.
+Like usual, paths starting with a / will be absolute from your
+webserver root directory. Paths starting without a / will be relative
+to the cgi directory.
+
+ex.:
+
+  logo_path_prefix = /icons/
+
+
+=== physical_logo_path
+
+Location of your logos in your filesystem. This directory should be
+mapped to your 'logo_path_prefix' directory where 'logo_path_prefix' is
+the path relative to your webserver root directory and 'physical_logo_path' is
+the corresponding filesystem path.
+
+ex.:
+
+  physical_logo_path = /usr/share/icons/
+
+
+=== mode_file
+
+Mode used when creating or saving files.
+
+ex.:
+
+  mode_file = 0660
+
+
+=== mode_dir
+
+Mode used when creating folders
+
+ex.:
+
+  mode_dir = 0770
+
+=== resource_file
+Set a general resource file.
+Be warned, if any macros contain sensitive data like passwords, setting
+this option could expose that data to unauthorized user. It is strongly
+recommended that this option is only used if no passwords are used in
+this file or in combination with the 'expand_user_macros' option which
+will limit which macros are exposed to the user.
+Instead of using a general 'resource_file' you could define one file
+per peer in your peer config.
+
+ex.:
+
+  resource_file = /etc/nagios3/resource.cfg
+
+
+
+
+
+
+== Search Settings
+
+=== use_new_search
+
+Use the old or the classic search from the navigation. The new search
+supports regular expressions and searches in many attributes. For
+example: plugin_output, groups, names, descriptions
+
+ex.:
+
+  use_new_search = 1
+
+
+=== default_service_filter
+{% include new_since.ad version="1.86-2" %}
+The `default_service_filter` set a default service filter which is used when no
+other filter is applied (except from links to hosts or groups). The filter is
+negated by a leading exclamation mark. The example filters out all services starting
+with "test_". You can use regular expressions. The Default is not set.
+
+ex.:
+
+  default_service_filter = !^test_
+
+
+=== use_ajax_search
+
+Enables the ajax search field. There will be suggestions while typing
+into the search field.
+
+ex.:
+
+  use_ajax_search = 1
+
+
+=== ajax_search_hosts
+
+Enables the suggestion of hosts in the ajax search field.
+Depending on the number of hosts, this can make the search slow.
+
+ex.:
+
+  ajax_search_hosts = 1
+
+
+=== ajax_search_hostgroups
+
+Enables the suggestion of hostgroups in the ajax search field.
+
+ex.:
+
+  ajax_search_hostgroups = 1
+
+
+=== ajax_search_services
+
+Enables the suggestion of services in the ajax search field.
+Depending on the number of services, this can make the search slow.
+
+ex.:
+
+  ajax_search_services = 1
+
+
+=== ajax_search_servicegroups
+
+Enables the suggestion of servicegroups in the ajax search field.
+
+ex.:
+
+  ajax_search_servicegroups = 1
+
+
+=== ajax_search_timeperiods
+
+Enables the suggestion of timeperiods in the ajax search field.
+Timeperiods will only displayed when filtering by check- or
+notification period.
+
+ex.:
+
+  ajax_search_timeperiods = 1
+
+
+
+
+
+== Paging Settings
+
+
+=== use_pager
+Using the pager will make huge pages much faster as most people don't want a
+services page with 100.000 services displayed. Can be disabled if you don't
+need it.
+
+ex.:
+
+  use_pager = 1
+
+
+=== paging_steps
+Define the selectable paging steps. Use the * to set the default
+selected value.
+
+ex.:
+
+  paging_steps = *100, 500, 1000, all
+
+
+=== group_paging_overview
+Just like the paging_steps, but only for the groups overview page.
+
+ex.:
+
+  group_paging_overview =  *3,  10, 100, all
+
+
+=== group_paging_summary
+Just like the paging_steps, but only for the groups summary page.
+
+ex.:
+
+  group_paging_summary = *10, 50, 100, all
+
+
+=== group_paging_grid
+Just like the paging_steps, but only for the groups grip page.
+
+ex.:
+
+  group_paging_grid = *5,  10, 50,  all
+
+
+
+
+
+== Display Settings
+
+
+=== host_action_icon
+
+Change path to your host action icons. You may use
+relative paths to specify completely different location.
+You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
+
+ex.:
+
+  host_action_icon = action.gif
+
+
+=== service_action_icon
+
+Change path to your service action icons. You may use
+relative paths to specify completely different location.
+You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
+
+ex.:
+
+  service_action_icon = action.gif
+
+
+=== initial_menu_state
+
+Set initial menu state.
+
+  closed  => 0
+  open    => 1
+
+ex.:
+
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 1
+    Reports        = 1
+    System         = 1
+    Bookmarks      = 1
+  </initial_menu_state>
+
+
+=== use_frames
+
+Set whether you want to use a framed navigation or not. With using frames it's
+sometimes easier to include addons.
+See allowed_frame_links option for how to integrate addons.
+
+ex.:
+
+  use_frames = 0
+
+=== use_new_command_box
+Show the new split command box on the host / service details page.
+
+ex.:
+
+  use_new_command_box = 1
+
+
+=== bug_email_rcpt
+what email address bug reports will be sent to
+
+ex.:
+  bug_email_rcpt  = bugs@thruk.org
+
+
+=== datetime_format
+Default timeformat. Use POSIX format.
+
+ex.:
+
+  datetime_format = %Y-%m-%d  %H:%M:%S
+
+
+=== datetime_format_long
+Default long timeformat.
+
+ex.:
+
+  datetime_format_long = %a %b %e %H:%M:%S %Z %Y
+
+
+=== datetime_format_log
+Default log timeformat.
+
+ex.:
+
+  datetime_format_log = %B %d, %Y  %H
+
+
+=== datetime_format_trends
+Default trends timeformat.
+
+ex.:
+
+  datetime_format_trends = %a %b %e %H:%M:%S %Y
+
+
+=== datetime_format_today
+Default timeformat for todays date. Can be useful if you want a
+shorter date format for today.
+
+ex.:
+
+  datetime_format_today = %H:%M:%S
+
+
+=== info_popup_event_type
+On which event should the comments / downtime or longpluginoutput popup
+show up. Valid values are onclick or onmouseover.
+
+ex.:
+
+  info_popup_event_type = onmouseover
+
+
+=== info_popup_options
+Options for the popup window used for long pluginoutput, downtimes and
+comments.
+See http://www.bosrup.com/web/overlib/?Command_Reference for
+what options are available
+
+ex.:
+
+  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
+
+
+=== show_notification_number
+Display the current number of notification after the current / max
+attempts on the status details page.
+
+ex.:
+
+  show_notification_number = 0
+
+
+=== show_backends_in_table
+Display the backend/site name in the status table.
+This is useful if you have same hosts or services on different
+backends and need to know which one returns an error.
+Valid values are:
+
+ 1 - show site name at the end
+ 2 - put site name in front
+
+ex.:
+
+  show_backends_in_table = 0
+
+
+=== show_config_edit_buttons
+Show links to config tool for each host / service.
+You need to have the config tool plugin enabled
+and you need proper permissions for the link to appear.
+
+ex.:
+
+  show_config_edit_buttons = 1
+
+
+=== show_full_commandline
+Display the full command line for host / service checks .
+Be warned, the command line could contain passwords and other confidential data.
+In order to replace the user macros for commands, you have to set the
+'resource_file' in your peer config or a general resource_file option.
+
+ * 0 = off, don't show the command line at all
+ * 1 = show them for contacts with the role: authorized_for_configuration_information
+ * 2 = show them for everyone
+
+ex.:
+
+  show_full_commandline = 0
+
+
+
+=== show_full_commandline_source
+Usually the source of your expanded check_command should
+be the check_command attribute of your host / service. But under
+certain circumstances you might want to use display expanded
+commands from a custom variable. In this case, set
+'show_full_commandline_source' to '_CUST_VAR_NAME'.
+
+ex.:
+
+  show_full_commandline_source = check_command
+
+
+
+=== show_logout_button
+Show additional logout button next to the top right preferences button.
+(works only together with cookie authentication)
+
+ex.:
+
+  show_logout_button=1
+
+
+
+=== show_long_plugin_output
+
+When a plugin returns more than one line of output, the
+output can be displayed directly in the status table, as
+popup or not at all.
+Choose between popup, inline and off
+
+ex.:
+
+  show_long_plugin_output = popup
+
+
+=== status_color_background
+Color complete status line with status colour or just the status
+itself.
+
+ex.:
+
+  status_color_background=0
+
+
+=== show_modified_attributes
+
+Show if a host / service has modified attributes.
+
+ex.:
+
+  show_modified_attributes = 1
+
+
+=== show_host_attempts
+
+Show check attempts for hosts too. The default is to show
+them on the problems page only. Use this value to force a value.
+
+ex.:
+
+  show_host_attempts = 1
+
+
+=== perf_bar_mode
+This option enables a performance bar inside the status/host list which
+create a graph from the performance data of the plugin output. Available
+options are 'match', 'first', 'all', 'worst' and 'off'.
+
+ match: try to set graph which matches the output
+ all: graph all performance values available
+ first: graph only the first performance value
+ worst: graph only the graph for the worst state
+ off: graph no value at all
+
+ex.:
+
+  perf_bar_mode = match
+
+
+=== perf_bar_pnp_popup
+Show pnp popup if performance data are available and
+pnp is used as graph engine. The popup will be available
+on the performance data bar chart on the right side of each
+host/service. It uses the normal pnp popup logic, so you
+need to install the proper SSI files.
+
+ex.:
+
+  perf_bar_pnp_popup = 1
+
+
+=== shown_inline_pnp
+Show inline pnp graph if available. If a service or host has a
+pnp4nagios action or notes url set. Thruk will show a inline graph on the
+extinfo page.
+This works for /pnp4nagios/ urls and /pnp/.
+
+ex.:
+
+  shown_inline_pnp = 1
+
+
+=== graph_word
+graph_word is a regexp used to display any graph on the details page.
+if a service or host has a graph url in action url (or notes url) set
+it can be displayed by specifying a regular expression that always appears
+in this url. You can specify multiple graph_words.
+
+[TIP]
+.pnp4nagios
+=======
+When using pnp4nagios, no graph_word is required, just keep it empty.
+=======
+
+
+
+sample service configuration for graphite:
+
+.....
+  define service{
+    service_description   Load
+    host_name             localhost
+    use                   generic-service
+    action_url            http://YOURGRAPHITE/render/?lineMode=connected&width=586&height=308&_salt=1355923874.899&target=cactiStyle($HOSTNAME$.$SERVICEDESC$.*)&xFormat=%25H%3A%25M&tz=Europe/Paris
+    check_command         check_load
+  }
+.....
+
+ex.:
+
+  graph_word = /render/       # for graphite
+
+
+[TIP]
+.quotes
+=======
+Quotes are supported in the action_url statement, you may want to use it for special graphite function (http://graphite.readthedocs.org/en/1.0/functions.html)
+Do not escape double quotes here, otherwise graph won't work.
+=======
+
+=== show_custom_vars
+Show custom vars in host / service ext info. List variable names to
+display in the host and service extinfo details page. Can be specified
+more than once to define multiple variables. You may use html in your
+variables. Use * as wildcard, ex.: _VAR*
+
+ex.:
+
+  show_custom_vars = _VAR1
+
+
+=== expand_user_macros
+Expand user macros ($USERx$) for host / service commands and custom
+variables. Can be specified more than once to define multiple user
+macros to expand.
+Be warned, some user macros can contain passwords and expanding them
+could expose them to unauthorized users. Use * as wildcard, ex.: USER*
+
+Defaults to 'ALL' which means all user macros are expanded, because
+its limited to admin users anyway.
+
+ex.:
+
+  expand_user_macros = USER1
+  expand_user_macros = USER10-20
+  expand_user_macros = PLUGIN*
+  expand_user_macros = ALL  # expands all user macros
+  expand_user_macros = NONE # do not expand user macros
+
+
+=== show_error_reports
+Show link to bug reports when internal errors occur.
+Set to '1' to show a error icon which links to a error report mail.
+Set to 'server' to log js error server side.
+Set to 'both' to log server side but still show the icon.
+
+ex.:
+  show_error_reports = both
+
+
+=== skip_js_errors
+don't report some known harmless javascript errors
+
+ex.:
+  skip_js_errors  = cluetip is not a function
+
+
+=== strict_passive_mode
+
+Normally passive checks would be marked as disabled. With this
+option set, disabled checks will only be displayed as disabled if their
+last result was active. Otherwise they would be marked as passive
+checks. This option also changes the passive icon only to be shown
+when the last check was passive, otherwise the disabled icon will be
+displayed.
+
+ex.:
+
+  strict_passive_mode = 1
+
+
+=== hide_passive_icon
+Normally passive checks whould be displayed with a passive icon
+if their last result is passive.
+With this option, passive icon will be hidden in status details.
+
+ex.:
+  hide_passive_icon = 0
+
+
+=== sitepanel
+The sitepanel is used to display multiple backends/sites at a glance.
+With than 10 or more sites, the list of backends will be combined
+into the 'compact' site panel which just displays the totals of
+available / down / disabled sites. The 'compact' panel will also
+automatically be used if you use sections.
+With more than 50 backends, the 'collapsed' will be selected in 'auto' mode.
+Set sitepanel to list/compact/collapsed/auto/off to change the default behaviour.
+
+ex.:
+
+  sitepanel = auto
+
+=== apache_status
+
+You can integrate the output of apache status into Thruk.
+The following list of apache status pages will be accessible
+from the performance info page. Make sure the page is
+accessible from Thruk, credentials will be passed through. So
+both, basic authentication or ip based authentication would be possible.
+Read more about Apaches mod_status here: http://httpd.apache.org/docs/current/mod/mod_status.html
+
+ex.:
+
+  <apache_status>
+    Site        http://127.0.0.1:5000/server-status
+    System      http://127.0.0.1/server-status
+    Other       http://127.0.0.1/server-status
+  </apache_status>
+
+
+
+
+== Connection Settings
+
+=== check_local_states
+Get the status for remote backends from local instances. This can
+increase performance when using multiple remote sites. It is enabled
+by default when using more than one site. You have to define
+hostchecks in any local backend (using unix sockets) with a name or
+alias of the address of your remote backends. To explicitly connect
+a host to a specific backend, set 'state_host' in that peer configuration.
+
+ex.:
+
+  check_local_states = 1
+
+
+=== backend_debug
+Set logging of backend in verbose mode. This only
+makes sense when debug logging is activated.
+
+ex.:
+
+  backend_debug = 1
+
+
+=== connection_pool_size
+Use connection pool when accessing multiple sites.
+Increases the performance because backends will be queried
+parallel but uses around 10mb of memory per pool member.
+Disabled when set to 0, number of concurrent connections otherwise.
+
+ex.:
+
+  connection_pool_size = 5
+
+
+=== logcache
+Enables caching logfiles for faster access and less memory usage for
+the naemon process. Cache supports MongoDB and Mysql only. Prefered
+type is Mysql. Format is a Mysql/MongoDB connection string like
+'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
+memory usage of Thruk and Naemon when accessing logfiles, for example when
+creating reports.
+
+[WARNING]
+The MongoDB logcache is deprecated and will be removed from Thruk in 2016. Use the MySQL logcache instead.
+
+ex.:
+
+  logcache = mysql://user:password@localhost:3306/thruk_log_cache
+
+  logcache = mongodb://localhost:27017/thruk_log_cache
+
+
+=== delay_pages_after_backend_reload
+
+Delay the page delivery until the backends uptime is at least this
+amount of seconds. Displaying pages soon after backend restarts
+may display wrong results and all services are pending. Enable this if
+you experience problems with pending services after reloading your
+backend.
+Should be obsolete with Livestatus versions greater than 1.2
+ex.: setting this to 10 would start serving pages 10 seconds
+after the backend reload
+
+ex.:
+
+  delay_pages_after_backend_reload = 10
+
+
+=== ssl_verify_hostnames
+
+Can be set to enable / disable hostname verification for https connections. For
+example for the cookie login or the http backend.
+
+ex.:
+
+  ssl_verify_hostnames = 1
+
+
+=== use_shadow_naemon
+
+Enable usage of shadownaemon. This is a daemon which shadows a remote
+core via livestatus and therefor removes network latency from accessing
+remote sites. It also reduces network bandwidth usage. Best used together
+with the logcache. Enabled with any true value, disabled when set to '0'.
+Usually the shadownaemon processes are stopped when the last thruk
+process exists, this can be changed by setting this option to 'start_only'.
+
+Default: 0
+
+ex.:
+
+    use_shadow_naemon=1
+
+
+=== shadow_naemon_dir
+Defines the folder where all shadow cores will run in. This
+also defines the path to the local socket, which will be
+'shadow_naemon_dir'/'peer key'/live
+
+ex.:
+
+    shadow_naemon_dir=/omd/sites/<site>/tmp/remotecache
+
+
+=== shadow_naemon_bin
+Defines the path to the shadownaemon binary.
+
+ex.:
+
+    shadow_naemon_bin=/omd/sites/<site>/bin/shadownaemon
+
+
+== Cookie Authentication Settings
+
+=== cookie_auth_login_url
+Specifies the url where non-authenticated users will be redirected
+too.
+
+ex.:
+
+  cookie_auth_login_url = thruk/cgi-bin/login.cgi
+
+
+=== cookie_auth_restricted_url
+Specifies the url against the cookie auth provider will verify its
+credentials.
+
+ex.:
+
+  cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi
+
+
+=== cookie_auth_session_timeout
+Specifies the timeout for idle sessions.
+
+ex.:
+
+  cookie_auth_session_timeout       = 86400
+
+
+=== cookie_auth_session_cache_timeout
+Specifies the amount of seconds in which subsequent requests won't
+verify authentication again. Set to zero to disable storing hashed
+credentials in the filesystem and disabling revalidation of active
+sessions.
+
+ex.:
+
+  cookie_auth_session_cache_timeout = 5
+
+
+=== cookie_auth_domain
+
+Cookie domain is usually set automatically. Use this option
+to override the default value. Domains have to contain at least
+two periods. Useful for single sign on environments.
+
+ex.:
+
+  cookie_auth_domain = .domain.com
+
+
+=== cookie_auth_login_hook
+
+Hook script which is called on every successful login. The REMOTE_USER
+environment variable will be set to the username of the current logged
+in user. Useful to do magic stuff on each login.
+
+ex.:
+
+  cookie_auth_login_hook = ./bin/hook.sh
+
+
+
+
+
+== Command Settings
+
+=== cmd_defaults
+Set the default checked state for command options.
+
+ex.:
+
+  <cmd_defaults>
+    ahas                   = 0  # For Hosts Too
+    broadcast_notification = 0  # Broadcast
+    force_check            = 0  # Forced Check
+    force_notification     = 0  # Forced Notification
+    send_notification      = 1  # Send Notification
+    sticky_ack             = 1  # Sticky Acknowledgement
+    persistent_comments    = 1  # Persistent Comments
+    persistent_ack         = 0  # Persistent Acknowledgement Comments
+    ptc                    = 0  # For Child Hosts Too
+    use_expire             = 0  # Use expire time ( for cores which support it)
+  </cmd_defaults>
+
+
+=== force_sticky_ack
+Forces acknowledgments to be sticky.
+
+ex.:
+
+  force_sticky_ack = 1
+
+
+=== force_send_notification
+Forces sending a notification for acknowledgments.
+
+ex.:
+
+  force_send_notification = 1
+
+
+=== force_persistent_ack
+Forces comments on acknowledgments to be persistent.
+
+ex.:
+
+  force_persistent_ack = 1
+
+
+=== force_persistent_comments
+Forces normal comments to be persistent.
+
+ex.:
+
+  force_persistent_comments = 1
+
+
+=== downtime_duration
+Default duration of new downtimes in seconds. Default is 2 hours.
+
+ex.:
+
+  downtime_duration = 7200
+
+
+=== expire_ack_duration
+Default duration of acknowledgements with expire date. Default is one
+day.
+
+ex.:
+
+  expire_ack_duration = 86400
+
+
+
+=== cmd_quick_status
+Configure which commands should be available as quick status commands.
+
+ex.:
+
+  <cmd_quick_status>
+    reschedule             = 0  # Reschedule next check
+    downtime               = 0  # Add/remove downtimes
+    comment                = 0  # Add/remove comments
+    acknowledgement        = 0  # Add/remove acknowledgements
+    active_checks          = 0  # Enable/disable active checks
+    notifications          = 0  # Enable/disable notifications
+    submit_result          = 0  # Submit passive check result
+    reset_attributes       = 0  # Reset modified attributes
+  </cmd_quick_status>
+
+
+
+=== command_reschedule_alias
+When you want to reschedule passive checks for which the result is fetched by
+an agent (For example check_mk or some scenarios of check_multi). You
+usually want to reschedule the agent instead of the passive check.
+
+The command reschedule alias can be used to translate the reschedule command
+from the passive service to the active agent service.
+
+  command_reschedule_alias = pattern;master_service_description
+
+.Notes
+* The pattern will be tested against the service description and the command_name
+  of the passive check.
+* The resulting service name be on the same host and the contact must
+  be authorized for that service too.
+* The pattern must be a valid perl regular expression.
+* Duplicates  will be removed. So if you reschedule 10 services which result in
+  the same master service will only trigger one reschedule.
+* Only passive services will be translated
+
+In this example, all passive check_mk checks will trigger the active agent check
+and therefor allow you to reschedule passive checks directly from the problems
+page.
+
+ex.:
+
+  command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK
+
+
+=== use_feature_recurring_downtime
+Use recurring downtime, shows recurring downtime links.
+
+ex.:
+
+  use_feature_recurring_downtime = 1
+
+
+=== use_feature_histogram
+Use histograms, shows histogram links.
+
+ex.:
+
+  use_feature_histogram = 1
+
+
+=== use_service_description
+Use service's description instead of display name.
+
+ex.:
+
+  use_service_description = 1
+
+
+=== use_feature_trends
+Use trends, shows trend links.
+
+ex.:
+
+  use_feature_trends = 1
+
+
+=== use_wait_feature
+Waiting is a livestatus feature. When enabled, Thruk will wait
+after rescheduling hosts/services checks until the
+check has been really executed up to a maximum of 10 seconds. Adjust
+the time waiting with the 'wait_timeout' option.
+
+ex.:
+
+  use_wait_feature = 1
+
+
+=== wait_timeout
+Amount of seconds to wait until a rescheduled check finishes. Thruk
+will wait this amount and display the result immediately.
+
+ex.:
+
+  wait_timeout = 10
+
+
+
+
+
+== Cron Settings
+
+
+=== cron_file
+Specify a file which is then completely under the control of Thruk.
+It will be used to store cronjobs, ex. for reports. The file has to be
+writable by Thruk.
+
+ex.:
+
+  cron_file = /tmp/thruk_cron.tmp
+
+
+=== cron_pre_edit_cmd
+The pre edit cmd can be used to do run a command just before Thruk
+will edit the crontab.
+
+ex.:
+
+  cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
+
+
+=== cron_post_edit_cmd
+The post edit cmd is necessary for OMD where you need to reload the
+crontab after editing or for replacing the users cron with the edited
+file.
+
+ex.:
+
+  cron_post_edit_cmd = crontab /tmp/thruk_cron.tmp
+
+
+=== thruk_bin
+Path to your thruk executable. Will be used in cronjobs.
+
+ex.:
+
+  thruk_bin = /usr/bin/thruk
+
+
+
+== Action Menu Settings
+{% include new_since.ad version="1.86" %}
+The Action Menu is a way to create custom icons and menus for every host or service. There
+are two ways to set the menu. First one is to directly assign the menu json data
+into the _THRUK_ACTION_MENU custom variable of your host or service. Or you can
+just put a placeholder into the _THRUK_ACTION_MENU custom variable and define the
+actual menu in 'action_menu_items'. You may add multiple action icons or even
+multiple menus for each host or service.
+
+image:source/action_menu.png[Custom Action Menu]
+
+See the link:action-menu.html[Action Menu] section from the advanced topics for
+more examples and details.
+
+=== action_menu_items
+{% include new_since.ad version="1.86" %}
+Defines the menu used by placeholders from the '_THRUK_ACTION_MENU' custom variable.
+The menu is a key/value pair with the name and the menu description in json format.
+The menu can either be a single icon/menu or a list of menus and icons.
+
+A simple menu could look like this, note that the menu has to be in a single line
+without newlines and all newlines from the example have to be removed in order
+to try that. But its more readable this way. You can also use a trailing
+backslash to write the menus on multiple lines.
+
+Sample menu with two items and a seperator:
+
+.....
+{% raw %}
+  {
+    "icon":"/thruk/themes/{{theme}}/images/dropdown.png",
+    "title": "sample menu",
+    "menu": [
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/arrow_refresh.png",
+        "label":  "refresh",
+        "action": "server://refresh/$HOSTNAME$"
+      },
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/page_white_key.png",
+        "label":  "example",
+        "action": "server://example/$HOSTNAME$/$SERVICEDESC$"
+      },
+      "-",
+      {
+        "icon":   "/thruk/themes/{{theme}}/images/page_white_text.png",
+        "label":  "wiki",
+        "action": "http://company-wiki/pages/$HOSTNAME$"
+      }
+    ]
+  }
+{% endraw %}
+.....
+
+A menu has the following attributes:
+
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `title`         title of the menu, will be display on mouse over.
+     ** `menu`          the actual menu definition as a list '[...]' of sub items.
+     ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
+
+A single `"-"` item can be used as a menu item seperator.
+
+
+The menu item can have the following attributes:
+
+     ** `icon`          icon for the menu itself. You can use `{% raw %}{{macros}}{% endraw %}` as placeholder, see list below.
+     ** `action`        url or action which will be run or openend. This can either be a
+                        http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
+                        the actionname must be a reference to a command from 'action_menu_actions'.
+                        You may use `{% raw %}{{macros}}{% endraw %}` here too.
+     ** `target`        Use '_blank' here to open link in a new window.
+     ** `...`           arbitrary attributes will be used as attributes of the menu item link html element.
+
+
+==== action menu macros
+
+The following macros can be used in the icon url and the link url:
+
+     ** `{% raw %}{{theme}}{% endraw %}`        contains the current selected user theme
+     ** `{% raw %}{{remote_user}}{% endraw %}`  contains the user name itself. (Do not rely on this value, a user can change the url by himself)
+     ** `{% raw %}{{prefix}}{% endraw %}`       the url path prefix, ex.: /thruk
+     ** `{% raw %}{{site}}{% endraw %}`         the OMD site name.
+
+
+Sample icons with two action icons:
+
+.....
+{% raw %}
+  [
+    {
+      "icon":"/thruk/themes/{{theme}}/images/criticity_1.png",
+      "action":"http://splunk/abc/hostid=$_HOSTHOSTID$",
+      "target":"_blank"
+    },
+    {
+      "icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",
+      "action":"server://refresh/$HOSTNAME$",
+    }
+  ]
+{% endraw %}
+.....
+
+
+Variant 1 - reference to a pre defined menu:
+
+.....
+{% raw %}
+  *thruk_local.conf:*
+
+    <action_menu_items>
+        standardmenu      = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                             "title": "test title",\
+                             "menu":[\
+                                {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png",\
+                                 "label":"refresh",\
+                                 "action":"server://refresh/$HOSTNAME$"}\
+                             ]\
+                            }
+    </action_menu_items>
+
+  *host.cfg:*
+
+    define host {
+      host_name            localhost
+      ...
+      _THRUK_ACTION_MENU   standardmenu
+    }
+{% endraw %}
+.....
+
+
+Variant 2 - define the menu in object config only:
+
+.....
+{% raw %}
+  *host.cfg:*
+
+    define host {
+      host_name            localhost
+      ...
+      _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"/thruk/themes/{{theme}}/images/arrow_refresh.png","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+    }
+{% endraw %}
+.....
+
+
+=== action_menu_actions
+{% include new_since.ad version="1.86" %}
+Defines the available server commands from action_menu_items. Key/Value pair of the name
+of the script and the corresponding command. The command has to be a full path program
+and *not* just a shell command. Therefor you do not have to use quotes because the arguments
+are not interpreted by a shell before execution due to security reasons.
+
+It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
+environment variable.
+
+ex.:
+
+  <action_menu_actions>
+      example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
+      refresh   = /usr/local/bin/refresh.sh otherargs
+  </action_menu_actions>
+
+
+=== action_menu_apply
+{% include new_since.ad version="1.86" %}
+With apply rules adding action menus is made easy and independant from the actual
+object configuration. You can setup a few regular expression rules which then add
+the corresponding action menu to matching hosts and services. The syntax is
+`menu_name = Hostpattern;Servicepattern`
+
+ex.:
+
+  <action_menu_apply>
+    hostmenu    = .*;$             # matches all hosts only
+    servicemenu = .*;.+$           # matches all services on all hosts
+    specialmenu = ^Host;Service$   # matches an exact service on one host only
+    cpu_menu    = .*;CPU           # matches all services starting with 'CPU'
+    hostmenu    = ^Host            # matches all hosts starting with 'Host'
+    demomenu    = ^Demo;           # matches all services on the 'Demo' host
+    demomenu    = ^Test;           # a menu name can be used multiple times
+  </action_menu_apply>
+
+
+
+
+
+
+== Icinga Settings
+
+=== enable_icinga_features
+This one activates all icinga specific features.
+If not set, Thruk will try to auto-detect your backends.
+Currently auto detection will only work within OMD. Don't enable it
+unless all your backends are icinga.
+
+ex.:
+
+  enable_icinga_features = 1
+
+
+
+
+
+== Shinken Settings
+
+=== enable_shinken_features
+This one activates all problem/impact and criticity features.
+Currently it will only work with shinken backends. Don't enable it
+unless all your backends are shinken.
+If not set, it will be automatically enabled when using only
+shinken backends.
+
+ex.:
+
+  enable_shinken_features = 1
+
+
+=== priorities
+Set the names of the priority (criticity in shinken). Currently this
+will only work with shinken backends.
+
+ex.:
+
+  <priorities>
+    5   = Business Critical
+    4   = Top Production
+    3   = Production
+    2   = Standard
+    1   = Testing
+    0   = Development
+  </priorities>
+
+
+
+
+
+== Other Settings
+
+=== no_external_job_forks
+Normally reports will be generated in an external process to avoid
+timeouts on long running reports. Use this switch to turn external
+jobs off and generate reports directly. Make sure they are finished
+within 40seconds which is the default fcgi timeout.
+
+ex.:
+
+  no_external_job_forks = 1
+
+
+
+=== thruk_init
+Path to your thruk init script. Will be used to restart thruk.
+
+ex.:
+
+  thruk_init = /etc/init.d/thruk
+
+
+=== cookie_path
+
+Path used for cookies. Do not change unless you have weird url
+rewrites which breaks setting cookies.
+
+ex.:
+
+  cookie_path = /
+
+
+
+
+
+== Component Thruk::Backend
+Enter your backend connection settings here. See link:install.html#backend-configuration[Backend Configuration]
+for details.
+
+=== peer
+
+     ** `name`          name for this connection
+     ** `type`          type of this connection. Can be 'livestatus' or 'http'.
+     ** `hidden`        should this peer be hidden initially ( can be reenabled
+                        via gui switch ) Only useful with more than one
+                        backend. Setting this option removes this
+                        backend from any report or cli action unless
+                        backends are specified explicitly.
+     ** `display`       Set to 0 if you want to hide this backend from
+                        the default view. This can be changed by the
+                        site panel again. In opposite to the 'hidden'
+                        flag, backends set to display=0 are still used
+                        for automatic actions and reports.
+     ** `groups`        if set, only contacts from these groups have access. You
+                        may add multiple groups separated by comma. Users
+                        without the right contactgroup don't even see
+                        that there is a backend. Note that this implies
+                        one extra backend request per page.
+                        (deprecated, please do not use)
+     ** `section`       to group backends/sites by different sections, enter a
+                        section.
+     ** `state_host`    Set 'state_host' explicitly. See See <<check_local_states,check_local_states>> for details.
+     ** `options`
+        *** `peer`            address of this connection.
+        *** `resource_file`   resource_file for this peer (used for macro replacement)
+     ** `configtool`
+        *** `core_type`       Give the config parser a hint about
+                              your config. Can be 'naemon', 'nagios', 'icinga'
+                              or 'shinken'.
+        *** `core_conf`       Path to your naemon.cfg / nagios.cfg / icinga.cfg. Read all
+                              object directories and files from this config
+                              file.
+        *** `obj_check_cmd`   Commandline to verify the config.
+        *** `obj_reload_cmd`  Commandline to reload the config.
+        *** `obj_readonly`    Filename pattern to define readonly objects.
+                              For example for generated config files.
+                              The same effect can be achieved by
+                              adding "# thruk: readonly" on top of a
+                              object config file.
+        *** `obj_dir`         Path to your objects. Enables the objects editor.
+                              Reads all *.cfg from this folder and all subfolders.
+                              (only needed when not using 'core_conf')
+        *** `obj_file`        Path to a single objects file. Enables the objects
+                              editor. Both 'obj_dir' and 'obj_file' can be
+                              specified more than once.
+                              (only needed when not using 'core_conf')
+        *** `obj_exclude`     Specify some exception pattern for the obj_dir.
+                              (only needed when not using 'core_conf')
+
+        *** `git_base_dir`    Override global 'git_base_dir' value.
+
+ex.:
+
+  <Component Thruk::Backend>
+    <peer>
+        name   = Local Naemon
+        type   = livestatus
+        hidden = 1             # makes this backend hidden by default
+        groups = admins,locals # makes this backend only visible to the
+                               # admin and the locals contactgroup
+        <options>
+            peer       = /tmp/livestatus.socket
+        </options>
+        <configtool>
+            core_conf  = /etc/naemon/naemon.cfg
+            obj_check  = /etc/init.d/naemon checkconfig
+            obj_reload = /etc/init.d/naemon reload
+        </configtool>
+    </peer>
+    <peer>
+        name   = External Icinga
+        type   = livestatus
+        <options>
+            peer   = 172.16.0.2:9999
+       </options>
+    </peer>
+    <peer>
+        name   = External Shinken
+        type = livestatus
+        <options>
+            peer   = 172.16.0.3:50000
+       </options>
+    </peer>
+  </Component>
+
+
+
+
+
+== Component Thruk::Plugin::ConfigTool
+
+Enable config tool by setting path to different components config
+files. Users with the roles 'authorized_for_configuration_information'
+and 'authorized_for_system_commands' will then have access to the
+config tool.
+You don't have to restart Thruk when changing the config with the
+config tool.
+
+ex.:
+
+  <Component Thruk::Plugin::ConfigTool>
+    show_plugin_syntax_helper = 1
+    thruk                     = .../thruk_local.conf
+    cgi.cfg                   = .../cgi.cfg
+    htpasswd                  = .../htpasswd
+    pre_obj_save_cmd          = .../hook.sh
+    post_obj_save_cmd         = .../hook.sh
+    git_base_dir              = /etc/naemon/conf.d/custom/
+    edit_files                = some/extra/files/to.edit
+  </Component>
+
+
+=== show_plugin_syntax_helper
+
+Enable/Disable the plugin syntax helper. When enabled, Thruk will
+run the plugins with "plugin -h" to get the help information.
+
+=== thruk
+Path to your thruk_local.conf. Enables adjusting Thruks config if set.
+
+=== cgi.cfg
+Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.
+
+=== htpasswd
+Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.
+
+=== pre_obj_save_cmd
+Run a command before saving object config files. Save will be canceled
+if the command returns non-zero exit code. Command will be run with
+'pre' as first argument and the root config folder as second argument.
+REMOTE_USER will be set in the environment.
+
+=== post_obj_save_cmd
+Run a command after saving object config files. Command will be run with
+'post' as first argument and the root config folder as second
+argument. REMOTE_USER will be set in the environment.
+
+=== git_base_dir
+If not all config folders are managed by git, then you can specify a
+directory which is used to display the history. Should point to a
+directory which is part of a git repository. This config setting is
+only used for the history support in the configuration tool. The
+'git_base_dir' may be overriden by an per backend value.
+
+=== edit_files
+Specify some extra files which can then be edited by the Thruk configtool
+text editor. Can be used multiple times. When used with a directory, all
+files below can be edited.
+
+
+
+
+== Component Thruk::Plugin::Panorama
+
+The 'Panorama' plugin is a nice, fully customizable dashboard allowing
+you to build your own panorama views.
+
+ex.:
+
+  <Component Thruk::Plugin::Panorama>
+    default_dashboard      = 1,3,7,4
+    readonly               = 0
+    full_reload_interval   = 10800
+    geo_map_default_center = 13.74,47.77
+    geo_map_default_zoom   = 5
+    extra_fonts            = CompanyFont1, CompanyFont2
+  </Component>
+
+
+=== default_dashboard
+Contains a comma seperated list of dashboards you want to show by default.
+
+=== readonly
+Make panorama dashboard readonly. The user cannot add, remove or
+change panels and tabs. Commands may still be send according to the
+user permissions.
+
+=== dashboard_ignore_changes
+Make panorama dashboard ignore changes. The user is allowed to change
+some parts of the layout, but nothing is saved. Commands may still be
+send according to the user permissions.
+
+=== full_reload_interval
+Full page reload every 3 hours to prevent memory
+leaks. Disabled when set to 0.
+
+=== geo_map_default_center
+Default coordinates (lon,lat) for new geo maps.
+
+=== geo_map_default_zoom
+Default zoom level for new geo maps.
+
+=== wms_provider
+WMS provider serve map tile data for geo maps according to
+http://dev.openlayers.org/docs/files/OpenLayers/Layer/WMS-js.html#OpenLayers.Layer.WMS.OpenLayers.Layer.WMS
+Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Servers
+
+ ex.:
+
+  <Component Thruk::Plugin::Panorama>
+    ...
+    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}"]
+  </Component>
+
+=== extra_fonts
+Comma separated list of additional fonts which will be listed in the text label
+drop down selection.
+
+
+
+== Component Thruk::Plugin::Reports2
+
+The 'Reports2' plugin creates sla reports in html or pdf format. You
+probably have to download the link:/documentation/faq.html#wkhtmltopdf[wkhtmltopdf binary] in a recent version.
+
+ex.:
+
+  <Component Thruk::Plugin::Reports2>
+    report_nice_level      = 5
+    max_concurrent_reports = 2
+    report_base_url        = http://host.local/thruk/cgi-bin/
+    wkhtmltopdf            = /usr/bin/wkhtmltopdf
+    pnp_export             = plugins/plugins-enabled/reports2/script/pnp_export.sh
+    report_from_email      = User Name <example@mail.com>
+    default_template       = host_sla.tt
+  </Component>
+
+=== report_nice_level
+Execute regular scheduled reports with this nice level.
+
+=== max_concurrent_reports
+{% include new_since.ad version="1.88" %}
+Maximum number of reports running at a time. If more reports are started, then
+they will be queued up. Default is 2.
+
+
+=== report_base_url
+Url used to replace relative links in html reports.
+
+=== wkhtmltopdf
+`wkhtmltopdf` is used to convert html pages into pdf.
+See the link:/documentation/faq.html#wkhtmltopdf[FAQ] for download
+links and further information.
+
+=== pnp_export
+pnp_export defines a script which exports a PNP4nagios graph into a
+local file which then can be included in reports. PNP4nagios images
+are either exported localy by executing php or remotly fetched with
+wget. This works automatically in OMD, but only for local sites of
+course. To make this work without OMD, set the variable 'PNP_ETC' and
+'PNP_INDEX' in the ~/.thruk file of your webserver. The PNP4nagios url
+is taken from the action url or from the notes url.
+
+ex.:
+
+  export PNP_ETC="/etc/pnp4nagios"
+  export PNP_INDEX="/usr/share/pnp4nagios/htdocs/index.php"
+
+Remote PNP4nagios graphs will be fetched by wget and usually the
+graphs are password protected, so you may want to set a different wget
+command to specify a username and password. This can to be set by the
+'PNP_WGET' variable in the ~/.thruk file of the webserver user. You
+may force to use wget by setting 'PNP_URL_PREFIX'.
+
+ex.:
+
+  export PNP_WGET="wget -q --user=admin --password=secret"
+  export PNP_URL_PREFIX="http://demo.thruk.org"
+
+
+=== report_from_email
+
+Set the from address used in e-mail reports.
+Format is "User Name <example@mail.com>"
+
+
+=== default_template
+
+Set the default template used for new reports.
+
+
+
+== Component Thruk::Plugin::Statusmap
+
+The Statusmap plugin gives an overview over your network.
+
+ex.:
+
+  <Component Thruk::Plugin::Statusmap>
+    statusmap_default_groupby = address
+    statusmap_default_type    = table
+  </Component>
+
+
+=== statusmap_default_type
+You may change the default map type of the statusmap here. Valid
+types are: 'table' and 'circle'
+
+
+=== statusmap_default_groupby
+And the statusmap default group by which has to be one of:
+'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
+
+
+== Component Thruk::Plugin::Minemap
+
+The Minemap plugin gives an overview of your hosts and services.
+
+ex.:
+
+  <Component Thruk::Plugin::Minemap>
+    minemap_default_link = /thruk/cgi-bin/minemap.cgi
+  </Component>
+
+
+=== minemap_default_link
+You may change the default minemap link here.
+
+
+
+== Component Thruk::Plugin::BP
+
+The Business Process plugin gives the possibility to create and model your business
+processes. In order to edit and create new business processes you will
+need the roles:
+
+ - authorized_for_configuration_information
+ - authorized_for_system_commands
+
+Configuration Example:
+
+  <Component Thruk::Plugin::BP>
+    #spool_dir             = /var/naemon/rw/check_results
+    result_backend         = naemon
+    objects_save_file      = /etc/naemon/conf.d/bp_generated.cfg
+    objects_templates_file = /etc/naemon/conf.d/thruk_bp_templates.cfg
+    objects_reload_cmd     = /etc/init.d/naemon reload
+    #pre_obj_save_cmd      =
+    #post_obj_save_cmd     =
+    refresh_interval       = 1
+  </Component>
+
+
+=== spool_dir
+Results will be send back by using the spool folder.
+This folder should point to the 'check_result_path' of your core.
+
+=== result_backend
+As alternative to the spool_dir, a livestatus connection can be used
+to send results to the core. Set the name or key of the backend with
+this option.
+
+=== objects_save_file
+Save objects to this file. Content will be overwritten.
+
+=== objects_templates_file
+User maintained file containing templates used for business process services.
+
+=== objects_reload_cmd
+Command to apply changes to the objects_save_file.
+
+=== pre_obj_save_cmd
+Run this hook command before saving a business process.
+
+=== post_obj_save_cmd
+Run this hook command after saving a business process.
+
+=== refresh_interval
+Refresh interval defines how often business processes
+will be recalculated and refreshed. (in minutes)
+
+
+
+
+== User & Group Specific Overrides
+Both, the 'Users' and the 'Groups' directive override default settings for
+single users or groups. In theory it's possible to override each and every
+config setting from the thruk.conf but you will get funny results if you
+override fundamental settings like backends, paths and such things.
+
+=== Groups
+The groups directive overrides specific config settings for one group only.
+Group overrides are applied in alphabetical order. For example, if you have
+a user in group 'Admins' and in 'Superadmins', he will get all overrides from
+both groups, but the 'Admins' overrides will be superseded by the 'Superadmins'.
+
+ex.:
+
+...................................
+    # disable all commands, except reschedule for all users
+    command_disabled = 0-6,8-95,97-999
+
+    <Group admins>
+        # enable commands for admins again
+        command_disabled =
+    </Group>
+...................................
+
+
+=== Users
+The users directive overrides specific config settings for one user only.
+
+ex.:
+
+...................................
+    <User guest>
+        # override single configuration item
+        show_error_reports  = 0
+        can_submit_commands = 0
+
+        # also available for nested components
+        <Component Thruk::Plugin::Panorama>
+          default_dashboard    = 1,3,7,4
+        </Component>
+    </User>
+...................................

@@ -34,8 +34,29 @@ INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT
 INPUT.obj_servicegroup_servicegroup_members {
   width: 400px !important;
 }
-INPUT.cmd_line_inp_wzd.single_arg {
-  width: 350px;
+
+TABLE.command_line_wzd {
+  width: 100%;
+  border-collapse: collapse;
+}
+TABLE.command_line_wzd INPUT {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+TABLE.command_line_wzd TD, TABLE.command_line_wzd TR {
+  height: 10px;
+  line-height: 10px;
+  padding: 1px 0;
+  margin: 0;
+  border-right: 10px solid transparent;
+}
+TABLE.command_line_wzd > tbody > TR > TD:first-child {
+  padding-left: 10px;
+  width: 10px;
+}
+TABLE.command_line_wzd.first > tbody > TR > TD:first-child {
+  padding-left: 0;
 }
 
 .conf_attr_used {
@@ -70,7 +91,7 @@ UL.obj_browse LI {
   text-align: left;
   clear: both;
   display: inline-block;
-  width: 420px;
+  width: 100%;
 }
 
 UL.obj_browse LI:hover {
@@ -83,10 +104,10 @@ UL.obj_browse LI IMG {
 }
 
 DIV.obj_browse_name {
-  width: 250px;
+  width: 500px;
   white-space: nowrap;
   overflow: hidden;
-  max-width: 50%;
+  max-width: 60%;
   float: left;
 }
 
@@ -279,4 +300,67 @@ LI#o_objects > INS {
 }
 LI#o_objects > UL {
   margin-left: -17px;
+}
+
+TABLE.conf_tool_results {
+  border-collapse: collapse;
+  margin-bottom: 15px;
+  margin-right: 15px;
+}
+
+TABLE.conf_tool_results TH, TABLE.conf_tool_results TD {
+  text-align: left;
+  padding-left: 3px;
+  padding-right: 15px;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+}
+TABLE.conf_tool_results TD:first-child, TABLE.conf_tool_results TH:first-child {
+  border-left: 0;
+}
+TABLE.conf_tool_results TR:last-child TD {
+  border-bottom: 0;
+}
+
+TABLE.conf_tool_results FORM {
+  display: inline;
+}
+
+SPAN.obj_ref {
+  float: right;
+  font-size: smaller;
+}
+
+UL.obj_ref {
+  padding-left: 10px;
+  margin: 3px;
+}
+
+TD.obj_ref {
+  text-align: left;
+  padding-left: 5px;
+}
+
+LI.file_node I.jstree-icon {
+  background-position: -100px -69px;
+}
+
+.ui-wrench-button {
+  background-image: url(images/wrench.png) !important;
+  margin-top: -7px !important;
+}
+.ui-cut-button {
+  background-image: url(images/cut.png) !important;
+  margin-top: -7px !important;
+}
+.width_80 {
+  width: 80px;
+}
+
+.left_pad_5 {
+  padding-left: 5px;
+}
+
+TR.tools_category TD {
+    border-top: 1px solid #444444;
 }

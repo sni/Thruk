@@ -2,7 +2,6 @@ package Thruk::Backend::Provider::HTTP;
 
 use strict;
 use warnings;
-use Carp;
 
 =head1 NAME
 
@@ -52,7 +51,7 @@ sub get_service_stats_dashboard {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2013, <sven.nierlein@consol.de>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =cut
 

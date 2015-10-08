@@ -1,8 +1,12 @@
-﻿[% FOREACH o = outages %]
-<div class="outages">
-  [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
-  <span class="duration">([% duration(o.duration) %])</span>
-</div>
-<div class="output">[% o.plugin_output %]</div>
-[% LAST IF loop.index == 13 %]
+﻿[% page_data = page_splice(out, 12, param.max_outages_pages)  %]
+[% FOREACH datablock = page_data %]
+  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = loc("Latest Outages") %]
+    [% FOREACH o = datablock %]
+      <div class="outages">
+        [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
+        <span class="duration">([% duration(o.duration) %])</span>
+      </div>
+      <div class="output">[% o.plugin_output %]</div>
+    [% END %]
+  [% END %]
 [% END %]

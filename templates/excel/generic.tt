@@ -1,0 +1,23 @@
+﻿[% USE date %]
+[% size = 1 %]
+[% IF data %][% size = data.size + 1 %][% END %]
+<workbook>
+  <worksheet name='[% name %]' autofilter='A1:[% last_col %][% size %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        [% FOREACH col = columns %]
+        [% x = loop.index + 1 %]
+        [% IF col_sel.$x %]<cell width='30'>[% IF col_tr.exists(col) %][% col_tr.$col %][% ELSE %][% col %][% END %]</cell>[% END %]
+        [% END %]
+      </format>
+    </row>
+    [% FOREACH d = data %]
+    <row>
+      [% FOREACH col = columns %]
+      [% x = loop.index + 1 %]
+      [% IF col_sel.$x %]<cell>[% IF d.exists(col) %][% d.$col %][% END %]</cell>[% END %]
+      [% END %]
+    </row>
+    [% END %]
+  </worksheet>
+</workbook>

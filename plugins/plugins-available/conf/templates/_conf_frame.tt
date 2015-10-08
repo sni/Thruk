@@ -1,4 +1,7 @@
-﻿[% PROCESS _header.tt overlib=1 css=["thruk/plugins/conf/conf.css","thruk/plugins/conf/linedtextarea/jquery-linedtextarea.css"] js=["thruk/plugins/conf/conf.js", "thruk/javascript/jstree/jstree.min.js"] %]
+﻿[% PROCESS _header.tt overlib=1
+                      css=["plugins/conf/conf.css","plugins/conf/linedtextarea/jquery-linedtextarea.css", "javascript/jstree-3.0.9/themes/default/style.min.css"]
+                      js=["plugins/conf/conf.js", "javascript/jstree-3.0.9/jstree.min.js"]
+%]
 [% PROCESS _message.tt %]
 [% PROCESS _overdiv.tt %]
 
@@ -8,13 +11,13 @@
         [% PROCESS _infobox.tt %]
         </td>
         <td align="right" valign="top" width="50%">
-          <form method="get" action="conf.cgi" id="obj_type_show_form">
             <table border="0" class="optBox">
               <tr>
                 <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
               </tr>
               <tr>
                 <td align="left" class='reportSelectItem'>
+                  <form method="get" action="conf.cgi" id="obj_type_show_form">
                   <select name='sub' onchange="document.getElementById('obj_type_show_form').submit()">
                     <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
                     [% IF conf_config.exists('thruk') %]
@@ -32,17 +35,17 @@
                     <option value='objects'[%  IF sub == 'objects' %] selected [% END %]>Objects</option>
                     [% END %]
                   </select>
+                  </form>
                 </td>
               </tr>
               [% IF last_changed || needs_commit || show_save_reload %]
                 <tr>
                   <td>
-                    [% button('conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes', 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(\'' _ show_save_reload _ '\')') %]
+                    [% link = 'conf.cgi?sub=objects&amp;apply=yes&amp;save_and_reload=yes&amp;token=' _ get_user_token(c); button(link, 'save &amp; reload', 'conf_save_reload_button', 'return save_reload_apply(\'' _ show_save_reload _ '\')') %]
                   </td>
                 </tr>
               [% END %]
             </table>
-          </form>
           [% PROCESS _help.tt topic = "conf" %]
         </td>
       </tr>

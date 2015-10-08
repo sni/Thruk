@@ -2,7 +2,7 @@
    dataTitle = 'Contactgroups'
 %]
 
-<table border="0" class='data'>
+<table border="0" class='data' id="configtable">
   <tr>
     [% IF backends.size > 1 %]
       <th class='data'>Backend</th>

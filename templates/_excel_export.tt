@@ -4,8 +4,8 @@
     [% FOR column IN columns %]
     [% counter = counter + 1 %]
     <tr>
-      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id)">[% column %]</td>
-      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" checked></td>
+      <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column %]</td>
+      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();" checked></td>
     </tr>
     [% END %]
   </table>
@@ -13,16 +13,16 @@
 [% BLOCK checkall %]
   <table border=0 cellspacing=2 cellpadding=0 width="100%">
     <tr>
-      <td colspan=2><hr></td>
-    </tr>
-    <tr>
       <td valign="top" align="right" class='filterName clickable' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]');" width="90%">check all</td>
       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" checked onclick="toggleAllFilterCheckBox('[% prefix %]')"></td>
+    </tr>
+    <tr>
+      <td colspan=2><hr></td>
     </tr>
   </table>
 [% END %]
 
-<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
+<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink'><img src='[% url_prefix %]themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
 <div class="shadow"><div class="shadowcontent">
 [% IF style != 'combined' %]
@@ -36,19 +36,29 @@
       <table border="0" cellspacing="2" cellpadding="0">
         <tr>
           <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-          <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
+          <td align="right"><input type="image" src="[% url_prefix %]themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;" alt="update"></td>
         </tr>
-        <tr>
           [% IF columns != '' %]
-            <td colspan=2>
-              [% PROCESS cols     prefix='' %]
-            </td>
-          </tr>
           <tr>
             <td colspan=2>
               [% PROCESS checkall prefix='' %]
             </td>
+          </tr>
+          <tr>
+            <td colspan=2>
+              [% PROCESS cols     prefix='' %]
+            </td>
+          </tr>
           [% ELSE %]
+          <tr>
+            <td valign="bottom">
+              [% PROCESS checkall prefix='host_' %]
+            </td>
+            <td valign="bottom">
+              [% PROCESS checkall prefix='service_' %]
+            </td>
+          </tr>
+          <tr>
             <td valign="top">
               <b>Hosts:</b><br>
               [% PROCESS cols prefix='host_' columns=hostcolumns %]
@@ -58,18 +68,28 @@
               [% PROCESS cols prefix='service_' columns=servicecolumns %]
             </td>
           </tr>
-          <tr>
-            <td valign="bottom">
-              [% PROCESS checkall prefix='host_' %]
-            </td>
-            <td valign="bottom">
-              [% PROCESS checkall prefix='service_' %]
-            </td>
           [% END %]
-        </tr>
         <tr>
           <td colspan=2 align="center">
             <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); jQuery('#view_mode').val('xls'); jQuery(this).parents('FORM').submit(); return false;">
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2><hr></td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table border=0 cellspacing=2 cellpadding=0 width="100%">
+              <tr>
+                <td>
+                  <span onclick="toggleElement('excel_export_url', 'excel_export_url_icon_display'); return false;" style="margin: 0 2px;" class="clickable">
+                    <input type="image" src="[% url_prefix %]themes/[% theme %]/images/icon_maximize.gif" id="excel_export_url_icon_display" style="vertical-align: sub;" alt="show permanent link">
+                    permanent link to this export
+                  </span><br>
+                  <input type="text" value="" id="excel_export_url" style="width: 99%; display: none;">
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>

@@ -1,38 +1,79 @@
 ﻿[% USE date %]
 <script type="text/javascript">
-  var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
+  var pnp_source = 0;
+  var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550";
+
+  /* try to fetch sources */
+  var source_url = pnp_url.replace(/\/image\?/, '/json?');
+  jQuery.ajax({
+    url: source_url,
+    type: 'POST',
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function(data) {
+      if(!data.match(/^\[/)) { return; }
+      var sources    = eval(data);
+      var has_graphs = false;
+      jQuery('#pnp_source_select').find('option').remove();
+      jQuery(sources).each(function(x, s) {
+          jQuery('#pnp_source_select').append('<option value="'+x+'"'+(x==pnp_source ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
+          has_graphs = true;
+      });
+      /* only useful for multiple sources */
+      if(has_graphs) {
+        jQuery('#pnp_source_select').show();
+      }
+    }
+  });
 </script>
-<div class='commentTitle'>Performance Graph</div>
-<table border="0" class='comment blockHeadBorder' width='500'>
+<table>
+  <tr>
+    <td style="position: relative;">
+        <div class='commentTitle'>Performance Graph</div>
+        <div class='pnpSelector'>
+          <form action="#">
+            <select onchange="pnp_source=this.value; set_png_img();" id="pnp_source_select" style="display: none;">
+            </select>
+          </form>
+        </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+<table border="0" class='comment blockHeadBorder' width='650'>
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
     </th>
-    <th id="pnp_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours</th>
-    <th id="pnp_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id)">day</th>
-    <th id="pnp_th3" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id)">week</th>
-    <th id="pnp_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id)">month</th>
-    <th id="pnp_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id)">year</th>
+    <th id="pnp_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id, pnp_source)">4 hours</th>
+    <th id="pnp_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id, pnp_source)">day</th>
+    <th id="pnp_th3" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id, pnp_source)">week</th>
+    <th id="pnp_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id, pnp_source)">month</th>
+    <th id="pnp_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id, pnp_source)">year</th>
     <th class='comment' width="20" nowrap>
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
+      <input type="image" src="[% url_prefix %]themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
     </th>
   </tr>
   <tr>
     <td colspan=7 align="center">
       <div id="pnp_graph_pane" style="position: relative;">
-        <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&theme=smoothness">
-          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
-          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
-          <div id="pnperr" style="display:none">Could not retrieve graph data</div>
+        <a href="[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness">
+          <img id="pnpwaitimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="z-index:100; top:45%; left:45%;" alt="waiting">
+          <img id="pnpimg" src="[% url_prefix %]themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
+          <span id="pnperr" style="display:none">Could not retrieve graph data</span>
         </a>
       </div>
     </td>
   </tr>
 </table>
+    </td>
+  </tr>
+</table>
 <script type="text/javascript">
-  var pnp_id    = 'pnp_th2';
-  var pnp_start = [% date.now - 90000 %];
-  var pnp_end   = [% date.now %];
+  var pnp_id     = 'pnp_th2';
+  var pnp_start  = [% date.now - 90000 %];
+  var pnp_end    = [% date.now %];
   if(window.location.hash != '#') {
     var values = window.location.hash.split("/");
     if(values[0]) {
@@ -44,6 +85,9 @@
     if(values[2]) {
       pnp_end = values[2];
     }
+    if(values[3] != undefined) {
+      pnp_source = values[3];
+    }
   }
-  set_png_img(pnp_start, pnp_end, pnp_id);
+  set_png_img(pnp_start, pnp_end, pnp_id, pnp_source);
 </script>

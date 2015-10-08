@@ -18,7 +18,7 @@
     [% IF c.request.parameters.force_check %]LAUNCH_SVC_EVENT_HANDLER[% ELSE %]LAUNCH_SVC_EVENT_HANDLER[% END %];[% sprintf("%s;%s",host_name,service_desc) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:00'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>

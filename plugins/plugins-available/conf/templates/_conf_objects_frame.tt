@@ -40,6 +40,7 @@
 </td>
 <td align="center" valign="top" class="action_menu">
 [% PROCESS _conf_action_menu.tt %]
+[% PROCESS _conf_references_menu.tt %]
 </td>
 </tr>
 </table>

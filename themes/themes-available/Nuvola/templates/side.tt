@@ -4,13 +4,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>[% title_prefix %][% title %]</title>
-    [% PROCESS _common_js.tt %]
     [% UNLESS all_in_one_css %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     [% END %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="[% url_prefix %]themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <style type="text/css">
     <!--
     HTML {
@@ -19,9 +18,11 @@
     }
     -->
     </style>
+    [% PROCESS _common_js_files.tt %]
     [% PROCESS extra_headers.tt %]
   </head>
   <body class='navbar' onload="preloadImages();">
+  [% PROCESS _common_js.tt bodyonload=0 %]
 [% END %]
 [% PROCESS _side_js.tt %]
 <div class="tree">
@@ -35,35 +36,35 @@
 [% icon         = '' %]
 
 [% BLOCK set_icons %]
-  [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/info.gif' %]
+  [% icon = url_prefix _ 'themes/Nuvola/side/icons/info.gif' %]
   [% IF section.name == 'Current Status' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/monitoring.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/monitoring.gif' %]
   [% ELSIF section.name == 'Reports' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/reporting.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/reporting.gif' %]
   [% ELSIF section.name == 'System' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/configuration.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/configuration.gif' %]
   [% ELSIF section.name == 'Bookmarks' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/info.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/info.gif' %]
   [% END %]
 
   [% IF l.name == 'Map' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/map.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/map.gif' %]
   [% ELSIF l.name == 'Comments' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notes.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/notes.gif' %]
   [% ELSIF l.name == 'Downtime' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/downtime.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/downtime.gif' %]
   [% ELSIF l.name == 'Problems' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/error.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/error.gif' %]
   [% ELSIF l.name == 'Notifications' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notifications.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/notifications.gif' %]
   [% ELSIF l.name == 'Event Log' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notes.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/notes.gif' %]
   [% ELSIF l.name == 'Process Info' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/processes.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/processes.gif' %]
   [% ELSIF l.name == 'Performance Info' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/performance.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/performance.gif' %]
   [% ELSIF l.name == 'Scheduling Queue' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/queue.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/icons/queue.gif' %]
   [% END %]
 
   [% IF l.exists('icon') %]
@@ -71,8 +72,8 @@
   [% END %]
 
   [% IF l.links && l.links.size > 0 %]
-    [% icon      = url_prefix _ 'thruk/themes/Nuvola/side/icons/folder.gif' %]
-    [% icon_open = url_prefix _ 'thruk/themes/Nuvola/side/icons/folder_open.gif' %]
+    [% icon      = url_prefix _ 'themes/Nuvola/side/icons/folder.gif' %]
+    [% icon_open = url_prefix _ 'themes/Nuvola/side/icons/folder_open.gif' %]
   [% END %]
 
 
@@ -87,19 +88,19 @@
   [% icon = url_prefix _ section.icon %]
 [% ELSE %]
   [% IF section.name == 'General' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/home.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/home.gif' %]
   [% ELSIF section.name == 'Current Status' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/monitoring.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/monitoring.gif' %]
   [% ELSIF section.name == 'Reports' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/reporting.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/reporting.gif' %]
   [% ELSIF section.name == 'System' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/configuration.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/configuration.gif' %]
   [% ELSIF section.name == 'Bookmarks' %]
-    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/home.gif' %]
+    [% icon = url_prefix _ 'themes/Nuvola/side/home.gif' %]
   [% END %]
 [% END %]
 
-[%+ menu_name %].header('&nbsp;&nbsp;<a thref="#">[% section.name %]<\/a>','[% icon %]',32,'[% url_prefix %]thruk/themes/Nuvola/side/title.gif','#AFB1C3',true)
+[%+ menu_name %].header('&nbsp;&nbsp;<a thref="#">[% section.name %]<\/a>','[% icon %]',32,'[% url_prefix %]themes/Nuvola/side/title.gif','#AFB1C3',true)
 [%+ menu_name %].add(0,-1);
   [%+ index = 0 %]
   [% FOREACH link = section.links +%]
@@ -118,7 +119,7 @@
           [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]', undefined, undefined, undefined, '[% tmp %]');
         [% END %]
       [% ELSIF link.search +%]
-        [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]thruk/cgi-bin/status.cgi' target='[% link.target %]'>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='text' name='s0_value' id='s0_value' class='NavBarSearchItem' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' id='NavBarSearchItem' size=10 style='font-size:10'>[% END %]<\/form><\/nobr>",'','','','[% url_prefix %]thruk/themes/Nuvola/side/icons/search.gif');
+        [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]cgi-bin/status.cgi' target='[% link.target %]'>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='hidden' name='add_default_service_filter' value='1' /><input type='text' name='s0_value' id='s0_value' class='NavBarSearchItem deletable' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' id='NavBarSearchItem' size=10 style='font-size:10'>[% END %]<\/form><\/nobr>",'','','','[% url_prefix %]themes/Nuvola/side/icons/search.gif');
       [% END %]
   [% END %]
 document.write([% menu_name %]);

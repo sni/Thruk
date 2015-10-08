@@ -1,134 +1,136 @@
---- a/thruk.conf	2013-06-11 12:40:11.000000000 +0200
-+++ b/thruk.conf	2013-06-11 12:40:30.000000000 +0200
-@@ -63,11 +63,11 @@
+--- a/thruk.conf	2015-05-04 11:38:01.000000000 +0200
++++ b/thruk.conf	2015-05-04 11:38:37.000000000 +0200
+@@ -91,7 +91,7 @@
  
  ######################################
  # location of your cgi.cfg
 -cgi.cfg             = cgi.cfg
-+cgi.cfg             = /etc/thruk/cgi.cfg
++cgi.cfg             = @SYSCONFDIR@/cgi.cfg
  
  ######################################
  # use frames, can be useful for addons
--use_frames          = 0
-+use_frames          = 1
- 
- ######################################
- # use histograms, shows histogram links
-@@ -169,11 +169,11 @@
+@@ -197,11 +197,11 @@
  
  ######################################
  # temporary directory, used for template cache...
 -#tmp_path = /tmp
-+tmp_path = /var/cache/thruk
++tmp_path = @TMPDIR@
  
  ######################################
  # var directory, used to store user settings
 -#var_path = ./var
-+var_path = /var/lib/thruk
++var_path = @LOCALSTATEDIR@
  
  ######################################
  # mode used when creating or saving files
-@@ -182,19 +182,19 @@
+@@ -210,24 +210,24 @@
+ 
+ ######################################
+ # files owners for new / changed files
+-#thruk_user=thruk
+-#thruk_group=thruk
++thruk_user=@THRUKUSER@
++thruk_group=@THRUKGROUP@
  
  ######################################
  # server side includes
 -#ssi_path = ssi/
-+ssi_path = /etc/thruk/ssi/
++ssi_path = @SYSCONFDIR@/ssi/
  
  ######################################
  # path to your plugins
  # see documentation for further steps if
  # you change the plugin path
 -#plugin_path = plugins/
-+plugin_path = /etc/thruk/plugins/
++plugin_path = @SYSCONFDIR@/plugins/
  
  ######################################
  # path to your themes
  # see documentation for further steps if
  # you change the themes path
 -#themes_path = themes/
-+themes_path = /etc/thruk/themes/
++themes_path = @SYSCONFDIR@/themes/
  
  ######################################
  # custom templates
-@@ -202,7 +202,7 @@
+@@ -235,7 +235,7 @@
  
  ######################################
  # log4perl config
 -#log4perl_conf = ./log4perl.conf
-+log4perl_conf = /etc/thruk/log4perl.conf
++log4perl_conf = @SYSCONFDIR@/log4perl.conf
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -412,23 +412,23 @@
+@@ -490,23 +490,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
 -cron_file          = /tmp/thruk_cron.tmp
-+cron_file          = /var/cache/thruk/thruk_cron.tmp
++cron_file          = @TMPDIR@/thruk_cron.tmp
  
  # The pre edit cmd can be used to do run a command just before thruk
  # will edit the crontab.
 -cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
-+cron_pre_edit_cmd  = /usr/bin/crontab -l > /var/cache/thruk/thruk_cron.tmp
++cron_pre_edit_cmd  = /usr/bin/crontab -l > @TMPDIR@/thruk_cron.tmp
  
  # The post edit cmd is necessary for OMD where you need to reload the
  # crontab after editing.
 -cron_post_edit_cmd = /usr/bin/crontab /tmp/thruk_cron.tmp && rm -f /tmp/thruk_cron.tmp
-+cron_post_edit_cmd = /usr/bin/crontab /var/cache/thruk/thruk_cron.tmp && rm -f /var/cache/thruk/thruk_cron.tmp
++cron_post_edit_cmd = /usr/bin/crontab @TMPDIR@/thruk_cron.tmp && rm -f @TMPDIR@/thruk_cron.tmp
  
  #####################################
  # path setting
  # Path to your thruk executable. Will be used in cronjobs.
 -#thruk_bin = /usr/bin/thruk
-+thruk_bin = /usr/bin/thruk
++thruk_bin = @BINDIR@/thruk
  
  # Path to your thruk init script. Will be used to restart thruk.
 -#thruk_init = /etc/init.d/thruk
-+thruk_init = /etc/init.d/thruk
++thruk_init = @INITDIR@/thruk
  
  # Set first day of week. Used in reports.
  # Sunday: 0
-@@ -529,6 +529,20 @@
+@@ -616,6 +616,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
  #    <peer>
 +#        name   = Core
 +#        type   = livestatus
 +#        <options>
-+#            peer          = /var/nagios/rw/live
-+#            resource_file = /etc/nagios/resource.cfg
++#            peer          = /var/naemon/rw/live
++#            resource_file = /etc/naemon/resource.cfg
 +#       </options>
 +#       <configtool>
-+#            core_conf      = /etc/nagios/nagios.cfg
-+#            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
-+#            obj_reload_cmd = /etc/init.d/nagios reload
++#            core_conf      = /etc/naemon/naemon.cfg
++#            obj_check_cmd  = /usr/bin/naemon -v /etc/naemon/naemon.cfg
++#            obj_reload_cmd = /etc/init.d/naemon reload
 +#       </configtool>
 +#    </peer>
 +
 +#    <peer>
- #        name   = Local Nagios
+ #        name   = Local Naemon
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -580,9 +594,9 @@
+@@ -667,9 +681,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
 -    thruk    = ./thruk_local.conf
 -    cgi.cfg  = ./cgi.cfg
 -    #htpasswd = ./htpasswd
-+    thruk    = /etc/thruk/thruk_local.conf
-+    cgi.cfg  = /etc/thruk/cgi.cfg
-+    htpasswd = /etc/thruk/htpasswd
++    thruk    = @SYSCONFDIR@/thruk_local.conf
++    cgi.cfg  = @SYSCONFDIR@/cgi.cfg
++    htpasswd = @SYSCONFDIR@/htpasswd
  
      #pre_obj_save_cmd   =
      #post_obj_save_cmd  =
-@@ -609,7 +623,7 @@
+@@ -718,7 +732,7 @@
      #report_base_url=http://host.local/thruk/cgi-bin/
  
      # wkhtmltopdf is used to convert html pages into pdf
 -    #wkhtmltopdf = /path/to/wkhtmltopdf
-+    wkhtmltopdf = /usr/share/thruk/script/wkhtmltopdf
++    wkhtmltopdf = @DATADIR@/script/wkhtmltopdf
  
      # pnp export script is used to export pnp graphs into reports
      #pnp_export = /path/to/pnp_export.sh

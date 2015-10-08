@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# config_tool_git_checkin - save hook for thruk config tool to commit changes to git repository
+#
+# in order to make this work, you have to initialize a git repository in your object
+# configuration folder:
+# 
+# %> cd etc/nagios/conf.d && git init
+#
+# then set this script as 'pre_obj_save_cmd' and 'post_obj_save_cmd'
+# in the '<Component Thruk::Plugin::ConfigTool>' section of your thruk_local.conf.
+
+if [ "x$OMD_ROOT" = 'x' ]; then
+  echo "this script is designed for OMD, please run under OMD environment or adjust accordingly"
+  exit 1
+fi
+
+exec  > $OMD_ROOT/var/log/git.log
+exec 2> $OMD_ROOT/var/log/git.log
+
+echo "[$(date)] **************************"
+echo "[$(date)] $0 $1 start"
+set -x
+
+ACTION=$1
+cd $OMD_ROOT/etc/nagios/conf.d/
+
+git add .
+
+if [ "$ACTION" == "pre" ]; then
+  msg="automatic commit of local cli changes"
+elif [ "$ACTION" == "post" ]; then
+  msg="automatic commit of config tool changes"
+  if [ "$REMOTE_USER" != "" ]; then
+    msg="automatic commit of config tool changes ($REMOTE_USER)"
+    export GIT_AUTHOR_NAME="$REMOTE_USER"
+    export GIT_AUTHOR_EMAIL=$OMD_SITE@`hostname`
+  elif [ "$SSH_CLIENT" != "" ]; then
+    msg="automatic commit of config tool changes ($SSH_CLIENT)"
+  fi
+fi
+
+git commit -q -a -m "$msg" >/dev/null
+
+echo "[$(date)] $0 $1 done"
+
+exit 0

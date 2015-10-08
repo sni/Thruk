@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+###################################################
+use strict;
+use warnings;
+use Time::HiRes qw/gettimeofday tv_interval/;
+
+my $url = 'http://localhost/thruk/cgi-bin/tac.cgi';
+#my $url = 'http://localhost/thruk/cgi-bin/status.cgi';
+#my $url = 'http://localhost/thruk/index.html';
+
+my $t0 = [gettimeofday];
+require Thruk;
+require HTTP::Request;
+require Plack::Test;
+my $t1 = [gettimeofday];
+
+my $app = Plack::Test->create(Thruk->startup);
+my $t2 = [gettimeofday];
+
+my $res = $app->request(HTTP::Request->new(GET => $url));
+my $t3 = [gettimeofday];
+print $res->{_rc}.' '.$res->{_msg}."\n";
+
+my $elapsed0 = tv_interval($t0, $t3);
+my $elapsed1 = tv_interval($t0, $t1);
+my $elapsed2 = tv_interval($t1, $t2);
+my $elapsed3 = tv_interval($t2, $t3);
+my $elapsed4 = tv_interval($t2, $t3);
+printf("total % 5.2fs  |  modules % 5.2fs  |  startup % 5.2fs  | request % 5.2fs  |\n", $elapsed0, $elapsed1, $elapsed2, $elapsed3);

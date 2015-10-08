@@ -15,16 +15,16 @@ use warnings;
 use strict;
 use Carp;
 use Data::Dumper qw/Dumper/;
-use LWP::UserAgent qw//;
+use Thruk::UserAgent qw//;
 use JSON::XS qw/encode_json decode_json/;
 use File::Slurp qw/read_file/;
 use Encode qw(encode_utf8);
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Utils qw//;
 use Thruk::Utils::IO qw//;
+use Thruk::Utils::Log qw/_error _info _debug _trace/;
 
-$Thruk::Utils::CLI::verbose  = 0;
-$Thruk::Utils::CLI::c        = undef;
+$Thruk::Utils::CLI::verbose = 0 unless defined $Thruk::Utils::CLI::verbose;
 
 ##############################################
 
@@ -53,11 +53,24 @@ sub new {
     };
     bless $self, $class;
 
+    # backends can be comma separated
+    if($options->{'backends'}) {
+        my @backends;
+        for my $b (@{$options->{'backends'}}) {
+            push @backends, split(/\s*,\s*/mx, $b);
+        }
+        $options->{'backends'} = \@backends;
+    }
+
     # set some env defaults
-    $ENV{'THRUK_SRC'}       = 'CLI';
-    $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
-    $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
-    $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'} >= 3;
+    ## no critic
+    $ENV{'THRUK_SRC'}        = 'CLI';
+    $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    $ENV{'REMOTE_USER'}      = $options->{'auth'} if defined $options->{'auth'};
+    $ENV{'THRUK_BACKENDS'}   = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
+    $ENV{'THRUK_DEBUG'}      = $options->{'verbose'} if $options->{'verbose'} >= 3;
+    $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
+    ## use critic
     $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
         $options->{'remoteurl_specified'} = 0;
@@ -89,14 +102,15 @@ sub new {
 
     get_c()
 
-return L<Catalyst|Catalyst> context object
+return L<Thruk::Context> context object
 
 =cut
 sub get_c {
     my($self) = @_;
-    return $Thruk::Utils::CLI::c if defined $Thruk::Utils::CLI::c;
-    my($c, $failed) = $self->_dummy_c();
-    $Thruk::Utils::CLI::c = $c;
+    return $Thruk::Request::c if defined $Thruk::Request::c;
+    #my($c, $failed)
+    my($c, undef, undef) = $self->_dummy_c();
+    $c->stats->enable(1);
     return $c;
 }
 
@@ -138,6 +152,7 @@ sub get_object_db {
     my($self) = @_;
     my $c = $self->get_c();
     die("Config tool not enabled!") unless $c->config->{'use_feature_configtool'} == 1;
+    require Thruk::Utils::Conf;
     Thruk::Utils::Conf::set_object_model($c) or die("Failed to set objects model. Object configuration enabled?");
     return $c->{'obj_db'};
 }
@@ -158,6 +173,7 @@ sub store_objects {
     die("config tool not enabled") unless $c->config->{'use_feature_configtool'} == 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->{'obj_db'}->{'last_changed'} = time();
+    require Thruk::Utils::Conf;
     Thruk::Utils::Conf::store_model_retention($c) or die("failed to store objects model");
     return;
 }
@@ -166,66 +182,76 @@ sub store_objects {
 
 =head2 request_url
 
-    request_url($c, $url, [$all_inclusive])
+    request_url($c, $url, $cookies)
 
 returns requested url as string. In list context returns ($code, $result)
 
 =cut
 sub request_url {
-    my($c, $url) = @_;
+    my($c, $url, $cookies) = @_;
 
-    local $ENV{'REQUEST_URI'}      = $url;
-    local $ENV{'SCRIPT_NAME'}      = $url;
-          $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-    local $ENV{'QUERY_STRING'}     = $1 if defined $1;
-    local $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
-    local $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
-    local $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
-    local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
-    local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+    # external url?
+    if($url =~ m/^https?:/mx) {
+        my($response) = _external_request($url, $cookies);
+        my $result = {
+            code    => $response->code(),
+            result  => $response->decoded_content || $response->content,
+            headers => {},
+        };
+        $result->{'result'} = Thruk::Utils::decode_any($result->{'result'});
+        $result->{'result'} =~ s/^\x{FEFF}//mx; # remove BOM
+        for my $field ($response->header_field_names()) {
+            $result->{'headers'}->{$field} = $response->header($field);
+        }
+        return($result->{'code'}, $result) if wantarray;
+        return $result->{'result'};
+    }
 
-    # reset args, otherwise they will be interpreted as args for the script runner
-    @ARGV = ();
+    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} && $c->stash->{'remote_user'});
+    local $ENV{'NO_EXTERNAL_JOBS'} = 1;
 
-    require Catalyst::ScriptRunner;
-    Catalyst::ScriptRunner->import();
-    Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-    my $result = $Plack::Handler::Thrukembedded::http_result;
+    # fork setting may be overriden in child requests
+    my $old_no_external_job_forks = $c->config->{'no_external_job_forks'};
 
+    my(undef, undef, $res) = _dummy_c(undef, $url);
+
+    my $result = {
+        code    => $res->code,
+        result  => $res->decoded_content || $res->content,
+        headers => $res->headers,
+    };
     if($result->{'code'} == 302
        and defined $result->{'headers'}
-       and defined $result->{'headers'}->{'Location'}
-       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
+       and defined $result->{'headers'}->{'location'}
+       and $result->{'headers'}->{'location'} =~ m|/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
         my $x = 0;
         while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
             my $sleep = 0.1 * $x;
             $sleep = 1 if $x > 10;
             sleep($sleep);
-            $url = $result->{'headers'}->{'Location'} if defined $result->{'headers'}->{'Location'};
-            local $ENV{'REQUEST_URI'}      = $url;
-            local $ENV{'SCRIPT_NAME'}      = $url;
-                  $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-            local $ENV{'QUERY_STRING'}     = $1 if defined $1;
-            Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-            $result = $Plack::Handler::Thrukembedded::http_result;
+            $url = $result->{'headers'}->{'location'} if defined $result->{'headers'}->{'location'};
+            (undef, undef, $result) = _dummy_c(undef, $url);
             $x++;
         }
     }
 
+    # restore fork setting
+    $c->config->{'no_external_job_forks'} = $old_no_external_job_forks;
+
     if($result->{'code'} == 302
-          and defined $result->{'headers'}->{'Set-Cookie'}
-          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mxo
+          and defined $result->{'headers'}->{'set-cookie'}
+          and $result->{'headers'}->{'set-cookie'} =~ m/^thruk_message="?(.*)(%7E%7E|~~)(.*)"?;\ path=/mxo
     ) {
         require URI::Escape;
-        my $txt = URI::Escape::uri_unescape($2);
+        my $txt = URI::Escape::uri_unescape($3);
         my $msg = '';
         if($1 eq 'success_message') {
             $msg = 'OK';
         } else {
             $msg = 'FAILED';
         }
+        $txt    =~ s/"\s*$//gmx;
         $txt = $msg.' - '.$txt."\n";
         return($result->{'code'}, $result, $txt) if wantarray;
         return $txt;
@@ -261,9 +287,9 @@ sub _read_secret {
     my($self) = @_;
     my $files = [];
     push @{$files}, 'thruk.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk.conf'       if defined $ENV{'THRUK_CONFIG'};
     push @{$files}, 'thruk_local.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'THRUK_CONFIG'}.'/thruk_local.conf' if defined $ENV{'THRUK_CONFIG'};
     my $var_path = './var';
     for my $file (@{$files}) {
         next unless -f $file;
@@ -274,7 +300,7 @@ sub _read_secret {
                 $var_path = $1;
             }
         }
-        Thruk::Utils::IO::close($fh, $file, 1);
+        CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     }
     my $secret;
     my $secretfile = $var_path.'/secret.key';
@@ -293,28 +319,47 @@ sub _read_secret {
 ##############################################
 sub _run {
     my($self) = @_;
+
     my($result, $response);
-    my($c, $failed);
     _debug("_run(): ".Dumper($self->{'opt'})) if $Thruk::Utils::CLI::verbose >= 2;
     unless($self->{'opt'}->{'local'}) {
-        ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
-        if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
-            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: ".Thruk::Utils::format_response_error($response));
+        ($result,$response) = _request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        if(!defined $result && $self->{'opt'}->{'remoteurl_specified'}) {
+            _error("requesting result from ".$self->{'opt'}->{'remoteurl'}." failed: "._format_response_error($response));
             _debug(" -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
             return 1;
         }
     }
 
+    my $c;
     unless(defined $result) {
         # initialize backend pool here to safe some memory
-        Thruk::Backend::Pool::init_backend_thread_pool();
+        require Thruk::Backend::Pool;
+        if($self->{'opt'}->{'action'} and $self->{'opt'}->{'action'} =~ m/livecache/mx) {
+            local $ENV{'USE_SHADOW_NAEMON'}        = 1;
+            local $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+            Thruk::Backend::Pool::init_backend_thread_pool();
+        } else {
+            Thruk::Backend::Pool::init_backend_thread_pool();
+        }
 
         $c = $self->get_c();
         if(!defined $c) {
             print STDERR "command failed";
             return 1;
         }
-        $result = $self->_from_local($c, $self->{'opt'})
+        if(!$ENV{'THRUK_JOB_ID'} && $self->{'opt'}->{'action'} && $self->{'opt'}->{'action'} =~ /^report(\w*)=(.*)$/mx) {
+            # create fake job
+            my($id,$dir) = Thruk::Utils::External::_init_external($c);
+            ## no critic
+            $SIG{CHLD} = 'DEFAULT';
+            Thruk::Utils::External::_do_parent_stuff($c, $dir, $$, $id, { allow => 'all', background => 1});
+            $ENV{'THRUK_JOB_ID'}       = $id;
+            $ENV{'THRUK_JOB_DIR'}      = $dir;
+            ## use critic
+            Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
+        }
+        $result = $self->_from_local($c, $self->{'opt'});
     }
 
     # no output?
@@ -323,37 +368,37 @@ sub _run {
     }
 
     # with output
-    if($result->{'rc'} == 0) {
+    if($result->{'rc'} == 0 or $result->{'all_stdout'}) {
         binmode STDOUT;
-        print STDOUT $result->{'output'};
+        print STDOUT $result->{'output'} unless $self->{'opt'}->{'quiet'};
     } else {
         binmode STDERR;
         print STDERR $result->{'output'};
     }
-    _trace("".$c->stats->report) if defined $c;
+    _trace("".$c->stats->report) if defined $c and $Thruk::Utils::CLI::verbose >= 3;
     return $result->{'rc'};
 }
 
 ##############################################
 sub _request {
-    my($self, $credential, $url, $options) = @_;
+    my($credential, $url, $options) = @_;
     _debug("_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
     my $ua       = _get_user_agent();
     my $response = $ua->post($url, {
         data => encode_json({
             credential => $credential,
             options    => $options,
-        })
+        }),
     });
     if($response->is_success) {
         _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
-        my $data_str = $response->decoded_content;
+        my $data_str = $response->decoded_content || $response->content;
         my $data;
         eval {
             $data = decode_json($data_str);
         };
         if($@) {
-            _error(" -> decode failed: ".Dumper($response));
+            _error(" -> decode failed: ".Dumper($@, $data_str, $response));
             return(undef, $response);
         }
         _debug("   -> ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
@@ -366,28 +411,52 @@ sub _request {
 }
 
 ##############################################
+sub _external_request {
+    my($url, $cookies) = @_;
+    _debug("_external_request(".$url.")") if $Thruk::Utils::CLI::verbose >= 2;
+    my $ua = _get_user_agent();
+    if($cookies) {
+        my $cookie_string = "";
+        for my $key (keys %{$cookies}) {
+            $cookie_string .= $key.'='.$cookies->{$key}.';';
+        }
+        $ua->default_header(Cookie => $cookie_string);
+    }
+
+    my $response = $ua->get($url);
+    if($response->is_success) {
+        _debug(" -> success") if $Thruk::Utils::CLI::verbose >= 2;
+        return($response);
+    }
+    _debug(" -> failed: ".Dumper($response)) if $Thruk::Utils::CLI::verbose >= 2;
+    return($response);
+}
+
+##############################################
 sub _dummy_c {
-    my($self) = @_;
+    my($self, $url) = @_;
     _debug("_dummy_c()") if $Thruk::Utils::CLI::verbose >= 2;
-    delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
-    require Catalyst::Test;
-    # temporary close stderr because ubuntu 12.04 (and maybe others) print
-    # Error opening file for reading: Permission denied
-    # due to permission errors on /proc/self/auxv after setuid
-    open(my $saveerr, ">&STDERR") if $Thruk::Utils::CLI::verbose <= 1;
-    close(STDERR)                 if $Thruk::Utils::CLI::verbose <= 1;
-    Catalyst::Test->import('Thruk');
-    open(STDERR, ">&", $saveerr)  if $Thruk::Utils::CLI::verbose <= 1;
-    my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
+    delete local $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+    $url = '/thruk/cgi-bin/remote.cgi' unless defined $url;
+    require Thruk;
+    require HTTP::Request;
+    require Plack::Test;
+    my $app    = Plack::Test->create(Thruk->startup);
+    local $ENV{'THRUK_KEEP_CONTEXT'} = 1;
+    my $res    = $app->request(HTTP::Request->new(GET => $url));
+    my $c      = $Thruk::Request::c;
     my $failed = ( $res->code == 200 ? 0 : 1 );
-    return($c, $failed);
+    _debug("_dummy_c() done") if $Thruk::Utils::CLI::verbose >= 2;
+    return($c, $failed, $res);
 }
 
 ##############################################
 sub _from_local {
     my($self, $c, $options) = @_;
     _debug("_from_local()") if $Thruk::Utils::CLI::verbose >= 2;
+    ## no critic
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    ## use critic
     return _run_commands($c, $options, 'local');
 }
 
@@ -399,17 +468,21 @@ sub _from_fcgi {
     my $data  = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
-    $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
+
+    # ensure secret key is fresh
+    my $secret_file = $c->config->{'var_path'}.'/secret.key';
+    $c->config->{'secret_key'}  = read_file($secret_file) if -s $secret_file;
+    chomp($c->config->{'secret_key'});
 
     # check credentials
     my $res = {};
     if(   !defined $c->config->{'secret_key'}
-       or !defined $data->{'credential'}
-       or $c->config->{'secret_key'} ne $data->{'credential'}) {
-        my $msg = "authorization failed, ". $c->request->uri." does not accept this key.\n";
-        if(!defined $data->{'credential'} or $data->{'credential'} eq '') {
-            $msg = "authorization failed, no auth key specified for ". $c->request->uri."\n";
+       || !defined $data->{'credential'}
+       || $c->config->{'secret_key'} ne $data->{'credential'}) {
+        my $msg = "authorization failed, ". $c->req->url." does not accept this key.\n";
+        if(!defined $data->{'credential'} || $data->{'credential'} eq '') {
+            $msg = "authorization failed, no auth key specified for ". $c->req->url."\n";
         }
         $res = {
             'version' => $c->config->{'version'},
@@ -441,7 +514,7 @@ sub _run_commands {
     }
 
     unless(defined $c->stash->{'defaults_added'}) {
-        Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
+        Thruk::Action::AddDefaults::add_defaults($c, 1);
     }
     # set backends from options
     if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
@@ -467,7 +540,6 @@ sub _run_commands {
         return(_run_command_action($c, $opt, $src, $actions[0]));
     }
 
-    my($rc, $output) = (0, '');
     for my $action (@actions) {
         my $res = _run_command_action($c, $opt, $src, $action);
         $data->{'rc'}     += $res->{'rc'};
@@ -543,8 +615,13 @@ sub _run_command_action {
     }
 
     # business process daemon
-    elsif($action eq 'bpd' or $action eq 'bp') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $src, $opt);
+    elsif($action eq 'bpd' or $action eq 'bp' or $action eq 'bpcommit') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_bpd($c, $opt, $action);
+    }
+
+    # dashboard cleanup
+    elsif($action eq 'clean_dashboards') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_panorama($c, $action);
     }
 
     # cache actions
@@ -554,10 +631,11 @@ sub _run_command_action {
     }
     elsif($action eq 'clearcache') {
         $data->{'rc'} = 0;
-        $data->{'output'} = Dumper($c->cache->clear);
+        unlink($c->config->{'tmp_path'}.'/thruk.cache');
+        $data->{'output'} = "cache cleared";
     }
 
-    # import mongodb/mysql logs
+    # import mysql logs
     elsif($action =~ /logcacheimport($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src, $2, $opt);
     }
@@ -576,12 +654,33 @@ sub _run_command_action {
     elsif($action =~ /logcacheclean($|=(\d+))/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'clean', $src, $2, $opt);
     }
+    elsif($action =~ /logcacheremoveunused/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'removeunused', $src, $2, $opt);
+    }
+
+    # livestatus proxy cache
+    elsif($action =~ /livecache(start|stop|status|restart)/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_livecache($c, $1, $src);
+    }
+
+    # self check
+    elsif($action eq 'selfcheck' or $action =~ /^selfcheck=(.*)$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_selfcheck($c, $1);
+        $data->{'all_stdout'} = 1;
+    }
+
+    # nothing matched...
     else {
         $data->{'output'} = "FAILED - no such command: ".$action.". Run with --help to see a list of commands.\n";
         $data->{'rc'}     = 1;
     }
 
     $c->stats->profile(end => "_run_command_action($action)");
+
+    if($ENV{'THRUK_JOB_DIR'}) {
+        Thruk::Utils::External::save_profile($c, $ENV{'THRUK_JOB_DIR'}) if $ENV{'THRUK_JOB_DIR'};
+        `touch $ENV{'THRUK_JOB_DIR'}/stdout`;
+    }
 
     return $data;
 }
@@ -590,7 +689,7 @@ sub _run_command_action {
 sub _cmd_listhosts {
     my($c) = @_;
     my $output = '';
-    for my $host (@{$c->{'db'}->get_hosts(sort => {'ASC' => 'name'})}) {
+    for my $host (@{$c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' )], sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n";
     }
 
@@ -604,7 +703,7 @@ sub _cmd_listhosts {
 sub _cmd_listhostgroups {
     my($c) = @_;
     my $output = '';
-    for my $group (@{$c->{'db'}->get_hostgroups(sort => {'ASC' => 'name'})}) {
+    for my $group (@{$c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' )], sort => {'ASC' => 'name'})}) {
         $output .= sprintf("%-30s %s\n", $group->{'name'}, join(',', @{$group->{'members'}}));
     }
 
@@ -631,7 +730,7 @@ sub _cmd_listbackends {
         my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
         $addr    =~ s|/cgi-bin/remote.cgi$||mx;
         $output .= sprintf("%-4s %-8s %-10s %s",
-                (!defined $peer->{'hidden'} or $peer->{'hidden'} == 0) ? ' * ' : '',
+                (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? ' * ' : '',
                 $key,
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
                 $addr,
@@ -646,56 +745,18 @@ sub _cmd_listbackends {
 }
 
 ##############################################
-sub _error {
-    return _debug($_[0],'error');
-}
-
-##############################################
-sub _info {
-    return _debug($_[0],'info');
-}
-
-##############################################
-sub _trace {
-    return _debug($_[0],'trace');
-}
-
-##############################################
-sub _debug {
-    my($data, $lvl) = @_;
-    return unless defined $data;
-    $lvl = 'DEBUG' unless defined $lvl;
-    return if($Thruk::Utils::CLI::verbose < 3 and uc($lvl) eq 'TRACE');
-    return if($Thruk::Utils::CLI::verbose < 2 and uc($lvl) eq 'DEBUG');
-    return if($Thruk::Utils::CLI::verbose < 1 and uc($lvl) eq 'INFO');
-    if(ref $data) {
-        return _debug(Dumper($data), $lvl);
-    }
-    my $time = scalar localtime();
-    for my $line (split/\n/mx, $data) {
-        if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-            print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
-        } else {
-            my $c = $Thruk::Utils::CLI::c;
-            confess('no c') unless defined $c;
-            if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
-            if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
-            if(uc($lvl) eq 'DEBUG') { $c->log->debug($line) }
-        }
-    }
-    return;
-}
-
-##############################################
 sub _cmd_installcron {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_installcron()");
     Thruk::Utils::switch_realuser($c);
-    Thruk::Controller::extinfo->_update_cron_file($c);
+    require Thruk::Utils::RecurringDowntimes;
+    Thruk::Utils::RecurringDowntimes::update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {
+        require Thruk::Utils::Reports;
         Thruk::Utils::Reports::update_cron_file($c);
     }
     if($c->config->{'use_feature_bp'}) {
+        require Thruk::BP::Utils;
         Thruk::BP::Utils::update_cron_file($c);
     }
     $c->stats->profile(end => "_cmd_installcron()");
@@ -779,54 +840,76 @@ sub _cmd_report {
 
     $c->stats->profile(begin => "_cmd_report()");
 
-    my($output, $rc);
+    my $output;
     eval {
         require Thruk::Utils::Reports;
     };
     if($@) {
-        return("reports plugin is not enabled.\n", 1)
+        return("reports plugin is not enabled.\n", 1);
     }
+    my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    # set waiting flag for queued reports, so the show up nicely in the gui
+    Thruk::Utils::Reports::process_queue_file($c);
     if($mail eq 'mail') {
-        if(Thruk::Utils::Reports::report_send($c, $nr)) {
+        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr, 1)) {
+            $output = "report queued successfully\n";
+        }
+        elsif(Thruk::Utils::Reports::report_send($c, $nr)) {
             $output = "mail send successfully\n";
         } else {
             return("cannot send mail\n", 1)
         }
     } else {
-        my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
-        if(defined $report_file and -f $report_file) {
-            $output = read_file($report_file);
+        if(Thruk::Utils::Reports::queue_report_if_busy($c, $nr)) {
+            $output = "report queued successfully\n";
         } else {
-            my $errors = read_file($c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
-            return("generating report failed:\n".$errors, 1)
+            my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+            if(defined $report_file and -f $report_file) {
+                $output = read_file($report_file);
+            } else {
+                my $errors = read_file($logfile);
+                return("generating report failed:\n".$errors, 1);
+            }
         }
     }
 
     $c->stats->profile(end => "_cmd_report()");
-    return($output, 0)
+    return($output, 0);
 }
 
 ##############################################
 sub _cmd_bpd {
-    my($c, $src, $opt) = @_;
-    $c->stats->profile(begin => "_cmd_bpd()");
+    my($c, $opt, $action) = @_;
+    $c->stats->profile(begin => "_cmd_bpd($action)");
 
     if(!$c->config->{'use_feature_bp'}) {
         return("ERROR - business process addon is disabled\n", 1);
     }
 
-    my $id;
-    if($opt->{'url'} and $opt->{'url'}->[0]) {
-        $id = $opt->{'url'}->[0];
-    }
-
-    my($output, $rc);
     eval {
         require Thruk::BP::Utils;
     };
     if($@) {
         _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
         return("business process plugin is disabled.\n", 1);
+    }
+
+    if($action eq 'bpcommit') {
+        my $bps = Thruk::BP::Utils::load_bp_data($c);
+        my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);
+        if($rc != 0) {
+            $c->stats->profile(end => "_cmd_bpd($action)");
+            return($msg, $rc);
+        }
+        Thruk::BP::Utils::update_cron_file($c); # check cronjob
+        $c->stats->profile(end => "_cmd_bpd($action)");
+        return('OK - wrote '.(scalar @{$bps})." business process(es)\n", 0);
+    }
+
+    # calculate bps
+    my $id;
+    if($opt->{'url'} and $opt->{'url'}->[0]) {
+        $id = $opt->{'url'}->[0];
     }
 
     my $last_bp;
@@ -836,6 +919,9 @@ sub _cmd_bpd {
     my $timeout = ($rate*60) -5;
     local $SIG{ALRM} = sub { die("hit ".$timeout."s timeout on ".($last_bp ? $last_bp->{'name'} : 'unknown')) };
     alarm($timeout);
+
+    # enable all backends for now till configuration is possible for each BP
+    $c->{'db'}->enable_backends();
 
     my $t0 = [gettimeofday];
     my $bps = Thruk::BP::Utils::load_bp_data($c, $id);
@@ -848,23 +934,62 @@ sub _cmd_bpd {
     alarm(0);
     my $nr = scalar @{$bps};
     my $elapsed = tv_interval($t0);
-    $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
+    my $output = sprintf("OK - %d business processes updated in %.2fs\n", $nr, $elapsed);
 
-    $c->stats->profile(end => "_cmd_bpd()");
+    $c->stats->profile(end => "_cmd_bpd($action)");
     return($output, 0);
+}
+
+##############################################
+sub _cmd_panorama {
+    my($c, $action) = @_;
+    $c->stats->profile(begin => "_cmd_panorama($action)");
+
+    if(!$c->config->{'use_feature_panorama'}) {
+        return("ERROR - panorama dashboard addon is disabled\n", 1);
+    }
+
+    eval {
+        require Thruk::Utils::Panorama;
+    };
+    if($@) {
+        _debug($@) if $Thruk::Utils::CLI::verbose >= 1;
+        return("panorama plugin is disabled.\n", 1);
+    }
+
+    if($action eq 'clean_dashboards') {
+        $c->stash->{'is_admin'} = 1;
+        $c->{'panorama_var'}    = $c->config->{'var_path'}.'/panorama';
+        my $num = Thruk::Utils::Panorama::clean_old_dashboards($c);
+        return("OK - cleaned up $num old dashboards\n", 0);
+    }
+
+    $c->stats->profile(end => "_cmd_panorama($action)");
+    return("unknown panorma command", 1);
 }
 
 ##############################################
 sub _cmd_downtimetask {
     my($c, $file) = @_;
     $c->stats->profile(begin => "_cmd_downtimetask()");
+    require URI::Escape;
+    require Thruk::Utils::RecurringDowntimes;
+
+    my $total_retries = 5;
+    my $retries;
 
     # do auth stuff
-    Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+    for($retries = 0; $retries < $total_retries; $retries++) {
+        sleep(10) if $retries > 0;
+        eval {
+            Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+        };
+        last unless $@;
+    }
 
     $file          = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     my $downtime   = Thruk::Utils::read_data_file($file);
-    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c);
+    my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c);
     for my $key (keys %{$default_rd}) {
         $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
     }
@@ -881,57 +1006,129 @@ sub _cmd_downtimetask {
         $minutes  = $downtime->{'duration'}%60;
     }
 
-    require URI::Escape;
     my $output     = '';
-    my $cmd_typ;
     if(!$downtime->{'target'}) {
         $downtime->{'target'} = 'host';
         $downtime->{'target'} = 'service' if $downtime->{'service'};
     }
-    if($downtime->{'target'} eq 'host') {
-        $cmd_typ = 55;
+
+    $downtime->{'host'}         = [$downtime->{'host'}]         unless ref $downtime->{'host'}         eq 'ARRAY';
+    $downtime->{'hostgroup'}    = [$downtime->{'hostgroup'}]    unless ref $downtime->{'hostgroup'}    eq 'ARRAY';
+    $downtime->{'servicegroup'} = [$downtime->{'servicegroup'}] unless ref $downtime->{'servicegroup'} eq 'ARRAY';
+
+    my $done = {hosts => {}, groups => {}};
+    my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
+    my $errors = 0;
+    for($retries = 0; $retries < $total_retries; $retries++) {
+        sleep(10) if $retries > 0;
+        if($downtime->{'target'} eq 'host' or $downtime->{'target'} eq 'service') {
+            my $hosts = $downtime->{'host'};
+            for my $hst (@{$hosts}) {
+                next if $done->{'hosts'}->{$hst};
+                $downtime->{'host'} = $hst;
+                my $rc;
+                eval {
+                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                };
+                if($rc && !$@) {
+                    $errors-- if defined $done->{'hosts'}->{$hst};
+                    $done->{'hosts'}->{$hst} = 1;
+                } else {
+                    $errors++ unless defined $done->{'hosts'}->{$hst};
+                    $done->{'hosts'}->{$hst} = 0;
+                }
+            }
+            $downtime->{'host'} = $hosts;
+        }
+        elsif($downtime->{'target'} eq 'hostgroup' or $downtime->{'target'} eq 'servicegroup') {
+            my $grps = $downtime->{$downtime->{'target'}};
+            for my $grp (@{$grps}) {
+                next if $done->{'groups'}->{$grp};
+                $downtime->{$downtime->{'target'}} = $grp;
+                my $rc;
+                eval {
+                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                };
+                if($rc && !$@) {
+                    $errors-- if defined $done->{'groups'}->{$grp};
+                    $done->{'groups'}->{$grp} = 1;
+                } else {
+                    $errors++ unless defined $done->{'groups'}->{$grp};
+                    $done->{'groups'}->{$grp} = 0;
+                }
+            }
+            $downtime->{$downtime->{'target'}} = $grps;
+        }
+        last unless $errors;
     }
-    elsif($downtime->{'target'} eq 'service') {
-        $cmd_typ = 56;
+
+    return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
+
+    if($downtime->{'service'}) {
+        $output = 'scheduled'.$flexible.' downtime for service \''.encode_utf8($downtime->{'service'}).'\' on host: \''.encode_utf8(join(', ', @{$downtime->{'host'}})).'\'';
+    } else {
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'target'}.': \''.encode_utf8(join(', ', @{$downtime->{$downtime->{'target'}}})).'\'';
     }
-    elsif($downtime->{'target'} eq 'hostgroup') {
-        $cmd_typ = 84;
+    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")";
+    $output .= " (after $retries retries)\n" if $retries;
+    $output .= "\n";
+
+    $c->stats->profile(end => "_cmd_downtimetask()");
+    return($output, 0);
+}
+
+##############################################
+
+=head2 set_downtime
+
+    set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes)
+
+set downtime.
+
+    downtime is a hash like this:
+    {
+        author  => 'downtime author'
+        host    => 'host name'
+        service => 'optional service name'
+        comment => 'downtime comment'
+        fixed   => 1
     }
-    elsif($downtime->{'target'} eq 'servicegroup') {
-        $cmd_typ = 122;
-    }
+
+    cmd_typ is:
+         55 -> hosts
+         56 -> services
+         84 -> hostgroups
+        122 -> servicegroups
+
+=cut
+sub set_downtime {
+    my($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes) = @_;
+
     # convert to normal url request
-    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
+    my $product = $c->config->{'product_prefix'} || 'thruk';
+    my $url = sprintf('/'.$product.'/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s%s%s%s',
                       $cmd_typ,
-                      URI::Escape::uri_escape($downtime->{'comment'}),
-                      '(cron)',
-                      URI::Escape::uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
-                      URI::Escape::uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape_utf8($downtime->{'comment'}),
+                      URI::Escape::uri_escape_utf8(defined $downtime->{'author'} ? $downtime->{'author'} : '(cron)'),
+                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
+                      URI::Escape::uri_escape_utf8(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
                       $hours,
                       $minutes,
-                      ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
+                      join(',', @{$backends}),
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape($downtime->{'host'}) : '',
-                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape($downtime->{'service'}) : '',
-                      $downtime->{'hostgroup'} ? '&hostgroup='.URI::Escape::uri_escape($downtime->{'hostgroup'}) : '',
-                      $downtime->{'servicegroup'} ? '&servicegroup='.URI::Escape::uri_escape($downtime->{'servicegroup'}) : '',
+                      $downtime->{'host'} ? '&host='.URI::Escape::uri_escape_utf8($downtime->{'host'}) : '',
+                      $downtime->{'service'} ? '&service='.URI::Escape::uri_escape_utf8($downtime->{'service'}) : '',
+                      (ref $downtime->{'hostgroup'} ne 'ARRAY' and $downtime->{'hostgroup'}) ? '&hostgroup='.URI::Escape::uri_escape_utf8($downtime->{'hostgroup'}) : '',
+                      (ref $downtime->{'servicegroup'} ne 'ARRAY' and $downtime->{'servicegroup'}) ? '&servicegroup='.URI::Escape::uri_escape_utf8($downtime->{'servicegroup'}) : '',
                      );
+    local $ENV{'THRUK_SRC'} = 'CLI';
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
     my @res = request_url($c, $url);
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
-    return("failed\n", 1) unless $res[0] == 200; # error is already printed
-
-    if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host \''.$downtime->{'host'}.'\'';
-    } else {
-        $output = 'scheduled'.$flexible.' downtime for host \''.$downtime->{'host'}.'\'';
-    }
-    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
-
-    $c->stats->profile(end => "_cmd_downtimetask()");
-    return($output, 0);
+    return 0 if $res[0] != 200; # error is already printed
+    return 1;
 }
 
 ##############################################
@@ -939,25 +1136,28 @@ sub _cmd_url {
     my($c, $url, $opt) = @_;
     $c->stats->profile(begin => "_cmd_url()");
 
-    if($opt->{'all_inclusive'} and !$c->config->{'use_feature_reports'}) {
+    if($opt->{'all_inclusive'} && !$c->config->{'use_feature_reports'}) {
         return("all-inclusive options requires the reports plugin to be enabled", 1);
     }
 
     if($url =~ m|^\w+\.cgi|gmx) {
-        $url = '/thruk/cgi-bin/'.$url;
+        my $product = $c->config->{'product_prefix'} || 'thruk';
+        $url = '/'.$product.'/cgi-bin/'.$url;
     }
     my @res = request_url($c, $url);
 
     # All Inclusive?
-    if($res[0] == 200 && $res[1]->{'result'} and $opt->{'all_inclusive'}) {
+    if($res[0] == 200 && $res[1]->{'result'} && $opt->{'all_inclusive'}) {
         require Thruk::Utils::Reports::Render;
-        $Thruk::Utils::Reports::Render::c = $c;
         $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
     }
 
     $c->stats->profile(end => "_cmd_url()");
     my $rc = $res[0] >= 400 ? 1 : 0;
     return($res[2], $rc) if $res[2];
+    if($res[1]->{'result'} =~ m/\Q<div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.\E/gmx) {
+        return("Command request successfully submitted to the Backend for processing\n", $rc);
+    }
     return($res[1]->{'result'}, $rc);
 }
 
@@ -973,7 +1173,7 @@ sub _cmd_import_logs {
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
     }
-    if($mode eq 'import' and !$opt->{'yes'}) {
+    if($mode eq 'import' && !$opt->{'yes'}) {
         print "import removes current cache and imports new logfile data.\n";
         print "use logcacheupdate to update cache. Continue? [n]: ";
         my $buf;
@@ -983,7 +1183,7 @@ sub _cmd_import_logs {
         }
     }
 
-    my $type = 'mongodb';
+    my $type = '';
     $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
 
     my $verbose = 0;
@@ -994,8 +1194,7 @@ sub _cmd_import_logs {
             require Thruk::Backend::Provider::Mysql;
             Thruk::Backend::Provider::Mysql->import;
         } else {
-            require Thruk::Backend::Provider::Mongodb;
-            Thruk::Backend::Provider::Mongodb->import;
+            die("unknown logcache type: ".$type);
         }
     };
     if($@) {
@@ -1007,18 +1206,29 @@ sub _cmd_import_logs {
         if($type eq 'mysql') {
             $stats= Thruk::Backend::Provider::Mysql->_log_stats($c);
         } else {
-            $stats= Thruk::Backend::Provider::Mongodb->_log_stats($c);
+            die("unknown logcache type: ".$type);
         }
         $c->stats->profile(end => "_cmd_import_logs()");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats."\n", 0);
+    }
+    elsif($mode eq 'removeunused') {
+        if($type eq 'mysql') {
+            my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
+            Thruk::Backend::Manager::close_logcache_connections($c);
+            $c->stats->profile(end => "_cmd_import_logs()");
+            return($stats."\n", 0);
+        }
+        Thruk::Backend::Manager::close_logcache_connections($c);
+        $c->stats->profile(end => "_cmd_import_logs()");
+        return($type." logcache does not support this operation\n", 1);
     } else {
         my $t0 = [gettimeofday];
-        my($backend_count, $log_count);
+        my($backend_count, $log_count, $errors);
         if($type eq 'mysql') {
-            ($backend_count, $log_count) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
+            ($backend_count, $log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $verbose, undef, $blocksize, $opt);
         } else {
-            ($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose, undef, $blocksize);
+            die("unknown logcache type: ".$type);
         }
         my $elapsed = tv_interval($t0);
         $c->stats->profile(end => "_cmd_import_logs()");
@@ -1027,15 +1237,112 @@ sub _cmd_import_logs {
         $action    = "removed" if $mode eq 'clean';
         Thruk::Backend::Manager::close_logcache_connections($c);
         return("\n", 1) if $log_count == -1;
-        return(sprintf("OK - %s %i log items from %i site%s successfully in %.2fs (%i/s)\n",
+        my($rc, $msg) = (0, 'OK');
+        my $res = 'successfully';
+        if(scalar @{$errors} > 0) {
+            $res = 'with '.scalar @{$errors}.' errors';
+            ($rc, $msg) = (1, 'ERROR');
+        }
+        my $details = '';
+        if(!$verbose) {
+            # already printed if verbose
+            $details = join("\n", @{$errors})."\n";
+        }
+        return(sprintf("%s - %s %i log items from %i site%s %s in %.2fs (%i/s)\n%s",
+                       $msg,
                        $action,
                        $log_count,
                        $backend_count,
                        ($backend_count == 1 ? '' : 's'),
+                       $res,
                        ($elapsed),
                        (($elapsed) > 0 ? ($log_count / ($elapsed)) : $log_count),
-                       ), 0);
+                       $details,
+                       ), $rc);
     }
+}
+
+##############################################
+sub _cmd_livecache {
+    my($c, $mode, $src) = @_;
+    $c->stats->profile(begin => "_cmd_livecache($mode)");
+
+    if($src ne 'local' and $mode ne 'status') {
+        return("ERROR - please run with --local only\n", 1);
+    }
+
+    Thruk::Backend::Pool::init_backend_thread_pool();
+
+    if($mode eq 'start') {
+        Thruk::Utils::Livecache::check_shadow_naemon_procs($c->config, $c, 0, 1);
+        # wait for the startup
+        my($status, $started);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
+            };
+            last if($status && scalar @{$status} == $started);
+            sleep(1);
+        }
+        return("OK - livecache started\n", 0) if(defined $started and $started > 0);
+        return("FAILED - starting livecache failed\n", 1);
+    }
+    elsif($mode eq 'stop') {
+        Thruk::Utils::Livecache::shutdown_shadow_naemon_procs($c->config);
+        # wait for the fully stopped
+        my($status, $started, $total, $failed);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
+                ($total, $failed) = _get_shadownaemon_totals($c, $status);
+            };
+            last if(defined $started && $started == 0 && defined $total && $total == $failed);
+            sleep(1);
+        }
+    }
+    elsif($mode eq 'restart') {
+        Thruk::Utils::Livecache::restart_shadow_naemon_procs($c, $c->config);
+        # wait for the startup
+        my($status, $started);
+        for(my $x = 0; $x <= 20; $x++) {
+            eval {
+                ($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
+            };
+            last if($status && scalar @{$status} == $started);
+            sleep(1);
+        }
+    }
+
+    my($status, $started) = Thruk::Utils::Livecache::status_shadow_naemon_procs($c->config);
+    $c->stats->profile(end => "_cmd_livecache($mode)");
+    if(scalar @{$status} == 0) {
+        return("UNKNOWN - livecache not enabled for any backend\n", 3);
+    }
+    if(scalar @{$status} == $started) {
+        my($total, $failed) = _get_shadownaemon_totals($c, $status);
+        return("OK - $started/$started livecache running, ".($total-$failed)."/".$total." online\n", 0);
+    }
+    if($started == 0) {
+        return("STOPPED - $started livecache running\n", $mode eq 'stop' ? 0 : 2);
+    }
+    return("WARNING - $started/".(scalar @{$status})." livecache running\n", 1);
+}
+
+##########################################################
+sub _get_shadownaemon_totals {
+    my($c, $status) = @_;
+    # get number of online sites
+    my $sites = [];
+    for my $site (@{$status}) { push @{$sites}, $site->{'key'}; }
+    $c->{'db'}->reset_failed_backends();
+    $c->{'db'}->enable_backends($sites);
+    my $total  = scalar @{$sites};
+    my $failed = $total;
+    eval {
+        $c->{'db'}->get_processinfo(backend => $sites);
+        $failed = scalar keys %{$c->stash->{'failed_backends'}};
+    };
+    return($total, $failed);
 }
 
 ##########################################################
@@ -1043,10 +1350,12 @@ sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
     my $res        = undef;
     my $last_error = undef;
-    my $peer       = $Thruk::Backend::Pool::peers->{$peerkey};
-    $c->stash->{'param_backend'} = $peerkey;
 
-    if(!Thruk::Utils::Conf::set_object_model($c)) {
+    $c->stash->{'param_backend'}     = $peerkey;
+    $c->req->parameters->{'backend'} = $peerkey;
+
+    require Thruk::Utils::Conf;
+    if(!Thruk::Utils::Conf::set_object_model($c) || $peerkey ne $c->stash->{'param_backend'}) {
         return("failed to set objects model", 1);
     }
     # outgoing file sync
@@ -1056,11 +1365,12 @@ sub _cmd_configtool {
         my $remotefiles = $opt->{'args'}->{'args'}->{'files'};
         for my $f (@{$c->{'obj_db'}->{'files'}}) {
             $f->get_meta_data() unless defined $f->{'mtime'};
-            $transfer->{$f->{'path'}} = { mtime => $f->{'mtime'} };
-            if(   !defined $remotefiles->{$f->{'path'}}
-               or !defined $remotefiles->{$f->{'path'}}->{'mtime'}
-               or $f->{'mtime'} != $remotefiles->{$f->{'path'}}->{'mtime'}) {
-                $transfer->{$f->{'path'}}->{'content'} = read_file($f->{'path'});
+            # use display instead of path to make cascaded http backends work
+            $transfer->{$f->{'display'}} = { mtime => $f->{'mtime'} };
+            if(   !defined $remotefiles->{$f->{'display'}}
+               || !defined $remotefiles->{$f->{'display'}}->{'mtime'}
+               || $f->{'mtime'} != $remotefiles->{$f->{'display'}}->{'mtime'}) {
+                $transfer->{$f->{'display'}}->{'content'} = read_file($f->{'path'});
             }
         }
         $res = $transfer;
@@ -1086,11 +1396,13 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
+        die("starting configcheck failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
+        die("starting configreload failed, check your logfiles") unless $jobid;
         $res = 'jobid:'.$jobid;
     }
     # save incoming config changes
@@ -1119,7 +1431,7 @@ sub _cmd_configtool {
             next if $path =~ m|/\.\./|gmx; # no relative paths
             my $file = $c->{'obj_db'}->get_file_by_path($path);
             my $saved;
-            if($file and !$file->readonly()) {
+            if($file && !$file->readonly()) {
                 # update file
                 Thruk::Utils::IO::write($path, $content, $mtime);
                 $saved = 'updated';
@@ -1127,25 +1439,27 @@ sub _cmd_configtool {
                 # new file
                 if($path =~ m/^\Q$filesroot\E/mx) {
                     $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
-                    if(defined $file and !$file->readonly()) {
+                    if(defined $file && !$file->readonly()) {
                         Thruk::Utils::IO::write($path, $content, $mtime);
                         $saved = 'created';
                     }
                 }
             }
             # create log message
-            $c->log->info(sprintf("[config][%s][%s][ext] %s file '%s'",
-                                        $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
-                                        $c->stash->{'remote_user'},
-                                        $saved,
-                                        $path,
-            )) if $saved;
+            if($saved && !$ENV{'THRUK_TEST_NO_STDOUT_LOG'}) {
+                $c->log->info(sprintf("[config][%s][%s][ext] %s file '%s'",
+                                            $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'name'},
+                                            $c->stash->{'remote_user'},
+                                            $saved,
+                                            $path,
+                ));
+            }
         }
         # deleted files
         my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
         for my $f (@{$deleted}) {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
-            if($file and !$file->readonly()) {
+            if($file && !$file->readonly()) {
                 unlink($f);
 
                 # create log message
@@ -1178,7 +1492,7 @@ sub _cmd_raw {
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
     }
-    my @keys = keys %{$Thruk::Backend::Pool::peers};
+    my @keys = @{$Thruk::Backend::Pool::peer_order};
     my $key = $keys[0];
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
@@ -1191,6 +1505,11 @@ sub _cmd_raw {
     die("no backends...") unless $key;
 
     if($function eq 'get_logs' or $function eq '_get_logs_start_end') {
+        # fake remote user unless we have one. renewing the logcache requires
+        # a remote user for starting external job
+        if(!defined $c->stash->{'remote_user'}) {
+            $c->stash->{'remote_user'} = 'cli';
+        }
         $c->{'db'}->renew_logcache($c);
     }
 
@@ -1201,7 +1520,7 @@ sub _cmd_raw {
 
     # result for external job
     elsif($function eq 'job') {
-        return _cmd_ext_job($c, $key, $opt);
+        return _cmd_ext_job($c, $opt);
     }
 
     my @res = Thruk::Backend::Pool::do_on_peer($key, $function, $opt->{'args'});
@@ -1211,21 +1530,15 @@ sub _cmd_raw {
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
 
-        # add config tool settings
+        # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
         if($Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}) {
+            my $tmp = $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'};
             $res->[2]->{$key}->{'configtool'} = {
-                'obj_readonly'   => $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
-                'obj_check_cmd'  => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
-                'obj_reload_cmd' => exists $Thruk::Backend::Pool::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
+                'core_type'      => $tmp->{'core_type'},
+                'obj_readonly'   => $tmp->{'obj_readonly'},
+                'obj_check_cmd'  => exists $tmp->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $tmp->{'obj_reload_cmd'},
             };
-        }
-    }
-
-    # remove useless mongodb _id if using logcache
-    if($function eq 'get_logs' and $c->config->{'logcache'} and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'ARRAY') {
-        if($c->config->{'logcache'} =~ m/^mysql/mx) {
-        } else {
-            for (@{$res->[2]}) { delete $_->{'_id'} }
         }
     }
 
@@ -1234,7 +1547,7 @@ sub _cmd_raw {
 
 ##############################################
 sub _cmd_ext_job {
-    my($c, $key, $opt) = @_;
+    my($c, $opt) = @_;
     my $jobid       = $opt->{'args'};
     my $res         = "";
     my $last_error  = "";
@@ -1242,22 +1555,48 @@ sub _cmd_ext_job {
         $res = "jobid:".$jobid.":0";
     }
     else {
-        my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $jobid, 1);
+        #my($out,$err,$time,$dir,$stash,$rc)
+        my @res = Thruk::Utils::External::get_result($c, $jobid, 1);
         $res = {
-            'out'   => $out,
-            'err'   => $err,
-            'time'  => $time,
-            'dir'   => $dir,
-            'rc'    => $rc,
+            'out'   => $res[0],
+            'err'   => $res[1],
+            'time'  => $res[2],
+            'dir'   => $res[3],
+            'rc'    => $res[5],
         };
     }
     return([undef, 1, $res, $last_error], 0);
 }
+
+##############################################
+sub _cmd_selfcheck {
+    my($c, $type) = @_;
+    $c->stats->profile(begin => "_cmd_selfcheck()");
+    $type = 'all' unless $type;
+
+    require Thruk::Utils::SelfCheck;
+    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $type);
+
+    $c->stats->profile(end => "_cmd_selfcheck()");
+    return($msg."\n".$details."\n", $rc);
+}
+
 ##############################################
 sub _get_user_agent {
-    my $ua = LWP::UserAgent->new;
+    my $config = { 'use_curl' => $ENV{'THRUK_CURL'} };
+    my $ua = Thruk::UserAgent->new($config);
     $ua->agent("thruk_cli");
     return $ua;
+}
+
+##############################################
+sub _format_response_error {
+    my($response) = @_;
+    if(defined $response) {
+        return $response->code().': '.$response->message();
+    } else {
+        return Dumper($response);
+    }
 }
 
 ##############################################
@@ -1269,7 +1608,7 @@ package.
 
 =head1 AUTHOR
 
-Sven Nierlein, 2012, <nierlein@cpan.org>
+Sven Nierlein, 2009-present, <sven@nierlein.org>
 
 =head1 LICENSE
 
