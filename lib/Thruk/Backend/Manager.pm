@@ -1258,7 +1258,8 @@ sub _do_on_peers {
         }
         # replace undef values
         if($replace) {
-            if(ref $data eq 'ARRAY') {
+            # but only in lists of hashes
+            if(ref $data eq 'ARRAY' && $data->[0] && ref $data->[0] eq 'HASH') {
                 for my $row (@{$data}) {
                     for my $key (keys %{$row}) {
                         $row->{$key} = '' unless defined $row->{$key};
