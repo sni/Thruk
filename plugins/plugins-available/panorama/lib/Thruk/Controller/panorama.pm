@@ -2101,7 +2101,7 @@ sub _task_dashboard_update {
     if($action && $dashboard && !$dashboard->{'readonly'}) {
         $json = { 'status' => 'ok' };
         if($action eq 'remove') {
-            _delete_dashboard($c, $nr, $dashboard);
+            Thruk::Utils::Panorama::delete_dashboard($c, $nr, $dashboard);
         }
         if($action eq 'update') {
             my $extra_settings = {};
@@ -2121,16 +2121,6 @@ sub _task_dashboard_update {
     }
     _add_misc_details($c, 1, $json);
     return $c->render(json => $json);
-}
-
-##########################################################
-sub _delete_dashboard {
-    my($c, $nr, $dashboard) = @_;
-    $dashboard = Thruk::Utils::Panorama::load_dashboard($c, $nr) unless $dashboard;
-    unlink($dashboard->{'file'});
-    # and also all backups
-    unlink(glob($dashboard->{'file'}.'.*'));
-    return;
 }
 
 ##########################################################

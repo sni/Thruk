@@ -71,7 +71,7 @@ sub clean_old_dashboards {
         my $dashboard = load_dashboard($c, $d->{'nr'});
         my @stat      = stat($dashboard->{'file'});
         if(($stat[9] < time() - 86400 && $d->{'name'} eq 'Dashboard') || $stat[9] < time() - (86400 * 14)) {
-            _delete_dashboard($c, $d->{'nr'}, $dashboard);
+            delete_dashboard($c, $d->{'nr'}, $dashboard);
             $num++;
         }
     }
@@ -249,6 +249,24 @@ sub is_authorized_for_dashboard {
     }
     return ACCESS_READONLY if $c->stash->{'readonly'};
     return ACCESS_OWNER;
+}
+
+##########################################################
+
+=head2 delete_dashboard
+
+    delete_dashboard($c, $nr, [$dashboard])
+
+return dashboard data.
+
+=cut
+sub delete_dashboard {
+    my($c, $nr, $dashboard) = @_;
+    $dashboard = load_dashboard($c, $nr) unless $dashboard;
+    unlink($dashboard->{'file'});
+    # and also all backups
+    unlink(glob($dashboard->{'file'}.'.*'));
+    return;
 }
 
 ##########################################################
