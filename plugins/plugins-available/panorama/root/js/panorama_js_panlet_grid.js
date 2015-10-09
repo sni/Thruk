@@ -183,6 +183,11 @@ Ext.define('TP.PanletGrid', {
         if(this.grid_columns == undefined) {
             this.grid_columns = true;
         }
+        /* do not change the columns in readonly mode */
+        if(panel.locked) {
+            this.grid_sort    = false;
+            this.grid_columns = false;
+        }
 
         this.grid = Ext.create('Ext.grid.Panel', {
             store:        this.gridStore,
