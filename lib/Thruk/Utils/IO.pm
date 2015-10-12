@@ -208,16 +208,14 @@ sub json_lock_retrieve {
     my($file) = @_;
 
     my $json = JSON::XS->new->utf8;
-    my $data;
+    $json->relaxed();
+    local $/=undef;
 
     open(my $fh, '<', $file) or die('cannot read file '.$file.': '.$!);
     alarm(30);
     local $SIG{'ALRM'} = sub { die("timeout while trying to lock_sh: ".$file); };
     flock($fh, LOCK_SH) or die 'Cannot lock '.$file.': '.$!;
-    while(my $line = <$fh>) {
-        $json->incr_parse($line);
-    }
-    $data = $json->incr_parse;
+    my $data = $json->decode(<$fh>);
     CORE::close($fh) or die("cannot close file ".$file.": ".$!);
     alarm(0);
     return $data;
