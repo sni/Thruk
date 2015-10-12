@@ -385,9 +385,12 @@ sub get_start_end_for_timeperiod {
         if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
         $start = Mktime($year,$lastmonth,1,  0,0,0);
     }
-    elsif($timeperiod eq 'last12months' or $timeperiod eq 'last12month') {
-        $start = Mktime($year-1,$month,1,  0,0,0);
+    elsif($timeperiod =~ /last(\d+)months?/mx) {
+        my $months = $1;
         $end   = Mktime($year,$month,1,  0,0,0);
+        my $lastmonth = $month - $months;
+        while($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
+        $start = Mktime($year,$lastmonth,1,  0,0,0);
     }
     elsif($timeperiod eq 'thisyear') {
         $start = Mktime($year,1,1,  0,0,0);

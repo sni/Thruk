@@ -1,0 +1,14 @@
+﻿<option value="today"[% IF        selected_timeperiod == 'today'        %] selected[% END %]>Today</option>
+<option value="last24hours"[% IF  selected_timeperiod == 'last24hours'  %] selected[% END %]>Last 24 Hours</option>
+<option value="yesterday"[% IF    selected_timeperiod == 'yesterday'    %] selected[% END %]>Yesterday</option>
+<option value="thisweek"[% IF     selected_timeperiod == 'thisweek'     %] selected[% END %]>This Week</option>
+<option value="last7days"[% IF    selected_timeperiod == 'last7days'    %] selected[% END %]>Last 7 Days</option>
+<option value="lastweek"[% IF     selected_timeperiod == 'lastweek'     %] selected[% END %]>Last Week</option>
+<option value="thismonth"[% IF    selected_timeperiod == 'thismonth'    %] selected[% END %]>This Month</option>
+<option value="last31days"[% IF   selected_timeperiod == 'last31days'   %] selected[% END %]>Last 31 Days</option>
+<option value="lastmonth"[% IF    selected_timeperiod == 'lastmonth'    %] selected[% END %]>Last Month</option>
+<option value="last3months"[% IF  selected_timeperiod == 'last3months'  %] selected[% END %]>Last 3 Months</option>
+<option value="last6months"[% IF  selected_timeperiod == 'last6months'  %] selected[% END %]>Last 6 Months</option>
+<option value="last12months"[% IF selected_timeperiod == 'last12months' %] selected[% END %]>Last 12 Months</option>
+<option value="thisyear"[% IF     selected_timeperiod == 'thisyear'     %] selected[% END %]>This Year</option>
+<option value="lastyear"[% IF     selected_timeperiod == 'lastyear'     %] selected[% END %]>Last Year</option>

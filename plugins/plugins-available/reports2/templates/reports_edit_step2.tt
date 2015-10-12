@@ -30,19 +30,8 @@
         <span class="name">expected objects:</span>
       [% ELSIF type == 'rptimeperiod' %]
         <select name="params.[% key %]" onchange="if(this.value == 'custom') { showElement('custom_timeperiod') } else { hideElement('custom_timeperiod') }">
-          <option value="today"[% IF        value == 'today'        %] selected[% END %]>Today</option>
-          <option value="last24hours"[% IF  value == 'last24hours'  %] selected[% END %]>Last 24 Hours</option>
-          <option value="yesterday"[% IF    value == 'yesterday'    %] selected[% END %]>Yesterday</option>
-          <option value="thisweek"[% IF     value == 'thisweek'     %] selected[% END %]>This Week</option>
-          <option value="last7days"[% IF    value == 'last7days'    %] selected[% END %]>Last 7 Days</option>
-          <option value="lastweek"[% IF     value == 'lastweek'     %] selected[% END %]>Last Week</option>
-          <option value="thismonth"[% IF    value == 'thismonth'    %] selected[% END %]>This Month</option>
-          <option value="last31days"[% IF   value == 'last31days'   %] selected[% END %]>Last 31 Days</option>
-          <option value="lastmonth"[% IF    value == 'lastmonth'    %] selected[% END %]>Last Month</option>
-          <option value="last12months"[% IF value == 'last12months' %] selected[% END %]>Last 12 Months</option>
-          <option value="thisyear"[% IF     value == 'thisyear'     %] selected[% END %]>This Year</option>
-          <option value="lastyear"[% IF     value == 'lastyear'     %] selected[% END %]>Last Year</option>
-          <option value="custom"[% IF       value == 'custom'       %] selected[% END %]>Custom</option>
+          [% PROCESS _timeperiods_select_options.tt selected_timeperiod=value %]
+          <option value="custom"[% IF value == 'custom' %] selected[% END %]>Custom</option>
         </select>
         <div [% IF value != 'custom' %]style="display:none"[% END %] id="custom_timeperiod">
         <table>

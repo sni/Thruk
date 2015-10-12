@@ -49,19 +49,8 @@
   <tr>
     <td valign="top" align="left" class='optBoxItem'>
       <select name='timeperiod'>
-        <option value="current"[% IF      timeperiod == 'current'      %] selected[% END %]>[ Current time range ]</option>
-        <option value="today"[% IF        timeperiod == 'today'        %] selected[% END %]>Today</option>
-        <option value="last24hours"[% IF  timeperiod == 'last24hours'  %] selected[% END %]>Last 24 Hours</option>
-        <option value="yesterday"[% IF    timeperiod == 'yesterday'    %] selected[% END %]>Yesterday</option>
-        <option value="thisweek"[% IF     timeperiod == 'thisweek'     %] selected[% END %]>This Week</option>
-        <option value="last7days"[% IF    timeperiod == 'last7days'    %] selected[% END %]>Last 7 Days</option>
-        <option value="lastweek"[% IF     timeperiod == 'lastweek'     %] selected[% END %]>Last Week</option>
-        <option value="thismonth"[% IF    timeperiod == 'thismonth'    %] selected[% END %]>This Month</option>
-        <option value="last31days"[% IF   timeperiod == 'last31days'   %] selected[% END %]>Last 31 Days</option>
-        <option value="lastmonth"[% IF    timeperiod == 'lastmonth'    %] selected[% END %]>Last Month</option>
-        <option value="last12months"[% IF timeperiod == 'last12months' %] selected[% END %]>Last 12 Months</option>
-        <option value="thisyear"[% IF     timeperiod == 'thisyear'     %] selected[% END %]>This Year</option>
-        <option value="lastyear"[% IF     timeperiod == 'lastyear'     %] selected[% END %]>Last Year</option>
+        <option value="current"[% IF timeperiod == 'current' %] selected[% END %]>[ Current time range ]</option>
+        [% PROCESS _timeperiods_select_options.tt selected_timeperiod=timeperiod %]
       </select>
     </td>
     <td valign="top" align="left" class='optBoxItem'>

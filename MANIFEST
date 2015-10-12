@@ -1391,6 +1391,7 @@ templates/_status_filter.tt
 templates/_status_hostdetail_table.tt
 templates/_table_search_field.tt
 templates/_third_graph.tt
+templates/_timeperiods_select_options.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt

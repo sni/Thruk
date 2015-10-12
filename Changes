@@ -9,6 +9,8 @@ next:
             - add clean dashboards button in dashboard management all tab
             - add cli command to clean dashboards
             - fix grid panels not restoring column width
+          - Reports:
+            - add quarterly and half year reports
 
 2.02     Wed Sep 30 17:38:30 CEST 2015
           - show eventhandler name on extinfo page if available
