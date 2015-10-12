@@ -118,9 +118,10 @@ if(scalar @{$tags} == 0) {
 
 #################################################
 END {
-    return unless $started;
-    cleanup();
-    switch_tag($branch) if $branch;
+    if($started) {
+        cleanup();
+        switch_tag($branch) if $branch;
+    }
     `touch .author` if $author;
     print "\n" if $branch;
     _create_results_file();
