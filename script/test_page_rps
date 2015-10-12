@@ -1,5 +1,40 @@
 #!/usr/bin/env perl
 
+=head1 NAME
+
+test_page_rps - command line utility for testing Thruks page requests per second
+
+=head1 SYNOPSIS
+
+  Usage: test_page_rps [options] [<commit|tags> ...]
+
+  Options:
+  -h, --help                    Show this help message and exit
+
+  -w, --write                   Write result file only.
+
+  -u, --update                  Do not retry already existing results.
+                                Only update new commits and tags.
+  -a, --all                     Run for normal commits too instead of just tags.
+  -n, --number=<n>              Limit tests to this number
+
+=head1 DESCRIPTION
+
+This script runs apache ab tool against a few sample pages and renders a
+result html page with the cpu and memory usage as well as the requests per second.
+
+=head1 EXAMPLES
+
+Update for the last 15 commits
+
+  %> test_page_rps -u -a -n 15
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2015, <sven@nierlein.org>
+
+=cut
+
 use warnings;
 use strict;
 use JSON::XS;
@@ -7,6 +42,7 @@ use File::Slurp qw/read_file/;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 use Getopt::Long;
 
+my $started = 0;
 my $tags    = [];
 my $options = {
     number   => 10,
@@ -14,15 +50,17 @@ my $options = {
 Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('bundling');
 Getopt::Long::GetOptions (
+   "h|help"             => \$options->{'help'},
    "w|write"            => \$options->{'write_file'},
    "u|update"           => \$options->{'update_only'},
    "a|all"              => \$options->{'all'},
    "n|number=i"         => \$options->{'number'},
    "<>"                 => sub { push @{$tags}, "".shift },
 ) or do {
-    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
+    print "usage: $0 [<options>] [<commit|tag> ...]\nsee --help for detailed help.\n";
     exit(3);
-} ;
+};
+_usage() if $options->{'help'};
 #################################################
 # settings
 my $NUM         = $options->{'number'};
@@ -34,6 +72,7 @@ my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
 
 #################################################
 # prepare
+$started = 0;
 cleanup();
 my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
@@ -79,6 +118,7 @@ if(scalar @{$tags} == 0) {
 
 #################################################
 END {
+    return unless $started;
     cleanup();
     switch_tag($branch) if $branch;
     `touch .author` if $author;
@@ -110,6 +150,11 @@ exit;
 #################################################
 # SUBS
 #################################################
+sub _usage {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+
 sub cleanup {
     `ps -efl | grep thruk_server | grep -v grep | awk '{ print \$4 }' | xargs -r kill >/dev/null 2>&1`;
     _safe_results();
