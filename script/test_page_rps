@@ -72,7 +72,7 @@ my $BASEURL     = "http://127.0.0.1:$BASEPORT/thruk";
 
 #################################################
 # prepare
-$started = 0;
+$started = 1;
 cleanup();
 my $result_html = 'rpsresults.html';
 my $results_file = '.rps_results';
@@ -388,6 +388,64 @@ table.thruktooltip .val {
 table.thruktooltip .date {
     padding-right: 5px;
 }
+
+
+/* Affix Navigation */
+
+/* First level of nav */
+.sidenav {
+  margin-top:       40px;
+  margin-bottom:    30px;
+  padding:          2px;
+  background-color: #f8f8f8;
+  border-radius:    5px;
+  border:           1px solid #ddd;
+}
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+  border-width: 0;
+}
+
+/* All levels of nav */
+.sidebar .nav > li > a {
+  display: block;
+  color: #716b7a;
+  padding: 1px 20px;
+  line-height: 16px;
+}
+.sidebar .nav > li > a:hover,
+.sidebar .nav > li > a:focus {
+  text-decoration: none;
+  background-color: #e5e3e9;
+}
+.sidebar .nav > .active > a,
+.sidebar .nav > .active:hover > a,
+.sidebar .nav > .active:focus > a {
+  font-weight: bold;
+  color: #ba3925;
+  background-color: transparent;
+}
+
+/* Nav: second level */
+.sidebar .nav .nav {
+  margin-bottom: 8px;
+}
+.sidebar .nav .nav > li > a {
+  padding-top:    2px;
+  padding-bottom: 0;
+  padding-left: 30px;
+  font-size: 90%;
+  line-height: 16px;
+}
+A.nav_label {
+    visibility: hidden;
+    position: absolute;
+    left: -20px;
+}
+A.nav_anchor {
+    position: absolute;
+    top: -50px;
+    display: block;
+}
   </style>
 </head>
 <body>
@@ -405,10 +463,41 @@ table.thruktooltip .date {
   </div>
 </nav>
 
+<nav id="affix-nav" class="sidebar col-md-4 col-sm-4 hidden-xs">
+  <ul class="nav sidenav nav-tabs nav-stacked affix-top shadow" data-spy="affix" style="position: fixed; right: 100px; top: 50px;">
+    <li><a href='#resource_usage'>Resource Usage</a></li>
+    <li>
+        <a href='#pages'>Requests per Second</a>
+        <ul class="nav">
+           <li><a href='#graph_page_static'>Static</a></li>
+           <li><a href='#graph_page_status'>Status</a></li>
+           <li><a href='#graph_page_tac'>Tactical Overview</a></li>
+           <li><a href='#graph_page_json'>JSON Status</a></li>
+           <li><a href='#graph_page_bp'>Business Process</a></li>
+        </ul>
+    </li>
+  </ul>
+</nav>
+
 <div id='tooltip'></div>
-<div id="graph_startup" style="width: 1100px; height: 300px;"></div>
-<div id="graph_mem"     style="width: 1100px; height: 300px;"></div>
-<div id="graph_pages"   style="width: 1100px; height: 300px;"></div>
+<div style="padding-left: 30px;">
+<h2 id="resource_usage">Resource Usage</h2>
+<div id="graph_startup"     style="width: 1000px; height: 300px;"></div>
+<div id="graph_memory"      style="width: 1000px; height: 300px; margin-top:10px;"></div>
+<hr>
+<h2 id="pages">Page Requests per Second</h2>
+<h3>Static Content Page</h3>
+<div id="graph_page_static" style="width: 1000px; height: 300px;"></div>
+<h3>Status Page</h3>
+<div id="graph_page_status" style="width: 1000px; height: 300px;"></div>
+<h3>Tactical Overview Page</h3>
+<div id="graph_page_tac"    style="width: 1000px; height: 300px;"></div>
+<h3>JSON Status Page</h3>
+<div id="graph_page_json"   style="width: 1000px; height: 300px;"></div>
+<h3>Business Process Page</h3>
+<div id="graph_page_bp"     style="width: 1000px; height: 300px;"></div>
+</div>
+
 
 <script type="text/javascript">
 <!--
@@ -447,17 +536,22 @@ var graph_options = {
 var dataSets = getData();
 var fadeOutTimer;
 $(function() {
-    plots['startup'] = $.plot("#graph_startup", dataSets['startup'], graph_options);
-    plots['mem']     = $.plot("#graph_mem",     dataSets['memory'],  graph_options);
+    plots['startup']     = $.plot("#graph_startup",     dataSets['startup'],     graph_options);
+    plots['memory']      = $.plot("#graph_memory",      dataSets['memory'],      graph_options);
+    plots['page_static'] = $.plot("#graph_page_static", dataSets['page_static'], graph_options);
+    plots['page_status'] = $.plot("#graph_page_status", dataSets['page_status'], graph_options);
+    plots['page_tac']    = $.plot("#graph_page_tac",    dataSets['page_tac'],    graph_options);
+    plots['page_json']   = $.plot("#graph_page_json",   dataSets['page_json'],   graph_options);
+    plots['page_bp']     = $.plot("#graph_page_bp",     dataSets['page_bp'],     graph_options);
     redrawMarkings();
 
-    jQuery.each(['graph_startup', 'graph_mem'], function(i, graph) {
-        $("#"+graph).bind("plotselected", function (event, ranges) {
+    jQuery.each(plots, function(graph, v) {
+        $("#graph_"+graph).bind("plotselected", function (event, ranges) {
             // do the zooming
             zoomIn(ranges.xaxis.from, ranges.xaxis.to);
         });
 
-        $("#"+graph).bind("plothover", function (event, pos, item) {
+        $("#graph_"+graph).bind("plothover", function (event, pos, item) {
             if (item) {
                 var date = new Date(item.datapoint[0]).toLocaleString();
                 var tooltip = "<table class='thruktooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
@@ -473,6 +567,20 @@ $(function() {
 
                 tooltip += "<td class='var'>First Request:</td>";
                 tooltip += "<td class='val'>"+(dataSets['startup'][1]['data'][item.dataIndex][1].toFixed(2))+"s</td></tr>";
+
+                tooltip += "<td class='var'>Pages per Second:</td>";
+                tooltip += "<td class='val'></td></tr>";
+
+                tooltip += "<td class='var'>Static:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_static'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>Status:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_status'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>Tac:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_tac'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>JSON:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_json'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
+                tooltip += "<td class='var'>BP:</td>";
+                tooltip += "<td class='val'>"+(dataSets['page_bp'][0]['data'][item.dataIndex][1].toFixed(2))+"/s</td></tr>";
                 tooltip += "</table>";
                 window.clearTimeout(fadeOutTimer);
                 jQuery("#tooltip").html(tooltip)
@@ -490,7 +598,7 @@ $(function() {
             });
         });
         /* set selection for other plots too */
-        jQuery("#"+graph).bind("plotselecting", function (event, ranges) {
+        jQuery("#graph_"+graph).bind("plotselecting", function (event, ranges) {
             if(ranges == null) { return; }
             $("#tooltip").hide();
             jQuery.each(plots, function(name, plot) {
@@ -498,7 +606,7 @@ $(function() {
             });
         });
         /* reset zoom on rightclick */
-        jQuery("#"+graph).bind("contextmenu", function (event, pos, item) {
+        jQuery("#graph_"+graph).bind("contextmenu", function (event, pos, item) {
             event.preventDefault();
             jQuery.each(plots, function(name, plot) {
                 zoomOut(plot);
@@ -520,6 +628,12 @@ $(function() {
         var range = window.location.hash.replace(/^#/, '').split(',');
         zoomIn(Number(range[0]), Number(range[1]));
     }
+
+    /* hide tooltip on document click */
+    $(window.document).bind("click", function (event, pos, item) {
+        window.clearTimeout(fadeOutTimer);
+        $("#tooltip").fadeOut(300);
+    });
 });
 
 function redrawMarkings() {
@@ -528,7 +642,7 @@ function redrawMarkings() {
         var div = $("#graph_"+name);
         jQuery.each(graph_options.grid.markings, function(i, m) {
             var o = plot.pointOffset({ x: m.xaxis.from, y: 0});
-            div.append("<div class='marking' style='position:absolute;left:" + (o.left + 4) + "px;top:" + (10) + "px;color:#666;font-size:smaller'>"+m.name+"</div>");
+            div.append("<div class='marking' style='position:absolute;left:" + (o.left + 4) + "px;top:" + (-9) + "px;color:#666;font-size:smaller'>"+m.name+"</div>");
         });
     });
 }
@@ -557,8 +671,9 @@ function setAllData(from, to) {
       window.location.hash = '';
     }
     dataSets = getData(from, to);
-    plots['startup'].setData(dataSets['startup']);
-    plots['mem'].setData(dataSets['memory']);
+    jQuery.each(plots, function(k, v) {
+        plots[k].setData(dataSets[k]);
+    });
 }
 
 function getData(from, to) {
@@ -613,6 +728,56 @@ function getData(from, to) {
         fillBetween: "memory",
         data: []
     };
+    var page_static_data = {
+        id:    "static",
+        label: "static rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_status_data = {
+        id:    "status",
+        label: "status rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_tac_data = {
+        id:    "tac",
+        label: "tac rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_json_data = {
+        id:    "json",
+        label: "json rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
+    var page_bp_data = {
+        id:    "bp",
+        label: "bp rps",
+        color: '#60a6d8',
+        lines: {
+            show: true,
+            lineWidth: 2
+        },
+        data: []
+    };
 
     var markings = [];
 
@@ -625,6 +790,11 @@ function getData(from, to) {
         load_data['data'].push([jstime, Number(d.load)]);
         mem_data['data'].push([jstime, Number(d.mem)/1024]);
         memmax_data['data'].push([jstime, Number(d.max_mem)/1024]);
+        page_static_data['data'].push([jstime, Number(d.pages.main)]);
+        page_status_data['data'].push([jstime, Number(d.pages.status)]);
+        page_tac_data['data'].push([jstime, Number(d.pages.tac)]);
+        page_json_data['data'].push([jstime, Number(d.pages.json)]);
+        page_bp_data['data'].push([jstime, Number(d.pages.bp)]);
         if(d.tag.match(/^v/)) {
             markings.push({
                 color: "#000",
@@ -643,8 +813,13 @@ function getData(from, to) {
         };
     });
     var dataSets = {
-        startup: [startup_data, firstreq_data, load_data],
-        memory:  [mem_data, memmax_data]
+        startup:     [startup_data, firstreq_data, load_data],
+        memory:      [mem_data, memmax_data],
+        page_static: [page_static_data],
+        page_status: [page_status_data],
+        page_tac:    [page_tac_data],
+        page_json:   [page_json_data],
+        page_bp:     [page_bp_data]
     };
     graph_options.grid.markings = markings;
     return(dataSets);
