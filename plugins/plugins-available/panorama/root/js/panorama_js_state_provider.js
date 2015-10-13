@@ -198,9 +198,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         var params  = {};
         var changed = 0;
         for(var key in data) {
-            var encoded = Ext.JSON.encode(data[key]);
-            if(!TP.JSONequals(this.lastdata[key], encoded)) {
-                params[key] = encoded;
+            var encoded1 = Ext.JSON.encode(this.lastdata[key]);
+            var encoded2 = Ext.JSON.encode(data[key]);
+            if(!TP.JSONequals(encoded1, encoded2)) {
+                params[key] = encoded2;
                 changed++;
             }
         }
