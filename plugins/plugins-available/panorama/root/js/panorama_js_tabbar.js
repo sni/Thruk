@@ -20,6 +20,7 @@ Ext.define('TP.TabBar', {
     deferredRender: false,
     stateful:       true,
     tabBar:{
+        id:        'maintabbar',
         items:[{ xtype: 'tbfill' },{
             id:       'debug_tab',
             closable: false,

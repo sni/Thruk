@@ -282,8 +282,9 @@ var TP = {
 
     /* choose position handler */
     add_panlet_handler: function(evt, element, args) {
-        var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3], pos = args[4];
-        tb.getEl().un('click', TP.add_panlet_handler, this, args); // remove event handler again
+        var tb = args[0], config = args[1], offsetX = args[2], offsetY = args[3], pos = args[4], el = args[5];
+        if(el == undefined) { el = tb.getEl() }
+        el.un('click', TP.add_panlet_handler, this, args); // remove event handler again
         tb.enableMapControlsTemp();
         if(config.conf == undefined) { config.conf = {}; }
         if(pos != undefined) {
@@ -291,7 +292,7 @@ var TP = {
         } else {
             config.conf.pos = [evt.getX()+offsetX, evt.getY()+offsetY];
         }
-        tb.getEl().dom.style.cursor = '';
+        el.dom.style.cursor = '';
         var panel = TP.add_panlet(config);
         panel.firstRun = true;
         if(panel.iconType) {
@@ -320,8 +321,12 @@ var TP = {
         if(!tb) {
             throw new Error("TP.add_panlet(): no active tab! (caller: " + (TP.add_panlet.caller ? TP.add_panlet.caller : 'unknown') + ")");
         }
-        tb.getEl().dom.style.cursor = 'crosshair';
-        tb.getEl().on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY]);
+        var el = tb.getEl();
+        if(tb.bgDragEl) {
+            el = tb.bgDragEl;
+        }
+        el.dom.style.cursor = 'crosshair';
+        el.on('click', TP.add_panlet_handler, tb, [tb, config, offsetX, offsetY, undefined, el]);
         window.setTimeout(function() {
             tb.disableMapControlsTemp();
         }, 100);

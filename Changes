@@ -8,6 +8,7 @@ next:
           - Panorama View:
             - add clean dashboards button in dashboard management all tab
             - add cli command to clean dashboards
+            - add scrollbars for large maps
             - fix grid panels not restoring column width
           - Reports:
             - add quarterly and half year reports

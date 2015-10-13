@@ -83,6 +83,7 @@ Ext.define('TP.Pantab', {
                 TP.suppressIconTip = false;
                 This.disableMapControls();
             }
+            This.setBaseHtmlClass();
             return(true);
         },
         activate: function(This, eOpts) {
@@ -170,12 +171,7 @@ Ext.define('TP.Pantab', {
             tab.el.on("contextmenu", function(evt) {
                 tab.contextmenu(evt);
             });
-            tab.el.on("click", function(evt) {
-                if(!TP.skipResetMoveIcons) {
-                    TP.resetMoveIcons();
-                }
-                TP.skipResetMoveIcons = false;
-            });
+            tab.el.on("click", tab.tabBodyClick);
         },
         beforerender: function(This, eOpts) {
             for(var nr=0; nr<This.window_ids.length; nr++) {
@@ -198,6 +194,21 @@ Ext.define('TP.Pantab', {
                 return(false);
             }
             return(true);
+        }
+    },
+    tabBodyClick: function(evt) {
+        if(!TP.skipResetMoveIcons) {
+            TP.resetMoveIcons();
+        }
+        TP.skipResetMoveIcons = false;
+    },
+    setBaseHtmlClass: function() {
+        var This = this;
+        var htmlRootEl = Ext.fly(Ext.getBody().dom.parentNode);
+        if(This.mapEl) {
+            htmlRootEl.addCls('geomap');
+        } else {
+            htmlRootEl.removeCls('geomap');
         }
     },
     forceSaveState: function() {
@@ -377,6 +388,7 @@ Ext.define('TP.Pantab', {
         This.setTitle(xdata.title);
         if(This.mapEl) { This.mapEl.destroy(); This.mapEl = undefined; }
         if(This.map)   { This.map.destroy();   This.map   = undefined; }
+        This.setBaseHtmlClass();
         This.setBackground(xdata);
         if(startTimeouts != false) {
             if(TP.initialized) {
@@ -655,22 +667,30 @@ Ext.define('TP.Pantab', {
             if(tab.mapEl) { tab.mapEl.destroy(); tab.mapEl = undefined; }
             if(tab.map)   { tab.map.destroy();   tab.map   = undefined; }
         }
+        tab.setBaseHtmlClass();
 
+        var bodyView = Ext.fly('bodyview');
         if(!tab.bgDragEl) {
-            tab.bgDragEl = body.createChild('<img>', body.dom.childNodes[0]);
+            tab.bgDragEl = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
             tab.bgDragEl.dom.src            = background;
-            tab.bgDragEl.dom.style.position = "absolute";
-            tab.bgDragEl.dom.style.width    = "500%";
-            tab.bgDragEl.dom.style.height   = "500%";
+            tab.bgDragEl.dom.style.position = "fixed";
+            tab.bgDragEl.dom.style.width    = "100%";
+            tab.bgDragEl.dom.style.height   = "100%";
             tab.bgDragEl.dom.style.top      = "0px";
             tab.bgDragEl.dom.style.left     = "0px";
             tab.bgDragEl.dom.src = url_prefix+"plugins/panorama/images/s.gif";
+            tab.bgDragEl.on("contextmenu", function(evt) {
+                tab.contextmenu(evt);
+            });
+            tab.bgDragEl.on("click", function(evt) {
+                tab.tabBodyClick(evt);
+            });
         }
         tab.disableMapControls();
 
         if(background != undefined && background != 'none' && !xdata.map) {
             if(!tab.bgImgEl) {
-                tab.bgImgEl = body.createChild('<img>', body.dom.childNodes[0]);
+                tab.bgImgEl  = bodyView.createChild('<img>', bodyView.dom.childNodes[0]);
             }
             tab.bgImgEl.dom.src            = background;
             tab.bgImgEl.dom.style.position = "absolute";
@@ -688,8 +708,11 @@ Ext.define('TP.Pantab', {
                 tab.bgImgEl.dom.style.width  = width+"px";
                 tab.bgImgEl.dom.style.height = height+"px";
             }
-            tab.bgImgEl.dom.style.top  = offset_y+"px";
+            tab.bgImgEl.dom.style.top  = (25+offset_y)+"px";
             tab.bgImgEl.dom.style.left = offset_x+"px";
+            if(!tab.isActiveTab()) {
+                tab.bgImgEl.hide();
+            }
         } else {
             if(tab.bgImgEl) {
                 tab.bgImgEl.destroy();
