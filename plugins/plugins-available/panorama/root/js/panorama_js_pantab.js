@@ -296,6 +296,9 @@ Ext.define('TP.Pantab', {
         }
     },
     isActiveTab: function() {
+        if(one_tab_only) {
+            return(true);
+        }
         var tabpan    = Ext.getCmp('tabpan');
         var activeTab = tabpan.getActiveTab();
         if(activeTab && this.id == activeTab.id) { return(true); }
