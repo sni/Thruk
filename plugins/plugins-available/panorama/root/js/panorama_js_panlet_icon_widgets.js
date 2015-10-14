@@ -2362,16 +2362,26 @@ TP.iconClickHandler = function(id) {
 TP.iconClickHandlerDo = function(id) {
     var panel = Ext.getCmp(id);
     if(!panel || !panel.xdata || !panel.xdata.link || !panel.xdata.link.link) {
-        return;
+        return(false);
     }
     var link    = panel.xdata.link.link;
     var newTab  = panel.xdata.link.newtab;
     if(!panel.locked) {
         TP.Msg.msg("info_message~~icon links are disabled in edit mode, would have openend:<br><b>"+link+"</b>"+(newTab?'<br>(in a new tab)':''));
-        return;
+        return(false);
     }
+    var target = "";
+    if(newTab) {
+        target = '_blank';
+    }
+    return(TP.iconClickHandlerExec(id, link, panel, target));
+}
+
+/* open link or special action for given link */
+TP.iconClickHandlerExec = function(id, link, panel, target) {
     var special = link.match(/dashboard:\/\/(.+)$/);
     var action  = link.match(/server:\/\/(.+)$/);
+    var menu    = link.match(/menu:\/\/(.+)$/);
     if(special && special[1]) {
         link = undefined;
         if(special[1].match(/^\d+$/)) {
@@ -2383,7 +2393,7 @@ TP.iconClickHandlerDo = function(id) {
                 tabpan.setActiveTab(tab);
             } else {
                 var replace;
-                if(!newTab) {
+                if(!target) {
                     replace = tabpan.getActiveTab().id;
                 }
                 TP.add_pantab(tab_id, replace);
@@ -2435,22 +2445,106 @@ TP.iconClickHandlerDo = function(id) {
         });
         return(false);
     }
-    if(link) {
-        var oldOnClick=panel.el.dom.onclick;
-        panel.el.dom.onclick="";
-        panel.el.dom.href=link;
-        panel.passClick = true;
-        if(newTab) {
-            panel.el.dom.target='_blank';
+    if(menu && menu[1]) {
+        var tmp = menu[1].split(/\//);
+        var menuName = tmp.shift();
+        var menuArgs = tmp;
+        var menuRaw;
+        Ext.Array.each(action_menu_items, function(val, i) {
+            var name    = val[0];
+            if(name == menuName) {
+                menuRaw = val[1];
+                return(false);
+            }
+        });
+        if(!menuRaw) {
+            TP.Msg.msg("fail_message~~no such menu: "+menu[1]);
+            return(false);
         }
-        panel.el.dom.click();
-        window.setTimeout(function() {
-            panel.el.dom.href=panel.xdata.link.link;
-            panel.el.dom.onclick=oldOnClick;
-            panel.passClick = false;
-        }, 300);
+        var menuData  = Ext.JSON.decode(menuRaw);
+        var menuItems = [];
+        Ext.Array.each(menuData['menu'], function(i, x) {
+            if(Ext.isString(i)) {
+                menuItems.push(i);
+            } else {
+                menuItems.push({
+                    text:    i.label,
+                    icon:    replace_macros(i.icon),
+                    handler: function(This, evt) {
+                        if(i.target) {
+                            target = i.target;
+                        }
+                        return(TP.iconClickHandlerExec(id, i.action, panel, target));
+                    }
+                });
+            }
+        });
+        TP.suppressIconTip = true;
+        Ext.create('Ext.menu.Menu', {
+            items: menuItems,
+            listeners: {
+                beforehide: function(This) {
+                    TP.suppressIconTip = false;
+                    This.destroy();
+                }
+            }
+        }).showBy(panel);
+        return(false);
     }
+    if(link) {
+        if(!link.match(/\$/)) {
+            // no macros, no problems
+            TP.iconClickHandlerClickLink(panel, link, target);
+        } else {
+            var tab = Ext.getCmp(panel.panel_id);
+            Ext.Ajax.request({
+                url:    url_prefix+'cgi-bin/status.cgi?replacemacros=1',
+                params:  {
+                    host:    panel.xdata.general.host,
+                    service: panel.xdata.general.service,
+                    backend: TP.getActiveBackendsPanel(tab, panel),
+                    data:    link,
+                    token:   user_token
+                },
+                method: 'POST',
+                callback: function(options, success, response) {
+                    if(!success) {
+                        if(response.status == 0) {
+                            TP.Msg.msg("fail_message~~could not replace macros");
+                        } else {
+                            TP.Msg.msg("fail_message~~could not replace macros: "+response.status+' - '+response.statusText);
+                        }
+                    } else {
+                        var data = TP.getResponse(undefined, response);
+                        if(data.rc != 0) {
+                            TP.Msg.msg("fail_message~~could not replace macros: "+data.data);
+                        } else {
+                            TP.iconClickHandlerClickLink(panel, data.data, target);
+                        }
+                    }
+                }
+            });
+
+        }
+    }
+    return(true);
 };
+
+TP.iconClickHandlerClickLink = function(panel, link, target) {
+    var oldOnClick=panel.el.dom.onclick;
+    panel.el.dom.onclick="";
+    panel.el.dom.href=link;
+    panel.passClick = true;
+    if(target) {
+        panel.el.dom.target = target;
+    }
+    panel.el.dom.click();
+    window.setTimeout(function() {
+        panel.el.dom.href=panel.xdata.link.link;
+        panel.el.dom.onclick=oldOnClick;
+        panel.passClick = false;
+    }, 300);
+}
 
 /* return link representing the data for this icon */
 TP.getIconDetailsLink = function(panel, relativeUrl) {

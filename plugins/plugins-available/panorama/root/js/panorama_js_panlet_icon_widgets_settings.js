@@ -1110,12 +1110,21 @@ TP.iconShowEditDialog = function(panel) {
     };
 
     /* Link Settings Tab */
-    var action_menu_items = [];
+    var server_actions_menu = [];
     Ext.Array.each(action_menu_actions, function(name, i) {
-        action_menu_items.push({
+        server_actions_menu.push({
             text:    name,
             icon:    url_prefix+'plugins/panorama/images/cog.png',
             handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'server://'+name+'/'}) }
+        });
+    });
+    var action_menus_menu = [];
+    Ext.Array.each(action_menu_items, function(val, i) {
+        var name = val[0];
+        action_menus_menu.push({
+            text:    name,
+            icon:    url_prefix+'plugins/panorama/images/cog.png',
+            handler: function(This, eOpts) { This.up('form').getForm().setValues({link: 'menu://'+name+'/'}) }
         });
     });
     var linkTab = {
@@ -1173,8 +1182,13 @@ TP.iconShowEditDialog = function(panel) {
                             }, {
                                 text: 'Server Actions',
                                 icon: url_prefix+'plugins/panorama/images/lightning_go.png',
-                                menu: action_menu_items,
-                                disabled: action_menu_items.length > 0 ? false : true
+                                menu: server_actions_menu,
+                                disabled: server_actions_menu.length > 0 ? false : true
+                            }, {
+                                text: 'Action Menus',
+                                icon: url_prefix+'plugins/panorama/images/lightning_go.png',
+                                menu: action_menus_menu,
+                                disabled: action_menus_menu.length > 0 ? false : true
                             }],
                             listeners: {
                                 afterrender: function(This, eOpts) {

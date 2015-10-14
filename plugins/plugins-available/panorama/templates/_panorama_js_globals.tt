@@ -40,9 +40,11 @@ var thruk_wms_provider       = [% json_encode(wms_provider) %];
 var thruk_shape_data         = [% json_encode(shape_data) %];
 var thruk_iconset_data       = [% json_encode(iconset_data) %];
 var action_menu_actions      = [% json_encode(action_menu_actions) %];
+var action_menu_items        = [% json_encode(action_menu_items) %];
 var default_map_zoom         = [% default_map_zoom %];
 var default_map_lon          = [% default_map_lon %];
 var default_map_lat          = [% default_map_lat %];
 var available_fonts          = [% json_encode(fonts) %];
+var omd_site                 = '[% omd_site %]';
 
 [%+ PROCESS _header_initial_states.tt +%]

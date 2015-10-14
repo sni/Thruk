@@ -329,6 +329,14 @@ sub _js {
     }
     $c->stash->{action_menu_actions}   = $action_menu_actions;
 
+    my $action_menu_items = [];
+    if($c->config->{'action_menu_items'}) {
+        for my $name (sort keys %{$c->config->{'action_menu_items'}}) {
+            push @{$action_menu_items}, [$name, $c->config->{'action_menu_items'}->{$name}];
+        }
+    }
+    $c->stash->{action_menu_items} = $action_menu_items;
+
     $c->stash->{shape_data}   = _task_userdata_shapes($c, 1);
     $c->stash->{iconset_data} = _task_userdata_iconsets($c, 1);
     $c->stash->{wms_provider} = _get_wms_provider($c);
