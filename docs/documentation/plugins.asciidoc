@@ -178,7 +178,8 @@ you to build your own panorama views. It supports multiple panels
 and sticky windows. link:dashboard.html[Read more]
 
 ++++
-<a title="panorama" rel="lightbox[plugins]" href="plugins/panorama1.png"><img src="plugins/panorama1.png" alt="mobile " width="30%" height="30%" /></a>
+<a title="panorama" rel="lightbox[plugins]" href="plugins/panorama1.png"><img src="plugins/panorama1.png" alt="panorama dashboard " width="30%" height="30%" /></a>
+<a title="panorama" rel="lightbox[plugins]" href="../images/galleries/dashboard2.png"><img src="../images/galleries/dashboard2-thumb.png" alt="panorama dashboard " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -199,8 +200,8 @@ contracts. Reports can be either downloaded or send by mail using the
 thruk command line tool. link:reporting.html[Read more]
 
 ++++
-<a title="reports" rel="lightbox[plugins]" href="plugins/reports1.png"><img src="plugins/reports1.png" alt="mobile " width="30%" height="30%" /></a>
-<a title="reports" rel="lightbox[plugins]" href="plugins/reports2.png"><img src="plugins/reports2.png" alt="mobile " width="30%" height="30%" /></a>
+<a title="reports" rel="lightbox[plugins]" href="plugins/reports1.png"><img src="plugins/reports1.png" alt="reporting " width="30%" height="30%" /></a>
+<a title="reports" rel="lightbox[plugins]" href="plugins/reports2.png"><img src="plugins/reports2.png" alt="reporting " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -227,8 +228,8 @@ root problems (problems not caused by another problem) order by
 priority.
 
 ++++
-<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business1.png"><img src="plugins/shinken-business1.png" alt="statusmap " width="30%" height="30%" /></a>
-<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business2.png"><img src="plugins/shinken-business2.png" alt="statusmap " width="30%" height="30%" /></a>
+<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business1.png"><img src="plugins/shinken-business1.png" alt="shinken features " width="30%" height="30%" /></a>
+<a title="shinken business view" rel="lightbox[plugins]" href="plugins/shinken-business2.png"><img src="plugins/shinken-business2.png" alt="shinken features " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -299,7 +300,7 @@ point in the last week the complete top data can be fetched,
 sorted and filtered.
 
 ++++
-<a title="omd" rel="lightbox[plugins]" href="plugins/omd1.png"><img src="plugins/omd1.png" alt="mobile " width="30%" height="30%" /></a>
+<a title="omd" rel="lightbox[plugins]" href="plugins/omd1.png"><img src="plugins/omd1.png" alt="omd addons " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
