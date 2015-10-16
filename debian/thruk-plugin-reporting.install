@@ -1,3 +1,3 @@
 /usr/share/thruk/plugins/plugins-available/reports2
 /etc/thruk/plugins/plugins-available/reports2
-/usr/share/thruk/script/wkhtmltopdf
+/usr/share/thruk/script/phantomjs

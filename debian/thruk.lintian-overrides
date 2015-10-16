@@ -1,7 +1,7 @@
 thruk: possible-gpl-code-linked-with-openssl
 # Debian 6
-thruk: arch-dependent-file-in-usr-share ./usr/share/thruk/script/wkhtmltopdf
-thruk: statically-linked-binary ./usr/share/thruk/script/wkhtmltopdf
+thruk: arch-dependent-file-in-usr-share ./usr/share/thruk/script/phantomjs
+thruk: statically-linked-binary ./usr/share/thruk/script/phantomjs
 # Debian 6 32
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/i486-linux-gnu-thread-multi/auto/Cairo/Cairo.so /usr/lib
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/i486-linux-gnu-thread-multi/auto/GD/GD.so /usr/lib
@@ -19,8 +19,8 @@ thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thre
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/DBD/mysql/mysql.so /usr/lib
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Crypt/SSLeay/SSLeay.so /usr/lib
 # Debian 7 / Ubuntu
-thruk: arch-dependent-file-in-usr-share usr/share/thruk/script/wkhtmltopdf
-thruk: statically-linked-binary usr/share/thruk/script/wkhtmltopdf
+thruk: arch-dependent-file-in-usr-share usr/share/thruk/script/phantomjs
+thruk: statically-linked-binary usr/share/thruk/script/phantomjs
 # Debian 7 32
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i486-linux-gnu-thread-multi-64int/auto/Cairo/Cairo.so /usr/lib/i386-linux-gnu
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i486-linux-gnu-thread-multi-64int/auto/GD/GD.so /usr/lib/i386-linux-gnu

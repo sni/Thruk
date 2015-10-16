@@ -41,7 +41,6 @@ Description: Monitoring Webinterface for Nagios/Icinga and Shinken
 Package: thruk-plugin-reporting
 Architecture: any
 Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
-         xvfb, libxrender1,
          thruk-base (= ${source:Version})
 Description: This package contains the reporting addon for thruk useful for sla
  and event reporting.

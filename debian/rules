@@ -46,7 +46,7 @@ override_dh_gencontrol:
 	dh_gencontrol -- -Vextra:Depends=perlapi-$(PERLVER)
 
 override_dh_strip:
-	dh_strip --exclude=wkhtmltopdf
+	dh_strip --exclude=phantomjs
 
 override_dh_auto_test:
 

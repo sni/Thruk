@@ -9,6 +9,7 @@
 set -x
 # read rc files if exist
 [ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
 
 DIR=$(dirname "$BASH_SOURCE")
 

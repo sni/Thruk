@@ -83,22 +83,6 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
-%if %{defined suse_version}
-%if 0%{?suse_version} >= 1315
-Requires: xorg-x11-server
-%else
-Requires: xorg-x11-server-extra
-%endif
-%else
-%if 0%{?el6}%{?el7}%{?fc20}%{?fc21}%{?fc22}
-# >rhel6
-Requires: xorg-x11-server-Xvfb libXrender libXext dejavu-fonts-common
-%else
-# rhel5 (there is no el5 rpm macro)
-Requires: xorg-x11-server-Xvfb libXext dejavu-lgc-fonts
-%endif
-%endif
-AutoReqProv: no
 
 %description plugin-reporting
 This package contains the reporting addon for thruk useful for sla
@@ -367,7 +351,7 @@ exit 0
 %files plugin-reporting
 %{_sysconfdir}/thruk/plugins/plugins-available/reports2
 %{_datadir}/thruk/plugins/plugins-available/reports2
-%{_datadir}/thruk/script/wkhtmltopdf
+%{_datadir}/thruk/script/phantomjs
 
 
 
