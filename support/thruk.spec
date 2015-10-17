@@ -83,6 +83,7 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
+AutoReqProv: no
 
 %description plugin-reporting
 This package contains the reporting addon for thruk useful for sla

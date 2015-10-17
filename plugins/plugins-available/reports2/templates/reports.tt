@@ -12,8 +12,8 @@
       <div align="center" class='dataTitle'>
         Reporting
       </div>
-      [% IF !wkhtmltopdf %]
-      <br><div class="alert"><b>Missing Converter!</b> [% wkhtmltopdf_file %] missing, no pdfs can be generated. <a href="http://www.thruk.org/faq.html#_wkhtmltopdf" target="_blank">please read the FAQ.</a></div>
+      [% IF !phantomjs %]
+      <br><div class="alert"><b>Missing Converter!</b> [% phantomjs_file %] missing, no pdfs can be generated. <a href="http://www.thruk.org/faq.html#_phantomjs" target="_blank">please read the FAQ.</a></div>
       [% END %]
     </td>
     <td align="right" valign="bottom" width="20%">

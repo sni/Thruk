@@ -199,18 +199,13 @@ folder.
 
 
 === wkhtmltopdf
-wkhtmltopdf is required to create PDF reports with the reports2 plugin. You can get
-wkhtmltopdf from http://wkhtmltopdf.org/ or use this direct links:
+wkhtmltopdf is no longer required and has been replaced by phantomjs.
 
- - 64bit: http://download.thruk.org/wkhtmltopdf-0.11.0_rc1-static-amd64.tar.gz
- - 32bit: http://download.thruk.org/wkhtmltopdf-0.11.0_rc1-static-i386.tar.gz
 
-These are statically linked binarys, so no installation required, just put the unpacked
-binary in the right location.
+=== phantomjs
+phantomjs is required to create PDF reports with the reports2 plugin. You can get
+wkhtmltopdf from http://phantomjs.org/ if it's not available for your system.
 
-Versions which have been successfully tested:
-
-  - 0.11.0_rc1: works fine
 
 === How can I enable the business process addon.
 It works out of the box with OMD. If not using OMD, some manual steps
